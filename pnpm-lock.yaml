@@ -24,6 +24,9 @@ importers:
       '@module-federation/enhanced':
         specifier: 0.21.6
         version: 0.21.6(@rspack/core@1.6.6(@swc/helpers@0.5.17))(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(typescript@5.9.3)(webpack@5.103.0(@swc/core@1.5.29(@swc/helpers@0.5.17)))
+      '@module-federation/vite':
+        specifier: ^1.9.2
+        version: 1.9.2(rollup@4.53.3)
       '@nx/devkit':
         specifier: 22.1.3
         version: 22.1.3(nx@22.1.3(@swc-node/register@1.9.2(@swc/core@1.5.29(@swc/helpers@0.5.17))(@swc/types@0.1.25)(typescript@5.9.3))(@swc/core@1.5.29(@swc/helpers@0.5.17)))
@@ -978,6 +981,9 @@ packages:
       webpack:
         optional: true
 
+  '@module-federation/error-codes@0.18.4':
+    resolution: {integrity: sha512-cpLsqL8du9CfTTCKvXbRg93ALF+lklqHnuPryhbwVEQg2eYo6CMoMQ6Eb7kJhLigUABIDujbHD01SvBbASGkeQ==}
+
   '@module-federation/error-codes@0.21.6':
     resolution: {integrity: sha512-MLJUCQ05KnoVl8xd6xs9a5g2/8U+eWmVxg7xiBMeR0+7OjdWUbHwcwgVFatRIwSZvFgKHfWEiI7wsU1q1XbTRQ==}
 
@@ -1019,20 +1025,32 @@ packages:
       vue-tsc:
         optional: true
 
+  '@module-federation/runtime-core@0.18.4':
+    resolution: {integrity: sha512-LGGlFXlNeTbIGBFDiOvg0zz4jBWCGPqQatXdKx7mylXhDij7YmwbuW19oenX+P1fGhmoBUBM5WndmR87U66qWA==}
+
   '@module-federation/runtime-core@0.21.6':
     resolution: {integrity: sha512-5Hd1Y5qp5lU/aTiK66lidMlM/4ji2gr3EXAtJdreJzkY+bKcI5+21GRcliZ4RAkICmvdxQU5PHPL71XmNc7Lsw==}
 
   '@module-federation/runtime-tools@0.21.6':
     resolution: {integrity: sha512-fnP+ZOZTFeBGiTAnxve+axGmiYn2D60h86nUISXjXClK3LUY1krUfPgf6MaD4YDJ4i51OGXZWPekeMe16pkd8Q==}
 
+  '@module-federation/runtime@0.18.4':
+    resolution: {integrity: sha512-2et6p7pjGRHzpmrW425jt/BiAU7QHgkZtbQB7pj01eQ8qx6SloFEBk9ODnV8/ztSm9H2T3d8GxXA6/9xVOslmQ==}
+
   '@module-federation/runtime@0.21.6':
     resolution: {integrity: sha512-+caXwaQqwTNh+CQqyb4mZmXq7iEemRDrTZQGD+zyeH454JAYnJ3s/3oDFizdH6245pk+NiqDyOOkHzzFQorKhQ==}
+
+  '@module-federation/sdk@0.18.4':
+    resolution: {integrity: sha512-dErzOlX+E3HS2Sg1m12Hi9nCnfvQPuIvlq9N47KxrbT2TIU3KKYc9q/Ua+QWqxfTyMVFpbNDwFMJ1R/w/gYf4A==}
 
   '@module-federation/sdk@0.21.6':
     resolution: {integrity: sha512-x6hARETb8iqHVhEsQBysuWpznNZViUh84qV2yE7AD+g7uIzHKiYdoWqj10posbo5XKf/147qgWDzKZoKoEP2dw==}
 
   '@module-federation/third-party-dts-extractor@0.21.6':
     resolution: {integrity: sha512-Il6x4hLsvCgZNk1DFwuMBNeoxD1BsZ5AW2BI/nUgu0k5FiAvfcz1OFawRFEHtaM/kVrCsymMOW7pCao90DaX3A==}
+
+  '@module-federation/vite@1.9.2':
+    resolution: {integrity: sha512-EOK07bxSF6/1g2zYXLT+meZPO/6lvQq1XJP6xDc5RZLj5ezXRCl0OLtMLUup+Z+gWTsVOmYd2KUmdRo08NP83Q==}
 
   '@module-federation/webpack-bundler-runtime@0.21.6':
     resolution: {integrity: sha512-7zIp3LrcWbhGuFDTUMLJ2FJvcwjlddqhWGxi/MW3ur1a+HaO8v5tF2nl+vElKmbG1DFLU/52l3PElVcWf/YcsQ==}
@@ -2285,6 +2303,9 @@ packages:
     resolution: {integrity: sha512-Ds09qNh8yw3khSjiJjiUInaGX9xlqZDY7JVryGxdxV7NPeuqQfplOpQ66yJFZut3jLa5zOwkXw1g9EI2uKh4Og==}
     engines: {node: '>=8'}
 
+  defu@6.1.4:
+    resolution: {integrity: sha512-mEQCMmwJu317oSz8CwdIOdwf3xMif1ttiM8LTufzc3g6kR+9Pe236twL8j3IYT1F7GfRgGcW6MWxzZjLIkuHIg==}
+
   delayed-stream@1.0.0:
     resolution: {integrity: sha512-ZySD7Nf91aLB0RxL4KGrKHBXl7Eds1DAmEdcoVawXnLD7SDhpNgtuII2aAkg7a7QS41jxPSZ17p4VdGnMHk3MQ==}
     engines: {node: '>=0.4.0'}
@@ -3339,6 +3360,9 @@ packages:
   path-type@4.0.0:
     resolution: {integrity: sha512-gDKb8aZMDeD/tZWs9P6+q0J9Mwkdl6xMV8TjnGP3qJVJ06bdMgkbBlLU8IdfOsIsFz2BW1rNVT3XuNEl8zPAvw==}
     engines: {node: '>=8'}
+
+  pathe@1.1.2:
+    resolution: {integrity: sha512-whLdWMYL2TwI08hn8/ZqAbrVemu0LNaNNJZX73O6qaIdCTfXutsLhMkjdENX0qhsQ9uIimo4/aQOmXkoon2nDQ==}
 
   pathe@2.0.3:
     resolution: {integrity: sha512-WUjGcAqP1gQacoQe+OBJsFA7Ld4DyXuUIjZ5cc75cLHvJ7dtNsTugphxIADwspS+AraAUePCKrSVtPLFj/F88w==}
@@ -5384,6 +5408,8 @@ snapshots:
       - supports-color
       - utf-8-validate
 
+  '@module-federation/error-codes@0.18.4': {}
+
   '@module-federation/error-codes@0.21.6': {}
 
   '@module-federation/inject-external-runtime-core-plugin@0.21.6(@module-federation/runtime-tools@0.21.6)':
@@ -5451,6 +5477,11 @@ snapshots:
       - supports-color
       - utf-8-validate
 
+  '@module-federation/runtime-core@0.18.4':
+    dependencies:
+      '@module-federation/error-codes': 0.18.4
+      '@module-federation/sdk': 0.18.4
+
   '@module-federation/runtime-core@0.21.6':
     dependencies:
       '@module-federation/error-codes': 0.21.6
@@ -5461,11 +5492,19 @@ snapshots:
       '@module-federation/runtime': 0.21.6
       '@module-federation/webpack-bundler-runtime': 0.21.6
 
+  '@module-federation/runtime@0.18.4':
+    dependencies:
+      '@module-federation/error-codes': 0.18.4
+      '@module-federation/runtime-core': 0.18.4
+      '@module-federation/sdk': 0.18.4
+
   '@module-federation/runtime@0.21.6':
     dependencies:
       '@module-federation/error-codes': 0.21.6
       '@module-federation/runtime-core': 0.21.6
       '@module-federation/sdk': 0.21.6
+
+  '@module-federation/sdk@0.18.4': {}
 
   '@module-federation/sdk@0.21.6': {}
 
@@ -5474,6 +5513,18 @@ snapshots:
       find-pkg: 2.0.0
       fs-extra: 9.1.0
       resolve: 1.22.8
+
+  '@module-federation/vite@1.9.2(rollup@4.53.3)':
+    dependencies:
+      '@module-federation/runtime': 0.18.4
+      '@module-federation/sdk': 0.18.4
+      '@rollup/pluginutils': 5.3.0(rollup@4.53.3)
+      defu: 6.1.4
+      estree-walker: 2.0.2
+      magic-string: 0.30.21
+      pathe: 1.1.2
+    transitivePeerDependencies:
+      - rollup
 
   '@module-federation/webpack-bundler-runtime@0.21.6':
     dependencies:
@@ -6975,6 +7026,8 @@ snapshots:
 
   define-lazy-prop@2.0.0: {}
 
+  defu@6.1.4: {}
+
   delayed-stream@1.0.0: {}
 
   delegates@1.0.0: {}
@@ -8124,6 +8177,8 @@ snapshots:
   path-to-regexp@0.1.12: {}
 
   path-type@4.0.0: {}
+
+  pathe@1.1.2: {}
 
   pathe@2.0.3: {}
 

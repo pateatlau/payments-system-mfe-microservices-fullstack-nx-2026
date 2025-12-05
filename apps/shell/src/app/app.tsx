@@ -1,5 +1,6 @@
 import { Route, Routes, Link } from 'react-router-dom';
 import Layout from '../components/Layout';
+import RemoteComponent from '../components/RemoteComponent';
 
 export function App() {
   return (
@@ -28,6 +29,7 @@ export function App() {
           </li>
         </ul>
       </div>
+      <RemoteComponent />
       <Routes>
         <Route
           path="/"
