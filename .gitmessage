@@ -1,0 +1,43 @@
+# Commit Message Template
+
+# Format: <type>(<scope>): [Task X.X] - <subject>
+#
+# <body>
+#
+# <footer>
+#
+# Types:
+#   feat:     New feature
+#   fix:      Bug fix
+#   docs:     Documentation only
+#   style:    Code style changes (formatting, etc.)
+#   refactor: Code refactoring
+#   test:     Adding or updating tests
+#   chore:    Maintenance tasks
+#   build:    Build system changes
+#   ci:       CI/CD changes
+#
+# Scope: poc-0, poc-1, poc-2, poc-3, or specific component
+#
+# Examples:
+#   feat(poc-0): [Task 1.1] - Initialize Nx workspace
+#   fix(poc-0): [Task 2.2] - Fix Vite configuration for shell
+#   test(poc-0): [Task 6.1] - Add tests for HelloRemote component
+#
+# Body (optional):
+#   - What was done
+#   - Why it was done
+#   - Any breaking changes
+#
+# Footer (optional):
+#   - Closes #issue
+#   - References task number
+#
+# Example:
+#   feat(poc-0): [Task 1.1] - Initialize Nx workspace
+#
+#   - Created Nx workspace with React preset
+#   - Configured pnpm as package manager
+#   - Set up basic workspace structure
+#
+#   References: docs/POC-0-Implementation/implementation-plan.md#task-11

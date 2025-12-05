@@ -111,6 +111,26 @@ libs/
 
 ---
 
+## Task Management & Workflow
+
+### Task Progression
+
+- **MUST:** Follow `docs/POC-0-Implementation/implementation-plan.md` for detailed task steps
+- **MUST:** Update `docs/POC-0-Implementation/task-list.md` after completing each task/sub-task
+- **MUST:** Ask for user confirmation before proceeding to the next task after completing each task or sub-task
+- **MUST:** Show completed task summary and next task details when asking for confirmation
+- **MUST NOT:** Automatically proceed to next task without explicit user approval
+
+### Task Completion Checklist
+
+- ✅ Task completed according to implementation plan
+- ✅ Verification checklist items completed
+- ✅ Acceptance criteria met
+- ✅ Task list updated with completion status
+- ✅ User confirmation obtained before next task
+
+---
+
 ## Before Committing
 
 ✅ TypeScript compiles | ✅ ESLint passes | ✅ Tests pass | ✅ Build works | ✅ No `any` types | ✅ Tests written | ✅ Module Federation works
