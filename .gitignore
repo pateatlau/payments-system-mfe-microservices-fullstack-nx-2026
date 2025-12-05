@@ -33,3 +33,9 @@ lerna-debug.log*
 # Nx
 .nx/cache
 .nx/workspace-data
+
+.nx/installation
+
+
+.cursor/rules/nx-rules.mdc
+.github/instructions/nx.instructions.md

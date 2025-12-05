@@ -102,6 +102,9 @@ libs/
 - **MUST:** Ask for user confirmation before making any git commits
 - **MUST:** Show commit message and changed files before committing
 - **MUST NOT:** Commit automatically without explicit user approval
+- **MUST:** Perform a git commit after completing each major/top-level phase (e.g., Phase 1, Phase 2, etc.)
+- **MUST:** Commit only after verifying everything works and updating status in both `task-list.md` and `implementation-plan.md`
+- **MUST:** Commit before asking user whether to proceed to the next phase
 
 ### Documentation Files
 
@@ -117,6 +120,7 @@ libs/
 
 - **MUST:** Follow `docs/POC-0-Implementation/implementation-plan.md` for detailed task steps
 - **MUST:** Update `docs/POC-0-Implementation/task-list.md` after completing each task/sub-task
+- **MUST:** Update `docs/POC-0-Implementation/implementation-plan.md` after completing each task/sub-task (mark verification checkboxes and update status)
 - **MUST:** Ask for user confirmation before proceeding to the next task after completing each task or sub-task
 - **MUST:** Show completed task summary and next task details when asking for confirmation
 - **MUST NOT:** Automatically proceed to next task without explicit user approval
@@ -126,7 +130,8 @@ libs/
 - ✅ Task completed according to implementation plan
 - ✅ Verification checklist items completed
 - ✅ Acceptance criteria met
-- ✅ Task list updated with completion status
+- ✅ Task list updated with completion status (`task-list.md`)
+- ✅ Implementation plan updated with completion status (`implementation-plan.md`)
 - ✅ User confirmation obtained before next task
 
 ---
