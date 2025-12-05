@@ -422,14 +422,196 @@ Is Auto mode stuck?
 - Architecture decisions → Claude Opus
 - Complex debugging → GPT-4 / Claude Opus
 
+---
+
+## Context Persistence When Switching Models
+
+### ✅ What Persists (No Loss)
+
+1. **Chat History**
+
+   - ✅ Previous messages in the conversation
+   - ✅ All prior context from the session
+   - ✅ What was discussed before switching
+   - **Reason:** Same conversation thread
+
+2. **Codebase Context**
+
+   - ✅ Codebase indexing remains
+   - ✅ File references still work
+   - ✅ Code understanding persists
+   - **Reason:** Independent of model selection
+
+3. **File References**
+
+   - ✅ Can still read files
+   - ✅ References to docs work
+   - ✅ Implementation plan accessible
+   - **Reason:** File system access unchanged
+
+4. **Rules & Configuration**
+   - ✅ `.cursorrules` still included
+   - ✅ Project rules apply
+   - ✅ All configuration persists
+   - **Reason:** Configuration is model-agnostic
+
+### ⚠️ What Might Change
+
+1. **Context Interpretation**
+
+   - ⚠️ Different models interpret context differently
+   - ⚠️ Some models use context more effectively
+   - ⚠️ Context window sizes may vary
+   - **Impact:** Low - Usually not noticeable
+
+2. **Context Window Limits**
+
+   - ⚠️ Some models have larger context windows
+   - ⚠️ Very long conversations might be truncated differently
+   - ⚠️ Older messages might be prioritized differently
+   - **Impact:** Low - Only affects very long conversations
+
+3. **Context Usage Patterns**
+   - ⚠️ Different models emphasize different parts of context
+   - ⚠️ Some models are better at long context
+   - **Impact:** Low - Usually beneficial (better models use context better)
+
+### 🎯 Best Practices for Context Preservation
+
+**When Switching Models:**
+
+1. **Summarize Current State**
+
+   ```
+   "We're working on Task 2.1: Configure Vite for Shell.
+   We've created the shell app, but the Vite config isn't working.
+   Here's the error: [error message]"
+   ```
+
+2. **Reference Key Files**
+
+   ```
+   "See vite.config.ts in apps/shell/ and the error is..."
+   ```
+
+3. **Mention What Was Tried**
+
+   ```
+   "I tried [X] and [Y] but it didn't work. The issue is..."
+   ```
+
+4. **Reference Task Number**
+   ```
+   "This is Task 2.1 from the implementation plan.
+   We need to configure Vite for the shell app."
+   ```
+
+### ✅ Context Preservation Strategy
+
+**Recommended Approach:**
+
+1. **Before Switching:**
+
+   - Summarize what you're working on
+   - Mention task number
+   - Reference relevant files
+   - Explain the problem clearly
+
+2. **When Switching:**
+
+   - The new model has access to:
+     - ✅ All previous chat messages
+     - ✅ Codebase context
+     - ✅ File references
+     - ✅ Project rules
+
+3. **After Switching:**
+   - New model can reference previous conversation
+   - Can read the same files
+   - Has same codebase understanding
+   - **No context loss** - just better capability
+
+### 🔍 Example: Switching Models with Context
+
+**Before Switch (Auto mode):**
+
+```
+You: "I'm working on Task 2.1: Configure Vite for Shell.
+      Created shell app, but Vite config has errors.
+      Error: [error message]
+      File: apps/shell/vite.config.ts"
+```
+
+**Switch to Claude Opus**
+
+**After Switch (Claude Opus):**
+
+```
+You: "Continuing with Task 2.1. We have a Vite config error.
+      Previous attempts didn't work. Need a better solution."
+```
+
+**What Claude Opus Has:**
+
+- ✅ All previous chat messages (can read them)
+- ✅ Access to vite.config.ts (can read file)
+- ✅ Understanding of Task 2.1 (from implementation plan)
+- ✅ Project rules (from .cursorrules)
+- ✅ Codebase context (indexed)
+
+**Result:** No context loss, just better problem-solving capability
+
+---
+
+## Summary
+
+### Quick Reference
+
+**Default:** Auto mode (90% of tasks)
+
+**When Auto gets stuck:**
+
+1. **2-3 attempts failed** → Switch to Claude Sonnet / GPT-4
+2. **Still stuck** → Switch to Claude Opus
+3. **Resolved** → Switch back to Auto
+
+**Complex tasks from start:**
+
+- Module Federation → Claude Opus / GPT-4
+- Architecture decisions → Claude Opus
+- Complex debugging → GPT-4 / Claude Opus
+
+### Context When Switching
+
+**✅ No Context Loss:**
+
+- Chat history persists
+- Codebase context remains
+- File references work
+- Rules still apply
+
+**⚠️ Minor Differences:**
+
+- Different models interpret context differently
+- Context window sizes may vary
+- Usually beneficial (better models use context better)
+
+**💡 Best Practice:**
+
+- Summarize current state when switching (helps, but not required)
+- Reference task numbers and files
+- Mention what was tried
+- New model has full context access
+
 ### Remember
 
 - ✅ Start with Auto
 - ✅ Give Auto 2-3 chances
 - ✅ Switch strategically
-- ✅ Provide full context when switching
+- ✅ Provide full context when switching (helps, but not required)
 - ✅ Switch back to Auto after resolving
 - ✅ Document complex solutions
+- ✅ **No context loss when switching models**
 
 ---
 
