@@ -1,8 +1,19 @@
 import { Route, Routes, Link } from 'react-router-dom';
 import Layout from '../components/Layout';
 import RemoteComponent from '../components/RemoteComponent';
+import { formatDate } from 'shared-utils';
+import { Button } from 'shared-ui';
+import type { User } from 'shared-types';
 
 export function App() {
+  // Example usage of shared-types
+  const exampleUser: User = {
+    id: '1',
+    name: 'John Doe',
+    email: 'john@example.com',
+    role: 'admin',
+  };
+
   return (
     <Layout>
       <div role="navigation">
@@ -37,6 +48,23 @@ export function App() {
             <div>
               <h2>Welcome to the Shell Application</h2>
               <p>This is the generated root route.</p>
+              <p>Current date: {formatDate(new Date())}</p>
+              <p>
+                Example user: {exampleUser.name} ({exampleUser.email})
+              </p>
+              <div
+                style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem' }}
+              >
+                <Button onClick={() => alert('Primary button clicked!')}>
+                  Primary Button
+                </Button>
+                <Button
+                  variant="secondary"
+                  onClick={() => alert('Secondary button clicked!')}
+                >
+                  Secondary Button
+                </Button>
+              </div>
               <Link to="/page-2" style={{ color: '#0066cc' }}>
                 Click here for page 2.
               </Link>
