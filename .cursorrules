@@ -125,6 +125,13 @@ libs/
 - **MUST:** Show completed task summary and next task details when asking for confirmation
 - **MUST NOT:** Automatically proceed to next task without explicit user approval
 
+### Package.json Scripts
+
+- **MUST:** Add relevant commands to root `package.json` scripts section when creating new features, apps, libraries, or testing configurations
+- **MUST:** Follow the existing naming convention: `feature:project` (e.g., `dev:shell`, `test:remote`)
+- **MUST:** Include both individual project commands and aggregate commands (e.g., `dev` for all, `dev:shell` for one)
+- **MUST:** Add affected commands when applicable (e.g., `build:affected`, `test:affected`)
+
 ### Task Completion Checklist
 
 - ✅ Task completed according to implementation plan
