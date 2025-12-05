@@ -1,7 +1,7 @@
 import { Route, Routes, Link } from 'react-router-dom';
 import Layout from '../components/Layout';
 
-export function App(): JSX.Element {
+export function App() {
   return (
     <Layout>
       <div role="navigation">

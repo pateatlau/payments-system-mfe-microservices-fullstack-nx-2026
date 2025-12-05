@@ -4,7 +4,7 @@ interface LayoutProps {
   children: ReactNode;
 }
 
-export function Layout({ children }: LayoutProps): JSX.Element {
+export function Layout({ children }: LayoutProps) {
   return (
     <div
       style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}
