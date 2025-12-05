@@ -1,0 +1,126 @@
+# MFE POC-0 - Cursor Rules
+
+> **Phase:** POC-0 Only | **Reference:** `docs/POC-0-Implementation/project-rules-cursor.md` for detailed rules
+
+---
+
+## 🚨 Critical Rules
+
+1. **NO throw-away code** - Must carry forward to Production
+2. **Never use `any` type** - Documented exceptions only
+3. **Fix type errors immediately** - Don't work around them
+4. **Write tests alongside code** - 60% coverage minimum
+5. **POC-0 scope only** - No backend, routing, state management, auth, Tailwind
+
+---
+
+## POC-0 Scope
+
+**In Scope:**
+
+- Shell app (host, Port 4200) + Hello Remote (remote, Port 4201)
+- Module Federation v2 (@module-federation/enhanced 0.21.6)
+- Shared libraries (utils, ui, types)
+- Basic testing (Vitest + React Testing Library)
+
+**NOT in Scope:**
+
+- ❌ Backend, Routing, State Management, Auth, Tailwind CSS (later POCs)
+
+---
+
+## Tech Stack (POC-0)
+
+- **React:** 19.2.0 (match React DOM)
+- **Nx:** Latest
+- **Vite:** 6.x
+- **Module Federation:** @module-federation/enhanced 0.21.6 (BIMF)
+- **Testing:** Vitest 2.0.x, React Testing Library 16.1.x
+- **Package Manager:** pnpm 9.x
+- **TypeScript:** 5.9.x (strict mode)
+
+---
+
+## Code Rules
+
+### TypeScript
+
+- **MUST:** Strict mode, no `any`, explicit return types, `interface` for objects, `type` for unions
+- **MUST:** Fix type errors immediately
+
+### React
+
+- **MUST:** Functional components only, hooks for state, explicit props interfaces
+- **MUST:** PascalCase components (`HelloRemote.tsx`), camelCase hooks with `use` prefix
+
+### File Organization
+
+- **MUST:** One component per file, tests alongside (`*.test.tsx`), index files for exports
+
+### Naming
+
+- Components: PascalCase | Hooks: camelCase with `use` | Functions: camelCase | Constants: UPPER_SNAKE_CASE | Types: PascalCase
+
+---
+
+## Module Federation v2
+
+- **MUST:** Configure shared dependencies (react, react-dom as singletons)
+- **MUST:** Use React.lazy() + Suspense for dynamic loading
+- **Shell:** `remotes: { helloRemote: 'http://localhost:4201/assets/remoteEntry.js' }`
+- **Remote:** `exposes: { './HelloRemote': './src/components/HelloRemote.tsx' }`
+
+---
+
+## Project Structure
+
+```
+apps/
+├── shell/              # Host (Port 4200)
+└── hello-remote/      # Remote (Port 4201)
+libs/
+├── shared-utils/
+├── shared-ui/
+└── shared-types/
+```
+
+---
+
+## Nx Commands
+
+- `nx serve shell` / `nx serve hello-remote`
+- `nx run-many --target=serve --projects=shell,hello-remote --parallel`
+- `nx build <project>` / `nx test <project>` / `nx lint <project>`
+- `nx generate @nx/react:application <name> --bundler=vite`
+
+---
+
+## Git & Documentation Rules
+
+### Git Commits
+
+- **MUST:** Ask for user confirmation before making any git commits
+- **MUST:** Show commit message and changed files before committing
+- **MUST NOT:** Commit automatically without explicit user approval
+
+### Documentation Files
+
+- **MUST:** Create documentation files in `docs/POC-0-temp/` folder by default
+- **MUST:** Only create documentation in other locations if explicitly instructed by user
+- **MUST:** Ask for confirmation if documentation location is unclear
+
+---
+
+## Before Committing
+
+✅ TypeScript compiles | ✅ ESLint passes | ✅ Tests pass | ✅ Build works | ✅ No `any` types | ✅ Tests written | ✅ Module Federation works
+
+---
+
+## Success Criteria
+
+✅ Shell (4200) & Remote (4201) run | ✅ Module Federation works | ✅ Shared deps work | ✅ HMR works | ✅ Production builds work | ✅ Types work across boundaries | ✅ Tests pass (60% coverage) | ✅ Shared libs work
+
+---
+
+**For detailed rules, examples, and guidance:** See `docs/POC-0-Implementation/project-rules-cursor.md`

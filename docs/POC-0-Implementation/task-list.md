@@ -1,0 +1,527 @@
+# POC-0 Task List - Progress Tracking
+
+**Status:** In Progress  
+**Version:** 1.0  
+**Date:** 2026-01-XX  
+**Phase:** POC-0 - Foundation
+
+> **📋 Related Document:** See [`implementation-plan.md`](./implementation-plan.md) for detailed step-by-step instructions for each task.
+
+---
+
+## How to Use This Checklist
+
+- **For Progress Tracking:** Mark tasks as complete by checking the box: `- [x]`
+- **For Detailed Instructions:** Refer to [`implementation-plan.md`](./implementation-plan.md) for step-by-step guidance
+- **For Notes:** Add notes or blockers in the Notes section of each task
+- **For Status:** Update status (⬜ Not Started | 🟡 In Progress | ✅ Complete) and completion percentage
+- **For Cursor AI:** This file helps Cursor understand what's completed and what's next across sessions
+
+**Sync Note:** This task list tracks high-level progress. Detailed implementation steps are in `implementation-plan.md`. When completing a task, mark it here and optionally add notes about any deviations from the plan.
+
+---
+
+## Phase 1: Workspace Setup & Configuration
+
+### Task 1.1: Initialize Nx Workspace
+
+- [ ] Workspace directory created
+- [ ] `nx.json` exists and is valid
+- [ ] `package.json` exists with correct name
+- [ ] `pnpm-workspace.yaml` exists
+- [ ] Can run `nx --version` successfully
+- [ ] Workspace structure matches expected layout
+
+**Status:** ⬜ Not Started | 🟡 In Progress | ✅ Complete  
+**Notes:**  
+**Completed Date:**
+
+---
+
+### Task 1.2: Install Core Dependencies
+
+- [ ] React 19.2.0 installed
+- [ ] React DOM 19.2.0 installed
+- [ ] Vite 6.x installed
+- [ ] Module Federation 0.21.6 installed
+- [ ] TypeScript 5.9.x installed
+- [ ] `pnpm-lock.yaml` updated
+- [ ] `pnpm install` runs successfully
+
+**Status:** ⬜ Not Started | 🟡 In Progress | ✅ Complete  
+**Notes:**  
+**Completed Date:**
+
+---
+
+### Task 1.3: Configure TypeScript
+
+- [ ] `tsconfig.json` exists at root
+- [ ] `strict: true` in compiler options
+- [ ] TypeScript compiles without errors
+- [ ] No `any` types in generated code
+- [ ] Path aliases configured (if needed)
+
+**Status:** ⬜ Not Started | 🟡 In Progress | ✅ Complete  
+**Notes:**  
+**Completed Date:**
+
+---
+
+### Task 1.4: Setup ESLint and Prettier
+
+- [ ] ESLint 9.x installed
+- [ ] Prettier 3.3.x installed
+- [ ] TypeScript ESLint 8.x installed
+- [ ] `.eslintrc.json` exists with flat config
+- [ ] `.prettierrc` exists
+- [ ] `nx lint` runs successfully
+- [ ] Code formatting works
+
+**Status:** ⬜ Not Started | 🟡 In Progress | ✅ Complete  
+**Notes:**  
+**Completed Date:**
+
+**Phase 1 Completion:** **_% (_**/4 tasks complete)
+
+---
+
+## Phase 2: Shell Application
+
+### Task 2.1: Create Shell Application
+
+- [ ] `apps/shell/` directory exists
+- [ ] `vite.config.ts` exists
+- [ ] `main.tsx` exists
+- [ ] `App.tsx` exists
+- [ ] `package.json` in shell app
+- [ ] App visible in `nx.json` projects
+
+**Status:** ⬜ Not Started | 🟡 In Progress | ✅ Complete  
+**Notes:**  
+**Completed Date:**
+
+---
+
+### Task 2.2: Configure Vite for Shell
+
+- [ ] `vite.config.ts` has React plugin
+- [ ] Port configured to 4200
+- [ ] Dev server starts on http://localhost:4200
+- [ ] App loads in browser
+- [ ] HMR works (make a change, see it update)
+
+**Status:** ⬜ Not Started | 🟡 In Progress | ✅ Complete  
+**Notes:**  
+**Completed Date:**
+
+---
+
+### Task 2.3: Create Basic Shell Layout
+
+- [ ] `Layout.tsx` component created
+- [ ] Layout has header and main content
+- [ ] `App.tsx` uses Layout component
+- [ ] Layout renders in browser
+- [ ] Basic styling applied
+
+**Status:** ⬜ Not Started | 🟡 In Progress | ✅ Complete  
+**Notes:**  
+**Completed Date:**
+
+**Phase 2 Completion:** **_% (_**/3 tasks complete)
+
+---
+
+## Phase 3: Hello Remote Application
+
+### Task 3.1: Create Hello Remote Application
+
+- [ ] `apps/hello-remote/` directory exists
+- [ ] `vite.config.ts` exists
+- [ ] `main.tsx` exists
+- [ ] `App.tsx` exists
+- [ ] `package.json` in hello-remote app
+- [ ] App visible in `nx.json` projects
+
+**Status:** ⬜ Not Started | 🟡 In Progress | ✅ Complete  
+**Notes:**  
+**Completed Date:**
+
+---
+
+### Task 3.2: Create HelloRemote Component
+
+- [ ] `HelloRemote.tsx` component created
+- [ ] Component displays "Hello from Remote!"
+- [ ] Component is exported as default
+- [ ] Component renders in browser (standalone)
+
+**Status:** ⬜ Not Started | 🟡 In Progress | ✅ Complete  
+**Notes:**  
+**Completed Date:**
+
+---
+
+### Task 3.3: Configure Vite for Hello Remote
+
+- [ ] `vite.config.ts` has React plugin
+- [ ] Port configured to 4201
+- [ ] CORS enabled
+- [ ] Dev server starts on http://localhost:4201
+- [ ] App loads in browser
+
+**Status:** ⬜ Not Started | 🟡 In Progress | ✅ Complete  
+**Notes:**  
+**Completed Date:**
+
+**Phase 3 Completion:** **_% (_**/3 tasks complete)
+
+---
+
+## Phase 4: Module Federation v2 Configuration
+
+### Task 4.1: Configure Module Federation for Hello Remote
+
+- [ ] Module Federation plugin installed
+- [ ] `vite.config.ts` has Module Federation config
+- [ ] Remote name is 'helloRemote'
+- [ ] Exposes './HelloRemote'
+- [ ] Shared dependencies configured
+- [ ] Build generates `remoteEntry.js`
+- [ ] Remote entry file accessible at expected path
+
+**Status:** ⬜ Not Started | 🟡 In Progress | ✅ Complete  
+**Notes:**  
+**Completed Date:**
+
+---
+
+### Task 4.2: Configure Module Federation for Shell
+
+- [ ] `vite.config.ts` has Module Federation config
+- [ ] Host name is 'shell'
+- [ ] Remotes configured with correct URL
+- [ ] Shared dependencies configured
+- [ ] Build completes successfully
+
+**Status:** ⬜ Not Started | 🟡 In Progress | ✅ Complete  
+**Notes:**  
+**Completed Date:**
+
+---
+
+### Task 4.3: Integrate HelloRemote in Shell
+
+- [ ] `RemoteComponent.tsx` created
+- [ ] Dynamic import configured correctly
+- [ ] Suspense boundary added
+- [ ] HelloRemote added to shell layout
+- [ ] Both apps running (shell on 4200, hello-remote on 4201)
+- [ ] HelloRemote component loads and displays
+- [ ] No console errors
+
+**Status:** ⬜ Not Started | 🟡 In Progress | ✅ Complete  
+**Notes:**  
+**Completed Date:**
+
+**Phase 4 Completion:** **_% (_**/3 tasks complete)
+
+---
+
+## Phase 5: Shared Libraries
+
+### Task 5.1: Create shared-utils Library
+
+- [ ] `libs/shared-utils/` directory exists
+- [ ] Library structure created
+- [ ] Utility function created (formatDate)
+- [ ] Exported from index.ts
+- [ ] Can import in shell app
+- [ ] Utility function works
+
+**Status:** ⬜ Not Started | 🟡 In Progress | ✅ Complete  
+**Notes:**  
+**Completed Date:**
+
+---
+
+### Task 5.2: Create shared-ui Library
+
+- [ ] `libs/shared-ui/` directory exists
+- [ ] Library structure created
+- [ ] Button component created
+- [ ] Exported from index.ts
+- [ ] Can import in shell app
+- [ ] Button component renders
+
+**Status:** ⬜ Not Started | 🟡 In Progress | ✅ Complete  
+**Notes:**  
+**Completed Date:**
+
+---
+
+### Task 5.3: Create shared-types Library
+
+- [ ] `libs/shared-types/` directory exists
+- [ ] Library structure created
+- [ ] Types file created (User interface)
+- [ ] Types exported from index.ts
+- [ ] Can import types in shell app
+- [ ] TypeScript recognizes types
+
+**Status:** ⬜ Not Started | 🟡 In Progress | ✅ Complete  
+**Notes:**  
+**Completed Date:**
+
+**Phase 5 Completion:** **_% (_**/3 tasks complete)
+
+---
+
+## Phase 6: Testing Setup
+
+### Task 6.1: Configure Vitest for Shell
+
+- [ ] `vitest.config.ts` exists
+- [ ] Vitest configured correctly
+- [ ] Test file created (App.test.tsx)
+- [ ] Test written ("renders shell app")
+- [ ] `nx test shell` runs successfully
+- [ ] Test passes
+
+**Status:** ⬜ Not Started | 🟡 In Progress | ✅ Complete  
+**Notes:**  
+**Completed Date:**
+
+---
+
+### Task 6.2: Configure Vitest for Hello Remote
+
+- [ ] `vitest.config.ts` exists
+- [ ] Vitest configured correctly
+- [ ] Test file created (HelloRemote.test.tsx)
+- [ ] Test written ("renders HelloRemote component")
+- [ ] `nx test hello-remote` runs successfully
+- [ ] Test passes
+
+**Status:** ⬜ Not Started | 🟡 In Progress | ✅ Complete  
+**Notes:**  
+**Completed Date:**
+
+---
+
+### Task 6.3: Configure Vitest for Shared Libraries
+
+- [ ] Shared libraries have Vitest config
+- [ ] Tests created for utilities (formatDate)
+- [ ] Tests created for components (Button)
+- [ ] All tests run successfully (`nx run-many --target=test --all`)
+- [ ] All tests pass
+
+**Status:** ⬜ Not Started | 🟡 In Progress | ✅ Complete  
+**Notes:**  
+**Completed Date:**
+
+**Phase 6 Completion:** **_% (_**/3 tasks complete)
+
+---
+
+## Phase 7: Production Builds
+
+### Task 7.1: Test Production Build for Hello Remote
+
+- [ ] Build completes successfully (`nx build hello-remote`)
+- [ ] Build output exists in `dist/apps/hello-remote/`
+- [ ] `remoteEntry.js` generated
+- [ ] Build is optimized (minified)
+- [ ] Bundle size is reasonable
+
+**Status:** ⬜ Not Started | 🟡 In Progress | ✅ Complete  
+**Notes:**  
+**Completed Date:**
+
+---
+
+### Task 7.2: Test Production Build for Shell
+
+- [ ] Build completes successfully (`nx build shell`)
+- [ ] Build output exists in `dist/apps/shell/`
+- [ ] Build references remote correctly
+- [ ] Build is optimized (minified)
+- [ ] Bundle size is reasonable
+
+**Status:** ⬜ Not Started | 🟡 In Progress | ✅ Complete  
+**Notes:**  
+**Completed Date:**
+
+---
+
+### Task 7.3: Test Production Build Together
+
+- [ ] Both builds complete (`nx run-many --target=build --all`)
+- [ ] Remote entry accessible
+- [ ] Production build serves correctly
+- [ ] Module Federation works in production
+- [ ] No console errors
+
+**Status:** ⬜ Not Started | 🟡 In Progress | ✅ Complete  
+**Notes:**  
+**Completed Date:**
+
+**Phase 7 Completion:** **_% (_**/3 tasks complete)
+
+---
+
+## Phase 8: Documentation & Validation
+
+### Task 8.1: Create Development Guide
+
+- [ ] Development guide created (`docs/POC-0-Implementation/development-guide.md`)
+- [ ] Instructions for starting shell app
+- [ ] Instructions for starting hello remote
+- [ ] Instructions for running both together
+- [ ] Common commands documented
+- [ ] Troubleshooting tips included
+
+**Status:** ⬜ Not Started | 🟡 In Progress | ✅ Complete  
+**Notes:**  
+**Completed Date:**
+
+---
+
+### Task 8.2: Validate POC-0 Success Criteria
+
+- [ ] Shell loads on http://localhost:4200
+- [ ] Remote loads on http://localhost:4201
+- [ ] Module Federation v2 works
+- [ ] Shared dependencies work (no duplicates)
+- [ ] HMR works
+- [ ] Production builds work
+- [ ] TypeScript types work across boundaries
+- [ ] Tests pass
+
+**Status:** ⬜ Not Started | 🟡 In Progress | ✅ Complete  
+**Notes:**  
+**Completed Date:**
+
+**Phase 8 Completion:** **_% (_**/2 tasks complete)
+
+---
+
+## Overall Progress Summary
+
+> **Last Updated:** [Update this date when progress changes]  
+> **Next Task:** [Identify the immediate next task to work on]
+
+### Phase Completion Status
+
+- **Phase 1: Workspace Setup & Configuration** - **_% (_**/4 tasks)
+- **Phase 2: Shell Application** - **_% (_**/3 tasks)
+- **Phase 3: Hello Remote Application** - **_% (_**/3 tasks)
+- **Phase 4: Module Federation v2 Configuration** - **_% (_**/3 tasks)
+- **Phase 5: Shared Libraries** - **_% (_**/3 tasks)
+- **Phase 6: Testing Setup** - **_% (_**/3 tasks)
+- **Phase 7: Production Builds** - **_% (_**/3 tasks)
+- **Phase 8: Documentation & Validation** - **_% (_**/2 tasks)
+
+### Overall Completion
+
+**Total Tasks:** 24  
+**Completed Tasks:** **\_  
+**In Progress Tasks:** \_**  
+**Not Started Tasks:** **\_  
+**Overall Progress:** \_**%
+
+### Current Focus
+
+**Active Task:** [Task number and name]  
+**Status:** ⬜ Not Started | 🟡 In Progress | ✅ Complete  
+**Next Task After This:** [Next task to work on]
+
+---
+
+## Deliverables Checklist
+
+### Core Deliverables
+
+- [ ] Nx workspace setup
+- [ ] Shell app running on port 4200
+- [ ] Hello remote app running on port 4201
+- [ ] Module Federation v2 configured
+- [ ] Dynamic remote loading working
+- [ ] Shared libraries created (utils, ui, types)
+- [ ] Testing setup complete (Vitest)
+- [ ] Production builds working
+- [ ] Documentation complete
+
+### Success Criteria Validation
+
+- [ ] Shell loads and runs on http://localhost:4200
+- [ ] Remote loads dynamically from http://localhost:4201
+- [ ] Module Federation v2 works correctly
+- [ ] Shared dependencies work (no duplicates)
+- [ ] HMR works (fast updates)
+- [ ] Production builds work (optimized)
+- [ ] TypeScript types work across boundaries
+- [ ] Tests pass
+
+---
+
+## Blockers & Issues
+
+### Current Blockers
+
+1. **Blocker 1:**  
+   **Description:**  
+   **Owner:**  
+   **Status:**  
+   **Resolution Plan:**
+
+2. **Blocker 2:**  
+   **Description:**  
+   **Owner:**  
+   **Status:**  
+   **Resolution Plan:**
+
+### Resolved Issues
+
+1. **Issue 1:**  
+   **Description:**  
+   **Resolution:**  
+   **Resolved Date:**
+
+---
+
+## Notes & Observations
+
+### Technical Notes
+
+-
+
+### Architecture Decisions
+
+-
+
+### Lessons Learned
+
+- ***
+
+## Next Steps (Post-POC-0)
+
+### POC-1 Preparation
+
+- [ ] Review POC-1 architecture document
+- [ ] Identify dependencies needed for POC-1
+- [ ] Plan migration path from POC-0 to POC-1
+
+### Documentation Updates
+
+- [ ] Update architecture diagrams if needed
+- [ ] Document any deviations from plan
+- [ ] Create migration guide for POC-1
+
+---
+
+**Last Updated:** 2026-01-XX  
+**Status:** In Progress  
+**Next Review Date:**
