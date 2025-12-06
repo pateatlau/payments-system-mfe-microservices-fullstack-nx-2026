@@ -1,6 +1,6 @@
-# MFE POC-0 - Cursor Rules
+# MFE POC-1 - Cursor Rules
 
-> **Phase:** POC-0 Only | **Reference:** `docs/POC-0-Implementation/project-rules-cursor.md` for detailed rules
+> **Phase:** POC-1 Only | **Reference:** `docs/POC-1-Implementation/project-rules-cursor.md` for detailed rules
 
 ---
 
@@ -8,35 +8,52 @@
 
 1. **NO throw-away code** - Must carry forward to Production
 2. **Never use `any` type** - Documented exceptions only
-3. **Fix type errors immediately** - Don't work around them
-4. **Write tests alongside code** - 60% coverage minimum
-5. **POC-0 scope only** - No backend, routing, state management, auth, Tailwind
-6. **DO NOT automatically perform additional tasks** - Only perform tasks explicitly requested in the prompt. If a related task seems helpful, ask for confirmation with a clear description of what you want to implement before proceeding.
+3. **Always use Tailwind v4 syntax** - Never v3 (CRITICAL)
+4. **Fix type errors immediately** - Don't work around them
+5. **Write tests alongside code** - 70% coverage minimum
+6. **POC-1 scope only** - Mock auth, stubbed payments (no actual PSP), no backend
+7. **DO NOT automatically perform additional tasks** - Only perform tasks explicitly requested in the prompt. If a related task seems helpful, ask for confirmation with a clear description of what you want to implement before proceeding.
 
 ---
 
-## POC-0 Scope
+## POC-1 Scope
 
 **In Scope:**
 
-- Shell app (host, Port 4200) + Hello Remote (remote, Port 4201)
-- Module Federation v2 (@module-federation/enhanced 0.21.6)
-- Shared libraries (utils, ui, types)
-- Basic testing (Vitest + React Testing Library)
+- Authentication system (Auth MFE, Port 4201) with mock authentication
+- Payments system (Payments MFE, Port 4202) with stubbed operations (no actual PSP)
+- Routing (React Router 7)
+- State management (Zustand + TanStack Query)
+- Styling (Tailwind CSS v4)
+- Role-based access control (RBAC) - VENDOR and CUSTOMER roles
+- Universal header component
+- Form validation (React Hook Form + Zod)
+- Route protection
 
 **NOT in Scope:**
 
-- ❌ Backend, Routing, State Management, Auth, Tailwind CSS (later POCs)
+- ❌ Real authentication backend (POC-2)
+- ❌ Event bus for inter-MFE communication (POC-2)
+- ❌ Real payment processing with PSP integration (MVP/Production - all POC phases use stubbed payments)
+- ❌ Design system (POC-2)
+- ❌ Backend integration (POC-2)
 
 ---
 
-## Tech Stack (POC-0)
+## Tech Stack (POC-1)
 
 - **React:** 19.2.0 (match React DOM)
 - **Nx:** Latest
 - **Vite:** 6.x
 - **Module Federation:** @module-federation/enhanced 0.21.6 (BIMF)
-- **Testing:** Vitest 2.0.x, React Testing Library 16.1.x
+- **Routing:** React Router 7.x
+- **State (Client):** Zustand 4.5.x
+- **State (Server):** TanStack Query 5.x
+- **Forms:** React Hook Form 7.52.x + Zod 3.23.x
+- **Styling:** Tailwind CSS 4.0+ - **CRITICAL: Always use v4 syntax, never v3**
+- **HTTP Client:** Axios 1.7.x (for future backend integration)
+- **Error Handling:** react-error-boundary 4.0.13
+- **Testing:** Vitest 2.0.x, React Testing Library 16.1.x, Playwright
 - **Package Manager:** pnpm 9.x
 - **TypeScript:** 5.9.x (strict mode)
 
@@ -52,7 +69,7 @@
 ### React
 
 - **MUST:** Functional components only, hooks for state, explicit props interfaces
-- **MUST:** PascalCase components (`HelloRemote.tsx`), camelCase hooks with `use` prefix
+- **MUST:** PascalCase components (`SignIn.tsx`), camelCase hooks with `use` prefix
 
 ### File Organization
 
@@ -64,12 +81,76 @@
 
 ---
 
+## Authentication & Authorization
+
+### Mock Authentication
+
+- **MUST:** Use mock authentication (no real backend in POC-1)
+- **MUST:** Store auth state in Zustand store (`libs/shared-auth-store`)
+- **MUST:** Use localStorage for persistence
+- **MUST:** Implement RBAC helpers (hasRole, hasAnyRole)
+
+**User Roles:**
+
+- `ADMIN` - Full system access (functionality in POC-2)
+- `CUSTOMER` - Can make payments, view own history
+- `VENDOR` - Can initiate payments, view reports
+
+## Routing (React Router 7)
+
+- **MUST:** Use React Router 7.x
+- **MUST:** Configure routes in shell app
+- **MUST:** Implement route protection with `ProtectedRoute` component
+- **Routes:** `/` (redirect), `/signin`, `/signup`, `/payments` (protected)
+
+## State Management
+
+### Zustand (Client State)
+
+- **MUST:** Use Zustand for client-side state (auth, UI, theme)
+- **MUST:** Share auth store between MFEs (acceptable for POC-1)
+- **MUST:** Use persist middleware for auth state
+
+### TanStack Query (Server State)
+
+- **MUST:** Use TanStack Query for server-side state (API data, caching)
+- **MUST:** Use with stubbed payment APIs (no actual PSP)
+- **MUST:** Configure query options (staleTime, cacheTime)
+
+## Payments System
+
+### Stubbed Payment Operations
+
+**CRITICAL: All payment operations are stubbed (no actual PSP integration):**
+
+- **MUST:** Create stubbed payment APIs (no actual PSP)
+- **MUST:** Document that operations are stubbed
+- **MUST:** Use TanStack Query hooks with stubbed APIs
+- **MUST NOT:** Integrate with real Payment Service Provider
+
+## Forms & Validation
+
+- **MUST:** Use React Hook Form for all forms
+- **MUST:** Use Zod for validation schemas
+- **MUST:** Minimum 12 characters for passwords (banking-grade)
+- **MUST:** Complexity requirements (uppercase, lowercase, numbers, symbols)
+
+## Styling (Tailwind CSS v4)
+
+**CRITICAL: Always use Tailwind v4 syntax, never v3:**
+
+- **MUST:** Use Tailwind CSS 4.0+
+- **MUST:** Use inline utility classes (POC-1)
+- **MUST NOT:** Use v3 syntax
+- **MUST NOT:** Use design system components yet (POC-2)
+
 ## Module Federation v2
 
 - **MUST:** Configure shared dependencies (react, react-dom as singletons)
 - **MUST:** Use React.lazy() + Suspense for dynamic loading
-- **Shell:** `remotes: { helloRemote: 'http://localhost:4201/assets/remoteEntry.js' }`
-- **Remote:** `exposes: { './HelloRemote': './src/components/HelloRemote.tsx' }`
+- **Shell:** `remotes: { authMfe: 'http://localhost:4201/assets/remoteEntry.js', paymentsMfe: 'http://localhost:4202/assets/remoteEntry.js' }`
+- **Auth MFE:** `exposes: { './SignIn': './src/components/SignIn.tsx', './SignUp': './src/components/SignUp.tsx' }`
+- **Payments MFE:** `exposes: { './PaymentsPage': './src/components/PaymentsPage.tsx' }`
 
 ---
 
@@ -77,22 +158,27 @@
 
 ```
 apps/
-├── shell/              # Host (Port 4200)
-└── hello-remote/      # Remote (Port 4201)
+├── shell/              # Host (Port 4200) - Updated with routing, header
+├── auth-mfe/           # Remote (Port 4201) - NEW
+└── payments-mfe/       # Remote (Port 4202) - NEW
 libs/
-├── shared-utils/
-├── shared-ui/
-└── shared-types/
+├── shared-utils/       # Existing
+├── shared-ui/          # Existing
+├── shared-types/       # Existing (extended)
+├── shared-auth-store/  # NEW - Zustand auth store
+└── shared-header-ui/   # NEW - Universal header component
 ```
 
 ---
 
 ## Nx Commands
 
-- `nx serve shell` / `nx serve hello-remote`
-- `nx run-many --target=serve --projects=shell,hello-remote --parallel`
+- `nx serve shell` / `nx serve auth-mfe` / `nx serve payments-mfe`
+- `nx run-many --target=serve --projects=shell,auth-mfe,payments-mfe --parallel`
 - `nx build <project>` / `nx test <project>` / `nx lint <project>`
 - `nx generate @nx/react:application <name> --bundler=vite`
+- `nx generate @nx/react:library <name> --bundler=vite`
+- `nx generate @nx/js:library <name> --bundler=tsc`
 
 ---
 
@@ -109,8 +195,8 @@ libs/
 
 ### Documentation Files
 
-- **MUST:** Create documentation files in `docs/POC-0-temp/` folder by default
-- **MUST:** Only create documentation in other locations if explicitly instructed by user
+- **MUST:** Create documentation files in `docs/POC-1-Implementation/` folder
+- **MUST:** Update both `task-list.md` and `implementation-plan.md` after each task
 - **MUST:** Ask for confirmation if documentation location is unclear
 
 ---
@@ -125,9 +211,9 @@ libs/
 
 ### Task Progression
 
-- **MUST:** Follow `docs/POC-0-Implementation/implementation-plan.md` for detailed task steps
-- **MUST:** Update `docs/POC-0-Implementation/task-list.md` after completing each task/sub-task
-- **MUST:** Update `docs/POC-0-Implementation/implementation-plan.md` after completing each task/sub-task (mark verification checkboxes and update status)
+- **MUST:** Follow `docs/POC-1-Implementation/implementation-plan.md` for detailed task steps
+- **MUST:** Update `docs/POC-1-Implementation/task-list.md` after completing each task/sub-task
+- **MUST:** Update `docs/POC-1-Implementation/implementation-plan.md` after completing each task/sub-task (mark verification checkboxes and update status)
 - **MUST:** Ask for user confirmation before proceeding to the next task after completing each task or sub-task
 - **MUST:** Show completed task summary and next task details when asking for confirmation
 - **MUST NOT:** Automatically proceed to next task without explicit user approval
@@ -135,7 +221,7 @@ libs/
 ### Package.json Scripts
 
 - **MUST:** Add relevant commands to root `package.json` scripts section when creating new features, apps, libraries, or testing configurations
-- **MUST:** Follow the existing naming convention: `feature:project` (e.g., `dev:shell`, `test:remote`)
+- **MUST:** Follow the existing naming convention: `feature:project` (e.g., `dev:shell`, `dev:auth-mfe`, `test:payments-mfe`)
 - **MUST:** Include both individual project commands and aggregate commands (e.g., `dev` for all, `dev:shell` for one)
 - **MUST:** Add affected commands when applicable (e.g., `build:affected`, `test:affected`)
 
@@ -150,16 +236,62 @@ libs/
 
 ---
 
+## Testing Requirements
+
+### Unit Testing
+
+- **MUST:** Write tests alongside code (not after)
+- **MUST:** 70%+ test coverage target
+- **MUST:** Test all components, stores, and hooks
+- **MUST:** Use Vitest + React Testing Library
+
+### Integration Testing
+
+- **MUST:** Test authentication flow
+- **MUST:** Test payments flow
+- **MUST:** Test route protection
+- **MUST:** Test state synchronization
+- **MUST:** Test role-based access
+
+### E2E Testing
+
+- **MUST:** Use Playwright for E2E tests
+- **MUST:** Test critical user journeys
+- **MUST:** Test sign-in/sign-up flows
+- **MUST:** Test payments flow
+- **MUST:** Test logout flow
+- **MUST:** Test role-based access
+
+---
+
 ## Before Committing
 
-✅ TypeScript compiles | ✅ ESLint passes | ✅ Tests pass | ✅ Build works | ✅ No `any` types | ✅ Tests written | ✅ Module Federation works
+✅ TypeScript compiles | ✅ ESLint passes | ✅ Tests pass | ✅ Build works | ✅ No `any` types | ✅ Tests written | ✅ Module Federation works | ✅ Tailwind v4 syntax | ✅ Mock auth works | ✅ Stubbed payments work
 
 ---
 
 ## Success Criteria
 
-✅ Shell (4200) & Remote (4201) run | ✅ Module Federation works | ✅ Shared deps work | ✅ HMR works | ✅ Production builds work | ✅ Types work across boundaries | ✅ Tests pass (60% coverage) | ✅ Shared libs work
+✅ Auth MFE (4201) & Payments MFE (4202) run | ✅ React Router 7 works | ✅ Zustand stores shared | ✅ TanStack Query works | ✅ Tailwind CSS v4 works | ✅ Route protection works | ✅ RBAC works | ✅ Universal header displays | ✅ Tests pass (70% coverage) | ✅ All remotes load dynamically
 
 ---
 
-**For detailed rules, examples, and guidance:** See `docs/POC-0-Implementation/project-rules-cursor.md`
+## Common Pitfalls to Avoid
+
+- ❌ Using `any` type without justification
+- ❌ Creating throw-away code
+- ❌ Ignoring TypeScript errors
+- ❌ Using Tailwind v3 syntax (must use v4)
+- ❌ Skipping tests
+- ❌ Breaking existing patterns
+- ❌ Not following project structure
+- ❌ Hardcoding values (use environment variables)
+- ❌ Creating circular dependencies
+- ❌ Mixing concerns (keep components, hooks, utilities separate)
+- ❌ Using real PSP integration (must use stubbed operations)
+- ❌ Using real backend authentication (must use mock auth)
+- ❌ Using design system components (POC-2)
+
+---
+
+**For detailed rules, examples, and guidance:** See `docs/POC-1-Implementation/project-rules-cursor.md`
