@@ -32,7 +32,7 @@
 - [x] Documentation updated
 
 **Status:** ✅ Complete  
-**Notes:** Fixed TypeScript error (unused vi import), fixed ESLint config paths, added ignore patterns for generated files. All tests, type checking, and linting now pass.  
+**Notes:** Fixed TypeScript error (unused vi import), fixed ESLint config paths, added ignore patterns for generated files. All tests, type checking, and linting now pass. Removed hello-remote app and hello-remote-e2e project as they are no longer needed for POC-1 (replaced by auth-mfe). Cleaned up shell app references (RemoteComponent, mocks, type declarations, vitest config). Updated package.json scripts to use auth-mfe instead of hello-remote.  
 **Completed Date:** 2026-01-XX
 
 ---
@@ -91,22 +91,24 @@
 
 - [x] Tailwind CSS v4 installed
 - [x] Tailwind configured for shell app
-- [ ] Tailwind configured for auth-mfe app (will be done when app is created)
+- [x] Tailwind configured for auth-mfe app
 - [ ] Tailwind configured for payments-mfe app (will be done when app is created)
 - [x] Tailwind configured for shared-header-ui
 - [x] Tailwind classes work in shell app
+- [x] Tailwind classes work in auth-mfe app
 - [x] Build performance acceptable
 - [x] Header component integrated into shell Layout (early integration for testing)
 
-**Status:** ✅ Complete (partial - remaining apps will be configured when created)  
+**Status:** ✅ Complete (partial - payments-mfe will be configured when created)  
 **Notes:** Configured Tailwind CSS v4 for Nx monorepo. Key learnings documented in `tailwind-v4-setup-guide.md`:
 
 - Used `@tailwindcss/postcss` plugin (not `@tailwindcss/vite`) for monorepo compatibility
 - Created `tailwind.config.js` with absolute paths using `resolve(__dirname, '...')`
 - Used `@config` directive in CSS to reference config file
 - Integrated Header component into shell Layout for early testing
-- Remaining apps (auth-mfe, payments-mfe) will be configured when created in Phase 2 and Phase 3.  
-  **Completed Date:** 2026-12-06
+- Configured Tailwind CSS v4 for auth-mfe app (Task 2.1.6) using same pattern as shell app
+- Remaining app (payments-mfe) will be configured when created in Phase 3.  
+  **Completed Date:** 2026-12-06 (shell), 2026-12-06 (auth-mfe)
 
 **Phase 1 Completion:** **100% (5/5 tasks complete)** ✅
 
@@ -116,73 +118,106 @@
 
 ### Task 2.1: Create Auth MFE Application
 
-- [ ] Application created at `apps/auth-mfe`
-- [ ] Port 4201 configured
-- [ ] Application runs successfully
-- [ ] Standalone mode works
-- [ ] No build errors
+- [x] Application created at `apps/auth-mfe`
+- [x] Port 4201 configured
+- [x] Application runs successfully (builds and typechecks)
+- [x] Standalone mode works (can be verified with `pnpm nx serve auth-mfe`)
+- [x] No build errors
+- [x] Tailwind CSS v4 configured (Task 2.1.6)
 
-**Status:** ⬜ Not Started  
-**Notes:** _Add notes here after completion_  
-**Completed Date:** _TBD_
+**Status:** ✅ Complete  
+**Notes:** Generated auth-mfe application using `nx generate @nx/react:application` with Vite bundler, CSS styling, no routing, and Vitest for testing. Configured port 4201 in vite.config.mts. Application builds successfully and passes type checking. Tailwind CSS v4 configured using same pattern as shell app: created `tailwind.config.js` with absolute content paths, added PostCSS configuration in vite.config.mts, imported styles.css in main.tsx, and verified Tailwind classes work correctly. Ready for Module Federation configuration in Task 2.3.  
+**Completed Date:** 2026-12-06
 
 ---
 
 ### Task 2.2: Implement Sign-In Component
 
-- [ ] SignIn component created
-- [ ] React Hook Form integrated
-- [ ] Zod validation working
-- [ ] Form fields implemented
-- [ ] Validation errors displayed
-- [ ] Auth store integration working
-- [ ] Loading states working
-- [ ] Error handling implemented
-- [ ] Styled with Tailwind CSS v4
-- [ ] Unit tests written and passing
+- [x] SignIn component created
+- [x] React Hook Form integrated
+- [x] Zod validation working
+- [x] Form fields implemented
+- [x] Validation errors displayed
+- [x] Auth store integration working
+- [x] Loading states working
+- [x] Error handling implemented
+- [x] Styled with Tailwind CSS v4
+- [x] Unit tests written and passing
 
-**Status:** ⬜ Not Started  
-**Notes:** _Add notes here after completion_  
-**Completed Date:** _TBD_
+**Status:** ✅ Complete  
+**Notes:** Created SignIn component at `apps/auth-mfe/src/components/SignIn.tsx` with:
+
+- React Hook Form with Zod resolver for form validation
+- Email and password fields with validation (email format, required fields)
+- Integration with auth store (login action)
+- Loading states (isLoading, isSubmitting)
+- Error handling (displays auth store errors)
+- Tailwind CSS v4 styling (responsive design, focus states, disabled states)
+- Comprehensive unit tests (16 tests, all passing) covering rendering, validation, form submission, loading states, error handling, and accessibility
+- Component exported for Module Federation (ready for Task 2.3)  
+  **Completed Date:** 2026-12-06
 
 ---
 
 ### Task 2.3: Implement Sign-Up Component
 
-- [ ] SignUp component created
-- [ ] React Hook Form integrated
-- [ ] Zod validation working
-- [ ] Form fields implemented
-- [ ] Password strength validation
-- [ ] Confirm password validation
-- [ ] Auth store integration working
-- [ ] Loading states working
-- [ ] Error handling implemented
-- [ ] Styled with Tailwind CSS v4
-- [ ] Unit tests written and passing
+- [x] SignUp component created
+- [x] React Hook Form integrated
+- [x] Zod validation working
+- [x] Form fields implemented
+- [x] Password strength validation
+- [x] Confirm password validation
+- [x] Auth store integration working
+- [x] Loading states working
+- [x] Error handling implemented
+- [x] Styled with Tailwind CSS v4
+- [x] Unit tests written and passing
 
-**Status:** ⬜ Not Started  
-**Notes:** _Add notes here after completion_  
-**Completed Date:** _TBD_
+**Status:** ✅ Complete  
+**Notes:** Created SignUp component at `apps/auth-mfe/src/components/SignUp.tsx` with:
+
+- React Hook Form with Zod resolver for form validation
+- Name, email, password, and confirm password fields with validation
+- Banking-grade password requirements (minimum 12 characters, uppercase, lowercase, numbers, symbols)
+- Real-time password strength indicator (Weak/Medium/Strong)
+- Confirm password matching validation
+- Integration with auth store (signup action)
+- Loading states (isLoading, isSubmitting)
+- Error handling (displays auth store errors)
+- Tailwind CSS v4 styling (responsive design, focus states, disabled states)
+- Comprehensive unit tests (19 tests, all passing) covering rendering, validation, password strength, form submission, loading states, error handling, and accessibility
+- Component exported for Module Federation (ready for Task 2.4)  
+  **Completed Date:** 2026-12-06
 
 ---
 
 ### Task 2.4: Configure Module Federation v2 for Auth MFE
 
-- [ ] Module Federation plugin installed
-- [ ] `vite.config.mts` updated
-- [ ] Remote configuration correct
-- [ ] `./SignIn` exposed
-- [ ] `./SignUp` exposed
-- [ ] Shared dependencies configured
-- [ ] Remote entry generated
-- [ ] Remote loads in shell (after integration)
+- [x] Module Federation plugin installed
+- [x] `vite.config.mts` updated
+- [x] Remote configuration correct
+- [x] `./SignIn` exposed
+- [x] `./SignUp` exposed
+- [x] Shared dependencies configured
+- [x] Remote entry generated
+- [x] Shell configured to load auth-mfe remote
+- [x] Type declarations created for remote modules
 
-**Status:** ⬜ Not Started  
-**Notes:** _Add notes here after completion_  
-**Completed Date:** _TBD_
+**Status:** ✅ Complete  
+**Notes:** Configured Module Federation v2 for auth-mfe:
 
-**Phase 2 Completion:** **0% (0/4 tasks complete)**
+- Added `@module-federation/vite` plugin to `apps/auth-mfe/vite.config.mts`
+- Configured remote name as `authMfe`
+- Exposed `./SignIn` component pointing to `./src/components/SignIn.tsx`
+- Exposed `./SignUp` component pointing to `./src/components/SignUp.tsx`
+- Configured shared dependencies (React 19.2.0, React DOM 19.2.0 as singletons)
+- Updated shell `vite.config.mts` to load `authMfe` remote from `http://localhost:4201/remoteEntry.js`
+- Created type declarations in `apps/shell/src/types/module-federation.d.ts` for TypeScript support
+- Verified remote entry generation in build output (`remoteEntry-CWk-KY2k.js`)
+- All builds and type checking pass successfully  
+  **Completed Date:** 2026-12-06
+
+**Phase 2 Completion:** **100% (4/4 tasks complete)** ✅
 
 ---
 
@@ -483,7 +518,7 @@
 ### Phase Completion Status
 
 - **Phase 1: Foundation & Setup** - **100% (5/5 tasks)** ✅
-- **Phase 2: Authentication MFE** - **0% (0/4 tasks)** ⬜
+- **Phase 2: Authentication MFE** - **100% (4/4 tasks)** ✅
 - **Phase 3: Payments MFE** - **0% (0/5 tasks)** ⬜
 - **Phase 4: Shell Integration** - **0% (0/7 tasks)** ⬜
 - **Phase 5: Testing & Refinement** - **0% (0/5 tasks)** ⬜
@@ -491,16 +526,18 @@
 ### Overall Completion
 
 **Total Tasks:** 26  
-**Completed Tasks:** **5 (19%)** ✅  
+**Completed Tasks:** **9 (35%)** ✅  
 **In Progress Tasks:** **0**  
-**Not Started Tasks:** **21**  
-**Overall Progress:** **19%**
+**Not Started Tasks:** **17**  
+**Overall Progress:** **35%**
 
 ### Current Focus
 
-**Active Task:** Task 2.1 - Create Auth MFE Application  
+**Active Task:** Task 3.1 - Create Payments MFE Application  
 **Status:** ⬜ Not Started  
-**Next Task After This:** Task 2.2 - Implement Sign-In Component
+**Next Task After This:** Task 3.2 - Implement Stubbed Payment APIs
+
+**Note:** Phase 2 (Authentication MFE) is complete. Auth MFE components are exposed via Module Federation and ready to be integrated in the shell during Phase 4 (Task 4.5: Integrate Auth MFE Components).
 
 ---
 

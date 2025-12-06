@@ -1,7 +1,6 @@
 import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
-import path from 'path';
 
 export default defineConfig({
   root: __dirname,
@@ -16,13 +15,5 @@ export default defineConfig({
       provider: 'v8',
     },
     setupFiles: ['./src/test/setup.ts'],
-  },
-  resolve: {
-    alias: {
-      'helloRemote/HelloRemote': path.resolve(
-        __dirname,
-        './src/components/__mocks__/HelloRemote.tsx'
-      ),
-    },
   },
 });

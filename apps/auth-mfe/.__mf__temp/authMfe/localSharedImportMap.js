@@ -5,12 +5,12 @@
     const importMap = {
       
         "react": async () => {
-          let pkg = await import("__mf__virtual/helloRemote__prebuild__react__prebuild__.js");
+          let pkg = await import("__mf__virtual/authMfe__prebuild__react__prebuild__.js");
             return pkg;
         }
       ,
         "react-dom": async () => {
-          let pkg = await import("__mf__virtual/helloRemote__prebuild__react_mf_2_dom__prebuild__.js");
+          let pkg = await import("__mf__virtual/authMfe__prebuild__react_mf_2_dom__prebuild__.js");
             return pkg;
         }
       
@@ -22,7 +22,7 @@
             version: "19.2.0",
             scope: ["default"],
             loaded: false,
-            from: "helloRemote",
+            from: "authMfe",
             async get () {
               if (false) {
                 throw new Error(`Shared module '${"react"}' must be provided by host`);
@@ -52,7 +52,7 @@
             version: "19.2.0",
             scope: ["default"],
             loaded: false,
-            from: "helloRemote",
+            from: "authMfe",
             async get () {
               if (false) {
                 throw new Error(`Shared module '${"react-dom"}' must be provided by host`);

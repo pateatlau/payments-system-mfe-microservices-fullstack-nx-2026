@@ -3,8 +3,6 @@
  * This file runs before each test file
  */
 
-import { vi } from 'vitest';
-
 // Setup localStorage mock for tests
 const localStorageMock = (() => {
   let store: Record<string, string> = {};

@@ -1,9 +1,0 @@
-{
-  "name": "hello-remote",
-  "$schema": "../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "apps/hello-remote/src",
-  "projectType": "application",
-  "tags": [],
-  "// targets": "to see all targets run: nx show project hello-remote --web",
-  "targets": {}
-}

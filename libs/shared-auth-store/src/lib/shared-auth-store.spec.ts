@@ -1,6 +1,6 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { useAuthStore } from './shared-auth-store';
-import type { UserRole, SignUpData } from './shared-auth-store';
+import type { SignUpData } from './shared-auth-store';
 
 describe('useAuthStore', () => {
   beforeEach(() => {
@@ -247,7 +247,8 @@ describe('useAuthStore', () => {
       
       // Login and persist
       await login('test@example.com', 'password123');
-      const user = useAuthStore.getState().user;
+      const _user = useAuthStore.getState().user;
+      expect(_user).toBeTruthy();
       
       // Clear store state
       useAuthStore.setState({

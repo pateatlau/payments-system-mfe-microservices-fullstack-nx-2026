@@ -31,11 +31,8 @@ export default defineConfig(() => ({
     federation({
       name: 'shell',
       remotes: {
-        helloRemote: {
-          type: 'module',
-          name: 'helloRemote',
-          entry: 'http://localhost:4201/remoteEntry.js',
-        },
+        authMfe: 'http://localhost:4201/remoteEntry.js',
+        // payments-mfe will be configured in Phase 3
       },
       shared: {
         react: {

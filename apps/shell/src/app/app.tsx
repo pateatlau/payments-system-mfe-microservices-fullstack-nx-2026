@@ -1,6 +1,5 @@
 import { Route, Routes, Link } from 'react-router-dom';
 import Layout from '../components/Layout';
-import RemoteComponent from '../components/RemoteComponent';
 import { formatDate } from 'shared-utils';
 import { Button } from 'shared-ui';
 import type { User } from 'shared-types';
@@ -40,7 +39,6 @@ export function App() {
           </li>
         </ul>
       </div>
-      <RemoteComponent />
       <Routes>
         <Route
           path="/"
