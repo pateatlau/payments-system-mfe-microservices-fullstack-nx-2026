@@ -30,6 +30,7 @@ export default tseslint.config(
       '**/*.config.js',
       '**/*.config.mjs',
       'pnpm-lock.yaml',
+      '**/.__mf__temp/**',
     ],
   }
 );
