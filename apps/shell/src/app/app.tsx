@@ -46,7 +46,9 @@ export function App() {
           path="/"
           element={
             <div>
-              <h2>Welcome to the Shell Application</h2>
+              <h2 className="text-2xl font-bold">
+                Welcome to the Shell Application
+              </h2>
               <p>This is the generated root route.</p>
               <p>Current date: {formatDate(new Date())}</p>
               <p>

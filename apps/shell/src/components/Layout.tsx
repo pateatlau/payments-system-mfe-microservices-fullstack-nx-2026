@@ -1,4 +1,5 @@
 import { ReactNode } from 'react';
+import { Header } from 'shared-header-ui';
 
 interface LayoutProps {
   children: ReactNode;
@@ -6,28 +7,9 @@ interface LayoutProps {
 
 export function Layout({ children }: LayoutProps) {
   return (
-    <div
-      style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}
-    >
-      <header
-        style={{
-          backgroundColor: '#1a1a1a',
-          color: '#ffffff',
-          padding: '1rem 2rem',
-          borderBottom: '1px solid #333',
-        }}
-      >
-        <h1 style={{ margin: 0, fontSize: '1.5rem', fontWeight: '600' }}>
-          Payments System - Shell
-        </h1>
-      </header>
-      <main
-        style={{
-          flex: 1,
-          padding: '2rem',
-          backgroundColor: '#f5f5f5',
-        }}
-      >
+    <div className="min-h-screen flex flex-col">
+      <Header />
+      <main className="flex-1 p-8 bg-slate-50">
         {children}
       </main>
     </div>
