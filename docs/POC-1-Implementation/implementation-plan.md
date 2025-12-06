@@ -592,11 +592,11 @@ The auth-mfe remote is now ready to be consumed by the shell application. Compon
 
 **Verification:**
 
-- [ ] Application created at `apps/payments-mfe`
-- [ ] Port 4202 configured
-- [ ] Application runs successfully
-- [ ] Standalone mode works
-- [ ] No build errors
+- [x] Application created at `apps/payments-mfe`
+- [x] Port 4202 configured
+- [x] Application runs successfully
+- [x] Standalone mode works
+- [x] No build errors
 
 **Acceptance Criteria:**
 
@@ -605,9 +605,9 @@ The auth-mfe remote is now ready to be consumed by the shell application. Compon
 - ✅ Standalone mode works
 - ✅ No build errors
 
-**Status:** ⬜ Not Started  
-**Completed Date:** _TBD_  
-**Notes:** _Add notes here after completion_
+**Status:** ✅ Complete  
+**Completed Date:** 2026-12-06  
+**Notes:** Generated payments-mfe application using `nx generate @nx/react:application payments-mfe --bundler=vite --style=css --routing=false --directory=apps/payments-mfe --unitTestRunner=vitest --e2eTestRunner=none`. Configured port 4202 in vite.config.mts. Application builds successfully, passes type checking, and is ready for Tailwind CSS v4 configuration and Module Federation setup in subsequent tasks.
 
 ---
 
@@ -631,14 +631,14 @@ The auth-mfe remote is now ready to be consumed by the shell application. Compon
 
 **Verification:**
 
-- [ ] Stubbed payment APIs created
-- [ ] Payment types defined
-- [ ] `getPayments` implemented
-- [ ] `createPayment` implemented
-- [ ] `updatePayment` implemented
-- [ ] `deletePayment` implemented
-- [ ] Simulated delays added
-- [ ] Unit tests written and passing
+- [x] Stubbed payment APIs created
+- [x] Payment types defined
+- [x] `getPayments` implemented
+- [x] `createPayment` implemented
+- [x] `updatePayment` implemented
+- [x] `deletePayment` implemented
+- [x] Simulated delays added
+- [x] Unit tests written and passing
 
 **Acceptance Criteria:**
 
@@ -649,9 +649,57 @@ The auth-mfe remote is now ready to be consumed by the shell application. Compon
 - ✅ Unit tests passing (70%+ coverage)
 - ✅ Clearly documented as stubbed (no PSP)
 
-**Status:** ⬜ Not Started  
-**Completed Date:** _TBD_  
-**Notes:** _Add notes here after completion_
+**Status:** ✅ Complete  
+**Completed Date:** 2026-12-06  
+**Notes:**
+
+Created stubbed payment APIs at `apps/payments-mfe/src/api/` with the following:
+
+1. **Type Definitions (`types.ts`):**
+   - `Payment` interface with all required fields (id, userId, amount, currency, status, type, description, metadata, timestamps)
+   - `PaymentStatus` type: 'pending' | 'initiated' | 'processing' | 'completed' | 'failed' | 'cancelled'
+   - `PaymentType` type: 'initiate' | 'payment'
+   - `CreatePaymentDto` interface for creating payments
+   - `UpdatePaymentDto` interface for updating payments
+
+2. **API Functions (`stubbedPayments.ts`):**
+   - `getPayments(userId?: string)` - Returns all payments, optionally filtered by userId (for CUSTOMER role to see own payments only). Sorted by created date (newest first). Simulated delay: 300-500ms.
+   - `getPaymentById(id: string)` - Returns single payment by ID or null if not found. Simulated delay: 200-400ms.
+   - `createPayment(userId: string, data: CreatePaymentDto)` - Creates new payment:
+     - Generates unique payment ID
+     - Sets status based on type: 'initiate' → 'initiated', 'payment' → 'processing'
+     - For 'payment' type, automatically transitions to 'completed' after 2 seconds (simulated processing)
+     - Defaults currency to 'USD' if not provided
+     - Simulated delay: 400-600ms
+   - `updatePayment(id: string, data: UpdatePaymentDto)` - Updates payment fields:
+     - Only updates provided fields (partial update)
+     - Updates `updatedAt` timestamp
+     - Returns null if payment not found
+     - Simulated delay: 300-500ms
+   - `deletePayment(id: string)` - Soft deletes payment:
+     - Marks payment as 'cancelled' (soft delete pattern)
+     - Updates `updatedAt` timestamp
+     - Returns false if payment not found
+     - Simulated delay: 200-400ms
+   - `resetPaymentsStore()` - Resets store to initial state (for testing)
+
+3. **Storage:**
+   - In-memory array storage (simulates database)
+   - Pre-populated with 3 sample payments
+   - Resets on page reload (no persistence)
+
+4. **Documentation:**
+   - Clear warnings that all operations are stubbed
+   - No actual Payment Service Provider (PSP) integration
+   - Comments explain what would happen in production
+
+5. **Testing:**
+   - 27 comprehensive unit tests (all passing)
+   - Tests cover: CRUD operations, filtering, sorting, edge cases, timestamp updates, metadata handling
+   - Test setup file created with `@testing-library/jest-dom`
+   - `resetPaymentsStore()` helper for test isolation
+
+The stubbed APIs are ready for use with TanStack Query hooks in Task 3.3.
 
 ---
 
@@ -674,13 +722,13 @@ The auth-mfe remote is now ready to be consumed by the shell application. Compon
 
 **Verification:**
 
-- [ ] TanStack Query provider setup
-- [ ] `usePayments` hook created
-- [ ] `useCreatePayment` hook created
-- [ ] `useUpdatePayment` hook created
-- [ ] `useDeletePayment` hook created
-- [ ] Query options configured
-- [ ] Unit tests written and passing
+- [x] TanStack Query provider setup
+- [x] `usePayments` hook created
+- [x] `useCreatePayment` hook created
+- [x] `useUpdatePayment` hook created
+- [x] `useDeletePayment` hook created
+- [x] Query options configured
+- [x] Unit tests written and passing
 
 **Acceptance Criteria:**
 
@@ -690,9 +738,62 @@ The auth-mfe remote is now ready to be consumed by the shell application. Compon
 - ✅ Hooks work with stubbed APIs
 - ✅ Unit tests passing (70%+ coverage)
 
-**Status:** ⬜ Not Started  
-**Completed Date:** _TBD_  
-**Notes:** _Add notes here after completion_
+**Status:** ✅ Complete  
+**Completed Date:** 2026-12-06  
+**Notes:**
+
+Setup TanStack Query for payments-mfe with the following:
+
+1. **QueryProvider (`apps/payments-mfe/src/providers/QueryProvider.tsx`):**
+   - Created QueryClient with optimized default options:
+     - `staleTime: 5 minutes` - Payments data is relatively stable
+     - `gcTime: 10 minutes` (formerly cacheTime) - Keep cached data for 10 minutes
+     - `retry: 1` - Retry failed requests once
+     - `refetchOnWindowFocus: false` - Better UX, don't refetch on window focus
+   - Integrated QueryProvider in `main.tsx` to wrap the entire app
+
+2. **Query Hooks (`apps/payments-mfe/src/hooks/usePayments.ts`):**
+   - `usePayments()` - Fetches payments with role-based filtering:
+     - CUSTOMER role: Filters by current user ID (sees own payments only)
+     - VENDOR/ADMIN roles: Gets all payments (no filtering)
+     - Only fetches when user is authenticated (`enabled: !!user`)
+   - `useInvalidatePayments()` - Helper hook to manually invalidate payments cache
+   - Query key factory pattern (`paymentKeys`) for type-safe cache management
+
+3. **Mutation Hooks (`apps/payments-mfe/src/hooks/usePaymentMutations.ts`):**
+   - `useCreatePayment()` - Creates new payment:
+     - Requires authenticated user
+     - Invalidates payments list after successful creation
+     - Returns TanStack Query mutation object
+   - `useUpdatePayment()` - Updates existing payment:
+     - Invalidates payments list after successful update
+     - Updates specific payment in cache (optimistic update)
+     - Returns updated payment or null if not found
+   - `useDeletePayment()` - Deletes (cancels) payment:
+     - Invalidates payments list after successful deletion
+     - Returns boolean (true if deleted, false if not found)
+
+4. **Query Key Factory:**
+   - `paymentKeys.all` - Base key for all payment queries
+   - `paymentKeys.lists()` - Key for payment lists
+   - `paymentKeys.list(filters)` - Key for filtered payment lists
+   - `paymentKeys.details()` - Key for payment detail queries
+   - `paymentKeys.detail(id)` - Key for specific payment detail
+   - Enables type-safe cache invalidation and updates
+
+5. **Testing:**
+   - 15 comprehensive unit tests (all passing)
+   - Tests cover: query hooks (role-based filtering, loading, error states), mutation hooks (create, update, delete), cache invalidation, error handling
+   - Test files renamed to `.tsx` to support JSX syntax
+   - Mocked auth store and stubbed payment APIs for isolated testing
+
+6. **Integration:**
+   - QueryProvider wraps app in `main.tsx`
+   - Hooks ready for use in PaymentsPage component (Task 3.4)
+   - All hooks work with stubbed payment APIs
+   - Cache management configured for optimal performance
+
+The TanStack Query hooks are ready for use in the PaymentsPage component.
 
 ---
 
@@ -719,30 +820,97 @@ The auth-mfe remote is now ready to be consumed by the shell application. Compon
 
 **Verification:**
 
-- [ ] PaymentsPage component created
-- [ ] Payments list displayed
-- [ ] Role-based UI implemented
-- [ ] VENDOR features working
-- [ ] CUSTOMER features working
-- [ ] Payment operations working
-- [ ] Loading states working
-- [ ] Error handling implemented
-- [ ] Styled with Tailwind CSS v4
-- [ ] Unit tests written and passing
+- [x] PaymentsPage component created
+- [x] Payments list displayed
+- [x] Role-based UI implemented
+- [x] VENDOR features working
+- [x] CUSTOMER features working
+- [x] Payment operations working
+- [x] Loading states working
+- [x] Error handling implemented
+- [x] Styled with Tailwind CSS v4
+- [x] Unit tests written and passing
 
 **Acceptance Criteria:**
 
 - ✅ Payments page implemented
 - ✅ Payments list displayed
-- [ ] Role-based access control working
-- [ ] Payment operations working (stubbed)
-- [ ] Loading and error states
-- [ ] Styled with Tailwind CSS v4
-- [ ] Unit tests passing (70%+ coverage)
+- ✅ Role-based access control working
+- ✅ Payment operations working (stubbed)
+- ✅ Loading and error states
+- ✅ Styled with Tailwind CSS v4
+- ✅ Unit tests passing (70%+ coverage)
 
-**Status:** ⬜ Not Started  
-**Completed Date:** _TBD_  
-**Notes:** _Add notes here after completion_
+**Status:** ✅ Complete  
+**Completed Date:** 2026-12-06  
+**Notes:**
+
+Implemented comprehensive PaymentsPage component with the following features:
+
+1. **Component Structure (`apps/payments-mfe/src/components/PaymentsPage.tsx`):**
+   - Main payments dashboard page component
+   - Integrated with TanStack Query hooks (`usePayments`, `useCreatePayment`, `useUpdatePayment`, `useDeletePayment`)
+   - Role-based UI rendering based on user role (VENDOR vs CUSTOMER)
+
+2. **Role-Based Access Control:**
+   - **VENDOR Role:**
+     - Can create new payments (with form)
+     - Can edit payments (inline editing in table)
+     - Can delete payments (with confirmation)
+     - Sees all payments (no filtering)
+     - Header text: "Manage payments and view reports"
+   - **CUSTOMER Role:**
+     - Can only view own payments (filtered by userId)
+     - No create/edit/delete buttons
+     - Header text: "View your payment history"
+
+3. **Payment Operations:**
+   - **Create Payment:** Form with validation (amount, currency, type, description)
+   - **Update Payment:** Inline editing in table (amount, currency, status, description)
+   - **Delete Payment:** Confirmation dialog before deletion
+   - All operations use TanStack Query mutations with proper cache invalidation
+
+4. **UI States:**
+   - **Loading State:** Spinner with "Loading payments..." message
+   - **Error State:** Error message display for API failures
+   - **Not Authenticated:** "Authentication Required" message
+   - **Empty State:** "No payments found" message in table
+   - **Mutation Errors:** Error messages for create/update/delete failures
+
+5. **Form Validation:**
+   - React Hook Form + Zod validation
+   - Create form: Amount (required, positive, min 0.01), Currency (required), Type (required), Description (optional)
+   - Update form: All fields optional, same validation rules
+   - Real-time validation feedback
+
+6. **Styling (Tailwind CSS v4):**
+   - Configured Tailwind CSS v4 for payments-mfe:
+     - Created `tailwind.config.js` with content paths
+     - Updated `vite.config.mts` with PostCSS plugins
+     - Updated `styles.css` with `@import "tailwindcss"` and `@config`
+     - Imported styles in `main.tsx`
+   - Modern, responsive design:
+     - Responsive table with horizontal scroll on mobile
+     - Color-coded status badges (green for completed, blue for processing, yellow for pending, red for failed)
+     - Proper spacing, shadows, and hover effects
+     - Accessible form inputs with focus states
+
+7. **Testing:**
+   - 14 comprehensive unit tests (all passing):
+     - Loading state test
+     - Error state test
+     - Not authenticated test
+     - CUSTOMER role tests (list display, empty state, no edit/delete buttons)
+     - VENDOR role tests (create button, form display, form validation, create success, edit/delete buttons, edit mode, delete confirmation)
+   - Updated `app.spec.tsx` to work with PaymentsPage component
+   - All tests use proper mocking for auth store and TanStack Query hooks
+
+8. **Integration:**
+   - PaymentsPage integrated in `app.tsx` as main component
+   - Ready for Module Federation exposure (Task 3.5)
+   - All payment operations work with stubbed APIs
+
+The PaymentsPage component is fully functional and ready for Module Federation configuration.
 
 ---
 
@@ -764,13 +932,13 @@ The auth-mfe remote is now ready to be consumed by the shell application. Compon
 
 **Verification:**
 
-- [ ] Module Federation plugin installed
-- [ ] `vite.config.mts` updated
-- [ ] Remote configuration correct
-- [ ] `./PaymentsPage` exposed
-- [ ] Shared dependencies configured
-- [ ] Remote entry generated
-- [ ] Remote loads in shell (after integration)
+- [x] Module Federation plugin installed
+- [x] `vite.config.mts` updated
+- [x] Remote configuration correct
+- [x] `./PaymentsPage` exposed
+- [x] Shared dependencies configured
+- [x] Remote entry generated
+- [ ] Remote loads in shell (after integration - Task 4.3)
 
 **Acceptance Criteria:**
 
@@ -778,11 +946,47 @@ The auth-mfe remote is now ready to be consumed by the shell application. Compon
 - ✅ PaymentsPage component exposed
 - ✅ Shared dependencies configured
 - ✅ Remote entry generated correctly
-- ✅ Remote loads dynamically in shell
+- ⬜ Remote loads dynamically in shell (Task 4.3)
 
-**Status:** ⬜ Not Started  
-**Completed Date:** _TBD_  
-**Notes:** _Add notes here after completion_
+**Status:** ✅ Complete  
+**Completed Date:** 2026-12-07  
+**Notes:**
+
+Configured Module Federation v2 for payments-mfe:
+
+1. **Module Federation Plugin:**
+   - `@module-federation/vite@1.9.2` already installed (from package.json)
+   - Added `federation` import to `vite.config.mts`
+
+2. **Remote Configuration (`apps/payments-mfe/vite.config.mts`):**
+   - Configured as remote with name `paymentsMfe`
+   - Exposed `./PaymentsPage` component from `./src/components/PaymentsPage.tsx`
+   - Matches the pattern used in auth-mfe for consistency
+
+3. **Shared Dependencies:**
+   - React: `19.2.0` (singleton)
+   - React DOM: `19.2.0` (singleton)
+   - TanStack Query: `^5.0.0` (singleton) - Added for payments-mfe since it uses TanStack Query
+   - All dependencies configured as singletons to ensure single instance across MFEs
+
+4. **Build Verification:**
+   - Build succeeds: `pnpm nx build payments-mfe`
+   - Remote entry generated: `remoteEntry-DASVJrLB.js` (2.41 kB)
+   - PaymentsPage chunk generated: `PaymentsPage-D6GDUj-c.js` (101.93 kB)
+   - TypeScript compilation passes
+   - No linting errors
+
+5. **Remote Entry Structure:**
+   - Remote entry file contains Module Federation runtime
+   - PaymentsPage component is properly exposed and chunked
+   - All shared dependencies are correctly configured
+
+6. **Next Steps:**
+   - Ready for shell integration (Task 4.3)
+   - Shell will consume `paymentsMfe/PaymentsPage` remote
+   - Remote will be loaded dynamically via React Router 7 (Task 4.1)
+
+The payments-mfe is now configured as a Module Federation remote and ready for integration into the shell application.
 
 ---
 
