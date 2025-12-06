@@ -11,6 +11,7 @@
 3. **Fix type errors immediately** - Don't work around them
 4. **Write tests alongside code** - 60% coverage minimum
 5. **POC-0 scope only** - No backend, routing, state management, auth, Tailwind
+6. **DO NOT automatically perform additional tasks** - Only perform tasks explicitly requested in the prompt. If a related task seems helpful, ask for confirmation with a clear description of what you want to implement before proceeding.
 
 ---
 
@@ -115,6 +116,12 @@ libs/
 ---
 
 ## Task Management & Workflow
+
+### AI Assistant Behavior
+
+- **MUST NOT:** Automatically perform additional tasks apart from what is explicitly requested in the prompt
+- **MUST:** If a related task seems helpful, ask for confirmation with a clear description of what you want to implement before proceeding
+- **MUST:** Only perform tasks that are explicitly requested or confirmed by the user
 
 ### Task Progression
 

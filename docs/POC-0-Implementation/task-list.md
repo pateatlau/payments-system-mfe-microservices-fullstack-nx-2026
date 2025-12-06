@@ -427,7 +427,7 @@
 
 **Total Tasks:** 24  
 **Completed Tasks:** **24 (100%)** ✅  
-**In Progress Tasks:** \_**  
+**In Progress Tasks:** \_\*\*  
 **Not Started Tasks:** **\_  
 **Overall Progress:** \_**%
 
