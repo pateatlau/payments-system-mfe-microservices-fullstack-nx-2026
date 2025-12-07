@@ -54,6 +54,7 @@ export function SignInPage({ SignInComponent }: SignInPageProps) {
 
   // Handle successful login - navigate to payments page
   const handleSuccess = () => {
+    // eslint-disable-next-line no-console
     console.log('[SignInPage] Login successful, navigating to /payments');
     navigate('/payments', { replace: true });
   };

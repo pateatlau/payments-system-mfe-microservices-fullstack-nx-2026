@@ -7,6 +7,28 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useAuthStore } from 'shared-auth-store';
 import { PaymentsPage } from '../pages/PaymentsPage';
 
+// Payment type for test mocks
+interface Payment {
+  id: string;
+  amount: number;
+  currency: string;
+  description: string;
+  status: string;
+}
+
+interface CreatePaymentData {
+  amount: number;
+  currency: string;
+  description: string;
+}
+
+interface UpdatePaymentData {
+  amount?: number;
+  currency?: string;
+  description?: string;
+  status?: string;
+}
+
 // Mock the auth store
 vi.mock('shared-auth-store', () => ({
   useAuthStore: vi.fn(),
@@ -15,13 +37,13 @@ vi.mock('shared-auth-store', () => ({
 // Mock PaymentsPage component from payments-mfe
 // This simulates the actual PaymentsPage component behavior
 const createMockPaymentsComponent = (mockData: {
-  payments?: any[];
+  payments?: Payment[];
   isLoading?: boolean;
   error?: Error | null;
   hasRole?: (role: string) => boolean;
-  onCreatePayment?: (data: any) => Promise<any>;
-  onUpdatePayment?: (id: string, data: any) => Promise<any>;
-  onDeletePayment?: (id: string) => Promise<any>;
+  onCreatePayment?: (data: CreatePaymentData) => Promise<Payment>;
+  onUpdatePayment?: (id: string, data: UpdatePaymentData) => Promise<Payment>;
+  onDeletePayment?: (id: string) => Promise<void>;
 }) => {
   return function MockPaymentsPageComponent() {
     const { hasRole: hasRoleFromStore } = (useAuthStore as unknown as ReturnType<typeof vi.fn>)();
@@ -36,7 +58,7 @@ const createMockPaymentsComponent = (mockData: {
         )}
         {mockData.payments && mockData.payments.length > 0 && (
           <div data-testid="payments-list">
-            {mockData.payments.map((payment: any) => (
+            {mockData.payments.map((payment: Payment) => (
               <div key={payment.id} data-testid={`payment-${payment.id}`}>
                 <span data-testid={`payment-amount-${payment.id}`}>
                   {payment.amount} {payment.currency}

@@ -3,7 +3,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
-import { useAuthStore } from 'shared-auth-store';
+import { useAuthStore, type User } from 'shared-auth-store';
 import { AppRoutes } from '../routes/AppRoutes';
 
 // Default mock state
@@ -45,6 +45,7 @@ function setMockAuthState(state: Partial<typeof defaultMockState>) {
 }
 
 // Mock components for testing
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const MockSignIn = vi.fn(({ onSuccess, onNavigateToSignUp }: any) => (
   <div data-testid="mock-signin">
     <button onClick={onSuccess} data-testid="signin-success">
@@ -56,6 +57,7 @@ const MockSignIn = vi.fn(({ onSuccess, onNavigateToSignUp }: any) => (
   </div>
 ));
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const MockSignUp = vi.fn(({ onSuccess, onNavigateToSignIn }: any) => (
   <div data-testid="mock-signup">
     <button onClick={onSuccess} data-testid="signup-success">
@@ -210,7 +212,7 @@ describe('App Integration Tests', () => {
       setMockAuthState({
         isAuthenticated: true,
         isLoading: false,
-        user: { id: '1', email: 'test@example.com', name: 'Test User', role: 'CUSTOMER' } as any,
+        user: { id: '1', email: 'test@example.com', name: 'Test User', role: 'CUSTOMER' } as User,
       });
     });
 
@@ -288,7 +290,7 @@ describe('App Integration Tests', () => {
       setMockAuthState({
         isAuthenticated: true,
         isLoading: false,
-        user: { id: '1', email: 'test@example.com', name: 'Test User', role: 'CUSTOMER' } as any,
+        user: { id: '1', email: 'test@example.com', name: 'Test User', role: 'CUSTOMER' } as User,
       });
 
       render(
@@ -309,7 +311,7 @@ describe('App Integration Tests', () => {
       setMockAuthState({
         isAuthenticated: true,
         isLoading: false,
-        user: { id: '1', email: 'test@example.com', name: 'Test User', role: 'CUSTOMER' } as any,
+        user: { id: '1', email: 'test@example.com', name: 'Test User', role: 'CUSTOMER' } as User,
       });
 
       render(
@@ -352,7 +354,7 @@ describe('App Integration Tests', () => {
       setMockAuthState({
         isAuthenticated: true,
         isLoading: false,
-        user: { id: '1', email: 'test@example.com', name: 'Test User', role: 'CUSTOMER' } as any,
+        user: { id: '1', email: 'test@example.com', name: 'Test User', role: 'CUSTOMER' } as User,
       });
 
       rerender(

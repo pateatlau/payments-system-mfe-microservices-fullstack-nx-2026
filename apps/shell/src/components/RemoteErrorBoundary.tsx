@@ -103,6 +103,7 @@ export function RemoteErrorBoundary({
       FallbackComponent={fallback ? () => <>{fallback}</> : DefaultErrorFallback}
       onError={(error, errorInfo) => {
         // Log error for debugging
+        // eslint-disable-next-line no-console
         console.error(`Failed to load ${componentName} component:`, error, errorInfo);
       }}
       onReset={() => {

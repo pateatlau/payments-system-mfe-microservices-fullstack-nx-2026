@@ -3,10 +3,9 @@ import { RemoteErrorBoundary } from '../components/RemoteErrorBoundary';
 
 /**
  * Props interface for the PaymentsPage component from payments-mfe
+ * PaymentsPage from payments-mfe doesn't require props
  */
-export interface PaymentsComponentProps {
-  // PaymentsPage from payments-mfe doesn't require props
-}
+export type PaymentsComponentProps = Record<string, never>;
 
 /**
  * Props for PaymentsPage - allows dependency injection for testing

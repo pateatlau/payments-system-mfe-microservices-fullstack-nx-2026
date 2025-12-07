@@ -5,7 +5,6 @@ import React from 'react';
 import { usePayments, useInvalidatePayments } from './usePayments';
 import { useAuthStore } from 'shared-auth-store';
 import { getPayments } from '../api/stubbedPayments';
-import { resetPaymentsStore } from '../api/stubbedPayments';
 
 // Mock the auth store
 vi.mock('shared-auth-store', () => ({

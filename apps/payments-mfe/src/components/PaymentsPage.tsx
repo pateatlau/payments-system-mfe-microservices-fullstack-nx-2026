@@ -157,6 +157,7 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
       onPaymentSuccess?.();
     } catch (error) {
       // Error is handled by mutation
+      // eslint-disable-next-line no-console
       console.error('Failed to create payment:', error);
     }
   };
@@ -175,6 +176,7 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
       onPaymentSuccess?.();
     } catch (error) {
       // Error is handled by mutation
+      // eslint-disable-next-line no-console
       console.error('Failed to update payment:', error);
     }
   };
@@ -187,6 +189,7 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
       onPaymentSuccess?.();
     } catch (error) {
       // Error is handled by mutation
+      // eslint-disable-next-line no-console
       console.error('Failed to delete payment:', error);
     }
   };

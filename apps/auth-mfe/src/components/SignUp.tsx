@@ -8,7 +8,8 @@ import { useEffect, useRef } from 'react';
  * Password strength validation helper
  * Banking-grade requirements: minimum 12 characters, uppercase, lowercase, numbers, symbols
  */
-const passwordStrengthRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#^()_+\-=\[\]{};':"\\|,.<>\/])[A-Za-z\d@$!%*?&#^()_+\-=\[\]{};':"\\|,.<>\/]{12,}$/;
+// eslint-disable-next-line no-useless-escape
+const passwordStrengthRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#^()_+\-=[\]{};':"\\|,.<>\/])[A-Za-z\d@$!%*?&#^()_+\-=[\]{};':"\\|,.<>\/]{12,}$/;
 
 /**
  * Sign-up form schema using Zod
@@ -106,6 +107,7 @@ export function SignUp({ onSuccess, onNavigateToSignIn }: SignUpProps = {}) {
       // when isAuthenticated becomes true. onSuccess is called via useEffect above.
     } catch (err) {
       // Error is handled by auth store
+      // eslint-disable-next-line no-console
       console.error('Sign-up error:', err);
     }
   };
@@ -121,7 +123,8 @@ export function SignUp({ onSuccess, onNavigateToSignIn }: SignUpProps = {}) {
     const hasLower = /[a-z]/.test(pwd);
     const hasUpper = /[A-Z]/.test(pwd);
     const hasNumber = /\d/.test(pwd);
-    const hasSymbol = /[@$!%*?&#^()_+\-=\[\]{};':"\\|,.<>\/]/.test(pwd);
+    // eslint-disable-next-line no-useless-escape
+    const hasSymbol = /[@$!%*?&#^()_+\-=[\]{};':"\\|,.<>\/]/.test(pwd);
 
     const requirementsMet = [hasLower, hasUpper, hasNumber, hasSymbol].filter(Boolean).length;
 

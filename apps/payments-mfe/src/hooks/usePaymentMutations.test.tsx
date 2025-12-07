@@ -202,7 +202,6 @@ describe('usePaymentMutations', () => {
     });
 
     it('handles update failure', async () => {
-      const mockError = new Error('Payment not found');
       (updatePayment as ReturnType<typeof vi.fn>).mockResolvedValue(null);
 
       const { result } = renderHook(() => useUpdatePayment(), {

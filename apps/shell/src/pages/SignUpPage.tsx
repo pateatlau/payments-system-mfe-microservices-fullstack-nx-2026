@@ -54,6 +54,7 @@ export function SignUpPage({ SignUpComponent }: SignUpPageProps) {
 
   // Handle successful signup - navigate to payments page
   const handleSuccess = () => {
+    // eslint-disable-next-line no-console
     console.log('[SignUpPage] Signup successful, navigating to /payments');
     navigate('/payments', { replace: true });
   };

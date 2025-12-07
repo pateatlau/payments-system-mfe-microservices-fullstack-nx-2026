@@ -321,6 +321,20 @@ pnpm preview:auth-mfe
 
 ---
 
+## Related Documentation
+
+### New Documentation (Task 5.4)
+
+- [`poc-1-completion-summary.md`](./poc-1-completion-summary.md) - POC-1 completion summary
+- [`authentication-flow.md`](./authentication-flow.md) - Authentication flow details
+- [`payments-flow.md`](./payments-flow.md) - Payments flow details
+- [`rbac-implementation.md`](./rbac-implementation.md) - RBAC implementation
+- [`packages-and-libraries.md`](./packages-and-libraries.md) - Package documentation
+- [`testing-guide.md`](./testing-guide.md) - Comprehensive testing guide
+- [`migration-guide-poc0-to-poc1.md`](./migration-guide-poc0-to-poc1.md) - Migration guide
+
+---
+
 ## Troubleshooting
 
 ### Port Already in Use

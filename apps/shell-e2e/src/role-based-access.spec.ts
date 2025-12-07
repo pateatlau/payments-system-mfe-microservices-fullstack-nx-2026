@@ -17,8 +17,8 @@ test.describe('Role-Based Access Control', () => {
 
     // If there are payments, verify edit/delete buttons are visible
     // (This depends on whether there are existing payments)
-    const editButtons = page.locator('button').filter({ hasText: /edit/i });
-    const deleteButtons = page.locator('button').filter({ hasText: /delete/i });
+    const _editButtons = page.locator('button').filter({ hasText: /edit/i });
+    const _deleteButtons = page.locator('button').filter({ hasText: /delete/i });
     
     // At least create button should be visible for VENDOR
     await expect(createButton).toBeVisible();
@@ -39,8 +39,8 @@ test.describe('Role-Based Access Control', () => {
     await expect(createButton).not.toBeVisible({ timeout: 5000 });
 
     // Verify edit/delete buttons are NOT visible
-    const editButtons = page.locator('button').filter({ hasText: /edit/i });
-    const deleteButtons = page.locator('button').filter({ hasText: /delete/i });
+    const _editButtons = page.locator('button').filter({ hasText: /edit/i });
+    const _deleteButtons = page.locator('button').filter({ hasText: /delete/i });
     
     // Customer should only see view-only content
     await expect(page.locator('h1, h2')).toContainText(/payment/i, { timeout: 10000 });

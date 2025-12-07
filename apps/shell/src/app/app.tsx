@@ -1,4 +1,3 @@
-import { ComponentType } from 'react';
 import Layout from '../components/Layout';
 import { AppRoutes, AppRoutesProps } from '../routes/AppRoutes';
 

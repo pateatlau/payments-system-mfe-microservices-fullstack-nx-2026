@@ -3,7 +3,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useAuthStore } from 'shared-auth-store';
 import { useEffect, useRef } from 'react';
-import type React from 'react';
 
 /**
  * Sign-in form schema using Zod
@@ -76,6 +75,7 @@ export function SignIn({ onSuccess, onNavigateToSignUp }: SignInProps = {}) {
       // which triggers navigation in the parent SignInPage component
     } catch (err) {
       // Error is handled by auth store
+      // eslint-disable-next-line no-console
       console.error('Sign-in error:', err);
     }
   };
