@@ -1,18 +1,13 @@
-import { StrictMode } from 'react';
-import * as ReactDOM from 'react-dom/client';
-import App from './app/app';
-import { QueryProvider } from './providers/QueryProvider';
-// CSS import temporarily commented out - will be enabled in Phase 4 (PostCSS/Tailwind configuration)
-// import './styles.css';
+/**
+ * Payments MFE Entry Point
+ *
+ * Module Federation requires an async boundary to properly initialize
+ * shared dependencies before the application code runs.
+ *
+ * @see https://module-federation.io/guide/troubleshooting/runtime/RUNTIME-006
+ */
 
-const root = ReactDOM.createRoot(
-  document.getElementById('root') as HTMLElement
-);
-
-root.render(
-  <StrictMode>
-    <QueryProvider>
-      <App />
-    </QueryProvider>
-  </StrictMode>
-);
+// Dynamic import creates the async boundary required by Module Federation
+import('./bootstrap').catch(err => {
+  console.error('Failed to load application:', err);
+});

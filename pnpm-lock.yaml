@@ -156,6 +156,9 @@ importers:
       autoprefixer:
         specifier: ^10.4.22
         version: 10.4.22(postcss@8.5.6)
+      css-loader:
+        specifier: ^7.1.2
+        version: 7.1.2(@rspack/core@1.6.6(@swc/helpers@0.5.17))(webpack@5.103.0(@swc/core@1.5.29(@swc/helpers@0.5.17)))
       eslint:
         specifier: ^9.0.0
         version: 9.39.1(jiti@2.4.2)
@@ -189,6 +192,9 @@ importers:
       react-refresh:
         specifier: ^0.18.0
         version: 0.18.0
+      style-loader:
+        specifier: ^4.0.0
+        version: 4.0.0(webpack@5.103.0(@swc/core@1.5.29(@swc/helpers@0.5.17)))
       tailwindcss:
         specifier: ^4.0.0
         version: 4.1.17
@@ -3309,6 +3315,18 @@ packages:
       webpack:
         optional: true
 
+  css-loader@7.1.2:
+    resolution: {integrity: sha512-6WvYYn7l/XEGN8Xu2vWFt9nVzrCn39vKyTEFf/ExEyoksJjjSZV/0/35XPlMbpnr6VGhZIUg5yJrL8tGfes/FA==}
+    engines: {node: '>= 18.12.0'}
+    peerDependencies:
+      '@rspack/core': 0.x || 1.x
+      webpack: ^5.27.0
+    peerDependenciesMeta:
+      '@rspack/core':
+        optional: true
+      webpack:
+        optional: true
+
   css-select@4.3.0:
     resolution: {integrity: sha512-wPpOYtnsVontu2mODhA19JrqWxNsfdatRKd64kmpRbQgh1KtItko5sTnEpPdpSaJszTOhEMlF/RPz28qj4HqhQ==}
 
@@ -6112,6 +6130,12 @@ packages:
     engines: {node: '>= 12.13.0'}
     peerDependencies:
       webpack: ^5.0.0
+
+  style-loader@4.0.0:
+    resolution: {integrity: sha512-1V4WqhhZZgjVAVJyt7TdDPZoPBPNHbekX4fWnCJL1yQukhCeZhJySUL+gL9y6sNdN95uEOS83Y55SqHcP7MzLA==}
+    engines: {node: '>= 18.12.0'}
+    peerDependencies:
+      webpack: ^5.27.0
 
   stylehacks@5.1.1:
     resolution: {integrity: sha512-sBpcd5Hx7G6seo7b1LkpttvTz7ikD0LlH5RmdcBNb6fFR0Fl7LQwHDFr300q4cwUqi+IYrFGmsIHieMBfnN/Bw==}
@@ -10492,6 +10516,20 @@ snapshots:
       '@rspack/core': 1.6.6(@swc/helpers@0.5.17)
       webpack: 5.103.0(@swc/core@1.5.29(@swc/helpers@0.5.17))
 
+  css-loader@7.1.2(@rspack/core@1.6.6(@swc/helpers@0.5.17))(webpack@5.103.0(@swc/core@1.5.29(@swc/helpers@0.5.17))):
+    dependencies:
+      icss-utils: 5.1.0(postcss@8.5.6)
+      postcss: 8.5.6
+      postcss-modules-extract-imports: 3.1.0(postcss@8.5.6)
+      postcss-modules-local-by-default: 4.2.0(postcss@8.5.6)
+      postcss-modules-scope: 3.2.1(postcss@8.5.6)
+      postcss-modules-values: 4.0.0(postcss@8.5.6)
+      postcss-value-parser: 4.2.0
+      semver: 7.7.3
+    optionalDependencies:
+      '@rspack/core': 1.6.6(@swc/helpers@0.5.17)
+      webpack: 5.103.0(@swc/core@1.5.29(@swc/helpers@0.5.17))
+
   css-select@4.3.0:
     dependencies:
       boolbase: 1.0.0
@@ -13595,6 +13633,10 @@ snapshots:
   style-inject@0.3.0: {}
 
   style-loader@3.3.4(webpack@5.103.0(@swc/core@1.5.29(@swc/helpers@0.5.17))):
+    dependencies:
+      webpack: 5.103.0(@swc/core@1.5.29(@swc/helpers@0.5.17))
+
+  style-loader@4.0.0(webpack@5.103.0(@swc/core@1.5.29(@swc/helpers@0.5.17))):
     dependencies:
       webpack: 5.103.0(@swc/core@1.5.29(@swc/helpers@0.5.17))
 

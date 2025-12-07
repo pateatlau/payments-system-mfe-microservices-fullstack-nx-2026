@@ -37,7 +37,14 @@ const updatePaymentSchema = z.object({
     .optional(),
   currency: z.string().min(1, 'Currency is required').optional(),
   status: z
-    .enum(['pending', 'initiated', 'processing', 'completed', 'failed', 'cancelled'] as const)
+    .enum([
+      'pending',
+      'initiated',
+      'processing',
+      'completed',
+      'failed',
+      'cancelled',
+    ] as const)
     .optional(),
   description: z.string().optional(),
 });
@@ -443,7 +450,7 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
               </thead>
               <tbody className="bg-white divide-y divide-slate-200">
                 {payments && payments.length > 0 ? (
-                  payments.map((payment) => (
+                  payments.map(payment => (
                     <tr key={payment.id} className="hover:bg-slate-50">
                       {editingPayment?.id === payment.id ? (
                         // Edit mode - single form for all fields
@@ -584,7 +591,9 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
                                   </div>
                                 ) : (
                                   <button
-                                    onClick={() => setDeleteConfirmId(payment.id)}
+                                    onClick={() =>
+                                      setDeleteConfirmId(payment.id)
+                                    }
                                     className="text-red-600 hover:text-red-900"
                                   >
                                     Delete
@@ -613,8 +622,7 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
         </div>
 
         {/* Mutation Errors */}
-        {(updatePaymentMutation.isError ||
-          deletePaymentMutation.isError) && (
+        {(updatePaymentMutation.isError || deletePaymentMutation.isError) && (
           <div className="mt-4 bg-red-50 border border-red-200 rounded-lg p-4">
             <p className="text-sm text-red-600">
               {updatePaymentMutation.error?.message ||
@@ -629,4 +637,3 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
 }
 
 export default PaymentsPage;
-

@@ -1,44 +1,18 @@
-import { StrictMode } from 'react';
-import { BrowserRouter } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import * as ReactDOM from 'react-dom/client';
-import App from './app/app';
-// CSS import temporarily commented out - will be enabled in Phase 4 (PostCSS/Tailwind configuration)
-// import './styles.css';
+/**
+ * Shell Application Entry Point
+ *
+ * Module Federation requires an async boundary to properly initialize
+ * shared dependencies before the application code runs. This is achieved
+ * by dynamically importing the bootstrap file.
+ *
+ * Without this async boundary, shared dependencies like React cannot be
+ * properly negotiated between the host and remotes, resulting in:
+ * "Invalid loadShareSync function call" errors
+ *
+ * @see https://module-federation.io/guide/troubleshooting/runtime/RUNTIME-006
+ */
 
-// Import remote components
-// This file (main.tsx) is not imported during tests, so MF imports are safe here
-import { SignInRemote, SignUpRemote, PaymentsPageRemote } from './remotes';
-
-// Create a QueryClient for TanStack Query
-// This is needed for remote components that use TanStack Query (like PaymentsPage)
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      gcTime: 10 * 60 * 1000, // 10 minutes (formerly cacheTime)
-      retry: 1,
-      refetchOnWindowFocus: false,
-    },
-  },
+// Dynamic import creates the async boundary required by Module Federation
+import('./bootstrap').catch(err => {
+  console.error('Failed to load application:', err);
 });
-
-const root = ReactDOM.createRoot(
-  document.getElementById('root') as HTMLElement
-);
-
-root.render(
-  <StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <App
-          remotes={{
-            SignInComponent: SignInRemote,
-            SignUpComponent: SignUpRemote,
-            PaymentsComponent: PaymentsPageRemote,
-          }}
-        />
-      </BrowserRouter>
-    </QueryClientProvider>
-  </StrictMode>
-);

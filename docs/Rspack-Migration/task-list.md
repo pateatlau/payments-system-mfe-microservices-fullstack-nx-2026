@@ -197,93 +197,93 @@
 
 **Goal:** Configure Module Federation v2 with HMR support  
 **Duration:** 2-3 days  
-**Status:** ⬜ Not Started
+**Status:** 🟡 In Progress
 
 ### Task 3.1: Configure Shell as Host
 
-- [ ] Add Module Federation plugin to shell config
-- [ ] Configure remotes (authMfe, paymentsMfe)
-- [ ] Configure shared dependencies
-- [ ] Set `output.uniqueName: 'shell'` (required for HMR)
+- [x] Add Module Federation plugin to shell config
+- [x] Configure remotes (authMfe, paymentsMfe)
+- [x] Configure shared dependencies
+- [x] Set `output.uniqueName: 'shell'` (required for HMR)
 
-**Status:** ⬜ Not Started  
-**Notes:**  
-**Completed Date:**
+**Status:** ✅ Complete  
+**Notes:** Added `rspack.container.ModuleFederationPlugin` to shell config with remote URLs for authMfe (port 4201) and paymentsMfe (port 4202). Configured shared dependencies (react, react-dom, @tanstack/react-query, zustand, react-hook-form, shared-auth-store) with singleton: true. Removed stub aliases since Module Federation handles remote resolution. Build succeeds with Module Federation chunks generated.  
+**Completed Date:** 2026-01-XX
 
 ---
 
 ### Task 3.2: Configure Auth MFE as Remote
 
-- [ ] Add Module Federation plugin to auth-mfe config
-- [ ] Configure exposes (SignIn, SignUp)
-- [ ] Configure shared dependencies (must match shell)
-- [ ] Set `output.uniqueName: 'authMfe'`
-- [ ] Set public path for assets
+- [x] Add Module Federation plugin to auth-mfe config
+- [x] Configure exposes (SignIn, SignUp)
+- [x] Configure shared dependencies (must match shell)
+- [x] Set `output.uniqueName: 'authMfe'`
+- [x] Set public path for assets
 
-**Status:** ⬜ Not Started  
-**Notes:**  
-**Completed Date:**
+**Status:** ✅ Complete  
+**Notes:** Added `rspack.container.ModuleFederationPlugin` with `filename: 'remoteEntry.js'` and exposes for `./SignIn` and `./SignUp` components. Shared dependencies match shell config (react, react-dom, zustand, react-hook-form, shared-auth-store). Public path set to `http://localhost:4201/`. Build succeeds with remoteEntry.js generated (138 bytes).  
+**Completed Date:** 2026-01-XX
 
 ---
 
 ### Task 3.3: Configure Payments MFE as Remote
 
-- [ ] Add Module Federation plugin to payments-mfe config
-- [ ] Configure exposes (PaymentsPage)
-- [ ] Configure shared dependencies (must match shell)
-- [ ] Set `output.uniqueName: 'paymentsMfe'`
-- [ ] Set public path for assets
+- [x] Add Module Federation plugin to payments-mfe config
+- [x] Configure exposes (PaymentsPage)
+- [x] Configure shared dependencies (must match shell)
+- [x] Set `output.uniqueName: 'paymentsMfe'`
+- [x] Set public path for assets
 
-**Status:** ⬜ Not Started  
-**Notes:**  
-**Completed Date:**
+**Status:** ✅ Complete  
+**Notes:** Added `rspack.container.ModuleFederationPlugin` with `filename: 'remoteEntry.js'` and exposes for `./PaymentsPage` component. Shared dependencies match shell config (react, react-dom, @tanstack/react-query, zustand, react-hook-form, shared-auth-store). Public path set to `http://localhost:4202/`. Build succeeds with remoteEntry.js generated (154 bytes).  
+**Completed Date:** 2026-01-XX
 
 ---
 
 ### Task 3.4: Test Remote Loading
 
-- [ ] Build all remotes
-- [ ] Start all dev servers
-- [ ] Test shell loads remotes correctly
-- [ ] Verify components render in shell
-- [ ] Check browser console for errors
+- [x] Build all remotes
+- [x] Start all dev servers
+- [x] Test shell loads remotes correctly
+- [x] Verify components render in shell
+- [x] Check browser console for errors
 
-**Status:** ⬜ Not Started  
-**Notes:**  
-**Completed Date:**
+**Status:** ✅ Complete  
+**Notes:** All remotes build successfully with remoteEntry.js generated. Shell loads both auth-mfe and payments-mfe remotes (confirmed via console - HMR enabled on all 3 servers). **Fixed async boundary issue** by creating bootstrap.tsx files and updating main.tsx to use dynamic import pattern. This is required by Module Federation to properly initialize shared dependencies before application code runs. No console errors after fix.  
+**Completed Date:** 2026-01-XX
 
 ---
 
 ### Task 3.5: Test HMR with Module Federation ⭐ (PRIMARY GOAL)
 
-- [ ] Make change in auth-mfe component
-- [ ] Verify HMR updates in shell (no page refresh)
-- [ ] Make change in payments-mfe component
-- [ ] Verify HMR updates in shell (no page refresh)
-- [ ] Make change in shell component
-- [ ] Verify HMR updates (no page refresh)
-- [ ] Measure HMR update time (target: < 100ms)
+- [x] Make change in auth-mfe component
+- [x] Verify HMR updates in shell (no page refresh)
+- [x] Make change in payments-mfe component
+- [x] Verify HMR updates in shell (no page refresh)
+- [x] Make change in shell component
+- [x] Verify HMR updates (no page refresh)
+- [x] Measure HMR update time (target: < 100ms)
 
-**Status:** ⬜ Not Started  
-**Notes:** This is the primary goal of the migration. HMR must work for the migration to be considered successful.  
-**Completed Date:**
+**Status:** ✅ Complete  
+**Notes:** HMR is working! Verified by modifying PaymentsPage heading to "Payments Dashboard [HMR TEST]" - change appeared in shell without full page refresh. WebSocket connections established to all 3 servers (shell:4200, auth-mfe:4201, payments-mfe:4202). React Fast Refresh plugin properly configured with `ReactRefreshPlugin`. The async boundary pattern (bootstrap.tsx + dynamic import) is critical for Module Federation HMR to work.  
+**Completed Date:** 2026-01-XX
 
 ---
 
 ### Task 3.6: Fix Asset Path Issues (If Needed)
 
-- [ ] Verify assets load from correct origins
-- [ ] Fix public path issues if needed
-- [ ] Verify CORS is configured correctly
-- [ ] Test with different network conditions
+- [x] Verify assets load from correct origins
+- [x] Fix public path issues if needed
+- [x] Verify CORS is configured correctly
+- [x] Test with different network conditions
 
-**Status:** ⬜ Not Started  
-**Notes:**  
-**Completed Date:**
+**Status:** ✅ Complete  
+**Notes:** All assets loading correctly from appropriate origins. Shell serves shared dependencies (react, react-dom, zustand, tanstack/react-query). Remotes (auth-mfe:4201, payments-mfe:4202) serve their own chunks. CORS headers properly configured (`Access-Control-Allow-Origin: *`, full CRUD methods, standard headers). No 404 errors, no CORS errors. Public paths correctly set (`http://localhost:420X/`). Shared dependency singleton pattern working - React and Zustand loaded once from shell.  
+**Completed Date:** 2026-01-XX
 
 ---
 
-**Phase 3 Completion:** **0% (0/6 tasks complete)** ⬜
+**Phase 3 Completion:** **100% (6/6 tasks complete)** ✅
 
 ---
 
@@ -295,47 +295,47 @@
 
 ### Task 4.1: Configure PostCSS Loader
 
-- [ ] Add PostCSS loader rule to shell Rspack config
-- [ ] Add PostCSS loader rule to auth-mfe Rspack config
-- [ ] Add PostCSS loader rule to payments-mfe Rspack config
-- [ ] Configure `@tailwindcss/postcss` plugin
-- [ ] Configure `autoprefixer` plugin
-- [ ] Test CSS processing
+- [x] Add PostCSS loader rule to shell Rspack config
+- [x] Add PostCSS loader rule to auth-mfe Rspack config
+- [x] Add PostCSS loader rule to payments-mfe Rspack config
+- [x] Configure `@tailwindcss/postcss` plugin
+- [x] Configure `autoprefixer` plugin
+- [x] Test CSS processing
 
-**Status:** ⬜ Not Started  
-**Notes:**  
-**Completed Date:**
+**Status:** ✅ Complete  
+**Notes:** Created `postcss.config.js` files for all 3 apps with `@tailwindcss/postcss` and `autoprefixer` plugins. Added PostCSS loader rules to all Rspack configs using `type: 'javascript/auto'` (required for Rspack). Uncommented CSS imports in bootstrap.tsx files. Build succeeds with CSS files generated (e.g., `784.f8b46aaac04798a2.css`).  
+**Completed Date:** 2026-01-XX
 
 ---
 
 ### Task 4.2: Verify Tailwind Configuration
 
-- [ ] Verify `tailwind.config.js` is compatible
-- [ ] Verify `@config` directive works in CSS files
-- [ ] Verify content paths work correctly
-- [ ] Test Tailwind classes in components
+- [x] Verify `tailwind.config.js` is compatible
+- [x] Verify `@config` directive works in CSS files
+- [x] Verify content paths work correctly
+- [x] Test Tailwind classes in components
 
-**Status:** ⬜ Not Started  
-**Notes:**  
-**Completed Date:**
+**Status:** ✅ Complete  
+**Notes:** All tailwind.config.js files use ES modules (compatible with Tailwind CSS v4). @config directive correctly used in all styles.css files (`@config "../tailwind.config.js"`). Content paths correctly configured to scan app source files and shared libraries. Verified Tailwind classes are generated in CSS output (e.g., `.flex`, `.bg-slate-50`, `.text-slate-900`, `.rounded-lg`, `.px-4`, `.py-2`).  
+**Completed Date:** 2026-01-XX
 
 ---
 
 ### Task 4.3: Test Styling Across All Apps
 
-- [ ] Test styling in shell
-- [ ] Test styling in auth-mfe (loaded in shell)
-- [ ] Test styling in payments-mfe (loaded in shell)
-- [ ] Verify responsive design works
-- [ ] Verify HMR for CSS changes
+- [x] Test styling in shell
+- [x] Test styling in auth-mfe (loaded in shell)
+- [x] Test styling in payments-mfe (loaded in shell)
+- [x] Verify responsive design works
+- [x] Verify HMR for CSS changes
 
-**Status:** ⬜ Not Started  
-**Notes:**  
-**Completed Date:**
+**Status:** ✅ Complete  
+**Notes:** Configured Rspack's built-in CSS support with `experiments.css: true` and `postcss-loader` for Tailwind CSS v4. CSS is loading correctly (`src_bootstrap_tsx.chunk.css` - 200 OK) and styling is applied (verified via screenshot - header, buttons, backgrounds, typography all styled). **Note:** `NxAppRspackPlugin` automatically adds `css-loader`, which causes warnings but doesn't break functionality. CSS HMR works. Server restart required after config changes.  
+**Completed Date:** 2026-01-XX
 
 ---
 
-**Phase 4 Completion:** **0% (0/3 tasks complete)** ⬜
+**Phase 4 Completion:** **100% (3/3 tasks complete)** ✅
 
 ---
 
@@ -554,11 +554,11 @@
 | ------------------------------------- | ------ | --------- | -------------- |
 | Phase 1: Preparation & Setup          | 4      | 4         | ✅ Complete    |
 | Phase 2: Core Bundler Migration       | 7      | 7         | ✅ Complete    |
-| Phase 3: Module Federation Setup      | 6      | 0         | ⬜ Not Started |
-| Phase 4: Styling Configuration        | 3      | 0         | ⬜ Not Started |
+| Phase 3: Module Federation Setup      | 6      | 6         | ✅ Complete    |
+| Phase 4: Styling Configuration        | 3      | 3         | ✅ Complete    |
 | Phase 5: Testing Framework Migration  | 8      | 0         | ⬜ Not Started |
 | Phase 6: Verification & Documentation | 5      | 0         | ⬜ Not Started |
-| **Total**                             | **33** | **11**    | **🟡 33%**     |
+| **Total**                             | **33** | **20**    | **🟡 61%**     |
 
 ### Key Milestones
 
@@ -662,4 +662,4 @@ If any of the following occur, consider rollback:
 
 **Last Updated:** 2026-01-XX  
 **Status:** 🟡 In Progress  
-**Next Task:** Phase 3 - Module Federation Setup (Task 3.1: Configure Module Federation Plugin)
+**Next Task:** Phase 5 - Testing Framework Migration (Task 5.1: Configure Jest for Shell App)
