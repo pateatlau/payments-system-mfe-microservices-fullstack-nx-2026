@@ -11,6 +11,7 @@ Use this prompt when starting a new chat session to plan the Vite to Rspack migr
 **Use this if:** You're starting fresh with no prior research.
 
 **What it does:**
+
 - ✅ Reads all context and current state
 - ✅ Conducts comprehensive Rspack research
 - ✅ Analyzes tech stack impact for ALL technologies
@@ -26,6 +27,7 @@ Use this prompt when starting a new chat session to plan the Vite to Rspack migr
 **Use this if:** You want to do research first, review findings, and then decide whether to proceed with planning.
 
 **What it does:**
+
 - ✅ Conducts Rspack research
 - ✅ Analyzes tech stack impact
 - ✅ Documents findings
@@ -43,6 +45,7 @@ Use this prompt when starting a new chat session to plan the Vite to Rspack migr
 **Use this if:** Research is already complete and you have a Go decision.
 
 **What it does:**
+
 - ✅ Reviews existing research
 - ✅ Creates detailed implementation plan
 - ✅ Breaks down into tasks/phases
@@ -55,11 +58,11 @@ Use this prompt when starting a new chat session to plan the Vite to Rspack migr
 
 ### 📊 Workflow Comparison
 
-| Workflow | Sessions | When to Use |
-|----------|----------|-------------|
-| **Standard Prompt** | 1 session | ✅ **Recommended** - Start here if you have no research |
-| **Research-First → Implementation Plan** | 2 sessions | Use if you want to review research before planning |
-| **Implementation Plan Only** | 1 session | Use if research is already done |
+| Workflow                                 | Sessions   | When to Use                                             |
+| ---------------------------------------- | ---------- | ------------------------------------------------------- |
+| **Standard Prompt**                      | 1 session  | ✅ **Recommended** - Start here if you have no research |
+| **Research-First → Implementation Plan** | 2 sessions | Use if you want to review research before planning      |
+| **Implementation Plan Only**             | 1 session  | Use if research is already done                         |
 
 ---
 
