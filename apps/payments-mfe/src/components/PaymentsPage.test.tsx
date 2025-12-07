@@ -638,6 +638,119 @@ describe('PaymentsPage', () => {
         expect(mockDeletePayment).toHaveBeenCalledWith('pay-1');
       });
     });
+
+    it('cancels delete confirmation when cancel button is clicked', async () => {
+      const user = userEvent.setup();
+      const mockHasRole = vi.fn((role: string) => role === 'VENDOR');
+      const mockDeletePayment = vi.fn().mockResolvedValue(true);
+
+      (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+        user: { id: 'user-1', email: 'vendor@example.com', name: 'Vendor', role: 'VENDOR' },
+        hasRole: mockHasRole,
+      });
+
+      (usePayments as ReturnType<typeof vi.fn>).mockReturnValue({
+        data: mockPayments,
+        isLoading: false,
+        error: null,
+      });
+
+      (useCreatePayment as ReturnType<typeof vi.fn>).mockReturnValue({
+        mutateAsync: vi.fn(),
+        isPending: false,
+        isError: false,
+        error: null,
+      });
+
+      (useUpdatePayment as ReturnType<typeof vi.fn>).mockReturnValue({
+        mutateAsync: vi.fn(),
+        isPending: false,
+        isError: false,
+        error: null,
+      });
+
+      (useDeletePayment as ReturnType<typeof vi.fn>).mockReturnValue({
+        mutateAsync: mockDeletePayment,
+        isPending: false,
+        isError: false,
+        error: null,
+      });
+
+      render(<PaymentsPage />, { wrapper: createWrapper() });
+
+      const deleteButtons = screen.getAllByText('Delete');
+      await user.click(deleteButtons[0]);
+
+      expect(screen.getByText('Confirm')).toBeInTheDocument();
+      
+      // Click cancel button - there should be a Cancel button next to Confirm
+      const cancelButtons = screen.getAllByText('Cancel');
+      // Click the last cancel button (should be the one in delete confirmation)
+      await user.click(cancelButtons[cancelButtons.length - 1]);
+
+      // Delete confirmation should be dismissed
+      await waitFor(() => {
+        expect(screen.queryByText('Confirm')).not.toBeInTheDocument();
+      });
+
+      // Delete should not have been called
+      expect(mockDeletePayment).not.toHaveBeenCalled();
+    });
+
+    it('cancels create payment form when cancel button is clicked', async () => {
+      const user = userEvent.setup();
+      const mockHasRole = vi.fn((role: string) => role === 'VENDOR');
+
+      (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+        user: { id: 'user-1', email: 'vendor@example.com', name: 'Vendor', role: 'VENDOR' },
+        hasRole: mockHasRole,
+      });
+
+      (usePayments as ReturnType<typeof vi.fn>).mockReturnValue({
+        data: mockPayments,
+        isLoading: false,
+        error: null,
+      });
+
+      (useCreatePayment as ReturnType<typeof vi.fn>).mockReturnValue({
+        mutateAsync: vi.fn(),
+        isPending: false,
+        isError: false,
+        error: null,
+      });
+
+      (useUpdatePayment as ReturnType<typeof vi.fn>).mockReturnValue({
+        mutateAsync: vi.fn(),
+        isPending: false,
+        isError: false,
+        error: null,
+      });
+
+      (useDeletePayment as ReturnType<typeof vi.fn>).mockReturnValue({
+        mutateAsync: vi.fn(),
+        isPending: false,
+        isError: false,
+        error: null,
+      });
+
+      render(<PaymentsPage />, { wrapper: createWrapper() });
+
+      // Open create form
+      const createButton = screen.getByRole('button', { name: /create payment/i });
+      await user.click(createButton);
+
+      expect(screen.getByText('Create New Payment')).toBeInTheDocument();
+
+      // Click cancel button in create form
+      const cancelButtons = screen.getAllByText('Cancel');
+      // The first cancel button should be in the create form
+      await user.click(cancelButtons[0]);
+
+      // Create form should be closed
+      await waitFor(() => {
+        expect(screen.queryByText('Create New Payment')).not.toBeInTheDocument();
+      });
+    });
   });
 });
 

@@ -4,9 +4,16 @@ import { MemoryRouter } from 'react-router-dom';
 import { useAuthStore } from 'shared-auth-store';
 import { SignUpPage, SignUpComponentProps } from './SignUpPage';
 
-// Mock the auth store
+// Mock the auth store - handle both selector and direct usage
 vi.mock('shared-auth-store', () => ({
-  useAuthStore: vi.fn(),
+  useAuthStore: vi.fn((selector?: (state: { isAuthenticated: boolean }) => boolean) => {
+    const mockState = { isAuthenticated: false };
+    // If a selector is passed, call it with the mock state
+    if (typeof selector === 'function') {
+      return selector(mockState);
+    }
+    return mockState;
+  }),
 }));
 
 // Mock SignUp component for testing (injected via props)
@@ -24,15 +31,25 @@ function MockSignUp({ onSuccess, onNavigateToSignIn }: SignUpComponentProps) {
   );
 }
 
+// Helper to mock auth store with specific state
+function mockAuthStore(state: { isAuthenticated: boolean }) {
+  (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockImplementation(
+    (selector?: (state: { isAuthenticated: boolean }) => boolean) => {
+      if (typeof selector === 'function') {
+        return selector(state);
+      }
+      return state;
+    }
+  );
+}
+
 describe('SignUpPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   it('renders SignUp component when not authenticated', () => {
-    (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
-      isAuthenticated: false,
-    });
+    mockAuthStore({ isAuthenticated: false });
 
     render(
       <MemoryRouter>
@@ -45,9 +62,7 @@ describe('SignUpPage', () => {
   });
 
   it('redirects to /payments when already authenticated', () => {
-    (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
-      isAuthenticated: true,
-    });
+    mockAuthStore({ isAuthenticated: true });
 
     const { container } = render(
       <MemoryRouter initialEntries={['/signup']}>
@@ -61,9 +76,7 @@ describe('SignUpPage', () => {
   });
 
   it('passes onSuccess callback to SignUp component', () => {
-    (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
-      isAuthenticated: false,
-    });
+    mockAuthStore({ isAuthenticated: false });
 
     render(
       <MemoryRouter>
@@ -76,9 +89,7 @@ describe('SignUpPage', () => {
   });
 
   it('passes onNavigateToSignIn callback to SignUp component', () => {
-    (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
-      isAuthenticated: false,
-    });
+    mockAuthStore({ isAuthenticated: false });
 
     render(
       <MemoryRouter>
@@ -91,9 +102,7 @@ describe('SignUpPage', () => {
   });
 
   it('renders with correct layout styles', () => {
-    (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
-      isAuthenticated: false,
-    });
+    mockAuthStore({ isAuthenticated: false });
 
     render(
       <MemoryRouter>

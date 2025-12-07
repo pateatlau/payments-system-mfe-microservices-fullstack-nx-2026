@@ -44,8 +44,8 @@
     "typecheck:affected": "nx affected --target=typecheck",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
-    "e2e": "nx run-many --target=e2e --all",
-    "e2e:shell": "nx e2e shell-e2e",
+    "e2e": "pnpm build:remotes && nx e2e shell-e2e",
+    "e2e:shell": "pnpm build:remotes && nx e2e shell-e2e",
     "graph": "nx graph",
     "reset": "nx reset"
   },

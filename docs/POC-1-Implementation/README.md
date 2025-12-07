@@ -178,6 +178,10 @@
 - [`../POC-0-Implementation/`](../POC-0-Implementation/) - POC-0 foundation (completed)
 - [`../adr/poc-1/`](../adr/poc-1/) - Architecture Decision Records for POC-1
 
+### Bug Fixes & Important Notes
+
+- [`bug-fix-navigation-after-auth.md`](./bug-fix-navigation-after-auth.md) - **Important:** Bug fix for automatic navigation after authentication across Module Federation boundaries
+
 ---
 
 ## 🎯 POC-1 Scope

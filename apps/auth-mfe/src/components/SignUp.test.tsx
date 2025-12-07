@@ -195,7 +195,16 @@ describe('SignUp', () => {
     const user = userEvent.setup();
     mockSignup.mockResolvedValue(undefined);
 
-    render(<SignUp onSuccess={mockOnSuccess} />);
+    // Start with unauthenticated state
+    (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      signup: mockSignup,
+      isLoading: false,
+      error: null,
+      clearError: mockClearError,
+      isAuthenticated: false,
+    });
+
+    const { rerender } = render(<SignUp onSuccess={mockOnSuccess} />);
 
     const nameInput = screen.getByLabelText('Full Name');
     const emailInput = screen.getByLabelText('Email');
@@ -209,9 +218,25 @@ describe('SignUp', () => {
     await user.type(confirmPasswordInput, 'Password123!@#');
     await user.click(submitButton);
 
+    // Wait for signup to complete
+    await waitFor(() => {
+      expect(mockSignup).toHaveBeenCalled();
+    });
+
+    // Update mock to reflect authenticated state (simulating store update)
+    (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      signup: mockSignup,
+      isLoading: false,
+      error: null,
+      clearError: mockClearError,
+      isAuthenticated: true,
+    });
+    rerender(<SignUp onSuccess={mockOnSuccess} />);
+
+    // onSuccess should be called when isAuthenticated becomes true
     await waitFor(() => {
       expect(mockOnSuccess).toHaveBeenCalled();
-    });
+    }, { timeout: 3000 });
   });
 
   it('displays loading state during form submission', async () => {

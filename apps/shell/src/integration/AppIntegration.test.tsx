@@ -6,10 +6,43 @@ import { MemoryRouter } from 'react-router-dom';
 import { useAuthStore } from 'shared-auth-store';
 import { AppRoutes } from '../routes/AppRoutes';
 
-// Mock the auth store
+// Default mock state
+const defaultMockState = {
+  isAuthenticated: false,
+  isLoading: false,
+  user: null,
+  login: vi.fn(),
+  logout: vi.fn(),
+  signup: vi.fn(),
+};
+
+// Current mock state (mutable for tests)
+let currentMockState = { ...defaultMockState };
+
+// Mock the auth store - handle both selector and direct usage
 vi.mock('shared-auth-store', () => ({
-  useAuthStore: vi.fn(),
+  useAuthStore: vi.fn((selector?: (state: typeof defaultMockState) => unknown) => {
+    // If a selector is passed, call it with the mock state
+    if (typeof selector === 'function') {
+      return selector(currentMockState);
+    }
+    return currentMockState;
+  }),
 }));
+
+// Helper to set mock auth state
+function setMockAuthState(state: Partial<typeof defaultMockState>) {
+  currentMockState = { ...defaultMockState, ...state };
+  // Update the mock implementation with new state
+  (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockImplementation(
+    (selector?: (state: typeof defaultMockState) => unknown) => {
+      if (typeof selector === 'function') {
+        return selector(currentMockState);
+      }
+      return currentMockState;
+    }
+  );
+}
 
 // Mock components for testing
 const MockSignIn = vi.fn(({ onSuccess, onNavigateToSignUp }: any) => (
@@ -55,26 +88,18 @@ vi.mock('../components/ProtectedRoute', () => ({
 }));
 
 describe('App Integration Tests', () => {
-  const mockLogin = vi.fn();
-  const mockLogout = vi.fn();
-  const mockSignup = vi.fn();
-
   beforeEach(() => {
     vi.clearAllMocks();
-    mockLogin.mockResolvedValue(undefined);
-    mockLogout.mockResolvedValue(undefined);
-    mockSignup.mockResolvedValue(undefined);
+    // Reset to default state
+    currentMockState = { ...defaultMockState };
   });
 
   describe('Unauthenticated User Flow', () => {
     beforeEach(() => {
-      (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      setMockAuthState({
         isAuthenticated: false,
         isLoading: false,
         user: null,
-        login: mockLogin,
-        logout: mockLogout,
-        signup: mockSignup,
       });
     });
 
@@ -127,15 +152,12 @@ describe('App Integration Tests', () => {
       expect(screen.queryByTestId('mock-signin')).not.toBeInTheDocument();
     });
 
-    it('should provide onSuccess callback to SignIn component', () => {
+    it('should provide onSuccess callback to SignIn component for navigation', () => {
       // Start unauthenticated
-      (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      setMockAuthState({
         isAuthenticated: false,
         isLoading: false,
         user: null,
-        login: mockLogin,
-        logout: mockLogout,
-        signup: mockSignup,
       });
 
       render(
@@ -152,19 +174,43 @@ describe('App Integration Tests', () => {
       expect(screen.getByTestId('mock-signin')).toBeInTheDocument();
       expect(screen.getByTestId('signin-success')).toBeInTheDocument();
       // The onSuccess callback is passed from SignInPage to SignIn component
+      // This callback triggers navigation to /payments after successful sign in
+      // This test verifies the integration between components
+    });
+
+    it('should provide onSuccess callback to SignUp component for navigation', () => {
+      // Start unauthenticated
+      setMockAuthState({
+        isAuthenticated: false,
+        isLoading: false,
+        user: null,
+      });
+
+      render(
+        <MemoryRouter initialEntries={['/signup']}>
+          <AppRoutes
+            SignInComponent={MockSignIn}
+            SignUpComponent={MockSignUp}
+            PaymentsComponent={MockPaymentsPage}
+          />
+        </MemoryRouter>
+      );
+
+      // Verify SignUp component is rendered with callback buttons
+      expect(screen.getByTestId('mock-signup')).toBeInTheDocument();
+      expect(screen.getByTestId('signup-success')).toBeInTheDocument();
+      // The onSuccess callback is passed from SignUpPage to SignUp component
+      // This callback triggers navigation to /payments after successful sign up
       // This test verifies the integration between components
     });
   });
 
   describe('Authenticated User Flow', () => {
     beforeEach(() => {
-      (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      setMockAuthState({
         isAuthenticated: true,
         isLoading: false,
-        user: { id: '1', email: 'test@example.com', name: 'Test User', role: 'CUSTOMER' },
-        login: mockLogin,
-        logout: mockLogout,
-        signup: mockSignup,
+        user: { id: '1', email: 'test@example.com', name: 'Test User', role: 'CUSTOMER' } as any,
       });
     });
 
@@ -217,13 +263,10 @@ describe('App Integration Tests', () => {
 
   describe('Route Protection', () => {
     it('should redirect unauthenticated user from /payments to sign in', () => {
-      (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      setMockAuthState({
         isAuthenticated: false,
         isLoading: false,
         user: null,
-        login: mockLogin,
-        logout: mockLogout,
-        signup: mockSignup,
       });
 
       render(
@@ -242,13 +285,10 @@ describe('App Integration Tests', () => {
     });
 
     it('should allow authenticated user to access /payments', () => {
-      (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      setMockAuthState({
         isAuthenticated: true,
         isLoading: false,
-        user: { id: '1', email: 'test@example.com', name: 'Test User', role: 'CUSTOMER' },
-        login: mockLogin,
-        logout: mockLogout,
-        signup: mockSignup,
+        user: { id: '1', email: 'test@example.com', name: 'Test User', role: 'CUSTOMER' } as any,
       });
 
       render(
@@ -266,13 +306,10 @@ describe('App Integration Tests', () => {
     });
 
     it('should redirect authenticated user from /signin to /payments', () => {
-      (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      setMockAuthState({
         isAuthenticated: true,
         isLoading: false,
-        user: { id: '1', email: 'test@example.com', name: 'Test User', role: 'CUSTOMER' },
-        login: mockLogin,
-        logout: mockLogout,
-        signup: mockSignup,
+        user: { id: '1', email: 'test@example.com', name: 'Test User', role: 'CUSTOMER' } as any,
       });
 
       render(
@@ -293,13 +330,10 @@ describe('App Integration Tests', () => {
   describe('State Synchronization', () => {
     it('should update UI when authentication state changes', () => {
       // Start unauthenticated
-      (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      setMockAuthState({
         isAuthenticated: false,
         isLoading: false,
         user: null,
-        login: mockLogin,
-        logout: mockLogout,
-        signup: mockSignup,
       });
 
       const { rerender } = render(
@@ -315,13 +349,10 @@ describe('App Integration Tests', () => {
       expect(screen.getByTestId('mock-signin')).toBeInTheDocument();
 
       // Change to authenticated
-      (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      setMockAuthState({
         isAuthenticated: true,
         isLoading: false,
-        user: { id: '1', email: 'test@example.com', name: 'Test User', role: 'CUSTOMER' },
-        login: mockLogin,
-        logout: mockLogout,
-        signup: mockSignup,
+        user: { id: '1', email: 'test@example.com', name: 'Test User', role: 'CUSTOMER' } as any,
       });
 
       rerender(
@@ -339,13 +370,10 @@ describe('App Integration Tests', () => {
     });
 
     it('should show loading state while checking authentication', () => {
-      (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      setMockAuthState({
         isAuthenticated: false,
         isLoading: true,
         user: null,
-        login: mockLogin,
-        logout: mockLogout,
-        signup: mockSignup,
       });
 
       render(
@@ -365,13 +393,10 @@ describe('App Integration Tests', () => {
 
   describe('Navigation Flow', () => {
     beforeEach(() => {
-      (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      setMockAuthState({
         isAuthenticated: false,
         isLoading: false,
         user: null,
-        login: mockLogin,
-        logout: mockLogout,
-        signup: mockSignup,
       });
     });
 

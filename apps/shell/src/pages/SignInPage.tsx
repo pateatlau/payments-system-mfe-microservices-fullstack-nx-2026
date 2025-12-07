@@ -29,6 +29,10 @@ export interface SignInPageProps {
  * Wrapper for SignIn component.
  * Uses dependency injection pattern - component must be provided via props.
  * 
+ * Navigation after login is handled via the onSuccess callback passed to SignInComponent.
+ * This ensures navigation happens immediately after successful login,
+ * avoiding issues with Zustand subscription across Module Federation boundaries.
+ * 
  * @example
  * // Production usage (in routes)
  * import { SignInRemote } from './remotes';
@@ -39,20 +43,32 @@ export interface SignInPageProps {
  * <SignInPage SignInComponent={MockSignIn} />
  */
 export function SignInPage({ SignInComponent }: SignInPageProps) {
-  const { isAuthenticated } = useAuthStore();
   const navigate = useNavigate();
+  // Check if already authenticated (for initial page load / direct navigation)
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
   // Redirect to payments if already authenticated
   if (isAuthenticated) {
     return <Navigate to="/payments" replace />;
   }
 
+  // Handle successful login - navigate to payments page
+  const handleSuccess = () => {
+    console.log('[SignInPage] Login successful, navigating to /payments');
+    navigate('/payments', { replace: true });
+  };
+
+  // Handle navigation to sign-up page
+  const handleNavigateToSignUp = () => {
+    navigate('/signup', { replace: true });
+  };
+
   return (
     <RemoteErrorBoundary componentName="SignIn">
       <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4 py-12">
         <SignInComponent
-          onSuccess={() => navigate('/payments', { replace: true })}
-          onNavigateToSignUp={() => navigate('/signup', { replace: true })}
+          onSuccess={handleSuccess}
+          onNavigateToSignUp={handleNavigateToSignUp}
         />
       </div>
     </RemoteErrorBoundary>

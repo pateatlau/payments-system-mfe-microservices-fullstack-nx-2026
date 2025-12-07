@@ -2,7 +2,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useAuthStore, type SignUpData } from 'shared-auth-store';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 /**
  * Password strength validation helper
@@ -52,7 +52,8 @@ export interface SignUpProps {
  * SignUp component with form validation and auth store integration
  */
 export function SignUp({ onSuccess, onNavigateToSignIn }: SignUpProps = {}) {
-  const { signup, isLoading, error, clearError } = useAuthStore();
+  const { signup, isLoading, error, clearError, isAuthenticated } = useAuthStore();
+  const onSuccessCalledRef = useRef(false);
 
   const {
     register,
@@ -79,6 +80,20 @@ export function SignUp({ onSuccess, onNavigateToSignIn }: SignUpProps = {}) {
     }
   }, [error, clearError]);
 
+  // Call onSuccess when authentication succeeds (only once)
+  // Note: Navigation is handled by SignUpPage component via Navigate component
+  // to avoid duplicate navigation attempts that cause browser throttling.
+  useEffect(() => {
+    if (isAuthenticated && !error && onSuccess && !onSuccessCalledRef.current) {
+      onSuccessCalledRef.current = true;
+      onSuccess();
+    }
+    // Reset ref when not authenticated (for re-signup scenarios)
+    if (!isAuthenticated) {
+      onSuccessCalledRef.current = false;
+    }
+  }, [isAuthenticated, error, onSuccess]);
+
   const onSubmit = async (data: SignUpFormData) => {
     try {
       const signUpData: SignUpData = {
@@ -87,7 +102,8 @@ export function SignUp({ onSuccess, onNavigateToSignIn }: SignUpProps = {}) {
         name: data.name,
       };
       await signup(signUpData);
-      onSuccess?.();
+      // Navigation is handled by SignUpPage component via Navigate component
+      // when isAuthenticated becomes true. onSuccess is called via useEffect above.
     } catch (err) {
       // Error is handled by auth store
       console.error('Sign-up error:', err);
@@ -129,7 +145,14 @@ export function SignUp({ onSuccess, onNavigateToSignIn }: SignUpProps = {}) {
             Create your account to get started
           </p>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <form 
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleSubmit(onSubmit)(e);
+            }} 
+            className="space-y-6"
+            noValidate
+          >
             {/* Name field */}
             <div>
               <label

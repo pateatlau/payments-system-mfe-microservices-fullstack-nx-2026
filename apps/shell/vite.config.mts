@@ -80,6 +80,13 @@ export default defineConfig(({ mode }) => {
           'react-hook-form': {
             singleton: true,
           },
+          // CRITICAL: Share the auth store to ensure same instance across MFEs
+          // Without this, shell and auth-mfe have separate store instances
+          // and state changes in auth-mfe don't trigger re-renders in shell
+          'shared-auth-store': {
+            singleton: true,
+            requiredVersion: false,
+          },
         },
       })] : []),
       nxViteTsPaths(),

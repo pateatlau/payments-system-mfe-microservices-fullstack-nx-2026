@@ -2,7 +2,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useAuthStore } from 'shared-auth-store';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
+import type React from 'react';
 
 /**
  * Sign-in form schema using Zod
@@ -32,7 +33,8 @@ export interface SignInProps {
  * SignIn component with form validation and auth store integration
  */
 export function SignIn({ onSuccess, onNavigateToSignUp }: SignInProps = {}) {
-  const { login, isLoading, error, clearError } = useAuthStore();
+  const { login, isLoading, error, clearError, isAuthenticated } = useAuthStore();
+  const onSuccessCalledRef = useRef(false);
 
   const {
     register,
@@ -53,10 +55,25 @@ export function SignIn({ onSuccess, onNavigateToSignUp }: SignInProps = {}) {
     }
   }, [error, clearError]);
 
+  // Call onSuccess when authentication succeeds (only once)
+  // Note: Navigation is handled by SignInPage component via Navigate component
+  // to avoid duplicate navigation attempts that cause browser throttling.
+  useEffect(() => {
+    if (isAuthenticated && !error && onSuccess && !onSuccessCalledRef.current) {
+      onSuccessCalledRef.current = true;
+      onSuccess();
+    }
+    // Reset ref when not authenticated (for re-login scenarios)
+    if (!isAuthenticated) {
+      onSuccessCalledRef.current = false;
+    }
+  }, [isAuthenticated, error, onSuccess]);
+
   const onSubmit = async (data: SignInFormData) => {
     try {
       await login(data.email, data.password);
-      onSuccess?.();
+      // After successful login, onSuccess callback is called via useEffect
+      // which triggers navigation in the parent SignInPage component
     } catch (err) {
       // Error is handled by auth store
       console.error('Sign-in error:', err);
@@ -74,7 +91,14 @@ export function SignIn({ onSuccess, onNavigateToSignUp }: SignInProps = {}) {
             Enter your credentials to access your account
           </p>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <form 
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleSubmit(onSubmit)(e);
+            }} 
+            className="space-y-6"
+            noValidate
+          >
             {/* Email field */}
             <div>
               <label

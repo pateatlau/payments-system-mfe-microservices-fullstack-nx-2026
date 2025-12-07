@@ -102,7 +102,16 @@ describe('SignIn', () => {
     const user = userEvent.setup();
     mockLogin.mockResolvedValue(undefined);
 
-    render(<SignIn onSuccess={mockOnSuccess} />);
+    // Start with unauthenticated state
+    (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      login: mockLogin,
+      isLoading: false,
+      error: null,
+      clearError: mockClearError,
+      isAuthenticated: false,
+    });
+
+    const { rerender } = render(<SignIn onSuccess={mockOnSuccess} />);
 
     const emailInput = screen.getByLabelText('Email');
     const passwordInput = screen.getByLabelText('Password');
@@ -112,9 +121,25 @@ describe('SignIn', () => {
     await user.type(passwordInput, 'password123');
     await user.click(submitButton);
 
+    // Wait for login to complete
+    await waitFor(() => {
+      expect(mockLogin).toHaveBeenCalledWith('test@example.com', 'password123');
+    });
+
+    // Update mock to reflect authenticated state (simulating store update)
+    (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      login: mockLogin,
+      isLoading: false,
+      error: null,
+      clearError: mockClearError,
+      isAuthenticated: true,
+    });
+    rerender(<SignIn onSuccess={mockOnSuccess} />);
+
+    // onSuccess should be called when isAuthenticated becomes true
     await waitFor(() => {
       expect(mockOnSuccess).toHaveBeenCalled();
-    });
+    }, { timeout: 3000 });
   });
 
   it('displays loading state during form submission', async () => {
