@@ -2,9 +2,33 @@
 
 Use this prompt when resuming work in a new tab, new session, or after restarting Cursor.
 
+> **📖 Important:** See [`../cursor-memory-guide.md`](../cursor-memory-guide.md) for details on what Cursor remembers and doesn't remember across sessions.
+
 ---
 
-## Standard Continuation Prompt
+## Standard Continuation Prompt (Generic)
+
+Replace `[POC-X]` and `[phase-name]` with your specific phase:
+
+```
+I'm resuming [POC-X] implementation. Please:
+
+1. Read `docs/[POC-X]-Implementation/task-list.md` to understand current progress
+2. Identify the next task that needs to be worked on
+3. Reference `docs/[POC-X]-Implementation/implementation-plan.md` for detailed steps
+4. Continue from where we left off
+
+Follow all rules in .cursorrules, especially:
+- Ask for confirmation before proceeding to next task
+- Update task-list.md after completing each task
+- Stay within [POC-X] scope
+
+Let's continue!
+```
+
+---
+
+## Standard Continuation Prompt (POC-0 Specific)
 
 ```
 I'm resuming POC-0 implementation. Please:
@@ -29,11 +53,11 @@ Let's continue!
 If you know the specific task number:
 
 ```
-I'm resuming POC-0 implementation. Please:
+I'm resuming [POC-X] implementation. Please:
 
-1. Check `docs/POC-0-Implementation/task-list.md` for current status
+1. Check `docs/[POC-X]-Implementation/task-list.md` for current status
 2. Continue with Task [X.X]: [Task Name]
-3. Reference `docs/POC-0-Implementation/implementation-plan.md` for Task [X.X] details
+3. Reference `docs/[POC-X]-Implementation/implementation-plan.md` for Task [X.X] details
 4. Follow all rules in .cursorrules
 
 Let's continue with Task [X.X]!
@@ -46,12 +70,12 @@ Let's continue with Task [X.X]!
 If work was interrupted mid-task:
 
 ```
-I'm resuming POC-0 implementation. Please:
+I'm resuming [POC-X] implementation. Please:
 
-1. Check `docs/POC-0-Implementation/task-list.md` for current status
+1. Check `docs/[POC-X]-Implementation/task-list.md` for current status
 2. Review what was completed in the current task
 3. Continue from where we left off
-4. Reference `docs/POC-0-Implementation/implementation-plan.md` for remaining steps
+4. Reference `docs/[POC-X]-Implementation/implementation-plan.md` for remaining steps
 
 Let's continue!
 ```
