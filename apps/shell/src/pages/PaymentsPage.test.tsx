@@ -1,13 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import { useAuthStore } from 'shared-auth-store';
 import { PaymentsPage, PaymentsComponentProps } from './PaymentsPage';
-
-// Mock the auth store
-vi.mock('shared-auth-store', () => ({
-  useAuthStore: vi.fn(),
-}));
 
 // Mock PaymentsPage component for testing (injected via props)
 function MockPaymentsPage(_props: PaymentsComponentProps) {
@@ -23,11 +17,7 @@ describe('PaymentsPage', () => {
     vi.clearAllMocks();
   });
 
-  it('renders PaymentsPage component when authenticated', () => {
-    (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
-      isAuthenticated: true,
-    });
-
+  it('renders PaymentsPage component when component is injected', () => {
     render(
       <MemoryRouter>
         <PaymentsPage PaymentsComponent={MockPaymentsPage} />
@@ -38,64 +28,43 @@ describe('PaymentsPage', () => {
     expect(screen.getByTestId('mock-payments')).toBeInTheDocument();
   });
 
-  it('redirects to /signin when not authenticated', () => {
-    (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
-      isAuthenticated: false,
-    });
-
-    const { container } = render(
-      <MemoryRouter initialEntries={['/payments']}>
-        <PaymentsPage PaymentsComponent={MockPaymentsPage} />
-      </MemoryRouter>
-    );
-
-    // Should redirect (Navigate component renders null in the current location)
-    expect(screen.queryByText('Mocked PaymentsPage Component')).not.toBeInTheDocument();
-    expect(container).toBeTruthy();
-  });
-
-  it('renders without wrapper layout when authenticated', () => {
-    (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
-      isAuthenticated: true,
-    });
-
+  it('renders without Suspense wrapper when component is injected', () => {
     render(
       <MemoryRouter>
         <PaymentsPage PaymentsComponent={MockPaymentsPage} />
       </MemoryRouter>
     );
 
-    // PaymentsPage doesn't wrap in extra layout div when component is injected
+    // Should not show loading fallback when component is injected
+    expect(screen.queryByText('Loading payments...')).not.toBeInTheDocument();
+    expect(screen.getByTestId('mock-payments')).toBeInTheDocument();
+  });
+
+  it('renders injected component directly without wrapper', () => {
+    render(
+      <MemoryRouter>
+        <PaymentsPage PaymentsComponent={MockPaymentsPage} />
+      </MemoryRouter>
+    );
+
+    // PaymentsPage renders the injected component directly
     const mockPayments = screen.getByTestId('mock-payments');
     expect(mockPayments).toBeInTheDocument();
   });
 
-  it('protects the route by checking authentication', () => {
-    // First render with authenticated user
-    (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
-      isAuthenticated: true,
-    });
+  it('accepts optional PaymentsComponent prop', () => {
+    // This test verifies the component works with DI pattern
+    const CustomMockPayments = () => (
+      <div data-testid="custom-payments">Custom Payments</div>
+    );
 
-    const { rerender } = render(
+    render(
       <MemoryRouter>
-        <PaymentsPage PaymentsComponent={MockPaymentsPage} />
+        <PaymentsPage PaymentsComponent={CustomMockPayments} />
       </MemoryRouter>
     );
 
-    expect(screen.getByTestId('mock-payments')).toBeInTheDocument();
-
-    // Re-render with unauthenticated user
-    (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
-      isAuthenticated: false,
-    });
-
-    rerender(
-      <MemoryRouter>
-        <PaymentsPage PaymentsComponent={MockPaymentsPage} />
-      </MemoryRouter>
-    );
-
-    // Should no longer show payments
-    expect(screen.queryByTestId('mock-payments')).not.toBeInTheDocument();
+    expect(screen.getByTestId('custom-payments')).toBeInTheDocument();
+    expect(screen.getByText('Custom Payments')).toBeInTheDocument();
   });
 });

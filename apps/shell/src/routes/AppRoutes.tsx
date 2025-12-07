@@ -1,15 +1,57 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
+import { ComponentType } from 'react';
 import { useAuthStore } from 'shared-auth-store';
-import { SignInPage } from '../pages/SignInPage';
-import { SignUpPage } from '../pages/SignUpPage';
-import { PaymentsPage } from '../pages/PaymentsPage';
+import { SignInPage, SignInComponentProps } from '../pages/SignInPage';
+import { SignUpPage, SignUpComponentProps } from '../pages/SignUpPage';
+import { PaymentsPage, PaymentsComponentProps } from '../pages/PaymentsPage';
 import { HomePage } from '../pages/HomePage';
+import { ProtectedRoute } from '../components/ProtectedRoute';
+
+/**
+ * Props for AppRoutes - allows dependency injection for testing
+ */
+export interface AppRoutesProps {
+  /**
+   * SignIn component to use. Required for proper DI pattern.
+   */
+  SignInComponent: ComponentType<SignInComponentProps>;
+  /**
+   * SignUp component to use. Required for proper DI pattern.
+   */
+  SignUpComponent: ComponentType<SignUpComponentProps>;
+  /**
+   * PaymentsPage component to use. Required for proper DI pattern.
+   */
+  PaymentsComponent: ComponentType<PaymentsComponentProps>;
+}
 
 /**
  * AppRoutes component
- * Defines all routes for the shell application
+ * Defines all routes for the shell application.
+ * Uses dependency injection pattern for testability.
+ * 
+ * @example
+ * // Production usage (in App.tsx) - imports remotes dynamically
+ * import { SignInRemote, SignUpRemote, PaymentsPageRemote } from '../remotes';
+ * <AppRoutes 
+ *   SignInComponent={SignInRemote}
+ *   SignUpComponent={SignUpRemote}
+ *   PaymentsComponent={PaymentsPageRemote}
+ * />
+ * 
+ * @example
+ * // Test usage - pass mock components
+ * <AppRoutes 
+ *   SignInComponent={MockSignIn}
+ *   SignUpComponent={MockSignUp}
+ *   PaymentsComponent={MockPayments}
+ * />
  */
-export function AppRoutes() {
+export function AppRoutes({
+  SignInComponent,
+  SignUpComponent,
+  PaymentsComponent,
+}: AppRoutesProps) {
   const { isAuthenticated } = useAuthStore();
 
   return (
@@ -30,11 +72,24 @@ export function AppRoutes() {
       <Route path="/home" element={<HomePage />} />
 
       {/* Authentication routes - only accessible when not authenticated */}
-      <Route path="/signin" element={<SignInPage />} />
-      <Route path="/signup" element={<SignUpPage />} />
+      <Route
+        path="/signin"
+        element={<SignInPage SignInComponent={SignInComponent} />}
+      />
+      <Route
+        path="/signup"
+        element={<SignUpPage SignUpComponent={SignUpComponent} />}
+      />
 
       {/* Protected routes - require authentication */}
-      <Route path="/payments" element={<PaymentsPage />} />
+      <Route
+        path="/payments"
+        element={
+          <ProtectedRoute>
+            <PaymentsPage PaymentsComponent={PaymentsComponent} />
+          </ProtectedRoute>
+        }
+      />
 
       {/* Catch-all route - redirect to home */}
       <Route path="*" element={<Navigate to="/" replace />} />

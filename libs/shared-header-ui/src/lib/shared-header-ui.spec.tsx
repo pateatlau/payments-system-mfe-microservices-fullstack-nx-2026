@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { MemoryRouter } from 'react-router-dom';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { Header } from './shared-header-ui';
 import { useAuthStore } from 'shared-auth-store';
@@ -32,6 +33,11 @@ vi.mock('shared-auth-store', () => ({
 
 const mockUseAuthStore = useAuthStore as unknown as ReturnType<typeof vi.fn>;
 
+// Helper function to render with Router
+const renderWithRouter = (ui: React.ReactElement) => {
+  return render(<MemoryRouter>{ui}</MemoryRouter>);
+};
+
 describe('Header', () => {
   const mockLogout = vi.fn();
 
@@ -47,28 +53,28 @@ describe('Header', () => {
 
   describe('when not authenticated', () => {
     it('should render branding', () => {
-      render(<Header />);
+      renderWithRouter(<Header />);
       expect(screen.getByText('Payments System')).toBeInTheDocument();
     });
 
     it('should render custom branding when provided', () => {
-      render(<Header branding="Custom Brand" />);
+      renderWithRouter(<Header branding="Custom Brand" />);
       expect(screen.getByText('Custom Brand')).toBeInTheDocument();
     });
 
     it('should show sign in and sign up buttons', () => {
-      render(<Header />);
+      renderWithRouter(<Header />);
       expect(screen.getByText('Sign In')).toBeInTheDocument();
       expect(screen.getByText('Sign Up')).toBeInTheDocument();
     });
 
     it('should not show user info', () => {
-      render(<Header />);
+      renderWithRouter(<Header />);
       expect(screen.queryByText(/customer|vendor|admin/i)).not.toBeInTheDocument();
     });
 
     it('should not show navigation items', () => {
-      render(<Header />);
+      renderWithRouter(<Header />);
       expect(screen.queryByText('Payments')).not.toBeInTheDocument();
     });
   });
@@ -91,24 +97,24 @@ describe('Header', () => {
     });
 
     it('should show user name and role', () => {
-      render(<Header />);
+      renderWithRouter(<Header />);
       expect(screen.getByText('Test User')).toBeInTheDocument();
       expect(screen.getByText('customer')).toBeInTheDocument();
     });
 
     it('should show logout button', () => {
-      render(<Header />);
+      renderWithRouter(<Header />);
       expect(screen.getByText('Logout')).toBeInTheDocument();
     });
 
     it('should show navigation items', () => {
-      render(<Header />);
+      renderWithRouter(<Header />);
       expect(screen.getByText('Payments')).toBeInTheDocument();
     });
 
     it('should call logout when logout button is clicked', async () => {
       const user = userEvent.setup();
-      render(<Header />);
+      renderWithRouter(<Header />);
       
       const logoutButton = screen.getByText('Logout');
       await user.click(logoutButton);
@@ -119,7 +125,7 @@ describe('Header', () => {
     it('should call custom onLogout when provided', async () => {
       const customLogout = vi.fn();
       const user = userEvent.setup();
-      render(<Header onLogout={customLogout} />);
+      renderWithRouter(<Header onLogout={customLogout} />);
       
       const logoutButton = screen.getByText('Logout');
       await user.click(logoutButton);
@@ -145,7 +151,7 @@ describe('Header', () => {
         hasRole: vi.fn((role: string) => role === 'VENDOR'),
       });
 
-      render(<Header />);
+      renderWithRouter(<Header />);
       expect(screen.getByText('Reports')).toBeInTheDocument();
     });
 
@@ -164,7 +170,7 @@ describe('Header', () => {
         hasRole: vi.fn((role: string) => role === 'CUSTOMER'),
       });
 
-      render(<Header />);
+      renderWithRouter(<Header />);
       expect(screen.queryByText('Reports')).not.toBeInTheDocument();
     });
 
@@ -183,14 +189,14 @@ describe('Header', () => {
         hasRole: vi.fn((role: string) => role === 'ADMIN'),
       });
 
-      render(<Header />);
+      renderWithRouter(<Header />);
       expect(screen.queryByText('Reports')).not.toBeInTheDocument();
     });
   });
 
   describe('responsive design', () => {
     it('should have mobile menu button', () => {
-      render(<Header />);
+      renderWithRouter(<Header />);
       const menuButton = screen.getByLabelText('Menu');
       expect(menuButton).toBeInTheDocument();
       expect(menuButton).toHaveClass('md:hidden');
@@ -211,7 +217,7 @@ describe('Header', () => {
         hasRole: vi.fn(() => false),
       });
 
-      render(<Header />);
+      renderWithRouter(<Header />);
       const paymentsLink = screen.getByText('Payments');
       const parentDiv = paymentsLink.closest('div');
       expect(parentDiv).not.toBeNull();
@@ -237,7 +243,7 @@ describe('Header', () => {
         hasRole: vi.fn(() => false),
       });
 
-      render(<Header />);
+      renderWithRouter(<Header />);
       const userInfo = screen.getByText('Test User').closest('div');
       expect(userInfo).toHaveClass('hidden', 'sm:flex');
     });
@@ -259,13 +265,13 @@ describe('Header', () => {
         hasRole: vi.fn(() => false),
       });
 
-      render(<Header />);
+      renderWithRouter(<Header />);
       expect(screen.getByLabelText('Logout')).toBeInTheDocument();
       expect(screen.getByLabelText('Menu')).toBeInTheDocument();
     });
 
     it('should have menu button aria label when not authenticated', () => {
-      render(<Header />);
+      renderWithRouter(<Header />);
       expect(screen.getByLabelText('Menu')).toBeInTheDocument();
     });
   });

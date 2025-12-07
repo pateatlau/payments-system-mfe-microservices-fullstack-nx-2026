@@ -1,6 +1,5 @@
 import { ComponentType } from 'react';
-import { Navigate } from 'react-router-dom';
-import { useAuthStore } from 'shared-auth-store';
+import { RemoteErrorBoundary } from '../components/RemoteErrorBoundary';
 
 /**
  * Props interface for the PaymentsPage component from payments-mfe
@@ -24,26 +23,26 @@ export interface PaymentsPageProps {
 /**
  * PaymentsPage component
  * 
- * Wrapper for PaymentsPage component.
- * Protected route - requires authentication.
- * Uses dependency injection pattern - component must be provided via props.
+ * Wrapper for PaymentsPage component from payments-mfe.
+ * Note: Route protection is handled by ProtectedRoute wrapper in AppRoutes.
+ * Uses dependency injection pattern for testability.
+ * Wrapped with error boundary for production readiness.
  * 
  * @example
- * // Production usage (in routes)
- * import { PaymentsPageRemote } from './remotes';
- * <PaymentsPage PaymentsComponent={PaymentsPageRemote} />
+ * // Production usage (in routes, wrapped with ProtectedRoute)
+ * const PaymentsRemote = lazy(() => import('paymentsMfe/PaymentsPage'));
+ * <ProtectedRoute>
+ *   <PaymentsPage PaymentsComponent={PaymentsRemote} />
+ * </ProtectedRoute>
  * 
  * @example
  * // Test usage (with mock component)
  * <PaymentsPage PaymentsComponent={MockPaymentsPage} />
  */
 export function PaymentsPage({ PaymentsComponent }: PaymentsPageProps) {
-  const { isAuthenticated } = useAuthStore();
-
-  // Redirect to sign in if not authenticated
-  if (!isAuthenticated) {
-    return <Navigate to="/signin" replace />;
-  }
-
-  return <PaymentsComponent />;
+  return (
+    <RemoteErrorBoundary componentName="PaymentsPage">
+      <PaymentsComponent />
+    </RemoteErrorBoundary>
+  );
 }

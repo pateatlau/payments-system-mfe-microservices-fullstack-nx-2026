@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { useAuthStore } from 'shared-auth-store';
 
 export interface HeaderProps {
@@ -46,19 +47,19 @@ export function Header({
             {/* Navigation Items - Only show when authenticated */}
             {isAuthenticated && (
               <div className="hidden md:flex items-center gap-4">
-                <a
-                  href="/payments"
+                <Link
+                  to="/payments"
                   className="text-slate-300 hover:text-white transition-colors px-3 py-2 rounded-md text-sm font-medium"
                 >
                   Payments
-                </a>
+                </Link>
                 {hasRole('VENDOR') && (
-                  <a
-                    href="/reports"
+                  <Link
+                    to="/reports"
                     className="text-slate-300 hover:text-white transition-colors px-3 py-2 rounded-md text-sm font-medium"
                   >
                     Reports
-                  </a>
+                  </Link>
                 )}
               </div>
             )}
@@ -85,18 +86,18 @@ export function Header({
               </div>
             ) : (
               <div className="flex items-center gap-2">
-                <a
-                  href="/signin"
+                <Link
+                  to="/signin"
                   className="text-slate-300 hover:text-white transition-colors px-3 py-2 rounded-md text-sm font-medium"
                 >
                   Sign In
-                </a>
-                <a
-                  href="/signup"
+                </Link>
+                <Link
+                  to="/signup"
                   className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
                 >
                   Sign Up
-                </a>
+                </Link>
               </div>
             )}
 

@@ -5,6 +5,14 @@ import * as ReactDOM from 'react-dom/client';
 import App from './app/app';
 import './styles.css';
 
+// Import remote components
+// This file (main.tsx) is not imported during tests, so MF imports are safe here
+import {
+  SignInRemote,
+  SignUpRemote,
+  PaymentsPageRemote,
+} from './remotes';
+
 // Create a QueryClient for TanStack Query
 // This is needed for remote components that use TanStack Query (like PaymentsPage)
 const queryClient = new QueryClient({
@@ -26,7 +34,13 @@ root.render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <App />
+        <App
+          remotes={{
+            SignInComponent: SignInRemote,
+            SignUpComponent: SignUpRemote,
+            PaymentsComponent: PaymentsPageRemote,
+          }}
+        />
       </BrowserRouter>
     </QueryClientProvider>
   </StrictMode>

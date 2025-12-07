@@ -392,17 +392,26 @@
 
 ### Task 4.2: Implement Route Protection
 
-- [ ] ProtectedRoute component created
-- [ ] Auth state checking implemented
-- [ ] Redirect logic working
-- [ ] Loading state implemented
-- [ ] Integrated with router
-- [ ] Route protection tested
-- [ ] Unit tests written and passing
+- [x] ProtectedRoute component created
+- [x] Auth state checking implemented
+- [x] Redirect logic working
+- [x] Loading state implemented
+- [x] Integrated with router
+- [x] Route protection tested
+- [x] Unit tests written and passing
 
-**Status:** ⬜ Not Started  
-**Notes:** _Add notes here after completion_  
-**Completed Date:** _TBD_
+**Status:** ✅ Complete  
+**Notes:** Created `ProtectedRoute` component at `apps/shell/src/components/ProtectedRoute.tsx`:
+
+- Checks `isAuthenticated` and `isLoading` from auth store
+- Shows loading spinner while checking auth
+- Redirects to `/signin` (configurable) if not authenticated
+- Passes current location in state for redirect-back functionality
+- 13 comprehensive unit tests covering all scenarios
+- Integrated with AppRoutes to wrap `/payments` route
+- Refactored App and AppRoutes to use DI pattern for testability
+- All 40 shell tests passing  
+  **Completed Date:** 2026-12-07
 
 ---
 
@@ -414,11 +423,20 @@
 - [x] Logout functionality working with routing (verified - redirects to /signin)
 - [x] Header displays correctly (verified - shows user info, navigation links, logout button)
 - [x] Logout redirects correctly (verified - redirects to /signin after logout)
-- [ ] Unit tests written and passing (update Layout tests)
+- [x] Unit tests written and passing (Layout tests + Header tests updated)
 
-**Status:** ✅ Complete (Verification Done)  
-**Notes:** Header component was integrated into shell Layout during Task 1.5. Verified that logout functionality works correctly with routing - clicking logout redirects to /signin page. Header displays correctly with user information, navigation links, and responsive design. Header uses useAuthStore hook directly, so no additional props needed.  
-**Completed Date:** 2026-12-07
+**Status:** ✅ Complete  
+**Notes:**
+
+- Header component was integrated into shell Layout during Task 1.5
+- Updated Header to use React Router `Link` components instead of anchor tags for proper client-side navigation
+- Added logout redirect functionality in Layout component - redirects to `/signin` after logout
+- Created comprehensive unit tests for Layout component (6 tests covering Header rendering, children rendering, logout functionality, and layout structure)
+- Updated Header component tests to use MemoryRouter wrapper (all 18 tests passing)
+- All navigation now uses React Router for seamless client-side routing
+- Header displays correctly with user information, navigation links, and responsive design
+- Header uses useAuthStore hook directly, so no additional props needed  
+  **Completed Date:** 2026-12-07
 
 ---
 
@@ -455,22 +473,28 @@
 - [x] SignIn remote loader created (SignInPage with lazy loading)
 - [x] SignUp remote loader created (SignUpPage with lazy loading)
 - [x] Suspense boundaries added (in page components)
-- [ ] Error boundaries added (to be added)
+- [x] Error boundaries added (RemoteErrorBoundary component)
 - [x] Integrated with router (routes: /signin, /signup)
 - [x] Components load correctly (verified in preview mode)
 - [x] Authentication flow works (login/logout tested)
 - [x] Unit tests written and passing (refactored with DI pattern)
 
-**Status:** ✅ Complete (Error boundaries pending)  
+**Status:** ✅ Complete  
 **Notes:** Auth MFE components successfully integrated:
 
 - SignInPage and SignUpPage components created with lazy loading for `authMfe/SignIn` and `authMfe/SignUp`
 - Suspense boundaries added with loading fallbacks
+- **Error boundaries added (2026-12-07):** Created `RemoteErrorBoundary` component using `react-error-boundary`:
+  - Wraps remote components to catch loading and runtime errors
+  - Provides user-friendly error UI with "Try Again" and "Go Home" buttons
+  - Displays error details in collapsible section
+  - Integrated with SignInPage and SignUpPage
+  - 6 comprehensive unit tests covering all scenarios
 - Components integrated with React Router 7 (routes: /signin, /signup)
 - Components load correctly from remote (verified in preview mode)
 - Authentication flow works: login redirects to /payments, logout redirects to /signin
 - **Testing Refactor (2026-12-07):** Page components refactored to use Dependency Injection (DI) pattern for testability. Components accept optional `SignInComponent`/`SignUpComponent` props, allowing tests to inject mock components and bypass Module Federation resolution issues.
-- Error boundaries should be added for production readiness  
+- All 52 shell tests passing (including 6 new RemoteErrorBoundary tests)  
   **Completed Date:** 2026-12-07
 
 ---
@@ -479,44 +503,57 @@
 
 - [x] PaymentsPage remote loader created (PaymentsPage with lazy loading)
 - [x] Suspense boundary added (in PaymentsPage component)
-- [ ] Error boundary added (to be added)
+- [x] Error boundary added (RemoteErrorBoundary component)
 - [x] Integrated with router (route: /payments)
-- [ ] ProtectedRoute wrapper added (to be added in Task 4.2)
+- [x] ProtectedRoute wrapper added (wrapped in AppRoutes)
 - [x] Component loads correctly (verified in preview mode)
 - [x] Payments flow works (CRUD operations tested)
 - [x] Unit tests written and passing (refactored with DI pattern)
 
-**Status:** ✅ Complete (ProtectedRoute and Error boundaries pending)  
+**Status:** ✅ Complete  
 **Notes:** Payments MFE component successfully integrated:
 
 - PaymentsPage component created with lazy loading for `paymentsMfe/PaymentsPage`
 - Suspense boundary added with loading fallback
+- **Error boundary added (2026-12-07):** Wrapped PaymentsPage with `RemoteErrorBoundary` component for error handling
 - Component integrated with React Router 7 (route: /payments)
+- **ProtectedRoute wrapper added (2026-12-07):** PaymentsPage is wrapped with ProtectedRoute in AppRoutes (completed in Task 4.2)
 - Component loads correctly from remote (verified in preview mode)
 - Payments flow works: create, read, update, delete operations functional
 - QueryClientProvider added to shell for TanStack Query support
 - **Testing Refactor (2026-12-07):** PaymentsPage refactored to use Dependency Injection (DI) pattern for testability. Component accepts optional `PaymentsComponent` prop, allowing tests to inject mock component and bypass Module Federation resolution issues.
-- ProtectedRoute wrapper will be added in Task 4.2
-- Error boundaries should be added for production readiness  
+- All 52 shell tests passing  
   **Completed Date:** 2026-12-07
 
 ---
 
 ### Task 4.7: Integration Testing
 
-- [ ] Unauthenticated flow tested
-- [ ] Authenticated flow tested
-- [ ] Route protection tested
-- [ ] State synchronization tested
-- [ ] Remote loading tested
-- [ ] All flows work correctly
-- [ ] Issues documented
+- [x] Unauthenticated flow tested
+- [x] Authenticated flow tested
+- [x] Route protection tested
+- [x] State synchronization tested
+- [x] Remote loading tested (verified in preview mode)
+- [x] All flows work correctly
+- [x] Issues documented
 
-**Status:** ⬜ Not Started  
-**Notes:** _Add notes here after completion_  
-**Completed Date:** _TBD_
+**Status:** ✅ Complete  
+**Notes:**
 
-**Phase 4 Completion:** **71% (5/7 tasks complete)**
+- Created comprehensive integration tests (`apps/shell/src/integration/AppIntegration.test.tsx`)
+- 13 integration tests covering all critical flows:
+  - Unauthenticated user flow (4 tests)
+  - Authenticated user flow (3 tests)
+  - Route protection (3 tests)
+  - State synchronization (2 tests)
+  - Navigation flow (1 test)
+- All 65 shell tests passing (including 13 new integration tests)
+- Remote loading verified in preview mode (Module Federation limitations prevent full testing in unit tests)
+- No issues found - all flows working correctly
+- Test results documented in `docs/POC-1-Implementation/integration-test-results.md`  
+  **Completed Date:** 2026-12-07
+
+**Phase 4 Completion:** **100% (7/7 tasks complete)** ✅
 
 ---
 

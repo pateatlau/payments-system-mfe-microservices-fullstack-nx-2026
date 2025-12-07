@@ -6,17 +6,6 @@ import autoprefixer from 'autoprefixer';
 import { federation } from '@module-federation/vite';
 import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
 import { nxCopyAssetsPlugin } from '@nx/vite/plugins/nx-copy-assets.plugin';
-import alias from '@rollup/plugin-alias';
-import * as path from 'path';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-// Mock component paths for testing
-const mockSignIn = path.resolve(__dirname, 'src/components/__mocks__/SignIn.tsx');
-const mockSignUp = path.resolve(__dirname, 'src/components/__mocks__/SignUp.tsx');
-const mockPaymentsPage = path.resolve(__dirname, 'src/components/__mocks__/PaymentsPage.tsx');
 
 /**
  * Shell Vite Configuration
@@ -28,9 +17,9 @@ const mockPaymentsPage = path.resolve(__dirname, 'src/components/__mocks__/Payme
  * - paymentsMfe: http://localhost:4202/remoteEntry.js
  * 
  * Testing Strategy:
- * - Page components use dependency injection pattern for testability
+ * - Page components and App use dependency injection pattern for testability
  * - Tests inject mock components via props instead of using Module Federation
- * - This avoids complex mocking of dynamic imports
+ * - Remote components are only imported in main.tsx (not imported during tests)
  */
 
 export default defineConfig(({ mode }) => {
@@ -48,15 +37,6 @@ export default defineConfig(({ mode }) => {
       port: 4200,
       host: 'localhost',
     },
-    // Resolve aliases for Module Federation imports
-    // Always set up - federation plugin will handle them in production
-    resolve: {
-      alias: {
-        'authMfe/SignIn': mockSignIn,
-        'authMfe/SignUp': mockSignUp,
-        'paymentsMfe/PaymentsPage': mockPaymentsPage,
-      },
-    },
     css: {
       postcss: {
         plugins: [
@@ -67,15 +47,6 @@ export default defineConfig(({ mode }) => {
     },
     plugins: [
       react(),
-      // Alias plugin for Module Federation imports
-      // This runs before federation plugin and handles test mocking
-      alias({
-        entries: [
-          { find: 'authMfe/SignIn', replacement: mockSignIn },
-          { find: 'authMfe/SignUp', replacement: mockSignUp },
-          { find: 'paymentsMfe/PaymentsPage', replacement: mockPaymentsPage },
-        ],
-      }),
       // Only include federation plugin when not testing
       ...(!isTest ? [federation({
         name: 'shell',

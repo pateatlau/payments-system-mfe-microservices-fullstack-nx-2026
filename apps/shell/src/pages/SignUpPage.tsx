@@ -1,6 +1,7 @@
 import { ComponentType } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { useAuthStore } from 'shared-auth-store';
+import { RemoteErrorBoundary } from '../components/RemoteErrorBoundary';
 
 /**
  * Props interface for the SignUp component from auth-mfe
@@ -47,11 +48,13 @@ export function SignUpPage({ SignUpComponent }: SignUpPageProps) {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4 py-12">
-      <SignUpComponent
-        onSuccess={() => navigate('/payments', { replace: true })}
-        onNavigateToSignIn={() => navigate('/signin', { replace: true })}
-      />
-    </div>
+    <RemoteErrorBoundary componentName="SignUp">
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4 py-12">
+        <SignUpComponent
+          onSuccess={() => navigate('/payments', { replace: true })}
+          onNavigateToSignIn={() => navigate('/signin', { replace: true })}
+        />
+      </div>
+    </RemoteErrorBoundary>
   );
 }

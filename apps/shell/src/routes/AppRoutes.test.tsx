@@ -1,21 +1,31 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter, Navigate } from 'react-router-dom';
 import { useAuthStore } from 'shared-auth-store';
+import { ReactNode } from 'react';
+import { AppRoutes } from './AppRoutes';
 
 // Mock the auth store
 vi.mock('shared-auth-store', () => ({
   useAuthStore: vi.fn(),
 }));
 
-// Mock the remotes module to prevent Module Federation imports during tests
-vi.mock('../pages/remotes', () => ({
-  SignInRemote: () => <div>Remote SignIn</div>,
-  SignUpRemote: () => <div>Remote SignUp</div>,
-  PaymentsPageRemote: () => <div>Remote PaymentsPage</div>,
+// Mock ProtectedRoute to simulate its behavior based on auth state
+vi.mock('../components/ProtectedRoute', () => ({
+  ProtectedRoute: ({ children }: { children: ReactNode }) => {
+    // Access the mock to get current auth state
+    const { isAuthenticated, isLoading } = useAuthStore();
+    if (isLoading) {
+      return <div data-testid="loading">Loading...</div>;
+    }
+    if (!isAuthenticated) {
+      return <Navigate to="/signin" replace />;
+    }
+    return <>{children}</>;
+  },
 }));
 
-// Mock the page components - these mocks prevent Module Federation imports from being resolved
+// Mock the page components
 vi.mock('../pages/SignInPage', () => ({
   SignInPage: () => <div data-testid="signin-page">SignInPage</div>,
 }));
@@ -32,8 +42,10 @@ vi.mock('../pages/HomePage', () => ({
   HomePage: () => <div data-testid="home-page">HomePage</div>,
 }));
 
-// Import AppRoutes after mocks are set up
-import { AppRoutes } from './AppRoutes';
+// Mock components for DI
+const MockSignIn = () => <div>Mock SignIn</div>;
+const MockSignUp = () => <div>Mock SignUp</div>;
+const MockPayments = () => <div>Mock Payments</div>;
 
 describe('AppRoutes', () => {
   beforeEach(() => {
@@ -43,7 +55,11 @@ describe('AppRoutes', () => {
   const renderWithRouter = (initialEntries: string[] = ['/']) => {
     return render(
       <MemoryRouter initialEntries={initialEntries}>
-        <AppRoutes />
+        <AppRoutes
+          SignInComponent={MockSignIn}
+          SignUpComponent={MockSignUp}
+          PaymentsComponent={MockPayments}
+        />
       </MemoryRouter>
     );
   };
@@ -52,6 +68,7 @@ describe('AppRoutes', () => {
     it('redirects to /signin when not authenticated', () => {
       (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
         isAuthenticated: false,
+        isLoading: false,
       });
 
       renderWithRouter(['/']);
@@ -64,6 +81,7 @@ describe('AppRoutes', () => {
     it('redirects to /payments when authenticated', () => {
       (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
         isAuthenticated: true,
+        isLoading: false,
       });
 
       renderWithRouter(['/']);
@@ -77,6 +95,7 @@ describe('AppRoutes', () => {
     it('renders SignInPage at /signin', () => {
       (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
         isAuthenticated: false,
+        isLoading: false,
       });
 
       renderWithRouter(['/signin']);
@@ -88,6 +107,7 @@ describe('AppRoutes', () => {
     it('renders SignUpPage at /signup', () => {
       (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
         isAuthenticated: false,
+        isLoading: false,
       });
 
       renderWithRouter(['/signup']);
@@ -101,6 +121,7 @@ describe('AppRoutes', () => {
     it('renders PaymentsPage at /payments when authenticated', () => {
       (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
         isAuthenticated: true,
+        isLoading: false,
       });
 
       renderWithRouter(['/payments']);
@@ -108,12 +129,39 @@ describe('AppRoutes', () => {
       expect(screen.getByTestId('payments-page')).toBeInTheDocument();
       expect(screen.getByText('PaymentsPage')).toBeInTheDocument();
     });
+
+    it('redirects to /signin at /payments when not authenticated', () => {
+      (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+        isAuthenticated: false,
+        isLoading: false,
+      });
+
+      renderWithRouter(['/payments']);
+
+      // Should redirect to signin via ProtectedRoute
+      expect(screen.getByTestId('signin-page')).toBeInTheDocument();
+      expect(screen.queryByTestId('payments-page')).not.toBeInTheDocument();
+    });
+
+    it('shows loading state while checking auth at /payments', () => {
+      (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+        isAuthenticated: false,
+        isLoading: true,
+      });
+
+      renderWithRouter(['/payments']);
+
+      // Should show loading state via ProtectedRoute
+      expect(screen.getByTestId('loading')).toBeInTheDocument();
+      expect(screen.queryByTestId('payments-page')).not.toBeInTheDocument();
+    });
   });
 
   describe('Other routes', () => {
     it('renders HomePage at /home', () => {
       (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
         isAuthenticated: false,
+        isLoading: false,
       });
 
       renderWithRouter(['/home']);
@@ -125,6 +173,7 @@ describe('AppRoutes', () => {
     it('redirects unknown routes to root and then to signin', () => {
       (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
         isAuthenticated: false,
+        isLoading: false,
       });
 
       renderWithRouter(['/unknown-route']);

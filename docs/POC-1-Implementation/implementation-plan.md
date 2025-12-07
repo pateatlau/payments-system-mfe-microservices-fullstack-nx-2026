@@ -1114,13 +1114,13 @@ React Router 7 successfully integrated in shell application:
 
 **Verification:**
 
-- [ ] ProtectedRoute component created
-- [ ] Auth state checking implemented
-- [ ] Redirect logic working
-- [ ] Loading state implemented
-- [ ] Integrated with router
-- [ ] Route protection tested
-- [ ] Unit tests written and passing
+- [x] ProtectedRoute component created
+- [x] Auth state checking implemented
+- [x] Redirect logic working
+- [x] Loading state implemented
+- [x] Integrated with router
+- [x] Route protection tested
+- [x] Unit tests written and passing
 
 **Acceptance Criteria:**
 
@@ -1130,9 +1130,36 @@ React Router 7 successfully integrated in shell application:
 - ✅ Loading state handled
 - ✅ Unit tests passing (70%+ coverage)
 
-**Status:** ⬜ Not Started  
-**Completed Date:** _TBD_  
-**Notes:** _Add notes here after completion_
+**Status:** ✅ Complete  
+**Completed Date:** 2026-12-07  
+**Notes:**
+
+Created `ProtectedRoute` component with the following features:
+
+1. **Component Structure (`apps/shell/src/components/ProtectedRoute.tsx`):**
+   - Accepts `children`, `redirectTo` (default: `/signin`), and `loadingComponent` props
+   - Uses `useAuthStore` to check `isAuthenticated` and `isLoading` states
+   - Uses `useLocation` to capture current path for redirect-back functionality
+
+2. **Auth State Handling:**
+   - Shows loading spinner (or custom component) while `isLoading` is true
+   - Redirects to sign-in page if not authenticated
+   - Passes current location in state for post-login redirect
+
+3. **Testing:**
+   - 13 comprehensive unit tests covering:
+     - Authenticated user rendering
+     - Unauthenticated user redirect
+     - Loading state display
+     - Custom redirect path
+     - Custom loading component
+     - State transitions
+   - All tests passing
+
+4. **Integration:**
+   - Integrated with AppRoutes to wrap `/payments` route
+   - Refactored App and AppRoutes to use Dependency Injection pattern
+   - Remote components are now passed from `main.tsx` to avoid MF imports in testable files
 
 ---
 
@@ -1162,7 +1189,7 @@ React Router 7 successfully integrated in shell application:
 - [x] Logout functionality working
 - [x] Header displays correctly
 - [x] Logout redirects correctly
-- [ ] Unit tests written and passing
+- [x] Unit tests written and passing
 
 **Acceptance Criteria:**
 
@@ -1170,11 +1197,31 @@ React Router 7 successfully integrated in shell application:
 - ✅ Header displays correctly
 - ✅ Logout functionality working
 - ✅ Redirects after logout
-- [ ] Unit tests passing (70%+ coverage)
+- ✅ Unit tests passing (70%+ coverage)
 
-**Status:** ✅ Complete (Unit tests pending)  
+**Status:** ✅ Complete  
 **Completed Date:** 2026-12-07  
-**Notes:** Header was integrated in Task 1.5. Verified that logout functionality works correctly with routing - clicking logout redirects to /signin page. Header displays correctly with user information, navigation links, and responsive design.
+**Notes:**
+
+1. **Header Integration:**
+   - Header was integrated in Task 1.5 into `apps/shell/src/components/Layout.tsx`
+   - Header uses `useAuthStore` hook directly for authentication state
+
+2. **React Router Integration:**
+   - Updated Header component to use React Router's `Link` component instead of anchor tags
+   - All navigation links now use client-side routing (no page reloads)
+   - Updated Header tests to wrap components in `MemoryRouter` (all 18 tests passing)
+
+3. **Logout Functionality:**
+   - Added logout redirect in Layout component using `useNavigate` hook
+   - Logout now redirects to `/signin` after calling `logout()` from auth store
+   - Layout passes `onLogout` callback to Header component
+
+4. **Testing:**
+   - Created comprehensive unit tests for Layout component (`apps/shell/src/components/Layout.test.tsx`)
+   - 6 tests covering: Header rendering, children rendering, logout functionality, redirect behavior, layout structure, and branding
+   - All 46 shell tests passing (including 6 new Layout tests)
+   - All 18 Header component tests passing (updated to use MemoryRouter)
 
 ---
 
@@ -1242,7 +1289,7 @@ React Router 7 successfully integrated in shell application:
 - [x] SignIn remote loader created
 - [x] SignUp remote loader created
 - [x] Suspense boundaries added
-- [ ] Error boundaries added
+- [x] Error boundaries added
 - [x] Integrated with router
 - [x] Components load correctly
 - [x] Authentication flow works
@@ -1253,19 +1300,45 @@ React Router 7 successfully integrated in shell application:
 - ✅ SignIn component loads from remote
 - ✅ SignUp component loads from remote
 - ✅ Suspense boundaries working
+- ✅ Error boundaries working
 - ✅ Authentication flow works
 - ✅ Unit tests passing (70%+ coverage)
 
-**Status:** ✅ Complete (Error boundaries pending)  
+**Status:** ✅ Complete  
 **Completed Date:** 2026-12-07  
-**Notes:** Auth MFE components successfully integrated. SignInPage and SignUpPage components created with lazy loading. Components load correctly from remote and authentication flow works. Error boundaries should be added for production readiness.
+**Notes:**
 
-**Testing Refactor (2026-12-07):** Page components refactored to use **Dependency Injection (DI) pattern** for testability:
+1. **Component Integration:**
+   - SignInPage and SignUpPage components created with lazy loading for `authMfe/SignIn` and `authMfe/SignUp`
+   - Components integrated with React Router 7 (routes: `/signin`, `/signup`)
+   - Components load correctly from remote (verified in preview mode)
 
-- Components accept optional `SignInComponent`/`SignUpComponent` props
-- Tests inject mock components directly, bypassing Module Federation resolution
-- This solves Vite's static analysis failing to resolve dynamic MF imports during tests
-- All 24 shell tests now pass
+2. **Suspense Boundaries:**
+   - Loading fallbacks added with user-friendly loading spinners
+   - Integrated in remote component loaders (`src/remotes/index.tsx`)
+
+3. **Error Boundaries (2026-12-07):**
+   - Created `RemoteErrorBoundary` component (`apps/shell/src/components/RemoteErrorBoundary.tsx`)
+   - Uses `react-error-boundary` library for error handling
+   - Provides user-friendly error UI with:
+     - Clear error message
+     - Collapsible error details section
+     - "Try Again" button (reloads page)
+     - "Go Home" button (navigates to home)
+   - Integrated with SignInPage and SignUpPage
+   - 6 comprehensive unit tests covering all error scenarios
+
+4. **Authentication Flow:**
+   - Login redirects to `/payments` after successful authentication
+   - Logout redirects to `/signin`
+   - Already authenticated users are redirected appropriately
+
+5. **Testing:**
+   - **Testing Refactor (2026-12-07):** Page components refactored to use **Dependency Injection (DI) pattern** for testability:
+     - Components accept optional `SignInComponent`/`SignUpComponent` props
+     - Tests inject mock components directly, bypassing Module Federation resolution
+     - This solves Vite's static analysis failing to resolve dynamic MF imports during tests
+   - All 52 shell tests passing (including 6 new RemoteErrorBoundary tests)
 
 ---
 
@@ -1290,9 +1363,9 @@ React Router 7 successfully integrated in shell application:
 
 - [x] PaymentsPage remote loader created
 - [x] Suspense boundary added
-- [ ] Error boundary added
+- [x] Error boundary added
 - [x] Integrated with router
-- [ ] ProtectedRoute wrapper added
+- [x] ProtectedRoute wrapper added
 - [x] Component loads correctly
 - [x] Payments flow works
 - [x] Unit tests written and passing
@@ -1301,19 +1374,47 @@ React Router 7 successfully integrated in shell application:
 
 - ✅ PaymentsPage component loads from remote
 - ✅ Suspense boundaries working
+- ✅ Error boundaries working
+- ✅ ProtectedRoute wrapper working
 - ✅ Payments flow works
 - ✅ Unit tests passing (70%+ coverage)
 
-**Status:** ✅ Complete (ProtectedRoute and Error boundaries pending)  
+**Status:** ✅ Complete  
 **Completed Date:** 2026-12-07  
-**Notes:** Payments MFE component successfully integrated. PaymentsPage component created with lazy loading. Component loads correctly from remote and payments flow works (CRUD operations functional). QueryClientProvider added to shell for TanStack Query support. ProtectedRoute wrapper will be added in Task 4.2. Error boundaries should be added for production readiness.
+**Notes:**
 
-**Testing Refactor (2026-12-07):** PaymentsPage component refactored to use **Dependency Injection (DI) pattern** for testability:
+1. **Component Integration:**
+   - PaymentsPage component created with lazy loading for `paymentsMfe/PaymentsPage`
+   - Component integrated with React Router 7 (route: `/payments`)
+   - Component loads correctly from remote (verified in preview mode)
 
-- Component accepts optional `PaymentsComponent` prop
-- Tests inject mock component directly, bypassing Module Federation resolution
-- Deleted unused `apps/shell/src/pages/remotes/` folder
-- Cleaned up `vite.config.mts` and `src/test/setup.ts`
+2. **Suspense Boundaries:**
+   - Loading fallback added with user-friendly loading spinner
+   - Integrated in remote component loaders (`src/remotes/index.tsx`)
+
+3. **Error Boundaries (2026-12-07):**
+   - Wrapped PaymentsPage with `RemoteErrorBoundary` component
+   - Provides user-friendly error UI with retry and navigation options
+   - Catches and handles remote loading and runtime errors
+
+4. **Route Protection (2026-12-07):**
+   - PaymentsPage wrapped with `ProtectedRoute` in AppRoutes (completed in Task 4.2)
+   - Unauthenticated users are redirected to `/signin`
+   - Authenticated users can access the payments page
+
+5. **Payments Flow:**
+   - CRUD operations functional: create, read, update, delete
+   - Role-based access: VENDOR can create/edit/delete, CUSTOMER can view own payments
+   - QueryClientProvider added to shell for TanStack Query support
+
+6. **Testing:**
+   - **Testing Refactor (2026-12-07):** PaymentsPage component refactored to use **Dependency Injection (DI) pattern** for testability:
+     - Component accepts optional `PaymentsComponent` prop
+     - Tests inject mock component directly, bypassing Module Federation resolution
+     - This solves Vite's static analysis failing to resolve dynamic MF imports during tests
+     - Deleted unused `apps/shell/src/pages/remotes/` folder
+     - Cleaned up `vite.config.mts` and `src/test/setup.ts`
+   - All 52 shell tests passing
 
 ---
 
@@ -1345,13 +1446,13 @@ React Router 7 successfully integrated in shell application:
 
 **Verification:**
 
-- [ ] Unauthenticated flow tested
-- [ ] Authenticated flow tested
-- [ ] Route protection tested
-- [ ] State synchronization tested
-- [ ] Remote loading tested
-- [ ] All flows work correctly
-- [ ] Issues documented
+- [x] Unauthenticated flow tested
+- [x] Authenticated flow tested
+- [x] Route protection tested
+- [x] State synchronization tested
+- [x] Remote loading tested
+- [x] All flows work correctly
+- [x] Issues documented
 
 **Acceptance Criteria:**
 
@@ -1361,9 +1462,52 @@ React Router 7 successfully integrated in shell application:
 - ✅ All remotes load correctly
 - ✅ No integration issues
 
-**Status:** ⬜ Not Started  
-**Completed Date:** _TBD_  
-**Notes:** _Add notes here after completion_
+**Status:** ✅ Complete  
+**Completed Date:** 2026-12-07  
+**Notes:**
+
+1. **Integration Test Suite Created:**
+   - Created `apps/shell/src/integration/AppIntegration.test.tsx`
+   - 13 comprehensive integration tests covering all critical flows
+   - All tests passing (65 total shell tests)
+
+2. **Test Coverage:**
+   - **Unauthenticated User Flow (4 tests):**
+     - Root redirects to `/signin`
+     - SignIn page displays correctly
+     - Navigation between SignIn and SignUp
+     - Callback integration verified
+   - **Authenticated User Flow (3 tests):**
+     - Root redirects to `/payments`
+     - PaymentsPage displays correctly
+     - Authenticated users redirected from `/signin`
+   - **Route Protection (3 tests):**
+     - Unauthenticated users redirected from protected routes
+     - Authenticated users can access protected routes
+     - Proper redirects for already authenticated users
+   - **State Synchronization (2 tests):**
+     - UI updates when authentication state changes
+     - Loading states handled correctly
+   - **Navigation Flow (1 test):**
+     - Navigation between auth pages works correctly
+
+3. **Remote Loading:**
+   - Verified in preview mode (Module Federation limitations prevent full testing in unit tests)
+   - All remotes load correctly
+   - No 404 errors for remoteEntry.js files
+   - Dynamic imports work correctly
+   - Assets load from correct origins
+
+4. **Test Results:**
+   - All 65 shell tests passing
+   - 13 integration tests
+   - 52 unit tests
+   - 100% of integration test scenarios passing
+   - No issues found
+
+5. **Documentation:**
+   - Test results documented in `docs/POC-1-Implementation/integration-test-results.md`
+   - All flows verified and working correctly
 
 ---
 
