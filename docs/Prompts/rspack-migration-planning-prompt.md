@@ -7,12 +7,14 @@ Use this prompt when starting a new chat session to plan the Vite to Rspack migr
 ## Context
 
 **Current State:**
+
 - POC-1 is complete with Vite 6.x + Module Federation v2
 - Module Federation v2 works in preview mode (not dev mode)
 - HMR not available during development (requires rebuild + refresh)
 - All MFEs (shell, auth-mfe, payments-mfe) working correctly
 
 **Goal:**
+
 - Plan migration from Vite to Rspack
 - Evaluate Rspack for better HMR support with Module Federation
 - Create implementation plan for migration
@@ -44,7 +46,68 @@ I'm starting a new session to plan the Vite to Rspack migration. Please:
    - Research Rspack + Tailwind CSS v4 compatibility
    - Research migration effort and complexity
 
-4. **Create Migration Plan:**
+4. **Analyze Tech Stack Impact:**
+   Analyze how Rspack migration will impact the ENTIRE tech stack (positively and negatively):
+   
+   **Bundling & Build:**
+   - Vite 6.x → Rspack: Impact on dev server, HMR, production builds
+   - TypeScript 5.9.x: Compatibility, compilation performance
+   - Build performance comparison
+   
+   **Module Federation:**
+   - @module-federation/enhanced 0.21.6: Compatibility with Rspack
+   - Module Federation v2 support in Rspack
+   - Remote loading behavior
+   - Shared dependencies handling
+   
+   **Monorepo & Tooling:**
+   - Nx integration: Compatibility, build caching, task execution
+   - pnpm 9.x: Package resolution, workspace support
+   - Node.js 24.11.x LTS: Compatibility
+   
+   **Core Framework:**
+   - React 19.2.0: Compatibility, build output
+   - React DOM 19.2.0: Runtime behavior
+   
+   **Routing:**
+   - React Router 7.x: Compatibility, code splitting, lazy loading
+   
+   **State Management:**
+   - Zustand 4.5.x: Bundle size, runtime behavior, middleware support
+   - TanStack Query 5.x: Compatibility, DevTools, caching behavior
+   
+   **Styling:**
+   - Tailwind CSS 4.0+: Compatibility, PostCSS integration, build performance
+   - CSS processing and optimization
+   
+   **Forms & Validation:**
+   - React Hook Form 7.52.x: Compatibility, bundle size
+   - Zod 3.23.x: Runtime validation, bundle size
+   
+   **HTTP & Storage:**
+   - Axios 1.7.x: Compatibility, bundle size
+   - localStorage: No impact (browser API)
+   
+   **Error Handling:**
+   - react-error-boundary 4.0.13: Compatibility, React 19 support
+   
+   **Testing:**
+   - Vitest 2.0.x: Compatibility with Rspack (may need alternative)
+   - React Testing Library 16.1.x: Compatibility
+   - Playwright: No impact (runs in browser)
+   
+   **Code Quality:**
+   - ESLint 9.x: No impact (runs separately)
+   - Prettier 3.3.x: No impact (runs separately)
+   - TypeScript ESLint 8.x: No impact (runs separately)
+   
+   For each technology, document:
+   - ✅ Positive impacts (benefits, improvements)
+   - ⚠️ Negative impacts (risks, regressions, breaking changes)
+   - 🔄 Neutral/no impact
+   - 📝 Migration considerations (config changes, code changes needed)
+
+5. **Create Migration Plan:**
    - Create new branch for Rspack migration planning
    - Document Rspack research findings
    - Create implementation plan for migration
@@ -52,7 +115,7 @@ I'm starting a new session to plan the Vite to Rspack migration. Please:
    - Identify risks and mitigations
    - Create rollback plan
 
-5. **Follow Rules:**
+6. **Follow Rules:**
    - Follow all rules in .cursorrules
    - Create documentation in appropriate location
    - Ask for confirmation before major decisions
@@ -62,7 +125,9 @@ I'm starting a new session to plan the Vite to Rspack migration. Please:
 - Better HMR support with Module Federation (primary goal)
 - Faster builds (secondary benefit)
 - Migration effort vs. benefits
-- Compatibility with existing stack (Nx, Tailwind v4, Module Federation v2)
+- **Comprehensive tech stack impact** (not just bundler, but ALL technologies)
+- Compatibility with existing stack (React, React Router, Zustand, TanStack Query, React Hook Form, Zod, Axios, Tailwind v4, Vitest, Nx, Module Federation v2, etc.)
+- Testing framework compatibility (Vitest may need alternative with Rspack)
 - Rollback strategy if migration fails
 
 Let's start planning the Rspack migration!
@@ -84,13 +149,24 @@ I'm starting a new session to research Rspack for migration from Vite. Please:
    - Rspack + Tailwind CSS v4 compatibility
    - Rspack vs. Vite comparison for our use case
 
-2. **Document Findings:**
+2. **Analyze Tech Stack Impact:**
+   Analyze how Rspack migration will impact the ENTIRE tech stack:
+   - Read `docs/References/mfe-poc1-tech-stack.md` for complete tech stack list
+   - For each technology, analyze:
+     * Positive impacts (benefits, improvements)
+     * Negative impacts (risks, regressions, breaking changes)
+     * Neutral/no impact
+     * Migration considerations (config changes, code changes)
+   - Focus on: React, React Router, Zustand, TanStack Query, React Hook Form, Zod, Axios, Tailwind CSS, Vitest, Nx, and all other technologies in the stack
+
+3. **Document Findings:**
    - Create research document with findings
+   - Create comprehensive tech stack impact analysis
    - Compare Rspack vs. Vite for our specific needs
    - Identify pros/cons of migration
-   - Document compatibility concerns
+   - Document compatibility concerns for ALL technologies
 
-3. **Provide Recommendation:**
+4. **Provide Recommendation:**
    - Should we proceed with migration?
    - What are the risks?
    - What is the estimated effort?
@@ -115,6 +191,7 @@ I'm starting a new session to create the Rspack migration implementation plan. P
 
 1. **Review Research:**
    - Read any existing Rspack research documents
+   - Review tech stack impact analysis
    - Review Rspack migration considerations from post-poc-1.md
    - Understand current Vite configuration
 
@@ -122,9 +199,10 @@ I'm starting a new session to create the Rspack migration implementation plan. P
    - Create detailed migration plan document
    - Break down into phases/tasks
    - Identify dependencies and prerequisites
-   - Document migration steps
+   - Document migration steps for each technology
+   - Address tech stack impact findings in migration plan
    - Create rollback plan
-   - Document testing strategy
+   - Document testing strategy for all affected technologies
 
 3. **Documentation:**
    - Create migration plan in appropriate location
@@ -159,6 +237,18 @@ Let's create the migration plan!
    - `docs/POC-1-Implementation/developer-workflow.md` - MF v2 configuration
    - Module Federation configuration in `apps/*/vite.config.mts`
 
+### Tech Stack Reference
+
+1. **Complete Tech Stack:**
+   - `docs/References/mfe-poc1-tech-stack.md` - Complete tech stack matrix and detailed breakdown
+   - `docs/POC-1-Implementation/packages-and-libraries.md` - All packages and their usage patterns
+
+2. **Current Configurations:**
+   - `apps/*/vite.config.mts` - Vite configurations for all apps
+   - `apps/*/vitest.config.ts` - Vitest configurations
+   - `tailwind.config.js` - Tailwind CSS v4 configuration
+   - `nx.json` - Nx workspace configuration
+
 ### Memories to Review
 
 - Key learnings from POC-1 about Tailwind v4 in monorepos
@@ -178,17 +268,26 @@ After planning session, you should have:
    - Migration effort estimation
    - Risk assessment
 
-2. **Implementation Plan:**
+2. **Tech Stack Impact Analysis:**
+   - Comprehensive analysis of Rspack impact on ALL technologies
+   - Positive impacts for each technology
+   - Negative impacts/risks for each technology
+   - Migration considerations for each technology
+   - Compatibility matrix (Rspack vs. Vite for each tech)
+
+3. **Implementation Plan:**
    - Detailed migration steps
    - Task breakdown
-   - Testing strategy
+   - Technology-specific migration steps
+   - Testing strategy (including all affected technologies)
    - Rollback plan
 
-3. **Decision Document:**
+4. **Decision Document:**
    - Go/No-Go recommendation
-   - Rationale
-   - Trade-offs
+   - Rationale based on comprehensive analysis
+   - Trade-offs (including all tech stack impacts)
    - Timeline
+   - Risk mitigation strategies
 
 ---
 
@@ -219,4 +318,3 @@ After planning session, you should have:
 
 **Last Updated:** 2026-01-XX  
 **Status:** Ready for Use
-
