@@ -33,8 +33,11 @@ lerna-debug.log*
 # Nx
 .nx/cache
 .nx/workspace-data
-
 .nx/installation
+
+# Module Federation temp files
+.__mf__temp/
+**/.__mf__temp/
 
 
 .cursor/rules/nx-rules.mdc

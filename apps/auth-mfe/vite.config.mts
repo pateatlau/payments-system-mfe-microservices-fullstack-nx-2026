@@ -3,26 +3,28 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/postcss';
 import autoprefixer from 'autoprefixer';
-import federation from '@originjs/vite-plugin-federation';
+import { federation } from '@module-federation/vite';
 import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
 import { nxCopyAssetsPlugin } from '@nx/vite/plugins/nx-copy-assets.plugin';
 
 /**
  * Auth MFE Vite Configuration
  * 
- * Module Federation Remote - exposes authentication components
- * 
- * IMPORTANT: @originjs/vite-plugin-federation requires:
- * 1. Build the remote first: pnpm build:auth-mfe
- * 2. Run in preview mode: pnpm preview:auth-mfe
+ * Module Federation v2 Remote - exposes authentication components
  * 
  * Exposed components:
  * - ./SignIn -> ./src/components/SignIn.tsx
  * - ./SignUp -> ./src/components/SignUp.tsx
  */
+
+// Check if running in test mode
+const isTest = process.env.NODE_ENV === 'test' || process.env.VITEST;
+
 export default defineConfig(() => ({
   root: import.meta.dirname,
   cacheDir: '../../node_modules/.vite/apps/auth-mfe',
+  // Set base URL for assets - required for Module Federation to load assets from correct origin
+  base: 'http://localhost:4201/',
   server: {
     port: 4201,
     host: 'localhost',
@@ -43,9 +45,12 @@ export default defineConfig(() => ({
   },
   plugins: [
     react(),
-    federation({
+    // Only include federation plugin when not testing
+    ...(!isTest ? [federation({
       name: 'authMfe',
       filename: 'remoteEntry.js',
+      // Set the public path so assets are loaded from the correct origin
+      getPublicPath: 'return "http://localhost:4201/"',
       exposes: {
         './SignIn': './src/components/SignIn.tsx',
         './SignUp': './src/components/SignUp.tsx',
@@ -66,7 +71,7 @@ export default defineConfig(() => ({
           singleton: true,
         },
       },
-    }),
+    })] : []),
     nxViteTsPaths(),
     nxCopyAssetsPlugin(['*.md']),
   ],

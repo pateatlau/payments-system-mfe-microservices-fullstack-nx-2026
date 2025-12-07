@@ -1,28 +1,43 @@
-import { Suspense, lazy } from 'react';
+import { ComponentType } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuthStore } from 'shared-auth-store';
 
-// Lazy load PaymentsPage component from payments-mfe remote
-// This will be properly configured in Task 4.3
-const PaymentsPageRemote = lazy(() =>
-  import('paymentsMfe/PaymentsPage').catch(() => ({
-    default: () => (
-      <div className="max-w-7xl mx-auto bg-white rounded-lg shadow-lg p-8">
-        <h2 className="text-2xl font-bold text-slate-900 mb-4">Payments</h2>
-        <p className="text-slate-600">
-          PaymentsPage component will be loaded from payments-mfe remote (Task 4.3)
-        </p>
-      </div>
-    ),
-  }))
-);
+/**
+ * Props interface for the PaymentsPage component from payments-mfe
+ */
+export interface PaymentsComponentProps {
+  // PaymentsPage from payments-mfe doesn't require props
+}
+
+/**
+ * Props for PaymentsPage - allows dependency injection for testing
+ */
+export interface PaymentsPageProps {
+  /**
+   * PaymentsPage component to render.
+   * In production, pass the lazy-loaded component from remotes.
+   * In tests, pass a mock component.
+   */
+  PaymentsComponent: ComponentType<PaymentsComponentProps>;
+}
 
 /**
  * PaymentsPage component
- * Wrapper for PaymentsPage component from payments-mfe
- * Protected route - requires authentication
+ * 
+ * Wrapper for PaymentsPage component.
+ * Protected route - requires authentication.
+ * Uses dependency injection pattern - component must be provided via props.
+ * 
+ * @example
+ * // Production usage (in routes)
+ * import { PaymentsPageRemote } from './remotes';
+ * <PaymentsPage PaymentsComponent={PaymentsPageRemote} />
+ * 
+ * @example
+ * // Test usage (with mock component)
+ * <PaymentsPage PaymentsComponent={MockPaymentsPage} />
  */
-export function PaymentsPage() {
+export function PaymentsPage({ PaymentsComponent }: PaymentsPageProps) {
   const { isAuthenticated } = useAuthStore();
 
   // Redirect to sign in if not authenticated
@@ -30,19 +45,5 @@ export function PaymentsPage() {
     return <Navigate to="/signin" replace />;
   }
 
-  return (
-    <Suspense
-      fallback={
-        <div className="min-h-screen flex items-center justify-center bg-slate-50">
-          <div className="text-center">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
-            <p className="text-slate-600">Loading payments...</p>
-          </div>
-        </div>
-      }
-    >
-      <PaymentsPageRemote />
-    </Suspense>
-  );
+  return <PaymentsComponent />;
 }
-

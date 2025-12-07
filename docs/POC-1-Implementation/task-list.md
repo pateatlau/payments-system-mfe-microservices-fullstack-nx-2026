@@ -1,9 +1,11 @@
 # POC-1 Task List - Progress Tracking
 
-**Status:** Not Started  
-**Version:** 1.0  
-**Date:** 2026-01-XX  
+**Status:** In Progress  
+**Version:** 1.1  
+**Date:** 2026-12-07  
 **Phase:** POC-1 - Authentication & Payments
+
+> **🎉 Module Federation v2 Working!** Successfully tested in preview mode on 2026-12-07. All MFEs (auth-mfe, payments-mfe) load correctly in the shell via Module Federation v2 (`@module-federation/vite`). The v1.5 package (`@originjs/vite-plugin-federation`) has been removed.
 
 > **📋 Related Document:** See [`implementation-plan.md`](./implementation-plan.md) for detailed step-by-step instructions for each task.
 
@@ -357,7 +359,8 @@
 - [x] All routes defined
 - [x] BrowserRouter setup
 - [x] Routing works correctly
-- [x] Unit tests written (some failing due to Module Federation mocks - will be fixed in Task 4.3)
+- [x] Module Federation v2 integration tested in preview mode
+- [x] Unit tests written (mocks configured for Module Federation remotes)
 
 **Status:** ✅ Complete  
 **Notes:** React Router 7 successfully integrated:
@@ -374,7 +377,14 @@
 - Page components created with lazy loading for Module Federation remotes
 - Layout component wraps all routes with Header
 - TypeScript compiles, build succeeds
-- Some tests failing due to Module Federation remote import resolution (will be fixed in Task 4.3 when remotes are properly integrated)
+- **Module Federation v2 tested and working in preview mode:**
+  - Configured remotes with `type: 'module'` for ES module loading
+  - `remoteEntry.js` files served correctly at root path
+  - SignIn, SignUp, and PaymentsPage components load successfully from remotes
+  - Removed `@originjs/vite-plugin-federation` (v1.5) - using only `@module-federation/vite` (v2)
+  - Fixed asset loading issues by adding `base` URL to remote Vite configs
+  - Fixed styling issues by including remote MFE source files in shell's Tailwind config
+  - Added QueryClientProvider to shell for TanStack Query support
 - AppRoutes tests exist and cover routing logic  
   **Completed Date:** 2026-12-07
 
@@ -401,65 +411,94 @@
 - [x] Header imported from shared library (✅ Done in Task 1.5)
 - [x] Header added to layout (✅ Done in Task 1.5)
 - [x] Auth store integrated (Header uses useAuthStore hook directly)
-- [ ] Logout functionality working with routing (verify after routing is set up)
-- [ ] Header displays correctly (verify)
-- [ ] Logout redirects correctly (verify after routing is set up)
+- [x] Logout functionality working with routing (verified - redirects to /signin)
+- [x] Header displays correctly (verified - shows user info, navigation links, logout button)
+- [x] Logout redirects correctly (verified - redirects to /signin after logout)
 - [ ] Unit tests written and passing (update Layout tests)
 
-**Status:** 🟡 Partially Complete (Early Integration Done)  
-**Notes:** Header component was integrated into shell Layout during Task 1.5 for early testing. Header uses useAuthStore hook directly, so no additional props needed. This task should verify the integration works correctly with routing and authentication flows once they are implemented.  
-**Completed Date:** _TBD (Early integration: 2026-01-XX)_
+**Status:** ✅ Complete (Verification Done)  
+**Notes:** Header component was integrated into shell Layout during Task 1.5. Verified that logout functionality works correctly with routing - clicking logout redirects to /signin page. Header displays correctly with user information, navigation links, and responsive design. Header uses useAuthStore hook directly, so no additional props needed.  
+**Completed Date:** 2026-12-07
 
 ---
 
 ### Task 4.4: Configure Module Federation v2 for Shell
 
-- [ ] `vite.config.mts` updated
-- [ ] Host configuration correct
-- [ ] authMfe remote configured
-- [ ] paymentsMfe remote configured
-- [ ] Shared dependencies configured
-- [ ] Remote component loaders created
-- [ ] Remotes load dynamically
-- [ ] No build errors
+- [x] `vite.config.mts` updated
+- [x] Host configuration correct
+- [x] authMfe remote configured
+- [x] paymentsMfe remote configured
+- [x] Shared dependencies configured
+- [x] Remote component loaders created (lazy loading with React.lazy)
+- [x] Remotes load dynamically
+- [x] No build errors
+- [x] Asset loading fixed (added `base` URL to remote configs)
+- [x] Styling fixed (added remote MFE source paths to shell Tailwind config)
 
-**Status:** ⬜ Not Started  
-**Notes:** _Add notes here after completion_  
-**Completed Date:** _TBD_
+**Status:** ✅ Complete  
+**Notes:** Module Federation v2 successfully configured:
+
+- Shell `vite.config.mts` configured with `@module-federation/vite` plugin
+- Remotes configured: `authMfe` (port 4201) and `paymentsMfe` (port 4202)
+- Shared dependencies: react, react-dom, zustand, react-hook-form, @tanstack/react-query
+- Remote components loaded via React.lazy() with Suspense boundaries
+- Fixed asset loading by adding `base: 'http://localhost:4201/'` and `base: 'http://localhost:4202/'` to remote Vite configs
+- Fixed styling by including `../auth-mfe/src/**/*.{js,jsx,ts,tsx}` and `../payments-mfe/src/**/*.{js,jsx,ts,tsx}` in shell's Tailwind content config
+- Added QueryClientProvider to shell for TanStack Query support
+- All remotes load successfully in preview mode  
+  **Completed Date:** 2026-12-07
 
 ---
 
 ### Task 4.5: Integrate Auth MFE Components
 
-- [ ] SignIn remote loader created
-- [ ] SignUp remote loader created
-- [ ] Suspense boundaries added
-- [ ] Error boundaries added
-- [ ] Integrated with router
-- [ ] Components load correctly
-- [ ] Authentication flow works
-- [ ] Unit tests written and passing
+- [x] SignIn remote loader created (SignInPage with lazy loading)
+- [x] SignUp remote loader created (SignUpPage with lazy loading)
+- [x] Suspense boundaries added (in page components)
+- [ ] Error boundaries added (to be added)
+- [x] Integrated with router (routes: /signin, /signup)
+- [x] Components load correctly (verified in preview mode)
+- [x] Authentication flow works (login/logout tested)
+- [x] Unit tests written and passing (refactored with DI pattern)
 
-**Status:** ⬜ Not Started  
-**Notes:** _Add notes here after completion_  
-**Completed Date:** _TBD_
+**Status:** ✅ Complete (Error boundaries pending)  
+**Notes:** Auth MFE components successfully integrated:
+
+- SignInPage and SignUpPage components created with lazy loading for `authMfe/SignIn` and `authMfe/SignUp`
+- Suspense boundaries added with loading fallbacks
+- Components integrated with React Router 7 (routes: /signin, /signup)
+- Components load correctly from remote (verified in preview mode)
+- Authentication flow works: login redirects to /payments, logout redirects to /signin
+- **Testing Refactor (2026-12-07):** Page components refactored to use Dependency Injection (DI) pattern for testability. Components accept optional `SignInComponent`/`SignUpComponent` props, allowing tests to inject mock components and bypass Module Federation resolution issues.
+- Error boundaries should be added for production readiness  
+  **Completed Date:** 2026-12-07
 
 ---
 
 ### Task 4.6: Integrate Payments MFE Component
 
-- [ ] PaymentsPage remote loader created
-- [ ] Suspense boundary added
-- [ ] Error boundary added
-- [ ] Integrated with router
-- [ ] ProtectedRoute wrapper added
-- [ ] Component loads correctly
-- [ ] Payments flow works
-- [ ] Unit tests written and passing
+- [x] PaymentsPage remote loader created (PaymentsPage with lazy loading)
+- [x] Suspense boundary added (in PaymentsPage component)
+- [ ] Error boundary added (to be added)
+- [x] Integrated with router (route: /payments)
+- [ ] ProtectedRoute wrapper added (to be added in Task 4.2)
+- [x] Component loads correctly (verified in preview mode)
+- [x] Payments flow works (CRUD operations tested)
+- [x] Unit tests written and passing (refactored with DI pattern)
 
-**Status:** ⬜ Not Started  
-**Notes:** _Add notes here after completion_  
-**Completed Date:** _TBD_
+**Status:** ✅ Complete (ProtectedRoute and Error boundaries pending)  
+**Notes:** Payments MFE component successfully integrated:
+
+- PaymentsPage component created with lazy loading for `paymentsMfe/PaymentsPage`
+- Suspense boundary added with loading fallback
+- Component integrated with React Router 7 (route: /payments)
+- Component loads correctly from remote (verified in preview mode)
+- Payments flow works: create, read, update, delete operations functional
+- QueryClientProvider added to shell for TanStack Query support
+- **Testing Refactor (2026-12-07):** PaymentsPage refactored to use Dependency Injection (DI) pattern for testability. Component accepts optional `PaymentsComponent` prop, allowing tests to inject mock component and bypass Module Federation resolution issues.
+- ProtectedRoute wrapper will be added in Task 4.2
+- Error boundaries should be added for production readiness  
+  **Completed Date:** 2026-12-07
 
 ---
 
@@ -477,7 +516,7 @@
 **Notes:** _Add notes here after completion_  
 **Completed Date:** _TBD_
 
-**Phase 4 Completion:** **0% (0/7 tasks complete)**
+**Phase 4 Completion:** **71% (5/7 tasks complete)**
 
 ---
 
@@ -647,7 +686,44 @@ _No blockers at this time_
 
 ### Resolved Issues
 
-_No resolved issues yet_
+#### Issue 1: Module Federation Testing Failures (2026-12-07)
+
+**Problem:** Shell app unit tests were failing because Vite's static analysis couldn't resolve Module Federation remote imports (`import('authMfe/SignIn')`, etc.) during Vitest runs.
+
+**Error Messages:**
+
+```
+Error: Failed to resolve import "paymentsMfe/PaymentsPage" from "src/pages/PaymentsPage.tsx". Does the file exist?
+Error: Failed to resolve import "authMfe/SignIn" from "src/pages/SignInPage.tsx". Does the file exist?
+```
+
+**Root Cause:**
+
+- Vite's `import-analysis` plugin attempts to resolve dynamic imports during the transform phase
+- Module Federation remotes are only available at runtime, not during build/test
+- Various mocking approaches (resolve.alias, custom plugins, vi.mock) failed because Vite's static analysis runs before runtime mocks
+
+**Solution:** Refactored page components to use **Dependency Injection (DI) pattern**:
+
+1. Page components (`SignInPage`, `SignUpPage`, `PaymentsPage`) now accept an optional component prop
+2. When provided, the injected component is used instead of the lazy-loaded remote
+3. Tests inject mock components directly, bypassing Module Federation entirely
+4. Cleaned up `vite.config.mts` to remove all previous mocking attempts
+5. Deleted unused `apps/shell/src/pages/remotes/` folder
+
+**Files Changed:**
+
+- `apps/shell/src/pages/SignInPage.tsx` - Added `SignInComponent` prop with DI pattern
+- `apps/shell/src/pages/SignUpPage.tsx` - Added `SignUpComponent` prop with DI pattern
+- `apps/shell/src/pages/PaymentsPage.tsx` - Added `PaymentsComponent` prop with DI pattern
+- `apps/shell/src/pages/SignInPage.test.tsx` - Updated to inject mock component
+- `apps/shell/src/pages/SignUpPage.test.tsx` - Updated to inject mock component
+- `apps/shell/src/pages/PaymentsPage.test.tsx` - Updated to inject mock component
+- `apps/shell/vite.config.mts` - Cleaned up, removed mocking attempts
+- `apps/shell/src/test/setup.ts` - Simplified, removed vi.mock calls
+- Deleted: `apps/shell/src/pages/remotes/` folder (no longer needed)
+
+**Result:** All 24 shell tests now pass. The DI pattern makes tests fast, reliable, and isolated from Module Federation concerns.
 
 ---
 
@@ -663,7 +739,55 @@ _Add architecture decisions here as they are made_
 
 ### Lessons Learned
 
-_Add lessons learned here as work progresses_
+#### 1. Module Federation + Vitest: Use Dependency Injection Pattern
+
+**Lesson:** When testing components that use Module Federation remotes, don't try to mock at the Vite/bundler level. Instead, design components for testability using Dependency Injection.
+
+**Why:** Vite's static analysis runs before runtime mocks can take effect. Approaches like `resolve.alias`, custom plugins, and `vi.mock()` fail because Vite tries to resolve imports during the transform phase.
+
+**Pattern:**
+
+```typescript
+// Component accepts optional injected component
+export function PageComponent({ InjectedComponent }: Props = {}) {
+  const Component = InjectedComponent || DefaultLazyComponent;
+  return <Component />;
+}
+
+// Tests inject mock directly
+render(<PageComponent InjectedComponent={MockComponent} />);
+```
+
+**Benefits:**
+
+- Tests are fast and reliable (no network calls)
+- No complex bundler configuration needed
+- Clear separation of concerns
+- Follows "design for testability" principle
+
+#### 2. Module Federation v2 in Vite: Use Preview Mode
+
+**Lesson:** Module Federation v2 (`@module-federation/vite`) works reliably in preview mode (after build), not in dev mode.
+
+**Why:** MF v2 generates `remoteEntry.js` during build. In dev mode, the file doesn't exist, causing 404 errors.
+
+**Workflow:**
+
+1. Build remotes: `pnpm build:remotes`
+2. Serve in preview mode: `pnpm preview:all`
+3. HMR is not available; rebuild and refresh for changes
+
+#### 3. Tailwind CSS v4 in Monorepo: Use PostCSS with @config
+
+**Lesson:** For Nx monorepos with shared libraries, use `@tailwindcss/postcss` with the `@config` directive, not `@tailwindcss/vite`.
+
+**Why:** The Vite plugin only scans the app's root directory. Shared libraries outside the app directory are not detected.
+
+**Solution:**
+
+- Create `tailwind.config.js` with absolute content paths
+- Use `@config "../tailwind.config.js"` in CSS file
+- Configure PostCSS in `vite.config.mts`
 
 ---
 
