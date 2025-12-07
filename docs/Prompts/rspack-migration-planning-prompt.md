@@ -4,6 +4,82 @@ Use this prompt when starting a new chat session to plan the Vite to Rspack migr
 
 ---
 
+## Getting Started - Which Prompt Should I Use?
+
+### 🎯 Recommended: Standard Rspack Migration Planning Prompt
+
+**Use this if:** You're starting fresh with no prior research.
+
+**What it does:**
+- ✅ Reads all context and current state
+- ✅ Conducts comprehensive Rspack research
+- ✅ Analyzes tech stack impact for ALL technologies
+- ✅ Creates migration plan
+- ✅ Documents everything in one session
+
+**Best for:** Most users starting migration planning. Gets you from zero to complete plan in one session.
+
+---
+
+### 🔬 Alternative: Research-First Approach
+
+**Use this if:** You want to do research first, review findings, and then decide whether to proceed with planning.
+
+**What it does:**
+- ✅ Conducts Rspack research
+- ✅ Analyzes tech stack impact
+- ✅ Documents findings
+- ✅ Provides recommendation (Go/No-Go)
+- ❌ Does NOT create implementation plan
+
+**Best for:** When you want to evaluate feasibility before committing to planning effort.
+
+**Next step after research:** If research is positive, use "Alternative: Implementation Plan Creation" prompt.
+
+---
+
+### 📋 Alternative: Implementation Plan Creation
+
+**Use this if:** Research is already complete and you have a Go decision.
+
+**What it does:**
+- ✅ Reviews existing research
+- ✅ Creates detailed implementation plan
+- ✅ Breaks down into tasks/phases
+- ✅ Documents migration steps
+- ❌ Does NOT do research (assumes it's done)
+
+**Best for:** Follow-up session after research is complete.
+
+---
+
+### 📊 Workflow Comparison
+
+| Workflow | Sessions | When to Use |
+|----------|----------|-------------|
+| **Standard Prompt** | 1 session | ✅ **Recommended** - Start here if you have no research |
+| **Research-First → Implementation Plan** | 2 sessions | Use if you want to review research before planning |
+| **Implementation Plan Only** | 1 session | Use if research is already done |
+
+---
+
+### 🚀 Quick Start Recommendation
+
+**For your situation (no research done yet):**
+
+1. **Start with:** **Standard Rspack Migration Planning Prompt** ✅
+   - This will do everything: research + analysis + planning
+   - Most efficient approach
+   - Gets you a complete plan in one session
+
+2. **If you prefer a two-step approach:**
+   - **Step 1:** Use "Research-First Approach" to get findings and recommendation
+   - **Step 2:** Review the research, then use "Implementation Plan Creation" if you decide to proceed
+
+**Our recommendation:** Use the **Standard Rspack Migration Planning Prompt** - it's comprehensive and efficient.
+
+---
+
 ## Context
 
 **Current State:**
@@ -48,59 +124,59 @@ I'm starting a new session to plan the Vite to Rspack migration. Please:
 
 4. **Analyze Tech Stack Impact:**
    Analyze how Rspack migration will impact the ENTIRE tech stack (positively and negatively):
-   
+
    **Bundling & Build:**
    - Vite 6.x → Rspack: Impact on dev server, HMR, production builds
    - TypeScript 5.9.x: Compatibility, compilation performance
    - Build performance comparison
-   
+
    **Module Federation:**
    - @module-federation/enhanced 0.21.6: Compatibility with Rspack
    - Module Federation v2 support in Rspack
    - Remote loading behavior
    - Shared dependencies handling
-   
+
    **Monorepo & Tooling:**
    - Nx integration: Compatibility, build caching, task execution
    - pnpm 9.x: Package resolution, workspace support
    - Node.js 24.11.x LTS: Compatibility
-   
+
    **Core Framework:**
    - React 19.2.0: Compatibility, build output
    - React DOM 19.2.0: Runtime behavior
-   
+
    **Routing:**
    - React Router 7.x: Compatibility, code splitting, lazy loading
-   
+
    **State Management:**
    - Zustand 4.5.x: Bundle size, runtime behavior, middleware support
    - TanStack Query 5.x: Compatibility, DevTools, caching behavior
-   
+
    **Styling:**
    - Tailwind CSS 4.0+: Compatibility, PostCSS integration, build performance
    - CSS processing and optimization
-   
+
    **Forms & Validation:**
    - React Hook Form 7.52.x: Compatibility, bundle size
    - Zod 3.23.x: Runtime validation, bundle size
-   
+
    **HTTP & Storage:**
    - Axios 1.7.x: Compatibility, bundle size
    - localStorage: No impact (browser API)
-   
+
    **Error Handling:**
    - react-error-boundary 4.0.13: Compatibility, React 19 support
-   
+
    **Testing:**
    - Vitest 2.0.x: Compatibility with Rspack (may need alternative)
    - React Testing Library 16.1.x: Compatibility
    - Playwright: No impact (runs in browser)
-   
+
    **Code Quality:**
    - ESLint 9.x: No impact (runs separately)
    - Prettier 3.3.x: No impact (runs separately)
    - TypeScript ESLint 8.x: No impact (runs separately)
-   
+
    For each technology, document:
    - ✅ Positive impacts (benefits, improvements)
    - ⚠️ Negative impacts (risks, regressions, breaking changes)
