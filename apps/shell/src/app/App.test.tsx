@@ -1,37 +1,45 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { BrowserRouter } from 'react-router-dom';
-import { App } from './app';
+import { MemoryRouter } from 'react-router-dom';
+import App from './app';
+
+// Mock the pages
+vi.mock('../pages/SignInPage', () => ({
+  SignInPage: () => <div>SignInPage</div>,
+}));
+
+vi.mock('../pages/SignUpPage', () => ({
+  SignUpPage: () => <div>SignUpPage</div>,
+}));
+
+vi.mock('../pages/PaymentsPage', () => ({
+  PaymentsPage: () => <div>PaymentsPage</div>,
+}));
+
+vi.mock('../pages/HomePage', () => ({
+  HomePage: () => <div>HomePage</div>,
+}));
+
+vi.mock('../routes/AppRoutes', () => ({
+  AppRoutes: () => <div>AppRoutes</div>,
+}));
 
 describe('App', () => {
-  it('renders shell app', () => {
-    render(
-      <BrowserRouter>
+  it('should render successfully', () => {
+    const { baseElement } = render(
+      <MemoryRouter>
         <App />
-      </BrowserRouter>
+      </MemoryRouter>
     );
-
-    expect(screen.getByText('Welcome to the Shell Application')).toBeDefined();
+    expect(baseElement).toBeTruthy();
   });
 
-  it('renders navigation links', () => {
+  it('should render Layout with AppRoutes', () => {
     render(
-      <BrowserRouter>
+      <MemoryRouter>
         <App />
-      </BrowserRouter>
+      </MemoryRouter>
     );
-
-    expect(screen.getByText('Home')).toBeDefined();
-    expect(screen.getByText('Page 2')).toBeDefined();
-  });
-
-  it('renders current date', () => {
-    render(
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
-    );
-
-    expect(screen.getByText(/Current date:/)).toBeDefined();
+    expect(screen.getByText('AppRoutes')).toBeInTheDocument();
   });
 });

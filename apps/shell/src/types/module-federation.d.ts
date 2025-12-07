@@ -20,3 +20,11 @@ declare module 'authMfe/SignUp' {
   export default SignUp;
 }
 
+declare module 'paymentsMfe/PaymentsPage' {
+  interface PaymentsPageProps {
+    onPaymentSuccess?: () => void;
+  }
+  const PaymentsPage: React.ComponentType<PaymentsPageProps>;
+  export default PaymentsPage;
+}
+
