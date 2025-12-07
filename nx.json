@@ -40,17 +40,12 @@
   },
   "plugins": [
     {
-      "plugin": "@nx/vite/plugin",
+      "plugin": "@nx/rspack/plugin",
       "options": {
         "buildTargetName": "build",
-        "testTargetName": "test",
         "serveTargetName": "serve",
-        "devTargetName": "dev",
         "previewTargetName": "preview",
-        "serveStaticTargetName": "serve-static",
-        "typecheckTargetName": "typecheck",
-        "buildDepsTargetName": "build-deps",
-        "watchDepsTargetName": "watch-deps"
+        "serveStaticTargetName": "serve-static"
       }
     },
     {
@@ -64,13 +59,6 @@
       "options": {
         "targetName": "lint"
       }
-    },
-    {
-      "plugin": "@nx/vitest",
-      "options": {
-        "testTargetName": "test",
-        "ciTargetName": "test-ci"
-      }
     }
   ],
   "generators": {
@@ -79,7 +67,7 @@
         "babel": true,
         "style": "css",
         "linter": "none",
-        "bundler": "vite"
+        "bundler": "rspack"
       },
       "component": {
         "style": "css"
@@ -87,7 +75,7 @@
       "library": {
         "style": "css",
         "linter": "none",
-        "unitTestRunner": "vitest"
+        "unitTestRunner": "jest"
       }
     }
   }

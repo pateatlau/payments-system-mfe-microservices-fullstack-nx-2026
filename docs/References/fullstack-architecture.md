@@ -3,7 +3,7 @@
 **Status:** Authoritative  
 **Version:** 1.0  
 **Date:** 2026-01-XX  
-**Tech Stack:** React + Nx + Vite + Module Federation v2 + Node.js + Express + PostgreSQL + pnpm
+**Tech Stack:** React + Nx + Rspack + Module Federation v2 + Node.js + Express + PostgreSQL + pnpm
 
 ---
 
@@ -18,7 +18,7 @@ This document defines the **master architecture** for the full-stack microfronte
 - **Microservices (Backend)** - API Gateway + services (Auth, Payments, Admin, Profile)
 - **Module Federation v2** - Dynamic remote loading for frontend
 - **Event-Based Communication** - Event hub for inter-service communication
-- **Unified Tooling** - pnpm workspaces, Vitest testing, TypeScript throughout
+- **Unified Tooling** - pnpm workspaces, Jest testing (frontend), Vitest testing (backend), TypeScript throughout
 - **Production-Ready** - All technologies are production-ready from day one
 
 **POC Purpose & Philosophy:**
@@ -365,18 +365,18 @@ packages:
 
 ### 4.1 Frontend Stack
 
-| Category              | Technology                  | Version | Purpose                    |
-| --------------------- | --------------------------- | ------- | -------------------------- |
-| **Framework**         | React                       | 19.2.0  | UI framework               |
-| **Monorepo**          | Nx                          | Latest  | Monorepo management        |
-| **Bundler**           | Vite                        | 6.x     | Fast dev server, builds    |
-| **Module Federation** | @module-federation/enhanced | 0.21.6  | Dynamic remote loading     |
-| **Routing**           | React Router                | 7.x     | Client-side routing        |
-| **State (Client)**    | Zustand                     | 4.5.x   | Client state management    |
-| **State (Server)**    | TanStack Query              | 5.x     | Server state management    |
-| **Styling**           | Tailwind CSS                | 4.0+    | Utility-first CSS          |
-| **Testing**           | Vitest                      | 2.0.x   | Unit & integration testing |
-| **E2E Testing**       | Playwright                  | Latest  | End-to-end testing         |
+| Category              | Technology                  | Version | Purpose                              |
+| --------------------- | --------------------------- | ------- | ------------------------------------ |
+| **Framework**         | React                       | 19.2.0  | UI framework                         |
+| **Monorepo**          | Nx                          | Latest  | Monorepo management                  |
+| **Bundler**           | Rspack                      | Latest  | Fast dev server, builds, HMR with MF |
+| **Module Federation** | @module-federation/enhanced | 0.21.6  | Dynamic remote loading               |
+| **Routing**           | React Router                | 7.x     | Client-side routing                  |
+| **State (Client)**    | Zustand                     | 4.5.x   | Client state management              |
+| **State (Server)**    | TanStack Query              | 5.x     | Server state management              |
+| **Styling**           | Tailwind CSS                | 4.0+    | Utility-first CSS                    |
+| **Testing**           | Jest                        | 29.x    | Unit & integration testing           |
+| **E2E Testing**       | Playwright                  | Latest  | End-to-end testing                   |
 
 ### 4.2 Backend Stack
 
@@ -432,39 +432,36 @@ packages:
 ### 5.2 Module Federation Configuration
 
 ```typescript
-// apps/frontend/shell/vite.config.ts
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
-import { federation } from '@module-federation/vite';
+// apps/frontend/shell/rspack.config.js
+const {
+  ModuleFederationPlugin,
+} = require('@module-federation/enhanced/rspack');
 
-export default defineConfig({
+module.exports = {
+  output: {
+    uniqueName: 'shell',
+    publicPath: 'auto',
+  },
   plugins: [
-    react(),
-    federation({
+    new ModuleFederationPlugin({
       name: 'shell',
       remotes: {
-        auth_mfe: {
-          type: 'module',
-          entry: 'http://localhost:4201/remoteEntry.js',
-        },
-        payments_mfe: {
-          type: 'module',
-          entry: 'http://localhost:4202/remoteEntry.js',
-        },
-        admin_mfe: {
-          type: 'module',
-          entry: 'http://localhost:4203/remoteEntry.js',
-        },
+        authMfe: 'authMfe@http://localhost:4201/remoteEntry.js',
+        paymentsMfe: 'paymentsMfe@http://localhost:4202/remoteEntry.js',
+        adminMfe: 'adminMfe@http://localhost:4203/remoteEntry.js',
       },
       shared: {
-        react: { singleton: true },
-        'react-dom': { singleton: true },
+        react: { singleton: true, requiredVersion: '^19.0.0' },
+        'react-dom': { singleton: true, requiredVersion: '^19.0.0' },
         'react-router': { singleton: true },
+        'react-router-dom': { singleton: true },
       },
     }),
   ],
-});
+};
 ```
+
+> **Note:** Rspack provides native HMR support with Module Federation v2, enabling instant updates during development without page refresh.
 
 ---
 
@@ -854,8 +851,8 @@ nx generate @nx/js:library shared-utils
 
 **Frontend:**
 
-- **Unit Tests (70%):** Vitest + React Testing Library
-- **Integration Tests (20%):** Vitest + Supertest
+- **Unit Tests (70%):** Jest + React Testing Library
+- **Integration Tests (20%):** Jest + React Testing Library
 - **E2E Tests (10%):** Playwright
 
 **Backend:**
@@ -863,6 +860,8 @@ nx generate @nx/js:library shared-utils
 - **Unit Tests (60%):** Vitest
 - **Integration Tests (30%):** Vitest + Supertest
 - **E2E Tests (10%):** Playwright
+
+> **Note:** Frontend testing was migrated from Vitest to Jest as part of the Rspack migration for better ecosystem compatibility.
 
 ### 13.2 Test Organization
 
@@ -933,7 +932,8 @@ jobs:
 - **Code Splitting:** Module Federation enables dynamic loading
 - **Lazy Loading:** Route-based code splitting
 - **Caching:** TanStack Query caching
-- **Bundle Optimization:** Vite optimizations
+- **Bundle Optimization:** Rspack optimizations (3-5x faster than Vite)
+- **HMR:** Native HMR support with Module Federation v2
 
 ### 15.2 Backend Performance
 

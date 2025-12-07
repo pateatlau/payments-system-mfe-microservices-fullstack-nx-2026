@@ -3,7 +3,7 @@
 **Status:** ✅ Complete  
 **Version:** 1.0  
 **Date:** 2026-01-XX  
-**Tech Stack:** React + Nx + Vite + Module Federation v2  
+**Tech Stack:** React + Nx + Rspack + Module Federation v2  
 **Completion Date:** 2026-01-XX
 
 ---
@@ -79,7 +79,7 @@ This explains why payment operations are **stubbed** (no actual PSP integration)
 | **Monorepo**          | Nx                          | Latest      | Scalable, build caching, task orchestration |
 | **Runtime**           | Node.js                     | 24.11.x LTS | Latest LTS                                  |
 | **Framework**         | React                       | 19.2.0      | Latest stable                               |
-| **Bundler**           | Vite                        | 6.x         | Fast dev server, excellent DX               |
+| **Bundler**           | Rspack                      | Latest      | Fast builds, HMR with MF v2                 |
 | **Module Federation** | @module-federation/enhanced | 0.21.6      | BIMF (Module Federation v2)                 |
 | **Language**          | TypeScript                  | 5.9.x       | Type safety                                 |
 | **Package Manager**   | pnpm                        | 9.x         | Recommended for Nx                          |
@@ -93,7 +93,7 @@ This explains why payment operations are **stubbed** (no actual PSP integration)
 | **HTTP Client**       | Axios                       | 1.7.x       | Production-ready                            |
 | **Storage**           | localStorage                | Native      | Browser API                                 |
 | **Error Handling**    | react-error-boundary        | 4.0.13      | React 19 compatible                         |
-| **Testing**           | Vitest                      | 2.0.x       | Fast, Vite-native                           |
+| **Testing**           | Jest                        | 29.x        | Mature ecosystem, Rspack-compatible         |
 | **E2E Testing**       | Playwright                  | Latest      | Web E2E testing                             |
 | **Code Quality**      | ESLint                      | 9.x         | Latest, flat config                         |
 | **Formatting**        | Prettier                    | 3.3.x       | Code formatting                             |
@@ -488,14 +488,14 @@ export const useAuthStore = create<AuthState>()(
 // apps/payments-mfe/src/api/stubbedPayments.ts
 export const stubbedPaymentsApi = {
   getPayments: async (): Promise<Payment[]> => {
-    await new Promise((resolve) => setTimeout(resolve, 500)); // Simulate delay
+    await new Promise(resolve => setTimeout(resolve, 500)); // Simulate delay
     return [
       { id: '1', amount: 100, description: 'Payment 1', status: 'completed' },
       { id: '2', amount: 200, description: 'Payment 2', status: 'pending' },
     ];
   },
   createPayment: async (dto: CreatePaymentDto): Promise<Payment> => {
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    await new Promise(resolve => setTimeout(resolve, 300));
     // Stubbed payment - simulates payment creation but does not process real payment
     return { id: '3', ...dto, status: 'completed' };
   },
@@ -569,7 +569,7 @@ export const useCreatePayment = () => {
 **Implementation:**
 
 - Tailwind CSS v4.0+
-- Vite integration
+- Rspack integration via PostCSS
 - Inline utility classes
 - Responsive design
 
@@ -705,7 +705,6 @@ web-mfe-workspace/
 **Tasks:**
 
 1. **Bug Fixes & Refactoring**
-
    - Review POC-0 issues
    - Fix identified bugs
    - Refactor code structure
@@ -740,7 +739,6 @@ web-mfe-workspace/
    ```
 
 4. **Setup Tailwind CSS v4**
-
    - Configure Tailwind CSS v4 for all apps
    - Create shared Tailwind config
    - Test styling across apps
@@ -768,14 +766,12 @@ web-mfe-workspace/
    ```
 
 2. **Implement Auth Store**
-
    - Create Zustand auth store in `libs/shared-auth-store`
    - Implement mock authentication
    - Add RBAC helpers
    - Add persistence (localStorage)
 
 3. **Create Auth Components**
-
    - Sign-in page/form
    - Sign-up page/form
    - Form validation (React Hook Form + Zod)
@@ -783,13 +779,11 @@ web-mfe-workspace/
    - Loading states
 
 4. **Configure Module Federation v2**
-
-   - Setup Vite plugin for Module Federation v2
+   - Setup Rspack with Module Federation v2 plugin
    - Expose `./SignIn` and `./SignUp` components
    - Test standalone mode
 
 5. **Styling**
-
    - Style with Tailwind CSS v4
    - Responsive design
    - Error states
@@ -813,33 +807,29 @@ web-mfe-workspace/
 
    ```bash
    nx generate @nx/react:application payments-mfe \
-     --bundler=vite \
+     --bundler=rspack \
      --style=css \
      --routing=false
    ```
 
 2. **Implement Stubbed Payment APIs**
-
    - Create stubbed payments API (no actual PSP integration)
    - Setup TanStack Query hooks
    - Implement data fetching
    - Implement mutations
 
 3. **Create Payments Components**
-
    - Payments dashboard/page
    - Payment list/table
    - Payment operations (stubbed - no actual PSP integration)
    - Role-based UI (VENDOR vs CUSTOMER)
 
 4. **Configure Module Federation v2**
-
-   - Setup Vite plugin for Module Federation v2
+   - Setup Rspack with Module Federation v2 plugin
    - Expose `./PaymentsPage` component
    - Test standalone mode
 
 5. **Styling**
-
    - Style with Tailwind CSS v4
    - Responsive design
    - Role-based UI variations
@@ -860,7 +850,6 @@ web-mfe-workspace/
 **Tasks:**
 
 1. **Update Shell Application**
-
    - Integrate React Router 7
    - Setup route protection
    - Integrate Zustand auth store
@@ -869,7 +858,6 @@ web-mfe-workspace/
    - Update Module Federation v2 config
 
 2. **Universal Header**
-
    - Implement header component in `libs/shared-header-ui`
    - Branding/logo
    - Navigation items
@@ -878,13 +866,11 @@ web-mfe-workspace/
    - Responsive design
 
 3. **Route Protection**
-
    - Create `ProtectedRoute` component
    - Redirect logic based on auth state
    - Test route protection
 
 4. **Integration Testing**
-
    - Test authentication flow
    - Test route protection
    - Test state synchronization
@@ -906,15 +892,13 @@ web-mfe-workspace/
 **Tasks:**
 
 1. **Unit Testing**
-
-   - Write Vitest tests for all components
+   - Write Jest tests for all components
    - Test auth store
    - Test form validation
    - Test role-based access
    - Test TanStack Query hooks
 
 2. **Integration Testing**
-
    - Test authentication flow
    - Test route protection
    - Test state synchronization
@@ -922,21 +906,18 @@ web-mfe-workspace/
    - Test logout flow
 
 3. **E2E Testing**
-
    - Setup Playwright
    - Write E2E tests for auth flow
    - Write E2E tests for payments flow
    - Test role-based access
 
 4. **Documentation**
-
    - Update architecture docs
    - Create POC-1 completion summary
    - Document new packages
    - Update testing guide
 
 5. **Refinement**
-
    - Fix identified issues
    - Optimize performance
    - Improve code quality
@@ -1137,7 +1118,6 @@ web-mfe-workspace/
 **Security Features:**
 
 1. **Authentication & Authorization**
-
    - ✅ Secure password handling (never log passwords)
    - ✅ Session management
    - ✅ Role-based access control (RBAC) foundation
@@ -1145,28 +1125,24 @@ web-mfe-workspace/
    - ✅ Mock authentication (real JWT in POC-2)
 
 2. **Input Validation & Sanitization**
-
    - ✅ Strong password requirements (12+ chars, complexity)
    - ✅ Input sanitization (XSS prevention)
    - ✅ Type-safe validation (Zod)
    - ✅ SQL injection prevention (parameterized queries in backend)
 
 3. **Secure Communication**
-
    - ✅ Secure headers
    - ✅ CORS configuration
    - ⚠️ HTTP for POC-1 (HTTPS with self-signed certificates in POC-3)
    - ⚠️ Real certificates planned for MVP
 
 4. **Secure Storage**
-
    - ✅ Encryption at rest (localStorage)
    - ✅ Secure key management
    - ✅ No plaintext sensitive data
    - ✅ Automatic cleanup on logout
 
 5. **Error Handling & Information Disclosure**
-
    - ✅ No sensitive data in error messages
    - ✅ Generic error messages in production
    - ✅ Secure error logging
@@ -1243,7 +1219,8 @@ web-mfe-workspace/
 - `zod` v3.23.x
 - `axios` v1.7.x
 - `react-error-boundary` v4.0.13
-- `vitest` v2.0.x
+- `jest` v29.x
+- `ts-jest` v29.x
 - `@testing-library/react` v16.1.x
 - `playwright` (latest)
 
@@ -1251,7 +1228,7 @@ web-mfe-workspace/
 
 - All POC-0 dependencies remain
 - React 19.2.0
-- Vite 6.x
+- Rspack (migrated from Vite 6.x)
 - Module Federation v2 (@module-federation/enhanced)
 
 ---
@@ -1278,7 +1255,7 @@ web-mfe-workspace/
 
 ### 14.2 Unit Testing
 
-**Tools:** Vitest 2.0.x, React Testing Library 16.1.x
+**Tools:** Jest 29.x, React Testing Library 16.1.x
 
 **Scope:**
 
@@ -1369,6 +1346,7 @@ describe('SignIn', () => {
 **Completion Date:** 2026-01-XX
 
 **Related Documentation:**
+
 - [`../POC-1-Implementation/poc-1-completion-summary.md`](../POC-1-Implementation/poc-1-completion-summary.md) - POC-1 completion summary
 - [`../POC-1-Implementation/deliverables-checklist.md`](../POC-1-Implementation/deliverables-checklist.md) - Comprehensive deliverables checklist
 - [`../POC-1-Implementation/success-criteria-validation.md`](../POC-1-Implementation/success-criteria-validation.md) - Success criteria validation

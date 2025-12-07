@@ -5,5 +5,44 @@
   "projectType": "application",
   "tags": [],
   "// targets": "to see all targets run: nx show project shell --web",
-  "targets": {}
+  "targets": {
+    "build": {
+      "executor": "@nx/rspack:rspack",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "target": "web",
+        "outputPath": "dist/apps/shell",
+        "main": "apps/shell/src/main.tsx",
+        "tsConfig": "apps/shell/tsconfig.app.json",
+        "index": "apps/shell/index.html",
+        "isolatedConfig": true,
+        "rspackConfig": "apps/shell/rspack.config.js"
+      },
+      "configurations": {
+        "development": {
+          "mode": "development"
+        },
+        "production": {
+          "mode": "production"
+        }
+      }
+    },
+    "serve": {
+      "executor": "@nx/rspack:dev-server",
+      "defaultConfiguration": "development",
+      "options": {
+        "buildTarget": "shell:build",
+        "hmr": true
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "shell:build:development"
+        },
+        "production": {
+          "buildTarget": "shell:build:production"
+        }
+      }
+    }
+  }
 }

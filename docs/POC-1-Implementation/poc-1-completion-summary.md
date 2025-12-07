@@ -15,7 +15,7 @@ POC-1 has been successfully completed, establishing a working microfrontend arch
 
 - ✅ **Authentication System** - Mock authentication with sign-in/sign-up flows
 - ✅ **Payments System** - Stubbed payment operations (no actual PSP)
-- ✅ **Module Federation v2** - Successfully integrated with Vite
+- ✅ **Module Federation v2** - Successfully integrated with Rspack (HMR enabled)
 - ✅ **React Router 7** - Full routing implementation with route protection
 - ✅ **State Management** - Zustand for client state, TanStack Query for server state
 - ✅ **Tailwind CSS v4** - Modern styling with proper monorepo configuration
@@ -58,21 +58,23 @@ POC-1 has been successfully completed, establishing a working microfrontend arch
 
 ### Technology Stack
 
-| Category              | Technology                  | Version     |
-| --------------------- | --------------------------- | ----------- |
-| **Monorepo**          | Nx                          | Latest      |
-| **Framework**         | React                       | 18.3.1      |
-| **Bundler**           | Vite                        | 6.4.1       |
-| **Module Federation** | @module-federation/enhanced | 0.21.6      |
-| **Routing**           | React Router                | 7.10.1      |
-| **State (Client)**    | Zustand                     | 4.5.0       |
-| **State (Server)**    | TanStack Query              | 5.0.0       |
-| **Styling**           | Tailwind CSS                | 4.0+        |
-| **Forms**             | React Hook Form             | 7.52.0      |
-| **Validation**        | Zod                         | 3.23.0      |
-| **HTTP Client**       | Axios                       | 1.7.0       |
-| **Testing**           | Vitest                      | 4.0.0       |
-| **E2E Testing**       | Playwright                  | Latest      |
+| Category              | Technology                  | Version |
+| --------------------- | --------------------------- | ------- |
+| **Monorepo**          | Nx                          | Latest  |
+| **Framework**         | React                       | 19.2.0  |
+| **Bundler**           | Rspack                      | Latest  |
+| **Module Federation** | @module-federation/enhanced | 0.21.6  |
+| **Routing**           | React Router                | 7.10.1  |
+| **State (Client)**    | Zustand                     | 4.5.0   |
+| **State (Server)**    | TanStack Query              | 5.0.0   |
+| **Styling**           | Tailwind CSS                | 4.0+    |
+| **Forms**             | React Hook Form             | 7.52.0  |
+| **Validation**        | Zod                         | 3.23.0  |
+| **HTTP Client**       | Axios                       | 1.7.0   |
+| **Testing**           | Jest                        | 29.x    |
+| **E2E Testing**       | Playwright                  | Latest  |
+
+> **Note:** Migrated from Vite to Rspack and Vitest to Jest to enable HMR with Module Federation v2. See `docs/Rspack-Migration/` for details.
 
 ---
 
@@ -83,10 +85,12 @@ POC-1 has been successfully completed, establishing a working microfrontend arch
 **Location:** `apps/auth-mfe`
 
 **Components:**
+
 - `SignIn` - Sign-in form with validation
 - `SignUp` - Sign-up form with validation
 
 **Features:**
+
 - ✅ Form validation using React Hook Form + Zod
 - ✅ Password complexity requirements (12+ characters)
 - ✅ Email validation
@@ -96,6 +100,7 @@ POC-1 has been successfully completed, establishing a working microfrontend arch
 - ✅ Error handling and display
 
 **Exposed via Module Federation:**
+
 - `./SignIn` - Sign-in component
 - `./SignUp` - Sign-up component
 
@@ -104,9 +109,11 @@ POC-1 has been successfully completed, establishing a working microfrontend arch
 **Location:** `apps/payments-mfe`
 
 **Components:**
+
 - `PaymentsPage` - Main payments dashboard
 
 **Features:**
+
 - ✅ View payments list
 - ✅ Create payment (VENDOR only)
 - ✅ Update payment (VENDOR only)
@@ -117,6 +124,7 @@ POC-1 has been successfully completed, establishing a working microfrontend arch
 - ✅ Optimistic updates
 
 **Exposed via Module Federation:**
+
 - `./PaymentsPage` - Payments dashboard component
 
 ### 3. Routing (React Router 7)
@@ -124,12 +132,14 @@ POC-1 has been successfully completed, establishing a working microfrontend arch
 **Location:** `apps/shell/src/routes`
 
 **Routes:**
+
 - `/` - Root (redirects based on auth state)
 - `/signin` - Sign-in page
 - `/signup` - Sign-up page
 - `/payments` - Payments page (protected)
 
 **Features:**
+
 - ✅ Route protection with `ProtectedRoute` component
 - ✅ Automatic redirects based on auth state
 - ✅ Navigation after authentication
@@ -142,6 +152,7 @@ POC-1 has been successfully completed, establishing a working microfrontend arch
 **Location:** `libs/shared-auth-store`
 
 **Store:**
+
 - `useAuthStore` - Authentication state management
   - User information
   - Authentication status
@@ -150,6 +161,7 @@ POC-1 has been successfully completed, establishing a working microfrontend arch
   - Persistence via localStorage
 
 **Features:**
+
 - ✅ Shared singleton across all MFEs
 - ✅ Persistence middleware
 - ✅ Type-safe state management
@@ -160,12 +172,14 @@ POC-1 has been successfully completed, establishing a working microfrontend arch
 **Location:** `apps/payments-mfe/src/hooks`
 
 **Hooks:**
+
 - `usePayments` - Fetch payments list
 - `useCreatePayment` - Create payment mutation
 - `useUpdatePayment` - Update payment mutation
 - `useDeletePayment` - Delete payment mutation
 
 **Features:**
+
 - ✅ Automatic caching
 - ✅ Optimistic updates
 - ✅ Error handling
@@ -174,11 +188,13 @@ POC-1 has been successfully completed, establishing a working microfrontend arch
 ### 5. Styling (Tailwind CSS v4)
 
 **Configuration:**
+
 - PostCSS plugin with `@config` directive
 - Absolute content paths for monorepo
 - Shared library source files included
 
 **Features:**
+
 - ✅ Modern utility-first CSS
 - ✅ Responsive design
 - ✅ Consistent styling across MFEs
@@ -187,11 +203,13 @@ POC-1 has been successfully completed, establishing a working microfrontend arch
 ### 6. Role-Based Access Control (RBAC)
 
 **Roles:**
+
 - `ADMIN` - Full system access (not implemented in POC-1)
 - `VENDOR` - Can create/edit/delete payments, view reports
 - `CUSTOMER` - Can view payments, make payments
 
 **Implementation:**
+
 - Role stored in user object (Zustand store)
 - `hasRole(role)` helper function
 - `hasAnyRole(roles)` helper function
@@ -203,6 +221,7 @@ POC-1 has been successfully completed, establishing a working microfrontend arch
 **Location:** `libs/shared-header-ui`
 
 **Features:**
+
 - ✅ Branding and logo
 - ✅ Navigation links
 - ✅ User information display
@@ -219,6 +238,7 @@ POC-1 has been successfully completed, establishing a working microfrontend arch
 **Total:** 73+ tests
 
 **Coverage:**
+
 - ✅ All components tested
 - ✅ All hooks tested
 - ✅ All stores tested
@@ -226,6 +246,7 @@ POC-1 has been successfully completed, establishing a working microfrontend arch
 - ✅ 70%+ coverage target achieved
 
 **Test Files:**
+
 - `apps/shell/src/**/*.test.tsx` - Shell component tests
 - `apps/auth-mfe/src/**/*.test.tsx` - Auth component tests
 - `apps/payments-mfe/src/**/*.test.tsx` - Payments component tests
@@ -236,6 +257,7 @@ POC-1 has been successfully completed, establishing a working microfrontend arch
 **Total:** 22 tests
 
 **Coverage:**
+
 - ✅ Authentication flow integration
 - ✅ Payments flow integration
 - ✅ Route protection integration
@@ -243,6 +265,7 @@ POC-1 has been successfully completed, establishing a working microfrontend arch
 - ✅ Role-based access integration
 
 **Test Files:**
+
 - `apps/shell/src/integration/AppIntegration.test.tsx` - App integration tests
 - `apps/shell/src/integration/PaymentsFlowIntegration.test.tsx` - Payments flow tests
 
@@ -251,12 +274,14 @@ POC-1 has been successfully completed, establishing a working microfrontend arch
 **Total:** 16 tests
 
 **Coverage:**
+
 - ✅ Authentication flows (sign-in, sign-up)
 - ✅ Payments flows (view, create)
 - ✅ Logout flow
 - ✅ Role-based access
 
 **Test Files:**
+
 - `apps/shell-e2e/src/auth-flow.spec.ts` - Auth E2E tests
 - `apps/shell-e2e/src/payments-flow.spec.ts` - Payments E2E tests
 - `apps/shell-e2e/src/logout-flow.spec.ts` - Logout E2E tests
@@ -266,13 +291,16 @@ POC-1 has been successfully completed, establishing a working microfrontend arch
 
 ## Key Learnings & Patterns
 
-### 1. Module Federation v2 with Vite
+### 1. Module Federation v2 with Rspack
 
-**Pattern:** Use preview mode (not dev mode) for Module Federation v2
+**Pattern:** Use Rspack for dev mode with HMR support for Module Federation v2
+
+> **Note:** Originally used Vite in preview mode (no HMR). Migrated to Rspack to enable HMR with Module Federation v2.
 
 **Why:** MF v2 generates `remoteEntry.js` during build. Dev mode doesn't work reliably.
 
 **Workflow:**
+
 1. Build remotes: `pnpm build:remotes`
 2. Serve in preview mode: `pnpm preview:all`
 3. Rebuild and refresh for changes (HMR not available)
@@ -291,9 +319,10 @@ POC-1 has been successfully completed, establishing a working microfrontend arch
 
 **Pattern:** Use PostCSS plugin with `@config` directive and absolute content paths
 
-**Why:** Vite plugin only scans app root directory. Shared libraries need explicit paths.
+**Why:** Bundler plugins only scan app root directory. Shared libraries need explicit paths.
 
 **Solution:**
+
 - Create `tailwind.config.js` with absolute paths
 - Use `@config "../tailwind.config.js"` in CSS
 - Configure PostCSS in `vite.config.mts`
@@ -302,9 +331,10 @@ POC-1 has been successfully completed, establishing a working microfrontend arch
 
 **Pattern:** Use Dependency Injection pattern for testability
 
-**Why:** Vite's static analysis runs before runtime mocks can take effect.
+**Why:** Module Federation remote imports cannot be resolved during test runs (applies to all bundlers/test frameworks).
 
 **Solution:**
+
 - Components accept optional injected component prop
 - Tests inject mock components directly
 - Bypasses Module Federation entirely in tests
@@ -444,7 +474,7 @@ apps/
 
 POC-1 has successfully validated the microfrontend architecture approach, demonstrating:
 
-- ✅ **Viability** - Module Federation v2 works with Vite
+- ✅ **Viability** - Module Federation v2 works with Rspack (HMR enabled)
 - ✅ **Practicality** - Multiple MFEs can work together effectively
 - ✅ **Effort Estimation** - Clear understanding of development complexity
 - ✅ **Security Foundation** - Input validation, secure storage patterns established
@@ -457,4 +487,3 @@ The foundation is solid for proceeding to POC-2 with backend integration, event 
 **Status:** ✅ **COMPLETE**  
 **Completion Date:** 2026-01-XX  
 **Ready for:** POC-2 Planning & Implementation
-

@@ -10,9 +10,12 @@
 POC-1 implements a comprehensive testing strategy with unit tests, integration tests, and end-to-end (E2E) tests. All tests are production-ready and follow best practices.
 
 **Testing Stack:**
-- **Unit Tests:** Vitest + React Testing Library
-- **Integration Tests:** Vitest + React Testing Library
+
+- **Unit Tests:** Jest + React Testing Library
+- **Integration Tests:** Jest + React Testing Library
 - **E2E Tests:** Playwright
+
+> **Note:** Testing framework migrated from Vitest to Jest as part of the Rspack migration. Jest provides better ecosystem compatibility with Rspack.
 
 **Coverage Target:** 70%+ (achieved)
 
@@ -33,7 +36,7 @@ POC-1 implements a comprehensive testing strategy with unit tests, integration t
        └─────────────────┘
       ┌─────────────────────┐
       │   Unit Tests        │  (73+ tests)
-      │   Vitest            │
+      │   Jest              │
       └─────────────────────┘
 ```
 
@@ -51,33 +54,38 @@ POC-1 implements a comprehensive testing strategy with unit tests, integration t
 
 ### Framework
 
-**Vitest** - Fast, Vite-native testing framework
+**Jest** - Industry-standard testing framework
 
-**Why Vitest:**
-- ✅ Fast (Vite-native)
-- ✅ Jest-compatible API
-- ✅ TypeScript support
-- ✅ UI mode for debugging
-- ✅ Coverage support
+**Why Jest:**
+
+- ✅ Mature ecosystem with extensive plugin support
+- ✅ Rspack-compatible (unlike Vitest which is Vite-native)
+- ✅ TypeScript support via ts-jest
+- ✅ Excellent coverage support
+- ✅ Snapshot testing
+- ✅ Parallel execution
 
 ### Setup
 
-**Configuration:** `vite.config.mts` (per project)
+**Configuration:** `jest.config.js` (per project or root)
 
-```typescript
-import { defineConfig } from 'vitest/config';
-
-export default defineConfig({
-  test: {
-    globals: true,
-    environment: 'jsdom',
-    setupFiles: ['./src/test/setup.ts'],
-    coverage: {
-      provider: 'v8',
-      reporter: ['text', 'json', 'html'],
+```javascript
+module.exports = {
+  preset: 'ts-jest',
+  testEnvironment: 'jsdom',
+  setupFilesAfterEnv: ['./src/test/setup.ts'],
+  moduleNameMapper: {
+    '^@web-mfe/(.*)$': '<rootDir>/libs/$1/src/index.ts',
+  },
+  coverageThreshold: {
+    global: {
+      branches: 70,
+      functions: 70,
+      lines: 70,
+      statements: 70,
     },
   },
-});
+};
 ```
 
 **Test Setup:** `src/test/setup.ts`
@@ -85,7 +93,6 @@ export default defineConfig({
 ```typescript
 import '@testing-library/jest-dom';
 import { cleanup } from '@testing-library/react';
-import { afterEach } from 'vitest';
 
 afterEach(() => {
   cleanup();
@@ -158,9 +165,10 @@ describe('useAuthStore', () => {
 
 **Pattern:** Dependency Injection for testability
 
-**Why:** Vite's static analysis runs before runtime mocks can take effect.
+**Why:** Module Federation remote imports cannot be resolved during test runs (applies to both Vitest and Jest).
 
 **Solution:**
+
 ```typescript
 // Component accepts optional injected component
 export function PageComponent({ InjectedComponent }: Props = {}) {
@@ -173,6 +181,7 @@ render(<PageComponent InjectedComponent={MockComponent} />);
 ```
 
 **Benefits:**
+
 - ✅ Fast and reliable (no network calls)
 - ✅ No complex bundler configuration
 - ✅ Clear separation of concerns
@@ -189,8 +198,8 @@ pnpm test:shell
 pnpm test:auth-mfe
 pnpm test:payments-mfe
 
-# Run tests in UI mode
-pnpm test:ui
+# Run tests in watch mode
+pnpm test --watch
 
 # Run tests with coverage
 pnpm test --coverage
@@ -202,7 +211,7 @@ pnpm test --coverage
 
 ### Framework
 
-**Vitest + React Testing Library** - Same as unit tests, but testing component integration
+**Jest + React Testing Library** - Same as unit tests, but testing component integration
 
 ### Test Files
 
@@ -297,6 +306,7 @@ pnpm test:shell
 **Playwright** - Cross-browser E2E testing
 
 **Why Playwright:**
+
 - ✅ Cross-browser (Chromium, Firefox, WebKit)
 - ✅ Auto-waiting
 - ✅ Network interception
@@ -421,6 +431,7 @@ pnpm e2e --headed
 ```
 
 **Prerequisites:**
+
 - Remotes must be built: `pnpm build:remotes`
 - All servers must be running (handled automatically by Playwright)
 
@@ -457,24 +468,26 @@ open coverage/index.html
 ### 1. Test User Behavior, Not Implementation
 
 **✅ Good:**
+
 ```typescript
 it('should display error when email is invalid', async () => {
   const user = userEvent.setup();
   render(<SignIn />);
-  
+
   await user.type(screen.getByLabelText(/email/i), 'invalid');
   await user.click(screen.getByRole('button', { name: /sign in/i }));
-  
+
   expect(await screen.findByText(/invalid email/i)).toBeInTheDocument();
 });
 ```
 
 **❌ Bad:**
+
 ```typescript
 it('should call validateEmail', () => {
   const validateEmail = jest.fn();
   render(<SignIn validateEmail={validateEmail} />);
-  
+
   expect(validateEmail).toHaveBeenCalled();
 });
 ```
@@ -482,6 +495,7 @@ it('should call validateEmail', () => {
 ### 2. Use Descriptive Test Names
 
 **✅ Good:**
+
 ```typescript
 it('should redirect to /payments after successful sign-in', async () => {
   // ...
@@ -489,6 +503,7 @@ it('should redirect to /payments after successful sign-in', async () => {
 ```
 
 **❌ Bad:**
+
 ```typescript
 it('should work', async () => {
   // ...
@@ -498,6 +513,7 @@ it('should work', async () => {
 ### 3. Test Edge Cases
 
 **✅ Good:**
+
 ```typescript
 it('should handle network error gracefully', async () => {
   // Mock network error
@@ -508,9 +524,10 @@ it('should handle network error gracefully', async () => {
 ### 4. Keep Tests Isolated
 
 **✅ Good:**
+
 ```typescript
 beforeEach(() => {
-  vi.clearAllMocks();
+  jest.clearAllMocks();
   localStorage.clear();
 });
 ```
@@ -535,14 +552,15 @@ beforeEach(() => {
 
 **Issue:** Tests fail because localStorage is not available.
 
-**Solution:** Use `jsdom` environment in Vitest config and mock localStorage if needed.
+**Solution:** Use `jsdom` environment in Jest config and mock localStorage if needed.
 
 ### E2E Tests Timing Out
 
 **Issue:** E2E tests timeout waiting for servers.
 
 **Solution:**
-1. Ensure remotes are built: `pnpm build:remotes`
+
+1. Ensure dev servers are running: `pnpm dev`
 2. Check server ports (4200, 4201, 4202)
 3. Increase timeout in Playwright config
 
@@ -551,9 +569,9 @@ beforeEach(() => {
 **Issue:** Coverage report not generated.
 
 **Solution:**
-1. Install `@vitest/coverage-v8`
-2. Configure coverage in `vite.config.mts`
-3. Run with `--coverage` flag
+
+1. Ensure Jest coverage is configured in `jest.config.js`
+2. Run with `--coverage` flag: `pnpm test --coverage`
 
 ---
 
@@ -568,4 +586,3 @@ beforeEach(() => {
 
 **Status:** ✅ Complete  
 **Last Updated:** 2026-01-XX
-

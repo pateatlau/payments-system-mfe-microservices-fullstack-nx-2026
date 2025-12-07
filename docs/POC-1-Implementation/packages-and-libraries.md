@@ -20,11 +20,13 @@ This document lists all new packages and libraries added in POC-1, their purpose
 **Purpose:** Client-side routing and navigation
 
 **Usage:**
+
 ```typescript
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 ```
 
 **Key Features:**
+
 - Declarative routing
 - Route protection
 - Navigation hooks (`useNavigate`, `useLocation`)
@@ -41,12 +43,14 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 **Purpose:** Lightweight state management for client-side state
 
 **Usage:**
+
 ```typescript
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 ```
 
 **Key Features:**
+
 - Simple API
 - No boilerplate
 - TypeScript support
@@ -54,6 +58,7 @@ import { persist } from 'zustand/middleware';
 - Small bundle size
 
 **Usage Pattern:**
+
 ```typescript
 const useAuthStore = create<AuthState>()(
   persist(
@@ -80,11 +85,13 @@ const useAuthStore = create<AuthState>()(
 **Purpose:** Server state management, data fetching, and caching
 
 **Usage:**
+
 ```typescript
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 ```
 
 **Key Features:**
+
 - Automatic caching
 - Background refetching
 - Optimistic updates
@@ -92,6 +99,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 - Loading states
 
 **Usage Pattern:**
+
 ```typescript
 // Query
 const { data, isLoading, error } = useQuery({
@@ -119,18 +127,21 @@ const mutation = useMutation({
 **Purpose:** Performant form handling with minimal re-renders
 
 **Usage:**
+
 ```typescript
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 ```
 
 **Key Features:**
+
 - Uncontrolled components
 - Minimal re-renders
 - Validation integration (Zod)
 - TypeScript support
 
 **Usage Pattern:**
+
 ```typescript
 const {
   register,
@@ -153,17 +164,20 @@ const {
 **Purpose:** TypeScript-first schema validation
 
 **Usage:**
+
 ```typescript
 import { z } from 'zod';
 ```
 
 **Key Features:**
+
 - Type-safe validation
 - Runtime type checking
 - Composable schemas
 - Great TypeScript integration
 
 **Usage Pattern:**
+
 ```typescript
 const schema = z.object({
   email: z.string().email('Invalid email'),
@@ -184,11 +198,13 @@ type FormData = z.infer<typeof schema>;
 **Purpose:** HTTP client for API requests (prepared for POC-2)
 
 **Usage:**
+
 ```typescript
 import axios from 'axios';
 ```
 
 **Key Features:**
+
 - Promise-based API
 - Request/response interceptors
 - Automatic JSON parsing
@@ -209,18 +225,21 @@ import axios from 'axios';
 **Purpose:** Utility-first CSS framework
 
 **Usage:**
+
 ```css
-@import "tailwindcss";
+@import 'tailwindcss';
 @config "../tailwind.config.js";
 ```
 
 **Key Features:**
+
 - Utility-first approach
 - Responsive design
 - Customizable design system
 - Fast builds
 
 **Configuration:**
+
 - PostCSS plugin (not Vite plugin) for monorepo support
 - Absolute content paths for shared libraries
 - `@config` directive in CSS files
@@ -238,17 +257,20 @@ import axios from 'axios';
 **Purpose:** Error boundary component for React 19 compatibility
 
 **Usage:**
+
 ```typescript
 import { ErrorBoundary } from 'react-error-boundary';
 ```
 
 **Key Features:**
+
 - React 19 compatible
 - Fallback UI
 - Error recovery
 - Error reporting
 
 **Usage Pattern:**
+
 ```typescript
 <ErrorBoundary
   FallbackComponent={ErrorFallback}
@@ -264,25 +286,36 @@ import { ErrorBoundary } from 'react-error-boundary';
 
 ## Testing
 
-### Vitest
+### Jest
 
-**Package:** `vitest@^4.0.0`, `@vitest/ui@^4.0.0`, `@vitest/coverage-v8@^4.0.0`
+**Package:** `jest@^29.0.0`, `ts-jest@^29.0.0`, `@types/jest@^29.0.0`, `jest-environment-jsdom@^29.0.0`
 
-**Purpose:** Fast unit testing framework (Vite-native)
+**Purpose:** Industry-standard unit testing framework
 
 **Usage:**
+
 ```typescript
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, jest } from '@jest/globals';
+// Or with globals enabled:
+describe('MyComponent', () => {
+  it('should work', () => {
+    expect(true).toBe(true);
+  });
+});
 ```
 
 **Key Features:**
-- Vite-native (fast)
-- Jest-compatible API
-- TypeScript support
-- UI mode for debugging
-- Coverage support
 
-**Documentation:** [Vitest Docs](https://vitest.dev/)
+- Mature ecosystem with extensive plugin support
+- Rspack-compatible (used after migration from Vitest)
+- TypeScript support via ts-jest
+- Parallel execution
+- Coverage support
+- Snapshot testing
+
+**Migration Note:** Migrated from Vitest as part of the Rspack migration. Vitest is Vite-native and not compatible with Rspack.
+
+**Documentation:** [Jest Docs](https://jestjs.io/)
 
 ---
 
@@ -293,12 +326,14 @@ import { describe, it, expect, vi } from 'vitest';
 **Purpose:** React component testing utilities
 
 **Usage:**
+
 ```typescript
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 ```
 
 **Key Features:**
+
 - User-centric testing
 - Accessible queries
 - Async utilities
@@ -315,11 +350,13 @@ import userEvent from '@testing-library/user-event';
 **Purpose:** End-to-end testing framework
 
 **Usage:**
+
 ```typescript
 import { test, expect } from '@playwright/test';
 ```
 
 **Key Features:**
+
 - Cross-browser testing
 - Auto-waiting
 - Network interception
@@ -338,11 +375,13 @@ import { test, expect } from '@playwright/test';
 **Purpose:** Validation resolver adapters for React Hook Form
 
 **Usage:**
+
 ```typescript
 import { zodResolver } from '@hookform/resolvers/zod';
 ```
 
 **Key Features:**
+
 - Zod integration
 - Yup integration
 - Custom resolver support
@@ -360,39 +399,67 @@ import { zodResolver } from '@hookform/resolvers/zod';
 **Purpose:** Module Federation v2 (BIMF) runtime
 
 **Usage:**
+
 ```typescript
-// Configured in vite.config.mts
-import { federation } from '@module-federation/vite';
+// Configured in rspack.config.js
+const {
+  ModuleFederationPlugin,
+} = require('@module-federation/enhanced/rspack');
 ```
 
 **Key Features:**
+
 - Module Federation v2
 - Shared dependencies
 - Remote loading
 - Runtime integration
+- Native HMR support with Rspack
 
 **Documentation:** [Module Federation Docs](https://module-federation.io/)
 
 ---
 
-### @module-federation/vite
+## Bundler
 
-**Package:** `@module-federation/vite@^1.9.2`
+### Rspack
 
-**Purpose:** Vite plugin for Module Federation v2
+**Package:** `@rspack/core`, `@rspack/dev-server`, `@nx/rspack`
+
+**Purpose:** Fast Rust-based bundler with native Module Federation HMR support
 
 **Usage:**
-```typescript
-import { federation } from '@module-federation/vite';
+
+```javascript
+// rspack.config.js
+const {
+  ModuleFederationPlugin,
+} = require('@module-federation/enhanced/rspack');
+
+module.exports = {
+  plugins: [
+    new ModuleFederationPlugin({
+      name: 'shell',
+      remotes: {
+        /* ... */
+      },
+      shared: {
+        /* ... */
+      },
+    }),
+  ],
+};
 ```
 
 **Key Features:**
-- Vite integration
-- Build-time configuration
-- Dev mode support (limited)
-- Preview mode support
 
-**Documentation:** [Module Federation Vite Plugin](https://module-federation.io/)
+- Rust-based (3-5x faster builds than Vite)
+- Native HMR with Module Federation v2
+- Webpack-compatible API
+- TypeScript support via SWC
+
+**Migration Note:** Migrated from Vite to enable HMR with Module Federation v2 in development mode.
+
+**Documentation:** [Rspack Docs](https://rspack.dev/)
 
 ---
 
@@ -405,6 +472,7 @@ import { federation } from '@module-federation/vite';
 **Purpose:** Type-safe JavaScript
 
 **Key Features:**
+
 - Static type checking
 - Modern JavaScript features
 - Strict mode support
@@ -418,6 +486,7 @@ import { federation } from '@module-federation/vite';
 **Purpose:** Code linting and quality
 
 **Key Features:**
+
 - Flat config (ESLint 9)
 - TypeScript support
 - Custom rules
@@ -431,6 +500,7 @@ import { federation } from '@module-federation/vite';
 **Purpose:** Code formatting
 
 **Key Features:**
+
 - Consistent formatting
 - Configurable rules
 - Editor integration
@@ -439,22 +509,23 @@ import { federation } from '@module-federation/vite';
 
 ## Package Versions Summary
 
-| Package | Version | Purpose |
-|---------|---------|---------|
-| `react-router` | `^7.0.0` | Routing |
-| `react-router-dom` | `7.10.1` | Routing (DOM) |
-| `zustand` | `^4.5.0` | State management |
-| `@tanstack/react-query` | `^5.0.0` | Server state |
-| `react-hook-form` | `^7.52.0` | Form handling |
-| `zod` | `^3.23.0` | Validation |
-| `axios` | `^1.7.0` | HTTP client |
-| `tailwindcss` | `^4.0.0` | Styling |
-| `react-error-boundary` | `4.0.13` | Error handling |
-| `vitest` | `^4.0.0` | Testing |
-| `@testing-library/react` | `16.3.0` | Component testing |
-| `@playwright/test` | `^1.36.0` | E2E testing |
-| `@module-federation/enhanced` | `0.21.6` | Module Federation runtime |
-| `@module-federation/vite` | `^1.9.2` | Module Federation plugin |
+| Package                       | Version   | Purpose                   |
+| ----------------------------- | --------- | ------------------------- |
+| `react-router`                | `^7.0.0`  | Routing                   |
+| `react-router-dom`            | `7.10.1`  | Routing (DOM)             |
+| `zustand`                     | `^4.5.0`  | State management          |
+| `@tanstack/react-query`       | `^5.0.0`  | Server state              |
+| `react-hook-form`             | `^7.52.0` | Form handling             |
+| `zod`                         | `^3.23.0` | Validation                |
+| `axios`                       | `^1.7.0`  | HTTP client               |
+| `tailwindcss`                 | `^4.0.0`  | Styling                   |
+| `react-error-boundary`        | `4.0.13`  | Error handling            |
+| `jest`                        | `^29.0.0` | Testing                   |
+| `@testing-library/react`      | `16.3.0`  | Component testing         |
+| `@playwright/test`            | `^1.36.0` | E2E testing               |
+| `@module-federation/enhanced` | `0.21.6`  | Module Federation runtime |
+| `@rspack/core`                | `Latest`  | Bundler                   |
+| `@nx/rspack`                  | `Latest`  | Nx Rspack plugin          |
 
 ---
 
@@ -475,6 +546,7 @@ pnpm install
 ### React 18.3.1
 
 All packages are compatible with React 18.3.1:
+
 - React Router 7 ✅
 - Zustand 4.5.0 ✅
 - TanStack Query 5.0.0 ✅
@@ -484,6 +556,7 @@ All packages are compatible with React 18.3.1:
 ### TypeScript 5.9.0
 
 All packages support TypeScript 5.9.0:
+
 - Full type definitions available
 - Strict mode compatible
 - No `any` types used
@@ -492,9 +565,26 @@ All packages support TypeScript 5.9.0:
 
 ## Migration Notes
 
+### Rspack Migration (from Vite)
+
+**Packages Changed:**
+
+- `vite` → `@rspack/core`, `@rspack/dev-server` (bundler)
+- `@module-federation/vite` → `@module-federation/enhanced/rspack` (MF plugin)
+- `vitest` → `jest`, `ts-jest` (testing framework)
+
+**Reason for Migration:**
+
+- Enable HMR with Module Federation v2 in development mode
+- Vite + MF v2 required preview mode without HMR
+- Rspack provides native HMR support with MF v2
+
+**See:** `docs/Rspack-Migration/` for detailed migration documentation.
+
 ### From POC-0
 
 **New Packages Added:**
+
 - React Router 7 (new)
 - Zustand (new)
 - TanStack Query (new)
@@ -503,11 +593,15 @@ All packages support TypeScript 5.9.0:
 - Axios (new)
 - Tailwind CSS v4 (upgraded from v3)
 - React Error Boundary (new)
+- Rspack (new - replaced Vite)
+- Jest (new - replaced Vitest)
 
-**No Breaking Changes:**
+**Key Changes:**
+
 - All POC-0 packages remain compatible
 - Module Federation v2 unchanged
-- Vite 6.x unchanged
+- Bundler changed: Vite → Rspack
+- Testing changed: Vitest → Jest
 - Nx unchanged
 
 ---
@@ -522,4 +616,3 @@ All packages support TypeScript 5.9.0:
 
 **Status:** ✅ Complete  
 **Last Updated:** 2026-01-XX
-

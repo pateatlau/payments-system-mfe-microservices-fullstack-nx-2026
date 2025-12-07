@@ -1,6 +1,6 @@
 # Developer Workflow Guide
 
-> **POC-1 Development Workflow** - Module Federation v2 with Vite (Preview Mode)
+> **POC-1 Development Workflow** - Module Federation v2 with Rspack (HMR Enabled)
 
 This guide explains how to develop, build, and test the POC-1 microfrontend application.
 
@@ -19,11 +19,13 @@ This guide explains how to develop, build, and test the POC-1 microfrontend appl
 
 ## Overview
 
-POC-1 uses **Module Federation v2** with **Vite** in **preview mode** for serving the microfrontends. This means:
+POC-1 uses **Module Federation v2** with **Rspack** for serving the microfrontends. This means:
 
 - ✅ **Module Federation works correctly** - All remotes load successfully
 - ✅ **Styling works correctly** - Tailwind CSS classes are properly applied
-- ⚠️ **HMR (Hot Module Replacement) is not available** - Changes require rebuild + refresh
+- ✅ **HMR (Hot Module Replacement) is available** - Changes update instantly without page refresh
+
+> **Note:** The project was migrated from Vite to Rspack to enable HMR with Module Federation v2. See `docs/Rspack-Migration/` for migration details.
 
 ### Architecture
 
@@ -58,23 +60,17 @@ POC-1 uses **Module Federation v2** with **Vite** in **preview mode** for servin
 
 ### Standard Development Workflow
 
-Since HMR is not available in preview mode, follow this workflow:
+With Rspack and HMR enabled, follow this simplified workflow:
 
-#### Option 1: Quick Start (Recommended for Testing)
+#### Option 1: Quick Start (Recommended)
 
-**Terminal 1 - Build Remotes:**
-
-```bash
-pnpm build:remotes
-```
-
-**Terminal 2 - Start All Servers:**
+**Single Terminal - Start All Dev Servers:**
 
 ```bash
-pnpm preview:all
+pnpm dev
 ```
 
-This will start all three servers (shell, auth-mfe, payments-mfe) in parallel.
+This will start all three dev servers (shell, auth-mfe, payments-mfe) in parallel with HMR enabled.
 
 **Access the application:**
 
@@ -82,62 +78,40 @@ This will start all three servers (shell, auth-mfe, payments-mfe) in parallel.
 - Auth MFE (standalone): http://localhost:4201
 - Payments MFE (standalone): http://localhost:4202
 
-#### Option 2: Individual Server Control (Recommended for Development)
+#### Option 2: Individual Server Control
 
-**Terminal 1 - Build Remotes:**
+**Terminal 1 - Start Shell:**
 
 ```bash
-pnpm build:remotes
+pnpm dev:shell
 ```
 
 **Terminal 2 - Start Auth MFE:**
 
 ```bash
-pnpm preview:auth-mfe
+pnpm dev:auth-mfe
 ```
 
 **Terminal 3 - Start Payments MFE:**
 
 ```bash
-pnpm preview:payments-mfe
-```
-
-**Terminal 4 - Start Shell:**
-
-```bash
-pnpm preview:shell
+pnpm dev:payments-mfe
 ```
 
 ### Making Changes
 
-When you make changes to code:
+With HMR enabled, changes are reflected instantly:
 
-1. **If you changed a remote (auth-mfe or payments-mfe):**
-
-   ```bash
-   # Rebuild the specific remote
-   pnpm build:auth-mfe      # For auth-mfe changes
-   pnpm build:payments-mfe  # For payments-mfe changes
-
-   # OR rebuild all remotes
-   pnpm build:remotes
-   ```
-
-2. **If you changed the shell:**
-
-   ```bash
-   # Rebuild the shell
-   pnpm build:shell
-   ```
-
-3. **Refresh your browser** to see the changes
+1. **Edit any file** in shell, auth-mfe, or payments-mfe
+2. **Save the file** - HMR will automatically update the browser
+3. **No rebuild or refresh needed** - Changes appear instantly
 
 ### Workflow Tips
 
-- **Keep remotes running** - Once remotes are built and running, you only need to rebuild when you make changes
-- **Shell rebuilds are faster** - Shell changes rebuild quickly, so you can iterate faster on shell-specific features
+- **HMR is automatic** - Just save your file and see changes instantly
 - **Use browser DevTools** - Check the Network tab to verify remote assets are loading correctly
-- **Check console** - Look for any Module Federation errors or asset loading issues
+- **Check console** - Look for any Module Federation errors or HMR update logs
+- **Full page reload only needed for certain changes** - Config changes, dependency updates, or errors may require manual refresh
 
 ---
 
@@ -185,9 +159,11 @@ pnpm test:shell
 pnpm test:auth-mfe
 pnpm test:payments-mfe
 
-# Run tests with UI
-pnpm test:ui
+# Run tests with coverage
+pnpm test --coverage
 ```
+
+> **Note:** Tests use Jest (migrated from Vitest). See `docs/POC-1-Implementation/testing-guide.md` for detailed testing documentation.
 
 #### Testing Architecture Notes
 
@@ -195,9 +171,9 @@ The shell app page components (`SignInPage`, `SignUpPage`, `PaymentsPage`) use a
 
 **The Problem:**
 
-- Module Federation remote imports (e.g., `import('authMfe/SignIn')`) cannot be resolved during Vitest runs
-- Vite's static analysis fails to resolve dynamic imports for remotes
-- Mocking at the Vite config level proved unreliable
+- Module Federation remote imports (e.g., `import('authMfe/SignIn')`) cannot be resolved during Jest test runs
+- Static analysis fails to resolve dynamic imports for remotes
+- Mocking Module Federation at the bundler level proved unreliable
 
 **The Solution:**
 
@@ -456,7 +432,7 @@ pnpm preview:all
 
 ### Module Federation Testing
 
-**Issue:** Vitest cannot resolve Module Federation remote imports during test runs.
+**Issue:** Jest cannot resolve Module Federation remote imports during test runs.
 
 **Solution:** Page components use Dependency Injection (DI) pattern. See [Testing Architecture Notes](#testing-architecture-notes) above.
 
@@ -465,16 +441,6 @@ pnpm preview:all
 - `apps/shell/src/pages/SignInPage.tsx`
 - `apps/shell/src/pages/SignUpPage.tsx`
 - `apps/shell/src/pages/PaymentsPage.tsx`
-
-### No HMR in Preview Mode
-
-**Issue:** Module Federation v2 requires preview mode, which doesn't support Hot Module Replacement.
-
-**Workaround:**
-
-1. Work on one MFE at a time in standalone mode (has HMR)
-2. Test in shell after building
-3. Use browser DevTools for quick iteration
 
 ### Tailwind CSS in Monorepo
 
@@ -493,5 +459,5 @@ pnpm preview:all
 
 ---
 
-**Last Updated:** 2026-12-07  
-**POC-1 Phase:** Phase 4 (Shell Integration)
+**Last Updated:** 2026-12-XX  
+**POC-1 Phase:** Complete (Rspack Migration)

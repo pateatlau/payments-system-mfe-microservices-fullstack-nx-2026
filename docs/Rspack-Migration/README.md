@@ -102,6 +102,23 @@ Comprehensive risk analysis with mitigation strategies.
 
 ---
 
+### 5. [Manual Testing Guide](./manual-testing-guide.md) ⭐ For Testing
+
+Step-by-step manual testing instructions organized by migration phase.
+
+**Contents:**
+
+- Current testing status
+- Testing instructions by phase
+- What can be tested now vs. what to wait for
+- Testing checklists
+- Troubleshooting guide
+- Command reference
+
+**Use this** to know when and how to test during the migration.
+
+---
+
 ## Quick Start Guide
 
 ### For Project Managers
@@ -282,14 +299,15 @@ Comprehensive risk analysis with mitigation strategies.
 
 ## Document Status
 
-| Document            | Status      | Version | Last Updated |
-| ------------------- | ----------- | ------- | ------------ |
-| Task List           | ✅ Complete | 1.0     | 2026-01-XX   |
-| Research Findings   | ✅ Complete | 1.0     | 2026-01-XX   |
-| Tech Stack Impact   | ✅ Complete | 1.0     | 2026-01-XX   |
-| Migration Plan      | ✅ Complete | 1.0     | 2026-01-XX   |
-| Risks & Mitigations | ✅ Complete | 1.0     | 2026-01-XX   |
-| README              | ✅ Complete | 1.0     | 2026-01-XX   |
+| Document             | Status      | Version | Last Updated |
+| -------------------- | ----------- | ------- | ------------ |
+| Task List            | ✅ Complete | 1.0     | 2026-01-XX   |
+| Research Findings    | ✅ Complete | 1.0     | 2026-01-XX   |
+| Tech Stack Impact    | ✅ Complete | 1.0     | 2026-01-XX   |
+| Migration Plan       | ✅ Complete | 1.0     | 2026-01-XX   |
+| Risks & Mitigations  | ✅ Complete | 1.0     | 2026-01-XX   |
+| Manual Testing Guide | ✅ Complete | 1.0     | 2026-01-XX   |
+| README               | ✅ Complete | 1.0     | 2026-01-XX   |
 
 ---
 

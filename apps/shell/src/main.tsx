@@ -3,15 +3,12 @@ import { BrowserRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import * as ReactDOM from 'react-dom/client';
 import App from './app/app';
-import './styles.css';
+// CSS import temporarily commented out - will be enabled in Phase 4 (PostCSS/Tailwind configuration)
+// import './styles.css';
 
 // Import remote components
 // This file (main.tsx) is not imported during tests, so MF imports are safe here
-import {
-  SignInRemote,
-  SignUpRemote,
-  PaymentsPageRemote,
-} from './remotes';
+import { SignInRemote, SignUpRemote, PaymentsPageRemote } from './remotes';
 
 // Create a QueryClient for TanStack Query
 // This is needed for remote components that use TanStack Query (like PaymentsPage)

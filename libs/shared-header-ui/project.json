@@ -5,5 +5,16 @@
   "projectType": "library",
   "tags": [],
   "// targets": "to see all targets run: nx show project shared-header-ui --web",
-  "targets": {}
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/shared-header-ui",
+        "main": "libs/shared-header-ui/src/index.ts",
+        "tsConfig": "libs/shared-header-ui/tsconfig.lib.json",
+        "assets": ["libs/shared-header-ui/*.md"]
+      }
+    }
+  }
 }
