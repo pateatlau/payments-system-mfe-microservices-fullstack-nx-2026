@@ -60,7 +60,7 @@ importers:
         specifier: ^3.4.0
         version: 3.4.0
       zod:
-        specifier: ^3.23.0
+        specifier: ^3.25.76
         version: 3.25.76
       zustand:
         specifier: ^4.5.0

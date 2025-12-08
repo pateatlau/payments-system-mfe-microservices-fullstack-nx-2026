@@ -187,7 +187,7 @@
     "react-router": "^7.0.0",
     "react-router-dom": "7.10.1",
     "tailwind-merge": "^3.4.0",
-    "zod": "^3.23.0",
+    "zod": "^3.25.76",
     "zustand": "^4.5.0"
   },
   "prisma": {
