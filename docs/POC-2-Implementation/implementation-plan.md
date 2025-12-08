@@ -2093,6 +2093,7 @@ Implemented payment webhook endpoint for stubbed PSP callbacks:
 Created comprehensive test suite for Payments Service:
 
 **Test Files Created:**
+
 1. `payment.service.spec.ts` - 30 unit tests
 2. `payment.controller.spec.ts` - 29 integration tests
 3. `auth.spec.ts` - 9 middleware tests
@@ -2100,6 +2101,7 @@ Created comprehensive test suite for Payments Service:
 5. `payment.validators.spec.ts` - 22 validator tests
 
 **Test Coverage:**
+
 - Statements: 92.72%
 - Branches: 84.78%
 - Functions: 100%
@@ -2108,6 +2110,7 @@ Created comprehensive test suite for Payments Service:
 **Total: 90 tests, all passing ✅**
 
 **Coverage by File:**
+
 - config/index.ts: 100%
 - controllers/payment.controller.ts: 85.96%
 - middleware/auth.ts: 100%
@@ -2117,6 +2120,7 @@ Created comprehensive test suite for Payments Service:
 - validators/payment.validators.ts: 100%
 
 **Test Categories:**
+
 - List payments (pagination, filtering, RBAC)
 - Get payment by ID (authorization, 404 handling)
 - Create payment (recipient lookup, validation)

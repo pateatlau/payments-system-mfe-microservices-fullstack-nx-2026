@@ -185,8 +185,14 @@ describe('ErrorHandler Middleware', () => {
           code: 'VALIDATION_ERROR',
           message: 'Invalid request data',
           details: expect.arrayContaining([
-            expect.objectContaining({ path: ['email'], message: 'Invalid email' }),
-            expect.objectContaining({ path: ['password'], message: 'Password too short' }),
+            expect.objectContaining({
+              path: ['email'],
+              message: 'Invalid email',
+            }),
+            expect.objectContaining({
+              path: ['password'],
+              message: 'Password too short',
+            }),
           ]),
         },
       });

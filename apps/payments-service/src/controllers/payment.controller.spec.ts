@@ -379,7 +379,7 @@ describe('PaymentController', () => {
   describe('handleWebhook', () => {
     it('should process webhook successfully', async () => {
       const { prisma } = require('db');
-      
+
       const webhookPayload = {
         paymentId: 'payment-1',
         status: 'completed',
@@ -438,7 +438,7 @@ describe('PaymentController', () => {
 
     it('should return 404 when payment not found', async () => {
       const { prisma } = require('db');
-      
+
       (prisma.payment.findUnique as jest.Mock).mockResolvedValue(null);
 
       mockRequest.body = {
