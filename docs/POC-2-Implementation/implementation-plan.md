@@ -2184,23 +2184,57 @@ Created comprehensive test suite for Payments Service:
 
 **Verification:**
 
-- [ ] Application created at `apps/admin-service`
-- [ ] Express server configured
-- [ ] Database connection works
-- [ ] Error handling setup
-- [ ] Health check created
-- [ ] Server starts on port 3003
+- [x] Application created at `apps/admin-service`
+- [x] Express server configured
+- [x] Database connection works (Prisma)
+- [x] Error handling setup (ApiError + Zod)
+- [x] Health check created (/health, /health/ready, /health/live)
+- [x] Server starts on port 3003
+- [x] Winston logger configured
+- [x] Authentication middleware created
+- [x] ADMIN role authorization middleware created
 
 **Acceptance Criteria:**
 
-- ⬜ Admin Service application created
-- ⬜ Server starts on port 3003
-- ⬜ Database connection works
-- ⬜ Health check returns 200
+- ✅ Admin Service application created
+- ✅ Server starts on port 3003
+- ✅ Database connection works
+- ✅ Health check returns 200
+- ✅ All health endpoints tested and working
 
-**Status:** ⬜ Not Started  
-**Completed Date:**  
+**Status:** ✅ Complete  
+**Completed Date:** 2026-12-08  
 **Notes:**
+
+Created complete Admin Service application infrastructure:
+
+**Files Created:**
+- `apps/admin-service/src/config/index.ts` - Configuration with Zod validation
+- `apps/admin-service/src/utils/logger.ts` - Winston logger
+- `apps/admin-service/src/middleware/errorHandler.ts` - Error handling (ApiError, ZodError)
+- `apps/admin-service/src/middleware/auth.ts` - JWT authentication + ADMIN role check
+- `apps/admin-service/src/routes/health.ts` - Health check endpoints
+- `apps/admin-service/src/main.ts` - Express server
+
+**Features:**
+- Express server on port 3003
+- Security middleware (helmet, cors, rate limiting)
+- JWT authentication middleware
+- ADMIN role authorization middleware (`requireAdmin`)
+- Comprehensive error handling
+- Winston structured logging
+- Health check endpoints:
+  - `/health` - Basic health check
+  - `/health/ready` - Readiness check with database connectivity
+  - `/health/live` - Liveness check
+- Prisma database connection
+- Graceful shutdown handling
+
+**Testing:**
+All health endpoints tested successfully:
+- ✅ `/health` returns healthy status
+- ✅ `/health/ready` confirms database connection
+- ✅ `/health/live` confirms service is alive
 
 ---
 
