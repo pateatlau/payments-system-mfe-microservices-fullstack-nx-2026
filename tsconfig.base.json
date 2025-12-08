@@ -28,7 +28,8 @@
       "db": ["libs/backend/db/src/index.ts"],
       "event-hub": ["libs/backend/event-hub/src/index.ts"],
       "@mfe/shared-api-client": ["libs/shared-api-client/src/index.ts"],
-      "@mfe/shared-event-bus": ["libs/shared-event-bus/src/index.ts"]
+      "@mfe/shared-event-bus": ["libs/shared-event-bus/src/index.ts"],
+      "@mfe/shared-design-system": ["libs/shared-design-system/src/index.ts"]
     }
   },
   "files": [],
