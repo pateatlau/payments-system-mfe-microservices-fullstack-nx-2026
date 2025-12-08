@@ -18,7 +18,6 @@ export enum UserRole {
  */
 export enum PaymentStatus {
   PENDING = 'pending',
-  INITIATED = 'initiated',
   PROCESSING = 'processing',
   COMPLETED = 'completed',
   FAILED = 'failed',
@@ -29,6 +28,7 @@ export enum PaymentStatus {
  * Payment type
  */
 export enum PaymentType {
-  INITIATE = 'initiate',
-  PAYMENT = 'payment',
+  INSTANT = 'instant',
+  SCHEDULED = 'scheduled',
+  RECURRING = 'recurring',
 }

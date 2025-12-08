@@ -112,12 +112,14 @@ async function main() {
 
   const payment1 = await prisma.payment.create({
     data: {
-      userId: vendorUser.id,
+      senderId: customerUser.id,
+      recipientId: vendorUser.id,
       amount: 1000.0,
       currency: 'USD',
       status: 'completed',
-      type: 'initiate',
-      description: 'Sample payment initiation',
+      type: 'instant',
+      description: 'Sample instant payment',
+      completedAt: new Date(),
       metadata: {
         source: 'test',
       },
@@ -126,12 +128,16 @@ async function main() {
 
   const payment2 = await prisma.payment.create({
     data: {
-      userId: customerUser.id,
+      senderId: vendorUser.id,
+      recipientId: customerUser.id,
       amount: 500.0,
       currency: 'USD',
-      status: 'processing',
-      type: 'payment',
-      description: 'Sample customer payment',
+      status: 'pending',
+      type: 'scheduled',
+      description: 'Sample scheduled payment',
+      metadata: {
+        source: 'test',
+      },
     },
   });
 
@@ -143,9 +149,9 @@ async function main() {
   await prisma.paymentTransaction.create({
     data: {
       paymentId: payment1.id,
-      transactionType: 'initiation',
-      amount: 1000.0,
       status: 'completed',
+      statusMessage: 'Payment completed successfully',
+      pspTransactionId: 'PSP_TX_123',
       metadata: {
         timestamp: new Date().toISOString(),
       },
@@ -155,9 +161,12 @@ async function main() {
   await prisma.paymentTransaction.create({
     data: {
       paymentId: payment2.id,
-      transactionType: 'processing',
-      amount: 500.0,
-      status: 'in_progress',
+      status: 'pending',
+      statusMessage: 'Payment initiated',
+      pspTransactionId: 'PSP_TX_456',
+      metadata: {
+        timestamp: new Date().toISOString(),
+      },
     },
   });
 
