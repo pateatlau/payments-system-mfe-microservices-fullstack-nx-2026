@@ -13,7 +13,6 @@
 5. **Write tests alongside code** - 70% coverage minimum
 6. **POC-2 scope only** - Real backend integration, JWT auth, event bus, design system, Admin MFE
 7. **DO NOT automatically perform additional tasks** - Only perform tasks explicitly requested in the prompt. If a related task seems helpful, ask for confirmation with a clear description of what you want to implement before proceeding.
-8. **🚨 MANDATORY: Update BOTH documentation files** - After completing ANY task or sub-task, you MUST update BOTH `docs/POC-2-Implementation/task-list.md` AND `docs/POC-2-Implementation/implementation-plan.md` with completion status, verification checkboxes, notes, and acceptance criteria. This is NON-NEGOTIABLE and must be done immediately after task completion, before moving to the next task.
 8. **🚨 MANDATORY: Update documentation IMMEDIATELY after completing ANY task/sub-task** - MUST update BOTH `docs/POC-2-Implementation/task-list.md` AND `docs/POC-2-Implementation/implementation-plan.md` with:
    - Verification checkboxes marked ([x] for completed, ⬜ for deferred)
    - Status updated (✅ Complete, 🟡 In Progress, ⬜ Not Started)
@@ -22,6 +21,7 @@
    - Acceptance criteria marked
    - Files created section updated
    - NEVER skip this step - it's a CRITICAL requirement
+   - This is NON-NEGOTIABLE and must be done immediately after task completion, before moving to the next task
 
 ---
 
