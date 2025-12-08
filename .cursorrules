@@ -55,6 +55,7 @@
 **Routing:** React Router 7.x, configure in shell app, `ProtectedRoute` component. Routes: `/` (redirect), `/signin`, `/signup`, `/payments` (protected), `/admin` (protected, ADMIN only)
 
 **State Management:**
+
 - **Zustand:** Client-side state (auth, UI, theme) within single MFEs only, persist middleware for auth, use event bus for inter-MFE communication
 - **TanStack Query:** Server state (API data, caching) with real backend APIs, configure staleTime/cacheTime, use shared API client
 - **Event Bus:** Decoupled inter-MFE communication, replace shared Zustand stores, implement `libs/shared-event-bus`, define event types/contracts
@@ -70,6 +71,7 @@
 **Module Federation v2:** Shared dependencies (react, react-dom as singletons), React.lazy() + Suspense. Shell remotes: `authMfe:4201`, `paymentsMfe:4202`, `adminMfe:4203`. Exposes: Auth (`./SignIn`, `./SignUp`), Payments (`./PaymentsPage`), Admin (`./AdminDashboard`)
 
 **Backend Integration:**
+
 - **API Client:** `libs/shared-api-client`, Axios with JWT interceptors, error handling/retry, base URL from env, auto token refresh
 - **Backend Services:** API Gateway integration, REST API endpoints, follow API contracts, handle auth errors, proper error handling
 
@@ -79,7 +81,7 @@
 
 ```
 apps/ → shell (4200), auth-mfe (4201), payments-mfe (4202), admin-mfe (4203)
-libs/ → shared-utils, shared-ui, shared-types, shared-auth-store, shared-header-ui, 
+libs/ → shared-utils, shared-ui, shared-types, shared-auth-store, shared-header-ui,
         shared-api-client (NEW), shared-event-bus (NEW), shared-design-system (NEW)
 ```
 
@@ -90,12 +92,14 @@ libs/ → shared-utils, shared-ui, shared-types, shared-auth-store, shared-heade
 **AI Assistant:** Only perform explicitly requested tasks. Ask for confirmation before additional related tasks.
 
 **Task Progression:**
+
 - Follow `docs/POC-2-Implementation/implementation-plan.md` for steps
 - **🚨 MANDATORY:** After EACH task/sub-task, update BOTH `task-list.md` AND `implementation-plan.md` (see Critical Rule #8)
 - Ask user confirmation before next task
 - Show completed task summary and next task details
 
 **Task Completion Checklist (MANDATORY):**
+
 - ✅ Task completed per implementation plan
 - ✅ Verification checklist items completed
 - ✅ Acceptance criteria met
