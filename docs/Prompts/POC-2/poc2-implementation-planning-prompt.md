@@ -6,56 +6,40 @@ Use this prompt when starting a new chat session to plan POC-2 implementation.
 
 ## 📖 How to Use This Prompt
 
-This document provides two approaches for planning POC-2 implementation. Choose the approach that best fits your needs:
+This document provides the implementation planning prompt for POC-2.
 
-### **Recommended: Two-Step Approach (Architecture-First)**
+### **Current Status: Architecture Review Complete** ✅
 
-**Best for:** Thorough planning, complex full-stack projects, when architecture needs validation
+The architecture-first approach has been **completed**. Critical documentation is ready:
 
-**Steps:**
+- ✅ Architecture review complete - see `docs/POC-2-Implementation/architecture-review.md`
+- ✅ API contracts defined - see `docs/POC-2-Implementation/api-contracts.md`
+- ✅ Event bus contract defined - see `docs/POC-2-Implementation/event-bus-contract.md`
+- ✅ Type sharing strategy defined - see `docs/POC-2-Implementation/type-sharing-strategy.md`
+- ✅ Environment configuration defined - see `docs/POC-2-Implementation/environment-configuration.md`
 
-1. **Open a new chat session**
-2. **Step 1 - Architecture Review:** Copy and paste the **"Architecture-First Approach"** section (see below)
-   - This performs a focused, thorough review of architecture and tech stack
-   - Evaluates full-stack integration points
-   - Produces an architecture review document
-   - Provides recommendations on readiness for implementation
-3. **After architecture review is complete:**
-   - **Step 2 - Implementation Planning:** Copy and paste the **"Standard POC-2 Implementation Planning Prompt"** section
-   - This builds on the architecture review to create detailed implementation plans
-   - Creates task breakdowns, timelines, and documentation structure
+**Ready to proceed with Standard POC-2 Implementation Planning Prompt**
 
-**Why this approach:**
+---
 
-- ✅ Ensures architecture is solid before detailed planning
-- ✅ Identifies integration issues early
-- ✅ Produces comprehensive documentation
-- ✅ Reduces risk of rework during implementation
-
-### **Alternative: Single-Step Approach (Standard Prompt)**
-
-**Best for:** When architecture is already well-defined and validated, faster planning
-
-**Steps:**
+### **How to Use**
 
 1. **Open a new chat session**
-2. **Copy and paste the "Standard POC-2 Implementation Planning Prompt"** section
-   - Includes architecture review in Step 1 (less thorough than Architecture-First)
-   - Proceeds directly to implementation planning
-   - Faster, but less comprehensive architecture review
-
-**When to use:**
-
-- Architecture documents are complete and validated
-- You're confident about integration points
-- You need faster planning turnaround
+2. **Copy and paste the "Standard POC-2 Implementation Planning Prompt"** section below
+3. The prompt will reference the completed architecture documentation
+4. Focus on creating implementation plan, task breakdown, and remaining documentation
 
 ### **Quick Reference**
 
-| Approach                   | Architecture Review                  | Implementation Planning       | Best For                                  |
-| -------------------------- | ------------------------------------ | ----------------------------- | ----------------------------------------- |
-| **Two-Step (Recommended)** | Thorough, dedicated session          | Separate session after review | Complex projects, new architectures       |
-| **Single-Step**            | Included in planning (less thorough) | Immediate                     | Validated architectures, time-constrained |
+| Document                  | Status       | Location                                                 |
+| ------------------------- | ------------ | -------------------------------------------------------- |
+| Architecture Review       | ✅ Complete  | `docs/POC-2-Implementation/architecture-review.md`       |
+| API Contracts             | ✅ Complete  | `docs/POC-2-Implementation/api-contracts.md`             |
+| Event Bus Contract        | ✅ Complete  | `docs/POC-2-Implementation/event-bus-contract.md`        |
+| Type Sharing Strategy     | ✅ Complete  | `docs/POC-2-Implementation/type-sharing-strategy.md`     |
+| Environment Configuration | ✅ Complete  | `docs/POC-2-Implementation/environment-configuration.md` |
+| Implementation Plan       | 📋 To Create | `docs/POC-2-Implementation/implementation-plan.md`       |
+| Task List                 | 📋 To Create | `docs/POC-2-Implementation/task-list.md`                 |
 
 ---
 
@@ -90,6 +74,15 @@ This document provides two approaches for planning POC-2 implementation. Choose 
 I'm starting a new session to plan POC-2 implementation. Please:
 
 1. **Read Context:**
+
+   **POC-2 Implementation Documents (CRITICAL - Read First):**
+   - Read `docs/POC-2-Implementation/architecture-review.md` - Architecture review and recommendations
+   - Read `docs/POC-2-Implementation/api-contracts.md` - API endpoint specifications (OpenAPI)
+   - Read `docs/POC-2-Implementation/event-bus-contract.md` - Event types and payload schemas
+   - Read `docs/POC-2-Implementation/type-sharing-strategy.md` - Type organization approach
+   - Read `docs/POC-2-Implementation/environment-configuration.md` - Environment variables
+
+   **Reference Documents:**
    - Read `docs/POC-1-Implementation/post-poc-1.md` - POC-2 scope and transition guidance
    - Read `docs/POC-1-Implementation/poc-1-completion-summary.md` - Current POC-1 state
    - Read `docs/References/mfe-poc2-architecture.md` - POC-2 frontend architecture
@@ -98,7 +91,6 @@ I'm starting a new session to plan POC-2 implementation. Please:
    - Read `docs/References/backend-poc2-tech-stack.md` - POC-2 backend tech stack
    - Read `docs/References/fullstack-architecture.md` - Full-stack architecture overview
    - Review existing ADRs in `docs/adr/poc-2/` and `docs/adr/backend/poc-2/`
-   - Review Rspack migration learnings (HMR stability, NxAppRspackPlugin removal)
 
 2. **Understand Current State:**
    - POC-1 is complete with Rspack + Module Federation v2 + HMR
@@ -135,20 +127,22 @@ I'm starting a new session to plan POC-2 implementation. Please:
 
 4. **Create Implementation Plan:**
 
-   **Phase 1: Planning & Architecture (Week 1)**
-   - Review and finalize architecture documents (frontend, backend, full-stack)
-   - Review tech stack documents (frontend, backend) for compatibility
-   - Create detailed task breakdown
-   - **Define API contracts (CRITICAL for parallel development):**
-     - Request/response formats
-     - Error codes and messages
-     - Authentication flow
-     - Data validation rules
-   - Design event bus architecture
-   - Plan design system structure
-   - Create database schema
-   - Define security requirements
-   - **Plan integration points:** Document how frontend and backend will integrate
+   **Phase 1: Planning & Setup (Week 1)**
+
+   **Review Completed Architecture Documentation:**
+   - ✅ `architecture-review.md` - Architecture analysis and recommendations
+   - ✅ `api-contracts.md` - API endpoint specifications (OpenAPI)
+   - ✅ `event-bus-contract.md` - Event types and payload schemas
+   - ✅ `type-sharing-strategy.md` - Type organization approach
+   - ✅ `environment-configuration.md` - Environment variables and validation
+
+   **Remaining Planning Tasks:**
+   - Create detailed task breakdown and timeline
+   - Create database schema (Prisma schema design)
+   - Plan design system component structure
+   - Set up development environment (Docker Compose, PostgreSQL, Redis)
+   - Create project structure for backend services
+   - Define security requirements (authentication middleware, RBAC)
 
    **Phase 2: Backend Foundation (Week 2-3)**
    - Set up backend monorepo structure (if separate)
@@ -197,29 +191,37 @@ I'm starting a new session to plan POC-2 implementation. Please:
    - Documentation updates
 
 5. **Documentation Structure:**
-   Create comprehensive documentation in `docs/POC-2-Implementation/`:
+   Documentation in `docs/POC-2-Implementation/`:
+
+   **Already Created (Reference):**
+   - ✅ `architecture-review.md` - Architecture analysis and readiness assessment
+   - ✅ `api-contracts.md` - API endpoint definitions (OpenAPI)
+   - ✅ `event-bus-contract.md` - Event bus types and schemas
+   - ✅ `type-sharing-strategy.md` - Type organization and synchronization
+   - ✅ `environment-configuration.md` - Environment variables and validation
+   - ✅ `project-rules-cursor.md` - Cursor rules for POC-2
+   - ✅ `project-rules.md` - Project rules
+
+   **To Create During Implementation:**
    - `implementation-plan.md` - Detailed step-by-step plan
    - `task-list.md` - Progress tracking with checkboxes
-   - `architecture.md` - POC-2 architecture details
-   - `api-contracts.md` - API endpoint definitions (frontend-backend contracts)
-   - `event-bus-specification.md` - Event bus architecture and events
    - `design-system-guide.md` - Design system usage and components
    - `migration-guide-poc1-to-poc2.md` - Migration steps from POC-1
    - `developer-workflow-frontend.md` - Frontend development workflow
    - `developer-workflow-backend.md` - Backend development workflow
    - `developer-workflow-fullstack.md` - Full-stack integration workflow
-   - `testing-guide.md` - Testing strategy and examples (frontend, backend, integration)
+   - `testing-guide.md` - Testing strategy and examples
 
 6. **Key Considerations:**
 
    **Full-Stack Integration (CRITICAL):**
-   - **Seamless Frontend-Backend Integration:** Ensure smooth communication between frontend MFEs and backend services
-   - **API Contracts:** Define clear, type-safe API contracts between frontend and backend
-   - **Authentication Flow:** Design seamless JWT authentication flow across frontend and backend
-   - **Error Handling:** Consistent error handling patterns across frontend and backend
+   - **API Contracts:** ✅ Defined in `api-contracts.md` - use as implementation reference
+   - **Event Bus:** ✅ Defined in `event-bus-contract.md` - use as implementation reference
+   - **Type Sharing:** ✅ Defined in `type-sharing-strategy.md` - follow type organization
+   - **Environment Config:** ✅ Defined in `environment-configuration.md` - follow variable naming
+   - **Authentication Flow:** Implement JWT flow following `api-contracts.md` specifications
+   - **Error Handling:** Follow error codes and response formats in `api-contracts.md`
    - **Data Flow:** Plan data flow from backend services → API Gateway → Frontend API client → Components
-   - **Integration Points:** Document all integration points (API endpoints, event bus, authentication)
-   - **Environment Configuration:** Coordinate environment variables between frontend and backend
    - **Development Workflow:** Establish separate but coordinated workflows for frontend and backend development
 
    **Frontend-Specific:**
@@ -304,9 +306,11 @@ Let's start planning POC-2 implementation!
 
 ---
 
-## Alternative: Architecture-First Approach
+## Alternative: Architecture-First Approach (COMPLETED)
 
-If you want to start with architecture review before detailed planning:
+> **Note:** This approach has been **completed**. The architecture review document and critical documentation have been created. See `docs/POC-2-Implementation/architecture-review.md` for the results.
+
+The following prompt was used to complete the architecture review:
 
 ```
 I'm starting a new session to review and finalize POC-2 architecture. Please:
@@ -355,6 +359,19 @@ Let's review the POC-2 architecture!
 
 ## Key Files to Reference
 
+### POC-2 Implementation Documents (CRITICAL - Read First)
+
+1. **Critical Documents (Completed):**
+   - `docs/POC-2-Implementation/architecture-review.md` - Architecture analysis and recommendations
+   - `docs/POC-2-Implementation/api-contracts.md` - API specifications (OpenAPI)
+   - `docs/POC-2-Implementation/event-bus-contract.md` - Event bus contract and schemas
+   - `docs/POC-2-Implementation/type-sharing-strategy.md` - Type organization strategy
+   - `docs/POC-2-Implementation/environment-configuration.md` - Environment configuration
+
+2. **Project Rules:**
+   - `docs/POC-2-Implementation/project-rules-cursor.md` - Cursor rules for POC-2
+   - `docs/POC-2-Implementation/project-rules.md` - Project rules
+
 ### POC-1 Completion Documentation
 
 1. **Completion Summary:**
@@ -370,7 +387,7 @@ Let's review the POC-2 architecture!
    - `docs/Rspack-Migration/rspack-migration-plan.md` - Rspack configuration
    - `docs/Rspack-Migration/task-list.md` - Migration learnings
 
-### POC-2 Architecture Documentation
+### POC-2 Reference Documentation
 
 1. **Frontend Architecture:**
    - `docs/References/mfe-poc2-architecture.md` - POC-2 MFE architecture
@@ -408,56 +425,59 @@ Let's review the POC-2 architecture!
 
 After planning session, you should have:
 
-1. **Implementation Plan:**
+1. **Architecture Documentation:** ✅ COMPLETE
+   - ✅ Architecture review - `architecture-review.md`
+   - ✅ API contracts specification - `api-contracts.md`
+   - ✅ Event bus specification - `event-bus-contract.md`
+   - ✅ Type sharing strategy - `type-sharing-strategy.md`
+   - ✅ Environment configuration - `environment-configuration.md`
+
+2. **Implementation Plan:** 📋 TO CREATE
    - Detailed phase breakdown (5 phases, 6-8 weeks)
    - Task breakdown for each phase
    - Dependencies and prerequisites
    - Timeline estimates
 
-2. **Architecture Documentation:**
-   - POC-2 architecture details
-   - API contracts specification
-   - Event bus specification
-   - Design system integration plan
-
-3. **Migration Guide:**
+3. **Migration Guide:** 📋 TO CREATE
    - Step-by-step migration from POC-1 to POC-2
    - Mock to real backend migration
    - Shared Zustand stores to event bus migration
    - Component migration to design system
 
-4. **Task List:**
+4. **Task List:** 📋 TO CREATE
    - Progress tracking with checkboxes
    - Task dependencies
    - Acceptance criteria
 
-5. **Testing Strategy:**
+5. **Testing Strategy:** 📋 TO CREATE
    - Backend testing approach
    - Frontend testing updates
    - Integration testing plan
    - Event bus testing
 
-6. **Risk Assessment:**
-   - Technical risks
-   - Schedule risks
-   - Mitigation strategies
+6. **Risk Assessment:** ✅ INCLUDED IN ARCHITECTURE REVIEW
+   - Technical risks documented in `architecture-review.md`
+   - Schedule risks documented
+   - Mitigation strategies included
 
 ---
 
 ## Tips
 
-1. **Start with Architecture Review:**
-   - Ensure architecture documents are complete (both architecture and tech stack)
-   - Verify API contracts are defined between frontend and backend
-   - Confirm event bus design is clear
-   - Review tech stack compatibility between frontend and backend
+1. **Architecture Review Complete:**
+   - ✅ Architecture documents reviewed and validated
+   - ✅ API contracts defined in `api-contracts.md`
+   - ✅ Event bus design documented in `event-bus-contract.md`
+   - ✅ Type sharing strategy in `type-sharing-strategy.md`
+   - ✅ Environment configuration in `environment-configuration.md`
+   - Focus on implementation planning, not architecture review
 
-2. **Plan Full-Stack Integration:**
-   - **API Contracts First:** Define API contracts before implementation to ensure frontend and backend teams can work in parallel
-   - **Authentication Flow:** Design JWT authentication flow that works seamlessly across frontend and backend
-   - **Error Handling:** Establish consistent error handling patterns across the stack
-   - **Environment Variables:** Coordinate environment configuration between frontend and backend
-   - **Integration Testing:** Plan integration tests early to catch issues at the boundary
+2. **Use Completed Documentation:**
+   - **API Contracts:** Reference `api-contracts.md` for all endpoint specifications
+   - **Event Bus:** Reference `event-bus-contract.md` for event types and schemas
+   - **Types:** Reference `type-sharing-strategy.md` for type organization
+   - **Environment:** Reference `environment-configuration.md` for variable naming
+   - **Architecture:** Reference `architecture-review.md` for implementation guidance
 
 3. **Separate Development Workflows:**
    - **Frontend Workflow:** Frontend developers can work with mock/stubbed backend APIs initially, then integrate with real backend
@@ -478,9 +498,7 @@ After planning session, you should have:
    - Frontend patterns can be extended for backend integration
 
 6. **Document Everything:**
-   - Architecture decisions (frontend, backend, and integration)
-   - API contracts (request/response formats, error codes)
-   - Event bus events
+   - Implementation decisions and rationale
    - Migration steps
    - Testing strategies (unit, integration, E2E)
    - Development workflows (frontend, backend, full-stack)
@@ -511,5 +529,5 @@ After planning session, you should have:
 ---
 
 **Last Updated:** 2026-01-XX  
-**Status:** Ready for Use  
+**Status:** Ready for Implementation Planning (Architecture Review Complete)  
 **Recommended Model:** Opus 4.5 or Sonnet 4.5 for planning phase
