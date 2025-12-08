@@ -40,8 +40,9 @@ app.use((req, _res, next) => {
 // Health check routes (no auth required)
 app.use(healthRoutes);
 
-// API routes will be added here
-// app.use('/api/admin', authenticate, requireAdmin, adminRoutes);
+// Admin routes (authentication and ADMIN role required)
+import adminRoutes from './routes/admin';
+app.use('/api/admin', adminRoutes);
 
 // 404 handler
 app.use(notFoundHandler);
