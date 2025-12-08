@@ -89,7 +89,15 @@
     "test:admin-service": "nx test admin-service",
     "test:profile-service": "nx test profile-service",
     "test:backend-libs": "nx run-many --target=test --projects=types,utils,db,event-hub --parallel",
-    "lint:backend": "nx run-many --target=lint --projects=api-gateway,auth-service,payments-service,admin-service,profile-service,types,utils,db,event-hub"
+    "lint:backend": "nx run-many --target=lint --projects=api-gateway,auth-service,payments-service,admin-service,profile-service,types,utils,db,event-hub",
+    "db:generate": "prisma generate --schema=libs/backend/db/prisma/schema.prisma",
+    "db:migrate": "prisma migrate dev --schema=libs/backend/db/prisma/schema.prisma",
+    "db:migrate:deploy": "prisma migrate deploy --schema=libs/backend/db/prisma/schema.prisma",
+    "db:seed": "tsx libs/backend/db/prisma/seed.ts",
+    "db:studio": "prisma studio --schema=libs/backend/db/prisma/schema.prisma",
+    "db:reset": "prisma migrate reset --schema=libs/backend/db/prisma/schema.prisma",
+    "db:format": "prisma format --schema=libs/backend/db/prisma/schema.prisma",
+    "db:validate": "prisma validate --schema=libs/backend/db/prisma/schema.prisma"
   },
   "devDependencies": {
     "@babel/core": "^7.14.5",
@@ -147,12 +155,17 @@
     "ts-jest": "^29.4.6",
     "ts-node": "10.9.1",
     "tslib": "^2.3.0",
+    "tsx": "^4.21.0",
     "typescript": "^5.9.0",
     "typescript-eslint": "^8.0.0"
   },
   "dependencies": {
+    "@prisma/client": "^5.0.0",
     "@tanstack/react-query": "^5.0.0",
+    "@types/bcrypt": "^6.0.0",
     "axios": "^1.7.0",
+    "bcrypt": "^6.0.0",
+    "prisma": "^5.0.0",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-error-boundary": "4.0.13",
@@ -161,5 +174,8 @@
     "react-router-dom": "7.10.1",
     "zod": "^3.23.0",
     "zustand": "^4.5.0"
+  },
+  "prisma": {
+    "seed": "tsx libs/backend/db/prisma/seed.ts"
   }
 }
