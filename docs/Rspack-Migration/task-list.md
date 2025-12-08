@@ -807,12 +807,14 @@ _Add architecture decisions here as they are made_
 ### Rspack-Specific Learnings
 
 **NxAppRspackPlugin and CSS Conflicts:**
+
 - `NxAppRspackPlugin` automatically adds CSS processing rules that can conflict with custom CSS loader chains
 - If using custom CSS loaders (e.g., for Tailwind CSS v4), consider removing `NxAppRspackPlugin` and manually configuring HTML generation, path aliases, and SPA routing
 - Explicit configuration is more maintainable than relying on plugin magic that adds hidden rules
 - Always verify there's only ONE CSS processing rule in the final configuration
 
 **HMR Stability:**
+
 - Test HMR not just for "does it work" but "does it stay working" (no rebuild loops)
 - Rebuild loops can be caused by file watchers triggering on output files
 - Use `experiments: { css: false }` when using custom CSS loader chains

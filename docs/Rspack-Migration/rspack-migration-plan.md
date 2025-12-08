@@ -1252,11 +1252,13 @@ All test files successfully migrated. Test execution verified.
 ### Issue Description
 
 After the initial migration, HMR was working but experienced intermittent issues:
+
 1. **CSS parsing errors** - CSS files being processed as JavaScript
 2. **Infinite rebuild loops** - Continuous page refreshing and HMR recompilation
 3. **Double CSS processing** - CSS files processed by both custom loader chain and NxAppRspackPlugin
 
 The issue would "suddenly appear out of nowhere" after the app was idle, triggered by:
+
 - Nx cache invalidation
 - HMR reconnection after idle period
 - Rebuilds that exposed latent configuration conflicts
@@ -1264,6 +1266,7 @@ The issue would "suddenly appear out of nowhere" after the app was idle, trigger
 ### Root Cause
 
 **NxAppRspackPlugin** was automatically adding CSS processing rules (`ruleSet[1].rules[10]`) that conflicted with our custom Tailwind CSS v4 loader chain (`ruleSet[1].rules[2]`). This created:
+
 - Two competing CSS processing chains
 - CSS being parsed as JavaScript (causing syntax errors)
 - File watcher loops (CSS writes triggering rebuilds)
@@ -1282,6 +1285,7 @@ The issue would "suddenly appear out of nowhere" after the app was idle, trigger
 ### Configuration Changes
 
 **Before (with NxAppRspackPlugin):**
+
 ```javascript
 const { NxAppRspackPlugin } = require('@nx/rspack/app-plugin');
 
@@ -1294,13 +1298,17 @@ module.exports = {
 ```
 
 **After (without NxAppRspackPlugin):**
+
 ```javascript
 module.exports = {
   context: __dirname,
   experiments: { css: false },
   resolve: {
     alias: {
-      'shared-auth-store': path.resolve(__dirname, '../../libs/shared-auth-store/src/index.ts'),
+      'shared-auth-store': path.resolve(
+        __dirname,
+        '../../libs/shared-auth-store/src/index.ts'
+      ),
       // ... other aliases
     },
   },
