@@ -52,4 +52,4 @@ function isFile(s) {
 }
 
 // Call the user-defined main.
-module.exports = require('./apps/api-gateway/src/main.js');
+module.exports = require('./apps/auth-service/src/main.js');

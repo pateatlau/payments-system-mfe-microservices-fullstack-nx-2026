@@ -2,7 +2,8 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "baseUrl": "../../",
-    "outDir": "../../dist/out-tsc",
+    "outDir": "../../dist/libs/shared-types/src",
+    "rootDir": "./src",
     "declaration": true,
     "types": ["node"]
   },
