@@ -22,7 +22,11 @@
       "shared-ui": ["libs/shared-ui/src/index.ts"],
       "shared-types": ["libs/shared-types/src/index.ts"],
       "shared-auth-store": ["libs/shared-auth-store/src/index.ts"],
-      "shared-header-ui": ["libs/shared-header-ui/src/index.ts"]
+      "shared-header-ui": ["libs/shared-header-ui/src/index.ts"],
+      "types": ["libs/backend/types/src/index.ts"],
+      "utils": ["libs/backend/utils/src/index.ts"],
+      "db": ["libs/backend/db/src/index.ts"],
+      "event-hub": ["libs/backend/event-hub/src/index.ts"]
     }
   },
   "files": [],
