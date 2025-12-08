@@ -13,6 +13,15 @@
 5. **Write tests alongside code** - 70% coverage minimum
 6. **POC-2 scope only** - Real backend integration, JWT auth, event bus, design system, Admin MFE
 7. **DO NOT automatically perform additional tasks** - Only perform tasks explicitly requested in the prompt. If a related task seems helpful, ask for confirmation with a clear description of what you want to implement before proceeding.
+8. **🚨 MANDATORY: Update BOTH documentation files** - After completing ANY task or sub-task, you MUST update BOTH `docs/POC-2-Implementation/task-list.md` AND `docs/POC-2-Implementation/implementation-plan.md` with completion status, verification checkboxes, notes, and acceptance criteria. This is NON-NEGOTIABLE and must be done immediately after task completion, before moving to the next task.
+8. **🚨 MANDATORY: Update documentation IMMEDIATELY after completing ANY task/sub-task** - MUST update BOTH `docs/POC-2-Implementation/task-list.md` AND `docs/POC-2-Implementation/implementation-plan.md` with:
+   - Verification checkboxes marked ([x] for completed, ⬜ for deferred)
+   - Status updated (✅ Complete, 🟡 In Progress, ⬜ Not Started)
+   - Completed Date added
+   - Notes section filled with implementation details
+   - Acceptance criteria marked
+   - Files created section updated
+   - NEVER skip this step - it's a CRITICAL requirement
 
 ---
 
@@ -249,7 +258,17 @@ libs/
 ### Documentation Files
 
 - **MUST:** Create documentation files in `docs/POC-2-Implementation/` folder
-- **MUST:** Update both `task-list.md` and `implementation-plan.md` after each task
+- **🚨 CRITICAL - MANDATORY:** Update BOTH `task-list.md` AND `implementation-plan.md` after completing EACH task or sub-task:
+  - This is NOT optional - it is a mandatory requirement
+  - Must be done immediately after task completion, before moving to next task
+  - Both files must be updated with:
+    - Completion status (✅ Complete)
+    - Completion date
+    - Verification checkboxes marked
+    - Acceptance criteria marked
+    - Detailed notes about implementation
+  - Do NOT skip this step or defer it
+  - Do NOT proceed to next task without updating both files
 - **MUST:** Ask for confirmation if documentation location is unclear
 
 ### Rspack Migration Documentation
@@ -274,8 +293,21 @@ libs/
 ### Task Progression
 
 - **MUST:** Follow `docs/POC-2-Implementation/implementation-plan.md` for detailed task steps
-- **MUST:** Update `docs/POC-2-Implementation/task-list.md` after completing each task/sub-task
-- **MUST:** Update `docs/POC-2-Implementation/implementation-plan.md` after completing each task/sub-task (mark verification checkboxes and update status)
+- **🚨 CRITICAL - MANDATORY:** Update BOTH documentation files IMMEDIATELY after completing ANY task/sub-task:
+  - **MUST:** Update `docs/POC-2-Implementation/task-list.md`:
+    - Mark all completed checkboxes ([x])
+    - Update Status field (✅ Complete, 🟡 In Progress, ⬜ Not Started)
+    - Add Completed Date
+    - Fill Notes section with implementation details
+  - **MUST:** Update `docs/POC-2-Implementation/implementation-plan.md`:
+    - Mark all verification checkboxes ([x] for completed, ⬜ for deferred)
+    - Mark all acceptance criteria (✅ for met, ⬜ for deferred)
+    - Update Status field
+    - Add Completed Date
+    - Fill Notes section with comprehensive implementation details
+    - Update Files Created section if applicable
+  - **MUST NOT:** Skip documentation updates - this is a CRITICAL requirement
+  - **MUST NOT:** Proceed to next task until BOTH files are updated
 - **MUST:** Ask for user confirmation before proceeding to the next task after completing each task or sub-task
 - **MUST:** Show completed task summary and next task details when asking for confirmation
 - **MUST NOT:** Automatically proceed to next task without explicit user approval
@@ -289,12 +321,27 @@ libs/
 
 ### Task Completion Checklist
 
+**🚨 MANDATORY - DO NOT PROCEED WITHOUT COMPLETING ALL ITEMS:**
+
 - ✅ Task completed according to implementation plan
 - ✅ Verification checklist items completed
 - ✅ Acceptance criteria met
-- ✅ Task list updated with completion status (`task-list.md`)
-- ✅ Implementation plan updated with completion status (`implementation-plan.md`)
+- ✅ **MANDATORY:** `docs/POC-2-Implementation/task-list.md` updated:
+  - All checkboxes marked `[x]`
+  - Status set to "✅ Complete"
+  - Completion date added
+  - Detailed notes added
+- ✅ **MANDATORY:** `docs/POC-2-Implementation/implementation-plan.md` updated:
+  - ALL verification checklist items marked `[x]`
+  - ALL acceptance criteria marked ✅
+  - Status set to "✅ Complete"
+  - Completion date added
+  - Comprehensive notes added
+  - Files created section updated (if applicable)
+- ✅ Both documentation files synchronized (same status, same completion date, consistent notes)
 - ✅ User confirmation obtained before next task
+
+**REMINDER:** Updating documentation is NOT optional - it is a mandatory step that must be completed immediately after each task/sub-task completion. Do not skip this step or defer it.
 
 ### Rspack Migration Task Completion Checklist
 
@@ -355,6 +402,7 @@ libs/
 
 ## Common Pitfalls to Avoid
 
+- ❌ **🚨 CRITICAL:** Forgetting to update `task-list.md` and `implementation-plan.md` after completing tasks - THIS IS MANDATORY
 - ❌ Using `any` type without justification
 - ❌ Creating throw-away code
 - ❌ Ignoring TypeScript errors
@@ -371,6 +419,7 @@ libs/
 - ❌ Not using design system components (must use shadcn/ui where appropriate)
 - ❌ Not using shared API client (must use shared API client for all backend calls)
 - ❌ Integrating with real PSP (must use stubbed backend operations)
+- ❌ Deferring documentation updates - they must be done immediately after task completion
 
 ---
 
