@@ -4,9 +4,9 @@
  * Request and response types for Auth Service endpoints
  */
 
-import { User, UserProfile } from '../models/user';
-import { UserRole } from '../enums';
-import { ApiResponse } from './common';
+import type { User } from '../models/user';
+import type { UserRole } from '../enums';
+import type { ApiResponse } from './common';
 
 /**
  * Register request

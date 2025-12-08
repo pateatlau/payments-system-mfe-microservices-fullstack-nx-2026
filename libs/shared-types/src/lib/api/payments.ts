@@ -4,9 +4,9 @@
  * Request and response types for Payments Service endpoints
  */
 
-import { Payment, PaymentTransaction } from '../models/payment';
-import { PaymentStatus, PaymentType } from '../enums';
-import { ApiResponse, PaginatedResponse } from './common';
+import type { Payment, PaymentTransaction } from '../models/payment';
+import type { PaymentStatus, PaymentType } from '../enums';
+import type { ApiResponse, PaginatedResponse } from './common';
 
 /**
  * Create payment request

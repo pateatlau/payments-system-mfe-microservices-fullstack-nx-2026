@@ -4,7 +4,7 @@
  * Payment model types matching the Prisma schema
  */
 
-import { PaymentStatus, PaymentType } from '../enums';
+import type { PaymentStatus, PaymentType } from '../enums';
 
 /**
  * Payment model

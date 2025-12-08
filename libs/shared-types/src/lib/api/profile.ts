@@ -4,8 +4,8 @@
  * Request and response types for Profile Service endpoints
  */
 
-import { UserProfile } from '../models/user';
-import { ApiResponse } from './common';
+import type { UserProfile } from '../models/user';
+import type { ApiResponse } from './common';
 
 /**
  * Get profile response

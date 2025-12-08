@@ -4,10 +4,10 @@
  * Request and response types for Admin Service endpoints
  */
 
-import { User } from '../models/user';
-import { AuditLog } from '../models/audit';
-import { UserRole } from '../enums';
-import { ApiResponse, PaginatedResponse } from './common';
+import type { User } from '../models/user';
+import type { AuditLog } from '../models/audit';
+import type { UserRole } from '../enums';
+import type { ApiResponse, PaginatedResponse } from './common';
 
 /**
  * Get users query parameters

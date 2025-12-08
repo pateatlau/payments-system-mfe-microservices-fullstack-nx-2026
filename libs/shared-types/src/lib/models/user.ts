@@ -4,7 +4,7 @@
  * User model types matching the Prisma schema
  */
 
-import { UserRole } from '../enums';
+import type { UserRole } from '../enums';
 
 /**
  * User model
