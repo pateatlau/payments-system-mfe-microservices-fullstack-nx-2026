@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from '@jest/globals';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
@@ -15,15 +15,15 @@ import {
 } from '../api/stubbedPayments';
 
 // Mock the auth store
-vi.mock('shared-auth-store', () => ({
-  useAuthStore: vi.fn(),
+jest.mock('shared-auth-store', () => ({
+  useAuthStore: jest.fn(),
 }));
 
 // Mock the stubbed payments API
-vi.mock('../api/stubbedPayments', () => ({
-  createPayment: vi.fn(),
-  updatePayment: vi.fn(),
-  deletePayment: vi.fn(),
+jest.mock('../api/stubbedPayments', () => ({
+  createPayment: jest.fn(),
+  updatePayment: jest.fn(),
+  deletePayment: jest.fn(),
 }));
 
 describe('usePaymentMutations', () => {
@@ -40,7 +40,7 @@ describe('usePaymentMutations', () => {
         },
       },
     });
-    vi.clearAllMocks();
+    jest.clearAllMocks();
   });
 
   const createWrapper = () => {
@@ -58,7 +58,7 @@ describe('usePaymentMutations', () => {
         role: 'CUSTOMER' as const,
       };
 
-      (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      (useAuthStore as unknown as ReturnType<typeof jest.fn>).mockReturnValue({
         user: mockUser,
       });
 
@@ -73,7 +73,9 @@ describe('usePaymentMutations', () => {
         updatedAt: new Date().toISOString(),
       };
 
-      (createPayment as ReturnType<typeof vi.fn>).mockResolvedValue(mockPayment);
+      (createPayment as ReturnType<typeof jest.fn>).mockResolvedValue(
+        mockPayment
+      );
 
       const { result } = renderHook(() => useCreatePayment(), {
         wrapper: createWrapper(),
@@ -96,7 +98,7 @@ describe('usePaymentMutations', () => {
     });
 
     it('throws error when user is not authenticated', async () => {
-      (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      (useAuthStore as unknown as ReturnType<typeof jest.fn>).mockReturnValue({
         user: null,
       });
 
@@ -128,7 +130,7 @@ describe('usePaymentMutations', () => {
         role: 'CUSTOMER' as const,
       };
 
-      (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      (useAuthStore as unknown as ReturnType<typeof jest.fn>).mockReturnValue({
         user: mockUser,
       });
 
@@ -143,9 +145,11 @@ describe('usePaymentMutations', () => {
         updatedAt: new Date().toISOString(),
       };
 
-      (createPayment as ReturnType<typeof vi.fn>).mockResolvedValue(mockPayment);
+      (createPayment as ReturnType<typeof jest.fn>).mockResolvedValue(
+        mockPayment
+      );
 
-      const invalidateQueriesSpy = vi.spyOn(queryClient, 'invalidateQueries');
+      const invalidateQueriesSpy = jest.spyOn(queryClient, 'invalidateQueries');
 
       const { result } = renderHook(() => useCreatePayment(), {
         wrapper: createWrapper(),
@@ -179,7 +183,9 @@ describe('usePaymentMutations', () => {
         updatedAt: new Date().toISOString(),
       };
 
-      (updatePayment as ReturnType<typeof vi.fn>).mockResolvedValue(mockPayment);
+      (updatePayment as ReturnType<typeof jest.fn>).mockResolvedValue(
+        mockPayment
+      );
 
       const { result } = renderHook(() => useUpdatePayment(), {
         wrapper: createWrapper(),
@@ -202,7 +208,7 @@ describe('usePaymentMutations', () => {
     });
 
     it('handles update failure', async () => {
-      (updatePayment as ReturnType<typeof vi.fn>).mockResolvedValue(null);
+      (updatePayment as ReturnType<typeof jest.fn>).mockResolvedValue(null);
 
       const { result } = renderHook(() => useUpdatePayment(), {
         wrapper: createWrapper(),
@@ -232,10 +238,12 @@ describe('usePaymentMutations', () => {
         updatedAt: new Date().toISOString(),
       };
 
-      (updatePayment as ReturnType<typeof vi.fn>).mockResolvedValue(mockPayment);
+      (updatePayment as ReturnType<typeof jest.fn>).mockResolvedValue(
+        mockPayment
+      );
 
-      const invalidateQueriesSpy = vi.spyOn(queryClient, 'invalidateQueries');
-      const setQueryDataSpy = vi.spyOn(queryClient, 'setQueryData');
+      const invalidateQueriesSpy = jest.spyOn(queryClient, 'invalidateQueries');
+      const setQueryDataSpy = jest.spyOn(queryClient, 'setQueryData');
 
       const { result } = renderHook(() => useUpdatePayment(), {
         wrapper: createWrapper(),
@@ -262,7 +270,7 @@ describe('usePaymentMutations', () => {
 
   describe('useDeletePayment', () => {
     it('deletes payment successfully', async () => {
-      (deletePayment as ReturnType<typeof vi.fn>).mockResolvedValue(true);
+      (deletePayment as ReturnType<typeof jest.fn>).mockResolvedValue(true);
 
       const { result } = renderHook(() => useDeletePayment(), {
         wrapper: createWrapper(),
@@ -279,7 +287,7 @@ describe('usePaymentMutations', () => {
     });
 
     it('handles delete failure', async () => {
-      (deletePayment as ReturnType<typeof vi.fn>).mockResolvedValue(false);
+      (deletePayment as ReturnType<typeof jest.fn>).mockResolvedValue(false);
 
       const { result } = renderHook(() => useDeletePayment(), {
         wrapper: createWrapper(),
@@ -295,9 +303,9 @@ describe('usePaymentMutations', () => {
     });
 
     it('invalidates payments queries after successful deletion', async () => {
-      (deletePayment as ReturnType<typeof vi.fn>).mockResolvedValue(true);
+      (deletePayment as ReturnType<typeof jest.fn>).mockResolvedValue(true);
 
-      const invalidateQueriesSpy = vi.spyOn(queryClient, 'invalidateQueries');
+      const invalidateQueriesSpy = jest.spyOn(queryClient, 'invalidateQueries');
 
       const { result } = renderHook(() => useDeletePayment(), {
         wrapper: createWrapper(),
@@ -315,4 +323,3 @@ describe('usePaymentMutations', () => {
     });
   });
 });
-

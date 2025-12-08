@@ -3,11 +3,9 @@
   "compilerOptions": {
     "outDir": "../../dist/out-tsc",
     "types": [
-      "vitest/globals",
-      "vitest/importMeta",
-      "vite/client",
+      "jest",
       "node",
-      "vitest",
+      "@testing-library/jest-dom",
       "@nx/react/typings/cssmodule.d.ts",
       "@nx/react/typings/image.d.ts"
     ]

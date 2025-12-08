@@ -1,19 +1,21 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from '@jest/globals';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { useAuthStore } from 'shared-auth-store';
 import { SignUpPage, SignUpComponentProps } from './SignUpPage';
 
 // Mock the auth store - handle both selector and direct usage
-vi.mock('shared-auth-store', () => ({
-  useAuthStore: vi.fn((selector?: (state: { isAuthenticated: boolean }) => boolean) => {
-    const mockState = { isAuthenticated: false };
-    // If a selector is passed, call it with the mock state
-    if (typeof selector === 'function') {
-      return selector(mockState);
+jest.mock('shared-auth-store', () => ({
+  useAuthStore: jest.fn(
+    (selector?: (state: { isAuthenticated: boolean }) => boolean) => {
+      const mockState = { isAuthenticated: false };
+      // If a selector is passed, call it with the mock state
+      if (typeof selector === 'function') {
+        return selector(mockState);
+      }
+      return mockState;
     }
-    return mockState;
-  }),
+  ),
 }));
 
 // Mock SignUp component for testing (injected via props)
@@ -33,7 +35,7 @@ function MockSignUp({ onSuccess, onNavigateToSignIn }: SignUpComponentProps) {
 
 // Helper to mock auth store with specific state
 function mockAuthStore(state: { isAuthenticated: boolean }) {
-  (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockImplementation(
+  (useAuthStore as unknown as ReturnType<typeof jest.fn>).mockImplementation(
     (selector?: (state: { isAuthenticated: boolean }) => boolean) => {
       if (typeof selector === 'function') {
         return selector(state);
@@ -45,7 +47,7 @@ function mockAuthStore(state: { isAuthenticated: boolean }) {
 
 describe('SignUpPage', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
   });
 
   it('renders SignUp component when not authenticated', () => {
@@ -71,7 +73,9 @@ describe('SignUpPage', () => {
     );
 
     // Should redirect (Navigate component renders null in the current location)
-    expect(screen.queryByText('Mocked SignUp Component')).not.toBeInTheDocument();
+    expect(
+      screen.queryByText('Mocked SignUp Component')
+    ).not.toBeInTheDocument();
     expect(container).toBeTruthy();
   });
 

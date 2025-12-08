@@ -43,6 +43,15 @@
           "buildTarget": "shell:build:production"
         }
       }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "apps/shell/jest.config.js",
+        "passWithNoTests": true,
+        "codeCoverage": false
+      }
     }
   }
 }

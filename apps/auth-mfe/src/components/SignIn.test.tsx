@@ -1,23 +1,23 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach } from '@jest/globals';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { SignIn } from './SignIn';
 import { useAuthStore } from 'shared-auth-store';
 
 // Mock the auth store
-vi.mock('shared-auth-store', () => ({
-  useAuthStore: vi.fn(),
+jest.mock('shared-auth-store', () => ({
+  useAuthStore: jest.fn(),
 }));
 
 describe('SignIn', () => {
-  const mockLogin = vi.fn();
-  const mockClearError = vi.fn();
-  const mockOnSuccess = vi.fn();
-  const mockOnNavigateToSignUp = vi.fn();
+  const mockLogin = jest.fn();
+  const mockClearError = jest.fn();
+  const mockOnSuccess = jest.fn();
+  const mockOnNavigateToSignUp = jest.fn();
 
   beforeEach(() => {
-    vi.clearAllMocks();
-    (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+    jest.clearAllMocks();
+    (useAuthStore as unknown as ReturnType<typeof jest.fn>).mockReturnValue({
       login: mockLogin,
       isLoading: false,
       error: null,
@@ -28,10 +28,14 @@ describe('SignIn', () => {
   it('renders sign-in form', () => {
     render(<SignIn />);
 
-    expect(screen.getByRole('heading', { name: /sign in/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: /sign in/i })
+    ).toBeInTheDocument();
     expect(screen.getByLabelText('Email')).toBeInTheDocument();
     expect(screen.getByLabelText('Password')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /sign in/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /sign in/i })
+    ).toBeInTheDocument();
   });
 
   it('displays validation error for invalid email', async () => {
@@ -45,16 +49,16 @@ describe('SignIn', () => {
     await user.clear(emailInput);
     await user.type(emailInput, 'invalid-email');
     await user.type(passwordInput, 'password123');
-    
+
     // Submit form - validation should prevent submission
     await user.click(submitButton);
 
     // Wait a bit for validation to process
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    await new Promise(resolve => setTimeout(resolve, 100));
 
     // Check that login was not called due to validation error
     expect(mockLogin).not.toHaveBeenCalled();
-    
+
     // Check for validation error message (may appear after form validation)
     const errorMessage = screen.queryByText('Invalid email address');
     // Note: React Hook Form validation may not show errors immediately in test environment
@@ -103,7 +107,7 @@ describe('SignIn', () => {
     mockLogin.mockResolvedValue(undefined);
 
     // Start with unauthenticated state
-    (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+    (useAuthStore as unknown as ReturnType<typeof jest.fn>).mockReturnValue({
       login: mockLogin,
       isLoading: false,
       error: null,
@@ -127,7 +131,7 @@ describe('SignIn', () => {
     });
 
     // Update mock to reflect authenticated state (simulating store update)
-    (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+    (useAuthStore as unknown as ReturnType<typeof jest.fn>).mockReturnValue({
       login: mockLogin,
       isLoading: false,
       error: null,
@@ -137,15 +141,18 @@ describe('SignIn', () => {
     rerender(<SignIn onSuccess={mockOnSuccess} />);
 
     // onSuccess should be called when isAuthenticated becomes true
-    await waitFor(() => {
-      expect(mockOnSuccess).toHaveBeenCalled();
-    }, { timeout: 3000 });
+    await waitFor(
+      () => {
+        expect(mockOnSuccess).toHaveBeenCalled();
+      },
+      { timeout: 3000 }
+    );
   });
 
   it('displays loading state during form submission', async () => {
     const user = userEvent.setup();
     mockLogin.mockImplementation(
-      () => new Promise((resolve) => setTimeout(resolve, 100))
+      () => new Promise(resolve => setTimeout(resolve, 100))
     );
 
     render(<SignIn />);
@@ -163,7 +170,7 @@ describe('SignIn', () => {
   });
 
   it('displays error from auth store', () => {
-    (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+    (useAuthStore as unknown as ReturnType<typeof jest.fn>).mockReturnValue({
       login: mockLogin,
       isLoading: false,
       error: 'Invalid credentials',
@@ -176,7 +183,7 @@ describe('SignIn', () => {
   });
 
   it('clears error when component mounts with error', () => {
-    (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+    (useAuthStore as unknown as ReturnType<typeof jest.fn>).mockReturnValue({
       login: mockLogin,
       isLoading: false,
       error: 'Some error',
@@ -189,7 +196,7 @@ describe('SignIn', () => {
   });
 
   it('disables form fields when loading', () => {
-    (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+    (useAuthStore as unknown as ReturnType<typeof jest.fn>).mockReturnValue({
       login: mockLogin,
       isLoading: true,
       error: null,
@@ -207,7 +214,9 @@ describe('SignIn', () => {
     render(<SignIn onNavigateToSignUp={mockOnNavigateToSignUp} />);
 
     expect(screen.getByText("Don't have an account?")).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /sign up/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /sign up/i })
+    ).toBeInTheDocument();
   });
 
   it('calls onNavigateToSignUp when sign-up link is clicked', async () => {
@@ -223,7 +232,9 @@ describe('SignIn', () => {
   it('does not render sign-up link when onNavigateToSignUp is not provided', () => {
     render(<SignIn />);
 
-    expect(screen.queryByText("Don't have an account?")).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("Don't have an account?")
+    ).not.toBeInTheDocument();
   });
 
   it('has correct accessibility attributes', () => {
@@ -249,16 +260,16 @@ describe('SignIn', () => {
     await user.clear(emailInput);
     await user.type(emailInput, 'invalid');
     await user.type(passwordInput, 'password123');
-    
+
     // Submit form - validation should prevent submission
     await user.click(submitButton);
 
     // Wait a bit for validation to process
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    await new Promise(resolve => setTimeout(resolve, 100));
 
     // Check that login was not called due to validation error
     expect(mockLogin).not.toHaveBeenCalled();
-    
+
     // Check for validation error message with role attribute (if displayed)
     const errorMessage = screen.queryByText('Invalid email address');
     if (errorMessage) {
@@ -267,4 +278,3 @@ describe('SignIn', () => {
     }
   });
 });
-

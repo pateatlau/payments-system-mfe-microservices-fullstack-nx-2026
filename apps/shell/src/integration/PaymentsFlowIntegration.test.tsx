@@ -1,5 +1,5 @@
 import React from 'react';
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from '@jest/globals';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
@@ -30,8 +30,8 @@ interface UpdatePaymentData {
 }
 
 // Mock the auth store
-vi.mock('shared-auth-store', () => ({
-  useAuthStore: vi.fn(),
+jest.mock('shared-auth-store', () => ({
+  useAuthStore: jest.fn(),
 }));
 
 // Mock PaymentsPage component from payments-mfe
@@ -46,13 +46,17 @@ const createMockPaymentsComponent = (mockData: {
   onDeletePayment?: (id: string) => Promise<void>;
 }) => {
   return function MockPaymentsPageComponent() {
-    const { hasRole: hasRoleFromStore } = (useAuthStore as unknown as ReturnType<typeof vi.fn>)();
+    const { hasRole: hasRoleFromStore } = (
+      useAuthStore as unknown as ReturnType<typeof jest.fn>
+    )();
     const hasRole = mockData.hasRole || hasRoleFromStore || (() => false);
 
     return (
       <div data-testid="payments-page">
         <h1>Payments</h1>
-        {mockData.isLoading && <div data-testid="loading">Loading payments...</div>}
+        {mockData.isLoading && (
+          <div data-testid="loading">Loading payments...</div>
+        )}
         {mockData.error && (
           <div data-testid="error">Error: {mockData.error.message}</div>
         )}
@@ -63,14 +67,18 @@ const createMockPaymentsComponent = (mockData: {
                 <span data-testid={`payment-amount-${payment.id}`}>
                   {payment.amount} {payment.currency}
                 </span>
-                <span data-testid={`payment-status-${payment.id}`}>{payment.status}</span>
+                <span data-testid={`payment-status-${payment.id}`}>
+                  {payment.status}
+                </span>
                 {hasRole('VENDOR') && (
                   <>
                     <button
                       data-testid={`edit-${payment.id}`}
                       onClick={async () => {
                         if (mockData.onUpdatePayment) {
-                          await mockData.onUpdatePayment(payment.id, { amount: 150 });
+                          await mockData.onUpdatePayment(payment.id, {
+                            amount: 150,
+                          });
                         }
                       }}
                     >
@@ -124,7 +132,7 @@ describe('Payments Flow Integration Tests', () => {
         mutations: { retry: false },
       },
     });
-    vi.clearAllMocks();
+    jest.clearAllMocks();
   });
 
   const createWrapper = () => {
@@ -162,10 +170,15 @@ describe('Payments Flow Integration Tests', () => {
 
   describe('View Payments List', () => {
     it('should display payments list for authenticated user', () => {
-      (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
-        user: { id: 'user-1', email: 'test@example.com', name: 'Test', role: 'CUSTOMER' },
+      (useAuthStore as unknown as ReturnType<typeof jest.fn>).mockReturnValue({
+        user: {
+          id: 'user-1',
+          email: 'test@example.com',
+          name: 'Test',
+          role: 'CUSTOMER',
+        },
         isAuthenticated: true,
-        hasRole: vi.fn(() => false),
+        hasRole: jest.fn(() => false),
       });
 
       const MockComponent = createMockPaymentsComponent({
@@ -175,23 +188,31 @@ describe('Payments Flow Integration Tests', () => {
         hasRole: () => false,
       });
 
-      render(
-        <PaymentsPage PaymentsComponent={MockComponent} />,
-        { wrapper: createWrapper() }
-      );
+      render(<PaymentsPage PaymentsComponent={MockComponent} />, {
+        wrapper: createWrapper(),
+      });
 
       expect(screen.getByTestId('payments-list')).toBeInTheDocument();
       expect(screen.getByTestId('payment-pay-1')).toBeInTheDocument();
       expect(screen.getByTestId('payment-pay-2')).toBeInTheDocument();
-      expect(screen.getByTestId('payment-amount-pay-1')).toHaveTextContent('100.5 USD');
-      expect(screen.getByTestId('payment-status-pay-1')).toHaveTextContent('completed');
+      expect(screen.getByTestId('payment-amount-pay-1')).toHaveTextContent(
+        '100.5 USD'
+      );
+      expect(screen.getByTestId('payment-status-pay-1')).toHaveTextContent(
+        'completed'
+      );
     });
 
     it('should display loading state while fetching payments', () => {
-      (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
-        user: { id: 'user-1', email: 'test@example.com', name: 'Test', role: 'CUSTOMER' },
+      (useAuthStore as unknown as ReturnType<typeof jest.fn>).mockReturnValue({
+        user: {
+          id: 'user-1',
+          email: 'test@example.com',
+          name: 'Test',
+          role: 'CUSTOMER',
+        },
         isAuthenticated: true,
-        hasRole: vi.fn(() => false),
+        hasRole: jest.fn(() => false),
       });
 
       const MockComponent = createMockPaymentsComponent({
@@ -201,10 +222,9 @@ describe('Payments Flow Integration Tests', () => {
         hasRole: () => false,
       });
 
-      render(
-        <PaymentsPage PaymentsComponent={MockComponent} />,
-        { wrapper: createWrapper() }
-      );
+      render(<PaymentsPage PaymentsComponent={MockComponent} />, {
+        wrapper: createWrapper(),
+      });
 
       expect(screen.getByTestId('loading')).toBeInTheDocument();
     });
@@ -213,7 +233,7 @@ describe('Payments Flow Integration Tests', () => {
   describe('Create Payment (VENDOR)', () => {
     it('should create payment successfully', async () => {
       const user = userEvent.setup();
-      const onCreatePayment = vi.fn().mockResolvedValue({
+      const onCreatePayment = jest.fn().mockResolvedValue({
         id: 'pay-new',
         amount: 100,
         currency: 'USD',
@@ -223,10 +243,15 @@ describe('Payments Flow Integration Tests', () => {
         updatedAt: new Date().toISOString(),
       });
 
-      (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
-        user: { id: 'user-1', email: 'vendor@example.com', name: 'Vendor', role: 'VENDOR' },
+      (useAuthStore as unknown as ReturnType<typeof jest.fn>).mockReturnValue({
+        user: {
+          id: 'user-1',
+          email: 'vendor@example.com',
+          name: 'Vendor',
+          role: 'VENDOR',
+        },
         isAuthenticated: true,
-        hasRole: vi.fn((role: string) => role === 'VENDOR'),
+        hasRole: jest.fn((role: string) => role === 'VENDOR'),
       });
 
       const MockComponent = createMockPaymentsComponent({
@@ -237,10 +262,9 @@ describe('Payments Flow Integration Tests', () => {
         onCreatePayment,
       });
 
-      render(
-        <PaymentsPage PaymentsComponent={MockComponent} />,
-        { wrapper: createWrapper() }
-      );
+      render(<PaymentsPage PaymentsComponent={MockComponent} />, {
+        wrapper: createWrapper(),
+      });
 
       const createButton = screen.getByTestId('create-payment');
       await user.click(createButton);
@@ -259,7 +283,7 @@ describe('Payments Flow Integration Tests', () => {
   describe('Update Payment', () => {
     it('should update payment successfully', async () => {
       const user = userEvent.setup();
-      const onUpdatePayment = vi.fn().mockResolvedValue({
+      const onUpdatePayment = jest.fn().mockResolvedValue({
         id: 'pay-1',
         amount: 150,
         currency: 'USD',
@@ -268,10 +292,15 @@ describe('Payments Flow Integration Tests', () => {
         updatedAt: new Date().toISOString(),
       });
 
-      (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
-        user: { id: 'user-1', email: 'vendor@example.com', name: 'Vendor', role: 'VENDOR' },
+      (useAuthStore as unknown as ReturnType<typeof jest.fn>).mockReturnValue({
+        user: {
+          id: 'user-1',
+          email: 'vendor@example.com',
+          name: 'Vendor',
+          role: 'VENDOR',
+        },
         isAuthenticated: true,
-        hasRole: vi.fn((role: string) => role === 'VENDOR'),
+        hasRole: jest.fn((role: string) => role === 'VENDOR'),
       });
 
       const MockComponent = createMockPaymentsComponent({
@@ -282,10 +311,9 @@ describe('Payments Flow Integration Tests', () => {
         onUpdatePayment,
       });
 
-      render(
-        <PaymentsPage PaymentsComponent={MockComponent} />,
-        { wrapper: createWrapper() }
-      );
+      render(<PaymentsPage PaymentsComponent={MockComponent} />, {
+        wrapper: createWrapper(),
+      });
 
       const editButton = screen.getByTestId('edit-pay-1');
       await user.click(editButton);
@@ -299,12 +327,17 @@ describe('Payments Flow Integration Tests', () => {
   describe('Delete Payment', () => {
     it('should delete payment successfully', async () => {
       const user = userEvent.setup();
-      const onDeletePayment = vi.fn().mockResolvedValue(true);
+      const onDeletePayment = jest.fn().mockResolvedValue(true);
 
-      (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
-        user: { id: 'user-1', email: 'vendor@example.com', name: 'Vendor', role: 'VENDOR' },
+      (useAuthStore as unknown as ReturnType<typeof jest.fn>).mockReturnValue({
+        user: {
+          id: 'user-1',
+          email: 'vendor@example.com',
+          name: 'Vendor',
+          role: 'VENDOR',
+        },
         isAuthenticated: true,
-        hasRole: vi.fn((role: string) => role === 'VENDOR'),
+        hasRole: jest.fn((role: string) => role === 'VENDOR'),
       });
 
       const MockComponent = createMockPaymentsComponent({
@@ -315,10 +348,9 @@ describe('Payments Flow Integration Tests', () => {
         onDeletePayment,
       });
 
-      render(
-        <PaymentsPage PaymentsComponent={MockComponent} />,
-        { wrapper: createWrapper() }
-      );
+      render(<PaymentsPage PaymentsComponent={MockComponent} />, {
+        wrapper: createWrapper(),
+      });
 
       const deleteButton = screen.getByTestId('delete-pay-1');
       await user.click(deleteButton);
@@ -331,10 +363,15 @@ describe('Payments Flow Integration Tests', () => {
 
   describe('Role-Based Access', () => {
     it('should show create/edit/delete buttons for VENDOR', () => {
-      (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
-        user: { id: 'user-1', email: 'vendor@example.com', name: 'Vendor', role: 'VENDOR' },
+      (useAuthStore as unknown as ReturnType<typeof jest.fn>).mockReturnValue({
+        user: {
+          id: 'user-1',
+          email: 'vendor@example.com',
+          name: 'Vendor',
+          role: 'VENDOR',
+        },
         isAuthenticated: true,
-        hasRole: vi.fn((role: string) => role === 'VENDOR'),
+        hasRole: jest.fn((role: string) => role === 'VENDOR'),
       });
 
       const MockComponent = createMockPaymentsComponent({
@@ -344,10 +381,9 @@ describe('Payments Flow Integration Tests', () => {
         hasRole: () => true, // VENDOR role
       });
 
-      render(
-        <PaymentsPage PaymentsComponent={MockComponent} />,
-        { wrapper: createWrapper() }
-      );
+      render(<PaymentsPage PaymentsComponent={MockComponent} />, {
+        wrapper: createWrapper(),
+      });
 
       expect(screen.getByTestId('create-payment')).toBeInTheDocument();
       expect(screen.getByTestId('edit-pay-1')).toBeInTheDocument();
@@ -355,10 +391,15 @@ describe('Payments Flow Integration Tests', () => {
     });
 
     it('should hide create/edit/delete buttons for CUSTOMER', () => {
-      (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
-        user: { id: 'user-1', email: 'customer@example.com', name: 'Customer', role: 'CUSTOMER' },
+      (useAuthStore as unknown as ReturnType<typeof jest.fn>).mockReturnValue({
+        user: {
+          id: 'user-1',
+          email: 'customer@example.com',
+          name: 'Customer',
+          role: 'CUSTOMER',
+        },
         isAuthenticated: true,
-        hasRole: vi.fn(() => false),
+        hasRole: jest.fn(() => false),
       });
 
       const MockComponent = createMockPaymentsComponent({
@@ -368,10 +409,9 @@ describe('Payments Flow Integration Tests', () => {
         hasRole: () => false, // CUSTOMER role
       });
 
-      render(
-        <PaymentsPage PaymentsComponent={MockComponent} />,
-        { wrapper: createWrapper() }
-      );
+      render(<PaymentsPage PaymentsComponent={MockComponent} />, {
+        wrapper: createWrapper(),
+      });
 
       expect(screen.queryByTestId('create-payment')).not.toBeInTheDocument();
       expect(screen.queryByTestId('edit-pay-1')).not.toBeInTheDocument();

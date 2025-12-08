@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import React from 'react';
@@ -14,13 +14,13 @@ function ThrowError({ shouldThrow }: { shouldThrow: boolean }) {
 
 describe('RemoteErrorBoundary', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
     // Suppress console.error for expected error boundary tests
-    vi.spyOn(console, 'error').mockImplementation(() => {});
+    jest.spyOn(console, 'error').mockImplementation(() => {});
   });
 
   afterEach(() => {
-    vi.restoreAllMocks();
+    jest.restoreAllMocks();
   });
 
   it('renders children when no error occurs', () => {
@@ -46,7 +46,9 @@ describe('RemoteErrorBoundary', () => {
     );
 
     expect(screen.getByText('Failed to Load Component')).toBeInTheDocument();
-    expect(screen.getByText(/We couldn't load the component from the remote/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/We couldn't load the component from the remote/)
+    ).toBeInTheDocument();
   });
 
   it('displays error details when error occurs', () => {
@@ -87,11 +89,16 @@ describe('RemoteErrorBoundary', () => {
   });
 
   it('uses custom fallback when provided', () => {
-    const customFallback = <div data-testid="custom-fallback">Custom Error</div>;
+    const customFallback = (
+      <div data-testid="custom-fallback">Custom Error</div>
+    );
 
     render(
       <MemoryRouter>
-        <RemoteErrorBoundary componentName="TestComponent" fallback={customFallback}>
+        <RemoteErrorBoundary
+          componentName="TestComponent"
+          fallback={customFallback}
+        >
           <ThrowError shouldThrow={true} />
         </RemoteErrorBoundary>
       </MemoryRouter>
@@ -101,4 +108,3 @@ describe('RemoteErrorBoundary', () => {
     expect(screen.getByText('Custom Error')).toBeInTheDocument();
   });
 });
-

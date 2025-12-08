@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from '@jest/globals';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
@@ -7,14 +7,14 @@ import { useAuthStore } from 'shared-auth-store';
 import { getPayments } from '../api/stubbedPayments';
 
 // Mock the auth store
-vi.mock('shared-auth-store', () => ({
-  useAuthStore: vi.fn(),
+jest.mock('shared-auth-store', () => ({
+  useAuthStore: jest.fn(),
 }));
 
 // Mock the stubbed payments API
-vi.mock('../api/stubbedPayments', () => ({
-  getPayments: vi.fn(),
-  resetPaymentsStore: vi.fn(),
+jest.mock('../api/stubbedPayments', () => ({
+  getPayments: jest.fn(),
+  resetPaymentsStore: jest.fn(),
 }));
 
 describe('usePayments', () => {
@@ -28,7 +28,7 @@ describe('usePayments', () => {
         },
       },
     });
-    vi.clearAllMocks();
+    jest.clearAllMocks();
   });
 
   const createWrapper = () => {
@@ -45,7 +45,7 @@ describe('usePayments', () => {
       role: 'CUSTOMER' as const,
     };
 
-    (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+    (useAuthStore as unknown as ReturnType<typeof jest.fn>).mockReturnValue({
       user: mockUser,
     });
 
@@ -62,7 +62,7 @@ describe('usePayments', () => {
       },
     ];
 
-    (getPayments as ReturnType<typeof vi.fn>).mockResolvedValue(mockPayments);
+    (getPayments as ReturnType<typeof jest.fn>).mockResolvedValue(mockPayments);
 
     const { result } = renderHook(() => usePayments(), {
       wrapper: createWrapper(),
@@ -84,7 +84,7 @@ describe('usePayments', () => {
       role: 'VENDOR' as const,
     };
 
-    (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+    (useAuthStore as unknown as ReturnType<typeof jest.fn>).mockReturnValue({
       user: mockUser,
     });
 
@@ -101,7 +101,7 @@ describe('usePayments', () => {
       },
     ];
 
-    (getPayments as ReturnType<typeof vi.fn>).mockResolvedValue(mockPayments);
+    (getPayments as ReturnType<typeof jest.fn>).mockResolvedValue(mockPayments);
 
     const { result } = renderHook(() => usePayments(), {
       wrapper: createWrapper(),
@@ -115,7 +115,7 @@ describe('usePayments', () => {
   });
 
   it('does not fetch when user is not authenticated', () => {
-    (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+    (useAuthStore as unknown as ReturnType<typeof jest.fn>).mockReturnValue({
       user: null,
     });
 
@@ -135,11 +135,11 @@ describe('usePayments', () => {
       role: 'CUSTOMER' as const,
     };
 
-    (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+    (useAuthStore as unknown as ReturnType<typeof jest.fn>).mockReturnValue({
       user: mockUser,
     });
 
-    (getPayments as ReturnType<typeof vi.fn>).mockImplementation(
+    (getPayments as ReturnType<typeof jest.fn>).mockImplementation(
       () => new Promise(() => {}) // Never resolves
     );
 
@@ -158,12 +158,12 @@ describe('usePayments', () => {
       role: 'CUSTOMER' as const,
     };
 
-    (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+    (useAuthStore as unknown as ReturnType<typeof jest.fn>).mockReturnValue({
       user: mockUser,
     });
 
     const mockError = new Error('Failed to fetch payments');
-    (getPayments as ReturnType<typeof vi.fn>).mockRejectedValue(mockError);
+    (getPayments as ReturnType<typeof jest.fn>).mockRejectedValue(mockError);
 
     const { result } = renderHook(() => usePayments(), {
       wrapper: createWrapper(),
@@ -197,7 +197,7 @@ describe('useInvalidatePayments', () => {
   };
 
   it('invalidates payments queries', () => {
-    const invalidateQueriesSpy = vi.spyOn(queryClient, 'invalidateQueries');
+    const invalidateQueriesSpy = jest.spyOn(queryClient, 'invalidateQueries');
 
     const { result } = renderHook(() => useInvalidatePayments(), {
       wrapper: createWrapper(),
@@ -210,4 +210,3 @@ describe('useInvalidatePayments', () => {
     });
   });
 });
-

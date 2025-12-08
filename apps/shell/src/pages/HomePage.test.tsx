@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from '@jest/globals';
 import { render, screen } from '@testing-library/react';
 import { HomePage } from './HomePage';
 
@@ -10,4 +10,3 @@ describe('HomePage', () => {
     expect(screen.getByText(/This is the home page/i)).toBeInTheDocument();
   });
 });
-

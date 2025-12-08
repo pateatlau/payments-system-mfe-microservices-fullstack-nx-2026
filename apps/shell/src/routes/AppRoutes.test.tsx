@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from '@jest/globals';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter, Navigate } from 'react-router-dom';
 import { useAuthStore } from 'shared-auth-store';
@@ -6,12 +6,12 @@ import { ReactNode } from 'react';
 import { AppRoutes } from './AppRoutes';
 
 // Mock the auth store
-vi.mock('shared-auth-store', () => ({
-  useAuthStore: vi.fn(),
+jest.mock('shared-auth-store', () => ({
+  useAuthStore: jest.fn(),
 }));
 
 // Mock ProtectedRoute to simulate its behavior based on auth state
-vi.mock('../components/ProtectedRoute', () => ({
+jest.mock('../components/ProtectedRoute', () => ({
   ProtectedRoute: ({ children }: { children: ReactNode }) => {
     // Access the mock to get current auth state
     const { isAuthenticated, isLoading } = useAuthStore();
@@ -26,19 +26,19 @@ vi.mock('../components/ProtectedRoute', () => ({
 }));
 
 // Mock the page components
-vi.mock('../pages/SignInPage', () => ({
+jest.mock('../pages/SignInPage', () => ({
   SignInPage: () => <div data-testid="signin-page">SignInPage</div>,
 }));
 
-vi.mock('../pages/SignUpPage', () => ({
+jest.mock('../pages/SignUpPage', () => ({
   SignUpPage: () => <div data-testid="signup-page">SignUpPage</div>,
 }));
 
-vi.mock('../pages/PaymentsPage', () => ({
+jest.mock('../pages/PaymentsPage', () => ({
   PaymentsPage: () => <div data-testid="payments-page">PaymentsPage</div>,
 }));
 
-vi.mock('../pages/HomePage', () => ({
+jest.mock('../pages/HomePage', () => ({
   HomePage: () => <div data-testid="home-page">HomePage</div>,
 }));
 
@@ -49,7 +49,7 @@ const MockPayments = () => <div>Mock Payments</div>;
 
 describe('AppRoutes', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
   });
 
   const renderWithRouter = (initialEntries: string[] = ['/']) => {
@@ -66,7 +66,7 @@ describe('AppRoutes', () => {
 
   describe('Root route (/)', () => {
     it('redirects to /signin when not authenticated', () => {
-      (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      (useAuthStore as unknown as ReturnType<typeof jest.fn>).mockReturnValue({
         isAuthenticated: false,
         isLoading: false,
       });
@@ -79,7 +79,7 @@ describe('AppRoutes', () => {
     });
 
     it('redirects to /payments when authenticated', () => {
-      (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      (useAuthStore as unknown as ReturnType<typeof jest.fn>).mockReturnValue({
         isAuthenticated: true,
         isLoading: false,
       });
@@ -93,7 +93,7 @@ describe('AppRoutes', () => {
 
   describe('Authentication routes', () => {
     it('renders SignInPage at /signin', () => {
-      (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      (useAuthStore as unknown as ReturnType<typeof jest.fn>).mockReturnValue({
         isAuthenticated: false,
         isLoading: false,
       });
@@ -105,7 +105,7 @@ describe('AppRoutes', () => {
     });
 
     it('renders SignUpPage at /signup', () => {
-      (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      (useAuthStore as unknown as ReturnType<typeof jest.fn>).mockReturnValue({
         isAuthenticated: false,
         isLoading: false,
       });
@@ -119,7 +119,7 @@ describe('AppRoutes', () => {
 
   describe('Protected routes', () => {
     it('renders PaymentsPage at /payments when authenticated', () => {
-      (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      (useAuthStore as unknown as ReturnType<typeof jest.fn>).mockReturnValue({
         isAuthenticated: true,
         isLoading: false,
       });
@@ -131,7 +131,7 @@ describe('AppRoutes', () => {
     });
 
     it('redirects to /signin at /payments when not authenticated', () => {
-      (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      (useAuthStore as unknown as ReturnType<typeof jest.fn>).mockReturnValue({
         isAuthenticated: false,
         isLoading: false,
       });
@@ -144,7 +144,7 @@ describe('AppRoutes', () => {
     });
 
     it('shows loading state while checking auth at /payments', () => {
-      (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      (useAuthStore as unknown as ReturnType<typeof jest.fn>).mockReturnValue({
         isAuthenticated: false,
         isLoading: true,
       });
@@ -159,7 +159,7 @@ describe('AppRoutes', () => {
 
   describe('Other routes', () => {
     it('renders HomePage at /home', () => {
-      (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      (useAuthStore as unknown as ReturnType<typeof jest.fn>).mockReturnValue({
         isAuthenticated: false,
         isLoading: false,
       });
@@ -171,7 +171,7 @@ describe('AppRoutes', () => {
     });
 
     it('redirects unknown routes to root and then to signin', () => {
-      (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      (useAuthStore as unknown as ReturnType<typeof jest.fn>).mockReturnValue({
         isAuthenticated: false,
         isLoading: false,
       });

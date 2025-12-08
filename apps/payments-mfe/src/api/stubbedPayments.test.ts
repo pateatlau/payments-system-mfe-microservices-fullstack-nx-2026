@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach } from '@jest/globals';
 import {
   getPayments,
   getPaymentById,
@@ -26,7 +26,7 @@ describe('stubbedPayments', () => {
     it('filters payments by userId when provided', async () => {
       const payments = await getPayments('user-1');
       expect(payments.length).toBeGreaterThan(0);
-      payments.forEach((payment) => {
+      payments.forEach(payment => {
         expect(payment.userId).toBe('user-1');
       });
     });
@@ -211,7 +211,7 @@ describe('stubbedPayments', () => {
     it('updates updatedAt timestamp', async () => {
       const paymentBefore = await getPaymentById('1');
       // Wait a bit to ensure timestamp difference
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await new Promise(resolve => setTimeout(resolve, 100));
 
       const updateData: UpdatePaymentDto = {
         amount: 300.0,
@@ -253,7 +253,7 @@ describe('stubbedPayments', () => {
     it('updates updatedAt timestamp when cancelling', async () => {
       const paymentBefore = await getPaymentById('1');
       // Wait a bit to ensure timestamp difference
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await new Promise(resolve => setTimeout(resolve, 100));
 
       await deletePayment('1');
 
@@ -281,8 +281,7 @@ describe('stubbedPayments', () => {
       // Verify store is reset
       const paymentsAfter = await getPayments();
       expect(paymentsAfter.length).toBe(3);
-      expect(paymentsAfter.find((p) => p.amount === 999.0)).toBeUndefined();
+      expect(paymentsAfter.find(p => p.amount === 999.0)).toBeUndefined();
     });
   });
 });
-

@@ -1,5 +1,5 @@
 /**
- * Vitest setup file for shared-auth-store library tests
+ * Jest setup file for shared-auth-store library tests
  * This file runs before each test file
  */
 
@@ -37,10 +37,12 @@ if (typeof globalThis.localStorage === 'undefined') {
 }
 
 // Also set up on window for browser-like environment
-if (typeof window !== 'undefined' && typeof window.localStorage === 'undefined') {
+if (
+  typeof window !== 'undefined' &&
+  typeof window.localStorage === 'undefined'
+) {
   Object.defineProperty(window, 'localStorage', {
     value: localStorageMock,
     writable: true,
   });
 }
-

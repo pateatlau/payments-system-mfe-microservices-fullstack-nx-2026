@@ -1,5 +1,5 @@
 import React from 'react';
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from '@jest/globals';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
@@ -11,30 +11,32 @@ const defaultMockState = {
   isAuthenticated: false,
   isLoading: false,
   user: null,
-  login: vi.fn(),
-  logout: vi.fn(),
-  signup: vi.fn(),
+  login: jest.fn(),
+  logout: jest.fn(),
+  signup: jest.fn(),
 };
 
 // Current mock state (mutable for tests)
 let currentMockState = { ...defaultMockState };
 
 // Mock the auth store - handle both selector and direct usage
-vi.mock('shared-auth-store', () => ({
-  useAuthStore: vi.fn((selector?: (state: typeof defaultMockState) => unknown) => {
-    // If a selector is passed, call it with the mock state
-    if (typeof selector === 'function') {
-      return selector(currentMockState);
+jest.mock('shared-auth-store', () => ({
+  useAuthStore: jest.fn(
+    (selector?: (state: typeof defaultMockState) => unknown) => {
+      // If a selector is passed, call it with the mock state
+      if (typeof selector === 'function') {
+        return selector(currentMockState);
+      }
+      return currentMockState;
     }
-    return currentMockState;
-  }),
+  ),
 }));
 
 // Helper to set mock auth state
 function setMockAuthState(state: Partial<typeof defaultMockState>) {
   currentMockState = { ...defaultMockState, ...state };
   // Update the mock implementation with new state
-  (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockImplementation(
+  (useAuthStore as unknown as ReturnType<typeof jest.fn>).mockImplementation(
     (selector?: (state: typeof defaultMockState) => unknown) => {
       if (typeof selector === 'function') {
         return selector(currentMockState);
@@ -46,7 +48,7 @@ function setMockAuthState(state: Partial<typeof defaultMockState>) {
 
 // Mock components for testing
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const MockSignIn = vi.fn(({ onSuccess, onNavigateToSignUp }: any) => (
+const MockSignIn = jest.fn(({ onSuccess, onNavigateToSignUp }: any) => (
   <div data-testid="mock-signin">
     <button onClick={onSuccess} data-testid="signin-success">
       Sign In Success
@@ -58,7 +60,7 @@ const MockSignIn = vi.fn(({ onSuccess, onNavigateToSignUp }: any) => (
 ));
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const MockSignUp = vi.fn(({ onSuccess, onNavigateToSignIn }: any) => (
+const MockSignUp = jest.fn(({ onSuccess, onNavigateToSignIn }: any) => (
   <div data-testid="mock-signup">
     <button onClick={onSuccess} data-testid="signup-success">
       Sign Up Success
@@ -69,21 +71,23 @@ const MockSignUp = vi.fn(({ onSuccess, onNavigateToSignIn }: any) => (
   </div>
 ));
 
-const MockPaymentsPage = vi.fn(() => (
+const MockPaymentsPage = jest.fn(() => (
   <div data-testid="mock-payments">
     <h1>Payments Page</h1>
   </div>
 ));
 
 // Mock ProtectedRoute
-vi.mock('../components/ProtectedRoute', () => ({
+jest.mock('../components/ProtectedRoute', () => ({
   ProtectedRoute: ({ children }: { children: React.ReactNode }) => {
     const { isAuthenticated, isLoading } = useAuthStore();
     if (isLoading) {
       return <div data-testid="loading">Loading...</div>;
     }
     if (!isAuthenticated) {
-      return <div data-testid="redirect-to-signin">Redirecting to sign in...</div>;
+      return (
+        <div data-testid="redirect-to-signin">Redirecting to sign in...</div>
+      );
     }
     return <>{children}</>;
   },
@@ -91,7 +95,7 @@ vi.mock('../components/ProtectedRoute', () => ({
 
 describe('App Integration Tests', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
     // Reset to default state
     currentMockState = { ...defaultMockState };
   });
@@ -212,7 +216,12 @@ describe('App Integration Tests', () => {
       setMockAuthState({
         isAuthenticated: true,
         isLoading: false,
-        user: { id: '1', email: 'test@example.com', name: 'Test User', role: 'CUSTOMER' } as User,
+        user: {
+          id: '1',
+          email: 'test@example.com',
+          name: 'Test User',
+          role: 'CUSTOMER',
+        } as User,
       });
     });
 
@@ -290,7 +299,12 @@ describe('App Integration Tests', () => {
       setMockAuthState({
         isAuthenticated: true,
         isLoading: false,
-        user: { id: '1', email: 'test@example.com', name: 'Test User', role: 'CUSTOMER' } as User,
+        user: {
+          id: '1',
+          email: 'test@example.com',
+          name: 'Test User',
+          role: 'CUSTOMER',
+        } as User,
       });
 
       render(
@@ -304,14 +318,21 @@ describe('App Integration Tests', () => {
       );
 
       expect(screen.getByTestId('mock-payments')).toBeInTheDocument();
-      expect(screen.queryByTestId('redirect-to-signin')).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId('redirect-to-signin')
+      ).not.toBeInTheDocument();
     });
 
     it('should redirect authenticated user from /signin to /payments', () => {
       setMockAuthState({
         isAuthenticated: true,
         isLoading: false,
-        user: { id: '1', email: 'test@example.com', name: 'Test User', role: 'CUSTOMER' } as User,
+        user: {
+          id: '1',
+          email: 'test@example.com',
+          name: 'Test User',
+          role: 'CUSTOMER',
+        } as User,
       });
 
       render(
@@ -354,7 +375,12 @@ describe('App Integration Tests', () => {
       setMockAuthState({
         isAuthenticated: true,
         isLoading: false,
-        user: { id: '1', email: 'test@example.com', name: 'Test User', role: 'CUSTOMER' } as User,
+        user: {
+          id: '1',
+          email: 'test@example.com',
+          name: 'Test User',
+          role: 'CUSTOMER',
+        } as User,
       });
 
       rerender(
@@ -404,7 +430,7 @@ describe('App Integration Tests', () => {
 
     it('should navigate between signin and signup pages', async () => {
       const user = userEvent.setup();
-      
+
       render(
         <MemoryRouter initialEntries={['/signin']}>
           <AppRoutes
@@ -434,4 +460,3 @@ describe('App Integration Tests', () => {
     });
   });
 });
-

@@ -1,6 +1,5 @@
 /**
- * Vitest setup file for payments-mfe app tests
+ * Jest setup file for payments-mfe app tests
  * This file runs before each test file
  */
 import '@testing-library/jest-dom';
-

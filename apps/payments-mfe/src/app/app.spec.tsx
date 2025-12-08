@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from '@jest/globals';
 import { render, screen } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
@@ -7,27 +7,27 @@ import { useAuthStore } from 'shared-auth-store';
 import { usePayments } from '../hooks';
 
 // Mock the auth store
-vi.mock('shared-auth-store', () => ({
-  useAuthStore: vi.fn(),
+jest.mock('shared-auth-store', () => ({
+  useAuthStore: jest.fn(),
 }));
 
 // Mock the hooks
-vi.mock('../hooks', () => ({
-  usePayments: vi.fn(),
-  useCreatePayment: vi.fn(() => ({
-    mutateAsync: vi.fn(),
+jest.mock('../hooks', () => ({
+  usePayments: jest.fn(),
+  useCreatePayment: jest.fn(() => ({
+    mutateAsync: jest.fn(),
     isPending: false,
     isError: false,
     error: null,
   })),
-  useUpdatePayment: vi.fn(() => ({
-    mutateAsync: vi.fn(),
+  useUpdatePayment: jest.fn(() => ({
+    mutateAsync: jest.fn(),
     isPending: false,
     isError: false,
     error: null,
   })),
-  useDeletePayment: vi.fn(() => ({
-    mutateAsync: vi.fn(),
+  useDeletePayment: jest.fn(() => ({
+    mutateAsync: jest.fn(),
     isPending: false,
     isError: false,
     error: null,
@@ -44,7 +44,7 @@ describe('App', () => {
         mutations: { retry: false },
       },
     });
-    vi.clearAllMocks();
+    jest.clearAllMocks();
   });
 
   const createWrapper = () => {
@@ -54,12 +54,17 @@ describe('App', () => {
   };
 
   it('should render successfully', () => {
-    (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
-      user: { id: 'user-1', email: 'test@example.com', name: 'Test', role: 'CUSTOMER' },
-      hasRole: vi.fn(() => false),
+    (useAuthStore as unknown as ReturnType<typeof jest.fn>).mockReturnValue({
+      user: {
+        id: 'user-1',
+        email: 'test@example.com',
+        name: 'Test',
+        role: 'CUSTOMER',
+      },
+      hasRole: jest.fn(() => false),
     });
 
-    (usePayments as ReturnType<typeof vi.fn>).mockReturnValue({
+    (usePayments as ReturnType<typeof jest.fn>).mockReturnValue({
       data: [],
       isLoading: false,
       error: null,
@@ -70,12 +75,17 @@ describe('App', () => {
   });
 
   it('should render PaymentsPage', () => {
-    (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
-      user: { id: 'user-1', email: 'test@example.com', name: 'Test', role: 'CUSTOMER' },
-      hasRole: vi.fn(() => false),
+    (useAuthStore as unknown as ReturnType<typeof jest.fn>).mockReturnValue({
+      user: {
+        id: 'user-1',
+        email: 'test@example.com',
+        name: 'Test',
+        role: 'CUSTOMER',
+      },
+      hasRole: jest.fn(() => false),
     });
 
-    (usePayments as ReturnType<typeof vi.fn>).mockReturnValue({
+    (usePayments as ReturnType<typeof jest.fn>).mockReturnValue({
       data: [],
       isLoading: false,
       error: null,

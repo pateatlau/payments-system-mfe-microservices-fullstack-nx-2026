@@ -1,23 +1,23 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach } from '@jest/globals';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { SignUp } from './SignUp';
 import { useAuthStore } from 'shared-auth-store';
 
 // Mock the auth store
-vi.mock('shared-auth-store', () => ({
-  useAuthStore: vi.fn(),
+jest.mock('shared-auth-store', () => ({
+  useAuthStore: jest.fn(),
 }));
 
 describe('SignUp', () => {
-  const mockSignup = vi.fn();
-  const mockClearError = vi.fn();
-  const mockOnSuccess = vi.fn();
-  const mockOnNavigateToSignIn = vi.fn();
+  const mockSignup = jest.fn();
+  const mockClearError = jest.fn();
+  const mockOnSuccess = jest.fn();
+  const mockOnNavigateToSignIn = jest.fn();
 
   beforeEach(() => {
-    vi.clearAllMocks();
-    (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+    jest.clearAllMocks();
+    (useAuthStore as unknown as ReturnType<typeof jest.fn>).mockReturnValue({
       signup: mockSignup,
       isLoading: false,
       error: null,
@@ -28,12 +28,16 @@ describe('SignUp', () => {
   it('renders sign-up form', () => {
     render(<SignUp />);
 
-    expect(screen.getByRole('heading', { name: /sign up/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: /sign up/i })
+    ).toBeInTheDocument();
     expect(screen.getByLabelText('Full Name')).toBeInTheDocument();
     expect(screen.getByLabelText('Email')).toBeInTheDocument();
     expect(screen.getByLabelText('Password')).toBeInTheDocument();
     expect(screen.getByLabelText('Confirm Password')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /sign up/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /sign up/i })
+    ).toBeInTheDocument();
   });
 
   it('displays validation error for empty name', async () => {
@@ -72,7 +76,9 @@ describe('SignUp', () => {
     await user.click(submitButton);
 
     await waitFor(() => {
-      expect(screen.getByText('Name must be at least 2 characters')).toBeInTheDocument();
+      expect(
+        screen.getByText('Name must be at least 2 characters')
+      ).toBeInTheDocument();
     });
   });
 
@@ -93,7 +99,7 @@ describe('SignUp', () => {
     await user.click(submitButton);
 
     // Wait a bit for validation to process
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    await new Promise(resolve => setTimeout(resolve, 100));
 
     // Check that signup was not called due to validation error
     expect(mockSignup).not.toHaveBeenCalled();
@@ -116,7 +122,9 @@ describe('SignUp', () => {
     await user.click(submitButton);
 
     await waitFor(() => {
-      expect(screen.getByText('Password must be at least 12 characters')).toBeInTheDocument();
+      expect(
+        screen.getByText('Password must be at least 12 characters')
+      ).toBeInTheDocument();
     });
   });
 
@@ -137,7 +145,7 @@ describe('SignUp', () => {
     await user.click(submitButton);
 
     // Wait a bit for validation to process
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    await new Promise(resolve => setTimeout(resolve, 100));
 
     // Check that signup was not called due to validation error
     expect(mockSignup).not.toHaveBeenCalled();
@@ -196,7 +204,7 @@ describe('SignUp', () => {
     mockSignup.mockResolvedValue(undefined);
 
     // Start with unauthenticated state
-    (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+    (useAuthStore as unknown as ReturnType<typeof jest.fn>).mockReturnValue({
       signup: mockSignup,
       isLoading: false,
       error: null,
@@ -224,7 +232,7 @@ describe('SignUp', () => {
     });
 
     // Update mock to reflect authenticated state (simulating store update)
-    (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+    (useAuthStore as unknown as ReturnType<typeof jest.fn>).mockReturnValue({
       signup: mockSignup,
       isLoading: false,
       error: null,
@@ -234,15 +242,18 @@ describe('SignUp', () => {
     rerender(<SignUp onSuccess={mockOnSuccess} />);
 
     // onSuccess should be called when isAuthenticated becomes true
-    await waitFor(() => {
-      expect(mockOnSuccess).toHaveBeenCalled();
-    }, { timeout: 3000 });
+    await waitFor(
+      () => {
+        expect(mockOnSuccess).toHaveBeenCalled();
+      },
+      { timeout: 3000 }
+    );
   });
 
   it('displays loading state during form submission', async () => {
     const user = userEvent.setup();
     mockSignup.mockImplementation(
-      () => new Promise((resolve) => setTimeout(resolve, 100))
+      () => new Promise(resolve => setTimeout(resolve, 100))
     );
 
     render(<SignUp />);
@@ -264,7 +275,7 @@ describe('SignUp', () => {
   });
 
   it('displays error from auth store', () => {
-    (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+    (useAuthStore as unknown as ReturnType<typeof jest.fn>).mockReturnValue({
       signup: mockSignup,
       isLoading: false,
       error: 'Email already exists',
@@ -277,7 +288,7 @@ describe('SignUp', () => {
   });
 
   it('clears error when component mounts with error', () => {
-    (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+    (useAuthStore as unknown as ReturnType<typeof jest.fn>).mockReturnValue({
       signup: mockSignup,
       isLoading: false,
       error: 'Some error',
@@ -290,7 +301,7 @@ describe('SignUp', () => {
   });
 
   it('disables form fields when loading', () => {
-    (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+    (useAuthStore as unknown as ReturnType<typeof jest.fn>).mockReturnValue({
       signup: mockSignup,
       isLoading: true,
       error: null,
@@ -303,14 +314,18 @@ describe('SignUp', () => {
     expect(screen.getByLabelText('Email')).toBeDisabled();
     expect(screen.getByLabelText('Password')).toBeDisabled();
     expect(screen.getByLabelText('Confirm Password')).toBeDisabled();
-    expect(screen.getByRole('button', { name: /creating account/i })).toBeDisabled();
+    expect(
+      screen.getByRole('button', { name: /creating account/i })
+    ).toBeDisabled();
   });
 
   it('renders sign-in link when onNavigateToSignIn is provided', () => {
     render(<SignUp onNavigateToSignIn={mockOnNavigateToSignIn} />);
 
     expect(screen.getByText('Already have an account?')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /sign in/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /sign in/i })
+    ).toBeInTheDocument();
   });
 
   it('calls onNavigateToSignIn when sign-in link is clicked', async () => {
@@ -326,7 +341,9 @@ describe('SignUp', () => {
   it('does not render sign-in link when onNavigateToSignIn is not provided', () => {
     render(<SignUp />);
 
-    expect(screen.queryByText('Already have an account?')).not.toBeInTheDocument();
+    expect(
+      screen.queryByText('Already have an account?')
+    ).not.toBeInTheDocument();
   });
 
   it('displays password strength indicator', async () => {
@@ -337,7 +354,9 @@ describe('SignUp', () => {
 
     // Type a weak password
     await user.type(passwordInput, 'weak');
-    expect(screen.getByText(/password strength: too short/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/password strength: too short/i)
+    ).toBeInTheDocument();
 
     // Type a medium password
     await user.clear(passwordInput);
@@ -365,7 +384,10 @@ describe('SignUp', () => {
     expect(passwordInput).toHaveAttribute('type', 'password');
     expect(passwordInput).toHaveAttribute('autoComplete', 'new-password');
     expect(confirmPasswordInput).toHaveAttribute('type', 'password');
-    expect(confirmPasswordInput).toHaveAttribute('autoComplete', 'new-password');
+    expect(confirmPasswordInput).toHaveAttribute(
+      'autoComplete',
+      'new-password'
+    );
   });
 
   it('displays password requirements hint', () => {
@@ -378,4 +400,3 @@ describe('SignUp', () => {
     ).toBeInTheDocument();
   });
 });
-

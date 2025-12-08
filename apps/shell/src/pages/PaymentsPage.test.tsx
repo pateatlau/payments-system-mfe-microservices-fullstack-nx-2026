@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from '@jest/globals';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { PaymentsPage, PaymentsComponentProps } from './PaymentsPage';
@@ -14,7 +14,7 @@ function MockPaymentsPage(_props: PaymentsComponentProps) {
 
 describe('PaymentsPage', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
   });
 
   it('renders PaymentsPage component when component is injected', () => {
@@ -24,7 +24,9 @@ describe('PaymentsPage', () => {
       </MemoryRouter>
     );
 
-    expect(screen.getByText('Mocked PaymentsPage Component')).toBeInTheDocument();
+    expect(
+      screen.getByText('Mocked PaymentsPage Component')
+    ).toBeInTheDocument();
     expect(screen.getByTestId('mock-payments')).toBeInTheDocument();
   });
 

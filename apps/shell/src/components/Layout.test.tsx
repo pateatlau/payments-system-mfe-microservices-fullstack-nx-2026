@@ -1,17 +1,23 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from '@jest/globals';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { useAuthStore } from 'shared-auth-store';
 import { Layout } from './Layout';
 
 // Mock the auth store
-vi.mock('shared-auth-store', () => ({
-  useAuthStore: vi.fn(),
+jest.mock('shared-auth-store', () => ({
+  useAuthStore: jest.fn(),
 }));
 
 // Mock the Header component
-vi.mock('shared-header-ui', () => ({
-  Header: ({ onLogout, branding }: { onLogout?: () => void; branding?: string }) => (
+jest.mock('shared-header-ui', () => ({
+  Header: ({
+    onLogout,
+    branding,
+  }: {
+    onLogout?: () => void;
+    branding?: string;
+  }) => (
     <header data-testid="header">
       <div>Header Component</div>
       <div>Branding: {branding || 'Payments System'}</div>
@@ -25,9 +31,9 @@ vi.mock('shared-header-ui', () => ({
 }));
 
 // Mock useNavigate
-const mockNavigate = vi.fn();
-vi.mock('react-router-dom', async () => {
-  const actual = await vi.importActual('react-router-dom');
+const mockNavigate = jest.fn();
+jest.mock('react-router-dom', async () => {
+  const actual = await jest.importActual('react-router-dom');
   return {
     ...actual,
     useNavigate: () => mockNavigate,
@@ -36,13 +42,13 @@ vi.mock('react-router-dom', async () => {
 
 describe('Layout', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
     mockNavigate.mockClear();
   });
 
   it('renders Header component', () => {
-    (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
-      logout: vi.fn(),
+    (useAuthStore as unknown as ReturnType<typeof jest.fn>).mockReturnValue({
+      logout: jest.fn(),
     });
 
     render(
@@ -58,8 +64,8 @@ describe('Layout', () => {
   });
 
   it('renders children in main content area', () => {
-    (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
-      logout: vi.fn(),
+    (useAuthStore as unknown as ReturnType<typeof jest.fn>).mockReturnValue({
+      logout: jest.fn(),
     });
 
     render(
@@ -75,8 +81,8 @@ describe('Layout', () => {
   });
 
   it('passes onLogout callback to Header', () => {
-    const mockLogout = vi.fn();
-    (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+    const mockLogout = jest.fn();
+    (useAuthStore as unknown as ReturnType<typeof jest.fn>).mockReturnValue({
       logout: mockLogout,
     });
 
@@ -101,8 +107,8 @@ describe('Layout', () => {
   });
 
   it('redirects to /signin after logout', () => {
-    const mockLogout = vi.fn();
-    (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+    const mockLogout = jest.fn();
+    (useAuthStore as unknown as ReturnType<typeof jest.fn>).mockReturnValue({
       logout: mockLogout,
     });
 
@@ -122,8 +128,8 @@ describe('Layout', () => {
   });
 
   it('applies correct layout structure and classes', () => {
-    (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
-      logout: vi.fn(),
+    (useAuthStore as unknown as ReturnType<typeof jest.fn>).mockReturnValue({
+      logout: jest.fn(),
     });
 
     const { container } = render(
@@ -144,8 +150,8 @@ describe('Layout', () => {
   });
 
   it('renders Header with default branding', () => {
-    (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
-      logout: vi.fn(),
+    (useAuthStore as unknown as ReturnType<typeof jest.fn>).mockReturnValue({
+      logout: jest.fn(),
     });
 
     render(
@@ -159,4 +165,3 @@ describe('Layout', () => {
     expect(screen.getByText('Branding: Payments System')).toBeInTheDocument();
   });
 });
-

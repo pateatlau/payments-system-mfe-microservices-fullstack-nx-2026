@@ -1,12 +1,12 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from '@jest/globals';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import { useAuthStore } from 'shared-auth-store';
 import { ProtectedRoute } from './ProtectedRoute';
 
 // Mock the auth store
-vi.mock('shared-auth-store', () => ({
-  useAuthStore: vi.fn(),
+jest.mock('shared-auth-store', () => ({
+  useAuthStore: jest.fn(),
 }));
 
 // Helper to render with router
@@ -17,8 +17,14 @@ function renderWithRouter(
   return render(
     <MemoryRouter initialEntries={initialEntries}>
       <Routes>
-        <Route path="/signin" element={<div data-testid="signin-page">Sign In Page</div>} />
-        <Route path="/custom-login" element={<div data-testid="custom-login">Custom Login</div>} />
+        <Route
+          path="/signin"
+          element={<div data-testid="signin-page">Sign In Page</div>}
+        />
+        <Route
+          path="/custom-login"
+          element={<div data-testid="custom-login">Custom Login</div>}
+        />
         <Route path="/protected" element={ui} />
       </Routes>
     </MemoryRouter>
@@ -27,12 +33,12 @@ function renderWithRouter(
 
 describe('ProtectedRoute', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
   });
 
   describe('when user is authenticated', () => {
     beforeEach(() => {
-      (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      (useAuthStore as unknown as ReturnType<typeof jest.fn>).mockReturnValue({
         isAuthenticated: true,
         isLoading: false,
       });
@@ -56,7 +62,9 @@ describe('ProtectedRoute', () => {
         </ProtectedRoute>
       );
 
-      expect(screen.queryByText('Checking authentication...')).not.toBeInTheDocument();
+      expect(
+        screen.queryByText('Checking authentication...')
+      ).not.toBeInTheDocument();
     });
 
     it('does not redirect when authenticated', () => {
@@ -73,7 +81,7 @@ describe('ProtectedRoute', () => {
 
   describe('when user is not authenticated', () => {
     beforeEach(() => {
-      (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      (useAuthStore as unknown as ReturnType<typeof jest.fn>).mockReturnValue({
         isAuthenticated: false,
         isLoading: false,
       });
@@ -114,7 +122,7 @@ describe('ProtectedRoute', () => {
 
   describe('when auth is loading', () => {
     beforeEach(() => {
-      (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      (useAuthStore as unknown as ReturnType<typeof jest.fn>).mockReturnValue({
         isAuthenticated: false,
         isLoading: true,
       });
@@ -127,20 +135,28 @@ describe('ProtectedRoute', () => {
         </ProtectedRoute>
       );
 
-      expect(screen.getByText('Checking authentication...')).toBeInTheDocument();
+      expect(
+        screen.getByText('Checking authentication...')
+      ).toBeInTheDocument();
       expect(screen.queryByTestId('protected-content')).not.toBeInTheDocument();
     });
 
     it('shows custom loading component when provided', () => {
       renderWithRouter(
-        <ProtectedRoute loadingComponent={<div data-testid="custom-loader">Custom Loading...</div>}>
+        <ProtectedRoute
+          loadingComponent={
+            <div data-testid="custom-loader">Custom Loading...</div>
+          }
+        >
           <div data-testid="protected-content">Protected Content</div>
         </ProtectedRoute>
       );
 
       expect(screen.getByTestId('custom-loader')).toBeInTheDocument();
       expect(screen.getByText('Custom Loading...')).toBeInTheDocument();
-      expect(screen.queryByText('Checking authentication...')).not.toBeInTheDocument();
+      expect(
+        screen.queryByText('Checking authentication...')
+      ).not.toBeInTheDocument();
     });
 
     it('does not redirect while loading', () => {
@@ -166,7 +182,7 @@ describe('ProtectedRoute', () => {
 
   describe('accessibility', () => {
     it('renders loading spinner with proper structure', () => {
-      (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      (useAuthStore as unknown as ReturnType<typeof jest.fn>).mockReturnValue({
         isAuthenticated: false,
         isLoading: true,
       });
@@ -178,14 +194,16 @@ describe('ProtectedRoute', () => {
       );
 
       // Check loading text is present for screen readers
-      expect(screen.getByText('Checking authentication...')).toBeInTheDocument();
+      expect(
+        screen.getByText('Checking authentication...')
+      ).toBeInTheDocument();
     });
   });
 
   describe('edge cases', () => {
     it('handles transition from loading to authenticated', () => {
       // Start with loading state
-      (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      (useAuthStore as unknown as ReturnType<typeof jest.fn>).mockReturnValue({
         isAuthenticated: false,
         isLoading: true,
       });
@@ -196,10 +214,12 @@ describe('ProtectedRoute', () => {
         </ProtectedRoute>
       );
 
-      expect(screen.getByText('Checking authentication...')).toBeInTheDocument();
+      expect(
+        screen.getByText('Checking authentication...')
+      ).toBeInTheDocument();
 
       // Transition to authenticated
-      (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      (useAuthStore as unknown as ReturnType<typeof jest.fn>).mockReturnValue({
         isAuthenticated: true,
         isLoading: false,
       });
@@ -207,7 +227,10 @@ describe('ProtectedRoute', () => {
       rerender(
         <MemoryRouter initialEntries={['/protected']}>
           <Routes>
-            <Route path="/signin" element={<div data-testid="signin-page">Sign In Page</div>} />
+            <Route
+              path="/signin"
+              element={<div data-testid="signin-page">Sign In Page</div>}
+            />
             <Route
               path="/protected"
               element={
@@ -225,7 +248,7 @@ describe('ProtectedRoute', () => {
 
     it('handles transition from loading to not authenticated', () => {
       // Start with loading state
-      (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      (useAuthStore as unknown as ReturnType<typeof jest.fn>).mockReturnValue({
         isAuthenticated: false,
         isLoading: true,
       });
@@ -236,10 +259,12 @@ describe('ProtectedRoute', () => {
         </ProtectedRoute>
       );
 
-      expect(screen.getByText('Checking authentication...')).toBeInTheDocument();
+      expect(
+        screen.getByText('Checking authentication...')
+      ).toBeInTheDocument();
 
       // Transition to not authenticated
-      (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      (useAuthStore as unknown as ReturnType<typeof jest.fn>).mockReturnValue({
         isAuthenticated: false,
         isLoading: false,
       });
@@ -247,7 +272,10 @@ describe('ProtectedRoute', () => {
       rerender(
         <MemoryRouter initialEntries={['/protected']}>
           <Routes>
-            <Route path="/signin" element={<div data-testid="signin-page">Sign In Page</div>} />
+            <Route
+              path="/signin"
+              element={<div data-testid="signin-page">Sign In Page</div>}
+            />
             <Route
               path="/protected"
               element={
@@ -264,4 +292,3 @@ describe('ProtectedRoute', () => {
     });
   });
 });
-

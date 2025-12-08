@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from '@jest/globals';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { App } from './app';
@@ -9,7 +9,7 @@ const MockSignUp = () => <div>Mock SignUp</div>;
 const MockPayments = () => <div>Mock Payments</div>;
 
 // Mock the AppRoutes component
-vi.mock('../routes/AppRoutes', () => ({
+jest.mock('../routes/AppRoutes', () => ({
   AppRoutes: () => <div data-testid="app-routes">AppRoutes</div>,
 }));
 

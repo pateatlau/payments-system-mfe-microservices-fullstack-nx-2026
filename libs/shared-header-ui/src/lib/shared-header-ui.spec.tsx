@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from '@jest/globals';
 import { Header } from './shared-header-ui';
 import { useAuthStore } from 'shared-auth-store';
 import type { User } from 'shared-auth-store';
@@ -12,12 +12,13 @@ expect.extend({
     const pass = received !== null && received !== undefined;
     return {
       pass,
-      message: () => `expected element ${pass ? 'not ' : ''}to be in the document`,
+      message: () =>
+        `expected element ${pass ? 'not ' : ''}to be in the document`,
     };
   },
   toHaveClass(received: HTMLElement, ...classes: string[]) {
     const classList = Array.from(received.classList);
-    const pass = classes.every((cls) => classList.includes(cls));
+    const pass = classes.every(cls => classList.includes(cls));
     return {
       pass,
       message: () =>
@@ -27,11 +28,11 @@ expect.extend({
 });
 
 // Mock the auth store
-vi.mock('shared-auth-store', () => ({
-  useAuthStore: vi.fn(),
+jest.mock('shared-auth-store', () => ({
+  useAuthStore: jest.fn(),
 }));
 
-const mockUseAuthStore = useAuthStore as unknown as ReturnType<typeof vi.fn>;
+const mockUseAuthStore = useAuthStore as unknown as ReturnType<typeof jest.fn>;
 
 // Helper function to render with Router
 const renderWithRouter = (ui: React.ReactElement) => {
@@ -39,15 +40,15 @@ const renderWithRouter = (ui: React.ReactElement) => {
 };
 
 describe('Header', () => {
-  const mockLogout = vi.fn();
+  const mockLogout = jest.fn();
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
     mockUseAuthStore.mockReturnValue({
       user: null,
       isAuthenticated: false,
       logout: mockLogout,
-      hasRole: vi.fn(() => false),
+      hasRole: jest.fn(() => false),
     });
   });
 
@@ -70,7 +71,9 @@ describe('Header', () => {
 
     it('should not show user info', () => {
       renderWithRouter(<Header />);
-      expect(screen.queryByText(/customer|vendor|admin/i)).not.toBeInTheDocument();
+      expect(
+        screen.queryByText(/customer|vendor|admin/i)
+      ).not.toBeInTheDocument();
     });
 
     it('should not show navigation items', () => {
@@ -92,7 +95,7 @@ describe('Header', () => {
         user: mockUser,
         isAuthenticated: true,
         logout: mockLogout,
-        hasRole: vi.fn((role: string) => role === 'CUSTOMER'),
+        hasRole: jest.fn((role: string) => role === 'CUSTOMER'),
       });
     });
 
@@ -115,21 +118,21 @@ describe('Header', () => {
     it('should call logout when logout button is clicked', async () => {
       const user = userEvent.setup();
       renderWithRouter(<Header />);
-      
+
       const logoutButton = screen.getByText('Logout');
       await user.click(logoutButton);
-      
+
       expect(mockLogout).toHaveBeenCalledTimes(1);
     });
 
     it('should call custom onLogout when provided', async () => {
-      const customLogout = vi.fn();
+      const customLogout = jest.fn();
       const user = userEvent.setup();
       renderWithRouter(<Header onLogout={customLogout} />);
-      
+
       const logoutButton = screen.getByText('Logout');
       await user.click(logoutButton);
-      
+
       expect(customLogout).toHaveBeenCalledTimes(1);
       expect(mockLogout).not.toHaveBeenCalled();
     });
@@ -148,7 +151,7 @@ describe('Header', () => {
         user: vendorUser,
         isAuthenticated: true,
         logout: mockLogout,
-        hasRole: vi.fn((role: string) => role === 'VENDOR'),
+        hasRole: jest.fn((role: string) => role === 'VENDOR'),
       });
 
       renderWithRouter(<Header />);
@@ -167,7 +170,7 @@ describe('Header', () => {
         user: customerUser,
         isAuthenticated: true,
         logout: mockLogout,
-        hasRole: vi.fn((role: string) => role === 'CUSTOMER'),
+        hasRole: jest.fn((role: string) => role === 'CUSTOMER'),
       });
 
       renderWithRouter(<Header />);
@@ -186,7 +189,7 @@ describe('Header', () => {
         user: adminUser,
         isAuthenticated: true,
         logout: mockLogout,
-        hasRole: vi.fn((role: string) => role === 'ADMIN'),
+        hasRole: jest.fn((role: string) => role === 'ADMIN'),
       });
 
       renderWithRouter(<Header />);
@@ -214,7 +217,7 @@ describe('Header', () => {
         user: mockUser,
         isAuthenticated: true,
         logout: mockLogout,
-        hasRole: vi.fn(() => false),
+        hasRole: jest.fn(() => false),
       });
 
       renderWithRouter(<Header />);
@@ -240,7 +243,7 @@ describe('Header', () => {
         user: mockUser,
         isAuthenticated: true,
         logout: mockLogout,
-        hasRole: vi.fn(() => false),
+        hasRole: jest.fn(() => false),
       });
 
       renderWithRouter(<Header />);
@@ -262,7 +265,7 @@ describe('Header', () => {
         user: mockUser,
         isAuthenticated: true,
         logout: mockLogout,
-        hasRole: vi.fn(() => false),
+        hasRole: jest.fn(() => false),
       });
 
       renderWithRouter(<Header />);
