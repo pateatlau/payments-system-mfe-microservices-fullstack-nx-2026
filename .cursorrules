@@ -12,379 +12,113 @@
 4. **Fix type errors immediately** - Don't work around them
 5. **Write tests alongside code** - 70% coverage minimum
 6. **POC-2 scope only** - Real backend integration, JWT auth, event bus, design system, Admin MFE
-7. **DO NOT automatically perform additional tasks** - Only perform tasks explicitly requested in the prompt. If a related task seems helpful, ask for confirmation with a clear description of what you want to implement before proceeding.
-8. **🚨 MANDATORY: Update documentation IMMEDIATELY after completing ANY task/sub-task** - MUST update BOTH `docs/POC-2-Implementation/task-list.md` AND `docs/POC-2-Implementation/implementation-plan.md` with:
-   - Verification checkboxes marked ([x] for completed, ⬜ for deferred)
-   - Status updated (✅ Complete, 🟡 In Progress, ⬜ Not Started)
-   - Completed Date added
-   - Notes section filled with implementation details
-   - Acceptance criteria marked
-   - Files created section updated
-   - NEVER skip this step - it's a CRITICAL requirement
-   - This is NON-NEGOTIABLE and must be done immediately after task completion, before moving to the next task
+7. **DO NOT automatically perform additional tasks** - Only perform tasks explicitly requested. If a related task seems helpful, ask for confirmation with a clear description before proceeding.
+8. **🚨 MANDATORY: Update BOTH documentation files IMMEDIATELY after ANY task/sub-task completion:**
+   - Update `docs/POC-2-Implementation/task-list.md`: Mark checkboxes `[x]`, set Status "✅ Complete", add date, add notes
+   - Update `docs/POC-2-Implementation/implementation-plan.md`: Mark ALL verification checkboxes `[x]`, mark ALL acceptance criteria ✅, set Status "✅ Complete", add date, add comprehensive notes, update Files Created section
+   - **NON-NEGOTIABLE** - Must be done immediately, before moving to next task. NEVER skip or defer.
 
 ---
 
 ## POC-2 Scope
 
-**In Scope:**
+**In Scope:** Real backend API integration, JWT auth, event bus, Admin MFE (Port 4203), design system (Tailwind v4 + shadcn/ui), RBAC (ADMIN/CUSTOMER/VENDOR), API client library, backend services (API Gateway, Auth, Payments, Admin, Profile, Event Hub), PostgreSQL + Prisma, Redis Pub/Sub, error handling, basic observability
 
-- Real backend API integration (REST API with backend services)
-- Real JWT authentication (replace mock auth with backend Auth Service)
-- Event bus for inter-MFE communication (replace shared Zustand stores)
-- Admin MFE (new remote, Port 4203) for ADMIN role functionality
-- Design system (Tailwind CSS v4 + shadcn/ui components)
-- Enhanced RBAC (ADMIN, CUSTOMER, VENDOR roles)
-- API client library (shared Axios client with interceptors)
-- Backend services (API Gateway, Auth, Payments, Admin, Profile, Event Hub)
-- Database integration (PostgreSQL with Prisma ORM)
-- Redis Pub/Sub for inter-service communication
-- Enhanced error handling and error boundaries
-- Basic observability (error logging, API logging, health checks, basic metrics)
-
-**NOT in Scope:**
-
-- ❌ Real payment processing with PSP integration (all POC phases use stubbed payments)
-- ❌ Advanced infrastructure (nginx, advanced observability) - POC-3
-- ❌ Separate databases per service (shared database in POC-2) - POC-3
-- ❌ WebSocket real-time updates - POC-3
-- ❌ Advanced performance optimizations - POC-3
+**NOT in Scope:** Real PSP integration (stubbed at backend), advanced infrastructure, separate DBs per service, WebSocket, advanced performance optimizations (all POC-3)
 
 ---
 
-## Tech Stack (POC-2)
+## Tech Stack
 
-- **React:** 19.2.0 (match React DOM)
-- **Nx:** Latest
-- **Rspack:** Latest (for HMR with Module Federation v2)
-- **Module Federation:** @module-federation/enhanced 0.21.6 (BIMF)
-- **Routing:** React Router 7.x
-- **State (Client):** Zustand 4.5.x
-- **State (Server):** TanStack Query 5.x
-- **Inter-MFE Communication:** Event Bus (custom implementation)
-- **Forms:** React Hook Form 7.52.x + Zod 3.23.x
-- **Styling:** Tailwind CSS 4.0+ - **CRITICAL: Always use v4 syntax, never v3**
-- **Design System:** shadcn/ui (latest) - **POC-2: Production-ready component library**
-- **HTTP Client:** Axios 1.7.x (shared API client with interceptors)
-- **Error Handling:** react-error-boundary 4.0.13
-- **Testing:** Jest 30.x (Rspack-compatible), React Testing Library 16.1.x, Playwright
-- **Package Manager:** pnpm 9.x
-- **TypeScript:** 5.9.x (strict mode)
-- **Backend:** Node.js 24.11.x LTS, Express, PostgreSQL, Prisma ORM, Redis, JWT
+**Frontend:** React 19.2.0, Nx, Rspack (HMR + Module Federation v2), React Router 7.x, Zustand 4.5.x, TanStack Query 5.x, React Hook Form 7.52.x + Zod 3.23.x, Tailwind CSS 4.0+ (CRITICAL: v4 syntax only), shadcn/ui, Axios 1.7.x, Jest 30.x + React Testing Library 16.1.x, Playwright, pnpm 9.x, TypeScript 5.9.x (strict)
+
+**Backend:** Node.js 24.11.x LTS, Express, PostgreSQL, Prisma ORM, Redis, JWT
 
 ---
 
 ## Code Rules
 
-### TypeScript
+**TypeScript:** Strict mode, no `any`, explicit return types, `interface` for objects, `type` for unions, fix errors immediately
 
-- **MUST:** Strict mode, no `any`, explicit return types, `interface` for objects, `type` for unions
-- **MUST:** Fix type errors immediately
+**React:** Functional components only, hooks for state, explicit props interfaces, PascalCase components, camelCase hooks with `use` prefix
 
-### React
+**File Organization:** One component per file, tests alongside (`*.test.tsx`), index files for exports
 
-- **MUST:** Functional components only, hooks for state, explicit props interfaces
-- **MUST:** PascalCase components (`SignIn.tsx`), camelCase hooks with `use` prefix
-
-### File Organization
-
-- **MUST:** One component per file, tests alongside (`*.test.tsx`), index files for exports
-
-### Naming
-
-- Components: PascalCase | Hooks: camelCase with `use` | Functions: camelCase | Constants: UPPER_SNAKE_CASE | Types: PascalCase
+**Naming:** Components: PascalCase | Hooks: camelCase with `use` | Functions: camelCase | Constants: UPPER_SNAKE_CASE | Types: PascalCase
 
 ---
 
-## Authentication & Authorization
+## Architecture Patterns
 
-### Real JWT Authentication
+**Authentication:** Real JWT with backend Auth Service (no mock), store in Zustand (`libs/shared-auth-store`), shared API client with interceptors, token refresh, RBAC helpers (hasRole, hasAnyRole), secure storage. Roles: `ADMIN` (full access, Admin MFE), `CUSTOMER` (payments, own history), `VENDOR` (initiate payments, reports)
 
-- **MUST:** Use real JWT authentication with backend Auth Service (no mock auth)
-- **MUST:** Store auth state in Zustand store (`libs/shared-auth-store`)
-- **MUST:** Use shared API client with JWT token interceptors
-- **MUST:** Implement token refresh mechanism
-- **MUST:** Implement RBAC helpers (hasRole, hasAnyRole)
-- **MUST:** Secure token storage (consider httpOnly cookies for production)
+**Routing:** React Router 7.x, configure in shell app, `ProtectedRoute` component. Routes: `/` (redirect), `/signin`, `/signup`, `/payments` (protected), `/admin` (protected, ADMIN only)
 
-**User Roles:**
+**State Management:**
+- **Zustand:** Client-side state (auth, UI, theme) within single MFEs only, persist middleware for auth, use event bus for inter-MFE communication
+- **TanStack Query:** Server state (API data, caching) with real backend APIs, configure staleTime/cacheTime, use shared API client
+- **Event Bus:** Decoupled inter-MFE communication, replace shared Zustand stores, implement `libs/shared-event-bus`, define event types/contracts
 
-- `ADMIN` - Full system access, admin dashboard (Admin MFE)
-- `CUSTOMER` - Can make payments, view own history
-- `VENDOR` - Can initiate payments, view reports
+**Payments:** CRITICAL - Operations stubbed at backend level (no PSP). Use real backend Payments Service API, TanStack Query hooks, shared API client, document stubbing
 
-## Routing (React Router 7)
+**Forms & Validation:** React Hook Form + Zod, passwords 12+ chars (banking-grade: uppercase, lowercase, numbers, symbols)
 
-- **MUST:** Use React Router 7.x
-- **MUST:** Configure routes in shell app
-- **MUST:** Implement route protection with `ProtectedRoute` component
-- **Routes:** `/` (redirect), `/signin`, `/signup`, `/payments` (protected), `/admin` (protected, ADMIN only)
+**Styling:** Tailwind CSS 4.0+ (CRITICAL: v4 syntax only, never v3), use shadcn/ui design system components, follow design system patterns
 
-## State Management
+**Design System:** shadcn/ui components, `libs/shared-design-system` library, Tailwind v4, follow shadcn/ui patterns, document usage, replace inline components
 
-### Zustand (Client State)
+**Module Federation v2:** Shared dependencies (react, react-dom as singletons), React.lazy() + Suspense. Shell remotes: `authMfe:4201`, `paymentsMfe:4202`, `adminMfe:4203`. Exposes: Auth (`./SignIn`, `./SignUp`), Payments (`./PaymentsPage`), Admin (`./AdminDashboard`)
 
-- **MUST:** Use Zustand for client-side state (auth, UI, theme)
-- **MUST:** Use Zustand only within single MFEs (not shared across MFEs)
-- **MUST:** Use event bus for inter-MFE communication (replace shared Zustand stores)
-- **MUST:** Use persist middleware for auth state (localStorage)
-- **MUST NOT:** Create shared Zustand stores across MFEs
-
-### TanStack Query (Server State)
-
-- **MUST:** Use TanStack Query for server-side state (API data, caching)
-- **MUST:** Use with real backend APIs (no stubbed frontend APIs)
-- **MUST:** Configure query options (staleTime, cacheTime)
-- **MUST:** Use shared API client for all API calls
-
-### Event Bus (Inter-MFE Communication)
-
-- **MUST:** Use event bus for decoupled inter-MFE communication
-- **MUST:** Replace shared Zustand stores with event bus pattern
-- **MUST:** Implement event bus library (`libs/shared-event-bus`)
-- **MUST:** Define event types and contracts
-- **MUST:** Use event bus for auth state changes, user updates, etc.
-
-## Payments System
-
-### Backend API Integration
-
-**CRITICAL: Payment operations are stubbed at backend level (no actual PSP integration):**
-
-- **MUST:** Use real backend Payments Service API (no frontend stubbed APIs)
-- **MUST:** Document that operations are stubbed at backend level
-- **MUST:** Use TanStack Query hooks with real backend API calls
-- **MUST:** Use shared API client for all payment operations
-- **MUST NOT:** Integrate with real Payment Service Provider
-
-## Forms & Validation
-
-- **MUST:** Use React Hook Form for all forms
-- **MUST:** Use Zod for validation schemas
-- **MUST:** Minimum 12 characters for passwords (banking-grade)
-- **MUST:** Complexity requirements (uppercase, lowercase, numbers, symbols)
-
-## Styling (Tailwind CSS v4)
-
-**CRITICAL: Always use Tailwind v4 syntax, never v3:**
-
-- **MUST:** Use Tailwind CSS 4.0+
-- **MUST:** Use design system components (shadcn/ui) for common UI patterns
-- **MUST NOT:** Use v3 syntax
-- **MUST:** Follow design system patterns and component usage
-
-## Design System (shadcn/ui)
-
-- **MUST:** Use shadcn/ui components for common UI patterns
-- **MUST:** Create design system library (`libs/shared-design-system`)
-- **MUST:** Use Tailwind CSS v4 for styling
-- **MUST:** Follow shadcn/ui patterns and conventions
-- **MUST:** Document component usage and customization
-- **MUST:** Replace inline components with design system components where appropriate
-
-## Module Federation v2
-
-- **MUST:** Configure shared dependencies (react, react-dom as singletons)
-- **MUST:** Use React.lazy() + Suspense for dynamic loading
-- **Shell:** `remotes: { authMfe: 'http://localhost:4201/assets/remoteEntry.js', paymentsMfe: 'http://localhost:4202/assets/remoteEntry.js', adminMfe: 'http://localhost:4203/assets/remoteEntry.js' }`
-- **Auth MFE:** `exposes: { './SignIn': './src/components/SignIn.tsx', './SignUp': './src/components/SignUp.tsx' }`
-- **Payments MFE:** `exposes: { './PaymentsPage': './src/components/PaymentsPage.tsx' }`
-- **Admin MFE:** `exposes: { './AdminDashboard': './src/components/AdminDashboard.tsx' }` (NEW)
-
-## Backend Integration
-
-### API Client Library
-
-- **MUST:** Create shared API client library (`libs/shared-api-client`)
-- **MUST:** Use Axios with interceptors for JWT tokens
-- **MUST:** Implement error handling and retry logic
-- **MUST:** Configure base URL from environment variables
-- **MUST:** Handle token refresh automatically
-
-### Backend Services
-
-- **MUST:** Integrate with backend API Gateway
-- **MUST:** Use REST API endpoints for all backend communication
-- **MUST:** Follow API contracts and specifications
-- **MUST:** Handle authentication errors appropriately
-- **MUST:** Implement proper error handling for API failures
+**Backend Integration:**
+- **API Client:** `libs/shared-api-client`, Axios with JWT interceptors, error handling/retry, base URL from env, auto token refresh
+- **Backend Services:** API Gateway integration, REST API endpoints, follow API contracts, handle auth errors, proper error handling
 
 ---
 
 ## Project Structure
 
 ```
-apps/
-├── shell/              # Host (Port 4200) - Routing, header, event bus init
-├── auth-mfe/           # Remote (Port 4201) - Updated with real JWT auth
-├── payments-mfe/        # Remote (Port 4202) - Updated with backend API
-└── admin-mfe/          # Remote (Port 4203) - NEW: Admin dashboard
-libs/
-├── shared-utils/       # Existing
-├── shared-ui/          # Existing
-├── shared-types/       # Existing (extended)
-├── shared-auth-store/  # Updated: Real JWT auth (no mock)
-├── shared-header-ui/   # Existing
-├── shared-api-client/  # NEW: API client with interceptors
-├── shared-event-bus/   # NEW: Event bus for inter-MFE communication
-└── shared-design-system/ # NEW: Design system & shadcn/ui components
+apps/ → shell (4200), auth-mfe (4201), payments-mfe (4202), admin-mfe (4203)
+libs/ → shared-utils, shared-ui, shared-types, shared-auth-store, shared-header-ui, 
+        shared-api-client (NEW), shared-event-bus (NEW), shared-design-system (NEW)
 ```
 
 ---
 
-## Nx Commands
+## Task Management & Documentation
 
-- `nx serve shell` / `nx serve auth-mfe` / `nx serve payments-mfe` / `nx serve admin-mfe`
-- `nx run-many --target=serve --projects=shell,auth-mfe,payments-mfe,admin-mfe --parallel`
-- `nx build <project>` / `nx test <project>` / `nx lint <project>`
-- `nx generate @nx/react:application <name> --bundler=rspack`
-- `nx generate @nx/react:library <name> --bundler=rspack`
-- `nx generate @nx/js:library <name> --bundler=tsc`
+**AI Assistant:** Only perform explicitly requested tasks. Ask for confirmation before additional related tasks.
 
----
+**Task Progression:**
+- Follow `docs/POC-2-Implementation/implementation-plan.md` for steps
+- **🚨 MANDATORY:** After EACH task/sub-task, update BOTH `task-list.md` AND `implementation-plan.md` (see Critical Rule #8)
+- Ask user confirmation before next task
+- Show completed task summary and next task details
 
-## Git & Documentation Rules
-
-### Git Commits
-
-- **MUST:** Ask for user confirmation before making any git commits
-- **MUST:** Show commit message and changed files before committing
-- **MUST NOT:** Commit automatically without explicit user approval
-- **MUST:** Perform a git commit after completing each major/top-level phase (e.g., Phase 1, Phase 2, etc.)
-- **MUST:** Commit only after verifying everything works and updating status in both `task-list.md` and `implementation-plan.md`
-- **MUST:** For Rspack migration, update both `docs/Rspack-Migration/task-list.md` and `docs/Rspack-Migration/rspack-migration-plan.md` before committing
-- **MUST:** Commit before asking user whether to proceed to the next phase
-
-### Documentation Files
-
-- **MUST:** Create documentation files in `docs/POC-2-Implementation/` folder
-- **🚨 CRITICAL - MANDATORY:** Update BOTH `task-list.md` AND `implementation-plan.md` after completing EACH task or sub-task:
-  - This is NOT optional - it is a mandatory requirement
-  - Must be done immediately after task completion, before moving to next task
-  - Both files must be updated with:
-    - Completion status (✅ Complete)
-    - Completion date
-    - Verification checkboxes marked
-    - Acceptance criteria marked
-    - Detailed notes about implementation
-  - Do NOT skip this step or defer it
-  - Do NOT proceed to next task without updating both files
-- **MUST:** Ask for confirmation if documentation location is unclear
-
-### Rspack Migration Documentation
-
-- **MUST:** Update both `docs/Rspack-Migration/task-list.md` AND `docs/Rspack-Migration/rspack-migration-plan.md` after completing:
-  - Top-level tasks (Phase 1, Phase 2, etc.) - update phase status and completion percentage
-  - Sub-tasks (Task 1.1, 1.2, 2.1, etc.) - mark checkboxes, update status, add notes, update acceptance criteria
-- **MUST:** Keep both files synchronized - same completion status, same notes, same dates
-- **MUST:** Update phase completion percentages in task-list.md
-- **MUST:** Update document header status and "Next Steps" section in rspack-migration-plan.md
-
----
-
-## Task Management & Workflow
-
-### AI Assistant Behavior
-
-- **MUST NOT:** Automatically perform additional tasks apart from what is explicitly requested in the prompt
-- **MUST:** If a related task seems helpful, ask for confirmation with a clear description of what you want to implement before proceeding
-- **MUST:** Only perform tasks that are explicitly requested or confirmed by the user
-
-### Task Progression
-
-- **MUST:** Follow `docs/POC-2-Implementation/implementation-plan.md` for detailed task steps
-- **🚨 CRITICAL - MANDATORY:** Update BOTH documentation files IMMEDIATELY after completing ANY task/sub-task:
-  - **MUST:** Update `docs/POC-2-Implementation/task-list.md`:
-    - Mark all completed checkboxes ([x])
-    - Update Status field (✅ Complete, 🟡 In Progress, ⬜ Not Started)
-    - Add Completed Date
-    - Fill Notes section with implementation details
-  - **MUST:** Update `docs/POC-2-Implementation/implementation-plan.md`:
-    - Mark all verification checkboxes ([x] for completed, ⬜ for deferred)
-    - Mark all acceptance criteria (✅ for met, ⬜ for deferred)
-    - Update Status field
-    - Add Completed Date
-    - Fill Notes section with comprehensive implementation details
-    - Update Files Created section if applicable
-  - **MUST NOT:** Skip documentation updates - this is a CRITICAL requirement
-  - **MUST NOT:** Proceed to next task until BOTH files are updated
-- **MUST:** Ask for user confirmation before proceeding to the next task after completing each task or sub-task
-- **MUST:** Show completed task summary and next task details when asking for confirmation
-- **MUST NOT:** Automatically proceed to next task without explicit user approval
-
-### Package.json Scripts
-
-- **MUST:** Add relevant commands to root `package.json` scripts section when creating new features, apps, libraries, or testing configurations
-- **MUST:** Follow the existing naming convention: `feature:project` (e.g., `dev:shell`, `dev:auth-mfe`, `test:payments-mfe`)
-- **MUST:** Include both individual project commands and aggregate commands (e.g., `dev` for all, `dev:shell` for one)
-- **MUST:** Add affected commands when applicable (e.g., `build:affected`, `test:affected`)
-
-### Task Completion Checklist
-
-**🚨 MANDATORY - DO NOT PROCEED WITHOUT COMPLETING ALL ITEMS:**
-
-- ✅ Task completed according to implementation plan
+**Task Completion Checklist (MANDATORY):**
+- ✅ Task completed per implementation plan
 - ✅ Verification checklist items completed
 - ✅ Acceptance criteria met
-- ✅ **MANDATORY:** `docs/POC-2-Implementation/task-list.md` updated:
-  - All checkboxes marked `[x]`
-  - Status set to "✅ Complete"
-  - Completion date added
-  - Detailed notes added
-- ✅ **MANDATORY:** `docs/POC-2-Implementation/implementation-plan.md` updated:
-  - ALL verification checklist items marked `[x]`
-  - ALL acceptance criteria marked ✅
-  - Status set to "✅ Complete"
-  - Completion date added
-  - Comprehensive notes added
-  - Files created section updated (if applicable)
-- ✅ Both documentation files synchronized (same status, same completion date, consistent notes)
-- ✅ User confirmation obtained before next task
+- ✅ `task-list.md` updated (checkboxes `[x]`, Status "✅ Complete", date, notes)
+- ✅ `implementation-plan.md` updated (ALL verification checkboxes `[x]`, ALL acceptance criteria ✅, Status "✅ Complete", date, comprehensive notes, Files Created section)
+- ✅ Both files synchronized (same status, date, consistent notes)
+- ✅ User confirmation obtained
 
-**REMINDER:** Updating documentation is NOT optional - it is a mandatory step that must be completed immediately after each task/sub-task completion. Do not skip this step or defer it.
+**Package.json Scripts:** Add commands when creating features/apps/libs, follow `feature:project` naming, include individual + aggregate commands
 
-### Rspack Migration Task Completion Checklist
+**Git Commits:** Ask for confirmation, show message/files, commit after major phases, only after updating both documentation files, commit before asking to proceed
 
-- ✅ Task completed according to migration plan
-- ✅ Verification checklist items completed
-- ✅ Acceptance criteria met
-- ✅ `docs/Rspack-Migration/task-list.md` updated (checkboxes, status, notes, completion date)
-- ✅ `docs/Rspack-Migration/rspack-migration-plan.md` updated (checkboxes, status, notes, acceptance criteria)
-- ✅ Phase completion percentage updated in task-list.md
-- ✅ Document status and "Next Steps" updated in rspack-migration-plan.md
-- ✅ Both files synchronized (same status, same notes)
+**Rspack Migration Docs:** Update both `task-list.md` and `rspack-migration-plan.md`, keep synchronized, update phase percentages and status
 
 ---
 
 ## Testing Requirements
 
-### Unit Testing
+**Unit:** Write alongside code, 70%+ coverage, test components/stores/hooks/API clients, Jest + React Testing Library
 
-- **MUST:** Write tests alongside code (not after)
-- **MUST:** 70%+ test coverage target
-- **MUST:** Test all components, stores, hooks, and API clients
-- **MUST:** Use Jest + React Testing Library
+**Integration:** Auth flow, payments flow, route protection, event bus, RBAC, API interceptors, token refresh
 
-### Integration Testing
-
-- **MUST:** Test authentication flow with real backend
-- **MUST:** Test payments flow with backend API
-- **MUST:** Test route protection
-- **MUST:** Test event bus communication
-- **MUST:** Test role-based access
-- **MUST:** Test API client interceptors
-- **MUST:** Test token refresh
-
-### E2E Testing
-
-- **MUST:** Use Playwright for E2E tests
-- **MUST:** Test critical user journeys
-- **MUST:** Test sign-in/sign-up flows with backend
-- **MUST:** Test payments flow with backend
-- **MUST:** Test logout flow
-- **MUST:** Test role-based access
-- **MUST:** Test Admin MFE functionality
-- **MUST:** Test event bus communication
+**E2E:** Playwright, critical journeys, sign-in/sign-up, payments, logout, RBAC, Admin MFE, event bus
 
 ---
 
@@ -396,30 +130,14 @@ libs/
 
 ## Success Criteria
 
-✅ Auth MFE (4201), Payments MFE (4202), Admin MFE (4203) run | ✅ React Router 7 works | ✅ Real JWT authentication works | ✅ Event bus communication works | ✅ TanStack Query works with backend APIs | ✅ Tailwind CSS v4 works | ✅ Design system components work | ✅ Route protection works | ✅ RBAC works (ADMIN, CUSTOMER, VENDOR) | ✅ Universal header displays | ✅ Tests pass (70% coverage) | ✅ All remotes load dynamically | ✅ Backend services integrated | ✅ API client works correctly
+✅ All MFEs run (4200, 4201, 4202, 4203) | ✅ React Router 7 works | ✅ Real JWT auth works | ✅ Event bus works | ✅ TanStack Query with backend APIs | ✅ Tailwind v4 works | ✅ Design system works | ✅ Route protection works | ✅ RBAC works | ✅ Universal header displays | ✅ Tests pass (70% coverage) | ✅ Remotes load dynamically | ✅ Backend services integrated | ✅ API client works
 
 ---
 
-## Common Pitfalls to Avoid
+## Common Pitfalls
 
-- ❌ **🚨 CRITICAL:** Forgetting to update `task-list.md` and `implementation-plan.md` after completing tasks - THIS IS MANDATORY
-- ❌ Using `any` type without justification
-- ❌ Creating throw-away code
-- ❌ Ignoring TypeScript errors
-- ❌ Using Tailwind v3 syntax (must use v4)
-- ❌ Skipping tests
-- ❌ Breaking existing patterns
-- ❌ Not following project structure
-- ❌ Hardcoding values (use environment variables)
-- ❌ Creating circular dependencies
-- ❌ Mixing concerns (keep components, hooks, utilities separate)
-- ❌ Using mock authentication (must use real JWT auth)
-- ❌ Using frontend stubbed APIs (must use backend APIs)
-- ❌ Using shared Zustand stores for inter-MFE communication (must use event bus)
-- ❌ Not using design system components (must use shadcn/ui where appropriate)
-- ❌ Not using shared API client (must use shared API client for all backend calls)
-- ❌ Integrating with real PSP (must use stubbed backend operations)
-- ❌ Deferring documentation updates - they must be done immediately after task completion
+❌ **🚨 CRITICAL:** Forgetting to update `task-list.md` and `implementation-plan.md` - MANDATORY  
+❌ Using `any` type | ❌ Throw-away code | ❌ Ignoring TypeScript errors | ❌ Tailwind v3 syntax (must use v4) | ❌ Skipping tests | ❌ Breaking patterns | ❌ Not following structure | ❌ Hardcoding values | ❌ Circular dependencies | ❌ Mixing concerns | ❌ Mock auth (use real JWT) | ❌ Frontend stubbed APIs (use backend) | ❌ Shared Zustand across MFEs (use event bus) | ❌ Not using design system | ❌ Not using shared API client | ❌ Real PSP integration | ❌ Deferring documentation updates
 
 ---
 
