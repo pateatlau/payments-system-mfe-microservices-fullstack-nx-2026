@@ -177,6 +177,7 @@
 - [`../References/mfe-poc1-tech-stack.md`](../References/mfe-poc1-tech-stack.md) - Technology stack
 - [`../POC-0-Implementation/`](../POC-0-Implementation/) - POC-0 foundation (completed)
 - [`../adr/poc-1/`](../adr/poc-1/) - Architecture Decision Records for POC-1
+- [`../Rspack-Migration/`](../Rspack-Migration/) - Rspack migration details (completed)
 
 ### Completion & Validation
 
@@ -202,6 +203,8 @@
 - Universal header component
 - Mock authentication (no real backend)
 - Stubbed payment operations (no actual PSP integration)
+- **Rspack bundler** (migrated from Vite for HMR with Module Federation v2)
+- **Jest testing** (migrated from Vitest for Rspack compatibility)
 
 **NOT in Scope:**
 

@@ -20,6 +20,7 @@ POC-1 has been successfully completed, validating the microfrontend architecture
 ### ✅ Completed Deliverables
 
 **Core Features:**
+
 - ✅ Authentication system (mock) - Auth MFE with sign-in/sign-up
 - ✅ Payments system (stubbed) - Payments MFE with CRUD operations
 - ✅ React Router 7 - Full routing with route protection
@@ -30,19 +31,24 @@ POC-1 has been successfully completed, validating the microfrontend architecture
 - ✅ Universal header - Shared header component
 
 **Technical Achievements:**
-- ✅ Module Federation v2 - Successfully integrated with Vite
+
+- ✅ Module Federation v2 - Successfully integrated with Rspack (HMR enabled)
+- ✅ Rspack migration complete - Migrated from Vite to enable HMR with Module Federation v2
+- ✅ Jest testing framework - Migrated from Vitest for Rspack compatibility
 - ✅ 111+ tests passing (73 unit + 22 integration + 16 E2E)
 - ✅ 70%+ test coverage achieved
 - ✅ All documentation complete
 - ✅ Production-ready code (no throw-away code)
 
 **Validation:**
+
 - ✅ All 33 core deliverables complete
 - ✅ All 18 success criteria validated
 - ✅ Comprehensive testing completed
 - ✅ Code quality verified
 
 **Documentation:**
+
 - ✅ Implementation plan complete
 - ✅ Task list complete
 - ✅ Deliverables checklist validated
@@ -54,15 +60,18 @@ POC-1 has been successfully completed, validating the microfrontend architecture
 
 ## Key Learnings from POC-1
 
-### 1. Module Federation v2 with Vite
+### 1. Module Federation v2 with Rspack
 
-**Finding:** Module Federation v2 requires preview mode (not dev mode) for reliable operation.
+**Finding:** Module Federation v2 with Vite required preview mode (not dev mode), preventing HMR.
 
-**Impact:** HMR not available during development.
+**Solution:** ✅ **COMPLETED** - Migrated to Rspack to enable HMR with Module Federation v2 in dev mode.
 
-**Solution:** Use build → preview workflow. Consider Rspack migration for better HMR support.
+**Result:** HMR now works correctly with Module Federation v2, providing instant updates during development.
 
-**Documentation:** See `docs/POC-1-Implementation/developer-workflow.md`
+**Documentation:**
+
+- See `docs/POC-1-Implementation/developer-workflow.md` for current workflow
+- See `docs/Rspack-Migration/` for migration details
 
 ### 2. Zustand Subscriptions Across MF Boundaries
 
@@ -82,9 +91,11 @@ POC-1 has been successfully completed, validating the microfrontend architecture
 
 ### 4. Testing Module Federation Components
 
-**Finding:** Vite's static analysis runs before runtime mocks can take effect.
+**Finding:** Bundler's static analysis (Vite/Rspack) runs before runtime mocks can take effect.
 
 **Solution:** Use Dependency Injection pattern - components accept optional injected props.
+
+> **Note:** This applies to both Vite and Rspack. The solution is framework-agnostic.
 
 **Documentation:** See `docs/POC-1-Implementation/testing-guide.md`
 
@@ -101,6 +112,7 @@ POC-1 has been successfully completed, validating the microfrontend architecture
 ### POC-2 Scope
 
 **Frontend Enhancements:**
+
 - Real backend API integration (replace mock APIs)
 - Event bus for inter-MFE communication (replace shared Zustand stores)
 - Admin MFE (new remote)
@@ -108,6 +120,7 @@ POC-1 has been successfully completed, validating the microfrontend architecture
 - Enhanced RBAC (ADMIN role)
 
 **Backend Implementation:**
+
 - API Gateway (routing, auth, rate limiting)
 - Auth Service (JWT authentication)
 - Payments Service (stubbed - no actual PSP)
@@ -117,6 +130,7 @@ POC-1 has been successfully completed, validating the microfrontend architecture
 - Database (PostgreSQL - shared in POC-2, separate in POC-3)
 
 **Infrastructure:**
+
 - Database setup (PostgreSQL)
 - Redis setup (Pub/Sub)
 - Docker Compose for local development
@@ -250,20 +264,24 @@ POC-1 has been successfully completed, validating the microfrontend architecture
 ### 1. Mock to Real Backend Migration
 
 **Current State (POC-1):**
+
 - Mock authentication in Zustand store
 - Stubbed payment APIs in TanStack Query hooks
 
 **Target State (POC-2):**
+
 - Real JWT authentication from Auth Service
 - Real API endpoints from backend services
 
 **Migration Strategy:**
+
 1. Keep same TanStack Query hook interfaces
 2. Replace mock functions with API client calls
 3. Update authentication flow to use JWT tokens
 4. Maintain backward compatibility during transition
 
 **Files to Update:**
+
 - `libs/shared-auth-store/src/lib/shared-auth-store.ts` - Replace mock auth with API calls
 - `apps/payments-mfe/src/api/stubbedPayments.ts` - Replace with API client
 - `apps/payments-mfe/src/hooks/usePayments.ts` - Update query functions
@@ -272,24 +290,29 @@ POC-1 has been successfully completed, validating the microfrontend architecture
 ### 2. Shared Zustand Stores to Event Bus
 
 **Current State (POC-1):**
+
 - Shared Zustand stores for inter-MFE communication
 - Direct store access across MFEs
 
 **Target State (POC-2):**
+
 - Event bus for inter-MFE communication
 - Zustand only for MFE-local state
 
 **Migration Strategy:**
+
 1. Create event bus library (`libs/shared-event-bus`)
 2. Implement event publishing/subscribing
 3. Migrate shared store logic to event handlers
 4. Keep Zustand for local state only
 
 **Files to Create:**
+
 - `libs/shared-event-bus/src/index.ts` - Event bus implementation
 - `libs/shared-event-bus/src/types.ts` - Event type definitions
 
 **Files to Update:**
+
 - `libs/shared-auth-store/src/lib/shared-auth-store.ts` - Remove shared store, use events
 - `apps/shell/src/pages/*` - Subscribe to auth events
 - `apps/auth-mfe/src/components/*` - Publish auth events
@@ -297,25 +320,30 @@ POC-1 has been successfully completed, validating the microfrontend architecture
 ### 3. Inline Tailwind to Design System
 
 **Current State (POC-1):**
+
 - Inline Tailwind classes in components
 - No design system
 
 **Target State (POC-2):**
+
 - shadcn/ui components
 - Design system library
 - Consistent design tokens
 
 **Migration Strategy:**
+
 1. Install shadcn/ui
 2. Create design system library
 3. Migrate components incrementally
 4. Update Tailwind configuration
 
 **Files to Create:**
+
 - `libs/shared-design-system/` - Design system library
 - Component wrappers for shadcn/ui
 
 **Files to Update:**
+
 - All component files - Migrate to design system components
 - `tailwind.config.js` - Add design system tokens
 
@@ -328,6 +356,7 @@ POC-1 has been successfully completed, validating the microfrontend architecture
 **Question:** Should we migrate from Vite to Rspack for better HMR support?
 
 **Considerations:**
+
 - ✅ Better HMR support with Module Federation
 - ✅ Faster builds
 - ⚠️ Migration effort required
@@ -344,6 +373,7 @@ POC-1 has been successfully completed, validating the microfrontend architecture
 **Decision:** Start with shared database in POC-2, migrate to separate databases in POC-3.
 
 **Rationale:**
+
 - Simpler for initial implementation
 - Easier transactions across services
 - Good for architecture validation
@@ -356,6 +386,7 @@ POC-1 has been successfully completed, validating the microfrontend architecture
 **Decision:** Start with Redis Pub/Sub in POC-2, migrate to RabbitMQ in POC-3.
 
 **Rationale:**
+
 - Simpler for initial implementation
 - Good for architecture validation
 - Production-ready pattern (RabbitMQ) in POC-3
@@ -455,13 +486,13 @@ POC-1 has been successfully completed, validating the microfrontend architecture
 
 ## Risks & Mitigations
 
-| Risk | Impact | Mitigation |
-|------|--------|------------|
-| Backend complexity | High | Start with simple services, iterate |
-| Database migration | Medium | Use Prisma migrations, test thoroughly |
-| Event bus reliability | Medium | Start with Redis Pub/Sub, test extensively |
-| Design system integration | Low | Incremental migration, maintain backward compatibility |
-| Full-stack testing complexity | Medium | Comprehensive test strategy, CI/CD integration |
+| Risk                          | Impact | Mitigation                                             |
+| ----------------------------- | ------ | ------------------------------------------------------ |
+| Backend complexity            | High   | Start with simple services, iterate                    |
+| Database migration            | Medium | Use Prisma migrations, test thoroughly                 |
+| Event bus reliability         | Medium | Start with Redis Pub/Sub, test extensively             |
+| Design system integration     | Low    | Incremental migration, maintain backward compatibility |
+| Full-stack testing complexity | Medium | Comprehensive test strategy, CI/CD integration         |
 
 ---
 
@@ -469,7 +500,7 @@ POC-1 has been successfully completed, validating the microfrontend architecture
 
 POC-1 has successfully validated the microfrontend architecture approach. The foundation is solid for proceeding to POC-2 with:
 
-- ✅ **Validated Architecture** - Module Federation v2 works with Vite
+- ✅ **Validated Architecture** - Module Federation v2 works with Rspack (HMR enabled)
 - ✅ **Production-Ready Code** - No throw-away code, all patterns carry forward
 - ✅ **Comprehensive Testing** - 111+ tests, 70%+ coverage
 - ✅ **Complete Documentation** - All deliverables documented
@@ -481,4 +512,3 @@ POC-1 has successfully validated the microfrontend architecture approach. The fo
 **Last Updated:** 2026-01-XX  
 **Status:** Ready for POC-2 Planning  
 **Next Phase:** POC-2 - Backend Integration & Enhanced Features
-

@@ -8,11 +8,14 @@
  * - paymentsMfe: http://localhost:4202/remoteEntry.js
  *
  * PostCSS loader configured for Tailwind CSS v4
+ *
+ * NOTE: We use HtmlRspackPlugin instead of NxAppRspackPlugin to avoid
+ * NxAppRspackPlugin's automatic CSS rules that conflict with our custom
+ * Tailwind CSS v4 loader chain.
  */
 
 const rspack = require('@rspack/core');
 const path = require('path');
-const { NxAppRspackPlugin } = require('@nx/rspack/app-plugin');
 const ReactRefreshPlugin = require('@rspack/plugin-react-refresh');
 
 const isProduction = process.env.NODE_ENV === 'production';
@@ -57,16 +60,14 @@ const sharedDependencies = {
 };
 
 module.exports = {
+  // Context is the base directory for resolving entry points and loaders
+  context: __dirname,
   mode: isProduction ? 'production' : 'development',
-  // Note: experiments.css defaults to false in Rspack v1.x
-  // We don't set it explicitly to avoid conflicts with NxAppRspackPlugin
+  // Disable Rspack's built-in CSS handling - we use our own loader chain
+  experiments: {
+    css: false,
+  },
   entry: './src/main.tsx',
-  // Suppress warnings from NxAppRspackPlugin's automatic CSS rules
-  // NxAppRspackPlugin adds CSS rules that conflict with our custom CSS loader configuration
-  ignoreWarnings: [
-    /use type 'css' and `CssExtractRspackPlugin`/,
-    /You can't use `experiments.css`/,
-  ],
   output: {
     path: path.resolve(__dirname, '../../dist/apps/shell'),
     // CRITICAL: uniqueName is required for Module Federation HMR
@@ -80,13 +81,33 @@ module.exports = {
   },
   resolve: {
     extensions: ['.tsx', '.ts', '.jsx', '.js', '.json'],
-    // No aliases needed - Module Federation handles remote resolution
+    // Aliases for shared libraries - required since we removed NxAppRspackPlugin
+    alias: {
+      'shared-auth-store': path.resolve(
+        __dirname,
+        '../../libs/shared-auth-store/src/index.ts'
+      ),
+      'shared-header-ui': path.resolve(
+        __dirname,
+        '../../libs/shared-header-ui/src/index.ts'
+      ),
+      'shared-ui': path.resolve(__dirname, '../../libs/shared-ui/src/index.ts'),
+      'shared-utils': path.resolve(
+        __dirname,
+        '../../libs/shared-utils/src/index.ts'
+      ),
+      'shared-types': path.resolve(
+        __dirname,
+        '../../libs/shared-types/src/index.ts'
+      ),
+    },
   },
   module: {
     rules: [
       // React/TypeScript loader using builtin:swc-loader
       {
         test: /\.(tsx|ts|jsx|js)$/,
+        exclude: /node_modules/,
         use: {
           loader: 'builtin:swc-loader',
           options: {
@@ -115,8 +136,7 @@ module.exports = {
       },
       // CSS/PostCSS loader for Tailwind CSS v4
       // NOTE: Loaders execute from RIGHT to LEFT (bottom to top in array)
-      // NxAppRspackPlugin automatically adds CSS rules, but our rule should take precedence
-      // Warnings about type 'css' and CssExtractRspackPlugin are expected and can be ignored
+      // This is the ONLY CSS rule - no NxAppRspackPlugin CSS conflicts
       {
         test: /\.css$/,
         use: [
@@ -134,14 +154,18 @@ module.exports = {
             },
           },
         ],
-        type: 'javascript/auto', // Required when not using experiments.css
+        type: 'javascript/auto', // Required when experiments.css is false
       },
     ],
   },
   plugins: [
     new rspack.ProgressPlugin(),
-    new NxAppRspackPlugin({
-      // NxAppRspackPlugin handles HTML automatically via project.json "index" option
+    // HTML generation - using HtmlRspackPlugin instead of NxAppRspackPlugin
+    // to avoid NxAppRspackPlugin's automatic CSS rules
+    new rspack.HtmlRspackPlugin({
+      template: path.resolve(__dirname, 'index.html'),
+      inject: 'body',
+      scriptLoading: 'defer',
     }),
     // Module Federation Plugin - Shell acts as HOST consuming remote MFEs
     new rspack.container.ModuleFederationPlugin({
@@ -161,20 +185,18 @@ module.exports = {
     port: 4200,
     host: 'localhost',
     hot: true,
+    historyApiFallback: true, // Required for SPA routing
     headers: {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, PATCH, OPTIONS',
       'Access-Control-Allow-Headers':
         'X-Requested-With, content-type, Authorization',
     },
-    // Suppress CSS-related warnings in browser console
-    // These warnings are harmless - they indicate Nx's automatic CSS rules are being ignored
-    // in favor of our custom CSS loader chain, which is working correctly
     client: {
-      logging: 'error', // Only show errors, suppress warnings
+      logging: 'warn',
       overlay: {
         errors: true,
-        warnings: false, // Disable warning overlay
+        warnings: false,
       },
     },
   },

@@ -3,16 +3,19 @@
  *
  * Module Federation v2 Remote - exposes authentication components
  *
- * Exposed components:
- * - ./SignIn -> ./src/components/SignIn.tsx
- * - ./SignUp -> ./src/components/SignUp.tsx
+ * Exposes:
+ * - ./SignIn: SignIn component
+ * - ./SignUp: SignUp component
  *
  * PostCSS loader configured for Tailwind CSS v4
+ *
+ * NOTE: We use HtmlRspackPlugin instead of NxAppRspackPlugin to avoid
+ * NxAppRspackPlugin's automatic CSS rules that conflict with our custom
+ * Tailwind CSS v4 loader chain.
  */
 
 const rspack = require('@rspack/core');
 const path = require('path');
-const { NxAppRspackPlugin } = require('@nx/rspack/app-plugin');
 const ReactRefreshPlugin = require('@rspack/plugin-react-refresh');
 
 const isProduction = process.env.NODE_ENV === 'production';
@@ -20,8 +23,8 @@ const isDevelopment = !isProduction;
 
 /**
  * Shared dependencies configuration for Module Federation
- * CRITICAL: Must match the shell's shared dependency configuration
- * to ensure singleton instances across federated modules
+ * CRITICAL: All MFEs must have matching shared dependency configurations
+ * to ensure singleton instances across the federated modules
  */
 const sharedDependencies = {
   react: {
@@ -34,6 +37,10 @@ const sharedDependencies = {
     requiredVersion: '18.3.1',
     eager: false,
   },
+  '@tanstack/react-query': {
+    singleton: true,
+    eager: false,
+  },
   zustand: {
     singleton: true,
     eager: false,
@@ -43,8 +50,6 @@ const sharedDependencies = {
     eager: false,
   },
   // CRITICAL: Share the auth store to ensure same instance across MFEs
-  // Without this, shell and auth-mfe have separate store instances
-  // and state changes in auth-mfe don't trigger re-renders in shell
   'shared-auth-store': {
     singleton: true,
     requiredVersion: false,
@@ -53,36 +58,54 @@ const sharedDependencies = {
 };
 
 module.exports = {
+  // Context is the base directory for resolving entry points and loaders
+  context: __dirname,
   mode: isProduction ? 'production' : 'development',
-  // Note: experiments.css defaults to false in Rspack v1.x
-  // We don't set it explicitly to avoid conflicts with NxAppRspackPlugin
+  // Disable Rspack's built-in CSS handling - we use our own loader chain
+  experiments: {
+    css: false,
+  },
   entry: './src/main.tsx',
-  // Suppress warnings from NxAppRspackPlugin's automatic CSS rules
-  // NxAppRspackPlugin adds CSS rules that conflict with our custom CSS loader configuration
-  ignoreWarnings: [
-    /use type 'css' and `CssExtractRspackPlugin`/,
-    /You can't use `experiments.css`/,
-  ],
   output: {
     path: path.resolve(__dirname, '../../dist/apps/auth-mfe'),
     // CRITICAL: uniqueName is required for Module Federation HMR
     uniqueName: 'authMfe',
+    publicPath: 'auto',
     filename: isProduction ? '[name].[contenthash].js' : '[name].js',
     chunkFilename: isProduction
       ? '[name].[contenthash].chunk.js'
       : '[name].chunk.js',
     clean: true,
-    // Public path for Module Federation - assets loaded from this origin
-    publicPath: 'http://localhost:4201/',
   },
   resolve: {
     extensions: ['.tsx', '.ts', '.jsx', '.js', '.json'],
+    // Aliases for shared libraries - required since we removed NxAppRspackPlugin
+    alias: {
+      'shared-auth-store': path.resolve(
+        __dirname,
+        '../../libs/shared-auth-store/src/index.ts'
+      ),
+      'shared-header-ui': path.resolve(
+        __dirname,
+        '../../libs/shared-header-ui/src/index.ts'
+      ),
+      'shared-ui': path.resolve(__dirname, '../../libs/shared-ui/src/index.ts'),
+      'shared-utils': path.resolve(
+        __dirname,
+        '../../libs/shared-utils/src/index.ts'
+      ),
+      'shared-types': path.resolve(
+        __dirname,
+        '../../libs/shared-types/src/index.ts'
+      ),
+    },
   },
   module: {
     rules: [
       // React/TypeScript loader using builtin:swc-loader
       {
         test: /\.(tsx|ts|jsx|js)$/,
+        exclude: /node_modules/,
         use: {
           loader: 'builtin:swc-loader',
           options: {
@@ -110,17 +133,12 @@ module.exports = {
         type: 'javascript/auto',
       },
       // CSS/PostCSS loader for Tailwind CSS v4
-      // NOTE: Loaders execute from RIGHT to LEFT (bottom to top in array)
-      // NxAppRspackPlugin automatically adds CSS rules, but our rule should take precedence
-      // Warnings about type 'css' and CssExtractRspackPlugin are expected and can be ignored
+      // This is the ONLY CSS rule - no NxAppRspackPlugin CSS conflicts
       {
         test: /\.css$/,
         use: [
-          // style-loader injects CSS into DOM via <style> tags (dev mode only) - executes LAST
           ...(isDevelopment ? ['style-loader'] : []),
-          // css-loader processes @import and url() in CSS - executes SECOND
           'css-loader',
-          // postcss-loader processes PostCSS plugins (Tailwind, Autoprefixer) - executes FIRST
           {
             loader: 'postcss-loader',
             options: {
@@ -130,27 +148,29 @@ module.exports = {
             },
           },
         ],
-        type: 'javascript/auto', // Required when not using experiments.css
+        type: 'javascript/auto',
       },
     ],
   },
   plugins: [
     new rspack.ProgressPlugin(),
-    new NxAppRspackPlugin({
-      // NxAppRspackPlugin handles HTML automatically via project.json "index" option
+    // HTML generation - using HtmlRspackPlugin instead of NxAppRspackPlugin
+    new rspack.HtmlRspackPlugin({
+      template: path.resolve(__dirname, 'index.html'),
+      inject: 'body',
+      scriptLoading: 'defer',
     }),
     // Module Federation Plugin - Auth MFE acts as REMOTE exposing components
     new rspack.container.ModuleFederationPlugin({
       name: 'authMfe',
       filename: 'remoteEntry.js',
       exposes: {
-        // Expose authentication components for shell to consume
         './SignIn': './src/components/SignIn.tsx',
         './SignUp': './src/components/SignUp.tsx',
       },
       shared: sharedDependencies,
     }),
-    // React Fast Refresh plugin - injects $RefreshReg$ runtime for HMR
+    // React Fast Refresh plugin
     ...(isDevelopment ? [new ReactRefreshPlugin()] : []),
   ],
   // Dev server configuration
@@ -158,20 +178,18 @@ module.exports = {
     port: 4201,
     host: 'localhost',
     hot: true,
+    historyApiFallback: true,
     headers: {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, PATCH, OPTIONS',
       'Access-Control-Allow-Headers':
         'X-Requested-With, content-type, Authorization',
     },
-    // Suppress CSS-related warnings in browser console
-    // These warnings are harmless - they indicate Nx's automatic CSS rules are being ignored
-    // in favor of our custom CSS loader chain, which is working correctly
     client: {
-      logging: 'error', // Only show errors, suppress warnings
+      logging: 'warn',
       overlay: {
         errors: true,
-        warnings: false, // Disable warning overlay
+        warnings: false,
       },
     },
   },

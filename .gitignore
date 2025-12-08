@@ -39,6 +39,8 @@ lerna-debug.log*
 .__mf__temp/
 **/.__mf__temp/
 
+# Backup files (kept for reference during migration)
+.backup/
 
 .cursor/rules/nx-rules.mdc
 .github/instructions/nx.instructions.md

@@ -299,11 +299,13 @@ POC-1 has been successfully completed, establishing a working microfrontend arch
 
 **Why:** MF v2 generates `remoteEntry.js` during build. Dev mode doesn't work reliably.
 
-**Workflow:**
+**Workflow (Rspack):**
 
-1. Build remotes: `pnpm build:remotes`
-2. Serve in preview mode: `pnpm preview:all`
-3. Rebuild and refresh for changes (HMR not available)
+1. Start all dev servers with HMR: `pnpm dev:mf`
+2. Changes update instantly (HMR enabled)
+3. No rebuild required during development
+
+> **Note:** The migration to Rspack resolved the HMR limitation. HMR now works correctly with Module Federation v2.
 
 ### 2. Zustand Subscriptions Across MF Boundaries
 
@@ -325,7 +327,7 @@ POC-1 has been successfully completed, establishing a working microfrontend arch
 
 - Create `tailwind.config.js` with absolute paths
 - Use `@config "../tailwind.config.js"` in CSS
-- Configure PostCSS in `vite.config.mts`
+- Configure PostCSS loader in `rspack.config.js` (see `tailwind-v4-setup-guide.md`)
 
 ### 4. Testing Module Federation Components
 

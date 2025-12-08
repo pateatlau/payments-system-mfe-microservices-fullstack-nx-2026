@@ -32,7 +32,8 @@ export interface SignInProps {
  * SignIn component with form validation and auth store integration
  */
 export function SignIn({ onSuccess, onNavigateToSignUp }: SignInProps = {}) {
-  const { login, isLoading, error, clearError, isAuthenticated } = useAuthStore();
+  const { login, isLoading, error, clearError, isAuthenticated } =
+    useAuthStore();
   const onSuccessCalledRef = useRef(false);
 
   const {
@@ -91,11 +92,11 @@ export function SignIn({ onSuccess, onNavigateToSignUp }: SignInProps = {}) {
             Enter your credentials to access your account
           </p>
 
-          <form 
-            onSubmit={(e) => {
+          <form
+            onSubmit={e => {
               e.preventDefault();
               handleSubmit(onSubmit)(e);
-            }} 
+            }}
             className="space-y-6"
             noValidate
           >
@@ -189,4 +190,3 @@ export function SignIn({ onSuccess, onNavigateToSignUp }: SignInProps = {}) {
 }
 
 export default SignIn;
-

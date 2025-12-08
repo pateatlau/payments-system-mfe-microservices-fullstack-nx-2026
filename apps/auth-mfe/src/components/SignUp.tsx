@@ -9,7 +9,8 @@ import { useEffect, useRef } from 'react';
  * Banking-grade requirements: minimum 12 characters, uppercase, lowercase, numbers, symbols
  */
 // eslint-disable-next-line no-useless-escape
-const passwordStrengthRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#^()_+\-=[\]{};':"\\|,.<>\/])[A-Za-z\d@$!%*?&#^()_+\-=[\]{};':"\\|,.<>\/]{12,}$/;
+const passwordStrengthRegex =
+  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#^()_+\-=[\]{};':"\\|,.<>\/])[A-Za-z\d@$!%*?&#^()_+\-=[\]{};':"\\|,.<>\/]{12,}$/;
 
 /**
  * Sign-up form schema using Zod
@@ -17,7 +18,10 @@ const passwordStrengthRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#^()_
  */
 const signUpSchema = z
   .object({
-    name: z.string().min(1, 'Name is required').min(2, 'Name must be at least 2 characters'),
+    name: z
+      .string()
+      .min(1, 'Name is required')
+      .min(2, 'Name must be at least 2 characters'),
     email: z.string().email('Invalid email address'),
     password: z
       .string()
@@ -28,7 +32,7 @@ const signUpSchema = z
       ),
     confirmPassword: z.string().min(1, 'Please confirm your password'),
   })
-  .refine((data) => data.password === data.confirmPassword, {
+  .refine(data => data.password === data.confirmPassword, {
     message: 'Passwords do not match',
     path: ['confirmPassword'],
   });
@@ -53,7 +57,8 @@ export interface SignUpProps {
  * SignUp component with form validation and auth store integration
  */
 export function SignUp({ onSuccess, onNavigateToSignIn }: SignUpProps = {}) {
-  const { signup, isLoading, error, clearError, isAuthenticated } = useAuthStore();
+  const { signup, isLoading, error, clearError, isAuthenticated } =
+    useAuthStore();
   const onSuccessCalledRef = useRef(false);
 
   const {
@@ -115,7 +120,9 @@ export function SignUp({ onSuccess, onNavigateToSignIn }: SignUpProps = {}) {
   const isFormLoading = isLoading || isSubmitting;
 
   // Password strength indicator
-  const getPasswordStrength = (pwd: string): { strength: string; color: string } => {
+  const getPasswordStrength = (
+    pwd: string
+  ): { strength: string; color: string } => {
     if (!pwd) return { strength: '', color: '' };
     if (pwd.length < 12) {
       return { strength: 'Too short', color: 'text-red-600' };
@@ -126,7 +133,9 @@ export function SignUp({ onSuccess, onNavigateToSignIn }: SignUpProps = {}) {
     // eslint-disable-next-line no-useless-escape
     const hasSymbol = /[@$!%*?&#^()_+\-=[\]{};':"\\|,.<>\/]/.test(pwd);
 
-    const requirementsMet = [hasLower, hasUpper, hasNumber, hasSymbol].filter(Boolean).length;
+    const requirementsMet = [hasLower, hasUpper, hasNumber, hasSymbol].filter(
+      Boolean
+    ).length;
 
     if (requirementsMet === 4) {
       return { strength: 'Strong', color: 'text-green-600' };
@@ -148,11 +157,11 @@ export function SignUp({ onSuccess, onNavigateToSignIn }: SignUpProps = {}) {
             Create your account to get started
           </p>
 
-          <form 
-            onSubmit={(e) => {
+          <form
+            onSubmit={e => {
               e.preventDefault();
               handleSubmit(onSubmit)(e);
-            }} 
+            }}
             className="space-y-6"
             noValidate
           >
@@ -232,7 +241,8 @@ export function SignUp({ onSuccess, onNavigateToSignIn }: SignUpProps = {}) {
                 </p>
               )}
               <p className="mt-1 text-xs text-slate-500">
-                Must be at least 12 characters with uppercase, lowercase, numbers, and symbols
+                Must be at least 12 characters with uppercase, lowercase,
+                numbers, and symbols
               </p>
             </div>
 
@@ -302,4 +312,3 @@ export function SignUp({ onSuccess, onNavigateToSignIn }: SignUpProps = {}) {
 }
 
 export default SignUp;
-

@@ -716,7 +716,8 @@ web-mfe-workspace/
    pnpm add -w react-router@7.x zustand@4.5.x @tanstack/react-query@5.x
    pnpm add -w react-hook-form@7.52.x zod@3.23.x axios@1.7.x
    pnpm add -w tailwindcss@4.0 react-error-boundary@4.0.13
-   pnpm add -D -w vitest@2.0.x @testing-library/react@16.1.x
+   pnpm add -D -w jest@30.x @jest/globals@30.x @types/jest@30.x jest-environment-jsdom@30.x ts-jest@29.x
+   pnpm add -D -w @testing-library/react@16.1.x @testing-library/jest-dom@6.x @nx/jest@22.1.3
    pnpm add -D -w playwright@latest
    ```
 
@@ -726,12 +727,12 @@ web-mfe-workspace/
    # Auth store
    nx generate @nx/js:library shared-auth-store \
      --bundler=tsc \
-     --unitTestRunner=vitest
+     --unitTestRunner=jest
 
    # Header UI
    nx generate @nx/react:library shared-header-ui \
-     --bundler=vite \
-     --unitTestRunner=vitest
+     --bundler=rspack \
+     --unitTestRunner=jest
 
    # Shared types (if not exists)
    nx generate @nx/js:library shared-types \
@@ -760,7 +761,7 @@ web-mfe-workspace/
 
    ```bash
    nx generate @nx/react:application auth-mfe \
-     --bundler=vite \
+     --bundler=rspack \
      --style=css \
      --routing=false
    ```
@@ -1275,7 +1276,7 @@ web-mfe-workspace/
 // apps/auth-mfe/src/components/SignIn.test.tsx
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from '@jest/globals';
 import SignIn from './SignIn';
 
 describe('SignIn', () => {

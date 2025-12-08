@@ -1,15 +1,19 @@
 # ADR-0004: Use Vitest for Testing
 
-**Status:** Accepted  
+**Status:** Superseded (POC-1+ Frontend)  
 **Date:** 2026-01-XX  
 **Deciders:** Architecture Team  
-**Context:** POC-0
+**Context:** POC-0  
+**Superseded By:** Jest migration (POC-1 Rspack Migration) for frontend testing
+
+> **Note:** This ADR remains valid for POC-0 and backend testing. Frontend testing was migrated to Jest as part of the Rspack migration (Phase 5) for better ecosystem compatibility. Backend continues to use Vitest.
 
 ---
 
 ## Context
 
 POC-0 requires a testing framework for unit and integration testing. Requirements:
+
 - Fast execution
 - TypeScript support
 - Vite-native (works seamlessly with Vite)
@@ -92,4 +96,3 @@ Use Vitest 2.0.x for unit and integration testing in MFE platform.
 ---
 
 **Last Updated:** 2026-01-XX
-

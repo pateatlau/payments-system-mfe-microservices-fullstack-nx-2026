@@ -3,7 +3,7 @@
 **Status:** Planning (Provisional)  
 **Version:** 1.0  
 **Date:** 2026-01-XX  
-**Tech Stack:** React + Nx + Vite + Module Federation v2 + Backend API + nginx
+**Tech Stack:** React + Nx + Rspack + Module Federation v2 + Backend API + nginx
 
 ---
 
@@ -99,7 +99,7 @@ This explains why payment operations remain **stubbed** (no actual PSP integrati
 | **Monorepo**          | Nx                          | Latest      | Scalable, build caching, task orchestration |
 | **Runtime**           | Node.js                     | 24.11.x LTS | Latest LTS                                  |
 | **Framework**         | React                       | 19.2.0      | Latest stable                               |
-| **Bundler**           | Vite                        | 6.x         | Fast dev server, excellent DX               |
+| **Bundler**           | Rspack                      | Latest      | Fast builds, HMR with MF v2                 |
 | **Module Federation** | @module-federation/enhanced | 0.21.6      | BIMF (Module Federation v2)                 |
 | **Language**          | TypeScript                  | 5.9.x       | Type safety                                 |
 | **Package Manager**   | pnpm                        | 9.x         | Recommended for Nx                          |
@@ -119,7 +119,7 @@ This explains why payment operations remain **stubbed** (no actual PSP integrati
 | **Validation**        | Zod                         | 3.23.x      | Type-safe validation                        |
 | **Storage**           | localStorage                | Native      | Browser API                                 |
 | **Error Handling**    | react-error-boundary        | 4.0.13      | React 19 compatible                         |
-| **Testing**           | Vitest                      | 2.0.x       | Fast, Vite-native                           |
+| **Testing**           | Jest                        | 30.x        | Mature ecosystem, Rspack-compatible         |
 | **E2E Testing**       | Playwright                  | Latest      | Web E2E testing                             |
 | **Code Quality**      | ESLint                      | 9.x         | Latest, flat config                         |
 | **Formatting**        | Prettier                    | 3.3.x       | Code formatting                             |
@@ -437,12 +437,12 @@ class WebSocketClient {
       EventBus.emit('websocket:connected', {});
     };
 
-    this.ws.onmessage = (event) => {
+    this.ws.onmessage = event => {
       const message = JSON.parse(event.data);
       this.handleMessage(message);
     };
 
-    this.ws.onerror = (error) => {
+    this.ws.onerror = error => {
       console.error('WebSocket error:', error);
       EventBus.emit('websocket:error', { error });
     };
@@ -744,15 +744,15 @@ export function AppErrorBoundary({ children }) {
 import { onCLS, onFID, onLCP } from 'web-vitals';
 import * as Sentry from '@sentry/react';
 
-onCLS((metric) => {
+onCLS(metric => {
   Sentry.metrics.distribution('web-vitals.cls', metric.value);
 });
 
-onFID((metric) => {
+onFID(metric => {
   Sentry.metrics.distribution('web-vitals.fid', metric.value);
 });
 
-onLCP((metric) => {
+onLCP(metric => {
   Sentry.metrics.distribution('web-vitals.lcp', metric.value);
 });
 ```
@@ -956,7 +956,6 @@ infrastructureMonitor.trackWebSocketConnection('connected');
 **Tasks:**
 
 1. **Setup nginx**
-
    - Install and configure nginx
    - Setup reverse proxy configuration
    - Configure load balancing
@@ -967,7 +966,6 @@ infrastructureMonitor.trackWebSocketConnection('connected');
    - Note: Real certificates will be implemented in MVP
 
 2. **Testing**
-
    - Test reverse proxy
    - Test load balancing
    - Test SSL/TLS
@@ -993,18 +991,16 @@ infrastructureMonitor.trackWebSocketConnection('connected');
    ```bash
    nx generate @nx/js:library shared-graphql-client \
      --bundler=tsc \
-     --unitTestRunner=vitest
+     --unitTestRunner=jest
    ```
 
 2. **Implement GraphQL Client**
-
    - Setup Apollo Client or urql
    - Configure authentication
    - Setup code generation
    - Create type-safe queries and mutations
 
 3. **Migrate Selected APIs**
-
    - Identify APIs to migrate to GraphQL
    - Implement GraphQL queries
    - Implement GraphQL mutations
@@ -1032,14 +1028,12 @@ infrastructureMonitor.trackWebSocketConnection('connected');
    ```
 
 2. **Implement WebSocket Client**
-
    - Connection management
    - Reconnection logic
    - Message handling
    - Integration with event bus
 
 3. **Integrate in MFEs**
-
    - Add WebSocket to Payments MFE
    - Add WebSocket to Admin MFE
    - Real-time payment updates
@@ -1059,14 +1053,12 @@ infrastructureMonitor.trackWebSocketConnection('connected');
 **Tasks:**
 
 1. **Service Worker**
-
    - Setup Workbox
    - Configure caching strategies
    - Implement offline support
    - Test service worker
 
 2. **Performance Optimizations**
-
    - Implement code splitting
    - Setup lazy loading
    - Optimize bundle sizes
@@ -1074,7 +1066,6 @@ infrastructureMonitor.trackWebSocketConnection('connected');
    - Resource hints
 
 3. **Caching Configuration**
-
    - Browser caching headers
    - CDN caching (if applicable)
    - TanStack Query cache optimization
@@ -1095,7 +1086,6 @@ infrastructureMonitor.trackWebSocketConnection('connected');
 **Tasks:**
 
 1. **Session Management (Basic)**
-
    - Create session sync library (`shared-session-sync`)
    - Implement basic cross-tab sync (BroadcastChannel API + localStorage fallback)
    - Implement basic cross-device sync (WebSocket + polling fallback)
@@ -1105,14 +1095,12 @@ infrastructureMonitor.trackWebSocketConnection('connected');
    - Basic error handling
 
 2. **Backend Session Management (Basic)**
-
    - Simple device registration endpoint
    - Basic session store (in-memory or simple DB)
    - WebSocket session events (basic)
    - Device ID tracking
 
 3. **Enhanced Observability**
-
    - Setup Sentry
    - Configure error tracking
    - Setup performance monitoring
@@ -1121,7 +1109,6 @@ infrastructureMonitor.trackWebSocketConnection('connected');
    - Test error reporting
 
 4. **Basic Analytics (Architecture-Focused)**
-
    - Create `shared-analytics` library
    - Implement architecture-focused event tracking
    - Track MFE metrics, API patterns, system usage
@@ -1129,13 +1116,11 @@ infrastructureMonitor.trackWebSocketConnection('connected');
    - Create analytics dashboard (architecture metrics only)
 
 5. **Performance Monitoring**
-
    - Core Web Vitals tracking
    - Custom performance metrics
    - Performance dashboards
 
 6. **Testing & Refinement**
-
    - Test cross-tab sync (login, logout, token refresh, session timeout)
    - Test cross-device sync (basic - 2 devices)
    - Performance testing
@@ -1144,7 +1129,6 @@ infrastructureMonitor.trackWebSocketConnection('connected');
    - Final optimizations
 
 7. **Documentation**
-
    - Update architecture docs
    - Document nginx configuration
    - Document GraphQL usage (if implemented)
@@ -1334,7 +1318,6 @@ infrastructureMonitor.trackWebSocketConnection('connected');
 **Security Features:**
 
 1. **Infrastructure Security (nginx)**
-
    - ✅ SSL/TLS 1.2+ only with strong cipher suites
    - ✅ Self-signed certificates (POC-3)
    - ⚠️ HSTS disabled for self-signed (will be enabled in MVP with real certificates)
@@ -1346,7 +1329,6 @@ infrastructureMonitor.trackWebSocketConnection('connected');
    - ⚠️ Real certificates planned for MVP
 
 2. **WebSocket Security**
-
    - ✅ WSS only (secure WebSocket)
    - ✅ WebSocket authentication
    - ✅ Message validation and sanitization
@@ -1355,7 +1337,6 @@ infrastructureMonitor.trackWebSocketConnection('connected');
    - ✅ Type whitelisting
 
 3. **GraphQL Security (If Implemented)**
-
    - ✅ Query depth limiting (DoS prevention)
    - ✅ Query complexity limiting
    - ✅ Rate limiting
@@ -1363,7 +1344,6 @@ infrastructureMonitor.trackWebSocketConnection('connected');
    - ✅ Error handling
 
 4. **Cache Security**
-
    - ✅ Encrypted cache for sensitive data
    - ✅ Cache key validation (prevent cache poisoning)
    - ✅ TTL for sensitive data (shorter TTL)
@@ -1371,7 +1351,6 @@ infrastructureMonitor.trackWebSocketConnection('connected');
    - ✅ No caching of sensitive endpoints
 
 5. **Advanced Monitoring & Threat Detection**
-
    - ✅ Real-time threat detection
    - ✅ Brute force detection
    - ✅ Anomaly detection
@@ -1436,7 +1415,6 @@ infrastructureMonitor.trackWebSocketConnection('connected');
 **CI/CD Components:**
 
 1. **All POC-2 Components** (carried forward)
-
    - ✅ Automated testing (unit, integration, E2E)
    - ✅ Build verification
    - ✅ Code quality checks (ESLint + SonarQube)
@@ -1447,7 +1425,6 @@ infrastructureMonitor.trackWebSocketConnection('connected');
    **Reference:** See `docs/sast-implementation-plan.md` for detailed SAST setup (Git hooks: Prettier + ESLint, CI/CD: ESLint + SonarQube + Dependency/Secret scanning).
 
 2. **Multi-Environment Pipeline**
-
    - ✅ Development environment
    - ✅ Staging environment
    - ✅ Production environment
@@ -1455,7 +1432,6 @@ infrastructureMonitor.trackWebSocketConnection('connected');
    - ✅ Environment promotion workflow
 
 3. **Infrastructure Deployment**
-
    - ✅ nginx configuration deployment
    - ✅ SSL/TLS certificate management
    - ✅ Load balancer configuration
@@ -1463,7 +1439,6 @@ infrastructureMonitor.trackWebSocketConnection('connected');
    - ✅ Infrastructure as Code (IaC)
 
 4. **Advanced Testing**
-
    - ✅ Performance testing (Lighthouse CI)
    - ✅ Load testing
    - ✅ Security scanning (OWASP ZAP, Snyk)
@@ -1471,7 +1446,6 @@ infrastructureMonitor.trackWebSocketConnection('connected');
    - ✅ Accessibility testing
 
 5. **Deployment Strategies**
-
    - ✅ Blue-green deployment
    - ✅ Canary releases
    - ✅ Rollback automation
@@ -1479,7 +1453,6 @@ infrastructureMonitor.trackWebSocketConnection('connected');
    - ✅ Zero-downtime deployments
 
 6. **Monitoring Integration**
-
    - ✅ Sentry integration
    - ✅ Performance monitoring
    - ✅ Error tracking
@@ -1866,7 +1839,7 @@ async function deployToCDN() {
 
 ### 15.2 Unit Testing
 
-**Tools:** Vitest 2.0.x, React Testing Library 16.1.x
+**Tools:** Jest 30.x, React Testing Library 16.1.x
 
 **Scope:**
 
@@ -1883,13 +1856,13 @@ async function deployToCDN() {
 
 ```typescript
 // libs/shared-websocket/src/WebSocketClient.test.ts
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from '@jest/globals';
 import { WebSocketClient } from './WebSocketClient';
 
 describe('WebSocketClient', () => {
   it('should connect to WebSocket', async () => {
     const client = new WebSocketClient('ws://localhost:8080');
-    const connectSpy = vi.spyOn(client, 'connect');
+    const connectSpy = jest.spyOn(client, 'connect');
 
     await client.connect();
     expect(connectSpy).toHaveBeenCalled();
@@ -1899,7 +1872,7 @@ describe('WebSocketClient', () => {
 
 ### 15.3 Integration Testing
 
-**Tools:** Vitest, MSW
+**Tools:** Jest, MSW
 
 **Scope:**
 

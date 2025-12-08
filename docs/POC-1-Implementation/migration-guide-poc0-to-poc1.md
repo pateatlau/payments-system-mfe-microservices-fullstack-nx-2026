@@ -2,7 +2,8 @@
 
 **Status:** ✅ Complete  
 **Version:** 1.0  
-**Date:** 2026-01-XX
+**Date:** 2026-01-XX  
+**Note:** POC-1 was migrated from Vite to Rspack to enable HMR with Module Federation v2. This guide reflects the current Rspack-based setup.
 
 ---
 
@@ -115,6 +116,7 @@ apps/
 ### Module Federation Configuration
 
 **POC-0:**
+
 ```typescript
 remotes: {
   helloRemote: 'http://localhost:4201/assets/remoteEntry.js',
@@ -122,19 +124,23 @@ remotes: {
 ```
 
 **POC-1:**
-```typescript
+
+```javascript
+// rspack.config.js
 remotes: {
-  authMfe: 'http://localhost:4201/assets/remoteEntry.js',
-  paymentsMfe: 'http://localhost:4202/assets/remoteEntry.js',
+  authMfe: 'authMfe@http://localhost:4201/assets/remoteEntry.js',
+  paymentsMfe: 'paymentsMfe@http://localhost:4202/assets/remoteEntry.js',
 }
 ```
 
 ### Routing
 
 **POC-0:**
+
 - No routing (single page)
 
 **POC-1:**
+
 - React Router 7
 - Multiple routes (`/signin`, `/signup`, `/payments`)
 - Route protection
@@ -142,9 +148,11 @@ remotes: {
 ### State Management
 
 **POC-0:**
+
 - No state management
 
 **POC-1:**
+
 - Zustand for client state (auth)
 - TanStack Query for server state (payments)
 
@@ -173,6 +181,7 @@ pnpm add -D tailwindcss@^4.0.0 @tailwindcss/postcss@^4.1.17
 ```
 
 **Configuration Changes:**
+
 - Switch from Vite plugin to PostCSS plugin
 - Use `@config` directive in CSS files
 - Update `tailwind.config.js` with absolute paths
@@ -181,50 +190,100 @@ pnpm add -D tailwindcss@^4.0.0 @tailwindcss/postcss@^4.1.17
 
 ```bash
 # Create auth-mfe
-nx generate @nx/react:application auth-mfe --bundler=vite
+nx generate @nx/react:application auth-mfe --bundler=rspack
 
 # Create payments-mfe
-nx generate @nx/react:application payments-mfe --bundler=vite
+nx generate @nx/react:application payments-mfe --bundler=rspack
 ```
+
+> **Note:** POC-1 was initially created with Vite, but migrated to Rspack to enable HMR with Module Federation v2. All new applications should use Rspack.
 
 ### Step 4: Create New Libraries
 
 ```bash
 # Create shared-auth-store
-nx generate @nx/js:library shared-auth-store --bundler=tsc
+nx generate @nx/js:library shared-auth-store --bundler=tsc --unitTestRunner=jest
 
 # Create shared-header-ui
-nx generate @nx/react:library shared-header-ui --bundler=vite
+nx generate @nx/react:library shared-header-ui --bundler=rspack --unitTestRunner=jest
 ```
+
+> **Note:** Testing framework is Jest (migrated from Vitest as part of Rspack migration).
 
 ### Step 5: Configure Module Federation
 
-**Update `apps/shell/vite.config.mts`:**
-```typescript
-remotes: {
-  authMfe: 'http://localhost:4201/assets/remoteEntry.js',
-  paymentsMfe: 'http://localhost:4202/assets/remoteEntry.js',
-}
+**Update `apps/shell/rspack.config.js`:**
+
+```javascript
+const ModuleFederationPlugin =
+  require('@rspack/core').container.ModuleFederationPlugin;
+
+module.exports = {
+  plugins: [
+    new ModuleFederationPlugin({
+      name: 'shell',
+      remotes: {
+        authMfe: 'authMfe@http://localhost:4201/assets/remoteEntry.js',
+        paymentsMfe: 'paymentsMfe@http://localhost:4202/assets/remoteEntry.js',
+      },
+      shared: {
+        react: { singleton: true },
+        'react-dom': { singleton: true },
+      },
+    }),
+  ],
+};
 ```
 
-**Update `apps/auth-mfe/vite.config.mts`:**
-```typescript
-exposes: {
-  './SignIn': './src/components/SignIn.tsx',
-  './SignUp': './src/components/SignUp.tsx',
-}
+**Update `apps/auth-mfe/rspack.config.js`:**
+
+```javascript
+const ModuleFederationPlugin =
+  require('@rspack/core').container.ModuleFederationPlugin;
+
+module.exports = {
+  plugins: [
+    new ModuleFederationPlugin({
+      name: 'authMfe',
+      exposes: {
+        './SignIn': './src/components/SignIn.tsx',
+        './SignUp': './src/components/SignUp.tsx',
+      },
+      shared: {
+        react: { singleton: true },
+        'react-dom': { singleton: true },
+      },
+    }),
+  ],
+};
 ```
 
-**Update `apps/payments-mfe/vite.config.mts`:**
-```typescript
-exposes: {
-  './PaymentsPage': './src/components/PaymentsPage.tsx',
-}
+**Update `apps/payments-mfe/rspack.config.js`:**
+
+```javascript
+const ModuleFederationPlugin =
+  require('@rspack/core').container.ModuleFederationPlugin;
+
+module.exports = {
+  plugins: [
+    new ModuleFederationPlugin({
+      name: 'paymentsMfe',
+      exposes: {
+        './PaymentsPage': './src/components/PaymentsPage.tsx',
+      },
+      shared: {
+        react: { singleton: true },
+        'react-dom': { singleton: true },
+      },
+    }),
+  ],
+};
 ```
 
 ### Step 6: Implement Routing
 
 **Create `apps/shell/src/routes/AppRoutes.tsx`:**
+
 ```typescript
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { BrowserRouter } from 'react-router-dom';
@@ -245,6 +304,7 @@ export function AppRoutes() {
 ### Step 7: Implement State Management
 
 **Create `libs/shared-auth-store/src/lib/shared-auth-store.ts`:**
+
 ```typescript
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
@@ -266,6 +326,7 @@ export const useAuthStore = create<AuthState>()(
 ### Step 8: Update Tailwind Configuration
 
 **Create `apps/shell/tailwind.config.js`:**
+
 ```javascript
 const path = require('path');
 
@@ -278,28 +339,48 @@ module.exports = {
 ```
 
 **Update `apps/shell/src/styles.css`:**
+
 ```css
-@import "tailwindcss";
+@import 'tailwindcss';
 @config "../tailwind.config.js";
 ```
 
-**Update `apps/shell/vite.config.mts`:**
-```typescript
-import tailwindcss from '@tailwindcss/postcss';
-import autoprefixer from 'autoprefixer';
+**Update `apps/shell/rspack.config.js`:**
 
-export default defineConfig({
-  css: {
-    postcss: {
-      plugins: [tailwindcss(), autoprefixer()],
-    },
+```javascript
+module.exports = {
+  module: {
+    rules: [
+      {
+        test: /\.css$/,
+        use: [
+          'style-loader',
+          'css-loader',
+          {
+            loader: 'postcss-loader',
+            options: {
+              postcssOptions: {
+                plugins: [
+                  require('@tailwindcss/postcss'),
+                  require('autoprefixer'),
+                ],
+              },
+            },
+          },
+        ],
+        type: 'javascript/auto',
+      },
+    ],
   },
-});
+};
 ```
+
+> **Note:** Rspack uses loader-based configuration. PostCSS is configured via `postcss-loader` instead of Vite's `css.postcss` option.
 
 ### Step 9: Remove Old Code
 
 **Remove:**
+
 - `apps/hello-remote/` (replaced by auth-mfe)
 - `apps/hello-remote-e2e/` (no longer needed)
 - Old Module Federation remotes configuration
@@ -313,8 +394,10 @@ export default defineConfig({
 ✅ **No breaking changes** - All POC-0 functionality remains intact.
 
 **Compatibility:**
+
 - Module Federation v2 unchanged
-- Vite 6.x unchanged
+- Bundler: Migrated from Vite 6.x to Rspack (enables HMR with Module Federation v2)
+- Testing: Migrated from Vitest to Jest (Rspack-compatible)
 - Nx unchanged
 - All POC-0 packages remain compatible
 
@@ -325,6 +408,7 @@ export default defineConfig({
 ### Vite Configuration
 
 **New:**
+
 - Module Federation remotes updated
 - PostCSS configuration for Tailwind
 - React Router support
@@ -332,12 +416,14 @@ export default defineConfig({
 ### TypeScript Configuration
 
 **New:**
+
 - Type definitions for new packages
 - Shared types library
 
 ### ESLint Configuration
 
 **Updated:**
+
 - New rules for React Router
 - New rules for Zustand
 - New rules for TanStack Query
@@ -356,9 +442,12 @@ export default defineConfig({
 ### Test Configuration
 
 **New:**
-- Vitest configuration for new apps
+
+- Jest configuration for new apps (migrated from Vitest)
 - Playwright configuration for E2E tests
 - Test setup files for new libraries
+
+> **Note:** Testing framework migrated from Vitest to Jest as part of the Rspack migration for better ecosystem compatibility.
 
 ---
 
@@ -384,13 +473,16 @@ pnpm e2e
 ### Workflow Changes
 
 **POC-0:**
+
 - Single app development
 - Simple dev server
 
 **POC-1:**
+
 - Multiple apps (shell + remotes)
-- Preview mode required (Module Federation v2)
-- Build remotes before preview
+- HMR-enabled dev mode (Rspack + Module Federation v2)
+- Use `pnpm dev:mf` for development with HMR
+- Preview mode available for production testing
 
 ---
 
@@ -418,19 +510,22 @@ pnpm e2e
 If migration fails:
 
 1. **Git Revert:**
+
    ```bash
    git revert <commit-hash>
    ```
 
 2. **Package Rollback:**
+
    ```bash
    pnpm install
    ```
 
 3. **Configuration Restore:**
-   - Restore `vite.config.mts` files
+   - Restore `rspack.config.js` files (or `vite.config.mts` if rolling back to Vite)
    - Restore `tailwind.config.js` files
    - Restore `package.json`
+   - Restore `jest.config.js` files (or `vitest.config.ts` if rolling back)
 
 ---
 
@@ -456,7 +551,8 @@ If migration fails:
 
 ### Build Verification
 
-- [ ] All apps build successfully
+- [ ] All apps build successfully with Rspack
+- [ ] Module Federation works in dev mode (HMR enabled)
 - [ ] Module Federation works in preview mode
 - [ ] No TypeScript errors
 - [ ] No linting errors
@@ -467,7 +563,10 @@ If migration fails:
 
 - [`poc-1-completion-summary.md`](./poc-1-completion-summary.md) - POC-1 summary
 - [`packages-and-libraries.md`](./packages-and-libraries.md) - Package details
-- [`developer-workflow.md`](./developer-workflow.md) - Development guide
+- [`developer-workflow.md`](./developer-workflow.md) - Development guide (Rspack-based)
+- [`testing-guide.md`](./testing-guide.md) - Testing guide (Jest-based)
+- [`tailwind-v4-setup-guide.md`](./tailwind-v4-setup-guide.md) - Tailwind setup (Rspack-based)
+- [`../Rspack-Migration/`](../Rspack-Migration/) - Rspack migration details
 - [`../POC-0-Implementation/`](../POC-0-Implementation/) - POC-0 documentation
 
 ---
@@ -485,4 +584,3 @@ If you encounter issues during migration:
 
 **Status:** ✅ Complete  
 **Last Updated:** 2026-01-XX
-

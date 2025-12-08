@@ -18,7 +18,7 @@ This document defines the **master architecture** for the full-stack microfronte
 - **Microservices (Backend)** - API Gateway + services (Auth, Payments, Admin, Profile)
 - **Module Federation v2** - Dynamic remote loading for frontend
 - **Event-Based Communication** - Event hub for inter-service communication
-- **Unified Tooling** - pnpm workspaces, Jest testing (frontend), Vitest testing (backend), TypeScript throughout
+- **Unified Tooling** - pnpm workspaces, Jest testing (frontend, migrated from Vitest), Vitest testing (backend), TypeScript throughout
 - **Production-Ready** - All technologies are production-ready from day one
 
 **POC Purpose & Philosophy:**

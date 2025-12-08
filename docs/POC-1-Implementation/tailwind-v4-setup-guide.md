@@ -7,16 +7,20 @@
 ## Overview
 
 This document describes the challenges faced when integrating Tailwind CSS v4 with:
+
 - Nx monorepo structure
-- Vite 7.x build tool
+- Rspack build tool (migrated from Vite in POC-1)
 - Module Federation v2
 - Shared libraries across workspace
+
+> **Note:** POC-1 was migrated from Vite to Rspack to enable HMR with Module Federation v2. This guide reflects the Rspack configuration.
 
 ---
 
 ## Problem Statement
 
 ### Initial Symptoms
+
 1. Header component styles not being applied
 2. Only base Tailwind reset styles were loading
 3. Utility classes like `bg-slate-900`, `text-white`, `px-4` were not generated
@@ -25,16 +29,19 @@ This document describes the challenges faced when integrating Tailwind CSS v4 wi
 ### Root Cause Analysis
 
 **Issue 1: Tailwind v4 Plugin Architecture Change**
+
 - Tailwind CSS v4 moved the PostCSS plugin to a separate package (`@tailwindcss/postcss`)
 - The main `tailwindcss` package can no longer be used directly as a PostCSS plugin
 - Error: "It looks like you're trying to use `tailwindcss` directly as a PostCSS plugin"
 
-**Issue 2: Vite Plugin Content Detection Limitation**
-- `@tailwindcss/vite` plugin auto-detects content only within the Vite root directory
+**Issue 2: Bundler Plugin Content Detection Limitation**
+
+- Bundler plugins (Vite/Rspack) auto-detect content only within the app root directory
 - In Nx monorepo, shared libraries are **outside** the app's directory
-- The Vite plugin couldn't scan `libs/shared-header-ui/` from `apps/shell/`
+- The bundler plugin couldn't scan `libs/shared-header-ui/` from `apps/shell/`
 
 **Issue 3: Content Path Configuration**
+
 - Tailwind v4 changed how content paths are configured
 - Traditional `tailwind.config.js` wasn't being picked up automatically
 - Relative paths in config files didn't resolve correctly in monorepo structure
@@ -50,6 +57,7 @@ pnpm add -D -w @tailwindcss/postcss @tailwindcss/vite autoprefixer
 ```
 
 **Packages Used:**
+
 - `tailwindcss@4.1.17` - Core Tailwind CSS v4
 - `@tailwindcss/postcss@4.1.17` - PostCSS plugin for Tailwind v4
 - `autoprefixer@10.x` - Vendor prefix automation
@@ -86,6 +94,7 @@ export default {
 ```
 
 **Key Points:**
+
 - Use `resolve()` with `__dirname` to create **absolute paths**
 - Include ALL directories containing Tailwind classes
 - Use ESM syntax (`import`/`export`) for compatibility with Vite
@@ -95,48 +104,55 @@ export default {
 **File:** `apps/shell/src/styles.css`
 
 ```css
-@import "tailwindcss";
+@import 'tailwindcss';
 @config "../tailwind.config.js";
 
 /* You can add global styles to this file, and also import other style files */
 ```
 
 **Key Points:**
+
 - `@import "tailwindcss"` - Tailwind v4 simplified import (replaces `@tailwind base/components/utilities`)
 - `@config "../tailwind.config.js"` - **Critical:** Points Tailwind to the config file with content paths
 
-### Step 4: Configure Vite with PostCSS
+### Step 4: Configure Rspack with PostCSS
 
-**File:** `apps/shell/vite.config.mts`
+**File:** `apps/shell/rspack.config.js`
 
-```typescript
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
-import tailwindcss from '@tailwindcss/postcss';
-import autoprefixer from 'autoprefixer';
-// ... other imports
-
-export default defineConfig(() => ({
-  // ... other config
-  css: {
-    postcss: {
-      plugins: [
-        tailwindcss(),
-        autoprefixer(),
-      ],
-    },
+```javascript
+module.exports = {
+  module: {
+    rules: [
+      {
+        test: /\.css$/,
+        use: [
+          'style-loader',
+          'css-loader',
+          {
+            loader: 'postcss-loader',
+            options: {
+              postcssOptions: {
+                plugins: [
+                  require('@tailwindcss/postcss'),
+                  require('autoprefixer'),
+                ],
+              },
+            },
+          },
+        ],
+        type: 'javascript/auto',
+      },
+    ],
   },
-  plugins: [
-    react(),
-    // ... other plugins
-  ],
-}));
+};
 ```
 
 **Key Points:**
-- Use `@tailwindcss/postcss` instead of `@tailwindcss/vite` for monorepo setups
-- Configure PostCSS inline in Vite config (no separate `postcss.config.js` needed)
+
+- Use `@tailwindcss/postcss` with `postcss-loader` for Rspack
+- Configure PostCSS via loader options (Rspack uses loader-based config)
 - The `@config` directive in CSS handles content path configuration
+- `type: 'javascript/auto'` is required for CSS loader chain in Rspack
 
 ---
 
@@ -147,58 +163,63 @@ export default defineConfig(() => ({
 1. **`@tailwindcss/postcss`** processes CSS files and respects the `@config` directive
 2. **`@config` directive** in CSS points to the config file with absolute content paths
 3. **Absolute paths** using `resolve(__dirname, '...')` ensure files are found regardless of working directory
-4. **PostCSS inline config** in Vite avoids issues with separate config file resolution
+4. **PostCSS loader config** in Rspack avoids issues with separate config file resolution
 
 ### Comparison of Approaches
 
-| Approach | Works in Monorepo? | Notes |
-|----------|-------------------|-------|
-| `@tailwindcss/vite` plugin | ❌ No | Only scans Vite root directory |
-| `@tailwindcss/postcss` with inline content | ❌ No | Content option not properly supported |
-| `@tailwindcss/postcss` + `@config` directive | ✅ Yes | Config file with absolute paths works |
-| Separate `postcss.config.js` | ❌ No | Path resolution issues in Nx |
+| Approach                                     | Works in Monorepo? | Notes                                 |
+| -------------------------------------------- | ------------------ | ------------------------------------- |
+| `@tailwindcss/vite` plugin                   | ❌ No              | Only scans Vite root directory        |
+| `@tailwindcss/postcss` with inline content   | ❌ No              | Content option not properly supported |
+| `@tailwindcss/postcss` + `@config` directive | ✅ Yes             | Config file with absolute paths works |
+| Separate `postcss.config.js`                 | ❌ No              | Path resolution issues in Nx          |
 
 ---
 
 ## Common Pitfalls to Avoid
 
 ### 1. Using Relative Paths in Config
+
 ```javascript
 // ❌ BAD - Relative paths may not resolve correctly
-content: [
-  './src/**/*.tsx',
-  '../../libs/shared-header-ui/src/**/*.tsx',
-]
+content: ['./src/**/*.tsx', '../../libs/shared-header-ui/src/**/*.tsx'];
 
 // ✅ GOOD - Absolute paths always work
 content: [
   resolve(__dirname, 'src/**/*.{js,jsx,ts,tsx}'),
   resolve(__dirname, '../../libs/shared-header-ui/src/**/*.{js,jsx,ts,tsx}'),
-]
+];
 ```
 
 ### 2. Using @tailwindcss/vite for Monorepos
+
 ```typescript
 // ❌ BAD - Vite plugin doesn't scan external directories
 import tailwindcss from '@tailwindcss/vite';
-plugins: [tailwindcss()]
+plugins: [tailwindcss()];
 
 // ✅ GOOD - PostCSS plugin with @config directive
 import tailwindcss from '@tailwindcss/postcss';
-css: { postcss: { plugins: [tailwindcss()] } }
+css: {
+  postcss: {
+    plugins: [tailwindcss()];
+  }
+}
 ```
 
 ### 3. Forgetting @config Directive
+
 ```css
 /* ❌ BAD - Config file not loaded */
-@import "tailwindcss";
+@import 'tailwindcss';
 
 /* ✅ GOOD - Config file loaded with content paths */
-@import "tailwindcss";
+@import 'tailwindcss';
 @config "../tailwind.config.js";
 ```
 
 ### 4. Testing Classes in Browser DevTools
+
 - Classes added via browser DevTools won't have CSS generated
 - Tailwind only generates CSS for classes found in source files
 - Always test by adding classes to actual source code
@@ -208,20 +229,24 @@ css: { postcss: { plugins: [tailwindcss()] } }
 ## Troubleshooting
 
 ### Styles Not Applied
+
 1. Check if the file with Tailwind classes is in the `content` array
 2. Verify absolute paths are correct: `console.log(resolve(__dirname, 'src/**/*.tsx'))`
 3. Clear Vite cache: `rm -rf apps/shell/node_modules/.vite`
 4. Restart dev server
 
 ### 500 Error on styles.css
+
 - Ensure `@tailwindcss/postcss` is installed (not using `tailwindcss` directly)
 - Check for syntax errors in `tailwind.config.js`
 
 ### Classes from Shared Library Not Working
+
 - Add the library path to `content` array in `tailwind.config.js`
 - Use absolute path with `resolve(__dirname, '../../libs/library-name/src/**/*.tsx')`
 
 ### Vite Cache Issues
+
 ```bash
 # Clear all caches
 rm -rf apps/shell/node_modules/.vite
@@ -233,12 +258,12 @@ pnpm nx reset
 
 ## Files Modified
 
-| File | Purpose |
-|------|---------|
-| `apps/shell/tailwind.config.js` | Tailwind config with absolute content paths |
-| `apps/shell/src/styles.css` | CSS entry with `@import` and `@config` directives |
-| `apps/shell/vite.config.mts` | Vite config with PostCSS plugins |
-| `package.json` | Added `@tailwindcss/postcss`, `@tailwindcss/vite`, `autoprefixer` |
+| File                            | Purpose                                                                                      |
+| ------------------------------- | -------------------------------------------------------------------------------------------- |
+| `apps/shell/tailwind.config.js` | Tailwind config with absolute content paths                                                  |
+| `apps/shell/src/styles.css`     | CSS entry with `@import` and `@config` directives                                            |
+| `apps/shell/rspack.config.js`   | Rspack config with PostCSS loader                                                            |
+| `package.json`                  | Added `@tailwindcss/postcss`, `postcss-loader`, `css-loader`, `style-loader`, `autoprefixer` |
 
 ---
 
@@ -250,17 +275,18 @@ When creating new MFE apps or shared libraries that use Tailwind:
 
 1. Create `tailwind.config.js` with content paths
 2. Create `styles.css` with `@import "tailwindcss"` and `@config` directive
-3. Configure PostCSS in `vite.config.mts`
+3. Configure PostCSS loader in `rspack.config.js`
 4. Import styles in `main.tsx`
 
 ### For New Shared Libraries
 
 1. Add the library path to the consuming app's `tailwind.config.js`:
+
    ```javascript
    content: [
      // ... existing paths
      resolve(__dirname, '../../libs/new-library/src/**/*.{js,jsx,ts,tsx}'),
-   ]
+   ];
    ```
 
 2. No separate Tailwind config needed in the library itself
@@ -278,4 +304,3 @@ When creating new MFE apps or shared libraries that use Tailwind:
 **Last Updated:** 2026-12-06  
 **Status:** Resolved - Working Configuration  
 **Applies To:** POC-1 Phase
-

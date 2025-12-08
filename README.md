@@ -1,8 +1,8 @@
 # MFE Microservices Full-Stack Platform
 
-**Status:** POC-0 - Foundation Implementation  
+**Status:** POC-1 - Rspack Migration Complete  
 **Version:** 0.1.0  
-**Tech Stack:** React 19 + Nx + Vite + Module Federation v2
+**Tech Stack:** React 19 + Nx + Rspack + Module Federation v2
 
 ---
 
@@ -63,43 +63,51 @@
 
 ---
 
-## 🎯 Current Phase: POC-0
+## 🎯 Current Phase: POC-1 (Rspack Migration Complete)
 
 ### Scope
 
 **In Scope:**
 
 - ✅ Shell app (host, Port 4200)
-- ✅ Hello Remote app (remote, Port 4201)
-- ✅ Module Federation v2 configuration
-- ✅ Shared libraries (utils, ui, types)
-- ✅ Basic testing setup
+- ✅ Auth MFE (remote, Port 4201)
+- ✅ Payments MFE (remote, Port 4202)
+- ✅ Module Federation v2 with HMR
+- ✅ Routing (React Router 7)
+- ✅ State Management (Zustand + TanStack Query)
+- ✅ Authentication (mock)
+- ✅ Payments (stubbed)
+- ✅ Tailwind CSS v4
+- ✅ Testing (Jest, migrated from Vitest)
 
 **NOT in Scope:**
 
 - ❌ Backend (POC-2)
-- ❌ Routing (POC-1)
-- ❌ State Management (POC-1)
-- ❌ Authentication (POC-1)
-- ❌ Tailwind CSS (POC-1)
+- ❌ Design System (POC-2)
+- ❌ Event Bus (POC-2)
 
 ### Progress
 
-Check current progress: [`docs/POC-0-Implementation/task-list.md`](docs/POC-0-Implementation/task-list.md)
+- **POC-0:** ✅ Complete
+- **POC-1:** ✅ Complete (Rspack migration complete)
+- **Rspack Migration:** ✅ Complete (Phase 1-5, Phase 6 in progress)
+- Check migration progress: [`docs/Rspack-Migration/task-list.md`](docs/Rspack-Migration/task-list.md)
 
 ---
 
 ## 🛠️ Technology Stack
 
-### Frontend (POC-0)
+### Frontend (POC-1)
 
 - **React:** 19.2.0
 - **Nx:** Latest
-- **Vite:** 6.x
+- **Rspack:** Latest (migrated from Vite 6.x)
 - **Module Federation:** @module-federation/enhanced 0.21.6 (BIMF)
-- **Testing:** Vitest 2.0.x, React Testing Library 16.1.x
+- **Testing:** Jest 30.x, React Testing Library 16.1.x (migrated from Vitest)
 - **Package Manager:** pnpm 9.x
 - **TypeScript:** 5.9.x (strict mode)
+
+> **Note:** Migrated from Vite to Rspack to enable HMR with Module Federation v2. See `docs/Rspack-Migration/` for migration details.
 
 ### Future Phases
 
@@ -289,12 +297,14 @@ See: [`.gitmessage`](.gitmessage) for template
 
 This is a **microfrontend (MFE) platform** with:
 
-- **Frontend:** React 19 + Nx + Vite + Module Federation v2 (BIMF)
+- **Frontend:** React 19 + Nx + Rspack + Module Federation v2 (BIMF)
 - **Monorepo:** Single Nx workspace
-- **Module Federation:** Runtime code sharing, independent deployments
+- **Module Federation:** Runtime code sharing, independent deployments with HMR
 - **Production-Ready:** All code must carry forward to Production
 
-**Full Architecture:** [`docs/References/mfe-poc0-architecture.md`](docs/References/mfe-poc0-architecture.md)
+> **Note:** Migrated from Vite to Rspack to enable HMR with Module Federation v2. See [`docs/Rspack-Migration/`](docs/Rspack-Migration/) for migration details.
+
+**Full Architecture:** [`docs/References/mfe-poc1-architecture.md`](docs/References/mfe-poc1-architecture.md)
 
 ---
 

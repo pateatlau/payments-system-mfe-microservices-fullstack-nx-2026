@@ -67,10 +67,12 @@ With Rspack and HMR enabled, follow this simplified workflow:
 **Single Terminal - Start All Dev Servers:**
 
 ```bash
-pnpm dev
+pnpm dev:mf
 ```
 
 This will start all three dev servers (shell, auth-mfe, payments-mfe) in parallel with HMR enabled.
+
+> **Note:** `pnpm dev` builds remotes and starts preview servers. For development with HMR, use `pnpm dev:mf`.
 
 **Access the application:**
 
@@ -120,16 +122,19 @@ With HMR enabled, changes are reflected instantly:
 ### Development
 
 ```bash
-# Build all remotes and start all servers (one command)
-pnpm dev
+# Start all dev servers with HMR (recommended for development)
+pnpm dev:mf
 
-# Build remotes only
+# Start individual dev servers
+pnpm dev:shell
+pnpm dev:auth-mfe
+pnpm dev:payments-mfe
+
+# Build remotes only (required before starting dev servers)
 pnpm build:remotes
 
-# Start all servers in preview mode
+# Start all servers in preview mode (production-like)
 pnpm preview:all
-
-# Start individual servers
 pnpm preview:shell
 pnpm preview:auth-mfe
 pnpm preview:payments-mfe
@@ -151,7 +156,7 @@ pnpm build:remotes
 ### Testing
 
 ```bash
-# Run all tests
+# Run all tests (includes libraries)
 pnpm test
 
 # Run tests for specific projects
@@ -159,11 +164,24 @@ pnpm test:shell
 pnpm test:auth-mfe
 pnpm test:payments-mfe
 
+# Run library tests
+pnpm test:libraries
+pnpm test:shared-auth-store
+pnpm test:shared-utils
+pnpm test:shared-types
+
 # Run tests with coverage
-pnpm test --coverage
+pnpm test:coverage
+pnpm test:coverage:shell
+pnpm test:coverage:payments-mfe
+
+# Run all tests (all projects)
+pnpm test:all
 ```
 
-> **Note:** Tests use Jest (migrated from Vitest). See `docs/POC-1-Implementation/testing-guide.md` for detailed testing documentation.
+> **Note:** Tests use Jest (migrated from Vitest in Phase 5). See `docs/POC-1-Implementation/testing-guide.md` for detailed testing documentation.
+>
+> **Test Status:** 48 tests verified passing. Test discovery issues exist for shell, auth-mfe, and shared-header-ui (test files exist but not being discovered - needs investigation).
 
 #### Testing Architecture Notes
 
@@ -205,18 +223,21 @@ This pattern:
 - ✅ Allows testing without running remote MFE servers
 - ✅ Follows the "design for testability" principle
 
-### Linting & Type Checking
+### Linting & Formatting
 
 ```bash
 # Lint all projects
 pnpm lint
-
-# Type check all projects
-pnpm typecheck
+pnpm lint:shell
+pnpm lint:auth-mfe
+pnpm lint:affected
 
 # Format code
 pnpm format
+pnpm format:check
 ```
+
+> **Note:** Typecheck targets are not configured in project.json. TypeScript checking is available via IDE or manually with `tsc --noEmit`.
 
 ---
 
@@ -459,5 +480,6 @@ pnpm preview:all
 
 ---
 
-**Last Updated:** 2026-12-XX  
-**POC-1 Phase:** Complete (Rspack Migration)
+**Last Updated:** 2026-01-XX  
+**POC-1 Phase:** Complete (Rspack Migration)  
+**Rspack Migration:** Phase 5 Complete - Jest testing framework migrated
