@@ -38,15 +38,15 @@ const sharedDependencies = {
   },
   '@tanstack/react-query': {
     singleton: true,
-    eager: false,
+    eager: true, // Must be eager for standalone app
   },
   zustand: {
     singleton: true,
-    eager: false,
+    eager: true, // Must be eager for standalone app (used by shared-auth-store)
   },
   'react-hook-form': {
     singleton: true,
-    eager: false,
+    eager: true, // Must be eager for standalone app
   },
   // CRITICAL: Share the auth store to ensure same instance across MFEs
   'shared-auth-store': {
