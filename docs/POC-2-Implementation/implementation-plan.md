@@ -3003,6 +3003,7 @@ queryFn: async () => {
 - [x] useUpdatePayment updated
 - [x] useDeletePayment updated
 - [x] usePaymentById added
+- [x] usePaymentReports added (VENDOR/ADMIN)
 - [x] Events emitted on mutations
 - [x] Tests updated
 - [x] Stubbed API code removed

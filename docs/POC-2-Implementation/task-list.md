@@ -714,6 +714,7 @@
 - [x] `useUpdatePayment` updated (PATCH /payments/:id/status)
 - [x] `useDeletePayment` updated (cancels via status=cancelled)
 - [x] `usePaymentById` hook added
+- [x] `usePaymentReports` hook added (VENDOR/ADMIN only)
 - [x] Events emitted on mutations
 - [x] Tests updated
 - [x] Stubbed API code removed
