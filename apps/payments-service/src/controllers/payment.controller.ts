@@ -248,5 +248,62 @@ export async function handleWebhook(
   }
 }
 
+/**
+ * Get payment reports
+ * Available to VENDOR and ADMIN roles
+ */
+export async function getPaymentReports(
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    if (!req.user) {
+      res.status(401).json({
+        success: false,
+        error: {
+          code: 'UNAUTHORIZED',
+          message: 'Authentication required',
+        },
+      });
+      return;
+    }
+
+    // Only VENDOR and ADMIN can access reports
+    if (req.user.role !== 'VENDOR' && req.user.role !== 'ADMIN') {
+      res.status(403).json({
+        success: false,
+        error: {
+          code: 'FORBIDDEN',
+          message: 'Only VENDOR and ADMIN roles can access reports',
+        },
+      });
+      return;
+    }
+
+    // Parse query parameters
+    const startDate = req.query.startDate
+      ? new Date(req.query.startDate as string)
+      : undefined;
+    const endDate = req.query.endDate
+      ? new Date(req.query.endDate as string)
+      : undefined;
+
+    const reports = await paymentService.getPaymentReports(
+      req.user.userId,
+      req.user.role,
+      startDate,
+      endDate
+    );
+
+    res.json({
+      success: true,
+      data: reports,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
 // Import prisma for webhook handler
 import { prisma as db } from 'db';

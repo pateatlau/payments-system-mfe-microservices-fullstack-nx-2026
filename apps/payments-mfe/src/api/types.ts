@@ -25,6 +25,28 @@ export interface UpdatePaymentDto {
 }
 
 /**
+ * Payment reports data (for VENDOR and ADMIN)
+ */
+export interface PaymentReports {
+  totalPayments: number;
+  totalAmount: number;
+  byStatus: Record<string, number>;
+  byType: Record<string, number>;
+  period: {
+    start: string;
+    end: string;
+  };
+}
+
+/**
+ * Payment reports query parameters
+ */
+export interface PaymentReportsParams {
+  startDate?: string; // ISO date string
+  endDate?: string; // ISO date string
+}
+
+/**
  * Export shared enums and models for convenience in the app
  */
 export { Payment, PaymentStatus, PaymentType };

@@ -11,6 +11,20 @@ import type {
   UpdatePaymentStatusRequest,
 } from '../validators/payment.validators';
 
+/**
+ * Payment reports data structure
+ */
+export interface PaymentReportsData {
+  totalPayments: number;
+  totalAmount: number;
+  byStatus: Record<string, number>;
+  byType: Record<string, number>;
+  period: {
+    start: string;
+    end: string;
+  };
+}
+
 export const paymentService = {
   /**
    * List payments with pagination, filtering, and role-based access
@@ -316,5 +330,72 @@ export const paymentService = {
     // TODO: Publish event: payment:status:updated
 
     return updatedPayment;
+  },
+
+  /**
+   * Get payment reports with aggregated statistics
+   * Available to VENDOR and ADMIN roles
+   */
+  async getPaymentReports(
+    userId: string,
+    userRole: UserRole,
+    startDate?: Date,
+    endDate?: Date
+  ): Promise<PaymentReportsData> {
+    // Default to last 30 days if not provided
+    const start = startDate || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    const end = endDate || new Date();
+
+    // Build where clause based on role
+    const where: Record<string, unknown> = {
+      createdAt: {
+        gte: start,
+        lte: end,
+      },
+    };
+
+    // Role-based filtering
+    if (userRole === 'VENDOR') {
+      // Vendors see only their own payments
+      where.senderId = userId;
+    }
+    // ADMIN sees all payments (no filter)
+
+    // Get all payments in the period
+    const payments = await db.payment.findMany({
+      where,
+      select: {
+        amount: true,
+        status: true,
+        type: true,
+      },
+    });
+
+    // Calculate aggregated statistics
+    const totalPayments = payments.length;
+    const totalAmount = payments.reduce((sum, p) => sum + p.amount, 0);
+
+    // Group by status
+    const byStatus: Record<string, number> = {};
+    payments.forEach(p => {
+      byStatus[p.status] = (byStatus[p.status] || 0) + 1;
+    });
+
+    // Group by type
+    const byType: Record<string, number> = {};
+    payments.forEach(p => {
+      byType[p.type] = (byType[p.type] || 0) + 1;
+    });
+
+    return {
+      totalPayments,
+      totalAmount,
+      byStatus,
+      byType,
+      period: {
+        start: start.toISOString(),
+        end: end.toISOString(),
+      },
+    };
   },
 };

@@ -13,6 +13,7 @@ router.use(authenticate);
 
 // Payment CRUD
 router.get('/payments', paymentController.listPayments);
+router.get('/payments/reports', paymentController.getPaymentReports);
 router.get('/payments/:id', paymentController.getPaymentById);
 router.post('/payments', paymentController.createPayment);
 router.patch('/payments/:id/status', paymentController.updatePaymentStatus);

@@ -59,6 +59,28 @@ export function usePaymentById(id: string | undefined) {
 }
 
 /**
+ * Hook to fetch payment reports (VENDOR and ADMIN only)
+ *
+ * @param params - Optional date range for reports
+ * @returns TanStack Query result with reports data
+ */
+export function usePaymentReports(params?: {
+  startDate?: string;
+  endDate?: string;
+}) {
+  const { user } = useAuthStore();
+
+  return useQuery({
+    queryKey: [...paymentKeys.all, 'reports', params] as const,
+    queryFn: async () => {
+      const { getPaymentReports } = await import('../api/payments');
+      return await getPaymentReports(params);
+    },
+    enabled: !!user && (user.role === 'VENDOR' || user.role === 'ADMIN'),
+  });
+}
+
+/**
  * Hook to invalidate payments queries
  * Useful after mutations to refetch payments list
  */

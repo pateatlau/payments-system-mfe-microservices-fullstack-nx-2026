@@ -1,7 +1,12 @@
 import type { Payment, PaymentStatus, PaymentType } from 'shared-types';
 import { ApiClient, type TokenProvider } from 'shared-api-client';
 import { useAuthStore } from 'shared-auth-store';
-import type { CreatePaymentDto, UpdatePaymentDto } from './types';
+import type {
+  CreatePaymentDto,
+  UpdatePaymentDto,
+  PaymentReports,
+  PaymentReportsParams,
+} from './types';
 
 /**
  * Backend Payments API (direct service URL - POC-2)
@@ -132,6 +137,27 @@ export async function updatePaymentStatus(
   if (!response?.data) {
     console.error('Invalid response structure:', response);
     throw new Error('Invalid response structure from payments API');
+  }
+
+  return response.data;
+}
+
+/**
+ * Get payment reports (VENDOR and ADMIN only)
+ */
+export async function getPaymentReports(
+  params?: PaymentReportsParams
+): Promise<PaymentReports> {
+  const response = await paymentsApiClient.get<PaymentReports>(
+    "/payments/reports",
+    {
+      params,
+    }
+  );
+
+  if (!response?.data) {
+    console.error("Invalid response structure:", response);
+    throw new Error("Invalid response structure from payments API");
   }
 
   return response.data;
