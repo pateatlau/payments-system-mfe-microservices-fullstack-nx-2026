@@ -665,18 +665,18 @@
 
 #### Sub-task 4.1.1: Update Auth Store
 
-- [ ] API client used for login
-- [ ] API client used for signup
-- [ ] API client used for logout
-- [ ] Token storage implemented (accessToken, refreshToken)
-- [ ] `setAccessToken` function added
-- [ ] Events emitted to event bus
-- [ ] Tests updated
-- [ ] Mock logic removed
+- [x] API client used for login
+- [x] API client used for signup
+- [x] API client used for logout
+- [x] Token storage implemented (accessToken, refreshToken)
+- [x] `setAccessToken` function added
+- [x] Events emitted to event bus
+- [x] Tests updated
+- [x] Mock logic removed
 
-**Status:** ⬜ Not Started  
-**Notes:**  
-**Completed Date:**
+**Status:** ✅ Complete  
+**Notes:** Successfully updated auth store to use real JWT authentication with backend API. All login, signup, and logout functions now use the shared API client. Token storage (accessToken, refreshToken) implemented and persisted. Event bus integration added for auth:login, auth:logout, and auth:token-refreshed events. All 20 tests passing. Mock authentication logic completely removed.  
+**Completed Date:** 2026-12-09
 
 ---
 

@@ -76,10 +76,12 @@ export class ApiClient {
   private onUnauthorized?: () => void;
 
   constructor(config: ApiClientConfig = {}) {
-    const baseURL =
-      config.baseURL ??
-      process.env['NX_API_BASE_URL'] ??
-      'http://localhost:3000/api';
+    // Access environment variable (replaced by DefinePlugin at build time in browser)
+    // DefinePlugin replaces process.env.NX_API_BASE_URL with the actual string value
+    // Use dot notation so DefinePlugin can replace it properly
+    // @ts-expect-error - process.env is replaced by DefinePlugin at build time
+    const envBaseURL = process.env.NX_API_BASE_URL;
+    const baseURL = config.baseURL ?? envBaseURL ?? 'http://localhost:3000/api';
 
     this.axiosInstance = axios.create({
       baseURL,

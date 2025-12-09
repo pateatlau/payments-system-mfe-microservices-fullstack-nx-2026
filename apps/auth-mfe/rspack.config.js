@@ -98,6 +98,14 @@ module.exports = {
         __dirname,
         '../../libs/shared-types/src/index.ts'
       ),
+      '@mfe/shared-api-client': path.resolve(
+        __dirname,
+        '../../libs/shared-api-client/src/index.ts'
+      ),
+      '@mfe/shared-event-bus': path.resolve(
+        __dirname,
+        '../../libs/shared-event-bus/src/index.ts'
+      ),
     },
   },
   module: {
@@ -154,6 +162,24 @@ module.exports = {
   },
   plugins: [
     new rspack.ProgressPlugin(),
+    // Define environment variables for browser (replaces process.env at build time)
+    new rspack.DefinePlugin({
+      'process.env': JSON.stringify({
+        NX_API_BASE_URL:
+          process.env.NX_API_BASE_URL || 'http://localhost:3000/api',
+        NODE_ENV: isProduction ? 'production' : 'development',
+      }),
+    }),
+    // Copy public assets (favicon.ico, etc.) to output directory
+    new rspack.CopyRspackPlugin({
+      patterns: [
+        {
+          from: path.resolve(__dirname, 'public'),
+          to: path.resolve(__dirname, '../../dist/apps/auth-mfe'),
+          noErrorOnMissing: true,
+        },
+      ],
+    }),
     // HTML generation - using HtmlRspackPlugin instead of NxAppRspackPlugin
     new rspack.HtmlRspackPlugin({
       template: path.resolve(__dirname, 'index.html'),
@@ -179,6 +205,11 @@ module.exports = {
     host: 'localhost',
     hot: true,
     historyApiFallback: true,
+    // Serve static files from public directory
+    static: {
+      directory: path.resolve(__dirname, 'public'),
+      publicPath: '/',
+    },
     headers: {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, PATCH, OPTIONS',

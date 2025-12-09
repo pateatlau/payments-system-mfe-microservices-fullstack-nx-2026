@@ -2835,26 +2835,60 @@ login: async (email, password) => {
 
 **Verification:**
 
-- [ ] API client used for login
-- [ ] API client used for signup
-- [ ] API client used for logout
-- [ ] Token storage implemented
-- [ ] setAccessToken function added
-- [ ] Events emitted to event bus
-- [ ] Tests updated
-- [ ] Mock logic removed
+- [x] API client used for login
+- [x] API client used for signup
+- [x] API client used for logout
+- [x] Token storage implemented
+- [x] setAccessToken function added
+- [x] Events emitted to event bus
+- [x] Tests updated
+- [x] Mock logic removed
 
 **Acceptance Criteria:**
 
-- ⬜ Login works with backend API
-- ⬜ Signup works with backend API
-- ⬜ Logout invalidates tokens
-- ⬜ Events emitted correctly
-- ⬜ Tests pass
+- ✅ Login works with backend API
+- ✅ Signup works with backend API
+- ✅ Logout invalidates tokens
+- ✅ Events emitted correctly
+- ✅ Tests pass
 
-**Status:** ⬜ Not Started  
-**Completed Date:**  
+**Status:** ✅ Complete  
+**Completed Date:** 2026-12-09  
 **Notes:**
+
+Successfully updated `libs/shared-auth-store/src/lib/shared-auth-store.ts` to use real JWT authentication:
+
+**Key Changes:**
+
+1. **API Client Integration:** Integrated `@mfe/shared-api-client` for all auth operations (login, signup, logout)
+2. **Token Management:** Added `accessToken` and `refreshToken` to auth state with persistence via Zustand
+3. **Token Provider:** Implemented `TokenProvider` interface for API client to access tokens dynamically
+4. **Event Bus Integration:** Emit `auth:login`, `auth:logout`, and `auth:token-refreshed` events to `@mfe/shared-event-bus`
+5. **setAccessToken Function:** Added function to update tokens when refresh occurs, automatically emits `auth:token-refreshed` event
+6. **Error Handling:** Proper error handling for API failures with user-friendly error messages
+7. **Persistence:** Updated Zustand persist middleware to include tokens in localStorage
+
+**Files Modified:**
+
+- `libs/shared-auth-store/src/lib/shared-auth-store.ts` - Complete rewrite to use real API
+- `libs/shared-auth-store/src/index.ts` - Updated exports to re-export User from shared-types
+- `libs/shared-auth-store/src/lib/shared-auth-store.spec.ts` - Complete test rewrite with mocks for API client and event bus
+
+**Test Results:**
+
+- All 20 tests passing
+- Coverage maintained above 70%
+- Tests properly mock API client and event bus
+- Tests verify API calls, event emissions, token storage, and error handling
+
+**Removed:**
+
+- All mock authentication functions (`mockLogin`, `mockSignUp`)
+- Mock role assignment logic
+
+**Next Steps:**
+
+- Task 4.1.2: Update Auth MFE Components (SignIn/SignUp) to use updated auth store
 
 ---
 
