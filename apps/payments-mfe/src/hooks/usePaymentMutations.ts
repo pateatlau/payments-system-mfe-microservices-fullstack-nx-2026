@@ -2,10 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from 'shared-auth-store';
 import { paymentKeys } from './usePayments';
 import type { Payment, CreatePaymentDto, UpdatePaymentDto } from '../api/types';
-import {
-  createPayment,
-  updatePaymentStatus,
-} from '../api/payments';
+import { createPayment, updatePaymentStatus } from '../api/payments';
 import { PaymentStatus } from 'shared-types';
 
 /**
@@ -86,4 +83,3 @@ export function useDeletePayment() {
     },
   });
 }
-

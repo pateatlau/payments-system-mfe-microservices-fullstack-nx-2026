@@ -105,6 +105,10 @@ module.exports = {
         __dirname,
         '../../libs/shared-event-bus/src/index.ts'
       ),
+      '@mfe/shared-design-system': path.resolve(
+        __dirname,
+        '../../libs/shared-design-system/src/index.ts'
+      ),
     },
   },
   module: {

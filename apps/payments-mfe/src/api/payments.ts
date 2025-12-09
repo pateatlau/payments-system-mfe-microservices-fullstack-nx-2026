@@ -1,8 +1,4 @@
-import type {
-  Payment,
-  PaymentStatus,
-  PaymentType,
-} from 'shared-types';
+import type { Payment, PaymentStatus, PaymentType } from 'shared-types';
 import { apiClient } from 'shared-api-client';
 import type { CreatePaymentDto, UpdatePaymentDto } from './types';
 
@@ -60,10 +56,7 @@ export async function getPaymentById(id: string): Promise<Payment> {
 export async function createPayment(
   payload: CreatePaymentDto
 ): Promise<Payment> {
-  const response = await apiClient.post<PaymentResponse>(
-    '/payments',
-    payload
-  );
+  const response = await apiClient.post<PaymentResponse>('/payments', payload);
   return response.data.data;
 }
 
@@ -80,4 +73,3 @@ export async function updatePaymentStatus(
   );
   return response.data.data;
 }
-

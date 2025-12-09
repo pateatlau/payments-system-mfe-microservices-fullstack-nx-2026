@@ -5,6 +5,21 @@ import { z } from 'zod';
 import { useAuthStore } from 'shared-auth-store';
 import { UserRole } from 'shared-types';
 import {
+  Button,
+  Input,
+  Label,
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  Alert,
+  AlertTitle,
+  AlertDescription,
+  Badge,
+  Loading,
+} from '@mfe/shared-design-system';
+import {
   usePayments,
   useCreatePayment,
   useUpdatePayment,
@@ -21,13 +36,11 @@ const createPaymentSchema = z.object({
     .positive('Amount must be positive')
     .min(0.01, 'Amount must be at least 0.01'),
   currency: z.string().min(1, 'Currency is required').default('USD'),
-  type: z.enum(
-    [PaymentType.INSTANT, PaymentType.SCHEDULED, PaymentType.RECURRING] as [
-      PaymentType,
-      PaymentType,
-      PaymentType,
-    ]
-  ),
+  type: z.enum([
+    PaymentType.INSTANT,
+    PaymentType.SCHEDULED,
+    PaymentType.RECURRING,
+  ] as [PaymentType, PaymentType, PaymentType]),
   description: z
     .string({ required_error: 'Description is required' })
     .min(1, 'Description is required'),
@@ -77,22 +90,24 @@ function formatCurrency(amount: number, currency: string): string {
 }
 
 /**
- * Get status badge color
+ * Get status badge variant for design system Badge component
  */
-function getStatusColor(status: PaymentStatus): string {
+function getStatusBadgeVariant(
+  status: PaymentStatus
+): 'success' | 'warning' | 'destructive' | 'default' | 'secondary' {
   switch (status) {
     case PaymentStatus.COMPLETED:
-      return 'bg-green-100 text-green-800';
+      return 'success';
     case PaymentStatus.PROCESSING:
-      return 'bg-blue-100 text-blue-800';
+      return 'default';
     case PaymentStatus.PENDING:
-      return 'bg-yellow-100 text-yellow-800';
+      return 'warning';
     case PaymentStatus.FAILED:
-      return 'bg-red-100 text-red-800';
+      return 'destructive';
     case PaymentStatus.CANCELLED:
-      return 'bg-gray-100 text-gray-800';
+      return 'secondary';
     default:
-      return 'bg-gray-100 text-gray-800';
+      return 'secondary';
   }
 }
 
@@ -231,10 +246,7 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
   if (isLoadingPayments) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
-        <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
-          <p className="text-slate-600">Loading payments...</p>
-        </div>
+        <Loading size="lg" label="Loading payments..." />
       </div>
     );
   }
@@ -243,16 +255,14 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
   if (paymentsError) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md w-full">
-          <h2 className="text-lg font-semibold text-red-800 mb-2">
-            Error Loading Payments
-          </h2>
-          <p className="text-red-600">
+        <Alert variant="destructive" className="max-w-md w-full">
+          <AlertTitle>Error Loading Payments</AlertTitle>
+          <AlertDescription>
             {paymentsError instanceof Error
               ? paymentsError.message
               : 'An unexpected error occurred'}
-          </p>
-        </div>
+          </AlertDescription>
+        </Alert>
       </div>
     );
   }
@@ -261,14 +271,12 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
   if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4">
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 max-w-md w-full">
-          <h2 className="text-lg font-semibold text-yellow-800 mb-2">
-            Authentication Required
-          </h2>
-          <p className="text-yellow-600">
+        <Alert variant="warning" className="max-w-md w-full">
+          <AlertTitle>Authentication Required</AlertTitle>
+          <AlertDescription>
             Please sign in to view your payments.
-          </p>
-        </div>
+          </AlertDescription>
+        </Alert>
       </div>
     );
   }
@@ -290,36 +298,34 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
         {isVendor && (
           <div className="mb-6">
             {!showCreateForm ? (
-              <button
-                onClick={() => setShowCreateForm(true)}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:bg-slate-400 disabled:cursor-not-allowed"
-              >
+              <Button onClick={() => setShowCreateForm(true)}>
                 Create Payment
-              </button>
+              </Button>
             ) : (
-              <div className="bg-white rounded-lg shadow-lg p-6">
-                <h2 className="text-xl font-semibold text-slate-900 mb-4">
-                  Create New Payment
-                </h2>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Create New Payment</CardTitle>
+                  <CardDescription>
+                    Enter payment details to create a new payment
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
                 <form
                   onSubmit={handleSubmitCreate(onSubmitCreate)}
                   className="space-y-4"
                 >
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label
-                        htmlFor="amount"
-                        className="block text-sm font-medium text-slate-700 mb-2"
-                      >
+                      <Label htmlFor="amount">
                         Amount *
-                      </label>
-                      <input
+                      </Label>
+                      <Input
                         id="amount"
                         type="number"
                         step="0.01"
                         {...registerCreate('amount', { valueAsNumber: true })}
-                        className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         placeholder="0.00"
+                        className="mt-2"
                       />
                       {createErrors.amount && (
                         <p className="mt-1 text-sm text-red-600" role="alert">
@@ -329,16 +335,13 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
                     </div>
 
                     <div>
-                      <label
-                        htmlFor="currency"
-                        className="block text-sm font-medium text-slate-700 mb-2"
-                      >
+                      <Label htmlFor="currency">
                         Currency *
-                      </label>
+                      </Label>
                       <select
                         id="currency"
                         {...registerCreate('currency')}
-                        className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 mt-2"
                       >
                         <option value="USD">USD</option>
                         <option value="EUR">EUR</option>
@@ -353,16 +356,13 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
                   </div>
 
                   <div>
-                    <label
-                      htmlFor="type"
-                      className="block text-sm font-medium text-slate-700 mb-2"
-                    >
+                    <Label htmlFor="type">
                       Payment Type *
-                    </label>
+                    </Label>
                     <select
                       id="type"
                       {...registerCreate('type')}
-                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 mt-2"
                     >
                       <option value={PaymentType.INSTANT}>Instant</option>
                       <option value={PaymentType.SCHEDULED}>Scheduled</option>
@@ -376,18 +376,15 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
                   </div>
 
                   <div>
-                    <label
-                      htmlFor="description"
-                      className="block text-sm font-medium text-slate-700 mb-2"
-                    >
+                    <Label htmlFor="description">
                       Description *
-                    </label>
-                    <input
+                    </Label>
+                    <Input
                       id="description"
                       type="text"
                       {...registerCreate('description')}
-                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="Payment description"
+                      className="mt-2"
                     />
                     {createErrors.description && (
                       <p className="mt-1 text-sm text-red-600" role="alert">
@@ -397,18 +394,15 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
                   </div>
 
                   <div>
-                    <label
-                      htmlFor="recipientEmail"
-                      className="block text-sm font-medium text-slate-700 mb-2"
-                    >
+                    <Label htmlFor="recipientEmail">
                       Recipient Email *
-                    </label>
-                    <input
+                    </Label>
+                    <Input
                       id="recipientEmail"
                       type="email"
                       {...registerCreate('recipientEmail')}
-                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="recipient@example.com"
+                      className="mt-2"
                     />
                     {createErrors.recipientEmail && (
                       <p className="mt-1 text-sm text-red-600" role="alert">
@@ -454,7 +448,7 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
         )}
 
         {/* Payments List */}
-        <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+        <Card className="overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-slate-50">
@@ -494,53 +488,42 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-900">
                             {payment.id}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="flex gap-2">
-                              <input
-                                type="number"
-                                step="0.01"
-                                {...registerUpdate('amount', {
-                                  valueAsNumber: true,
-                                })}
-                                className="w-24 px-2 py-1 border border-slate-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                placeholder="Amount"
-                              />
-                              <select
-                                {...registerUpdate('currency')}
-                                className="w-20 px-2 py-1 border border-slate-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                              >
-                                <option value="USD">USD</option>
-                                <option value="EUR">EUR</option>
-                                <option value="GBP">GBP</option>
-                              </select>
-                            </div>
-                            {updateErrors.amount && (
-                              <p className="text-xs text-red-600 mt-1">
-                                {updateErrors.amount.message}
-                              </p>
-                            )}
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-slate-900">
+                            {formatCurrency(payment.amount, payment.currency)}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
-                            {payment.type}
+                            <Badge variant="outline">
+                              {payment.type}
+                            </Badge>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <select
                               {...registerUpdate('status')}
-                              className="px-2 py-1 border border-slate-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              className="flex h-9 rounded-md border border-gray-300 bg-white px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                             >
-                              <option value={PaymentStatus.PENDING}>Pending</option>
-                              <option value={PaymentStatus.PROCESSING}>Processing</option>
-                              <option value={PaymentStatus.COMPLETED}>Completed</option>
-                              <option value={PaymentStatus.FAILED}>Failed</option>
-                              <option value={PaymentStatus.CANCELLED}>Cancelled</option>
+                              <option value={PaymentStatus.PENDING}>
+                                Pending
+                              </option>
+                              <option value={PaymentStatus.PROCESSING}>
+                                Processing
+                              </option>
+                              <option value={PaymentStatus.COMPLETED}>
+                                Completed
+                              </option>
+                              <option value={PaymentStatus.FAILED}>
+                                Failed
+                              </option>
+                              <option value={PaymentStatus.CANCELLED}>
+                                Cancelled
+                              </option>
                             </select>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <input
+                            <Input
                               type="text"
                               {...registerUpdate('reason')}
-                              className="w-full px-2 py-1 border border-slate-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                               placeholder="Reason (optional)"
+                              className="w-full"
                             />
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
@@ -552,20 +535,22 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
                               className="inline"
                             >
                               <div className="flex gap-2">
-                                <button
+                                <Button
                                   type="submit"
+                                  variant="ghost"
+                                  size="sm"
                                   disabled={isUpdating}
-                                  className="text-blue-600 hover:text-blue-900 disabled:text-slate-400"
                                 >
                                   Save
-                                </button>
-                                <button
+                                </Button>
+                                <Button
                                   type="button"
+                                  variant="ghost"
+                                  size="sm"
                                   onClick={cancelEdit}
-                                  className="text-slate-600 hover:text-slate-900"
                                 >
                                   Cancel
-                                </button>
+                                </Button>
                               </div>
                             </form>
                           </td>
@@ -585,13 +570,9 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
                             </span>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <span
-                              className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
-                                payment.status
-                              )}`}
-                            >
+                            <Badge variant={getStatusBadgeVariant(payment.status)}>
                               {payment.status}
-                            </span>
+                            </Badge>
                           </td>
                           <td className="px-6 py-4 text-sm text-slate-500">
                             {payment.description || '-'}
@@ -602,37 +583,41 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
                           {isVendor && (
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                               <div className="flex gap-2">
-                                <button
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
                                   onClick={() => startEdit(payment)}
-                                  className="text-blue-600 hover:text-blue-900"
                                 >
                                   Edit
-                                </button>
+                                </Button>
                                 {deleteConfirmId === payment.id ? (
                                   <div className="flex gap-2">
-                                    <button
+                                    <Button
+                                      variant="destructive"
+                                      size="sm"
                                       onClick={() => handleDelete(payment.id)}
                                       disabled={deletePaymentMutation.isPending}
-                                      className="text-red-600 hover:text-red-900 disabled:text-slate-400"
                                     >
                                       Confirm
-                                    </button>
-                                    <button
+                                    </Button>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
                                       onClick={() => setDeleteConfirmId(null)}
-                                      className="text-slate-600 hover:text-slate-900"
                                     >
                                       Cancel
-                                    </button>
+                                    </Button>
                                   </div>
                                 ) : (
-                                  <button
+                                  <Button
+                                    variant="destructive"
+                                    size="sm"
                                     onClick={() =>
                                       setDeleteConfirmId(payment.id)
                                     }
-                                    className="text-red-600 hover:text-red-900"
                                   >
                                     Delete
-                                  </button>
+                                  </Button>
                                 )}
                               </div>
                             </td>
@@ -658,13 +643,13 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
 
         {/* Mutation Errors */}
         {(updatePaymentMutation.isError || deletePaymentMutation.isError) && (
-          <div className="mt-4 bg-red-50 border border-red-200 rounded-lg p-4">
-            <p className="text-sm text-red-600">
+          <Alert variant="destructive" className="mt-4">
+            <AlertDescription>
               {updatePaymentMutation.error?.message ||
                 deletePaymentMutation.error?.message ||
                 'An error occurred'}
-            </p>
-          </div>
+            </AlertDescription>
+          </Alert>
         )}
       </div>
     </div>

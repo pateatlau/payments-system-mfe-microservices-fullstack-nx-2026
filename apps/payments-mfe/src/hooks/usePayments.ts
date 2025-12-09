@@ -49,4 +49,3 @@ export function useInvalidatePayments() {
     queryClient.invalidateQueries({ queryKey: paymentKeys.all });
   };
 }
-

@@ -28,4 +28,3 @@ export interface UpdatePaymentDto {
  * Export shared enums and models for convenience in the app
  */
 export { Payment, PaymentStatus, PaymentType };
-
