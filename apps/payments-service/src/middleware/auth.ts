@@ -7,10 +7,9 @@ import type { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import type { UserRole } from 'shared-types';
 
-// JWT Secret (must match API Gateway and Auth Service)
+// JWT Secret (must match Auth Service)
 const JWT_SECRET =
-  process.env['JWT_SECRET'] ||
-  'your-super-secret-jwt-key-minimum-32-characters-long-for-development-only';
+  process.env['JWT_SECRET'] || 'your-secret-key-change-in-production';
 
 interface JwtPayload {
   userId: string;
