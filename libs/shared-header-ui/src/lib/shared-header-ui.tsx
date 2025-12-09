@@ -62,6 +62,14 @@ export function Header({
                     Reports
                   </Link>
                 )}
+                {hasRole(UserRole.ADMIN) && (
+                  <Link
+                    to="/admin"
+                    className="text-slate-300 hover:text-white transition-colors px-3 py-2 rounded-md text-sm font-medium"
+                  >
+                    Admin
+                  </Link>
+                )}
               </div>
             )}
 

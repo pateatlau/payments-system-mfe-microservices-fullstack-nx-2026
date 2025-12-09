@@ -27,19 +27,19 @@ describe('AdminDashboard', () => {
 
   it('should render admin dashboard', () => {
     render(<AdminDashboard />);
-    
+
     expect(screen.getByText('Admin Dashboard')).toBeInTheDocument();
   });
 
   it('should display welcome message with user name', () => {
     render(<AdminDashboard />);
-    
+
     expect(screen.getByText(/Welcome back, Admin User/)).toBeInTheDocument();
   });
 
   it('should display dashboard cards', () => {
     render(<AdminDashboard />);
-    
+
     expect(screen.getByText('User Management')).toBeInTheDocument();
     expect(screen.getByText('Payment Reports')).toBeInTheDocument();
     expect(screen.getByText('System Health')).toBeInTheDocument();
@@ -48,7 +48,7 @@ describe('AdminDashboard', () => {
 
   it('should display quick stats section', () => {
     render(<AdminDashboard />);
-    
+
     expect(screen.getByText('Quick Stats')).toBeInTheDocument();
     expect(screen.getByText('Total Users')).toBeInTheDocument();
     expect(screen.getByText('Active Payments')).toBeInTheDocument();
@@ -65,7 +65,7 @@ describe('AdminDashboard', () => {
     });
 
     render(<AdminDashboard />);
-    
+
     expect(screen.getByText(/Welcome back, Admin/)).toBeInTheDocument();
   });
 });

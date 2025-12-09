@@ -170,8 +170,7 @@ module.exports = {
       'process.env': JSON.stringify({
         // POC-2: Direct service URL (Admin Service)
         // API Gateway proxy deferred to POC-3
-        NX_API_BASE_URL:
-          process.env.NX_API_BASE_URL || 'http://localhost:3003',
+        NX_API_BASE_URL: process.env.NX_API_BASE_URL || 'http://localhost:3003',
         NODE_ENV: isProduction ? 'production' : 'development',
       }),
     }),

@@ -195,6 +195,63 @@ describe('Header', () => {
       renderWithRouter(<Header />);
       expect(screen.queryByText('Reports')).not.toBeInTheDocument();
     });
+
+    it('should show Admin link for ADMIN role', () => {
+      const adminUser: User = {
+        id: '1',
+        email: 'admin@example.com',
+        name: 'Admin User',
+        role: 'ADMIN',
+      };
+
+      mockUseAuthStore.mockReturnValue({
+        user: adminUser,
+        isAuthenticated: true,
+        logout: mockLogout,
+        hasRole: jest.fn((role: string) => role === 'ADMIN'),
+      });
+
+      renderWithRouter(<Header />);
+      expect(screen.getByText('Admin')).toBeInTheDocument();
+    });
+
+    it('should not show Admin link for CUSTOMER role', () => {
+      const customerUser: User = {
+        id: '1',
+        email: 'customer@example.com',
+        name: 'Customer User',
+        role: 'CUSTOMER',
+      };
+
+      mockUseAuthStore.mockReturnValue({
+        user: customerUser,
+        isAuthenticated: true,
+        logout: mockLogout,
+        hasRole: jest.fn((role: string) => role === 'CUSTOMER'),
+      });
+
+      renderWithRouter(<Header />);
+      expect(screen.queryByText('Admin')).not.toBeInTheDocument();
+    });
+
+    it('should not show Admin link for VENDOR role', () => {
+      const vendorUser: User = {
+        id: '1',
+        email: 'vendor@example.com',
+        name: 'Vendor User',
+        role: 'VENDOR',
+      };
+
+      mockUseAuthStore.mockReturnValue({
+        user: vendorUser,
+        isAuthenticated: true,
+        logout: mockLogout,
+        hasRole: jest.fn((role: string) => role === 'VENDOR'),
+      });
+
+      renderWithRouter(<Header />);
+      expect(screen.queryByText('Admin')).not.toBeInTheDocument();
+    });
   });
 
   describe('responsive design', () => {
