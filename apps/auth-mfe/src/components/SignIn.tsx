@@ -60,12 +60,13 @@ export function SignIn({ onSuccess, onNavigateToSignUp }: SignInProps = {}) {
     },
   });
 
-  // Clear auth store error when component mounts or when error changes
+  // Clear auth store error when component mounts (to clear stale errors from previous sessions)
+  // Note: We use an empty dependency array so this only runs on mount, not when error changes.
+  // This allows error messages to be displayed to users before being cleared.
   useEffect(() => {
-    if (error) {
-      clearError();
-    }
-  }, [error, clearError]);
+    clearError();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Call onSuccess when authentication succeeds (only once)
   // Note: Navigation is handled by SignInPage component via Navigate component
