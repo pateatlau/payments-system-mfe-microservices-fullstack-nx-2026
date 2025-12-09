@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from 'shared-auth-store';
+import { eventBus } from '@mfe/shared-event-bus';
 import { paymentKeys } from './usePayments';
 import type { Payment, CreatePaymentDto, UpdatePaymentDto } from '../api/types';
 import { createPayment, updatePaymentStatus } from '../api/payments';
@@ -25,9 +26,24 @@ export function useCreatePayment() {
       }
       return await createPayment(data);
     },
-    onSuccess: () => {
+    onSuccess: (payment) => {
       // Invalidate payments list to refetch after creation
       queryClient.invalidateQueries({ queryKey: paymentKeys.all });
+      
+      // Emit payment created event
+      eventBus.emit('payments:created', {
+        payment: {
+          id: payment.id,
+          userId: payment.senderId,
+          amount: payment.amount,
+          currency: payment.currency,
+          status: payment.status as PaymentStatus,
+          type: payment.type as 'initiate' | 'payment',
+          description: payment.description || undefined,
+          createdAt: payment.createdAt,
+          updatedAt: payment.updatedAt,
+        },
+      });
     },
   });
 }
@@ -44,17 +60,72 @@ export function useUpdatePayment() {
   return useMutation<
     Payment | null,
     Error,
-    { id: string; data: UpdatePaymentDto }
+    { id: string; data: UpdatePaymentDto; previousStatus?: string }
   >({
     mutationFn: async ({ id, data }) => {
       return await updatePaymentStatus(id, data);
     },
-    onSuccess: (data, variables) => {
-      if (data) {
+    onSuccess: (payment, variables) => {
+      if (payment) {
         // Invalidate payments list
         queryClient.invalidateQueries({ queryKey: paymentKeys.all });
         // Update specific payment in cache
-        queryClient.setQueryData(paymentKeys.detail(variables.id), data);
+        queryClient.setQueryData(paymentKeys.detail(variables.id), payment);
+        
+        // Emit payment updated event
+        eventBus.emit('payments:updated', {
+          payment: {
+            id: payment.id,
+            userId: payment.senderId,
+            amount: payment.amount,
+            currency: payment.currency,
+            status: payment.status as PaymentStatus,
+            type: payment.type as 'initiate' | 'payment',
+            description: payment.description || undefined,
+            createdAt: payment.createdAt,
+            updatedAt: payment.updatedAt,
+          },
+          previousStatus: (variables.previousStatus || 'pending') as PaymentStatus,
+        });
+        
+        // Emit completed event if status is completed
+        if (payment.status === 'completed') {
+          eventBus.emit('payments:completed', {
+            payment: {
+              id: payment.id,
+              userId: payment.senderId,
+              amount: payment.amount,
+              currency: payment.currency,
+              status: payment.status as PaymentStatus,
+              type: payment.type as 'initiate' | 'payment',
+              description: payment.description || undefined,
+              createdAt: payment.createdAt,
+              updatedAt: payment.updatedAt,
+            },
+            completedAt: payment.completedAt || new Date().toISOString(),
+          });
+        }
+        
+        // Emit failed event if status is failed
+        if (payment.status === 'failed') {
+          eventBus.emit('payments:failed', {
+            payment: {
+              id: payment.id,
+              userId: payment.senderId,
+              amount: payment.amount,
+              currency: payment.currency,
+              status: payment.status as PaymentStatus,
+              type: payment.type as 'initiate' | 'payment',
+              description: payment.description || undefined,
+              createdAt: payment.createdAt,
+              updatedAt: payment.updatedAt,
+            },
+            error: {
+              code: 'PAYMENT_FAILED',
+              message: variables.data.reason || 'Payment failed',
+            },
+          });
+        }
       }
     },
   });

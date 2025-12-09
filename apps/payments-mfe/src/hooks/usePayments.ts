@@ -39,6 +39,26 @@ export function usePayments() {
 }
 
 /**
+ * Hook to fetch a single payment by ID
+ * 
+ * @param id - Payment ID
+ * @returns TanStack Query result with payment data
+ */
+export function usePaymentById(id: string | undefined) {
+  return useQuery<Payment>({
+    queryKey: paymentKeys.detail(id || ''),
+    queryFn: async () => {
+      if (!id) {
+        throw new Error('Payment ID is required');
+      }
+      const { getPaymentById } = await import('../api/payments');
+      return await getPaymentById(id);
+    },
+    enabled: !!id, // Only fetch if ID is provided
+  });
+}
+
+/**
  * Hook to invalidate payments queries
  * Useful after mutations to refetch payments list
  */
