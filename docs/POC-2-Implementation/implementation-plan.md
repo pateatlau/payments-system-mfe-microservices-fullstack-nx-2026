@@ -1,6 +1,6 @@
 # POC-2 Implementation Plan
 
-**Status:** 🟡 In Progress (Phase 4 Started - 62% overall)
+**Status:** 🟡 In Progress (Phase 4 - 65% overall)
 **Version:** 1.0  
 **Date:** 2026-12-09  
 **Phase:** POC-2 - Backend Integration & Full-Stack
@@ -21,12 +21,12 @@ This document provides a detailed, step-by-step implementation plan for POC-2, e
 **Timeline:** 8 weeks  
 **Goal:** Full-stack integration with real JWT authentication, backend services, event bus communication, Admin MFE, and design system
 
-**Overall Progress:** 58% (3 of 5 phases complete, Phase 3 complete)
+**Overall Progress:** 65% (3 of 5 phases complete, Phase 4 in progress)
 
 - ✅ Phase 1: Planning & Setup (100%)
 - ✅ Phase 2: Backend Foundation (100%)
 - ✅ Phase 3: Backend Services (100% - Tasks 3.1, 3.2, and 3.3 complete)
-- ⬜ Phase 4: Frontend Integration (0%)
+- 🟡 Phase 4: Frontend Integration (40% - Tasks 4.1 and 4.2 complete, 2 of 5 tasks done)
 - ⬜ Phase 5: Testing & Polish (0%)
 
 **Latest Update (2026-12-09):** Fixed `db` library build output to emit compiled JS into `dist/libs/backend/db/src`, resolving the admin-service runtime error (`Cannot find module .../dist/libs/backend/db/src/index.js`). Fixed `shared-types` library output path and package entrypoints (`dist/libs/shared-types/shared-types/src/index.js`) to unblock auth-service. Added CORS to Auth Service to allow MFEs (`http://localhost:4200-4203`) and prevent signup/signin preflight failures; removed invalid `app.options('*', cors())` that caused Express 5 path-to-regexp error; added `X-Request-ID` to `allowedHeaders` to fix final preflight failure from API client interceptor. Rebuild via `npx nx build db --skip-nx-cache` and `npx nx build shared-types --skip-nx-cache` if needed. Auth flow now working end-to-end (signup/login/logout, protected routes). Payments hooks (usePayments/useCreatePayment/useUpdatePayment/useDeletePayment) now call real Payments Service via shared API client; types aligned to shared enums; recipient email/ID required for create; cancel handled via status endpoint. PaymentsPage migrated to design system components (Button, Input, Label, Card, Alert, Badge, Loading) for consistent styling.

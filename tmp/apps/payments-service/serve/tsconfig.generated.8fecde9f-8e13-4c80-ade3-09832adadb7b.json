@@ -42,5 +42,5 @@
       ]
     }
   },
-  "extends": "../../../../apps/admin-service/tsconfig.app.json"
+  "extends": "../../../../apps/payments-service/tsconfig.app.json"
 }
