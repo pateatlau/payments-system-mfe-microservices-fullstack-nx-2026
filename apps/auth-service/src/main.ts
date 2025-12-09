@@ -43,6 +43,7 @@ app.use(
       'Content-Type',
       'Authorization',
       'X-Requested-With',
+      'X-Request-ID',
       'Accept',
       'Origin',
     ],

@@ -1,16 +1,16 @@
 # POC-2 Task List - Progress Tracking
 
-**Status:** 🟡 In Progress (Phase 3 Complete - 58% overall)  
+**Status:** 🟡 In Progress (Phase 4 Started - 59% overall)  
 **Version:** 1.0  
 **Date:** 2026-12-09  
 **Phase:** POC-2 - Backend Integration & Full-Stack
 
-**Overall Progress:** 58% (3 of 5 phases complete, Phase 3 complete)
+**Overall Progress:** 59% (3 of 5 phases complete, Phase 4 started)
 
 - ✅ Phase 1: Planning & Setup (100%)
 - ✅ Phase 2: Backend Foundation (100%)
 - ✅ Phase 3: Backend Services (100% - Tasks 3.1, 3.2, and 3.3 complete)
-- ⬜ Phase 4: Frontend Integration (0%)
+- 🟡 Phase 4: Frontend Integration (12.5% - Task 4.1 complete)
 - ⬜ Phase 5: Testing & Polish (0%)
 
 > **📋 Related Document:** See [`implementation-plan.md`](./implementation-plan.md) for detailed step-by-step instructions for each task.
@@ -23,6 +23,7 @@
 - Fixed `shared-types` library output path (`dist/libs/shared-types/shared-types/src/index.js`) by updating package entrypoints; rebuild via `npx nx build shared-types --skip-nx-cache` if needed.
 - Added CORS for Auth Service to allow MFEs (`http://localhost:4200-4203`) so signup/signin requests succeed without preflight failures.
 - Removed invalid `app.options('*', cors())` in Auth Service (Express 5 path-to-regexp error) and rely on global CORS middleware for OPTIONS.
+- **✅ Task 4.1 Complete:** Added `X-Request-ID` header to Auth Service CORS `allowedHeaders` to fix final CORS error (API client interceptor adds this header for request tracing). Auth flow now fully working: signup ✅, login ✅, logout ✅, protected routes ✅.
 
 ## How to Use This Checklist
 
@@ -916,7 +917,7 @@
 
 ---
 
-**Phase 4 Completion:** **0% (0/16 sub-tasks complete)** ⬜
+**Phase 4 Completion:** **12.5% (2/16 sub-tasks complete)** 🟡
 
 ---
 
@@ -1132,16 +1133,16 @@
 - **Phase 1: Planning & Setup** - **100% (7/7 sub-tasks)** ✅
 - **Phase 2: Backend Foundation** - **100% (11/11 sub-tasks)** ✅
 - **Phase 3: Backend Services** - **100% (19/19 sub-tasks)** ✅
-- **Phase 4: Frontend Integration** - **0% (0/16 sub-tasks)** ⬜
+- **Phase 4: Frontend Integration** - **12.5% (2/16 sub-tasks)** 🟡
 - **Phase 5: Testing & Refinement** - **0% (0/13 sub-tasks)** ⬜
 
 ### Overall Completion
 
 **Total Sub-tasks:** 66  
-**Completed Sub-tasks:** **37 (56%)** ✅  
+**Completed Sub-tasks:** **39 (59%)** ✅  
 **In Progress Sub-tasks:** **0**  
-**Not Started Sub-tasks:** **29**  
-**Overall Progress:** **58%** 🟡
+**Not Started Sub-tasks:** **27**  
+**Overall Progress:** **59%** 🟡
 
 ### Phase 3 Summary
 
@@ -1196,23 +1197,25 @@
 
 ### Success Criteria Validation
 
-- [x] Real JWT authentication working (Phase 2)
-- [x] Token refresh mechanism working (Phase 2)
-- [x] Payment operations working (stubbed backend) (Phase 3)
-- [x] Admin functionality working (ADMIN role) (Phase 3)
+- [x] Real JWT authentication working (Phase 2) ✅
+- [x] Token refresh mechanism working (Phase 2) ✅
+- [x] Payment operations working (stubbed backend) (Phase 3) ✅
+- [x] Admin functionality working (ADMIN role) (Phase 3) ✅
+- [x] Frontend auth flow working (signup/login/logout) (Phase 4) ✅
+- [x] Protected routes working (Phase 4) ✅
 - [ ] Event bus communication working (Phase 4)
 - [ ] All MFEs decoupled (no shared Zustand stores) (Phase 4)
 - [ ] Design system components working (Phase 4)
 - [ ] Consistent design across all MFEs (Phase 4)
-- [x] API client library working (Phase 2)
-- [x] Backend test coverage: 70%+ (Phase 3 - 84% average)
+- [x] API client library working (Phase 2) ✅
+- [x] Backend test coverage: 70%+ (Phase 3 - 84% average) ✅
 - [ ] Frontend test coverage: 70%+ (Phase 4)
 - [ ] All E2E tests pass (Phase 5)
-- [x] Backend API contracts verified (Phase 3)
+- [x] Backend API contracts verified (Phase 3) ✅
 - [x] Backend documentation complete (Phase 3)
 
-**Status:** 🟡 In Progress (Phase 3 Complete)  
-**Completion Date:** Phase 3 completed 2026-12-09
+**Status:** 🟡 In Progress (Phase 4 Started - Task 4.1 Complete)  
+**Completion Date:** Phase 3 completed 2026-12-09, Task 4.1 completed 2026-12-09
 
 ---
 
@@ -1307,6 +1310,6 @@ _No blockers at this time_
 ---
 
 **Last Updated:** 2026-12-09  
-**Status:** 🟡 In Progress (Phase 3 Complete - 58% overall)
+**Status:** 🟡 In Progress (Phase 4 Started - 59% overall)
 
-**Next Steps:** Begin Phase 4: Frontend Integration
+**Next Steps:** Continue Phase 4: Update Payments MFE (Task 4.2)
