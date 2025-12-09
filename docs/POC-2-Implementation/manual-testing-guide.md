@@ -1,7 +1,7 @@
 # Manual Testing Guide
 
 > **Status:** Incremental - Updated as we progress through POC-2  
-> **Last Updated:** Phase 2 Complete
+> **Last Updated:** Phase 3 Complete
 
 This guide provides step-by-step instructions for manually testing the implemented features. It will be updated incrementally as we progress through each phase.
 
@@ -16,6 +16,10 @@ This guide provides step-by-step instructions for manually testing the implement
   - [API Gateway Testing](#api-gateway-testing)
   - [Auth Service Testing](#auth-service-testing)
   - [Event Hub Testing](#event-hub-testing)
+- [Phase 3: Backend Services](#phase-3-backend-services)
+  - [Payments Service Testing](#payments-service-testing)
+  - [Admin Service Testing](#admin-service-testing)
+  - [Profile Service Testing](#profile-service-testing)
 - [Additional Testing Scenarios](#additional-testing-scenarios)
   - [Complete User Workflow Testing](#complete-user-workflow-testing)
   - [Database Inspection](#database-inspection)
@@ -816,9 +820,30 @@ pnpm backend:kill
 
 #### Protected Endpoints (Require JWT)
 
+**Auth Service:**
 - `GET /api/auth/me` - Get current user
 - `POST /api/auth/logout` - Logout user
 - `POST /api/auth/password` - Change password
+
+**Payments Service (Port 3002):**
+- `GET /api/payments` - List payments (paginated, filtered)
+- `GET /api/payments/:id` - Get payment by ID
+- `POST /api/payments` - Create payment
+- `PATCH /api/payments/:id/status` - Update payment status
+- `POST /api/payments/webhook` - Webhook handler
+
+**Admin Service (Port 3003) - ADMIN Only:**
+- `GET /api/admin/users` - List users (paginated, filtered, sorted)
+- `GET /api/admin/users/:id` - Get user by ID (with payment counts)
+- `PUT /api/admin/users/:id` - Update user
+- `PATCH /api/admin/users/:id/role` - Update user role
+- `PATCH /api/admin/users/:id/status` - Update user status (placeholder)
+
+**Profile Service (Port 3004):**
+- `GET /api/profile` - Get user profile (auto-creates if not exists)
+- `PUT /api/profile` - Update profile
+- `GET /api/profile/preferences` - Get preferences
+- `PUT /api/profile/preferences` - Update preferences
 
 ### Environment Variables
 
@@ -848,9 +873,427 @@ pnpm env:validate
 
 ---
 
+## Phase 3: Backend Services
+
+### Payments Service Testing
+
+#### Start Payments Service
+
+```bash
+# Terminal: Start Payments Service
+pnpm dev:payments-service
+
+# Or start all backend services
+pnpm dev:backend
+```
+
+**Expected Output:**
+
+```
+Payments Service started on port 3002
+```
+
+#### Test Payments Service Health
+
+```bash
+pnpm test:api:payments:health
+
+# Or manually:
+curl http://localhost:3002/health | jq .
+
+# Expected Response:
+{
+  "status": "ok",
+  "service": "payments-service",
+  "timestamp": "2026-12-09T..."
+}
+```
+
+#### Get Authentication Token
+
+```bash
+# First, get a token (use admin or customer user)
+TOKEN=$(curl -s -X POST http://localhost:3001/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"admin@example.com","password":"Admin123!@#"}' \
+  | jq -r '.data.accessToken')
+
+echo "Token: ${TOKEN:0:50}..."
+```
+
+#### List Payments
+
+```bash
+pnpm test:api:payments:list
+
+# Or manually:
+curl -X GET "http://localhost:3002/api/payments?page=1&limit=10" \
+  -H "Authorization: Bearer $TOKEN" | jq .
+
+# With filters:
+curl -X GET "http://localhost:3002/api/payments?page=1&limit=10&status=PENDING&type=PAYMENT" \
+  -H "Authorization: Bearer $TOKEN" | jq .
+```
+
+#### Create Payment
+
+```bash
+pnpm test:api:payments:create
+
+# Or manually:
+curl -X POST http://localhost:3002/api/payments \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "amount": "100.00",
+    "currency": "USD",
+    "type": "PAYMENT",
+    "description": "Test payment",
+    "recipientEmail": "customer@example.com"
+  }' | jq .
+
+# Expected Response:
+{
+  "success": true,
+  "data": {
+    "id": "uuid",
+    "amount": "100.00",
+    "currency": "USD",
+    "status": "PENDING",
+    "type": "PAYMENT",
+    ...
+  }
+}
+```
+
+#### Get Payment by ID
+
+```bash
+# Extract payment ID from create response
+PAYMENT_ID="<payment-id-from-create>"
+
+curl -X GET "http://localhost:3002/api/payments/$PAYMENT_ID" \
+  -H "Authorization: Bearer $TOKEN" | jq .
+```
+
+#### Update Payment Status
+
+```bash
+pnpm test:api:payments:update-status
+
+# Or manually:
+curl -X PATCH "http://localhost:3002/api/payments/$PAYMENT_ID/status" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "status": "COMPLETED"
+  }' | jq .
+```
+
+#### Test Payment Validation
+
+```bash
+# Test invalid amount
+curl -X POST http://localhost:3002/api/payments \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "amount": "-100.00",
+    "currency": "USD",
+    "type": "PAYMENT"
+  }' | jq .
+
+# Should return validation error
+```
+
+---
+
+### Admin Service Testing
+
+#### Start Admin Service
+
+```bash
+# Terminal: Start Admin Service
+pnpm dev:admin-service
+```
+
+**Expected Output:**
+
+```
+Admin Service started on port 3003
+```
+
+#### Test Admin Service Health
+
+```bash
+pnpm test:api:admin:health
+
+# Or manually:
+curl http://localhost:3003/health | jq .
+```
+
+#### Get Admin Token
+
+```bash
+# Admin token required for all Admin Service endpoints
+ADMIN_TOKEN=$(curl -s -X POST http://localhost:3001/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"admin@example.com","password":"Admin123!@#"}' \
+  | jq -r '.data.accessToken')
+```
+
+#### List Users
+
+```bash
+pnpm test:api:admin:list-users
+
+# Or manually:
+curl -X GET "http://localhost:3003/api/admin/users?page=1&limit=10" \
+  -H "Authorization: Bearer $ADMIN_TOKEN" | jq .
+
+# With filters:
+curl -X GET "http://localhost:3003/api/admin/users?page=1&limit=10&role=CUSTOMER&search=test" \
+  -H "Authorization: Bearer $ADMIN_TOKEN" | jq .
+
+# With sorting:
+curl -X GET "http://localhost:3003/api/admin/users?page=1&limit=10&sort=createdAt&order=desc" \
+  -H "Authorization: Bearer $ADMIN_TOKEN" | jq .
+```
+
+#### Get User by ID
+
+```bash
+# Extract user ID from list response
+USER_ID="<user-id-from-list>"
+
+pnpm test:api:admin:get-user
+
+# Or manually:
+curl -X GET "http://localhost:3003/api/admin/users/$USER_ID" \
+  -H "Authorization: Bearer $ADMIN_TOKEN" | jq .
+
+# Expected Response includes payment counts:
+{
+  "success": true,
+  "data": {
+    "id": "uuid",
+    "email": "user@example.com",
+    "name": "User Name",
+    "role": "CUSTOMER",
+    "_count": {
+      "sentPayments": 5,
+      "receivedPayments": 3
+    }
+  }
+}
+```
+
+#### Update User
+
+```bash
+pnpm test:api:admin:update-user
+
+# Or manually:
+curl -X PUT "http://localhost:3003/api/admin/users/$USER_ID" \
+  -H "Authorization: Bearer $ADMIN_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Updated Name",
+    "email": "updated@example.com"
+  }' | jq .
+```
+
+#### Update User Role
+
+```bash
+pnpm test:api:admin:update-role
+
+# Or manually:
+curl -X PATCH "http://localhost:3003/api/admin/users/$USER_ID/role" \
+  -H "Authorization: Bearer $ADMIN_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "role": "VENDOR"
+  }' | jq .
+```
+
+#### Test ADMIN-Only Access
+
+```bash
+# Try with customer token (should fail)
+CUSTOMER_TOKEN=$(curl -s -X POST http://localhost:3001/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"customer@example.com","password":"Customer123!@#"}' \
+  | jq -r '.data.accessToken')
+
+curl -X GET "http://localhost:3003/api/admin/users" \
+  -H "Authorization: Bearer $CUSTOMER_TOKEN" | jq .
+
+# Expected: 403 Forbidden
+```
+
+---
+
+### Profile Service Testing
+
+#### Start Profile Service
+
+```bash
+# Terminal: Start Profile Service
+pnpm dev:profile-service
+```
+
+**Expected Output:**
+
+```
+Profile Service started on port 3004
+```
+
+#### Test Profile Service Health
+
+```bash
+pnpm test:api:profile:health
+
+# Or manually:
+curl http://localhost:3004/health | jq .
+```
+
+#### Get Profile (Auto-Creates if Not Exists)
+
+```bash
+# Use any authenticated token
+TOKEN=$(curl -s -X POST http://localhost:3001/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"admin@example.com","password":"Admin123!@#"}' \
+  | jq -r '.data.accessToken')
+
+pnpm test:api:profile:get
+
+# Or manually:
+curl -X GET http://localhost:3004/api/profile \
+  -H "Authorization: Bearer $TOKEN" | jq .
+
+# Expected Response (auto-creates profile if not exists):
+{
+  "success": true,
+  "data": {
+    "id": "uuid",
+    "userId": "uuid",
+    "phone": null,
+    "address": null,
+    "bio": null,
+    "avatarUrl": null,
+    "preferences": null,
+    "user": {
+      "id": "uuid",
+      "email": "admin@example.com",
+      "name": "Admin User",
+      "role": "ADMIN"
+    }
+  }
+}
+```
+
+#### Update Profile
+
+```bash
+pnpm test:api:profile:update
+
+# Or manually:
+curl -X PUT http://localhost:3004/api/profile \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "phoneNumber": "+1234567890",
+    "address": "123 Main St",
+    "bio": "Test bio",
+    "avatarUrl": "https://example.com/avatar.jpg"
+  }' | jq .
+```
+
+#### Get Preferences
+
+```bash
+pnpm test:api:profile:get-preferences
+
+# Or manually:
+curl -X GET http://localhost:3004/api/profile/preferences \
+  -H "Authorization: Bearer $TOKEN" | jq .
+
+# Expected Response (empty initially):
+{
+  "success": true,
+  "data": {}
+}
+```
+
+#### Update Preferences
+
+```bash
+pnpm test:api:profile:update-preferences
+
+# Or manually:
+curl -X PUT http://localhost:3004/api/profile/preferences \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "theme": "dark",
+    "language": "en-US",
+    "currency": "USD",
+    "notifications": {
+      "email": true,
+      "push": false,
+      "sms": true
+    },
+    "timezone": "America/New_York"
+  }' | jq .
+
+# Verify update:
+curl -X GET http://localhost:3004/api/profile/preferences \
+  -H "Authorization: Bearer $TOKEN" | jq .
+```
+
+---
+
 ## Quick Test Checklist
 
 ### Phase 2 Complete ✅
+
+- [ ] Infrastructure started (PostgreSQL, Redis)
+- [ ] Database migrated and seeded
+- [ ] API Gateway health check works
+- [ ] Auth Service health check works
+- [ ] User registration works
+- [ ] User login works
+- [ ] Token refresh works
+- [ ] Get current user works (protected route)
+- [ ] Logout works
+- [ ] Change password works
+- [ ] RBAC works (admin vs customer access)
+- [ ] Rate limiting works
+- [ ] CORS works
+- [ ] Error handling works (404, 401, 403, 400)
+
+### Phase 3 Complete ✅
+
+- [ ] Payments Service health check works
+- [ ] List payments works (with pagination)
+- [ ] Create payment works
+- [ ] Get payment by ID works
+- [ ] Update payment status works
+- [ ] Payment validation works
+- [ ] Admin Service health check works
+- [ ] List users works (with pagination, filtering, sorting)
+- [ ] Get user by ID works (with payment counts)
+- [ ] Update user works
+- [ ] Update user role works
+- [ ] ADMIN-only access enforced
+- [ ] Profile Service health check works
+- [ ] Get profile works (auto-creates if not exists)
+- [ ] Update profile works
+- [ ] Get preferences works
+- [ ] Update preferences works
+- [ ] All services running and accessible
 
 - [ ] Infrastructure started (PostgreSQL, Redis)
 - [ ] Database migrated and seeded
@@ -1325,4 +1768,4 @@ As we progress through Phase 3, this guide will be updated with:
 
 ---
 
-**Last Updated:** Phase 2 Complete (2026-01-XX)
+**Last Updated:** Phase 3 Complete (2026-12-09)
