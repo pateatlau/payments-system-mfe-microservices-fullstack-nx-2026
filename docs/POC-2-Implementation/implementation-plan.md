@@ -2356,7 +2356,7 @@ Implemented update user endpoint:
 
 ---
 
-#### Sub-task 3.2.6: Update User Role
+#### Sub-task 3.2.5: Update User Role
 
 **Steps:**
 
