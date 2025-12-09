@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom';
 import { useAuthStore } from 'shared-auth-store';
 import { UserRole } from 'shared-types';
+import { Button, buttonVariants } from '@mfe/shared-design-system';
+import { cn } from '@mfe/shared-design-system';
 
 export interface HeaderProps {
   /**
@@ -35,10 +37,7 @@ export function Header({
   };
 
   return (
-    <header
-      className="text-white shadow-lg"
-      style={{ backgroundColor: '#084683' }}
-    >
+    <header className="text-white shadow-lg bg-primary">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           {/* Branding/Logo */}
@@ -88,14 +87,14 @@ export function Header({
                 </div>
 
                 {/* Logout Button */}
-                <button
+                <Button
                   onClick={handleLogout}
-                  className="text-white px-4 py-2 rounded-md text-sm font-medium transition-colors hover:bg-white/10"
-                  style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
+                  variant="ghost"
+                  className="text-white hover:bg-white/10 bg-white/15"
                   aria-label="Logout"
                 >
                   Logout
-                </button>
+                </Button>
               </div>
             ) : (
               <div className="flex items-center gap-2">
@@ -107,7 +106,10 @@ export function Header({
                 </Link>
                 <Link
                   to="/signup"
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+                  className={cn(
+                    buttonVariants({ variant: 'default' }),
+                    'bg-primary-600 hover:bg-primary-700'
+                  )}
                 >
                   Sign Up
                 </Link>

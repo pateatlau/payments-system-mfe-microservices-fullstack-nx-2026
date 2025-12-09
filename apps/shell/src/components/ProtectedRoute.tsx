@@ -2,6 +2,7 @@ import { ReactNode } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from 'shared-auth-store';
 import { UserRole } from 'shared-types';
+import { Loading } from '@mfe/shared-design-system';
 
 /**
  * Props for ProtectedRoute component
@@ -40,14 +41,12 @@ export interface ProtectedRouteProps {
 
 /**
  * Default loading component shown while checking auth state
+ * Uses design system Loading component
  */
 function DefaultLoadingComponent() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-50">
-      <div className="text-center">
-        <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
-        <p className="text-slate-600">Checking authentication...</p>
-      </div>
+      <Loading size="lg" label="Checking authentication..." />
     </div>
   );
 }

@@ -30,6 +30,12 @@ module.exports = {
   },
   resolve: {
     extensions: ['.ts', '.tsx', '.js', '.jsx', '.json'],
+    alias: {
+      '@mfe/shared-design-system': path.resolve(
+        __dirname,
+        '../shared-design-system/src/index.ts'
+      ),
+    },
   },
   module: {
     rules: [
