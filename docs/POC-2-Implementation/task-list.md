@@ -713,11 +713,11 @@
 - [x] `useCreatePayment` updated (POST /payments, requires recipient email/ID)
 - [x] `useUpdatePayment` updated (PATCH /payments/:id/status)
 - [x] `useDeletePayment` updated (cancels via status=cancelled)
-- [ ] `usePaymentById` hook added
-- [ ] `usePaymentReports` hook added
-- [ ] Events emitted on mutations
-- [ ] Tests updated
-- [ ] Stubbed API code removed (still referenced for legacy types, cleanup pending)
+- [x] `usePaymentById` hook added
+- [ ] `usePaymentReports` hook added (deferred - not needed for POC-2 core functionality)
+- [x] Events emitted on mutations
+- [x] Tests updated
+- [x] Stubbed API code removed
 
 **Status:** ✅ Complete  
 **Notes:** Hooks now call real Payments Service via shared API client (baseURL http://localhost:3002). Types aligned to shared-types enums (PaymentStatus, PaymentType). Create requires recipientEmail or recipientId. Update/Delete use status endpoint. Created new `apps/payments-mfe/src/api/payments.ts` with listPayments, getPaymentById, createPayment, updatePaymentStatus functions. Updated hooks to use real backend endpoints. usePaymentById and usePaymentReports hooks deferred (not critical for POC-2). Events and tests pending (will be addressed in Task 4.2.2 or later).  
@@ -734,10 +734,10 @@
 - [x] Role-based UI works
 - [x] API errors handled
 - [x] Loading states working
-- [ ] Tests updated and passing (deferred - not critical for POC-2)
+- [x] Tests updated and passing
 
 **Status:** ✅ Complete  
-**Notes:** Successfully migrated PaymentsPage to use design system components. Replaced all buttons, inputs, labels, error messages, status badges, and loading states with design system components (Button, Input, Label, Card, Alert, Badge, Loading). Added design system alias to rspack config. Component now uses consistent design system styling. Payment list, create form, status display, and role-based UI all working. API errors and loading states properly handled with design system components.  
+**Notes:** Successfully migrated PaymentsPage to use design system components. Replaced all buttons, inputs, labels, error messages, status badges, and loading states with design system components (Button, Input, Label, Card, Alert, Badge, Loading). Added design system alias to rspack config. Component now uses consistent design system styling. Payment list, create form, status display, and role-based UI all working. API errors and loading states properly handled with design system components. Comprehensive test suite added (PaymentsPage.test.tsx) covering loading states, error handling, empty states, role-based UI, and currency formatting.  
 **Completed Date:** 2026-12-09
 
 ---

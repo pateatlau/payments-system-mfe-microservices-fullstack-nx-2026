@@ -3002,19 +3002,19 @@ queryFn: async () => {
 - [x] useCreatePayment updated
 - [x] useUpdatePayment updated
 - [x] useDeletePayment updated
-- [ ] usePaymentById added (deferred - not critical for POC-2)
-- [ ] usePaymentReports added (deferred - not critical for POC-2)
-- [ ] Events emitted on mutations (deferred to Task 4.2.2 or later)
-- [ ] Tests updated (deferred to Task 4.2.2 or later)
-- [ ] Stubbed API code removed (stubbedPayments.ts kept for reference, cleanup pending)
+- [x] usePaymentById added
+- [ ] usePaymentReports added (deferred - not needed for POC-2 core functionality)
+- [x] Events emitted on mutations
+- [x] Tests updated
+- [x] Stubbed API code removed
 
 **Acceptance Criteria:**
 
 - ✅ Queries fetch from backend
 - ✅ Mutations work with backend
-- ⬜ Events emitted on success (deferred)
+- ✅ Events emitted on success
 - ✅ Error handling works
-- ⬜ Tests pass (deferred)
+- ✅ Tests pass
 
 **Status:** ✅ Complete  
 **Completed Date:** 2026-12-09  
@@ -3087,7 +3087,7 @@ Successfully updated TanStack Query hooks to use real Payments Service API:
 - [x] Role-based UI works
 - [x] API errors handled
 - [x] Loading states working
-- [ ] Tests updated and passing (deferred - not critical for POC-2)
+- [x] Tests updated and passing
 
 **Acceptance Criteria:**
 
