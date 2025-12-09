@@ -149,15 +149,15 @@ export async function getPaymentReports(
   params?: PaymentReportsParams
 ): Promise<PaymentReports> {
   const response = await paymentsApiClient.get<PaymentReports>(
-    "/payments/reports",
+    '/payments/reports',
     {
       params,
     }
   );
 
   if (!response?.data) {
-    console.error("Invalid response structure:", response);
-    throw new Error("Invalid response structure from payments API");
+    console.error('Invalid response structure:', response);
+    throw new Error('Invalid response structure from payments API');
   }
 
   return response.data;

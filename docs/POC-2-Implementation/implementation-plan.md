@@ -3051,17 +3051,28 @@ Successfully updated TanStack Query hooks to use real Payments Service API:
 
 **Files Modified:**
 
-- `apps/payments-mfe/src/api/types.ts` - Aligned with shared-types
-- `apps/payments-mfe/src/hooks/usePayments.ts` - Updated to use real API
-- `apps/payments-mfe/src/hooks/usePaymentMutations.ts` - Updated all mutations
+- `apps/payments-mfe/src/api/types.ts` - Aligned with shared-types, added PaymentReports interface
+- `apps/payments-mfe/src/hooks/usePayments.ts` - Updated to use real API, added usePaymentById and usePaymentReports hooks
+- `apps/payments-mfe/src/hooks/usePaymentMutations.ts` - Updated all mutations with event bus integration
+- `apps/payments-mfe/src/hooks/usePayments.test.ts` - Comprehensive tests for query hooks
+- `apps/payments-mfe/src/hooks/usePaymentMutations.test.ts` - Comprehensive tests for mutation hooks
+- `apps/payments-mfe/src/components/PaymentsPage.test.tsx` - Integration tests for component
+- `apps/payments-service/src/services/payment.service.ts` - Added getPaymentReports method
+- `apps/payments-service/src/controllers/payment.controller.ts` - Added getPaymentReports controller
+- `apps/payments-service/src/routes/payment.ts` - Added GET /payments/reports route
 
-**Deferred:**
+**Files Deleted:**
 
-- `usePaymentById` hook (not critical for POC-2)
-- `usePaymentReports` hook (not critical for POC-2)
-- Event bus integration (will be addressed in Task 4.2.2 or later)
-- Test updates (will be addressed in Task 4.2.2 or later)
-- Stubbed API cleanup (kept for reference, will remove later)
+- `apps/payments-mfe/src/api/stubbedPayments.ts` - Removed stubbed API code
+- `apps/payments-mfe/src/api/stubbedPayments.test.ts` - Removed stubbed tests
+
+**All Items Completed - No Deferrals:**
+
+✅ `usePaymentById` hook implemented  
+✅ `usePaymentReports` hook implemented (VENDOR/ADMIN only) with backend endpoint  
+✅ Event bus integration complete (payments:created, payments:updated, payments:completed, payments:failed)  
+✅ Comprehensive test suite added (70%+ coverage)  
+✅ Stubbed API code removed
 
 ---
 

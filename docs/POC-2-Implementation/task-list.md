@@ -24,7 +24,7 @@
 - Added CORS for Auth Service to allow MFEs (`http://localhost:4200-4203`) so signup/signin requests succeed without preflight failures.
 - Removed invalid `app.options('*', cors())` in Auth Service (Express 5 path-to-regexp error) and rely on global CORS middleware for OPTIONS.
 - **✅ Task 4.1 Complete:** Added `X-Request-ID` header to Auth Service CORS `allowedHeaders` to fix final CORS error (API client interceptor adds this header for request tracing). Auth flow now fully working: signup ✅, login ✅, logout ✅, protected routes ✅.
-- **✅ Task 4.2.1 Complete:** Payments hooks now call real Payments Service (list/create/update/delete) via shared API client using shared-types enums. Create requires recipient email/ID; delete cancels via status endpoint. Reports/events/tests deferred.
+- **✅ Task 4.2.1 Complete:** Payments hooks now call real Payments Service (list/create/update/delete/reports) via shared API client using shared-types enums. All hooks implemented: usePayments, usePaymentById, usePaymentReports (VENDOR/ADMIN with backend endpoint), useCreatePayment, useUpdatePayment, useDeletePayment. Event bus integration complete. Comprehensive tests added. Stubbed API code removed. No deferrals.
 - **✅ Task 4.2.2 Complete:** PaymentsPage migrated to design system components (Button, Input, Label, Card, Alert, Badge, Loading). All forms, error messages, status displays, and loading states now use consistent design system styling.
 
 ## How to Use This Checklist
@@ -720,7 +720,7 @@
 - [x] Stubbed API code removed
 
 **Status:** ✅ Complete  
-**Notes:** Hooks now call real Payments Service via shared API client (baseURL http://localhost:3002). Types aligned to shared-types enums (PaymentStatus, PaymentType). Create requires recipientEmail or recipientId. Update/Delete use status endpoint. Created new `apps/payments-mfe/src/api/payments.ts` with listPayments, getPaymentById, createPayment, updatePaymentStatus functions. Updated hooks to use real backend endpoints. usePaymentById and usePaymentReports hooks deferred (not critical for POC-2). Events and tests pending (will be addressed in Task 4.2.2 or later).  
+**Notes:** Hooks now call real Payments Service via shared API client (baseURL http://localhost:3002). Types aligned to shared-types enums (PaymentStatus, PaymentType). Create requires recipientEmail or recipientId. Update/Delete use status endpoint. Added usePaymentById hook for fetching individual payments. Added usePaymentReports hook (VENDOR/ADMIN only) with backend endpoint GET /payments/reports - aggregates total payments, total amount, by status, by type with optional date range filtering. Event bus integration complete - mutations emit payments:created, payments:updated, payments:completed, and payments:failed events. Removed stubbed API code (stubbedPayments.ts). Comprehensive tests added: usePayments.test.ts, usePaymentMutations.test.ts, PaymentsPage.test.tsx covering queries, mutations, event emissions, and component behavior. **All 9 items complete - no deferrals.**  
 **Completed Date:** 2026-12-09
 
 ---
