@@ -29,7 +29,7 @@ This document provides a detailed, step-by-step implementation plan for POC-2, e
 - ⬜ Phase 4: Frontend Integration (0%)
 - ⬜ Phase 5: Testing & Polish (0%)
 
-**Latest Update (2026-12-09):** Fixed `db` library build output to emit compiled JS into `dist/libs/backend/db/src`, resolving the admin-service runtime error (`Cannot find module .../dist/libs/backend/db/src/index.js`). Fixed `shared-types` library output path and package entrypoints (`dist/libs/shared-types/shared-types/src/index.js`) to unblock auth-service. Rebuild via `npx nx build db --skip-nx-cache` and `npx nx build shared-types --skip-nx-cache` if needed.
+**Latest Update (2026-12-09):** Fixed `db` library build output to emit compiled JS into `dist/libs/backend/db/src`, resolving the admin-service runtime error (`Cannot find module .../dist/libs/backend/db/src/index.js`). Fixed `shared-types` library output path and package entrypoints (`dist/libs/shared-types/shared-types/src/index.js`) to unblock auth-service. Added CORS to Auth Service to allow MFEs (`http://localhost:4200-4203`) and prevent signup/signin preflight failures. Rebuild via `npx nx build db --skip-nx-cache` and `npx nx build shared-types --skip-nx-cache` if needed.
 
 **Key Features:**
 
