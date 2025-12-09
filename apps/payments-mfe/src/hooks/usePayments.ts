@@ -40,7 +40,7 @@ export function usePayments() {
 
 /**
  * Hook to fetch a single payment by ID
- * 
+ *
  * @param id - Payment ID
  * @returns TanStack Query result with payment data
  */

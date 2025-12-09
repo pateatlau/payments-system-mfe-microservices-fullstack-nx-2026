@@ -57,7 +57,7 @@ describe('PaymentsPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     queryClient.clear();
-    
+
     mockUseAuthStore.mockReturnValue({
       user: {
         id: 'user1',

@@ -3003,7 +3003,6 @@ queryFn: async () => {
 - [x] useUpdatePayment updated
 - [x] useDeletePayment updated
 - [x] usePaymentById added
-- [ ] usePaymentReports added (deferred - not needed for POC-2 core functionality)
 - [x] Events emitted on mutations
 - [x] Tests updated
 - [x] Stubbed API code removed

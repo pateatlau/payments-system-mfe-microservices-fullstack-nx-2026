@@ -714,7 +714,6 @@
 - [x] `useUpdatePayment` updated (PATCH /payments/:id/status)
 - [x] `useDeletePayment` updated (cancels via status=cancelled)
 - [x] `usePaymentById` hook added
-- [ ] `usePaymentReports` hook added (deferred - not needed for POC-2 core functionality)
 - [x] Events emitted on mutations
 - [x] Tests updated
 - [x] Stubbed API code removed

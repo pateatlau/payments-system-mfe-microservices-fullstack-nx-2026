@@ -26,10 +26,10 @@ export function useCreatePayment() {
       }
       return await createPayment(data);
     },
-    onSuccess: (payment) => {
+    onSuccess: payment => {
       // Invalidate payments list to refetch after creation
       queryClient.invalidateQueries({ queryKey: paymentKeys.all });
-      
+
       // Emit payment created event
       eventBus.emit('payments:created', {
         payment: {
@@ -71,7 +71,7 @@ export function useUpdatePayment() {
         queryClient.invalidateQueries({ queryKey: paymentKeys.all });
         // Update specific payment in cache
         queryClient.setQueryData(paymentKeys.detail(variables.id), payment);
-        
+
         // Emit payment updated event
         eventBus.emit('payments:updated', {
           payment: {
@@ -85,9 +85,10 @@ export function useUpdatePayment() {
             createdAt: payment.createdAt,
             updatedAt: payment.updatedAt,
           },
-          previousStatus: (variables.previousStatus || 'pending') as PaymentStatus,
+          previousStatus: (variables.previousStatus ||
+            'pending') as PaymentStatus,
         });
-        
+
         // Emit completed event if status is completed
         if (payment.status === 'completed') {
           eventBus.emit('payments:completed', {
@@ -105,7 +106,7 @@ export function useUpdatePayment() {
             completedAt: payment.completedAt || new Date().toISOString(),
           });
         }
-        
+
         // Emit failed event if status is failed
         if (payment.status === 'failed') {
           eventBus.emit('payments:failed', {
