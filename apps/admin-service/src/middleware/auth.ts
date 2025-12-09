@@ -42,6 +42,7 @@ export function authenticate(
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      console.log('[Auth Middleware] No token provided');
       res.status(401).json({
         success: false,
         error: {
@@ -53,9 +54,15 @@ export function authenticate(
     }
 
     const token = authHeader.substring(7); // Remove 'Bearer ' prefix
+    console.log(
+      '[Auth Middleware] Token received:',
+      token.substring(0, 50) + '...'
+    );
+    console.log('[Auth Middleware] Using JWT_SECRET:', JWT_SECRET);
 
     // Verify token
     const decoded = jwt.verify(token, JWT_SECRET) as JwtPayload;
+    console.log('[Auth Middleware] Token verified successfully:', decoded);
 
     // Attach user to request
     req.user = {
@@ -68,6 +75,7 @@ export function authenticate(
     next();
   } catch (error) {
     if (error instanceof jwt.TokenExpiredError) {
+      console.log('[Auth Middleware] Token expired:', error.message);
       res.status(401).json({
         success: false,
         error: {
@@ -79,6 +87,7 @@ export function authenticate(
     }
 
     if (error instanceof jwt.JsonWebTokenError) {
+      console.log('[Auth Middleware] Invalid token:', error.message);
       res.status(401).json({
         success: false,
         error: {
@@ -89,6 +98,7 @@ export function authenticate(
       return;
     }
 
+    console.log('[Auth Middleware] Unexpected error:', error);
     next(error);
   }
 }
