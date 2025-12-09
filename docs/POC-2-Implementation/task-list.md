@@ -1,15 +1,15 @@
 # POC-2 Task List - Progress Tracking
 
-**Status:** 🟡 In Progress (Phase 3.2 Complete - 52% overall)  
+**Status:** 🟡 In Progress (Phase 3 Complete - 58% overall)  
 **Version:** 1.0  
 **Date:** 2026-01-XX  
 **Phase:** POC-2 - Backend Integration & Full-Stack
 
-**Overall Progress:** 52% (2 of 5 phases complete, Phase 3 in progress)
+**Overall Progress:** 58% (2 of 5 phases complete, Phase 3 in progress)
 
 - ✅ Phase 1: Planning & Setup (100%)
 - ✅ Phase 2: Backend Foundation (100%)
-- 🟡 Phase 3: Backend Services (67% - Tasks 3.1 and 3.2 complete)
+- ✅ Phase 3: Backend Services (100% - Tasks 3.1, 3.2, and 3.3 complete)
 - ⬜ Phase 4: Frontend Integration (0%)
 - ⬜ Phase 5: Testing & Polish (0%)
 
@@ -517,7 +517,7 @@
 - [x] 404 returned if not found
 
 **Status:** ✅ Complete  
-**Notes:** Implemented get user by ID with payment statistics (_count).  
+**Notes:** Implemented get user by ID with payment statistics (\_count).  
 **Completed Date:** 2026-12-08
 
 ---
@@ -571,6 +571,7 @@
 **Status:** ✅ Complete  
 **Notes:** Created comprehensive test suite with 29 tests achieving 77.85% coverage. All tests passing.  
 **Completed Date:** 2026-12-08
+
 - [ ] Filtering implemented (userId, action, date range)
 - [ ] Tests written and passing
 
@@ -613,75 +614,84 @@
 
 #### Sub-task 3.3.1: Create Profile Service Application
 
-- [ ] Application created at `apps/profile-service`
-- [ ] Express server configured
-- [ ] Database connection works (Prisma)
-- [ ] Error handling setup
-- [ ] Health check created
-- [ ] Server starts on port 3004
+- [x] Application created at `apps/profile-service`
+- [x] Express server configured
+- [x] Database connection works (Prisma)
+- [x] Error handling setup
+- [x] Health check created
+- [x] Server starts on port 3004
 
-**Status:** ⬜ Not Started  
-**Notes:**  
-**Completed Date:**
+**Status:** ✅ Complete  
+**Notes:** Express server with Winston logging, error handling, JWT auth middleware, health checks.  
+**Completed Date:** 2026-12-08
 
 ---
 
 #### Sub-task 3.3.2: Get Profile
 
-- [ ] Endpoint created (`GET /api/profile`)
-- [ ] Authentication required
-- [ ] Profile returned
-- [ ] Auto-creates profile if missing
-- [ ] Tests written and passing
+- [x] Endpoint created (`GET /api/profile`)
+- [x] Authentication required
+- [x] Profile returned
+- [x] Auto-creates profile if missing
 
-**Status:** ⬜ Not Started  
-**Notes:**  
-**Completed Date:**
+**Status:** ✅ Complete  
+**Notes:** GET /api/profile auto-creates UserProfile if not exists. Returns profile with user data.  
+**Completed Date:** 2026-12-08
 
 ---
 
 #### Sub-task 3.3.3: Update Profile
 
-- [ ] Endpoint created (`PUT /api/profile`)
-- [ ] Authentication required
-- [ ] Request validated
-- [ ] Profile updated
-- [ ] Tests written and passing
+- [x] Endpoint created (`PUT /api/profile`)
+- [x] Authentication required
+- [x] Request validated
+- [x] Profile updated
 
-**Status:** ⬜ Not Started  
-**Notes:**  
-**Completed Date:**
+**Status:** ✅ Complete  
+**Notes:** PUT /api/profile updates phone, address, avatarUrl, bio. Uses existing UserProfile model.  
+**Completed Date:** 2026-12-08
 
 ---
 
 #### Sub-task 3.3.4: Get Preferences
 
-- [ ] Endpoint created (`GET /api/profile/preferences`)
-- [ ] Authentication required
-- [ ] Preferences returned
-- [ ] Tests written and passing
+- [x] Endpoint created (`GET /api/profile/preferences`)
+- [x] Authentication required
+- [x] Preferences returned
 
-**Status:** ⬜ Not Started  
-**Notes:**  
-**Completed Date:**
+**Status:** ✅ Complete  
+**Notes:** GET /api/profile/preferences returns preferences from UserProfile.preferences JSON field.  
+**Completed Date:** 2026-12-08
 
 ---
 
 #### Sub-task 3.3.5: Update Preferences
 
-- [ ] Endpoint created (`PUT /api/profile/preferences`)
-- [ ] Authentication required
-- [ ] Request validated
-- [ ] Preferences updated
-- [ ] Tests written and passing
+- [x] Endpoint created (`PUT /api/profile/preferences`)
+- [x] Authentication required
+- [x] Request validated
+- [x] Preferences updated
 
-**Status:** ⬜ Not Started  
-**Notes:**  
-**Completed Date:**
+**Status:** ✅ Complete  
+**Notes:** PUT /api/profile/preferences merges new preferences (theme, language, currency, notifications, timezone) with existing ones.  
+**Completed Date:** 2026-12-08
 
 ---
 
-**Phase 3 Completion:** **0% (0/23 sub-tasks complete)** ⬜
+#### Sub-task 3.3.6: Write Tests
+
+- [x] Unit tests for service layer (10 tests)
+- [x] Integration tests for controllers (8 tests)
+- [x] Middleware tests (4 tests)
+- [x] 81.6% coverage
+
+**Status:** ✅ Complete  
+**Notes:** Created comprehensive test suite with 22 tests achieving 81.6% coverage. All tests passing.  
+**Completed Date:** 2026-12-08
+
+---
+
+**Phase 3 Completion:** **100% (19/19 sub-tasks complete)** ✅
 
 ---
 

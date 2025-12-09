@@ -314,7 +314,9 @@ describe('AdminService', () => {
           isActive: false,
           reason: 'Test',
         })
-      ).rejects.toThrow('User activation/deactivation will be available in a future update');
+      ).rejects.toThrow(
+        'User activation/deactivation will be available in a future update'
+      );
     });
 
     it('should throw 404 if user not found', async () => {

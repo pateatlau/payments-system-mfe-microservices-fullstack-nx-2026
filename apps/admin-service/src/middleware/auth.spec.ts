@@ -26,11 +26,7 @@ describe('Auth Middleware - requireAdmin', () => {
       role: 'ADMIN',
     };
 
-    requireAdmin(
-      mockRequest as Request,
-      mockResponse as Response,
-      mockNext
-    );
+    requireAdmin(mockRequest as Request, mockResponse as Response, mockNext);
 
     expect(mockNext).toHaveBeenCalledWith();
   });
@@ -43,11 +39,7 @@ describe('Auth Middleware - requireAdmin', () => {
       role: 'CUSTOMER',
     };
 
-    requireAdmin(
-      mockRequest as Request,
-      mockResponse as Response,
-      mockNext
-    );
+    requireAdmin(mockRequest as Request, mockResponse as Response, mockNext);
 
     expect(mockNext).toHaveBeenCalledWith(expect.any(ApiError));
     const error = (mockNext as jest.Mock).mock.calls[0][0];
@@ -63,11 +55,7 @@ describe('Auth Middleware - requireAdmin', () => {
       role: 'VENDOR',
     };
 
-    requireAdmin(
-      mockRequest as Request,
-      mockResponse as Response,
-      mockNext
-    );
+    requireAdmin(mockRequest as Request, mockResponse as Response, mockNext);
 
     expect(mockNext).toHaveBeenCalledWith(expect.any(ApiError));
     const error = (mockNext as jest.Mock).mock.calls[0][0];
@@ -78,11 +66,7 @@ describe('Auth Middleware - requireAdmin', () => {
   it('should reject when user is not authenticated', () => {
     mockRequest.user = undefined;
 
-    requireAdmin(
-      mockRequest as Request,
-      mockResponse as Response,
-      mockNext
-    );
+    requireAdmin(mockRequest as Request, mockResponse as Response, mockNext);
 
     expect(mockNext).toHaveBeenCalledWith(expect.any(ApiError));
     const error = (mockNext as jest.Mock).mock.calls[0][0];

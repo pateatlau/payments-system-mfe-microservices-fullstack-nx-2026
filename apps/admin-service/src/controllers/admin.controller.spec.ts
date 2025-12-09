@@ -183,9 +183,7 @@ describe('AdminController', () => {
         role: 'CUSTOMER',
       };
 
-      (adminService.updateUser as jest.Mock).mockResolvedValue(
-        mockUpdatedUser
-      );
+      (adminService.updateUser as jest.Mock).mockResolvedValue(mockUpdatedUser);
 
       mockRequest.params = { id: 'user-1' };
       mockRequest.body = { name: 'Updated Name' };
