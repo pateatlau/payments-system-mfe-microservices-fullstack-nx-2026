@@ -17,10 +17,10 @@ jest.mock('../services/profile.service');
 // Mock Zod validators
 jest.mock('../validators/profile.validators', () => ({
   updateProfileSchema: {
-    parse: jest.fn((data) => data),
+    parse: jest.fn(data => data),
   },
   updatePreferencesSchema: {
-    parse: jest.fn((data) => data),
+    parse: jest.fn(data => data),
   },
 }));
 

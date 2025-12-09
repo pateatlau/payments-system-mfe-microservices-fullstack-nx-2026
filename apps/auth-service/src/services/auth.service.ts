@@ -85,7 +85,12 @@ export const register = async (data: RegisterInput): Promise<AuthResponse> => {
 
   const tokens = generateTokenPair(jwtPayload);
 
-  // Store refresh token
+  // Delete old refresh tokens for this user (prevent unique constraint violations)
+  await prisma.refreshToken.deleteMany({
+    where: { userId: user.id },
+  });
+
+  // Store new refresh token
   await prisma.refreshToken.create({
     data: {
       userId: user.id,
@@ -146,7 +151,12 @@ export const login = async (data: LoginInput): Promise<AuthResponse> => {
 
   const tokens = generateTokenPair(jwtPayload);
 
-  // Store refresh token
+  // Delete old refresh tokens for this user (prevent unique constraint violations)
+  await prisma.refreshToken.deleteMany({
+    where: { userId: user.id },
+  });
+
+  // Store new refresh token
   await prisma.refreshToken.create({
     data: {
       userId: user.id,

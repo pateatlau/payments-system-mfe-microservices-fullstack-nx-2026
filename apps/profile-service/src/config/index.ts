@@ -22,7 +22,9 @@ const config = configSchema.parse({
   eventHubUrl: process.env['NX_EVENT_HUB_URL'] || 'http://localhost:3005',
   logLevel: process.env['LOG_LEVEL'] || 'info',
   jwtSecret:
-    process.env['JWT_SECRET'] || process.env['NX_JWT_SECRET'] || 'your-secret-key-change-in-production',
+    process.env['JWT_SECRET'] ||
+    process.env['NX_JWT_SECRET'] ||
+    'your-secret-key-change-in-production',
   defaultPageSize: Number(process.env['DEFAULT_PAGE_SIZE']) || 10,
   maxPageSize: Number(process.env['MAX_PAGE_SIZE']) || 100,
 });
