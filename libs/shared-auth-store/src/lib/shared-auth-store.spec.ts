@@ -127,7 +127,7 @@ describe('useAuthStore', () => {
       expect(state.error).toBeNull();
 
       // Verify API call
-      expect(getMockPost()).toHaveBeenCalledWith('/api/auth/login', {
+      expect(getMockPost()).toHaveBeenCalledWith('/auth/login', {
         email: 'test@example.com',
         password: 'password123',
       });
@@ -402,7 +402,7 @@ describe('useAuthStore', () => {
       expect(state.error).toBeNull();
 
       // Verify logout API call
-      expect(getMockPost()).toHaveBeenCalledWith('/api/auth/logout', {});
+      expect(getMockPost()).toHaveBeenCalledWith('/auth/logout', {});
 
       // Verify logout event emission
       expect(getMockEmit()).toHaveBeenCalledWith(
@@ -546,7 +546,7 @@ describe('useAuthStore', () => {
       expect(state.error).toBeNull();
 
       // Verify API call
-      expect(getMockPost()).toHaveBeenCalledWith('/api/auth/register', {
+      expect(getMockPost()).toHaveBeenCalledWith('/auth/register', {
         email: 'newuser@example.com',
         password: 'password123',
         name: 'New User',

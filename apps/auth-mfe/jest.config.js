@@ -16,17 +16,24 @@ module.exports = {
     '^shared-auth-store$':
       '<rootDir>/../../libs/shared-auth-store/src/index.ts',
     '^shared-header-ui$': '<rootDir>/../../libs/shared-header-ui/src/index.ts',
+    '^@mfe/shared-design-system$':
+      '<rootDir>/../../libs/shared-design-system/src/index.ts',
   },
   transform: {
     '^.+\\.[tj]sx?$': [
       'ts-jest',
       {
-        tsconfig: '<rootDir>/tsconfig.json',
+        tsconfig: '<rootDir>/tsconfig.spec.json',
         isolatedModules: true,
       },
     ],
   },
-  testMatch: ['**/__tests__/**/*.[jt]s?(x)', '**/?(*.)+(spec|test).[jt]s?(x)'],
+  // Override testMatch to ensure we find all test files
+  testMatch: [
+    '**/?(*.)+(spec|test).?([mc])[jt]s?(x)',
+    '**/__tests__/**/*.[jt]s?(x)',
+    '**/?(*.)+(spec|test).[jt]s?(x)',
+  ],
   collectCoverageFrom: [
     'src/**/*.{ts,tsx}',
     '!src/**/*.d.ts',

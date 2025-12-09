@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useAuthStore } from 'shared-auth-store';
+import { UserRole } from 'shared-types';
 import {
   usePayments,
   useCreatePayment,
@@ -153,7 +154,7 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
   });
 
   // Check if user is VENDOR
-  const isVendor = hasRole('VENDOR');
+  const isVendor = hasRole(UserRole.VENDOR);
 
   // Handle create payment
   const onSubmitCreate = async (data: CreatePaymentFormData) => {

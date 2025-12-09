@@ -8,12 +8,7 @@ import type {
   RegisterRequest,
   RegisterResponse,
 } from 'shared-types';
-import type { User } from 'shared-types';
-
-/**
- * User roles for Role-Based Access Control (RBAC)
- */
-export type UserRole = 'ADMIN' | 'CUSTOMER' | 'VENDOR';
+import type { User, UserRole } from 'shared-types';
 
 /**
  * Sign-up data interface
@@ -90,7 +85,7 @@ export const useAuthStore = create<AuthState>()(
           try {
             const request: LoginRequest = { email, password };
             const response: LoginResponse = await apiClient.post(
-              '/api/auth/login',
+              '/auth/login',
               request
             );
 
@@ -148,7 +143,7 @@ export const useAuthStore = create<AuthState>()(
             // Call logout endpoint if we have a token
             if (accessToken) {
               try {
-                await apiClient.post('/api/auth/logout', {});
+                await apiClient.post('/auth/logout', {});
               } catch (error) {
                 // Log error but continue with logout
                 console.warn('Logout API call failed:', error);
@@ -197,7 +192,7 @@ export const useAuthStore = create<AuthState>()(
               role: data.role,
             };
             const response: RegisterResponse = await apiClient.post(
-              '/api/auth/register',
+              '/auth/register',
               request
             );
 
@@ -282,7 +277,7 @@ export const useAuthStore = create<AuthState>()(
     },
     {
       name: 'auth-storage',
-      partialize: (state) => ({
+      partialize: state => ({
         user: state.user,
         accessToken: state.accessToken,
         refreshToken: state.refreshToken,

@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useAuthStore } from 'shared-auth-store';
+import { UserRole } from 'shared-types';
 
 export interface HeaderProps {
   /**
@@ -53,7 +54,7 @@ export function Header({
                 >
                   Payments
                 </Link>
-                {hasRole('VENDOR') && (
+                {hasRole(UserRole.VENDOR) && (
                   <Link
                     to="/reports"
                     className="text-slate-300 hover:text-white transition-colors px-3 py-2 rounded-md text-sm font-medium"

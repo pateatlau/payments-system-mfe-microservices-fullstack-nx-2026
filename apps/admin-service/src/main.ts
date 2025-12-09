@@ -20,12 +20,13 @@ app.use(helmet());
 app.use(cors());
 
 // Rate limiting
+// Type assertion needed for express-rate-limit compatibility with Express 5
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // Limit each IP to 100 requests per windowMs
   message: 'Too many requests from this IP, please try again later.',
 });
-app.use('/api/', limiter);
+app.use(limiter as unknown as express.RequestHandler);
 
 // Body parsing
 app.use(express.json());

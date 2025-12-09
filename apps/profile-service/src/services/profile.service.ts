@@ -3,7 +3,6 @@
  */
 
 import { prisma } from 'db';
-import { ApiError } from '../middleware/errorHandler';
 import logger from '../utils/logger';
 
 export interface UpdateProfileData {
@@ -58,7 +57,7 @@ export const profileService = {
           address: null,
           avatarUrl: null,
           bio: null,
-          preferences: null,
+          preferences: {},
         },
         include: {
           user: {
@@ -124,6 +123,9 @@ export const profileService = {
     const profile = await this.getOrCreateProfile(userId);
 
     // Return preferences from JSON field
+    if (!profile || !profile.preferences) {
+      return {};
+    }
     return (profile.preferences as Record<string, unknown>) || {};
   },
 
@@ -137,8 +139,9 @@ export const profileService = {
     const existingProfile = await this.getOrCreateProfile(userId);
 
     // Get existing preferences or empty object
-    const existingPrefs =
-      (existingProfile.preferences as Record<string, unknown>) || {};
+    const existingPrefs = existingProfile?.preferences
+      ? (existingProfile.preferences as Record<string, unknown>)
+      : {};
 
     // Merge new preferences with existing ones
     const updatedPrefs = { ...existingPrefs, ...data };
@@ -147,7 +150,7 @@ export const profileService = {
     await prisma.userProfile.update({
       where: { userId },
       data: {
-        preferences: updatedPrefs as unknown as Record<string, unknown>,
+        preferences: updatedPrefs,
       },
     });
 

@@ -31,7 +31,7 @@ declare global {
  */
 export function authenticate(
   req: Request,
-  res: Response,
+  _res: Response,
   next: NextFunction
 ): void {
   try {
@@ -54,10 +54,13 @@ export function authenticate(
       );
     }
 
-    const token = parts[1];
+    const token = parts[1] as string; // parts[1] is guaranteed to exist after length check
 
     // Verify JWT token
-    const payload = jwt.verify(token, config.jwtSecret) as JwtPayload;
+    // Config is validated by zod, so jwtSecret is guaranteed to be a string
+    const jwtSecret = config.jwtSecret as string;
+    const verified = jwt.verify(token, jwtSecret);
+    const payload = verified as unknown as JwtPayload;
 
     // Attach user payload to request
     req.user = payload;

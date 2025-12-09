@@ -1,7 +1,32 @@
 # Manual Testing Guide
 
-> **Status:** Incremental - Updated as we progress through POC-2  
-> **Last Updated:** Phase 3 Complete
+> **Status:** POC-2 - Using Direct Service URLs  
+> **Last Updated:** 2025-12-09 (Phase 4 - Direct Service URLs)
+
+## ⚠️ IMPORTANT: POC-2 Configuration Change
+
+**API Gateway Proxy Disabled for POC-2**
+
+Due to technical challenges with `http-proxy-middleware` v3.x, the API Gateway proxy has been **temporarily disabled** for POC-2. Frontend applications now communicate **directly** with backend services.
+
+**Current Service URLs (POC-2):**
+
+- 🔑 **Auth Service:** `http://localhost:3001`
+- 💳 **Payments Service:** `http://localhost:3002`
+- 👥 **Admin Service:** `http://localhost:3003`
+- 👤 **Profile Service:** `http://localhost:3004`
+
+**What This Means:**
+
+- Replace all `http://localhost:3000/api/*` URLs with direct service URLs
+- Auth endpoints: `http://localhost:3001/auth/*` (not `/api/auth/*`)
+- Payments endpoints: `http://localhost:3002/payments/*` (not `/api/payments/*`)
+- Admin endpoints: `http://localhost:3003/admin/*` (not `/api/admin/*`)
+- Profile endpoints: `http://localhost:3004/profile/*` (not `/api/profile/*`)
+
+**POC-3:** API Gateway proxy will be re-implemented with a more robust solution. See `docs/POC-3-Planning/api-gateway-proxy-implementation.md` for details.
+
+---
 
 This guide provides step-by-step instructions for manually testing the implemented features. It will be updated incrementally as we progress through each phase.
 
@@ -230,7 +255,7 @@ curl -H "Origin: http://localhost:4200" \
      -H "Access-Control-Request-Method: POST" \
      -H "Access-Control-Request-Headers: Content-Type" \
      -X OPTIONS \
-     http://localhost:3000/api/auth/login \
+     http://localhost:3001/auth/login \
      -v
 
 # Should include CORS headers in response
@@ -315,7 +340,7 @@ curl http://localhost:3001/health | jq .
 pnpm test:api:register
 
 # Or manually:
-curl -X POST http://localhost:3000/api/auth/register \
+curl -X POST http://localhost:3001/auth/register \
   -H "Content-Type: application/json" \
   -d '{
     "email": "newuser@example.com",
@@ -347,7 +372,7 @@ curl -X POST http://localhost:3000/api/auth/register \
 
 ```bash
 # Test invalid email
-curl -X POST http://localhost:3000/api/auth/register \
+curl -X POST http://localhost:3001/auth/register \
   -H "Content-Type: application/json" \
   -d '{
     "email": "invalid-email",
@@ -358,7 +383,7 @@ curl -X POST http://localhost:3000/api/auth/register \
 # Expected: 400 with validation error
 
 # Test weak password
-curl -X POST http://localhost:3000/api/auth/register \
+curl -X POST http://localhost:3001/auth/register \
   -H "Content-Type: application/json" \
   -d '{
     "email": "test@example.com",
@@ -369,7 +394,7 @@ curl -X POST http://localhost:3000/api/auth/register \
 # Expected: 400 with password validation error
 
 # Test duplicate email
-curl -X POST http://localhost:3000/api/auth/register \
+curl -X POST http://localhost:3001/auth/register \
   -H "Content-Type: application/json" \
   -d '{
     "email": "admin@example.com",
@@ -387,7 +412,7 @@ curl -X POST http://localhost:3000/api/auth/register \
 pnpm test:api:login
 
 # Or manually:
-curl -X POST http://localhost:3000/api/auth/login \
+curl -X POST http://localhost:3001/auth/login \
   -H "Content-Type: application/json" \
   -d '{
     "email": "customer@example.com",
@@ -426,7 +451,7 @@ export REFRESH_TOKEN="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 
 ```bash
 # Wrong password
-curl -X POST http://localhost:3000/api/auth/login \
+curl -X POST http://localhost:3001/auth/login \
   -H "Content-Type: application/json" \
   -d '{
     "email": "customer@example.com",
@@ -436,7 +461,7 @@ curl -X POST http://localhost:3000/api/auth/login \
 # Expected: 401 with INVALID_CREDENTIALS
 
 # Non-existent user
-curl -X POST http://localhost:3000/api/auth/login \
+curl -X POST http://localhost:3001/auth/login \
   -H "Content-Type: application/json" \
   -d '{
     "email": "nonexistent@example.com",
@@ -450,7 +475,7 @@ curl -X POST http://localhost:3000/api/auth/login \
 
 ```bash
 # Refresh access token
-curl -X POST http://localhost:3000/api/auth/refresh \
+curl -X POST http://localhost:3001/auth/refresh \
   -H "Content-Type: application/json" \
   -d "{
     \"refreshToken\": \"$REFRESH_TOKEN\"
@@ -469,7 +494,7 @@ curl -X POST http://localhost:3000/api/auth/refresh \
 **Test Invalid Refresh Token:**
 
 ```bash
-curl -X POST http://localhost:3000/api/auth/refresh \
+curl -X POST http://localhost:3001/auth/refresh \
   -H "Content-Type: application/json" \
   -d '{
     "refreshToken": "invalid-token"
@@ -482,7 +507,7 @@ curl -X POST http://localhost:3000/api/auth/refresh \
 
 ```bash
 # Get current user (requires authentication)
-curl http://localhost:3000/api/auth/me \
+curl http://localhost:3001/auth/me \
   -H "Authorization: Bearer $ACCESS_TOKEN" | jq .
 
 # Expected Response:
@@ -501,7 +526,7 @@ curl http://localhost:3000/api/auth/me \
 **Test Without Token:**
 
 ```bash
-curl http://localhost:3000/api/auth/me | jq .
+curl http://localhost:3001/auth/me | jq .
 
 # Expected: 401 with UNAUTHORIZED
 ```
@@ -510,7 +535,7 @@ curl http://localhost:3000/api/auth/me | jq .
 
 ```bash
 # Use an expired token (wait 15+ minutes or use an old token)
-curl http://localhost:3000/api/auth/me \
+curl http://localhost:3001/auth/me \
   -H "Authorization: Bearer expired-token" | jq .
 
 # Expected: 401 with TOKEN_EXPIRED or TOKEN_INVALID
@@ -520,7 +545,7 @@ curl http://localhost:3000/api/auth/me \
 
 ```bash
 # Logout (invalidates refresh token)
-curl -X POST http://localhost:3000/api/auth/logout \
+curl -X POST http://localhost:3001/auth/logout \
   -H "Authorization: Bearer $ACCESS_TOKEN" \
   -H "Content-Type: application/json" \
   -d "{
@@ -536,7 +561,7 @@ curl -X POST http://localhost:3000/api/auth/logout \
 }
 
 # Try to refresh after logout
-curl -X POST http://localhost:3000/api/auth/refresh \
+curl -X POST http://localhost:3001/auth/refresh \
   -H "Content-Type: application/json" \
   -d "{
     \"refreshToken\": \"$REFRESH_TOKEN\"
@@ -549,7 +574,7 @@ curl -X POST http://localhost:3000/api/auth/refresh \
 
 ```bash
 # Change password (requires authentication)
-curl -X POST http://localhost:3000/api/auth/password \
+curl -X POST http://localhost:3001/auth/password \
   -H "Authorization: Bearer $ACCESS_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -566,7 +591,7 @@ curl -X POST http://localhost:3000/api/auth/password \
 }
 
 # Try to login with old password (should fail)
-curl -X POST http://localhost:3000/api/auth/login \
+curl -X POST http://localhost:3001/auth/login \
   -H "Content-Type: application/json" \
   -d '{
     "email": "customer@example.com",
@@ -576,7 +601,7 @@ curl -X POST http://localhost:3000/api/auth/login \
 # Expected: 401 with INVALID_CREDENTIALS
 
 # Login with new password (should succeed)
-curl -X POST http://localhost:3000/api/auth/login \
+curl -X POST http://localhost:3001/auth/login \
   -H "Content-Type: application/json" \
   -d '{
     "email": "customer@example.com",
@@ -590,7 +615,7 @@ curl -X POST http://localhost:3000/api/auth/login \
 
 ```bash
 # Login as ADMIN
-ADMIN_RESPONSE=$(curl -s -X POST http://localhost:3000/api/auth/login \
+ADMIN_RESPONSE=$(curl -s -X POST http://localhost:3001/auth/login \
   -H "Content-Type: application/json" \
   -d '{
     "email": "admin@example.com",
@@ -600,7 +625,7 @@ ADMIN_RESPONSE=$(curl -s -X POST http://localhost:3000/api/auth/login \
 ADMIN_TOKEN=$(echo $ADMIN_RESPONSE | jq -r '.data.accessToken')
 
 # Login as CUSTOMER
-CUSTOMER_RESPONSE=$(curl -s -X POST http://localhost:3000/api/auth/login \
+CUSTOMER_RESPONSE=$(curl -s -X POST http://localhost:3001/auth/login \
   -H "Content-Type: application/json" \
   -d '{
     "email": "customer@example.com",
@@ -610,13 +635,13 @@ CUSTOMER_RESPONSE=$(curl -s -X POST http://localhost:3000/api/auth/login \
 CUSTOMER_TOKEN=$(echo $CUSTOMER_RESPONSE | jq -r '.data.accessToken')
 
 # Try to access admin route with customer token (should fail)
-curl http://localhost:3000/api/admin/users \
+curl http://localhost:3003/admin/users \
   -H "Authorization: Bearer $CUSTOMER_TOKEN" | jq .
 
 # Expected: 403 with FORBIDDEN
 
 # Access admin route with admin token (should succeed - once admin routes are implemented)
-curl http://localhost:3000/api/admin/users \
+curl http://localhost:3003/admin/users \
   -H "Authorization: Bearer $ADMIN_TOKEN" | jq .
 
 # Expected: 200 (when admin service is implemented)
@@ -722,7 +747,7 @@ echo $ACCESS_TOKEN | cut -d. -f2 | base64 -d | jq .
 ```bash
 curl -H "Origin: http://localhost:4200" \
      -X OPTIONS \
-     http://localhost:3000/api/auth/login \
+     http://localhost:3001/auth/login \
      -v
 ```
 
@@ -1324,7 +1349,7 @@ curl -X GET http://localhost:3004/api/profile/preferences \
 
 ```bash
 # 1. Register a new user
-REGISTER_RESPONSE=$(curl -s -X POST http://localhost:3000/api/auth/register \
+REGISTER_RESPONSE=$(curl -s -X POST http://localhost:3001/auth/register \
   -H "Content-Type: application/json" \
   -d '{
     "email": "workflow@example.com",
@@ -1345,12 +1370,12 @@ echo "User ID: $USER_ID"
 
 # 2. Get current user (verify token works)
 echo -e "\n2. Getting current user..."
-curl -s http://localhost:3000/api/auth/me \
+curl -s http://localhost:3001/auth/me \
   -H "Authorization: Bearer $ACCESS_TOKEN" | jq .
 
 # 3. Refresh token
 echo -e "\n3. Refreshing token..."
-REFRESH_RESPONSE=$(curl -s -X POST http://localhost:3000/api/auth/refresh \
+REFRESH_RESPONSE=$(curl -s -X POST http://localhost:3001/auth/refresh \
   -H "Content-Type: application/json" \
   -d "{\"refreshToken\": \"$REFRESH_TOKEN\"}")
 
@@ -1359,12 +1384,12 @@ echo "New Access Token: $NEW_ACCESS_TOKEN"
 
 # 4. Use new token to get user
 echo -e "\n4. Using new token to get user..."
-curl -s http://localhost:3000/api/auth/me \
+curl -s http://localhost:3001/auth/me \
   -H "Authorization: Bearer $NEW_ACCESS_TOKEN" | jq .
 
 # 5. Change password
 echo -e "\n5. Changing password..."
-curl -s -X POST http://localhost:3000/api/auth/password \
+curl -s -X POST http://localhost:3001/auth/password \
   -H "Authorization: Bearer $NEW_ACCESS_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -1374,7 +1399,7 @@ curl -s -X POST http://localhost:3000/api/auth/password \
 
 # 6. Login with new password
 echo -e "\n6. Logging in with new password..."
-curl -s -X POST http://localhost:3000/api/auth/login \
+curl -s -X POST http://localhost:3001/auth/login \
   -H "Content-Type: application/json" \
   -d '{
     "email": "workflow@example.com",
@@ -1383,7 +1408,7 @@ curl -s -X POST http://localhost:3000/api/auth/login \
 
 # 7. Logout
 echo -e "\n7. Logging out..."
-NEW_LOGIN_RESPONSE=$(curl -s -X POST http://localhost:3000/api/auth/login \
+NEW_LOGIN_RESPONSE=$(curl -s -X POST http://localhost:3001/auth/login \
   -H "Content-Type: application/json" \
   -d '{
     "email": "workflow@example.com",
@@ -1393,14 +1418,14 @@ NEW_LOGIN_RESPONSE=$(curl -s -X POST http://localhost:3000/api/auth/login \
 FINAL_REFRESH_TOKEN=$(echo $NEW_LOGIN_RESPONSE | jq -r '.data.refreshToken')
 FINAL_ACCESS_TOKEN=$(echo $NEW_LOGIN_RESPONSE | jq -r '.data.accessToken')
 
-curl -s -X POST http://localhost:3000/api/auth/logout \
+curl -s -X POST http://localhost:3001/auth/logout \
   -H "Authorization: Bearer $FINAL_ACCESS_TOKEN" \
   -H "Content-Type: application/json" \
   -d "{\"refreshToken\": \"$FINAL_REFRESH_TOKEN\"}" | jq .
 
 # 8. Verify token is invalidated
 echo -e "\n8. Verifying token is invalidated..."
-curl -s http://localhost:3000/api/auth/me \
+curl -s http://localhost:3001/auth/me \
   -H "Authorization: Bearer $FINAL_ACCESS_TOKEN" | jq .
 
 echo -e "\n✅ Complete workflow test finished!"
@@ -1527,7 +1552,7 @@ pnpm test:security:rate-limit
 # Or manually test auth rate limiting (5 requests per 15 min)
 for i in {1..6}; do
   echo "Request $i:"
-  curl -X POST http://localhost:3000/api/auth/login \
+  curl -X POST http://localhost:3001/auth/login \
     -H "Content-Type: application/json" \
     -d '{"email":"test@example.com","password":"wrong"}' \
     -w "\nHTTP Status: %{http_code}\n\n"
@@ -1548,7 +1573,7 @@ curl -H "Origin: http://localhost:4200" \
      -H "Access-Control-Request-Method: POST" \
      -H "Access-Control-Request-Headers: Content-Type,Authorization" \
      -X OPTIONS \
-     http://localhost:3000/api/auth/login \
+     http://localhost:3001/auth/login \
      -v
 
 # Should see:
@@ -1561,19 +1586,19 @@ curl -H "Origin: http://localhost:4200" \
 
 ```bash
 # Test with malformed token
-curl http://localhost:3000/api/auth/me \
+curl http://localhost:3001/auth/me \
   -H "Authorization: Bearer invalid.token.here" | jq .
 
 # Expected: 401 with TOKEN_INVALID
 
 # Test with missing Bearer prefix
-curl http://localhost:3000/api/auth/me \
+curl http://localhost:3001/auth/me \
   -H "Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." | jq .
 
 # Expected: 401 with UNAUTHORIZED
 
 # Test with no Authorization header
-curl http://localhost:3000/api/auth/me | jq .
+curl http://localhost:3001/auth/me | jq .
 
 # Expected: 401 with UNAUTHORIZED
 ```
@@ -1582,7 +1607,7 @@ curl http://localhost:3000/api/auth/me | jq .
 
 ```bash
 # Test email field (should be sanitized by Prisma)
-curl -X POST http://localhost:3000/api/auth/login \
+curl -X POST http://localhost:3001/auth/login \
   -H "Content-Type: application/json" \
   -d '{
     "email": "admin@example.com\"; DROP TABLE \"User\"; --",

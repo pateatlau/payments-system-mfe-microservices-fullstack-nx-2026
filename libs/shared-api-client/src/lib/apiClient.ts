@@ -8,13 +8,7 @@
  * - Type-safe request/response handling
  */
 
-import axios, {
-  AxiosInstance,
-  AxiosRequestConfig,
-  AxiosResponse,
-  AxiosError,
-  InternalAxiosRequestConfig,
-} from 'axios';
+import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
 import { setupInterceptors } from './interceptors';
 
 /**
@@ -76,12 +70,20 @@ export class ApiClient {
   private onUnauthorized?: () => void;
 
   constructor(config: ApiClientConfig = {}) {
+    // POC-2: Using direct service URLs (bypassing API Gateway proxy)
+    // API Gateway proxy implementation deferred to POC-3
+    // For now, frontend will call backend services directly
+    
     // Access environment variable (replaced by DefinePlugin at build time in browser)
     // DefinePlugin replaces process.env.NX_API_BASE_URL with the actual string value
     // Use dot notation so DefinePlugin can replace it properly
-    // @ts-expect-error - process.env is replaced by DefinePlugin at build time
-    const envBaseURL = process.env.NX_API_BASE_URL;
-    const baseURL = config.baseURL ?? envBaseURL ?? 'http://localhost:3000/api';
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    const envBaseURL =
+      typeof process !== 'undefined' && process.env
+        ? (process.env as { NX_API_BASE_URL?: string }).NX_API_BASE_URL
+        : undefined;
+    // Default to Auth Service direct URL for POC-2
+    const baseURL = config.baseURL ?? envBaseURL ?? 'http://localhost:3001';
 
     this.axiosInstance = axios.create({
       baseURL,

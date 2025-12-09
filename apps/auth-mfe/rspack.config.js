@@ -106,6 +106,10 @@ module.exports = {
         __dirname,
         '../../libs/shared-event-bus/src/index.ts'
       ),
+      '@mfe/shared-design-system': path.resolve(
+        __dirname,
+        '../../libs/shared-design-system/src/index.ts'
+      ),
     },
   },
   module: {
@@ -165,8 +169,10 @@ module.exports = {
     // Define environment variables for browser (replaces process.env at build time)
     new rspack.DefinePlugin({
       'process.env': JSON.stringify({
+        // POC-2: Direct service URL (Auth Service)
+        // API Gateway proxy deferred to POC-3
         NX_API_BASE_URL:
-          process.env.NX_API_BASE_URL || 'http://localhost:3000/api',
+          process.env.NX_API_BASE_URL || 'http://localhost:3001',
         NODE_ENV: isProduction ? 'production' : 'development',
       }),
     }),

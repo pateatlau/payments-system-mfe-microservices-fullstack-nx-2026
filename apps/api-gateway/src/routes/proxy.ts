@@ -1,153 +1,59 @@
 /**
  * Service Proxy Routes
  *
- * Configures request proxying to backend services
+ * ⚠️ POC-2 STATUS: DISABLED
+ *
+ * Proxy routes are temporarily disabled for POC-2.
+ * Frontend applications communicate directly with backend services.
+ *
+ * Direct Service URLs (POC-2):
+ * - Auth Service: http://localhost:3001
+ * - Payments Service: http://localhost:3002
+ * - Admin Service: http://localhost:3003
+ * - Profile Service: http://localhost:3004
+ *
+ * Why Disabled:
+ * During POC-2 implementation, we encountered technical issues with
+ * http-proxy-middleware v3.x including request body streaming problems,
+ * path rewriting complications, and timeout errors.
+ *
+ * POC-3 Implementation:
+ * API Gateway proxy will be re-implemented in POC-3 with a more robust
+ * solution. See: docs/POC-3-Planning/api-gateway-proxy-implementation.md
  */
 
-import express, { Router } from 'express';
-import { createProxyMiddleware } from 'http-proxy-middleware';
-import { config } from '../config';
-import { authenticate } from '../middleware/auth';
-import { requireAdmin } from '../middleware/rbac';
-import { authRateLimiter } from '../middleware/rateLimit';
-import { logger } from '../utils/logger';
+import { Router } from 'express';
 
 const router = Router();
 
 /**
- * Auth Service Routes
- * Public routes: /api/auth/login, /api/auth/register, /api/auth/refresh
- * Protected routes: /api/auth/me, /api/auth/logout, /api/auth/password
+ * POC-2: All proxy routes are disabled
+ *
+ * Frontend MFEs communicate directly with backend services:
+ * - Auth Service: http://localhost:3001
+ * - Payments Service: http://localhost:3002
+ * - Admin Service: http://localhost:3003
+ * - Profile Service: http://localhost:3004
+ *
+ * This will be re-implemented in POC-3 with a more robust solution.
  */
-router.use(
-  '/api/auth/login',
-  authRateLimiter as unknown as express.RequestHandler,
-  createProxyMiddleware({
-    target: config.services.auth,
-    changeOrigin: true,
-    pathRewrite: {
-      '^/api/auth': '/auth',
-    },
-    on: {
-      proxyReq: (_proxyReq, req) => {
-        logger.debug('Proxying to Auth Service', {
-          path: req.url,
-          target: config.services.auth,
-        });
+
+// Placeholder route for documentation
+router.get('/proxy-disabled', (_req, res) => {
+  res.status(501).json({
+    success: false,
+    error: {
+      code: 'PROXY_DISABLED',
+      message:
+        'API Gateway proxy is disabled in POC-2. Use direct service URLs.',
+      services: {
+        auth: 'http://localhost:3001',
+        payments: 'http://localhost:3002',
+        admin: 'http://localhost:3003',
+        profile: 'http://localhost:3004',
       },
     },
-  })
-);
-
-router.use(
-  '/api/auth/register',
-  authRateLimiter as unknown as express.RequestHandler,
-  createProxyMiddleware({
-    target: config.services.auth,
-    changeOrigin: true,
-    pathRewrite: {
-      '^/api/auth': '/auth',
-    },
-  })
-);
-
-router.use(
-  '/api/auth/refresh',
-  authRateLimiter as unknown as express.RequestHandler,
-  createProxyMiddleware({
-    target: config.services.auth,
-    changeOrigin: true,
-    pathRewrite: {
-      '^/api/auth': '/auth',
-    },
-  })
-);
-
-// Protected auth routes
-router.use(
-  '/api/auth',
-  authenticate,
-  createProxyMiddleware({
-    target: config.services.auth,
-    changeOrigin: true,
-    pathRewrite: {
-      '^/api/auth': '/auth',
-    },
-  })
-);
-
-/**
- * Payments Service Routes
- * All routes require authentication
- * CUSTOMER can create payments, VENDOR can initiate payments
- */
-router.use(
-  '/api/payments',
-  authenticate,
-  createProxyMiddleware({
-    target: config.services.payments,
-    changeOrigin: true,
-    pathRewrite: {
-      '^/api/payments': '/payments',
-    },
-    on: {
-      proxyReq: (_proxyReq, req) => {
-        logger.debug('Proxying to Payments Service', {
-          path: req.url,
-          target: config.services.payments,
-        });
-      },
-    },
-  })
-);
-
-/**
- * Admin Service Routes
- * All routes require ADMIN role
- */
-router.use(
-  '/api/admin',
-  authenticate,
-  requireAdmin,
-  createProxyMiddleware({
-    target: config.services.admin,
-    changeOrigin: true,
-    pathRewrite: {
-      '^/api/admin': '/admin',
-    },
-    on: {
-      proxyReq: (_proxyReq, req) => {
-        logger.debug('Proxying to Admin Service', {
-          path: req.url,
-          target: config.services.admin,
-        });
-      },
-    },
-  })
-);
-
-/**
- * Profile Service Routes
- * All routes require authentication
- */
-router.use(
-  '/api/profile',
-  authenticate,
-  createProxyMiddleware({
-    target: config.services.profile,
-    changeOrigin: true,
-    pathRewrite: {
-      '^/api/profile': '/profile',
-    },
-    on: {
-      proxyReq: (_proxyReq, req) => {
-        logger.debug('Proxying to Profile Service', {
-          path: req.url,
-          target: config.services.profile,
-        });
-      },
-    },
-  })
-);
+  });
+});
 
 export default router;

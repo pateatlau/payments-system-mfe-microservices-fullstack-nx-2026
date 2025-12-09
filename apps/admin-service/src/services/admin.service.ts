@@ -17,7 +17,7 @@ export const adminService = {
    * List users with pagination, filtering, and sorting
    */
   async listUsers(query: ListUsersQuery) {
-    const { page, limit, sort, order, role, search, isActive } = query;
+    const { page, limit, sort, order, role, search } = query;
 
     const skip = (page - 1) * limit;
 
@@ -191,7 +191,7 @@ export const adminService = {
    * Activate or deactivate user
    * Note: isActive field not yet in schema - this is a placeholder for future implementation
    */
-  async updateUserStatus(userId: string, data: UpdateUserStatusRequest) {
+  async updateUserStatus(userId: string, _data: UpdateUserStatusRequest) {
     // Check if user exists
     const existingUser = await db.user.findUnique({
       where: { id: userId },
