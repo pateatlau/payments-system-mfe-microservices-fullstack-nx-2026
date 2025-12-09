@@ -821,11 +821,13 @@ pnpm backend:kill
 #### Protected Endpoints (Require JWT)
 
 **Auth Service:**
+
 - `GET /api/auth/me` - Get current user
 - `POST /api/auth/logout` - Logout user
 - `POST /api/auth/password` - Change password
 
 **Payments Service (Port 3002):**
+
 - `GET /api/payments` - List payments (paginated, filtered)
 - `GET /api/payments/:id` - Get payment by ID
 - `POST /api/payments` - Create payment
@@ -833,6 +835,7 @@ pnpm backend:kill
 - `POST /api/payments/webhook` - Webhook handler
 
 **Admin Service (Port 3003) - ADMIN Only:**
+
 - `GET /api/admin/users` - List users (paginated, filtered, sorted)
 - `GET /api/admin/users/:id` - Get user by ID (with payment counts)
 - `PUT /api/admin/users/:id` - Update user
@@ -840,6 +843,7 @@ pnpm backend:kill
 - `PATCH /api/admin/users/:id/status` - Update user status (placeholder)
 
 **Profile Service (Port 3004):**
+
 - `GET /api/profile` - Get user profile (auto-creates if not exists)
 - `PUT /api/profile` - Update profile
 - `GET /api/profile/preferences` - Get preferences
