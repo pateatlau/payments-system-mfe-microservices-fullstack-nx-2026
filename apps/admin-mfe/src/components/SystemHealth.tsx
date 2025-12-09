@@ -48,6 +48,7 @@ export function SystemHealth() {
       setHealthData(data);
       setLastRefresh(new Date());
     } catch (err) {
+      console.error('[SystemHealth] Failed to load health data:', err);
       setError(
         err instanceof Error ? err.message : 'Failed to load health data'
       );

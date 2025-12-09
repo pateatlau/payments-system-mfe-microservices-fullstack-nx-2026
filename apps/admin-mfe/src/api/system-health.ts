@@ -50,11 +50,9 @@ export interface SystemHealthData {
  * @returns Promise with system health data
  */
 export async function getSystemHealth(): Promise<SystemHealthData> {
-  const response = await adminApiClient.get<{ data: SystemHealthData }>(
-    '/admin/health'
-  );
+  const response = await adminApiClient.get<SystemHealthData>('/admin/health');
 
-  return response.data.data;
+  return response.data;
 }
 
 /**

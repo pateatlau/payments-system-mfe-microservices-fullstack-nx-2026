@@ -68,10 +68,12 @@ export function UserManagement() {
       setError(null);
 
       const response = await getUsers(filters);
-      setUsers(response.data);
+      setUsers(response.users || []);
       setPagination(response.pagination);
     } catch (err) {
+      console.error('[UserManagement] Failed to load users:', err);
       setError(err instanceof Error ? err.message : 'Failed to load users');
+      setUsers([]); // Ensure users is always an array
     } finally {
       setIsLoading(false);
     }

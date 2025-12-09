@@ -47,7 +47,7 @@ export interface PaginationInfo {
  * Users list response
  */
 export interface UsersListResponse {
-  data: User[];
+  users: User[];
   pagination: PaginationInfo;
 }
 
@@ -116,11 +116,11 @@ export async function getUsers(
  * @returns Promise with user details including profile
  */
 export async function getUserById(userId: string): Promise<UserWithProfile> {
-  const response = await adminApiClient.get<{ data: UserWithProfile }>(
+  const response = await adminApiClient.get<UserWithProfile>(
     `/admin/users/${userId}`
   );
 
-  return response.data.data;
+  return response.data;
 }
 
 /**
@@ -130,12 +130,9 @@ export async function getUserById(userId: string): Promise<UserWithProfile> {
  * @returns Promise with created user
  */
 export async function createUser(userData: CreateUserRequest): Promise<User> {
-  const response = await adminApiClient.post<{ data: User }>(
-    '/admin/users',
-    userData
-  );
+  const response = await adminApiClient.post<User>('/admin/users', userData);
 
-  return response.data.data;
+  return response.data;
 }
 
 /**
@@ -149,12 +146,12 @@ export async function updateUser(
   userId: string,
   userData: UpdateUserRequest
 ): Promise<User> {
-  const response = await adminApiClient.put<{ data: User }>(
+  const response = await adminApiClient.put<User>(
     `/admin/users/${userId}`,
     userData
   );
 
-  return response.data.data;
+  return response.data;
 }
 
 /**
@@ -169,10 +166,12 @@ export async function updateUserRole(
   role: UserRole
 ): Promise<{ id: string; role: UserRole; updatedAt: string }> {
   const response = await adminApiClient.put<{
-    data: { id: string; role: UserRole; updatedAt: string };
+    id: string;
+    role: UserRole;
+    updatedAt: string;
   }>(`/admin/users/${userId}/role`, { role });
 
-  return response.data.data;
+  return response.data;
 }
 
 /**

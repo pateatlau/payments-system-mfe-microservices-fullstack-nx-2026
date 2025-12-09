@@ -92,6 +92,11 @@ const server = app.listen(config.port, () => {
   logger.info(`Health check: http://localhost:${config.port}/health`);
 });
 
+server.on('error', error => {
+  logger.error('Server error:', error);
+  process.exit(1);
+});
+
 // Graceful shutdown
 process.on('SIGTERM', () => {
   logger.info('SIGTERM signal received: closing HTTP server');
