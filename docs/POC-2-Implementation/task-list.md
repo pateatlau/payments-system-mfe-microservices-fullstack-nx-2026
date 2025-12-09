@@ -17,6 +17,10 @@
 
 ---
 
+### Latest Update (2026-12-09)
+
+- Fixed `db` library build output to emit compiled JS into `dist/libs/backend/db/src`, resolving the admin-service runtime error (`Cannot find module .../dist/libs/backend/db/src/index.js`). Rebuild `db` via `npx nx build db --skip-nx-cache` if needed.
+
 ## How to Use This Checklist
 
 - **For Progress Tracking:** Mark tasks as complete by checking the box: `- [x]`

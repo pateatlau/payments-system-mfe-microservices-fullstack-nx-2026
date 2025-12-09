@@ -29,6 +29,8 @@ This document provides a detailed, step-by-step implementation plan for POC-2, e
 - ⬜ Phase 4: Frontend Integration (0%)
 - ⬜ Phase 5: Testing & Polish (0%)
 
+**Latest Update (2026-12-09):** Fixed `db` library build output to emit compiled JS into `dist/libs/backend/db/src`, resolving the admin-service runtime error (`Cannot find module .../dist/libs/backend/db/src/index.js`). Rebuild `db` via `npx nx build db --skip-nx-cache` if needed.
+
 **Key Features:**
 
 - Real JWT authentication (replace mock)
