@@ -9,6 +9,7 @@ import {
   updateUserSchema,
   updateUserRoleSchema,
   updateUserStatusSchema,
+  createUserSchema,
 } from '../validators/admin.validators';
 import type { UserRole } from 'shared-types';
 
@@ -178,6 +179,59 @@ export async function updateUserStatus(
       success: true,
       data: user,
     });
+  } catch (error) {
+    next(error);
+  }
+}
+
+/**
+ * Create new user
+ * POST /api/admin/users
+ */
+export async function createUser(
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const data = createUserSchema.parse(req.body);
+    const user = await adminService.createUser(data);
+
+    res.status(201).json({
+      success: true,
+      data: user,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+/**
+ * Delete user
+ * DELETE /api/admin/users/:id
+ */
+export async function deleteUser(
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      res.status(400).json({
+        success: false,
+        error: {
+          code: 'BAD_REQUEST',
+          message: 'User ID is required',
+        },
+      });
+      return;
+    }
+
+    await adminService.deleteUser(id);
+
+    res.status(204).send();
   } catch (error) {
     next(error);
   }

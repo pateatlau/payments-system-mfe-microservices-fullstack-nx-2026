@@ -42,3 +42,13 @@ export const updateUserStatusSchema = z.object({
 });
 
 export type UpdateUserStatusRequest = z.infer<typeof updateUserStatusSchema>;
+
+// Create user request body
+export const createUserSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(12).max(255),
+  name: z.string().min(1).max(255),
+  role: z.enum(['ADMIN', 'CUSTOMER', 'VENDOR']),
+});
+
+export type CreateUserRequest = z.infer<typeof createUserSchema>;

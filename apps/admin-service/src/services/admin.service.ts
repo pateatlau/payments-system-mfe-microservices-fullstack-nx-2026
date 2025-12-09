@@ -10,7 +10,9 @@ import type {
   UpdateUserRequest,
   UpdateUserRoleRequest,
   UpdateUserStatusRequest,
+  CreateUserRequest,
 } from '../validators/admin.validators';
+import bcrypt from 'bcrypt';
 
 export const adminService = {
   /**
@@ -211,5 +213,80 @@ export const adminService = {
       'NOT_IMPLEMENTED',
       'User activation/deactivation will be available in a future update. The isActive field needs to be added to the User model schema first.'
     );
+  },
+
+  /**
+   * Create new user
+   */
+  async createUser(data: CreateUserRequest) {
+    // Check if email already exists
+    const existingUser = await db.user.findUnique({
+      where: { email: data.email },
+    });
+
+    if (existingUser) {
+      throw new ApiError(
+        409,
+        'EMAIL_ALREADY_EXISTS',
+        'Email is already in use'
+      );
+    }
+
+    // Hash password
+    const passwordHash = await bcrypt.hash(data.password, 10);
+
+    // Create user
+    const user = await db.user.create({
+      data: {
+        email: data.email,
+        passwordHash,
+        name: data.name,
+        role: data.role,
+      },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+
+    return user;
+  },
+
+  /**
+   * Delete user
+   */
+  async deleteUser(userId: string) {
+    // Check if user exists
+    const existingUser = await db.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!existingUser) {
+      throw new ApiError(404, 'USER_NOT_FOUND', 'User not found');
+    }
+
+    // Prevent deleting the last admin
+    if (existingUser.role === 'ADMIN') {
+      const adminCount = await db.user.count({
+        where: { role: 'ADMIN' },
+      });
+
+      if (adminCount <= 1) {
+        throw new ApiError(
+          403,
+          'CANNOT_DELETE_LAST_ADMIN',
+          'Cannot delete the last admin user'
+        );
+      }
+    }
+
+    // Delete user
+    await db.user.delete({
+      where: { id: userId },
+    });
   },
 };
