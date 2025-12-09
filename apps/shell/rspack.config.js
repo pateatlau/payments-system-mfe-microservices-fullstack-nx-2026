@@ -128,6 +128,10 @@ module.exports = {
         __dirname,
         '../../libs/shared-event-bus/src/index.ts'
       ),
+      '@mfe/shared-design-system': path.resolve(
+        __dirname,
+        '../../libs/shared-design-system/src/index.ts'
+      ),
     },
   },
   module: {
@@ -221,6 +225,7 @@ module.exports = {
         // Remote MFE URLs - format: 'remoteName@http://host:port/remoteEntry.js'
         authMfe: 'authMfe@http://localhost:4201/remoteEntry.js',
         paymentsMfe: 'paymentsMfe@http://localhost:4202/remoteEntry.js',
+        adminMfe: 'adminMfe@http://localhost:4203/remoteEntry.js',
       },
       shared: sharedDependencies,
     }),

@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach } from '@jest/globals';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import { useAuthStore } from 'shared-auth-store';
+import { UserRole } from 'shared-types';
 import { ProtectedRoute } from './ProtectedRoute';
 
 // Mock the auth store
@@ -24,6 +25,14 @@ function renderWithRouter(
         <Route
           path="/custom-login"
           element={<div data-testid="custom-login">Custom Login</div>}
+        />
+        <Route
+          path="/payments"
+          element={<div data-testid="payments-page">Payments Page</div>}
+        />
+        <Route
+          path="/access-denied"
+          element={<div data-testid="access-denied">Access Denied</div>}
         />
         <Route path="/protected" element={ui} />
       </Routes>
@@ -289,6 +298,121 @@ describe('ProtectedRoute', () => {
       );
 
       expect(screen.getByTestId('signin-page')).toBeInTheDocument();
+    });
+  });
+
+  describe('role-based access control', () => {
+    describe('when user has required role', () => {
+      beforeEach(() => {
+        (useAuthStore as unknown as ReturnType<typeof jest.fn>).mockReturnValue(
+          {
+            isAuthenticated: true,
+            isLoading: false,
+            hasRole: jest.fn((role: UserRole) => role === UserRole.ADMIN),
+            hasAnyRole: jest.fn((roles: UserRole[]) =>
+              roles.includes(UserRole.ADMIN)
+            ),
+          }
+        );
+      });
+
+      it('renders children when user has single required role', () => {
+        renderWithRouter(
+          <ProtectedRoute requiredRole={UserRole.ADMIN}>
+            <div data-testid="admin-content">Admin Content</div>
+          </ProtectedRoute>
+        );
+
+        expect(screen.getByTestId('admin-content')).toBeInTheDocument();
+        expect(screen.queryByTestId('payments-page')).not.toBeInTheDocument();
+      });
+
+      it('renders children when user has one of multiple required roles', () => {
+        renderWithRouter(
+          <ProtectedRoute requiredRole={[UserRole.ADMIN, UserRole.VENDOR]}>
+            <div data-testid="admin-content">Admin Content</div>
+          </ProtectedRoute>
+        );
+
+        expect(screen.getByTestId('admin-content')).toBeInTheDocument();
+      });
+    });
+
+    describe('when user does not have required role', () => {
+      beforeEach(() => {
+        (useAuthStore as unknown as ReturnType<typeof jest.fn>).mockReturnValue(
+          {
+            isAuthenticated: true,
+            isLoading: false,
+            hasRole: jest.fn((role: UserRole) => role === UserRole.CUSTOMER),
+            hasAnyRole: jest.fn((roles: UserRole[]) =>
+              roles.includes(UserRole.CUSTOMER)
+            ),
+          }
+        );
+      });
+
+      it('redirects to default access denied path when user lacks required role', () => {
+        renderWithRouter(
+          <ProtectedRoute requiredRole={UserRole.ADMIN}>
+            <div data-testid="admin-content">Admin Content</div>
+          </ProtectedRoute>
+        );
+
+        expect(screen.getByTestId('payments-page')).toBeInTheDocument();
+        expect(screen.queryByTestId('admin-content')).not.toBeInTheDocument();
+      });
+
+      it('redirects to custom access denied path when provided', () => {
+        renderWithRouter(
+          <ProtectedRoute
+            requiredRole={UserRole.ADMIN}
+            accessDeniedRedirect="/access-denied"
+          >
+            <div data-testid="admin-content">Admin Content</div>
+          </ProtectedRoute>
+        );
+
+        expect(screen.getByTestId('access-denied')).toBeInTheDocument();
+        expect(screen.queryByTestId('admin-content')).not.toBeInTheDocument();
+      });
+
+      it('redirects when user lacks any of multiple required roles', () => {
+        renderWithRouter(
+          <ProtectedRoute requiredRole={[UserRole.ADMIN, UserRole.VENDOR]}>
+            <div data-testid="admin-content">Admin Content</div>
+          </ProtectedRoute>
+        );
+
+        expect(screen.getByTestId('payments-page')).toBeInTheDocument();
+        expect(screen.queryByTestId('admin-content')).not.toBeInTheDocument();
+      });
+    });
+
+    describe('when not authenticated with role requirement', () => {
+      beforeEach(() => {
+        (useAuthStore as unknown as ReturnType<typeof jest.fn>).mockReturnValue(
+          {
+            isAuthenticated: false,
+            isLoading: false,
+            hasRole: jest.fn(),
+            hasAnyRole: jest.fn(),
+          }
+        );
+      });
+
+      it('redirects to signin before checking role', () => {
+        renderWithRouter(
+          <ProtectedRoute requiredRole={UserRole.ADMIN}>
+            <div data-testid="admin-content">Admin Content</div>
+          </ProtectedRoute>
+        );
+
+        // Should redirect to signin, not access denied
+        expect(screen.getByTestId('signin-page')).toBeInTheDocument();
+        expect(screen.queryByTestId('admin-content')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('payments-page')).not.toBeInTheDocument();
+      });
     });
   });
 });

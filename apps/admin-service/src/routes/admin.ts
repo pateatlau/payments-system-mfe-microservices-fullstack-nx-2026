@@ -11,12 +11,16 @@ import {
   updateUserRole,
   updateUserStatus,
 } from '../controllers/admin.controller';
+import { getSystemHealth } from '../controllers/system-health.controller';
 
 const router = express.Router();
 
 // All admin routes require authentication and ADMIN role
 router.use(authenticate);
 router.use(requireAdmin);
+
+// System health route
+router.get('/health', getSystemHealth);
 
 // User management routes
 router.get('/users', listUsers);

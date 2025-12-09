@@ -1,6 +1,7 @@
 import { ReactNode } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from 'shared-auth-store';
+import { UserRole } from 'shared-types';
 
 /**
  * Props for ProtectedRoute component
@@ -22,6 +23,19 @@ export interface ProtectedRouteProps {
    * If not provided, a default loading spinner is shown
    */
   loadingComponent?: ReactNode;
+
+  /**
+   * Optional required role(s) for accessing this route
+   * If provided, user must have one of these roles to access the route
+   * Users without the required role will be redirected to accessDeniedRedirect
+   */
+  requiredRole?: UserRole | UserRole[];
+
+  /**
+   * Path to redirect to if user doesn't have required role
+   * @default '/payments'
+   */
+  accessDeniedRedirect?: string;
 }
 
 /**
@@ -41,34 +55,46 @@ function DefaultLoadingComponent() {
 /**
  * ProtectedRoute component
  *
- * A wrapper component that protects routes requiring authentication.
+ * A wrapper component that protects routes requiring authentication and optionally role-based access.
  * Redirects unauthenticated users to the sign-in page.
+ * Redirects users without required role to access denied page.
  * Shows a loading state while checking authentication.
  *
  * @example
- * // Basic usage
+ * // Basic usage - authentication only
  * <ProtectedRoute>
  *   <PaymentsPage />
  * </ProtectedRoute>
  *
  * @example
- * // Custom redirect path
- * <ProtectedRoute redirectTo="/login">
- *   <DashboardPage />
+ * // Role-based protection - single role
+ * <ProtectedRoute requiredRole={UserRole.ADMIN}>
+ *   <AdminPage />
  * </ProtectedRoute>
  *
  * @example
- * // Custom loading component
- * <ProtectedRoute loadingComponent={<CustomSpinner />}>
- *   <PaymentsPage />
+ * // Role-based protection - multiple roles
+ * <ProtectedRoute requiredRole={[UserRole.ADMIN, UserRole.VENDOR]}>
+ *   <ReportsPage />
+ * </ProtectedRoute>
+ *
+ * @example
+ * // Custom redirect paths
+ * <ProtectedRoute
+ *   redirectTo="/login"
+ *   accessDeniedRedirect="/unauthorized"
+ * >
+ *   <DashboardPage />
  * </ProtectedRoute>
  */
 export function ProtectedRoute({
   children,
   redirectTo = '/signin',
   loadingComponent,
+  requiredRole,
+  accessDeniedRedirect = '/payments',
 }: ProtectedRouteProps) {
-  const { isAuthenticated, isLoading } = useAuthStore();
+  const { isAuthenticated, isLoading, hasRole, hasAnyRole } = useAuthStore();
   const location = useLocation();
 
   // Show loading state while checking auth
@@ -82,7 +108,18 @@ export function ProtectedRoute({
     return <Navigate to={redirectTo} state={{ from: location }} replace />;
   }
 
-  // User is authenticated, render children
+  // Check role-based access if required
+  if (requiredRole) {
+    const hasRequiredRole = Array.isArray(requiredRole)
+      ? hasAnyRole(requiredRole)
+      : hasRole(requiredRole);
+
+    if (!hasRequiredRole) {
+      // User is authenticated but doesn't have required role
+      return <Navigate to={accessDeniedRedirect} replace />;
+    }
+  }
+
+  // User is authenticated and has required role (if specified), render children
   return <>{children}</>;
 }
-

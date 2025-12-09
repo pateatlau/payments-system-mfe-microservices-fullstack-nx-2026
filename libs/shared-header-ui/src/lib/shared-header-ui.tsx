@@ -35,7 +35,10 @@ export function Header({
   };
 
   return (
-    <header className="bg-slate-900 text-white shadow-lg">
+    <header
+      className="text-white shadow-lg"
+      style={{ backgroundColor: '#084683' }}
+    >
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           {/* Branding/Logo */}
@@ -87,7 +90,8 @@ export function Header({
                 {/* Logout Button */}
                 <button
                   onClick={handleLogout}
-                  className="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+                  className="text-white px-4 py-2 rounded-md text-sm font-medium transition-colors hover:bg-white/10"
+                  style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
                   aria-label="Logout"
                 >
                   Logout

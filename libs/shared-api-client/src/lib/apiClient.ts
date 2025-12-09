@@ -31,6 +31,7 @@ export interface ApiClientConfig {
   tokenProvider?: TokenProvider;
   onTokenRefresh?: (accessToken: string, refreshToken: string) => void;
   onUnauthorized?: () => void;
+  refreshURL?: string; // Optional: Override URL for token refresh (defaults to baseURL)
 }
 
 /**
@@ -73,7 +74,7 @@ export class ApiClient {
     // POC-2: Using direct service URLs (bypassing API Gateway proxy)
     // API Gateway proxy implementation deferred to POC-3
     // For now, frontend will call backend services directly
-    
+
     // Access environment variable (replaced by DefinePlugin at build time in browser)
     // DefinePlugin replaces process.env.NX_API_BASE_URL with the actual string value
     // Use dot notation so DefinePlugin can replace it properly
@@ -98,6 +99,9 @@ export class ApiClient {
     this.onUnauthorized = config.onUnauthorized;
 
     // Setup interceptors
+    // Use refreshURL if provided, otherwise use baseURL (for services other than auth)
+    const refreshURL = config.refreshURL ?? baseURL;
+
     setupInterceptors(
       this.axiosInstance,
       {
@@ -112,7 +116,7 @@ export class ApiClient {
           this.onUnauthorized?.();
         },
       },
-      baseURL
+      refreshURL
     );
   }
 

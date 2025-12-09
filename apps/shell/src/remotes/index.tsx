@@ -1,9 +1,9 @@
 /**
  * Remote component loaders for Module Federation
- * 
+ *
  * This file contains lazy-loaded components from remote MFEs.
  * These are used in production routes.
- * 
+ *
  * For testing, mock the page components directly instead of this file.
  */
 import { lazy, Suspense, ComponentType } from 'react';
@@ -71,8 +71,20 @@ const LazyPaymentsPage = lazy(() =>
   }))
 );
 
+const LazyAdminDashboard = lazy(() =>
+  import('adminMfe/AdminDashboard').catch(() => ({
+    default: () => <ErrorFallback componentName="AdminDashboard" />,
+  }))
+);
+
 // Export wrapped components with Suspense
 export const SignInRemote = withSuspense(LazySignIn, 'Loading sign in...');
 export const SignUpRemote = withSuspense(LazySignUp, 'Loading sign up...');
-export const PaymentsPageRemote = withSuspense(LazyPaymentsPage, 'Loading payments...');
-
+export const PaymentsPageRemote = withSuspense(
+  LazyPaymentsPage,
+  'Loading payments...'
+);
+export const AdminDashboardRemote = withSuspense(
+  LazyAdminDashboard,
+  'Loading admin dashboard...'
+);

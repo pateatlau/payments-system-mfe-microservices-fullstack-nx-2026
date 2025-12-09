@@ -8,7 +8,12 @@ import './styles.css';
 // Import remote components
 // This file (bootstrap.tsx) is dynamically imported, providing the async boundary
 // required for Module Federation shared dependencies to initialize properly
-import { SignInRemote, SignUpRemote, PaymentsPageRemote } from './remotes';
+import {
+  SignInRemote,
+  SignUpRemote,
+  PaymentsPageRemote,
+  AdminDashboardRemote,
+} from './remotes';
 
 // Create a QueryClient for TanStack Query
 // This is needed for remote components that use TanStack Query (like PaymentsPage)
@@ -36,6 +41,7 @@ root.render(
             SignInComponent: SignInRemote,
             SignUpComponent: SignUpRemote,
             PaymentsComponent: PaymentsPageRemote,
+            AdminDashboardComponent: AdminDashboardRemote,
           }}
         />
       </BrowserRouter>

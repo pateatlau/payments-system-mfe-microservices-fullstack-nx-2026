@@ -28,3 +28,10 @@ declare module 'paymentsMfe/PaymentsPage' {
   export default PaymentsPage;
 }
 
+declare module 'adminMfe/AdminDashboard' {
+  interface AdminDashboardProps {
+    // Admin dashboard props (can be extended as needed)
+  }
+  const AdminDashboard: React.ComponentType<AdminDashboardProps>;
+  export default AdminDashboard;
+}
