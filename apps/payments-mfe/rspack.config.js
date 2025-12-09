@@ -54,6 +54,26 @@ const sharedDependencies = {
     requiredVersion: false,
     eager: false,
   },
+  '@mfe/shared-api-client': {
+    singleton: true,
+    requiredVersion: false,
+    eager: false,
+  },
+  'shared-api-client': {
+    singleton: true,
+    requiredVersion: false,
+    eager: false,
+  },
+  '@mfe/shared-design-system': {
+    singleton: true,
+    requiredVersion: false,
+    eager: false,
+  },
+  'shared-types': {
+    singleton: true,
+    requiredVersion: false,
+    eager: false,
+  },
 };
 
 module.exports = {
@@ -98,6 +118,10 @@ module.exports = {
         '../../libs/shared-types/src/index.ts'
       ),
       '@mfe/shared-api-client': path.resolve(
+        __dirname,
+        '../../libs/shared-api-client/src/index.ts'
+      ),
+      'shared-api-client': path.resolve(
         __dirname,
         '../../libs/shared-api-client/src/index.ts'
       ),
@@ -168,10 +192,9 @@ module.exports = {
     // Define environment variables for browser (replaces process.env at build time)
     new rspack.DefinePlugin({
       'process.env': JSON.stringify({
-        // POC-2: Direct service URL (Payments Service)  
+        // POC-2: Direct service URL (Payments Service)
         // API Gateway proxy deferred to POC-3
-        NX_API_BASE_URL:
-          process.env.NX_API_BASE_URL || 'http://localhost:3002',
+        NX_API_BASE_URL: process.env.NX_API_BASE_URL || 'http://localhost:3002',
         NODE_ENV: isProduction ? 'production' : 'development',
       }),
     }),

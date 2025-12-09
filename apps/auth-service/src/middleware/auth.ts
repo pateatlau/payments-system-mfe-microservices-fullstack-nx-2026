@@ -22,12 +22,19 @@ declare global {
 /**
  * Authentication middleware
  * Validates JWT token and attaches user to request
+ * Skips OPTIONS requests (handled by CORS middleware)
  */
 export const authenticate = (
   req: Request,
   _res: Response,
   next: NextFunction
 ) => {
+  // Skip authentication for OPTIONS requests (CORS preflight)
+  if (req.method === 'OPTIONS') {
+    next();
+    return;
+  }
+
   try {
     // Get token from Authorization header
     const authHeader = req.headers.authorization;

@@ -25,7 +25,8 @@ import {
   useUpdatePayment,
   useDeletePayment,
 } from '../hooks';
-import type { Payment, PaymentStatus, PaymentType } from '../api/types';
+import type { Payment } from '../api/types';
+import { PaymentType, PaymentStatus } from 'shared-types';
 
 /**
  * Create payment form schema using Zod
@@ -310,139 +311,129 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                <form
-                  onSubmit={handleSubmitCreate(onSubmitCreate)}
-                  className="space-y-4"
-                >
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="amount">
-                        Amount *
-                      </Label>
-                      <Input
-                        id="amount"
-                        type="number"
-                        step="0.01"
-                        {...registerCreate('amount', { valueAsNumber: true })}
-                        placeholder="0.00"
-                        className="mt-2"
-                      />
-                      {createErrors.amount && (
-                        <p className="mt-1 text-sm text-red-600" role="alert">
-                          {createErrors.amount.message}
-                        </p>
-                      )}
+                  <form
+                    onSubmit={handleSubmitCreate(onSubmitCreate)}
+                    className="space-y-4"
+                  >
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="amount">Amount *</Label>
+                        <Input
+                          id="amount"
+                          type="number"
+                          step="0.01"
+                          {...registerCreate('amount', { valueAsNumber: true })}
+                          placeholder="0.00"
+                          className="mt-2"
+                        />
+                        {createErrors.amount && (
+                          <p className="mt-1 text-sm text-red-600" role="alert">
+                            {createErrors.amount.message}
+                          </p>
+                        )}
+                      </div>
+
+                      <div>
+                        <Label htmlFor="currency">Currency *</Label>
+                        <select
+                          id="currency"
+                          {...registerCreate('currency')}
+                          className="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 mt-2"
+                        >
+                          <option value="USD">USD</option>
+                          <option value="EUR">EUR</option>
+                          <option value="GBP">GBP</option>
+                        </select>
+                        {createErrors.currency && (
+                          <p className="mt-1 text-sm text-red-600" role="alert">
+                            {createErrors.currency.message}
+                          </p>
+                        )}
+                      </div>
                     </div>
 
                     <div>
-                      <Label htmlFor="currency">
-                        Currency *
-                      </Label>
+                      <Label htmlFor="type">Payment Type *</Label>
                       <select
-                        id="currency"
-                        {...registerCreate('currency')}
+                        id="type"
+                        {...registerCreate('type')}
                         className="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 mt-2"
                       >
-                        <option value="USD">USD</option>
-                        <option value="EUR">EUR</option>
-                        <option value="GBP">GBP</option>
+                        <option value={PaymentType.INSTANT}>Instant</option>
+                        <option value={PaymentType.SCHEDULED}>Scheduled</option>
+                        <option value={PaymentType.RECURRING}>Recurring</option>
                       </select>
-                      {createErrors.currency && (
+                      {createErrors.type && (
                         <p className="mt-1 text-sm text-red-600" role="alert">
-                          {createErrors.currency.message}
+                          {createErrors.type.message}
                         </p>
                       )}
                     </div>
-                  </div>
 
-                  <div>
-                    <Label htmlFor="type">
-                      Payment Type *
-                    </Label>
-                    <select
-                      id="type"
-                      {...registerCreate('type')}
-                      className="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 mt-2"
-                    >
-                      <option value={PaymentType.INSTANT}>Instant</option>
-                      <option value={PaymentType.SCHEDULED}>Scheduled</option>
-                      <option value={PaymentType.RECURRING}>Recurring</option>
-                    </select>
-                    {createErrors.type && (
-                      <p className="mt-1 text-sm text-red-600" role="alert">
-                        {createErrors.type.message}
-                      </p>
-                    )}
-                  </div>
-
-                  <div>
-                    <Label htmlFor="description">
-                      Description *
-                    </Label>
-                    <Input
-                      id="description"
-                      type="text"
-                      {...registerCreate('description')}
-                      placeholder="Payment description"
-                      className="mt-2"
-                    />
-                    {createErrors.description && (
-                      <p className="mt-1 text-sm text-red-600" role="alert">
-                        {createErrors.description.message}
-                      </p>
-                    )}
-                  </div>
-
-                  <div>
-                    <Label htmlFor="recipientEmail">
-                      Recipient Email *
-                    </Label>
-                    <Input
-                      id="recipientEmail"
-                      type="email"
-                      {...registerCreate('recipientEmail')}
-                      placeholder="recipient@example.com"
-                      className="mt-2"
-                    />
-                    {createErrors.recipientEmail && (
-                      <p className="mt-1 text-sm text-red-600" role="alert">
-                        {createErrors.recipientEmail.message}
-                      </p>
-                    )}
-                  </div>
-
-                  {createPaymentMutation.isError && (
-                    <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-                      <p className="text-sm text-red-600">
-                        {createPaymentMutation.error?.message ||
-                          'Failed to create payment'}
-                      </p>
+                    <div>
+                      <Label htmlFor="description">Description *</Label>
+                      <Input
+                        id="description"
+                        type="text"
+                        {...registerCreate('description')}
+                        placeholder="Payment description"
+                        className="mt-2"
+                      />
+                      {createErrors.description && (
+                        <p className="mt-1 text-sm text-red-600" role="alert">
+                          {createErrors.description.message}
+                        </p>
+                      )}
                     </div>
-                  )}
 
-                  <div className="flex gap-3">
-                    <button
-                      type="submit"
-                      disabled={isCreating || createPaymentMutation.isPending}
-                      className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:bg-slate-400 disabled:cursor-not-allowed"
-                    >
-                      {isCreating || createPaymentMutation.isPending
-                        ? 'Creating...'
-                        : 'Create Payment'}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setShowCreateForm(false);
-                        resetCreateForm();
-                      }}
-                      className="bg-slate-200 text-slate-700 px-4 py-2 rounded-lg hover:bg-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </form>
-              </div>
+                    <div>
+                      <Label htmlFor="recipientEmail">Recipient Email *</Label>
+                      <Input
+                        id="recipientEmail"
+                        type="email"
+                        {...registerCreate('recipientEmail')}
+                        placeholder="recipient@example.com"
+                        className="mt-2"
+                      />
+                      {createErrors.recipientEmail && (
+                        <p className="mt-1 text-sm text-red-600" role="alert">
+                          {createErrors.recipientEmail.message}
+                        </p>
+                      )}
+                    </div>
+
+                    {createPaymentMutation.isError && (
+                      <Alert variant="destructive">
+                        <AlertDescription>
+                          {createPaymentMutation.error?.message ||
+                            'Failed to create payment'}
+                        </AlertDescription>
+                      </Alert>
+                    )}
+
+                    <div className="flex gap-3 mt-4">
+                      <Button
+                        type="submit"
+                        disabled={isCreating || createPaymentMutation.isPending}
+                      >
+                        {isCreating || createPaymentMutation.isPending
+                          ? 'Creating...'
+                          : 'Create Payment'}
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        onClick={() => {
+                          setShowCreateForm(false);
+                          resetCreateForm();
+                        }}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </form>
+                </CardContent>
+              </Card>
             )}
           </div>
         )}
@@ -492,9 +483,7 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
                             {formatCurrency(payment.amount, payment.currency)}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
-                            <Badge variant="outline">
-                              {payment.type}
-                            </Badge>
+                            <Badge variant="outline">{payment.type}</Badge>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <select
@@ -565,12 +554,12 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
                             {formatCurrency(payment.amount, payment.currency)}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
-                            <span className="px-2 py-1 bg-slate-100 text-slate-700 rounded">
-                              {payment.type}
-                            </span>
+                            <Badge variant="outline">{payment.type}</Badge>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <Badge variant={getStatusBadgeVariant(payment.status)}>
+                            <Badge
+                              variant={getStatusBadgeVariant(payment.status)}
+                            >
                               {payment.status}
                             </Badge>
                           </td>
@@ -639,7 +628,7 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
               </tbody>
             </table>
           </div>
-        </div>
+        </Card>
 
         {/* Mutation Errors */}
         {(updatePaymentMutation.isError || deletePaymentMutation.isError) && (

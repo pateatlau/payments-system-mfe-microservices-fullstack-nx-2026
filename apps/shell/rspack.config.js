@@ -57,6 +57,26 @@ const sharedDependencies = {
     requiredVersion: false,
     eager: false,
   },
+  '@mfe/shared-api-client': {
+    singleton: true,
+    requiredVersion: false,
+    eager: false,
+  },
+  'shared-api-client': {
+    singleton: true,
+    requiredVersion: false,
+    eager: false,
+  },
+  '@mfe/shared-design-system': {
+    singleton: true,
+    requiredVersion: false,
+    eager: false,
+  },
+  'shared-types': {
+    singleton: true,
+    requiredVersion: false,
+    eager: false,
+  },
 };
 
 module.exports = {
@@ -173,8 +193,7 @@ module.exports = {
       'process.env': JSON.stringify({
         // POC-2: Direct service URL (Auth Service)
         // API Gateway proxy deferred to POC-3
-        NX_API_BASE_URL:
-          process.env.NX_API_BASE_URL || 'http://localhost:3001',
+        NX_API_BASE_URL: process.env.NX_API_BASE_URL || 'http://localhost:3001',
         NODE_ENV: isProduction ? 'production' : 'development',
       }),
     }),

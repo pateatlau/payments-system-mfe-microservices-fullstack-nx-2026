@@ -3046,14 +3046,17 @@ Successfully updated TanStack Query hooks to use real Payments Service API:
    - Configured in `apps/payments-mfe/rspack.config.js` via NX_API_BASE_URL
 
 **Files Created:**
+
 - `apps/payments-mfe/src/api/payments.ts` - Real backend API client
 
 **Files Modified:**
+
 - `apps/payments-mfe/src/api/types.ts` - Aligned with shared-types
 - `apps/payments-mfe/src/hooks/usePayments.ts` - Updated to use real API
 - `apps/payments-mfe/src/hooks/usePaymentMutations.ts` - Updated all mutations
 
 **Deferred:**
+
 - `usePaymentById` hook (not critical for POC-2)
 - `usePaymentReports` hook (not critical for POC-2)
 - Event bus integration (will be addressed in Task 4.2.2 or later)
@@ -3136,10 +3139,12 @@ Successfully migrated PaymentsPage component to use design system components:
    - Edit/Cancel buttons use Button component with ghost variant
 
 **Files Modified:**
+
 - `apps/payments-mfe/rspack.config.js` - Added design system alias
 - `apps/payments-mfe/src/components/PaymentsPage.tsx` - Complete design system migration
 
 **Build Status:**
+
 - ✅ No TypeScript errors
 - ✅ No linter errors
 - ✅ All design system components properly imported and used
