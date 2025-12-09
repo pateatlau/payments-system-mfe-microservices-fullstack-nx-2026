@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { getPayments } from '../api/stubbedPayments';
 import { useAuthStore } from 'shared-auth-store';
 import type { Payment } from '../api/types';
+import { listPayments } from '../api/payments';
 
 /**
  * Query key factory for payments
@@ -28,10 +28,11 @@ export function usePayments() {
   return useQuery<Payment[]>({
     queryKey: paymentKeys.list({ userId: user?.id }),
     queryFn: async () => {
-      // For CUSTOMER role, filter by user ID (see own payments only)
-      // For VENDOR/ADMIN roles, get all payments
-      const userId = user?.role === 'CUSTOMER' ? user.id : undefined;
-      return await getPayments(userId);
+      // Role-based filtering handled by backend; include basic pagination defaults
+      return await listPayments({
+        page: 1,
+        limit: 20,
+      });
     },
     enabled: !!user, // Only fetch if user is authenticated
   });

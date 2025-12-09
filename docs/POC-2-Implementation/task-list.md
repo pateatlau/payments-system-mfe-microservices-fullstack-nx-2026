@@ -24,6 +24,7 @@
 - Added CORS for Auth Service to allow MFEs (`http://localhost:4200-4203`) so signup/signin requests succeed without preflight failures.
 - Removed invalid `app.options('*', cors())` in Auth Service (Express 5 path-to-regexp error) and rely on global CORS middleware for OPTIONS.
 - **✅ Task 4.1 Complete:** Added `X-Request-ID` header to Auth Service CORS `allowedHeaders` to fix final CORS error (API client interceptor adds this header for request tracing). Auth flow now fully working: signup ✅, login ✅, logout ✅, protected routes ✅.
+- **🟡 Task 4.2.1 In Progress:** Payments hooks now call real Payments Service (list/create/update/delete) via shared API client using shared-types enums. Create requires recipient email/ID; delete cancels via status endpoint. Reports/events/tests pending.
 
 ## How to Use This Checklist
 
@@ -707,19 +708,19 @@
 
 #### Sub-task 4.2.1: Update TanStack Query Hooks
 
-- [ ] `usePayments` updated to use API client
-- [ ] `useCreatePayment` updated
-- [ ] `useUpdatePayment` updated
-- [ ] `useDeletePayment` updated
+- [x] `usePayments` updated to use API client (direct Payments Service URL)
+- [x] `useCreatePayment` updated (POST /payments, requires recipient email/ID)
+- [x] `useUpdatePayment` updated (PATCH /payments/:id/status)
+- [x] `useDeletePayment` updated (cancels via status=cancelled)
 - [ ] `usePaymentById` hook added
 - [ ] `usePaymentReports` hook added
 - [ ] Events emitted on mutations
 - [ ] Tests updated
-- [ ] Stubbed API code removed
+- [ ] Stubbed API code removed (still referenced for legacy types, cleanup pending)
 
-**Status:** ⬜ Not Started  
-**Notes:**  
-**Completed Date:**
+**Status:** 🟡 In Progress  
+**Notes:** Hooks now call real Payments Service via shared API client (baseURL http://localhost:3002). Types aligned to shared-types enums (PaymentStatus, PaymentType). Create requires recipientEmail or recipientId. Update/Delete use status endpoint. UI not fully updated for reports or events; tests still pending.  
+**Completed Date:** 2026-12-09
 
 ---
 

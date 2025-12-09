@@ -10,7 +10,7 @@ import {
   useUpdatePayment,
   useDeletePayment,
 } from '../hooks';
-import type { Payment, PaymentStatus } from '../api/types';
+import type { Payment, PaymentStatus, PaymentType } from '../api/types';
 
 /**
  * Create payment form schema using Zod
@@ -21,8 +21,19 @@ const createPaymentSchema = z.object({
     .positive('Amount must be positive')
     .min(0.01, 'Amount must be at least 0.01'),
   currency: z.string().min(1, 'Currency is required').default('USD'),
-  type: z.enum(['initiate', 'payment'] as const),
-  description: z.string().optional(),
+  type: z.enum(
+    [PaymentType.INSTANT, PaymentType.SCHEDULED, PaymentType.RECURRING] as [
+      PaymentType,
+      PaymentType,
+      PaymentType,
+    ]
+  ),
+  description: z
+    .string({ required_error: 'Description is required' })
+    .min(1, 'Description is required'),
+  recipientEmail: z
+    .string({ required_error: 'Recipient email is required' })
+    .email('Valid recipient email is required'),
 });
 
 type CreatePaymentFormData = z.infer<typeof createPaymentSchema>;
@@ -31,23 +42,16 @@ type CreatePaymentFormData = z.infer<typeof createPaymentSchema>;
  * Update payment form schema
  */
 const updatePaymentSchema = z.object({
-  amount: z
-    .number()
-    .positive('Amount must be positive')
-    .min(0.01, 'Amount must be at least 0.01')
-    .optional(),
-  currency: z.string().min(1, 'Currency is required').optional(),
   status: z
     .enum([
-      'pending',
-      'initiated',
-      'processing',
-      'completed',
-      'failed',
-      'cancelled',
+      PaymentStatus.PENDING,
+      PaymentStatus.PROCESSING,
+      PaymentStatus.COMPLETED,
+      PaymentStatus.FAILED,
+      PaymentStatus.CANCELLED,
     ] as const)
     .optional(),
-  description: z.string().optional(),
+  reason: z.string().max(500).optional(),
 });
 
 type UpdatePaymentFormData = z.infer<typeof updatePaymentSchema>;
@@ -77,16 +81,15 @@ function formatCurrency(amount: number, currency: string): string {
  */
 function getStatusColor(status: PaymentStatus): string {
   switch (status) {
-    case 'completed':
+    case PaymentStatus.COMPLETED:
       return 'bg-green-100 text-green-800';
-    case 'processing':
+    case PaymentStatus.PROCESSING:
       return 'bg-blue-100 text-blue-800';
-    case 'pending':
-    case 'initiated':
+    case PaymentStatus.PENDING:
       return 'bg-yellow-100 text-yellow-800';
-    case 'failed':
+    case PaymentStatus.FAILED:
       return 'bg-red-100 text-red-800';
-    case 'cancelled':
+    case PaymentStatus.CANCELLED:
       return 'bg-gray-100 text-gray-800';
     default:
       return 'bg-gray-100 text-gray-800';
@@ -138,8 +141,9 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
     defaultValues: {
       amount: 0,
       currency: 'USD',
-      type: 'payment',
+      type: PaymentType.INSTANT,
       description: '',
+      recipientEmail: '',
     },
   });
 
@@ -175,9 +179,15 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
     if (!editingPayment) return;
 
     try {
+      if (!data.status) {
+        throw new Error('Status is required to update payment');
+      }
       await updatePaymentMutation.mutateAsync({
         id: editingPayment.id,
-        data,
+        data: {
+          status: data.status,
+          reason: data.reason,
+        },
       });
       resetUpdateForm();
       setEditingPayment(null);
@@ -206,10 +216,8 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
   const startEdit = (payment: Payment) => {
     setEditingPayment(payment);
     resetUpdateForm({
-      amount: payment.amount,
-      currency: payment.currency,
       status: payment.status,
-      description: payment.description || '',
+      reason: '',
     });
   };
 
@@ -356,8 +364,9 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
                       {...registerCreate('type')}
                       className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     >
-                      <option value="payment">Payment</option>
-                      <option value="initiate">Initiate</option>
+                      <option value={PaymentType.INSTANT}>Instant</option>
+                      <option value={PaymentType.SCHEDULED}>Scheduled</option>
+                      <option value={PaymentType.RECURRING}>Recurring</option>
                     </select>
                     {createErrors.type && (
                       <p className="mt-1 text-sm text-red-600" role="alert">
@@ -371,7 +380,7 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
                       htmlFor="description"
                       className="block text-sm font-medium text-slate-700 mb-2"
                     >
-                      Description
+                      Description *
                     </label>
                     <input
                       id="description"
@@ -380,6 +389,32 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
                       className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="Payment description"
                     />
+                    {createErrors.description && (
+                      <p className="mt-1 text-sm text-red-600" role="alert">
+                        {createErrors.description.message}
+                      </p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="recipientEmail"
+                      className="block text-sm font-medium text-slate-700 mb-2"
+                    >
+                      Recipient Email *
+                    </label>
+                    <input
+                      id="recipientEmail"
+                      type="email"
+                      {...registerCreate('recipientEmail')}
+                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="recipient@example.com"
+                    />
+                    {createErrors.recipientEmail && (
+                      <p className="mt-1 text-sm text-red-600" role="alert">
+                        {createErrors.recipientEmail.message}
+                      </p>
+                    )}
                   </div>
 
                   {createPaymentMutation.isError && (
@@ -493,20 +528,19 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
                               {...registerUpdate('status')}
                               className="px-2 py-1 border border-slate-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                             >
-                              <option value="pending">Pending</option>
-                              <option value="initiated">Initiated</option>
-                              <option value="processing">Processing</option>
-                              <option value="completed">Completed</option>
-                              <option value="failed">Failed</option>
-                              <option value="cancelled">Cancelled</option>
+                              <option value={PaymentStatus.PENDING}>Pending</option>
+                              <option value={PaymentStatus.PROCESSING}>Processing</option>
+                              <option value={PaymentStatus.COMPLETED}>Completed</option>
+                              <option value={PaymentStatus.FAILED}>Failed</option>
+                              <option value={PaymentStatus.CANCELLED}>Cancelled</option>
                             </select>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <input
                               type="text"
-                              {...registerUpdate('description')}
+                              {...registerUpdate('reason')}
                               className="w-full px-2 py-1 border border-slate-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                              placeholder="Description"
+                              placeholder="Reason (optional)"
                             />
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">

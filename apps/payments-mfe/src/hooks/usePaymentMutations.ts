@@ -1,16 +1,12 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import {
-  createPayment,
-  updatePayment,
-  deletePayment,
-} from '../api/stubbedPayments';
 import { useAuthStore } from 'shared-auth-store';
 import { paymentKeys } from './usePayments';
-import type {
-  Payment,
-  CreatePaymentDto,
-  UpdatePaymentDto,
-} from '../api/types';
+import type { Payment, CreatePaymentDto, UpdatePaymentDto } from '../api/types';
+import {
+  createPayment,
+  updatePaymentStatus,
+} from '../api/payments';
+import { PaymentStatus } from 'shared-types';
 
 /**
  * Hook to create a new payment
@@ -27,7 +23,10 @@ export function useCreatePayment() {
       if (!user) {
         throw new Error('User must be authenticated to create payments');
       }
-      return await createPayment(user.id, data);
+      if (!data.recipientEmail && !data.recipientId) {
+        throw new Error('Recipient email or ID is required to create payment');
+      }
+      return await createPayment(data);
     },
     onSuccess: () => {
       // Invalidate payments list to refetch after creation
@@ -51,7 +50,7 @@ export function useUpdatePayment() {
     { id: string; data: UpdatePaymentDto }
   >({
     mutationFn: async ({ id, data }) => {
-      return await updatePayment(id, data);
+      return await updatePaymentStatus(id, data);
     },
     onSuccess: (data, variables) => {
       if (data) {
@@ -75,7 +74,11 @@ export function useDeletePayment() {
 
   return useMutation<boolean, Error, string>({
     mutationFn: async (id: string) => {
-      return await deletePayment(id);
+      await updatePaymentStatus(id, {
+        status: PaymentStatus.CANCELLED,
+        reason: 'Cancelled by user',
+      });
+      return true;
     },
     onSuccess: () => {
       // Invalidate payments list to refetch after deletion
