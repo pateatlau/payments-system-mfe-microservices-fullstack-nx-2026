@@ -52,7 +52,7 @@ const sharedDependencies = {
   'shared-auth-store': {
     singleton: true,
     requiredVersion: false,
-    eager: false,
+    eager: true, // Must be eager for standalone app
   },
 };
 
