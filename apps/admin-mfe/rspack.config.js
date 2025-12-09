@@ -29,12 +29,12 @@ const sharedDependencies = {
   react: {
     singleton: true,
     requiredVersion: '18.3.1',
-    eager: false,
+    eager: true, // Must be eager for standalone app
   },
   'react-dom': {
     singleton: true,
     requiredVersion: '18.3.1',
-    eager: false,
+    eager: true, // Must be eager for standalone app
   },
   '@tanstack/react-query': {
     singleton: true,
@@ -180,6 +180,11 @@ module.exports = {
         {
           from: path.resolve(__dirname, 'src/assets'),
           to: path.resolve(__dirname, '../../dist/apps/admin-mfe/assets'),
+          noErrorOnMissing: true,
+        },
+        {
+          from: path.resolve(__dirname, 'src/favicon.ico'),
+          to: path.resolve(__dirname, '../../dist/apps/admin-mfe'),
           noErrorOnMissing: true,
         },
       ],
