@@ -22,6 +22,7 @@
 - Fixed `db` library build output to emit compiled JS into `dist/libs/backend/db/src`, resolving the admin-service runtime error (`Cannot find module .../dist/libs/backend/db/src/index.js`). Rebuild `db` via `npx nx build db --skip-nx-cache` if needed.
 - Fixed `shared-types` library output path (`dist/libs/shared-types/shared-types/src/index.js`) by updating package entrypoints; rebuild via `npx nx build shared-types --skip-nx-cache` if needed.
 - Added CORS for Auth Service to allow MFEs (`http://localhost:4200-4203`) so signup/signin requests succeed without preflight failures.
+- Removed invalid `app.options('*', cors())` in Auth Service (Express 5 path-to-regexp error) and rely on global CORS middleware for OPTIONS.
 
 ## How to Use This Checklist
 

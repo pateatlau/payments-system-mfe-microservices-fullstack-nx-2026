@@ -51,9 +51,6 @@ app.use(
   })
 );
 
-// Preflight handling
-app.options('*', cors());
-
 // Body parsing
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
