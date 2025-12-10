@@ -32,6 +32,11 @@ lerna-debug.log*
 *.swo
 *~
 
+# Cursor AI files
+.cursor/
+.cursorignore
+.cursorrules
+
 # Nx
 .nx/cache
 .nx/workspace-data
@@ -44,7 +49,6 @@ lerna-debug.log*
 # Backup files (kept for reference during migration)
 .backup/
 
-.cursor/rules/nx-rules.mdc
 .github/instructions/nx.instructions.md
 vite.config.*.timestamp*
 vitest.config.*.timestamp*
