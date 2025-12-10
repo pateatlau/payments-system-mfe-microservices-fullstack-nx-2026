@@ -30,7 +30,10 @@
       "@mfe/shared-api-client": ["libs/shared-api-client/src/index.ts"],
       "@mfe/shared-event-bus": ["libs/shared-event-bus/src/index.ts"],
       "@mfe/shared-design-system": ["libs/shared-design-system/src/index.ts"],
-      "backend": ["libs/backend/src/index.ts"]
+      "backend": ["libs/backend/src/index.ts"],
+      "@payments-system/rabbitmq-event-hub": [
+        "libs/backend/rabbitmq-event-hub/src/index.ts"
+      ]
     }
   },
   "files": [],
