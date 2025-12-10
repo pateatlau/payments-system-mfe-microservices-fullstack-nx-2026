@@ -21,8 +21,14 @@ export const config = {
   // API Gateway
   apiGatewayUrl: process.env['API_GATEWAY_URL'] || 'http://localhost:3000',
 
-  // Event Hub
+  // Event Hub (Legacy - will be removed)
   eventHubUrl: process.env['EVENT_HUB_URL'] || 'http://localhost:3005',
+
+  // RabbitMQ (POC-3: Event-driven architecture)
+  rabbitmq: {
+    url: process.env['RABBITMQ_URL'] || 'amqp://guest:guest@localhost:5672',
+    exchange: process.env['RABBITMQ_EXCHANGE'] || 'payments_events',
+  },
 
   // Logging
   logLevel: process.env['LOG_LEVEL'] || 'info',

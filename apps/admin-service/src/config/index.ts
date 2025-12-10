@@ -21,6 +21,11 @@ const configSchema = z.object({
   }),
   apiGatewayUrl: z.string().default('http://localhost:3000'),
   eventHubUrl: z.string().default('http://localhost:3004'),
+  // RabbitMQ (POC-3: Event-driven architecture)
+  rabbitmq: z.object({
+    url: z.string().default('amqp://guest:guest@localhost:5672'),
+    exchange: z.string().default('payments_events'),
+  }),
   logLevel: z.string().default('info'),
   // Admin service specific config
   defaultPageSize: z.coerce.number().default(10),
@@ -38,6 +43,10 @@ const config = configSchema.parse({
   },
   apiGatewayUrl: process.env['API_GATEWAY_URL'],
   eventHubUrl: process.env['EVENT_HUB_URL'],
+  rabbitmq: {
+    url: process.env['RABBITMQ_URL'],
+    exchange: process.env['RABBITMQ_EXCHANGE'],
+  },
   logLevel: process.env['LOG_LEVEL'],
   defaultPageSize: process.env['DEFAULT_PAGE_SIZE'],
   maxPageSize: process.env['MAX_PAGE_SIZE'],
