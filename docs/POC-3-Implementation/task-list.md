@@ -201,21 +201,21 @@
 
 #### Sub-task 1.3.1: Update Docker Compose for POC-3 Services
 
-- [x] RabbitMQ service added
-- [x] nginx service added
-- [x] auth_db service added
-- [x] payments_db service added
-- [x] admin_db service added
-- [x] profile_db service added
-- [x] Redis service updated
-- [x] Volumes configured
-- [x] Health checks configured
-- [x] Network updated
+- [ ] RabbitMQ service added
+- [ ] nginx service added
+- [ ] auth_db service added
+- [ ] payments_db service added
+- [ ] admin_db service added
+- [ ] profile_db service added
+- [ ] Redis service updated
+- [ ] Volumes configured
+- [ ] Health checks configured
+- [ ] Network updated
 - [ ] `docker-compose up` works
 
-**Status:** Complete  
-**Completed Date:** 2026-12-10  
-**Notes:** Docker Compose updated with all POC-3 services: nginx (80, 443), auth_db (5432), payments_db (5433), admin_db (5434), profile_db (5435), rabbitmq (5672, 15672), redis (6379). Full stack startup verification deferred to Phase 2 implementation.
+**Status:** Not Started  
+**Completed Date:** -  
+**Notes:** -
 
 ---
 
@@ -245,29 +245,29 @@
 
 #### Sub-task 2.1.1: Create nginx Directory Structure
 
-- [x] `nginx/` directory created
-- [x] `nginx/nginx.conf` created
-- [x] `nginx/conf.d/` created
-- [x] `nginx/ssl/` created
-- [x] SSL files gitignored
+- [ ] `nginx/` directory created
+- [ ] `nginx/nginx.conf` created
+- [ ] `nginx/conf.d/` created
+- [ ] `nginx/ssl/` created
+- [ ] SSL files gitignored
 
-**Status:** Complete  
-**Completed Date:** 2026-12-10  
-**Notes:** nginx directory structure created during POC-3 planning. SSL exclusions added to .gitignore (nginx/ssl/_.crt, _.key, _.pem, _.csr)
+**Status:** Not Started  
+**Completed Date:** -  
+**Notes:** -
 
 ---
 
 #### Sub-task 2.1.2: Create SSL/TLS Self-Signed Certificates
 
-- [x] Script created
+- [ ] Script created
 - [ ] Certificate generated
 - [ ] Key generated
-- [x] Files gitignored
-- [x] Process documented
+- [ ] Files gitignored
+- [ ] Process documented
 
-**Status:** In Progress Partial  
+**Status:** Not Started  
 **Completed Date:** -  
-**Notes:** Script `scripts/generate-ssl-certs.sh` created during POC-3 planning. SSL files gitignored. Certificate generation deferred to Phase 2 implementation (requires running the script)
+**Notes:** -
 
 ---
 
@@ -354,7 +354,7 @@
 
 #### Sub-task 2.3.2: Configure RabbitMQ Exchanges and Queues
 
-- [x] definitions.json created
+- [ ] definitions.json created
 - [ ] Topic exchange created
 - [ ] DLX exchange created
 - [ ] Service queues created
@@ -362,9 +362,9 @@
 - [ ] Bindings configured
 - [ ] Auto-import works
 
-**Status:** In Progress Partial  
+**Status:** Not Started  
 **Completed Date:** -  
-**Notes:** `rabbitmq/definitions.json` created during POC-3 planning with full topology. Exchange/queue creation verification deferred to Phase 2 implementation (requires running RabbitMQ)
+**Notes:** -
 
 ---
 

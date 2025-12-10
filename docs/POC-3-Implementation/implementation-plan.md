@@ -728,27 +728,27 @@ Each task is designed to be:
 
 **Verification:**
 
-- [x] RabbitMQ service added
-- [x] nginx service added
-- [x] auth_db service added
-- [x] payments_db service added
-- [x] admin_db service added
-- [x] profile_db service added
-- [x] Redis service updated
-- [x] Volumes configured
-- [x] Health checks configured
-- [x] Network updated
-- [ ] `docker-compose up` works (verification deferred to Phase 2)
+- [ ] RabbitMQ service added
+- [ ] nginx service added
+- [ ] auth_db service added
+- [ ] payments_db service added
+- [ ] admin_db service added
+- [ ] profile_db service added
+- [ ] Redis service updated
+- [ ] Volumes configured
+- [ ] Health checks configured
+- [ ] Network updated
+- [ ] `docker-compose up` works
 
 **Acceptance Criteria:**
 
-- Complete All POC-3 services start successfully
+- All POC-3 services start successfully
 
-**Status:** Complete  
-**Completed Date:** 2026-12-10  
-**Notes:** Docker Compose fully configured with all POC-3 services: nginx (80, 443), auth_db (5432), payments_db (5433), admin_db (5434), profile_db (5435), postgres legacy (5436), rabbitmq (5672, 15672), redis (6379). All with health checks, volumes, and mfe-network. Full stack verification deferred to Phase 2.
+**Status:** Not Started  
+**Completed Date:** -  
+**Notes:** -
 
-**Files Modified:**
+**Files to Modify:**
 
 - `docker-compose.yml`
 
@@ -811,13 +811,38 @@ Each task is designed to be:
 
 **Objective:** Set up nginx configuration directory
 
-**Status:** Complete (completed during Phase 1 planning)
+**Detailed Steps:**
 
-**Files Created:**
+```bash
+# Step 1: Create nginx directory
+mkdir -p nginx/conf.d nginx/ssl
 
-- `nginx/nginx.conf`
-- `nginx/conf.d/.gitkeep`
-- `nginx/ssl/.gitkeep`
+# Step 2: Create placeholder files
+touch nginx/conf.d/.gitkeep
+touch nginx/ssl/.gitkeep
+
+# Step 3: Add SSL files to .gitignore
+echo "nginx/ssl/*.crt" >> .gitignore
+echo "nginx/ssl/*.key" >> .gitignore
+echo "nginx/ssl/*.pem" >> .gitignore
+echo "nginx/ssl/*.csr" >> .gitignore
+```
+
+**Verification:**
+
+- [ ] `nginx/` directory exists
+- [ ] `nginx/conf.d/` directory exists
+- [ ] `nginx/ssl/` directory exists
+- [ ] `.gitkeep` files created
+- [ ] SSL files added to `.gitignore`
+
+**Acceptance Criteria:**
+
+- nginx directory structure ready for configuration files
+
+**Status:** Not Started  
+**Completed Date:** -  
+**Notes:** -
 
 ---
 
@@ -868,9 +893,9 @@ sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keyc
 
 #### Sub-task 2.1.3: Configure nginx Main Configuration
 
-**Objective:** Verify and finalize nginx.conf
+**Objective:** Create and configure nginx.conf
 
-**Status:** Complete (nginx.conf created during Phase 1 planning)
+**Status:** Not Started
 
 **Verification Commands:**
 
@@ -958,9 +983,9 @@ for i in {1..15}; do curl -k -w "%{http_code}\n" -o /dev/null -s https://localho
 
 #### Sub-task 2.2.1: Create Separate PostgreSQL Services
 
-**Objective:** Verify 4 PostgreSQL containers in Docker Compose
+**Objective:** Add 4 separate PostgreSQL services to Docker Compose
 
-**Status:** Complete (docker-compose.yml updated during Phase 1)
+**Status:** Not Started
 
 **Verification Commands:**
 
@@ -1086,9 +1111,9 @@ cd apps/profile-service && npx prisma migrate dev --name init
 
 #### Sub-task 2.3.1: Add RabbitMQ to Docker Compose
 
-**Objective:** Verify RabbitMQ container configuration
+**Objective:** Add RabbitMQ service to Docker Compose
 
-**Status:** Complete (docker-compose.yml updated during Phase 1)
+**Status:** Not Started
 
 **Verification Commands:**
 
@@ -1162,13 +1187,13 @@ open http://localhost:15672
 # Verify message appears in auth.events.queue
 ```
 
-**Files:**
+**Files to Create:**
 
-- `rabbitmq/definitions.json` (created during Phase 1)
+- `rabbitmq/definitions.json`
 
 **Verification:**
 
-- [x] definitions.json created with topology
+- [ ] definitions.json created with topology
 - [ ] Topic exchange `events` created
 - [ ] DLX exchange `events.dlx` created
 - [ ] Service queues created (4 queues)
@@ -1190,9 +1215,9 @@ open http://localhost:15672
 
 #### Sub-task 2.4.1: Update Docker Compose with All Services
 
-**Objective:** Verify complete Docker Compose configuration
+**Objective:** Finalize Docker Compose with all POC-3 services
 
-**Status:** Complete (docker-compose.yml updated during Phase 1)
+**Status:** Not Started
 
 **Verification Commands:**
 
