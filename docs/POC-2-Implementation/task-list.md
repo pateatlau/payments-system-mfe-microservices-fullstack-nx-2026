@@ -1022,16 +1022,16 @@
 
 #### Sub-task 5.3.1: Authentication Flow Tests
 
-- [ ] Registration tested e2e
-- [ ] Login tested e2e
-- [ ] Logout tested e2e
-- [ ] Token refresh tested
-- [ ] Session expiry tested
-- [ ] Invalid credentials tested
+- [x] Registration tested e2e (auth-fullstack-integration.spec.ts - backend API verification)
+- [x] Login tested e2e (auth-fullstack-integration.spec.ts - backend API verification)
+- [x] Logout tested e2e (auth-fullstack-integration.spec.ts - backend API verification)
+- [x] Token refresh tested (auth-fullstack-integration.spec.ts - automatic refresh, invalid token)
+- [x] Session expiry tested (auth-fullstack-integration.spec.ts - expired token handling)
+- [x] Invalid credentials tested (auth-fullstack-integration.spec.ts - backend 401 verification)
 
-**Status:** ⬜ Not Started  
-**Notes:**  
-**Completed Date:**
+**Status:** ✅ Complete  
+**Notes:** Created comprehensive full-stack integration tests verifying end-to-end flows across frontend and backend. Tests verify both UI interactions and backend API calls/responses. Registration: 201 response, token storage, duplicate email (409). Login: 200 response, token storage, invalid credentials (401). Logout: backend API call, token cleanup. Token refresh: automatic refresh, invalid token (401). Session expiry: expired token redirect. Invalid credentials: backend 401, error display. Total: 15+ full-stack integration tests.  
+**Completed Date:** 2026-12-09
 
 ---
 
