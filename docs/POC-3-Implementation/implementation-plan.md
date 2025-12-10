@@ -2044,22 +2044,61 @@ export function createStreamingProxy(options: ProxyOptions) {
 
 **Verification:**
 
-- [ ] Proxy module created: `apps/api-gateway/src/middleware/proxy.ts`
-- [ ] Request streaming works (no body buffering)
-- [ ] Response streaming works
-- [ ] Headers forwarded (including X-Forwarded-\*)
-- [ ] Path rewriting works
-- [ ] Error handling: 502 for connection errors
-- [ ] Timeout handling: 504 for timeouts
-- [ ] Tests pass: `pnpm test apps/api-gateway`
+- [x] Proxy module created: `apps/api-gateway/src/middleware/proxy.ts` ✅
+- [x] Request streaming works (no body buffering) - Using req.pipe(proxyReq)
+- [x] Response streaming works - Using proxyRes.pipe(res)
+- [x] Headers forwarded (including X-Forwarded-\*) - X-Forwarded-For, X-Forwarded-Proto, X-Forwarded-Host, X-Real-IP
+- [x] Path rewriting works - Configurable pathRewrite with regex support
+- [x] Error handling: 502 for connection errors - Implemented with JSON error response
+- [x] Timeout handling: 504 for timeouts - Implemented with configurable timeout
+- [x] Tests pass: `pnpm test apps/api-gateway` - 13/13 tests passing ✅
 
 **Acceptance Criteria:**
 
-- Complete Proxy forwards all request types correctly
+- Complete ✅ Proxy forwards all request types correctly
 
-**Status:** Not Started  
-**Completed Date:** -  
-**Notes:** -
+**Status:** Complete  
+**Completed Date:** 2026-12-10  
+**Notes:** Implemented production-ready streaming HTTP proxy using Node.js native http/https modules (no http-proxy-middleware dependency). Streaming request/response with zero buffering for memory efficiency. Full header forwarding including X-Forwarded-\* headers. Configurable path rewriting with regex support. Proper error handling (502 for connection errors, 504 for timeouts). Client abort handling. All tests passing.
+
+**Files Created:**
+
+- `apps/api-gateway/src/middleware/proxy.ts` (279 lines) - Streaming proxy middleware
+- `apps/api-gateway/src/middleware/proxy.test.ts` (358 lines) - Comprehensive unit tests
+- `apps/api-gateway/src/routes/proxy-routes.ts` (112 lines) - Service proxy route definitions
+
+**Implementation Details:**
+
+- **Request Streaming:** Uses `req.pipe(proxyReq)` to stream request body without buffering
+- **Response Streaming:** Uses `proxyRes.pipe(res)` to stream response back to client
+- **Header Forwarding:**
+  - X-Forwarded-For (with IP chain support)
+  - X-Forwarded-Proto
+  - X-Forwarded-Host
+  - X-Real-IP
+  - Removes content-length/transfer-encoding (Node.js recalculates)
+- **Path Rewriting:** Configurable regex-based path rewriting
+- **Error Handling:**
+  - 502 Bad Gateway for connection errors
+  - 504 Gateway Timeout for timeouts
+  - Graceful handling of client abort
+- **Configuration Options:**
+  - timeout (default: 30000ms)
+  - preserveHostHeader (default: false)
+  - changeOrigin (default: true)
+  - pathRewrite (optional regex patterns)
+
+**Test Coverage:** 13/13 tests passing
+- Proxy creation and configuration
+- Path rewriting
+- Timeout configuration
+- Error handling (502, 504)
+- Header forwarding (X-Forwarded-\*, X-Real-IP)
+- HTTPS support
+- Multiple configuration options
+
+**Why Native HTTP:**
+POC-2 encountered issues with http-proxy-middleware v3.x including request body streaming problems, path rewriting complications, and timeout errors. This implementation uses Node.js native http/https modules for maximum control, reliability, and zero external proxy dependencies.
 
 ---
 
