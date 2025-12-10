@@ -2303,6 +2303,7 @@ VITE_API_BASE_URL=https://api.example.com
 **Notes:** Updated all frontend applications to use API Gateway via nginx proxy. All requests now route through: Frontend → nginx (https://localhost) → API Gateway (http://localhost:3000) → Backend Services.
 
 **URL Structure:**
+
 - Frontend API calls: `https://localhost/api/{service}/*`
 - nginx → API Gateway: `http://localhost:3000/api/{service}/*`
 - API Gateway → Services: `http://localhost:300{X}/*` (path rewritten)
@@ -2342,12 +2343,14 @@ VITE_API_BASE_URL=https://api.example.com
    - Fixed missing `stubbedPayments.ts` file - updated index.ts to export from `payments.ts`
 
 **Build Status:**
+
 - ✅ Shell: Build successful
 - ✅ Auth MFE: Build successful
 - ✅ Payments MFE: Build successful (after fixes)
 - ✅ Admin MFE: Build successful (after fixes)
 
 **Environment Variable:**
+
 - `NX_API_BASE_URL` (via Rspack DefinePlugin) = `https://localhost/api` (default)
 - Can be overridden via environment variable for different deployments
 
