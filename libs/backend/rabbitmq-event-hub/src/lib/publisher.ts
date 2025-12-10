@@ -181,7 +181,12 @@ export class RabbitMQPublisher {
    * @returns Array of event IDs
    */
   async publishBatch<T = unknown>(
-    events: Array<{ routingKey: string; data: T; metadata?: Record<string, unknown>; correlationId?: string }>
+    events: Array<{
+      routingKey: string;
+      data: T;
+      metadata?: Record<string, unknown>;
+      correlationId?: string;
+    }>
   ): Promise<string[]> {
     const eventIds: string[] = [];
 

@@ -41,7 +41,10 @@ export class RabbitMQConnectionManager {
   private closed = false;
 
   constructor(options: RabbitMQConnectionOptions) {
-    this.options = { ...defaultConnectionOptions, ...options } as RabbitMQConnectionOptions;
+    this.options = {
+      ...defaultConnectionOptions,
+      ...options,
+    } as RabbitMQConnectionOptions;
     this.startTime = Date.now();
     this.stats = {
       published: 0,
@@ -167,7 +170,9 @@ export class RabbitMQConnectionManager {
    * Check if connected
    */
   isConnected(): boolean {
-    return this.stats.connected && this.connection !== null && this.channel !== null;
+    return (
+      this.stats.connected && this.connection !== null && this.channel !== null
+    );
   }
 
   /**

@@ -22,7 +22,7 @@ let publisher: RabbitMQPublisher | null = null;
 export function getEventPublisher(): RabbitMQPublisher {
   if (!publisher) {
     const connectionManager = getConnectionManager();
-    
+
     publisher = new RabbitMQPublisher(connectionManager, {
       exchange: config.rabbitmq.exchange,
       exchangeType: 'topic',
@@ -34,8 +34,11 @@ export function getEventPublisher(): RabbitMQPublisher {
     });
 
     // Initialize exchange
-    publisher.initialize().catch((error) => {
-      console.error('[Payments Service] Failed to initialize publisher:', error);
+    publisher.initialize().catch(error => {
+      console.error(
+        '[Payments Service] Failed to initialize publisher:',
+        error
+      );
     });
   }
 
@@ -87,20 +90,20 @@ interface PaymentFailedPayload {
  * Triggered when a new payment is initiated
  * Subscribers: Admin Service (audit log), Profile Service (transaction history)
  */
-export async function publishPaymentCreated(payload: PaymentCreatedPayload): Promise<void> {
+export async function publishPaymentCreated(
+  payload: PaymentCreatedPayload
+): Promise<void> {
   const publisher = getEventPublisher();
-  
-  await publisher.publish(
-    'payment.created',
-    payload,
-    {
-      paymentId: payload.paymentId,
-      senderId: payload.senderId,
-      eventType: 'payment_lifecycle',
-    }
-  );
 
-  console.log(`[Payments Service] Published payment.created event: ${payload.paymentId}`);
+  await publisher.publish('payment.created', payload, {
+    paymentId: payload.paymentId,
+    senderId: payload.senderId,
+    eventType: 'payment_lifecycle',
+  });
+
+  console.log(
+    `[Payments Service] Published payment.created event: ${payload.paymentId}`
+  );
 }
 
 /**
@@ -109,19 +112,19 @@ export async function publishPaymentCreated(payload: PaymentCreatedPayload): Pro
  * Triggered when payment status changes
  * Subscribers: Admin Service (audit log), Profile Service (update status)
  */
-export async function publishPaymentUpdated(payload: PaymentUpdatedPayload): Promise<void> {
+export async function publishPaymentUpdated(
+  payload: PaymentUpdatedPayload
+): Promise<void> {
   const publisher = getEventPublisher();
-  
-  await publisher.publish(
-    'payment.updated',
-    payload,
-    {
-      paymentId: payload.paymentId,
-      eventType: 'payment_lifecycle',
-    }
-  );
 
-  console.log(`[Payments Service] Published payment.updated event: ${payload.paymentId}`);
+  await publisher.publish('payment.updated', payload, {
+    paymentId: payload.paymentId,
+    eventType: 'payment_lifecycle',
+  });
+
+  console.log(
+    `[Payments Service] Published payment.updated event: ${payload.paymentId}`
+  );
 }
 
 /**
@@ -130,21 +133,21 @@ export async function publishPaymentUpdated(payload: PaymentUpdatedPayload): Pro
  * Triggered when a payment completes successfully
  * Subscribers: Admin Service (reporting), Profile Service (update balance/history)
  */
-export async function publishPaymentCompleted(payload: PaymentCompletedPayload): Promise<void> {
+export async function publishPaymentCompleted(
+  payload: PaymentCompletedPayload
+): Promise<void> {
   const publisher = getEventPublisher();
-  
-  await publisher.publish(
-    'payment.completed',
-    payload,
-    {
-      paymentId: payload.paymentId,
-      senderId: payload.senderId,
-      recipientId: payload.recipientId,
-      eventType: 'payment_lifecycle',
-    }
-  );
 
-  console.log(`[Payments Service] Published payment.completed event: ${payload.paymentId}`);
+  await publisher.publish('payment.completed', payload, {
+    paymentId: payload.paymentId,
+    senderId: payload.senderId,
+    recipientId: payload.recipientId,
+    eventType: 'payment_lifecycle',
+  });
+
+  console.log(
+    `[Payments Service] Published payment.completed event: ${payload.paymentId}`
+  );
 }
 
 /**
@@ -153,20 +156,20 @@ export async function publishPaymentCompleted(payload: PaymentCompletedPayload):
  * Triggered when a payment fails
  * Subscribers: Admin Service (error tracking), Profile Service (notify user)
  */
-export async function publishPaymentFailed(payload: PaymentFailedPayload): Promise<void> {
+export async function publishPaymentFailed(
+  payload: PaymentFailedPayload
+): Promise<void> {
   const publisher = getEventPublisher();
-  
-  await publisher.publish(
-    'payment.failed',
-    payload,
-    {
-      paymentId: payload.paymentId,
-      senderId: payload.senderId,
-      eventType: 'payment_lifecycle',
-    }
-  );
 
-  console.log(`[Payments Service] Published payment.failed event: ${payload.paymentId}`);
+  await publisher.publish('payment.failed', payload, {
+    paymentId: payload.paymentId,
+    senderId: payload.senderId,
+    eventType: 'payment_lifecycle',
+  });
+
+  console.log(
+    `[Payments Service] Published payment.failed event: ${payload.paymentId}`
+  );
 }
 
 /**

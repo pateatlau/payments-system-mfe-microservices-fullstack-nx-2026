@@ -11,7 +11,11 @@
  * - Eventual consistency via event synchronization
  */
 
-import { RabbitMQSubscriber, BaseEvent, EventContext } from '@payments-system/rabbitmq-event-hub';
+import {
+  RabbitMQSubscriber,
+  BaseEvent,
+  EventContext,
+} from '@payments-system/rabbitmq-event-hub';
 import { getConnectionManager } from './connection';
 import config from '../config';
 import { prisma } from '../lib/prisma';
@@ -51,7 +55,10 @@ interface UserDeletedEvent {
  *
  * Create denormalized User copy in admin_db
  */
-async function handleUserCreated(event: BaseEvent<UserCreatedEvent>, context: EventContext): Promise<void> {
+async function handleUserCreated(
+  event: BaseEvent<UserCreatedEvent>,
+  context: EventContext
+): Promise<void> {
   try {
     const { userId, email, name, role, emailVerified, createdAt } = event.data;
 
@@ -81,7 +88,10 @@ async function handleUserCreated(event: BaseEvent<UserCreatedEvent>, context: Ev
  *
  * Update denormalized User copy in admin_db
  */
-async function handleUserUpdated(event: BaseEvent<UserUpdatedEvent>, context: EventContext): Promise<void> {
+async function handleUserUpdated(
+  event: BaseEvent<UserUpdatedEvent>,
+  context: EventContext
+): Promise<void> {
   try {
     const { userId, ...updates } = event.data;
 
@@ -108,7 +118,10 @@ async function handleUserUpdated(event: BaseEvent<UserUpdatedEvent>, context: Ev
  *
  * Delete denormalized User copy from admin_db
  */
-async function handleUserDeleted(event: BaseEvent<UserDeletedEvent>, context: EventContext): Promise<void> {
+async function handleUserDeleted(
+  event: BaseEvent<UserDeletedEvent>,
+  context: EventContext
+): Promise<void> {
   try {
     const { userId } = event.data;
 
@@ -142,7 +155,10 @@ interface PaymentEvent {
 /**
  * Handle payment events (for audit logging)
  */
-async function handlePaymentEvent(event: BaseEvent<PaymentEvent>, context: EventContext): Promise<void> {
+async function handlePaymentEvent(
+  event: BaseEvent<PaymentEvent>,
+  context: EventContext
+): Promise<void> {
   try {
     // Create audit log for payment event
     await prisma.auditLog.create({
@@ -155,7 +171,9 @@ async function handlePaymentEvent(event: BaseEvent<PaymentEvent>, context: Event
       },
     });
 
-    console.log(`[Admin Service] Logged payment event: ${event.type} - ${event.data.paymentId}`);
+    console.log(
+      `[Admin Service] Logged payment event: ${event.type} - ${event.data.paymentId}`
+    );
     context.ack();
   } catch (error) {
     console.error(`[Admin Service] Error handling ${event.type}:`, error);
@@ -172,7 +190,7 @@ export async function subscribeToUserEvents(): Promise<void> {
   }
 
   const connectionManager = getConnectionManager();
-  
+
   userEventsSubscriber = new RabbitMQSubscriber(connectionManager, {
     exchange: config.rabbitmq.exchange,
     queue: 'admin_service_user_events',
@@ -213,7 +231,7 @@ export async function subscribeToPaymentEvents(): Promise<void> {
   }
 
   const connectionManager = getConnectionManager();
-  
+
   paymentEventsSubscriber = new RabbitMQSubscriber(connectionManager, {
     exchange: config.rabbitmq.exchange,
     queue: 'admin_service_payment_events',

@@ -6,7 +6,12 @@
  */
 
 import { RabbitMQConnectionManager } from './connection';
-import { BaseEvent, EventHandler, SubscriberOptions, EventContext } from './types';
+import {
+  BaseEvent,
+  EventHandler,
+  SubscriberOptions,
+  EventContext,
+} from './types';
 
 /**
  * Default subscriber options
@@ -53,13 +58,9 @@ export class RabbitMQSubscriber {
       const channel = await this.connectionManager.getChannel();
 
       // Create exchange if it doesn't exist
-      await channel.assertExchange(
-        this.options.exchange,
-        'topic',
-        {
-          durable: true,
-        }
-      );
+      await channel.assertExchange(this.options.exchange, 'topic', {
+        durable: true,
+      });
 
       // Create queue with optional dead letter exchange
       const queueArgs: Record<string, unknown> = {
@@ -69,7 +70,8 @@ export class RabbitMQSubscriber {
       if (this.options.deadLetterExchange) {
         queueArgs['x-dead-letter-exchange'] = this.options.deadLetterExchange;
         if (this.options.deadLetterRoutingKey) {
-          queueArgs['x-dead-letter-routing-key'] = this.options.deadLetterRoutingKey;
+          queueArgs['x-dead-letter-routing-key'] =
+            this.options.deadLetterRoutingKey;
         }
       }
 

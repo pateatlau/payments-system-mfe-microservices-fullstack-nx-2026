@@ -360,7 +360,10 @@ export const paymentService = {
 
     // Calculate aggregated statistics
     const totalPayments = payments.length;
-    const totalAmount = payments.reduce((sum: number, p: any) => sum + Number(p.amount), 0);
+    const totalAmount = payments.reduce(
+      (sum: number, p: any) => sum + Number(p.amount),
+      0
+    );
 
     // Group by status
     const byStatus: Record<string, number> = {};

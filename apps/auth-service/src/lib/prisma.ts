@@ -22,7 +22,9 @@ const prismaClientSingleton = () => {
   return new PrismaClient({
     datasources: {
       db: {
-        url: process.env.AUTH_DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/auth_db',
+        url:
+          process.env.AUTH_DATABASE_URL ||
+          'postgresql://postgres:postgres@localhost:5432/auth_db',
       },
     },
     log:
