@@ -55,17 +55,17 @@ async function handleUserCreated(event: BaseEvent<UserCreatedEvent>, context: Ev
   try {
     const { userId, email, name, role, emailVerified, createdAt } = event.data;
 
-    // Create denormalized user in admin_db
+    // Create denormalized user in admin_db (passwordHash omitted for security)
     await prisma.user.create({
       data: {
         id: userId,
         email,
         name,
-        role,
+        role: role as any, // Type cast for denormalized field
         emailVerified,
         createdAt: new Date(createdAt),
         updatedAt: new Date(createdAt),
-      },
+      } as any,
     });
 
     console.log(`[Admin Service] Synced user.created: ${userId}`);
@@ -86,12 +86,13 @@ async function handleUserUpdated(event: BaseEvent<UserUpdatedEvent>, context: Ev
     const { userId, ...updates } = event.data;
 
     // Update denormalized user in admin_db
+    const updateData: any = { ...updates };
+    if (updates.updatedAt) {
+      updateData.updatedAt = new Date(updates.updatedAt);
+    }
     await prisma.user.update({
       where: { id: userId },
-      data: {
-        ...updates,
-        updatedAt: new Date(updates.updatedAt),
-      },
+      data: updateData,
     });
 
     console.log(`[Admin Service] Synced user.updated: ${userId}`);
@@ -150,7 +151,7 @@ async function handlePaymentEvent(event: BaseEvent<PaymentEvent>, context: Event
         resourceType: 'payment',
         resourceId: event.data.paymentId,
         userId: event.data.senderId,
-        details: event.data,
+        details: event.data as any, // Cast to any for JSON field
       },
     });
 

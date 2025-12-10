@@ -9,7 +9,7 @@
  *   const users = await prisma.user.findMany();
  */
 
-import { PrismaClient } from '../node_modules/.prisma/auth-client';
+import { PrismaClient } from '@prisma/client';
 
 /**
  * Prisma Client instance for Auth Service

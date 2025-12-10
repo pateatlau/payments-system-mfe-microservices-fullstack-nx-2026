@@ -12,7 +12,7 @@
 
 import { RabbitMQPublisher } from '@payments-system/rabbitmq-event-hub';
 import { getConnectionManager } from './connection';
-import config from '../config';
+import { config } from '../config';
 
 let publisher: RabbitMQPublisher | null = null;
 

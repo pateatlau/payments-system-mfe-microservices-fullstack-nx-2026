@@ -9,7 +9,7 @@
  *   const profiles = await prisma.userProfile.findMany();
  */
 
-import { PrismaClient } from '../node_modules/.prisma/profile-client';
+import { PrismaClient } from '@prisma/client';
 
 /**
  * Prisma Client instance for Profile Service

@@ -22,7 +22,6 @@ const defaultPublisherOptions: Partial<PublisherOptions> = {
   defaultProperties: {
     contentType: 'application/json',
     contentEncoding: 'utf-8',
-    persistent: true,
   },
 };
 

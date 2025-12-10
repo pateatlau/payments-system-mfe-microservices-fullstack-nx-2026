@@ -360,17 +360,17 @@ export const paymentService = {
 
     // Calculate aggregated statistics
     const totalPayments = payments.length;
-    const totalAmount = payments.reduce((sum, p) => sum + Number(p.amount), 0);
+    const totalAmount = payments.reduce((sum: number, p: any) => sum + Number(p.amount), 0);
 
     // Group by status
     const byStatus: Record<string, number> = {};
-    payments.forEach(p => {
+    payments.forEach((p: any) => {
       byStatus[p.status] = (byStatus[p.status] || 0) + 1;
     });
 
     // Group by type
     const byType: Record<string, number> = {};
-    payments.forEach(p => {
+    payments.forEach((p: any) => {
       byType[p.type] = (byType[p.type] || 0) + 1;
     });
 

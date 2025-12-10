@@ -9,7 +9,7 @@
  *   const payments = await prisma.payment.findMany();
  */
 
-import { PrismaClient } from '../node_modules/.prisma/payments-client';
+import { PrismaClient } from '@prisma/client';
 
 /**
  * Prisma Client instance for Payments Service

@@ -34,11 +34,12 @@ model User {
   id            String    @id
   email         String    @unique
   name          String
+  passwordHash  String?   @map("password_hash") // Optional - NOT synced from auth_db (security)
   role          UserRole
   emailVerified Boolean   @default(false) @map("email_verified")
   createdAt     DateTime  @map("created_at")
   updatedAt     DateTime  @updatedAt @map("updated_at")
-  // Note: passwordHash NOT stored here (security - only in auth_db)
+  // Note: passwordHash kept optional and NOT synced (security - only in auth_db)
   // Note: This is a read-only copy for admin operations
 
   @@index([email])

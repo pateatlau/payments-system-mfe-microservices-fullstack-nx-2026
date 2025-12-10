@@ -5,7 +5,6 @@
  * Features: Manual ack/nack, dead letter queue, message validation, error handling
  */
 
-import * as amqp from 'amqplib';
 import { RabbitMQConnectionManager } from './connection';
 import { BaseEvent, EventHandler, SubscriberOptions, EventContext } from './types';
 
@@ -129,7 +128,7 @@ export class RabbitMQSubscriber {
       // Start consuming messages
       const consumer = await channel.consume(
         this.options.queue!,
-        async (msg) => {
+        async (msg: any) => {
           if (!msg) {
             console.warn('[RabbitMQ Subscriber] Received null message');
             return;

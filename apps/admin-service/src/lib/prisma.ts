@@ -9,7 +9,7 @@
  *   const logs = await prisma.auditLog.findMany();
  */
 
-import { PrismaClient } from '../node_modules/.prisma/admin-client';
+import { PrismaClient } from '@prisma/client';
 
 /**
  * Prisma Client instance for Admin Service
