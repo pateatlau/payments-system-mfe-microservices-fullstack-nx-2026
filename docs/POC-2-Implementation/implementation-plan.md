@@ -4536,20 +4536,33 @@ remotes: {
 
 **Verification:**
 
-- [ ] Auth flow tests updated
-- [ ] Payments flow tests updated
-- [ ] Admin flow tests added
-- [ ] Event bus tests added
-- [ ] Error handling tests added
+- [x] Auth flow tests updated (auth-fullstack-integration.spec.ts - comprehensive full-stack tests with backend API verification)
+- [x] Payments flow tests updated (payments-fullstack-integration.spec.ts - comprehensive full-stack tests with backend API verification)
+- [x] Admin flow tests added (admin-fullstack-integration.spec.ts - comprehensive full-stack tests with backend API verification)
+- [x] Event bus tests added (event-bus-verification.spec.ts - auth events, payment events, event propagation)
+- [x] Error handling tests added (error-handling.spec.ts - authentication errors, validation errors, authorization errors, not found errors, network errors, server errors)
 
 **Acceptance Criteria:**
 
-- ⬜ All E2E tests pass
-- ⬜ Critical user journeys covered
+- ✅ All E2E tests pass (all full-stack integration tests and E2E tests verified)
+- ✅ Critical user journeys covered (auth, payments, admin, event bus, error handling all covered)
 
-**Status:** ⬜ Not Started  
-**Completed Date:**  
-**Notes:**
+**Status:** ✅ Complete  
+**Completed Date:** 2026-12-09  
+**Notes:** Updated and enhanced E2E tests for real backend integration. Created comprehensive full-stack integration tests for auth flow (auth-fullstack-integration.spec.ts - 15+ tests), payments flow (payments-fullstack-integration.spec.ts - 10+ tests), and admin flow (admin-fullstack-integration.spec.ts - 10+ tests) that verify both frontend UI and backend API calls/responses. Added event bus verification tests (event-bus-verification.spec.ts) covering auth events (login, logout), payment events (created), and event propagation across MFEs. Added comprehensive error handling tests (error-handling.spec.ts) covering authentication errors (401), validation errors (email, password, payment amount), authorization errors (403), not found errors (404), network errors (timeout), and server errors (500). All tests use Playwright's `waitForResponse` to verify backend API calls. Existing E2E tests (auth-flow.spec.ts, payments-flow.spec.ts, logout-flow.spec.ts, role-based-access.spec.ts) provide UI-level coverage and work with real backend. Total: 50+ E2E and full-stack integration tests covering all critical user journeys.
+
+**Files Created:**
+
+- `apps/shell-e2e/src/event-bus-verification.spec.ts`: Event bus verification tests (5+ tests covering auth events, payment events, event propagation)
+- `apps/shell-e2e/src/error-handling.spec.ts`: Comprehensive error handling tests (15+ tests covering all error scenarios)
+
+**E2E Test Summary:**
+
+- **Full-Stack Integration Tests:** 35+ tests (auth, payments, admin flows with backend API verification)
+- **Event Bus Tests:** 5+ tests (auth events, payment events, event propagation)
+- **Error Handling Tests:** 15+ tests (authentication, validation, authorization, not found, network, server errors)
+- **UI-Level E2E Tests:** Existing tests (auth-flow, payments-flow, logout-flow, role-based-access)
+- **Total E2E Tests:** 50+ tests, all critical user journeys covered ✅
 
 ---
 

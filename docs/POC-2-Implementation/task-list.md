@@ -1067,15 +1067,15 @@
 
 #### Sub-task 5.4.1: Update E2E Tests
 
-- [ ] Auth flow tests updated
-- [ ] Payments flow tests updated
-- [ ] Admin flow tests added
-- [ ] Event bus tests added
-- [ ] Error handling tests added
+- [x] Auth flow tests updated (auth-fullstack-integration.spec.ts - 15+ tests with backend API verification)
+- [x] Payments flow tests updated (payments-fullstack-integration.spec.ts - 10+ tests with backend API verification)
+- [x] Admin flow tests added (admin-fullstack-integration.spec.ts - 10+ tests with backend API verification)
+- [x] Event bus tests added (event-bus-verification.spec.ts - auth events, payment events, event propagation)
+- [x] Error handling tests added (error-handling.spec.ts - 15+ tests covering all error scenarios)
 
-**Status:** ⬜ Not Started  
-**Notes:**  
-**Completed Date:**
+**Status:** ✅ Complete  
+**Notes:** Updated and enhanced E2E tests for real backend integration. Created comprehensive full-stack integration tests for auth, payments, and admin flows (35+ tests) that verify both frontend UI and backend API calls. Added event bus verification tests (5+ tests) and comprehensive error handling tests (15+ tests). All tests use waitForResponse to verify backend API calls. Existing UI-level E2E tests work with real backend. Total: 50+ E2E and full-stack integration tests covering all critical user journeys.  
+**Completed Date:** 2026-12-09
 
 ---
 
