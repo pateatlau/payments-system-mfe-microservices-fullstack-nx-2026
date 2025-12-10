@@ -1,11 +1,11 @@
 #!/usr/bin/env tsx
 /**
  * Export Payments Data from Legacy Database
- * 
+ *
  * Purpose: Export payments and payment_transactions from mfe_poc2 to payments-data.json
  * Input: mfe_poc2 database (PostgreSQL on port 5436)
  * Output: migration-data/payments-data.json
- * 
+ *
  * Usage: pnpm tsx scripts/migration/export-payments-data.ts
  */
 
@@ -16,7 +16,9 @@ import * as path from 'path';
 const prisma = new PrismaClient({
   datasources: {
     db: {
-      url: process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5436/mfe_poc2',
+      url:
+        process.env.DATABASE_URL ||
+        'postgresql://postgres:postgres@localhost:5436/mfe_poc2',
     },
   },
 });
@@ -49,7 +51,9 @@ async function exportPaymentsData() {
     const paymentTransactions = await prisma.paymentTransaction.findMany({
       orderBy: { createdAt: 'asc' },
     });
-    console.log(`✓ Exported ${paymentTransactions.length} payment transactions`);
+    console.log(
+      `✓ Exported ${paymentTransactions.length} payment transactions`
+    );
 
     // Prepare data structure
     const paymentsData: PaymentsData = {
@@ -78,7 +82,9 @@ async function exportPaymentsData() {
     console.log('');
     console.log('📈 Export Summary:');
     console.log(`   - Payments: ${paymentsData.metadata.paymentCount}`);
-    console.log(`   - Payment Transactions: ${paymentsData.metadata.transactionCount}`);
+    console.log(
+      `   - Payment Transactions: ${paymentsData.metadata.transactionCount}`
+    );
     console.log(`   - Exported At: ${paymentsData.metadata.exportedAt}`);
 
     await prisma.$disconnect();

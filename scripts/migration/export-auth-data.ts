@@ -1,11 +1,11 @@
 #!/usr/bin/env tsx
 /**
  * Export Auth Data from Legacy Database
- * 
+ *
  * Purpose: Export users and refresh_tokens from mfe_poc2 to auth-data.json
  * Input: mfe_poc2 database (PostgreSQL on port 5436)
  * Output: migration-data/auth-data.json
- * 
+ *
  * Usage: pnpm tsx scripts/migration/export-auth-data.ts
  */
 
@@ -16,7 +16,9 @@ import * as path from 'path';
 const prisma = new PrismaClient({
   datasources: {
     db: {
-      url: process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5436/mfe_poc2',
+      url:
+        process.env.DATABASE_URL ||
+        'postgresql://postgres:postgres@localhost:5436/mfe_poc2',
     },
   },
 });
