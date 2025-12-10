@@ -1,0 +1,72 @@
+// Payments Service Database Schema
+// Database: payments_db (port 5433)
+// 
+// This schema defines the payment processing data model.
+// User references (senderId, recipientId) are stored as strings without foreign keys.
+// User validation happens at the API level by calling the Auth Service.
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/payments-client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("PAYMENTS_DATABASE_URL")
+}
+
+enum PaymentStatus {
+  pending
+  processing
+  completed
+  failed
+  cancelled
+}
+
+enum PaymentType {
+  instant
+  scheduled
+  recurring
+}
+
+model Payment {
+  id                String        @id @default(uuid())
+  senderId          String        @map("sender_id")        // Reference to User ID (no FK)
+  recipientId       String?       @map("recipient_id")     // Reference to User ID (no FK)
+  amount            Decimal       @db.Decimal(10, 2)
+  currency          String        @default("USD")
+  status            PaymentStatus
+  type              PaymentType
+  description       String?
+  metadata          Json?
+  pspTransactionId  String?       @map("psp_transaction_id")
+  pspStatus         String?       @map("psp_status")
+  failureReason     String?       @map("failure_reason")
+  completedAt       DateTime?     @map("completed_at")
+  createdAt         DateTime      @default(now()) @map("created_at")
+  updatedAt         DateTime      @updatedAt @map("updated_at")
+
+  transactions PaymentTransaction[]
+
+  @@index([senderId])
+  @@index([recipientId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("payments")
+}
+
+model PaymentTransaction {
+  id               String        @id @default(uuid())
+  paymentId        String        @map("payment_id")
+  status           PaymentStatus
+  statusMessage    String?       @map("status_message")
+  pspTransactionId String?       @map("psp_transaction_id")
+  metadata         Json?
+  createdAt        DateTime      @default(now()) @map("created_at")
+
+  payment Payment @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+
+  @@index([paymentId])
+  @@index([createdAt])
+  @@map("payment_transactions")
+}
