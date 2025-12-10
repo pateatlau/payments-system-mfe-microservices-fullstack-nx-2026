@@ -7,7 +7,7 @@
  * This API client is ready for when the backend implementation is complete.
  */
 
-import { apiClient } from '@mfe/shared-api-client';
+import { adminApiClient } from './adminApiClient';
 
 /**
  * Audit log entry interface
@@ -76,7 +76,7 @@ export async function getAuditLogs(
   if (filters?.startDate) params.append('startDate', filters.startDate);
   if (filters?.endDate) params.append('endDate', filters.endDate);
 
-  const response = await apiClient.get<AuditLogsListResponse>(
+  const response = await adminApiClient.get<AuditLogsListResponse>(
     `/admin/audit-logs?${params.toString()}`
   );
 
