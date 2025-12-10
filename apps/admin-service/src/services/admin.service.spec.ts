@@ -3,7 +3,7 @@
  */
 
 import { adminService } from './admin.service';
-import { prisma } from 'db';
+import { prisma } from '../lib/prisma';
 
 // Mock Prisma
 jest.mock('db', () => ({

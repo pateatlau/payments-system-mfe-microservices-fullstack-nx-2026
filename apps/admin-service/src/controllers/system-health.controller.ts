@@ -5,7 +5,7 @@
  */
 
 import { Request, Response } from 'express';
-import { prisma } from 'db';
+import { prisma } from '../lib/prisma';
 import { logger } from '../utils/logger';
 import Redis from 'ioredis';
 

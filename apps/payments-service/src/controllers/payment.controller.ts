@@ -306,4 +306,4 @@ export async function getPaymentReports(
 }
 
 // Import prisma for webhook handler
-import { prisma as db } from 'db';
+import { prisma as db } from '../lib/prisma';

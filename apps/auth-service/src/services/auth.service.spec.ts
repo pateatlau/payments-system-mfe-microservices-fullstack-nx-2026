@@ -3,7 +3,7 @@
  */
 
 import * as authService from './auth.service';
-import { prisma } from 'db';
+import { prisma } from '../lib/prisma';
 import bcrypt from 'bcrypt';
 import { generateTokenPair, verifyRefreshToken } from '../utils/token';
 import { ApiError } from '../middleware/errorHandler';
@@ -17,7 +17,8 @@ jest.mock('db', () => ({
       create: jest.fn(),
       update: jest.fn(),
     },
-    userProfile: {
+    // userProfile removed - now in profile service (POC-3)
+    // userProfile: {
       create: jest.fn(),
     },
     refreshToken: {
@@ -72,7 +73,8 @@ describe('AuthService', () => {
       (prisma.user.findUnique as jest.Mock).mockResolvedValue(null);
       (bcrypt.hash as jest.Mock).mockResolvedValue('hashed-password');
       (prisma.user.create as jest.Mock).mockResolvedValue(mockUser);
-      (prisma.userProfile.create as jest.Mock).mockResolvedValue({});
+      // userProfile.create removed - now in profile service (POC-3)
+      // (prisma.userProfile.create as jest.Mock).mockResolvedValue({});
       (generateTokenPair as jest.Mock).mockReturnValue(mockTokens);
       (prisma.refreshToken.deleteMany as jest.Mock).mockResolvedValue({});
       (prisma.refreshToken.create as jest.Mock).mockResolvedValue({});
@@ -99,7 +101,8 @@ describe('AuthService', () => {
         expect.any(Number)
       );
       expect(prisma.user.create).toHaveBeenCalled();
-      expect(prisma.userProfile.create).toHaveBeenCalled();
+      // userProfile.create removed - now in profile service (POC-3)
+      // expect(prisma.userProfile.create).toHaveBeenCalled();
       expect(generateTokenPair).toHaveBeenCalled();
     });
 
@@ -120,7 +123,8 @@ describe('AuthService', () => {
       (prisma.user.findUnique as jest.Mock).mockResolvedValue(null);
       (bcrypt.hash as jest.Mock).mockResolvedValue('hashed-password');
       (prisma.user.create as jest.Mock).mockResolvedValue(mockUser);
-      (prisma.userProfile.create as jest.Mock).mockResolvedValue({});
+      // userProfile.create removed - now in profile service (POC-3)
+      // (prisma.userProfile.create as jest.Mock).mockResolvedValue({});
       (generateTokenPair as jest.Mock).mockReturnValue(mockTokens);
       (prisma.refreshToken.deleteMany as jest.Mock).mockResolvedValue({});
       (prisma.refreshToken.create as jest.Mock).mockResolvedValue({});

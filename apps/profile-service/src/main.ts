@@ -6,7 +6,7 @@ import express from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
 import rateLimit from 'express-rate-limit';
-import { prisma } from 'db';
+import { prisma } from './lib/prisma';
 import config from './config';
 import logger from './utils/logger';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';

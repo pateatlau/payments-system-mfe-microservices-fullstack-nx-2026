@@ -2,7 +2,7 @@
  * Payment Service - Business Logic
  */
 
-import { prisma as db } from 'db';
+import { prisma as db } from '../lib/prisma';
 import type { PaymentStatus, PaymentType, UserRole } from 'shared-types';
 import { ApiError } from '../middleware/errorHandler';
 import type {
@@ -169,20 +169,25 @@ export const paymentService = {
     if (data.recipientId) {
       recipientId = data.recipientId;
     } else if (data.recipientEmail) {
-      const recipient = await db.user.findUnique({
-        where: { email: data.recipientEmail },
-        select: { id: true },
-      });
-
-      if (!recipient) {
-        throw new ApiError(
-          404,
-          'RECIPIENT_NOT_FOUND',
-          'Recipient user not found'
-        );
-      }
-
-      recipientId = recipient.id;
+      // TODO (POC-3 Phase 3): Replace with Auth Service API call
+      // Users are now in auth_db, not payments_db
+      // Should call: GET /api/auth/users?email={recipientEmail}
+      // For now, this will fail - needs Auth Service integration
+      throw new ApiError(
+        501,
+        'NOT_IMPLEMENTED',
+        'Recipient lookup by email requires Auth Service integration (POC-3 Phase 3)'
+      );
+      
+      // OLD CODE (removed - users are in auth-service now):
+      // const recipient = await db.user.findUnique({
+      //   where: { email: data.recipientEmail },
+      //   select: { id: true },
+      // });
+      // if (!recipient) {
+      //   throw new ApiError(404, 'RECIPIENT_NOT_FOUND', 'Recipient user not found');
+      // }
+      // recipientId = recipient.id;
     } else {
       throw new ApiError(
         400,
@@ -291,30 +296,14 @@ export const paymentService = {
     }
 
     // Update payment
+    // Note: sender/recipient relations removed - users are in auth-service (POC-3)
+    // User details should be fetched from Auth Service API if needed
     const updatedPayment = await db.payment.update({
       where: { id: paymentId },
       data: {
         status: data.status,
         completedAt:
           data.status === 'completed' ? new Date() : payment.completedAt,
-      },
-      include: {
-        sender: {
-          select: {
-            id: true,
-            email: true,
-            name: true,
-            role: true,
-          },
-        },
-        recipient: {
-          select: {
-            id: true,
-            email: true,
-            name: true,
-            role: true,
-          },
-        },
       },
     });
 

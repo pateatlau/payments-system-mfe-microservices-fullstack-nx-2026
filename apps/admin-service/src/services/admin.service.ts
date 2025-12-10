@@ -2,7 +2,25 @@
  * Admin Service - Business Logic
  */
 
-import { prisma as db } from 'db';
+import { prisma as db } from '../lib/prisma';
+
+/**
+ * TODO (POC-3 Phase 3): Admin Service User Management Migration
+ *
+ * The admin service currently uses db.user operations, but users are now in auth-service (auth_db).
+ * All user operations (findMany, findUnique, update, create, delete) need to be migrated to
+ * use the Auth Service API instead of direct database access.
+ *
+ * Migration plan:
+ * - Replace db.user.findMany() with GET /api/auth/users
+ * - Replace db.user.findUnique() with GET /api/auth/users/:id
+ * - Replace db.user.update() with PUT /api/auth/users/:id
+ * - Replace db.user.create() with POST /api/auth/users (if admin can create users)
+ * - Replace db.user.delete() with DELETE /api/auth/users/:id
+ *
+ * The admin_db schema only contains AuditLog and SystemConfig models.
+ * User references (userId, updatedBy) are stored as strings without foreign keys.
+ */
 import type { UserRole } from 'shared-types';
 import { ApiError } from '../middleware/errorHandler';
 import type {

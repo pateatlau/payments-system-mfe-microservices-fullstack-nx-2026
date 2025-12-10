@@ -3,7 +3,7 @@
  */
 
 import express from 'express';
-import { prisma } from 'db';
+import { prisma } from '../lib/prisma';
 
 const router = express.Router();
 

@@ -4,7 +4,7 @@
 
 import { Request, Response } from 'express';
 import { getSystemHealth } from './system-health.controller';
-import { prisma } from 'db';
+import { prisma } from '../lib/prisma';
 
 // Mock dependencies
 jest.mock('db', () => ({

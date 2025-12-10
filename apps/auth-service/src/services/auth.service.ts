@@ -5,7 +5,7 @@
  */
 
 import bcrypt from 'bcrypt';
-import { prisma } from 'db';
+import { prisma } from '../lib/prisma';
 import { config } from '../config';
 import {
   generateTokenPair,
@@ -68,12 +68,9 @@ export const register = async (data: RegisterInput): Promise<AuthResponse> => {
     },
   });
 
-  // Create user profile
-  await prisma.userProfile.create({
-    data: {
-      userId: user.id,
-    },
-  });
+  // TODO (POC-3 Phase 4): User profile creation will be handled via RabbitMQ event
+  // When auth.user.created event is published, profile service will create the profile
+  // This maintains service isolation - auth service only manages users and tokens
 
   // Generate tokens
   const jwtPayload: JwtPayload = {

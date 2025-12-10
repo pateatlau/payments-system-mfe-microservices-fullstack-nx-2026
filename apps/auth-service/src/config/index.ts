@@ -9,6 +9,13 @@ export const config = {
   port: parseInt(process.env['AUTH_SERVICE_PORT'] ?? '3001', 10),
   nodeEnv: process.env['NODE_ENV'] ?? 'development',
 
+  // Database (POC-3: Separate database per service)
+  database: {
+    url:
+      process.env['AUTH_DATABASE_URL'] ??
+      'postgresql://postgres:postgres@localhost:5432/auth_db',
+  },
+
   // JWT
   jwtSecret:
     process.env['JWT_SECRET'] ?? 'your-secret-key-change-in-production',

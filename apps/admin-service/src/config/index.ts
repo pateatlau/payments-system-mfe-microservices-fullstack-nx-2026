@@ -7,6 +7,18 @@ import { z } from 'zod';
 const configSchema = z.object({
   port: z.coerce.number().default(3003),
   nodeEnv: z.string().default('development'),
+  // Database (POC-3: Separate database per service)
+  database: z.object({
+    url: z
+      .string()
+      .default(
+        'postgresql://postgres:postgres@localhost:5434/admin_db'
+      ),
+  }),
+  // Auth Service (for user validation)
+  authService: z.object({
+    url: z.string().default('http://localhost:3001'),
+  }),
   apiGatewayUrl: z.string().default('http://localhost:3000'),
   eventHubUrl: z.string().default('http://localhost:3004'),
   logLevel: z.string().default('info'),
@@ -18,6 +30,12 @@ const configSchema = z.object({
 const config = configSchema.parse({
   port: process.env['ADMIN_SERVICE_PORT'],
   nodeEnv: process.env['NODE_ENV'],
+  database: {
+    url: process.env['ADMIN_DATABASE_URL'],
+  },
+  authService: {
+    url: process.env['AUTH_SERVICE_URL'],
+  },
   apiGatewayUrl: process.env['API_GATEWAY_URL'],
   eventHubUrl: process.env['EVENT_HUB_URL'],
   logLevel: process.env['LOG_LEVEL'],

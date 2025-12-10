@@ -3,7 +3,7 @@
  */
 
 import { profileService } from './profile.service';
-import { prisma } from 'db';
+import { prisma } from '../lib/prisma';
 
 // Mock Prisma
 jest.mock('db', () => ({

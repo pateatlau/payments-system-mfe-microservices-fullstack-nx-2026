@@ -2,7 +2,7 @@
  * Profile Service - Business Logic
  */
 
-import { prisma } from 'db';
+import { prisma } from '../lib/prisma';
 import logger from '../utils/logger';
 
 export interface UpdateProfileData {
