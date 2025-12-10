@@ -9,19 +9,22 @@ import type {
 } from './types';
 
 /**
- * Backend Payments API (direct service URL - POC-2)
+ * Backend Payments API (via API Gateway - POC-3)
  *
- * Uses Payments Service direct URL (http://localhost:3002)
- * Note: When loaded in shell context, we need to explicitly set baseURL
- * since the shell's NX_API_BASE_URL points to Auth Service
+ * Routes through nginx (https://localhost) → API Gateway (http://localhost:3000)
+ * API Gateway proxies /api/payments/* to Payments Service (http://localhost:3002)
+ *
+ * URL Structure:
+ * - Frontend: https://localhost/api/payments/*
+ * - nginx → API Gateway: http://localhost:3000/api/payments/*
+ * - API Gateway → Payments Service: http://localhost:3002/* (path rewritten)
  */
-// Create payments-specific API client with Payments Service URL
 // Access environment variable (replaced by DefinePlugin at build time)
 const envBaseURL =
   typeof process !== 'undefined' && process.env
     ? (process.env as { NX_API_BASE_URL?: string }).NX_API_BASE_URL
     : undefined;
-// Use Payments Service URL (port 3002) - this is set in payments-mfe rspack.config.js
+
 // Create token provider that accesses auth store directly (Zustand allows direct access)
 // Token provider functions access store state dynamically on each call
 const tokenProvider: TokenProvider = {
@@ -36,7 +39,10 @@ const tokenProvider: TokenProvider = {
 };
 
 const paymentsApiClient = new ApiClient({
-  baseURL: envBaseURL ?? 'http://localhost:3002',
+  // Use API Gateway URL via nginx (default: https://localhost/api/payments)
+  baseURL: envBaseURL
+    ? `${envBaseURL}/payments`
+    : 'https://localhost/api/payments',
   tokenProvider,
   onTokenRefresh: (accessToken: string, refreshToken: string) => {
     useAuthStore.setState({ accessToken, refreshToken });

@@ -1,7 +1,7 @@
 /**
  * Payment API exports
- * Stubbed payment APIs for POC-1 (no actual PSP integration)
+ * Real payment APIs connected to backend Payments Service
  */
 export * from './types';
-export * from './stubbedPayments';
+export * from './payments';
 

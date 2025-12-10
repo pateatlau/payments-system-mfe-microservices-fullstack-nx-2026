@@ -71,9 +71,9 @@ export class ApiClient {
   private onUnauthorized?: () => void;
 
   constructor(config: ApiClientConfig = {}) {
-    // POC-2: Using direct service URLs (bypassing API Gateway proxy)
-    // API Gateway proxy implementation deferred to POC-3
-    // For now, frontend will call backend services directly
+    // POC-3: Using API Gateway via nginx proxy
+    // All requests route through nginx (https://localhost) → API Gateway (http://localhost:3000)
+    // API Gateway proxies to backend services (Auth, Payments, Admin, Profile)
 
     // Access environment variable (replaced by DefinePlugin at build time in browser)
     // DefinePlugin replaces process.env.NX_API_BASE_URL with the actual string value
@@ -83,8 +83,8 @@ export class ApiClient {
       typeof process !== 'undefined' && process.env
         ? (process.env as { NX_API_BASE_URL?: string }).NX_API_BASE_URL
         : undefined;
-    // Default to Auth Service direct URL for POC-2
-    const baseURL = config.baseURL ?? envBaseURL ?? 'http://localhost:3001';
+    // Default to API Gateway URL via nginx for POC-3
+    const baseURL = config.baseURL ?? envBaseURL ?? 'https://localhost/api';
 
     this.axiosInstance = axios.create({
       baseURL,

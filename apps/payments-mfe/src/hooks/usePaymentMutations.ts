@@ -31,19 +31,23 @@ export function useCreatePayment() {
       queryClient.invalidateQueries({ queryKey: paymentKeys.all });
 
       // Emit payment created event
-      eventBus.emit('payments:created', {
-        payment: {
-          id: payment.id,
-          userId: payment.senderId,
-          amount: payment.amount,
-          currency: payment.currency,
-          status: payment.status as PaymentStatus,
-          type: payment.type as 'initiate' | 'payment',
-          description: payment.description || undefined,
-          createdAt: payment.createdAt,
-          updatedAt: payment.updatedAt,
+      eventBus.emit(
+        'payments:created',
+        {
+          payment: {
+            id: payment.id,
+            userId: payment.userId,
+            amount: payment.amount,
+            currency: payment.currency,
+            status: payment.status as PaymentStatus,
+            type: (payment.type as unknown) as 'initiate' | 'payment',
+            description: payment.description || undefined,
+            createdAt: payment.createdAt,
+            updatedAt: payment.updatedAt,
+          },
         },
-      });
+        'payments-mfe'
+      );
     },
   });
 }
@@ -73,59 +77,71 @@ export function useUpdatePayment() {
         queryClient.setQueryData(paymentKeys.detail(variables.id), payment);
 
         // Emit payment updated event
-        eventBus.emit('payments:updated', {
-          payment: {
-            id: payment.id,
-            userId: payment.senderId,
-            amount: payment.amount,
-            currency: payment.currency,
-            status: payment.status as PaymentStatus,
-            type: payment.type as 'initiate' | 'payment',
-            description: payment.description || undefined,
-            createdAt: payment.createdAt,
-            updatedAt: payment.updatedAt,
-          },
-          previousStatus: (variables.previousStatus ||
-            'pending') as PaymentStatus,
-        });
-
-        // Emit completed event if status is completed
-        if (payment.status === 'completed') {
-          eventBus.emit('payments:completed', {
+        eventBus.emit(
+          'payments:updated',
+          {
             payment: {
               id: payment.id,
-              userId: payment.senderId,
+              userId: payment.userId,
               amount: payment.amount,
               currency: payment.currency,
               status: payment.status as PaymentStatus,
-              type: payment.type as 'initiate' | 'payment',
+              type: (payment.type as unknown) as 'initiate' | 'payment',
               description: payment.description || undefined,
               createdAt: payment.createdAt,
               updatedAt: payment.updatedAt,
             },
-            completedAt: payment.completedAt || new Date().toISOString(),
-          });
+            previousStatus: (variables.previousStatus ||
+              'pending') as PaymentStatus,
+          },
+          'payments-mfe'
+        );
+
+        // Emit completed event if status is completed
+        if (payment.status === 'completed') {
+          eventBus.emit(
+            'payments:completed',
+            {
+              payment: {
+                id: payment.id,
+                userId: payment.userId,
+                amount: payment.amount,
+                currency: payment.currency,
+                status: payment.status as PaymentStatus,
+                type: (payment.type as unknown) as 'initiate' | 'payment',
+                description: payment.description || undefined,
+                createdAt: payment.createdAt,
+                updatedAt: payment.updatedAt,
+              },
+              completedAt: new Date().toISOString(),
+            },
+            'payments-mfe'
+          );
         }
 
         // Emit failed event if status is failed
         if (payment.status === 'failed') {
-          eventBus.emit('payments:failed', {
-            payment: {
-              id: payment.id,
-              userId: payment.senderId,
-              amount: payment.amount,
-              currency: payment.currency,
-              status: payment.status as PaymentStatus,
-              type: payment.type as 'initiate' | 'payment',
-              description: payment.description || undefined,
-              createdAt: payment.createdAt,
-              updatedAt: payment.updatedAt,
+          eventBus.emit(
+            'payments:failed',
+            {
+              payment: {
+                id: payment.id,
+                userId: payment.userId,
+                amount: payment.amount,
+                currency: payment.currency,
+                status: payment.status as PaymentStatus,
+                type: (payment.type as unknown) as 'initiate' | 'payment',
+                description: payment.description || undefined,
+                createdAt: payment.createdAt,
+                updatedAt: payment.updatedAt,
+              },
+              error: {
+                code: 'PAYMENT_FAILED',
+                message: variables.data.reason || 'Payment failed',
+              },
             },
-            error: {
-              code: 'PAYMENT_FAILED',
-              message: variables.data.reason || 'Payment failed',
-            },
-          });
+            'payments-mfe'
+          );
         }
       }
     },

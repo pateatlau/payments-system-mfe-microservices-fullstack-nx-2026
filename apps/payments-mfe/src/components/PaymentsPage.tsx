@@ -167,7 +167,7 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
   const {
     register: registerUpdate,
     handleSubmit: handleSubmitUpdate,
-    formState: { errors: updateErrors, isSubmitting: isUpdating },
+    formState: { isSubmitting: isUpdating },
     reset: resetUpdateForm,
   } = useForm<UpdatePaymentFormData>({
     resolver: zodResolver(updatePaymentSchema),

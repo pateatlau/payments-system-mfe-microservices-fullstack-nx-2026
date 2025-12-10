@@ -6,7 +6,6 @@
 
 import { ApiClient } from '@mfe/shared-api-client';
 import { useAuthStore } from 'shared-auth-store';
-import { adminApiClient } from './adminApiClient';
 import { getUsers } from './users';
 import { getAuditLogs } from './audit-logs';
 
@@ -24,13 +23,25 @@ interface PaymentReports {
   };
 }
 
+// Access environment variable (replaced by DefinePlugin at build time)
+const envBaseURL =
+  typeof process !== 'undefined' && process.env
+    ? (process.env as { NX_API_BASE_URL?: string }).NX_API_BASE_URL
+    : undefined;
+
 /**
- * Payments API client for admin dashboard
- * Uses Payments Service direct URL (port 3002)
+ * Payments API client for admin dashboard (via API Gateway - POC-3)
+ *
+ * Routes through nginx (https://localhost) → API Gateway (http://localhost:3000)
+ * API Gateway proxies /api/payments/* to Payments Service (http://localhost:3002)
  */
 const paymentsApiClient = new ApiClient({
-  baseURL: 'http://localhost:3002/api',
-  refreshURL: 'http://localhost:3001', // Auth Service handles token refresh
+  // Use API Gateway URL via nginx (default: https://localhost/api/payments)
+  baseURL: envBaseURL
+    ? `${envBaseURL}/payments`
+    : 'https://localhost/api/payments',
+  // Token refresh handled via Auth Service through API Gateway
+  refreshURL: envBaseURL ? `${envBaseURL}/auth` : 'https://localhost/api/auth',
   timeout: 30000,
   tokenProvider: {
     getAccessToken: () => useAuthStore.getState().accessToken ?? null,

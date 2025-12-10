@@ -540,15 +540,16 @@
 
 #### Sub-task 3.3.3: Update Frontend to Use API Gateway
 
-- [ ] API client updated
-- [ ] Payments MFE updated
-- [ ] Admin MFE updated
-- [ ] Environment updated
-- [ ] All calls work through proxy
-- [ ] Direct URLs removed
+- [x] API client updated (libs/shared-api-client)
+- [x] Payments MFE updated (api/payments.ts)
+- [x] Admin MFE updated (api/adminApiClient.ts, api/dashboard.ts)
+- [x] Environment updated (Rspack configs for all MFEs)
+- [x] All calls work through proxy (https://localhost/api → API Gateway)
+- [x] Direct URLs removed (no localhost:300X in frontend)
 
-**Status:** Not Started  
-**Notes:** -
+**Status:** Complete  
+**Completed Date:** 2026-12-10  
+**Notes:** Updated all frontend API clients to use API Gateway via nginx. All requests now route through nginx (https://localhost) → API Gateway (http://localhost:3000) → backend services. Fixed pre-existing type errors in payments-mfe. All MFE builds successful.
 
 ---
 

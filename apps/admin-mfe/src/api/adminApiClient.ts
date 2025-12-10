@@ -1,8 +1,13 @@
 /**
- * Admin API Client
+ * Admin API Client (via API Gateway - POC-3)
  *
- * Dedicated API client for Admin Service (port 3003)
- * Configured to use the Admin Service base URL
+ * Routes through nginx (https://localhost) → API Gateway (http://localhost:3000)
+ * API Gateway proxies /api/admin/* to Admin Service (http://localhost:3003)
+ *
+ * URL Structure:
+ * - Frontend: https://localhost/api/admin/*
+ * - nginx → API Gateway: http://localhost:3000/api/admin/*
+ * - API Gateway → Admin Service: http://localhost:3003/* (path rewritten)
  *
  * Note: This client does NOT handle token refresh itself.
  * Token refresh is handled by the auth store's API client.
@@ -12,15 +17,23 @@
 import { ApiClient } from '@mfe/shared-api-client';
 import { useAuthStore } from 'shared-auth-store';
 
+// Access environment variable (replaced by DefinePlugin at build time)
+const envBaseURL =
+  typeof process !== 'undefined' && process.env
+    ? (process.env as { NX_API_BASE_URL?: string }).NX_API_BASE_URL
+    : undefined;
+
 /**
  * Admin Service API Client instance
  *
- * Points to Admin Service on port 3003
+ * Routes through API Gateway (via nginx)
  * Reads tokens from auth store (no automatic refresh to avoid conflicts)
  */
 export const adminApiClient = new ApiClient({
-  baseURL: 'http://localhost:3003/api',
-  refreshURL: 'http://localhost:3001', // Auth Service handles token refresh
+  // Use API Gateway URL via nginx (default: https://localhost/api/admin)
+  baseURL: envBaseURL ? `${envBaseURL}/admin` : 'https://localhost/api/admin',
+  // Token refresh handled by auth store via Auth Service through API Gateway
+  refreshURL: envBaseURL ? `${envBaseURL}/auth` : 'https://localhost/api/auth',
   timeout: 30000,
   tokenProvider: {
     getAccessToken: () => {
