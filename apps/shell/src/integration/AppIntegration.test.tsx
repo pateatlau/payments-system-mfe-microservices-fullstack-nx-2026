@@ -46,30 +46,43 @@ function setMockAuthState(state: Partial<typeof defaultMockState>) {
   );
 }
 
-// Mock components for testing
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const MockSignIn = jest.fn(({ onSuccess, onNavigateToSignUp }: any) => (
-  <div data-testid="mock-signin">
-    <button onClick={onSuccess} data-testid="signin-success">
-      Sign In Success
-    </button>
-    <button onClick={onNavigateToSignUp} data-testid="navigate-signup">
-      Go to Sign Up
-    </button>
-  </div>
-));
+// Mock component props interfaces
+interface MockSignInProps {
+  onSuccess?: () => void;
+  onNavigateToSignUp?: () => void;
+}
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const MockSignUp = jest.fn(({ onSuccess, onNavigateToSignIn }: any) => (
-  <div data-testid="mock-signup">
-    <button onClick={onSuccess} data-testid="signup-success">
-      Sign Up Success
-    </button>
-    <button onClick={onNavigateToSignIn} data-testid="navigate-signin">
-      Go to Sign In
-    </button>
-  </div>
-));
+interface MockSignUpProps {
+  onSuccess?: () => void;
+  onNavigateToSignIn?: () => void;
+}
+
+// Mock components for testing
+const MockSignIn = jest.fn(
+  ({ onSuccess, onNavigateToSignUp }: MockSignInProps) => (
+    <div data-testid="mock-signin">
+      <button onClick={onSuccess} data-testid="signin-success">
+        Sign In Success
+      </button>
+      <button onClick={onNavigateToSignUp} data-testid="navigate-signup">
+        Go to Sign Up
+      </button>
+    </div>
+  )
+);
+
+const MockSignUp = jest.fn(
+  ({ onSuccess, onNavigateToSignIn }: MockSignUpProps) => (
+    <div data-testid="mock-signup">
+      <button onClick={onSuccess} data-testid="signup-success">
+        Sign Up Success
+      </button>
+      <button onClick={onNavigateToSignIn} data-testid="navigate-signin">
+        Go to Sign In
+      </button>
+    </div>
+  )
+);
 
 const MockPaymentsPage = jest.fn(() => (
   <div data-testid="mock-payments">

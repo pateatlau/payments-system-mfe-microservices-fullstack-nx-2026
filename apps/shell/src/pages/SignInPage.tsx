@@ -25,19 +25,19 @@ export interface SignInPageProps {
 
 /**
  * SignInPage component
- * 
+ *
  * Wrapper for SignIn component.
  * Uses dependency injection pattern - component must be provided via props.
- * 
+ *
  * Navigation after login is handled via the onSuccess callback passed to SignInComponent.
  * This ensures navigation happens immediately after successful login,
  * avoiding issues with Zustand subscription across Module Federation boundaries.
- * 
+ *
  * @example
  * // Production usage (in routes)
  * import { SignInRemote } from './remotes';
  * <SignInPage SignInComponent={SignInRemote} />
- * 
+ *
  * @example
  * // Test usage (with mock component)
  * <SignInPage SignInComponent={MockSignIn} />
@@ -45,7 +45,7 @@ export interface SignInPageProps {
 export function SignInPage({ SignInComponent }: SignInPageProps) {
   const navigate = useNavigate();
   // Check if already authenticated (for initial page load / direct navigation)
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const isAuthenticated = useAuthStore(state => state.isAuthenticated);
 
   // Redirect to payments if already authenticated
   if (isAuthenticated) {
@@ -54,8 +54,6 @@ export function SignInPage({ SignInComponent }: SignInPageProps) {
 
   // Handle successful login - navigate to payments page
   const handleSuccess = () => {
-    // eslint-disable-next-line no-console
-    console.log('[SignInPage] Login successful, navigating to /payments');
     navigate('/payments', { replace: true });
   };
 

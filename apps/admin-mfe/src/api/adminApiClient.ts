@@ -24,27 +24,19 @@ export const adminApiClient = new ApiClient({
   timeout: 30000,
   tokenProvider: {
     getAccessToken: () => {
-      const token = useAuthStore.getState().accessToken;
-      console.log(
-        '[AdminApiClient] Getting access token:',
-        token?.substring(0, 50) + '...'
-      );
-      return token;
+      return useAuthStore.getState().accessToken;
     },
     getRefreshToken: () => useAuthStore.getState().refreshToken,
     setTokens: (accessToken: string, refreshToken: string) => {
-      console.log('[AdminApiClient] setTokens called - updating auth store');
       // Update the auth store with new tokens
       useAuthStore.getState().setAccessToken(accessToken, refreshToken);
     },
     clearTokens: () => {
-      console.log('[AdminApiClient] clearTokens called - logging out');
       useAuthStore.getState().logout();
     },
   },
   // When we get unauthorized, just logout (don't try to refresh)
   onUnauthorized: () => {
-    console.log('[AdminApiClient] Unauthorized - logging out');
     useAuthStore.getState().logout();
   },
 });

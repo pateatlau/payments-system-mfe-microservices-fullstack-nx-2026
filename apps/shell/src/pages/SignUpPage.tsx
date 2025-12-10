@@ -25,19 +25,19 @@ export interface SignUpPageProps {
 
 /**
  * SignUpPage component
- * 
+ *
  * Wrapper for SignUp component.
  * Uses dependency injection pattern - component must be provided via props.
- * 
+ *
  * Navigation after signup is handled via the onSuccess callback passed to SignUpComponent.
  * This ensures navigation happens immediately after successful signup,
  * avoiding issues with Zustand subscription across Module Federation boundaries.
- * 
+ *
  * @example
  * // Production usage (in routes)
  * import { SignUpRemote } from './remotes';
  * <SignUpPage SignUpComponent={SignUpRemote} />
- * 
+ *
  * @example
  * // Test usage (with mock component)
  * <SignUpPage SignUpComponent={MockSignUp} />
@@ -45,7 +45,7 @@ export interface SignUpPageProps {
 export function SignUpPage({ SignUpComponent }: SignUpPageProps) {
   const navigate = useNavigate();
   // Check if already authenticated (for initial page load / direct navigation)
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const isAuthenticated = useAuthStore(state => state.isAuthenticated);
 
   // Redirect to payments if already authenticated
   if (isAuthenticated) {
@@ -54,8 +54,6 @@ export function SignUpPage({ SignUpComponent }: SignUpPageProps) {
 
   // Handle successful signup - navigate to payments page
   const handleSuccess = () => {
-    // eslint-disable-next-line no-console
-    console.log('[SignUpPage] Signup successful, navigating to /payments');
     navigate('/payments', { replace: true });
   };
 

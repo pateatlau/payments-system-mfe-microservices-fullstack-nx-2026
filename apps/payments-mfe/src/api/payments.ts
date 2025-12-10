@@ -1,5 +1,5 @@
 import type { Payment, PaymentStatus, PaymentType } from 'shared-types';
-import { ApiClient, type TokenProvider } from 'shared-api-client';
+import { ApiClient, type TokenProvider } from '@mfe/shared-api-client';
 import { useAuthStore } from 'shared-auth-store';
 import type {
   CreatePaymentDto,
@@ -17,7 +17,6 @@ import type {
  */
 // Create payments-specific API client with Payments Service URL
 // Access environment variable (replaced by DefinePlugin at build time)
-// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
 const envBaseURL =
   typeof process !== 'undefined' && process.env
     ? (process.env as { NX_API_BASE_URL?: string }).NX_API_BASE_URL
@@ -79,7 +78,6 @@ export async function listPayments(params?: {
 
   // Validate response structure
   if (!response?.data?.payments) {
-    console.error('Invalid response structure:', response.data);
     throw new Error('Invalid response structure from payments API');
   }
 
@@ -95,7 +93,6 @@ export async function getPaymentById(id: string): Promise<Payment> {
   );
 
   if (!response?.data) {
-    console.error('Invalid response structure:', response);
     throw new Error('Invalid response structure from payments API');
   }
 
@@ -115,7 +112,6 @@ export async function createPayment(
   );
 
   if (!response?.data) {
-    console.error('Invalid response structure:', response);
     throw new Error('Invalid response structure from payments API');
   }
 
@@ -135,7 +131,6 @@ export async function updatePaymentStatus(
   );
 
   if (!response?.data) {
-    console.error('Invalid response structure:', response);
     throw new Error('Invalid response structure from payments API');
   }
 
@@ -156,7 +151,6 @@ export async function getPaymentReports(
   );
 
   if (!response?.data) {
-    console.error('Invalid response structure:', response);
     throw new Error('Invalid response structure from payments API');
   }
 
