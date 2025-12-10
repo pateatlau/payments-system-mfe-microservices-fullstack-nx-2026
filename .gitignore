@@ -52,3 +52,9 @@ lerna-debug.log*
 .github/instructions/nx.instructions.md
 vite.config.*.timestamp*
 vitest.config.*.timestamp*
+
+# SSL/TLS Certificates (POC-3)
+nginx/ssl/*.crt
+nginx/ssl/*.key
+nginx/ssl/*.pem
+nginx/ssl/*.csr
