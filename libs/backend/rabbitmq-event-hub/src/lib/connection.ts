@@ -94,11 +94,11 @@ export class RabbitMQConnectionManager {
         this.scheduleReconnect();
       });
 
-      // Create channel
+      // Create channel (confirm channel for publisher confirms)
       if (!this.connection) {
         throw new Error('Connection not established');
       }
-      this.channel = await this.connection.createChannel();
+      this.channel = await this.connection.createConfirmChannel();
 
       // Set prefetch
       if (this.options.prefetch) {
