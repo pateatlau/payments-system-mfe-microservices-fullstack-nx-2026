@@ -1,8 +1,8 @@
 # MFE Microservices Full-Stack Platform
 
-**Status:** POC-1 - Rspack Migration Complete  
-**Version:** 0.1.0  
-**Tech Stack:** React 19 + Nx + Rspack + Module Federation v2
+**Status:** POC-2 - Backend Integration Complete  
+**Version:** 0.2.0  
+**Tech Stack:** React 19 + Nx + Rspack + Module Federation v2 + Node.js + PostgreSQL + Redis
 
 ---
 
@@ -63,71 +63,109 @@
 
 ---
 
-## 🎯 Current Phase: POC-1 (Rspack Migration Complete)
+## 🎯 Current Phase: POC-2 (Backend Integration Complete)
 
 ### Scope
 
-**In Scope:**
+**In Scope (POC-2):**
 
 - ✅ Shell app (host, Port 4200)
 - ✅ Auth MFE (remote, Port 4201)
 - ✅ Payments MFE (remote, Port 4202)
+- ✅ Admin MFE (remote, Port 4203) - NEW
 - ✅ Module Federation v2 with HMR
 - ✅ Routing (React Router 7)
 - ✅ State Management (Zustand + TanStack Query)
-- ✅ Authentication (mock)
-- ✅ Payments (stubbed)
-- ✅ Tailwind CSS v4
-- ✅ Testing (Jest, migrated from Vitest)
+- ✅ Real JWT Authentication (backend integration)
+- ✅ Backend API Integration (REST API)
+- ✅ Design System (shadcn/ui + Tailwind CSS v4)
+- ✅ Event Bus (inter-MFE communication)
+- ✅ Backend Services (API Gateway, Auth, Payments, Admin, Profile)
+- ✅ Database (PostgreSQL + Prisma ORM)
+- ✅ Event Hub (Redis Pub/Sub)
+- ✅ Testing (380+ tests, 70%+ coverage)
 
-**NOT in Scope:**
+**NOT in Scope (POC-3):**
 
-- ❌ Backend (POC-2)
-- ❌ Design System (POC-2)
-- ❌ Event Bus (POC-2)
+- ❌ Real PSP Integration (stubbed at backend)
+- ❌ Advanced Infrastructure (nginx, advanced observability)
+- ❌ Separate Databases per Service
+- ❌ WebSocket Real-time Updates
+- ❌ Advanced Performance Optimizations
 
 ### Progress
 
 - **POC-0:** ✅ Complete
 - **POC-1:** ✅ Complete (Rspack migration complete)
-- **Rspack Migration:** ✅ Complete (Phase 1-5, Phase 6 in progress)
-- Check migration progress: [`docs/Rspack-Migration/task-list.md`](docs/Rspack-Migration/task-list.md)
+- **POC-2:** ✅ Complete (Backend integration, design system, event bus, admin MFE)
+- **Rspack Migration:** ✅ Complete
+- Check POC-2 progress: [`docs/POC-2-Implementation/task-list.md`](docs/POC-2-Implementation/task-list.md)
 
 ---
 
 ## 🛠️ Technology Stack
 
-### Frontend (POC-1)
+### Frontend (POC-2)
 
 - **React:** 19.2.0
 - **Nx:** Latest
 - **Rspack:** Latest (migrated from Vite 6.x)
 - **Module Federation:** @module-federation/enhanced 0.21.6 (BIMF)
-- **Testing:** Jest 30.x, React Testing Library 16.1.x (migrated from Vitest)
+- **Routing:** React Router 7.x
+- **State Management:** Zustand 4.5.x + TanStack Query 5.x
+- **Design System:** shadcn/ui + Tailwind CSS v4
+- **Forms:** React Hook Form 7.52.x + Zod 3.23.x
+- **Testing:** Jest 30.x, React Testing Library 16.1.x, Playwright
 - **Package Manager:** pnpm 9.x
+- **TypeScript:** 5.9.x (strict mode)
+
+### Backend (POC-2)
+
+- **Node.js:** 24.11.x LTS
+- **Framework:** Express
+- **Database:** PostgreSQL 16.x + Prisma ORM
+- **Event Hub:** Redis 7.x (Pub/Sub)
+- **Authentication:** JWT (access + refresh tokens)
+- **Testing:** Jest
 - **TypeScript:** 5.9.x (strict mode)
 
 > **Note:** Migrated from Vite to Rspack to enable HMR with Module Federation v2. See `docs/Rspack-Migration/` for migration details.
 
 ### Future Phases
 
-- **POC-1:** Routing, State Management, Tailwind CSS v4
-- **POC-2:** Backend Integration, Design System
-- **POC-3:** Infrastructure, Performance, Enhanced Observability
+- **POC-3:** Infrastructure improvements, separate databases, WebSocket, RabbitMQ, advanced observability
 
 ---
 
 ## 📁 Project Structure
 
 ```
-web-mfe-workspace/
+payments-system-mfe-microservices-fullstack-nx-2026/
 ├── apps/
-│   ├── shell/              # Host (Port 4200) - POC-0
-│   └── hello-remote/      # Remote (Port 4201) - POC-0
+│   ├── shell/              # Host (Port 4200)
+│   ├── auth-mfe/           # Auth MFE (Port 4201)
+│   ├── payments-mfe/       # Payments MFE (Port 4202)
+│   ├── admin-mfe/          # Admin MFE (Port 4203) - POC-2
+│   ├── shell-e2e/          # E2E tests
+│   ├── api-gateway/        # API Gateway (Port 3000) - POC-2
+│   ├── auth-service/       # Auth Service (Port 3001) - POC-2
+│   ├── payments-service/   # Payments Service (Port 3002) - POC-2
+│   ├── admin-service/      # Admin Service (Port 3003) - POC-2
+│   └── profile-service/    # Profile Service (Port 3004) - POC-2
 ├── libs/
-│   ├── shared-utils/      # Shared utilities - POC-0
-│   ├── shared-ui/          # Shared UI components - POC-0
-│   └── shared-types/       # Shared TypeScript types - POC-0
+│   ├── shared-utils/       # Shared utilities
+│   ├── shared-ui/          # Shared UI components
+│   ├── shared-types/       # Shared TypeScript types
+│   ├── shared-auth-store/  # Auth store (Zustand)
+│   ├── shared-header-ui/   # Universal header
+│   ├── shared-api-client/  # API client (Axios) - POC-2
+│   ├── shared-event-bus/   # Event bus - POC-2
+│   ├── shared-design-system/ # Design system (shadcn/ui) - POC-2
+│   └── backend/            # Backend shared libraries - POC-2
+│       ├── db/             # Prisma schema
+│       ├── types/          # Backend types
+│       ├── utils/           # Backend utilities
+│       └── event-hub/       # Event Hub (Redis) - POC-2
 ├── docs/                   # Documentation
 ├── scripts/                # Utility scripts
 └── .cursorrules           # Cursor AI rules
@@ -143,34 +181,63 @@ web-mfe-workspace/
 ./scripts/verify-environment.sh
 ```
 
-### 2. Read Quick Start Guide
+### 2. Start Infrastructure
 
-See: [`docs/POC-0-Implementation/QUICK-START.md`](docs/POC-0-Implementation/QUICK-START.md)
+```bash
+# Start PostgreSQL and Redis
+pnpm infra:start
 
-### 3. Start Implementation
+# Set up database
+pnpm backend:setup
+```
 
-Open Cursor and use the first prompt from [`docs/Prompts/POC-0/first-prompt.md`](docs/Prompts/POC-0/first-prompt.md)
+### 3. Start Development
+
+```bash
+# Terminal 1: Start backend services
+pnpm dev:backend
+
+# Terminal 2: Start frontend services
+pnpm dev:mf
+```
+
+### 4. Access Application
+
+- **Frontend:** http://localhost:4200
+- **API Gateway:** http://localhost:3000
+
+**See:** [`docs/POC-2-Implementation/developer-workflow-fullstack.md`](docs/POC-2-Implementation/developer-workflow-fullstack.md) for complete setup guide.
 
 ---
 
 ## 📖 Key Documentation
 
-### For Implementation
+### POC-2 Implementation (Current)
 
-1. **Start Here:** [`docs/POC-0-Implementation/QUICK-START.md`](docs/POC-0-Implementation/QUICK-START.md)
-2. **Track Progress:** [`docs/POC-0-Implementation/task-list.md`](docs/POC-0-Implementation/task-list.md)
-3. **Follow Plan:** [`docs/POC-0-Implementation/implementation-plan.md`](docs/POC-0-Implementation/implementation-plan.md)
+1. **Quick Start:** [`docs/POC-2-Implementation/developer-workflow-fullstack.md`](docs/POC-2-Implementation/developer-workflow-fullstack.md)
+2. **Track Progress:** [`docs/POC-2-Implementation/task-list.md`](docs/POC-2-Implementation/task-list.md)
+3. **Implementation Plan:** [`docs/POC-2-Implementation/implementation-plan.md`](docs/POC-2-Implementation/implementation-plan.md)
 
-### For Understanding
+### Developer Workflows
 
-1. **Architecture:** [`docs/References/mfe-poc0-architecture.md`](docs/References/mfe-poc0-architecture.md)
-2. **Tech Stack:** [`docs/References/mfe-poc0-tech-stack.md`](docs/References/mfe-poc0-tech-stack.md)
-3. **ADRs:** [`docs/adr/poc-0/`](docs/adr/poc-0/)
+1. **Frontend Workflow:** [`docs/POC-2-Implementation/developer-workflow-frontend.md`](docs/POC-2-Implementation/developer-workflow-frontend.md)
+2. **Backend Workflow:** [`docs/POC-2-Implementation/developer-workflow-backend.md`](docs/POC-2-Implementation/developer-workflow-backend.md)
+3. **Full-Stack Workflow:** [`docs/POC-2-Implementation/developer-workflow-fullstack.md`](docs/POC-2-Implementation/developer-workflow-fullstack.md)
 
-### For Workflow
+### Technical Documentation
 
-1. **Workflow Guide:** [`docs/Developer-Workflow/README-FIRST.md`](docs/Developer-Workflow/README-FIRST.md)
-2. **Resuming Work:** [`docs/Prompts/POC-0/continuation-prompt.md`](docs/Prompts/POC-0/continuation-prompt.md)
+1. **Design System:** [`docs/POC-2-Implementation/design-system-guide.md`](docs/POC-2-Implementation/design-system-guide.md)
+2. **Migration Guide:** [`docs/POC-2-Implementation/migration-guide-poc1-to-poc2.md`](docs/POC-2-Implementation/migration-guide-poc1-to-poc2.md)
+3. **Testing Guide:** [`docs/POC-2-Implementation/testing-guide.md`](docs/POC-2-Implementation/testing-guide.md)
+4. **API Contracts:** [`docs/POC-2-Implementation/api-contracts.md`](docs/POC-2-Implementation/api-contracts.md)
+5. **Event Bus Contract:** [`docs/POC-2-Implementation/event-bus-contract.md`](docs/POC-2-Implementation/event-bus-contract.md)
+
+### Architecture
+
+1. **POC-2 Architecture:** [`docs/References/mfe-poc2-architecture.md`](docs/References/mfe-poc2-architecture.md)
+2. **Backend Architecture:** [`docs/References/backend-poc2-architecture.md`](docs/References/backend-poc2-architecture.md)
+3. **Full-Stack Architecture:** [`docs/References/fullstack-architecture.md`](docs/References/fullstack-architecture.md)
+4. **Architecture Review:** [`docs/POC-2-Implementation/architecture-review.md`](docs/POC-2-Implementation/architecture-review.md)
 
 ---
 
