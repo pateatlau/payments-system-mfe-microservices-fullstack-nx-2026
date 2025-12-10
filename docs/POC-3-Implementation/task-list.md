@@ -486,7 +486,7 @@
 
 **Status:** Complete  
 **Completed Date:** 2026-12-10  
-**Notes:** All services updated with RabbitMQ event infrastructure. Auth Service publishes user lifecycle events (user.created, user.updated, user.deleted, user.login, user.logout). Payments Service publishes payment events (payment.created, payment.updated, payment.completed, payment.failed). Admin Service subscribes to all events (user.*, payment.*) for denormalization and audit logging. All services build successfully. Fixed type issues and Prisma imports. Zero-coupling pattern enforced.
+**Notes:** All services updated with RabbitMQ event infrastructure. Auth Service publishes user lifecycle events (user.created, user.updated, user.deleted, user.login, user.logout). Payments Service publishes payment events (payment.created, payment.updated, payment.completed, payment.failed). Admin Service subscribes to all events (user._, payment._) for denormalization and audit logging. All services build successfully. Fixed type issues and Prisma imports. Zero-coupling pattern enforced.
 
 ---
 

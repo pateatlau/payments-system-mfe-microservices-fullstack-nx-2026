@@ -1812,9 +1812,9 @@ await subscriber.subscribe('#', handleAllEvents); // Admin listens to all
 
 - [x] Auth Service using RabbitMQ publisher - Event publisher ready (user lifecycle events)
 - [x] Payments Service using RabbitMQ publisher - Event publisher ready (payment events)
-- [x] Admin Service using RabbitMQ subscriber (all events) - Subscriber ready (user.*, payment.*)
+- [x] Admin Service using RabbitMQ subscriber (all events) - Subscriber ready (user._, payment._)
 - [x] Profile Service using RabbitMQ subscriber (user events) - Builds successfully, ready for subscribers
-- [x] Events published with correct routing keys - Routing configured (auth.*, payments.*)
+- [x] Events published with correct routing keys - Routing configured (auth._, payments._)
 - [x] Events consumed and acknowledged - Manual ack/nack configured
 - [x] All service tests pass - All builds passing
 
@@ -1827,14 +1827,17 @@ await subscriber.subscribe('#', handleAllEvents); // Admin listens to all
 **Notes:** All services updated with RabbitMQ event infrastructure (commit 1dc047e). Zero-coupling pattern enforced - services communicate ONLY via RabbitMQ events, no direct API calls.
 
 **Event Publishers:**
+
 - Auth Service: user.created, user.updated, user.deleted, user.login, user.logout
 - Payments Service: payment.created, payment.updated, payment.completed, payment.failed
 
 **Event Subscribers:**
-- Admin Service: Subscribes to user.* and payment.* for denormalization and audit logging
+
+- Admin Service: Subscribes to user._ and payment._ for denormalization and audit logging
 - Profile Service: Ready for user event subscribers (infrastructure in place)
 
 **Files Created:**
+
 - `apps/auth-service/src/events/connection.ts` - RabbitMQ connection manager
 - `apps/auth-service/src/events/publisher.ts` - Auth event publisher
 - `apps/payments-service/src/events/connection.ts` - RabbitMQ connection manager
@@ -1843,12 +1846,14 @@ await subscriber.subscribe('#', handleAllEvents); // Admin listens to all
 - `apps/admin-service/src/events/subscriber.ts` - Admin event subscriber
 
 **Build Fixes:**
+
 - Fixed RabbitMQ library type issues (any types for amqplib compatibility)
 - Fixed Prisma client imports (use @prisma/client)
 - Fixed Admin Service schema (passwordHash optional for denormalization)
 - All services build successfully ✅
 
 **Configuration:**
+
 - RabbitMQ URL configured in all services: amqp://admin:admin@localhost:5672
 - Exchange: "events" (topic, durable)
 - Queues configured with DLQ support
