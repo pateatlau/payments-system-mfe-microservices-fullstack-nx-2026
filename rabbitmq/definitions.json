@@ -1,0 +1,122 @@
+{
+  "rabbit_version": "3.13.7",
+  "rabbitmq_version": "3.13.7",
+  "product_name": "RabbitMQ",
+  "product_version": "3.13.7",
+  "vhosts": [
+    {
+      "name": "/"
+    }
+  ],
+  "exchanges": [
+    {
+      "name": "events",
+      "vhost": "/",
+      "type": "topic",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    },
+    {
+      "name": "events.dlx",
+      "vhost": "/",
+      "type": "direct",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    }
+  ],
+  "queues": [
+    {
+      "name": "auth.events.queue",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-dead-letter-exchange": "events.dlx",
+        "x-dead-letter-routing-key": "dead-letter"
+      }
+    },
+    {
+      "name": "payments.events.queue",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-dead-letter-exchange": "events.dlx",
+        "x-dead-letter-routing-key": "dead-letter"
+      }
+    },
+    {
+      "name": "admin.events.queue",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-dead-letter-exchange": "events.dlx",
+        "x-dead-letter-routing-key": "dead-letter"
+      }
+    },
+    {
+      "name": "profile.events.queue",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-dead-letter-exchange": "events.dlx",
+        "x-dead-letter-routing-key": "dead-letter"
+      }
+    },
+    {
+      "name": "events.dlq",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    }
+  ],
+  "bindings": [
+    {
+      "source": "events",
+      "vhost": "/",
+      "destination": "auth.events.queue",
+      "destination_type": "queue",
+      "routing_key": "auth.#",
+      "arguments": {}
+    },
+    {
+      "source": "events",
+      "vhost": "/",
+      "destination": "payments.events.queue",
+      "destination_type": "queue",
+      "routing_key": "payments.#",
+      "arguments": {}
+    },
+    {
+      "source": "events",
+      "vhost": "/",
+      "destination": "admin.events.queue",
+      "destination_type": "queue",
+      "routing_key": "#",
+      "arguments": {}
+    },
+    {
+      "source": "events",
+      "vhost": "/",
+      "destination": "profile.events.queue",
+      "destination_type": "queue",
+      "routing_key": "auth.user.#",
+      "arguments": {}
+    },
+    {
+      "source": "events.dlx",
+      "vhost": "/",
+      "destination": "events.dlq",
+      "destination_type": "queue",
+      "routing_key": "dead-letter",
+      "arguments": {}
+    }
+  ]
+}

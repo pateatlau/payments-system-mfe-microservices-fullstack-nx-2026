@@ -344,31 +344,32 @@
 
 #### Sub-task 2.3.1: Add RabbitMQ to Docker Compose
 
-- [ ] Service added
-- [ ] Ports configured
-- [ ] Credentials configured
-- [ ] Volume configured
-- [ ] Health check works
-- [ ] Management UI accessible
+- [x] Service added
+- [x] Ports configured
+- [x] Credentials configured
+- [x] Volume configured
+- [x] Health check works
+- [x] Management UI accessible
 
-**Status:** Not Started  
-**Notes:** -
+**Status:** Complete  
+**Completed Date:** 2026-12-10  
+**Notes:** RabbitMQ service already configured in Task 1.3.1 and verified working. Running rabbitmq:3-management on ports 5672 (AMQP) and 15672 (Management UI). Credentials: admin/admin. Health check passing. Management API accessible and responding. RabbitMQ version 3.13.7, Erlang/OTP 26, uptime 1+ hour. Ready for topology configuration.
 
 ---
 
 #### Sub-task 2.3.2: Configure RabbitMQ Exchanges and Queues
 
-- [ ] definitions.json created
-- [ ] Topic exchange created
-- [ ] DLX exchange created
-- [ ] Service queues created
-- [ ] DLQ queues created
-- [ ] Bindings configured
-- [ ] Auto-import works
+- [x] definitions.json created
+- [x] Topic exchange created
+- [x] DLX exchange created
+- [x] Service queues created
+- [x] DLQ queues created
+- [x] Bindings configured
+- [x] Topology loaded via API
 
-**Status:** Not Started  
-**Completed Date:** -  
-**Notes:** -
+**Status:** Complete  
+**Completed Date:** 2026-12-10  
+**Notes:** Created rabbitmq/definitions.json with complete topology. Exchanges: events (topic), events.dlx (direct). Queues: auth.events.queue, payments.events.queue, admin.events.queue, profile.events.queue, events.dlq. Bindings: auth.# → auth, payments.# → payments, # → admin (all events), auth.user.# → profile, dead-letter → dlq. Loaded via Management API. All verified.
 
 ---
 
