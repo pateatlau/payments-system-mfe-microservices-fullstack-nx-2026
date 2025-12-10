@@ -1037,15 +1037,15 @@
 
 #### Sub-task 5.3.2: Payments Flow Tests
 
-- [ ] View payments tested
-- [ ] Create payment tested
-- [ ] Update payment tested
-- [ ] Status changes tested
-- [ ] Role-based access tested
+- [x] View payments tested (payments-fullstack-integration.spec.ts - backend API verification)
+- [x] Create payment tested (payments-fullstack-integration.spec.ts - backend 201 verification, validation errors)
+- [x] Update payment tested (payments-fullstack-integration.spec.ts - backend 200 verification)
+- [x] Status changes tested (payments-fullstack-integration.spec.ts - status update API verification)
+- [x] Role-based access tested (payments-fullstack-integration.spec.ts - VENDOR/CUSTOMER RBAC, backend 403)
 
-**Status:** ⬜ Not Started  
-**Notes:**  
-**Completed Date:**
+**Status:** ✅ Complete  
+**Notes:** Created comprehensive full-stack integration tests verifying end-to-end flows across frontend and backend. Tests verify both UI interactions and backend API calls/responses. View payments: 200 response, payment list, empty list. Create payment: 201 response, validation errors (400). Update payment: 200 response. Status changes: status update API. Role-based access: VENDOR can create (UI + API), CUSTOMER cannot (UI hidden, backend 403). Total: 10+ full-stack integration tests.  
+**Completed Date:** 2026-12-09
 
 ---
 
