@@ -9,7 +9,7 @@
  * Usage: pnpm tsx scripts/migration/import-payments-data.ts
  */
 
-import { PrismaClient } from '../../../apps/payments-service/node_modules/.prisma/payments-client';
+import { PrismaClient } from '../../apps/payments-service/node_modules/.prisma/payments-client';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -49,8 +49,11 @@ async function importPaymentsData() {
     console.log(`   - Payment Transactions: ${paymentsData.metadata.transactionCount}`);
     console.log('');
 
+    // Note: Users are imported separately (export-auth-data.ts → import-payments-data-users.ts)
+    // This script only imports payments and payment transactions
+
     // Import payments
-    console.log('📥 Importing payments...');
+    console.log('Importing payments...');
     let paymentsImported = 0;
     for (const payment of paymentsData.payments) {
       await prisma.payment.create({
@@ -77,7 +80,7 @@ async function importPaymentsData() {
     console.log(`✓ Imported ${paymentsImported} payments`);
 
     // Import payment transactions
-    console.log('📥 Importing payment transactions...');
+    console.log('Importing payment transactions...');
     let transactionsImported = 0;
     for (const transaction of paymentsData.paymentTransactions) {
       await prisma.paymentTransaction.create({

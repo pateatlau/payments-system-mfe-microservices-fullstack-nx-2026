@@ -47,7 +47,7 @@ async function exportAdminData() {
     // Export system config
     console.log('📊 Exporting system config...');
     const systemConfig = await prisma.systemConfig.findMany({
-      orderBy: { createdAt: 'asc' },
+      orderBy: { key: 'asc' },
     });
     console.log(`✓ Exported ${systemConfig.length} system config entries`);
 

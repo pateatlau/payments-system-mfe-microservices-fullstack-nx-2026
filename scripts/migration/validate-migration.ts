@@ -10,10 +10,10 @@
  */
 
 import { PrismaClient as LegacyPrisma } from '@prisma/client';
-import { PrismaClient as AuthPrisma } from '../../../apps/auth-service/node_modules/.prisma/auth-client';
-import { PrismaClient as PaymentsPrisma } from '../../../apps/payments-service/node_modules/.prisma/payments-client';
-import { PrismaClient as AdminPrisma } from '../../../apps/admin-service/node_modules/.prisma/admin-client';
-import { PrismaClient as ProfilePrisma } from '../../../apps/profile-service/node_modules/.prisma/profile-client';
+import { PrismaClient as AuthPrisma } from '../../apps/auth-service/node_modules/.prisma/auth-client';
+import { PrismaClient as PaymentsPrisma } from '../../apps/payments-service/node_modules/.prisma/payments-client';
+import { PrismaClient as AdminPrisma } from '../../apps/admin-service/node_modules/.prisma/admin-client';
+import { PrismaClient as ProfilePrisma } from '../../apps/profile-service/node_modules/.prisma/profile-client';
 
 const legacyDb = new LegacyPrisma({
   datasources: {

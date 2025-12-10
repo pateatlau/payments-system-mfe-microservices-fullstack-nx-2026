@@ -41,9 +41,6 @@ model User {
   // Note: passwordHash NOT stored here (security - only in auth_db)
   // Note: This is a read-only copy for admin operations
 
-  auditLogs AuditLog[]
-  systemConfigUpdates SystemConfig[]
-
   @@index([email])
   @@index([role])
   @@map("users")
@@ -51,7 +48,7 @@ model User {
 
 model AuditLog {
   id           String   @id @default(uuid())
-  userId       String?  @map("user_id")         // Reference to User ID (no FK)
+  userId       String?  @map("user_id")         // Reference to User ID (no FK - string only)
   action       String
   resourceType String?  @map("resource_type")
   resourceId   String?  @map("resource_id")
@@ -71,7 +68,7 @@ model SystemConfig {
   value       Json
   description String?
   updatedAt   DateTime @default(now()) @updatedAt @map("updated_at")
-  updatedBy   String?  @map("updated_by")       // Reference to User ID (no FK)
+  updatedBy   String?  @map("updated_by")       // Reference to User ID (no FK - string only)
 
   @@map("system_config")
 }

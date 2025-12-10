@@ -9,7 +9,7 @@
  * Usage: pnpm tsx scripts/migration/import-admin-data.ts
  */
 
-import { PrismaClient } from '../../../apps/admin-service/node_modules/.prisma/admin-client';
+import { PrismaClient } from '../../apps/admin-service/node_modules/.prisma/admin-client';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -49,8 +49,11 @@ async function importAdminData() {
     console.log(`   - System Config: ${adminData.metadata.configCount}`);
     console.log('');
 
+    // Note: Users are imported separately (export-auth-data.ts → import-admin-data-users.ts)
+    // This script only imports audit logs and system config
+
     // Import audit logs
-    console.log('📥 Importing audit logs...');
+    console.log('Importing audit logs...');
     let logsImported = 0;
     for (const log of adminData.auditLogs) {
       await prisma.auditLog.create({
@@ -71,7 +74,7 @@ async function importAdminData() {
     console.log(`✓ Imported ${logsImported} audit logs`);
 
     // Import system config
-    console.log('📥 Importing system config...');
+    console.log('Importing system config...');
     let configImported = 0;
     for (const config of adminData.systemConfig) {
       await prisma.systemConfig.create({

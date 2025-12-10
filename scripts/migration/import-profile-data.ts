@@ -9,7 +9,7 @@
  * Usage: pnpm tsx scripts/migration/import-profile-data.ts
  */
 
-import { PrismaClient } from '../../../apps/profile-service/node_modules/.prisma/profile-client';
+import { PrismaClient } from '../../apps/profile-service/node_modules/.prisma/profile-client';
 import * as fs from 'fs';
 import * as path from 'path';
 

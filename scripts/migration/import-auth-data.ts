@@ -9,7 +9,7 @@
  * Usage: pnpm tsx scripts/migration/import-auth-data.ts
  */
 
-import { PrismaClient } from '../../../apps/auth-service/node_modules/.prisma/auth-client';
+import { PrismaClient } from '../../apps/auth-service/node_modules/.prisma/auth-client';
 import * as fs from 'fs';
 import * as path from 'path';
 
