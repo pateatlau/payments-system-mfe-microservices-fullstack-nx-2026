@@ -200,6 +200,7 @@
     "rabbitmq:test:persistence:publish": "pnpm tsx scripts/test-event-persistence.ts publish",
     "rabbitmq:test:persistence:verify": "pnpm tsx scripts/test-event-persistence.ts verify",
     "rabbitmq:monitor-dlq": "pnpm tsx scripts/monitor-dlq.ts",
+    "test:api-gateway:proxy": "./scripts/test-api-gateway-proxy.sh",
     "test:workflow:register-login": "echo 'Testing complete registration → login workflow...' && pnpm test:api:register && sleep 1 && pnpm test:api:login && echo 'Workflow test complete'",
     "test:workflow:full": "echo 'Testing full user workflow (register → login → me → refresh → logout)...' && echo 'See manual-testing-guide.md for full workflow script'",
     "test:security:rate-limit": "echo 'Testing rate limiting (may take a moment)...' && for i in {1..105}; do curl -s http://localhost:3000/health > /dev/null && echo -n '.'; done && echo '' && echo 'Check if rate limit was triggered'",
