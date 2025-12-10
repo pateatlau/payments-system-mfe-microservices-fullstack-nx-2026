@@ -2,8 +2,15 @@
 // Database: payments_db (port 5433)
 // 
 // This schema defines the payment processing data model.
-// User references (senderId, recipientId) are stored as strings without foreign keys.
-// User validation happens at the API level by calling the Auth Service.
+// 
+// ZERO COUPLING PATTERN: Payments Service maintains a minimal denormalized User table
+// synchronized via RabbitMQ events from Auth Service. This enables recipient validation
+// without coupling to Auth Service API.
+//
+// Event Synchronization Flow:
+// 1. Auth Service publishes: auth.user.created, auth.user.updated, auth.user.deleted
+// 2. Payments Service subscribes and updates local User table
+// 3. Payment creation validates recipients against local User table (no API calls)
 
 generator client {
   provider = "prisma-client-js"
@@ -29,10 +36,28 @@ enum PaymentType {
   recurring
 }
 
+// Minimal denormalized User table - synchronized via RabbitMQ events from Auth Service
+// Only stores fields needed for payment validation (id, email)
+// This enables zero-coupling: Payments Service can validate recipients without calling Auth Service API
+model User {
+  id    String  @id
+  email String  @unique
+  // Note: Only minimal fields needed for recipient validation
+  // Full user data is in auth_db, this is just for validation
+
+  sentPayments     Payment[] @relation("SentPayments")
+  receivedPayments Payment[] @relation("ReceivedPayments")
+
+  @@index([email])
+  @@map("users")
+}
+
 model Payment {
   id                String        @id @default(uuid())
-  senderId          String        @map("sender_id")        // Reference to User ID (no FK)
-  recipientId       String?       @map("recipient_id")     // Reference to User ID (no FK)
+  senderId          String        @map("sender_id")
+  sender            User          @relation("SentPayments", fields: [senderId], references: [id])
+  recipientId       String?       @map("recipient_id")
+  recipient         User?         @relation("ReceivedPayments", fields: [recipientId], references: [id])
   amount            Decimal       @db.Decimal(10, 2)
   currency          String        @default("USD")
   status            PaymentStatus

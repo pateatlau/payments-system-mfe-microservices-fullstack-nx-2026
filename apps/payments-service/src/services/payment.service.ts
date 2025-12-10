@@ -169,25 +169,23 @@ export const paymentService = {
     if (data.recipientId) {
       recipientId = data.recipientId;
     } else if (data.recipientEmail) {
-      // TODO (POC-3 Phase 3): Replace with Auth Service API call
-      // Users are now in auth_db, not payments_db
-      // Should call: GET /api/auth/users?email={recipientEmail}
-      // For now, this will fail - needs Auth Service integration
-      throw new ApiError(
-        501,
-        'NOT_IMPLEMENTED',
-        'Recipient lookup by email requires Auth Service integration (POC-3 Phase 3)'
-      );
-      
-      // OLD CODE (removed - users are in auth-service now):
-      // const recipient = await db.user.findUnique({
-      //   where: { email: data.recipientEmail },
-      //   select: { id: true },
-      // });
-      // if (!recipient) {
-      //   throw new ApiError(404, 'RECIPIENT_NOT_FOUND', 'Recipient user not found');
-      // }
-      // recipientId = recipient.id;
+      // ZERO COUPLING: Lookup recipient in local denormalized User table
+      // This table is synchronized via RabbitMQ events from Auth Service (Phase 4)
+      // No API calls to Auth Service - maintains zero coupling
+      const recipient = await db.user.findUnique({
+        where: { email: data.recipientEmail },
+        select: { id: true },
+      });
+
+      if (!recipient) {
+        throw new ApiError(
+          404,
+          'RECIPIENT_NOT_FOUND',
+          'Recipient user not found'
+        );
+      }
+
+      recipientId = recipient.id;
     } else {
       throw new ApiError(
         400,

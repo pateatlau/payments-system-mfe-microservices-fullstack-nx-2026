@@ -5,21 +5,26 @@
 import { prisma as db } from '../lib/prisma';
 
 /**
- * TODO (POC-3 Phase 3): Admin Service User Management Migration
+ * Admin Service - Zero Coupling Pattern
  *
- * The admin service currently uses db.user operations, but users are now in auth-service (auth_db).
- * All user operations (findMany, findUnique, update, create, delete) need to be migrated to
- * use the Auth Service API instead of direct database access.
+ * ZERO COUPLING ARCHITECTURE:
+ * Admin Service maintains a denormalized User table in admin_db, synchronized via
+ * RabbitMQ events from Auth Service. This enables user management operations without
+ * any API coupling between services.
  *
- * Migration plan:
- * - Replace db.user.findMany() with GET /api/auth/users
- * - Replace db.user.findUnique() with GET /api/auth/users/:id
- * - Replace db.user.update() with PUT /api/auth/users/:id
- * - Replace db.user.create() with POST /api/auth/users (if admin can create users)
- * - Replace db.user.delete() with DELETE /api/auth/users/:id
+ * Event Synchronization (Phase 4 - RabbitMQ Integration):
+ * - Auth Service publishes: auth.user.created, auth.user.updated, auth.user.deleted
+ * - Admin Service subscribes to these events and updates local User table
+ * - All admin operations query local User table (no API calls to Auth Service)
  *
- * The admin_db schema only contains AuditLog and SystemConfig models.
- * User references (userId, updatedBy) are stored as strings without foreign keys.
+ * Benefits:
+ * - Zero coupling: No direct API calls between services
+ * - Fast queries: Local database access
+ * - Fault tolerance: Admin Service works even if Auth Service is down
+ * - Eventual consistency: User data syncs via events (acceptable for admin operations)
+ *
+ * Note: User updates from Admin Service will need to be handled via events back to
+ * Auth Service (Phase 4), or Admin Service can publish events that Auth Service subscribes to.
  */
 import type { UserRole } from 'shared-types';
 import { ApiError } from '../middleware/errorHandler';
