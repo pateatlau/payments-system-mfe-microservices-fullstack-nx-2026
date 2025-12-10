@@ -89,12 +89,14 @@ Before starting Phase 2, we should complete the remaining Phase 1 tasks:
 **Objective:** Add all POC-3 infrastructure services to Docker Compose
 
 **Reference Documents:**
+
 - `docs/POC-3-Implementation/implementation-plan.md` - Sub-task 1.3.1 (lines ~700-750)
 - `docs/POC-3-Implementation/database-migration-strategy.md` - Database schemas
 - `docs/POC-3-Implementation/event-hub-migration-strategy.md` - RabbitMQ topology
 - `docs/POC-3-Implementation/nginx-configuration-design.md` - nginx configuration
 
 **Services to Add:**
+
 - nginx (ports 80, 443)
 - auth_db (PostgreSQL, port 5432)
 - payments_db (PostgreSQL, port 5433)
@@ -105,6 +107,7 @@ Before starting Phase 2, we should complete the remaining Phase 1 tasks:
 - Keep postgres (legacy, port 5436 for migration compatibility)
 
 **Detailed Steps:**
+
 1. Read current `docker-compose.yml`
 2. Add nginx service with volumes for config and SSL
 3. Add 4 separate PostgreSQL services (auth_db, payments_db, admin_db, profile_db)
@@ -118,6 +121,7 @@ Before starting Phase 2, we should complete the remaining Phase 1 tasks:
 11. Update documentation (task-list.md and implementation-plan.md)
 
 **Verification:**
+
 - [ ] All services defined in docker-compose.yml
 - [ ] Ports configured correctly
 - [ ] Volumes configured
@@ -127,6 +131,7 @@ Before starting Phase 2, we should complete the remaining Phase 1 tasks:
 - [ ] Documentation updated
 
 **Acceptance Criteria:**
+
 - All POC-3 services defined in Docker Compose
 - Configuration syntax valid
 - Ready for `docker-compose up` (verification in Phase 2)
