@@ -271,11 +271,13 @@ The following major features have been implemented and committed:
 ### Latest Integration Fixes (Dec 11, 2026)
 
 **Commit:** `7d7b76f` - Add WebSocketProvider to Admin and Payments MFEs for standalone mode
+
 - Fixed "useWebSocketContext must be used within WebSocketProvider" error
 - Admin and Payments MFEs now support standalone mode with full WebSocket functionality
 - Both MFEs remain compatible with shell mode via Module Federation
 
 **Commit:** `5b4f43f` - Fix database migration: implement service-specific Prisma clients and resolve integration issues
+
 - **Backend fixes:**
   - Migrated all services from shared `@prisma/client` to service-specific Prisma clients
   - Fixed Prisma client imports with dynamic `require()` using `process.cwd()` paths
@@ -294,6 +296,7 @@ The following major features have been implemented and committed:
   - Fixed payments MFE API client to avoid double `/payments` in URL
 
 **Current System State:**
+
 - ✅ Shell (http://localhost:4200) - Fully operational with all remote MFEs integrated
 - ✅ Standalone MFEs - All working (Admin: 4203, Payments: 4202, Auth: 4201)
 - ✅ Backend services - All operational with correct database clients
