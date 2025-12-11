@@ -42,6 +42,7 @@ import healthRoutes from './routes/health';
 import proxyRoutes from './routes/proxy-routes';
 import { logger } from './utils/logger';
 import { createWebSocketServer } from './websocket/server';
+import { initSentry, initSentryErrorHandler } from '@mfe-poc/observability';
 
 /**
  * Create Express application
@@ -51,6 +52,11 @@ const app = express();
 /**
  * Middleware Setup (order matters!)
  */
+
+// 0. Initialize Sentry (must be first, before other middleware)
+initSentry(app, {
+  serviceName: 'api-gateway',
+});
 
 // 1. Security headers
 app.use(securityMiddleware);
@@ -87,6 +93,9 @@ app.use(proxyRoutes);
 
 // 404 handler
 app.use(notFoundHandler);
+
+// Sentry error handler (must be before general error handler)
+initSentryErrorHandler(app);
 
 // Error handler
 app.use(errorHandler);

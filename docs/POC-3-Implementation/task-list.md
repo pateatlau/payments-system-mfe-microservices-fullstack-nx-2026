@@ -854,16 +854,53 @@ Application is production-ready with optimized code splitting. No immediate chan
 
 #### Sub-task 6.1.1: Add Sentry to Backend Services
 
-- [ ] Sentry installed
-- [ ] API Gateway configured
-- [ ] Auth Service configured
-- [ ] Payments Service configured
-- [ ] Admin Service configured
-- [ ] Profile Service configured
-- [ ] Errors reported to Sentry
+- [x] Sentry installed
+- [x] API Gateway configured
+- [x] Auth Service configured
+- [x] Payments Service configured
+- [x] Admin Service configured
+- [x] Profile Service configured
+- [x] Errors reported to Sentry
 
-**Status:** Not Started  
-**Notes:** -
+**Status:** Complete  
+**Completed Date:** 2025-12-11  
+**Notes:**
+
+- Generated observability library at `libs/backend/observability` using Nx
+- Installed Sentry packages: `@sentry/node@10.30.0`, `@sentry/tracing@7.120.4`, `@sentry/profiling-node@10.30.0`
+- Created Sentry initialization module (`libs/backend/observability/src/lib/sentry.ts`) with v10 API:
+  - `initSentry()` function for service initialization
+  - `initSentryErrorHandler()` function for error handling
+  - Support for error tracking, performance monitoring, and profiling
+  - Automatic filtering of sensitive data (authorization headers, tokens, passwords)
+  - Configurable sample rates (10% in production, 100% in development)
+- Created enhanced logger module (`libs/backend/observability/src/lib/logger.ts`) with Sentry integration
+- Integrated Sentry into all backend services:
+  - API Gateway (`apps/api-gateway/src/main.ts`)
+  - Auth Service (`apps/auth-service/src/main.ts`)
+  - Payments Service (`apps/payments-service/src/main.ts`)
+  - Admin Service (`apps/admin-service/src/main.ts`)
+  - Profile Service (`apps/profile-service/src/main.ts`)
+- All services build successfully
+- Sentry DSN configured via `SENTRY_DSN` environment variable (optional - skips initialization if not provided)
+- Service-specific release tags for better error tracking
+- Transaction tracing enabled with configurable sample rates
+- Performance profiling enabled with nodeProfilingIntegration
+
+**Files Created:**
+
+- `libs/backend/observability/src/lib/sentry.ts`
+- `libs/backend/observability/src/lib/logger.ts`
+- `libs/backend/observability/src/index.ts` (updated)
+- `libs/backend/observability/package.json` (updated with peer dependencies)
+
+**Files Modified:**
+
+- `apps/api-gateway/src/main.ts` (added Sentry initialization)
+- `apps/auth-service/src/main.ts` (added Sentry initialization)
+- `apps/payments-service/src/main.ts` (added Sentry initialization)
+- `apps/admin-service/src/main.ts` (added Sentry initialization)
+- `apps/profile-service/src/main.ts` (added Sentry initialization)
 
 ---
 

@@ -9,8 +9,14 @@ import { logger } from './utils/logger';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 import healthRoutes from './routes/health';
 import { paymentRoutes, webhookRouter } from './routes/payment';
+import { initSentry, initSentryErrorHandler } from '@mfe-poc/observability';
 
 const app = express();
+
+// Initialize Sentry (must be first, before other middleware)
+initSentry(app, {
+  serviceName: 'payments-service',
+});
 
 // CORS - allow frontend MFEs (shell/auth/payments/admin)
 const allowedOrigins = [
@@ -54,6 +60,9 @@ app.use(paymentRoutes); // Protected payment endpoints
 
 // 404 Handler
 app.use(notFoundHandler);
+
+// Sentry error handler (must be before general error handler)
+initSentryErrorHandler(app);
 
 // Error Handler
 app.use(errorHandler);

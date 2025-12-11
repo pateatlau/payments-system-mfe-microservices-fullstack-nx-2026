@@ -12,8 +12,14 @@ import logger from './utils/logger';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 import healthRoutes from './routes/health';
 import profileRoutes from './routes/profile';
+import { initSentry, initSentryErrorHandler } from '@mfe-poc/observability';
 
 const app = express();
+
+// Initialize Sentry (must be first, before other middleware)
+initSentry(app, {
+  serviceName: 'profile-service',
+});
 
 // Security middleware
 app.use(helmet());
@@ -78,6 +84,9 @@ app.use('/api/profile', profileRoutes);
 
 // 404 handler
 app.use(notFoundHandler);
+
+// Sentry error handler (must be before general error handler)
+initSentryErrorHandler(app);
 
 // Error handler (must be last)
 app.use(errorHandler);

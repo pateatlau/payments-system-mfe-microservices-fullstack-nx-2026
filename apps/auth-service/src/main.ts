@@ -11,6 +11,7 @@ import healthRoutes from './routes/health';
 import authRoutes from './routes/auth';
 import { logger } from './utils/logger';
 import cors from 'cors';
+import { initSentry, initSentryErrorHandler } from '@mfe-poc/observability';
 
 /**
  * Create Express application
@@ -20,6 +21,11 @@ const app = express();
 /**
  * Middleware Setup
  */
+
+// Initialize Sentry (must be first, before other middleware)
+initSentry(app, {
+  serviceName: 'auth-service',
+});
 
 // CORS - allow frontend MFEs (shell/auth/payments/admin)
 const allowedOrigins = [
@@ -72,6 +78,9 @@ app.use(authRoutes);
 
 // 404 handler
 app.use(notFoundHandler);
+
+// Sentry error handler (must be before general error handler)
+initSentryErrorHandler(app);
 
 // Error handler
 app.use(errorHandler);
