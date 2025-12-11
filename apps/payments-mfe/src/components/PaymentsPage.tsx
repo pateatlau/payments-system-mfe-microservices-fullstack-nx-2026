@@ -24,6 +24,7 @@ import {
   useCreatePayment,
   useUpdatePayment,
   useDeletePayment,
+  usePaymentUpdates,
 } from '../hooks';
 import type { Payment } from '../api/types';
 import { PaymentType, PaymentStatus } from 'shared-types';
@@ -133,6 +134,9 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingPayment, setEditingPayment] = useState<Payment | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+
+  // Real-time payment updates via WebSocket
+  usePaymentUpdates();
 
   // Fetch payments
   const {

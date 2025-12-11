@@ -21,6 +21,7 @@ import { UserManagement } from './UserManagement';
 import { AuditLogs } from './AuditLogs';
 import { SystemHealth } from './SystemHealth';
 import { useDashboardStats, useRecentActivity } from '../hooks/useDashboard';
+import { useDashboardUpdates } from '../hooks/useDashboardUpdates';
 import type { DashboardStat } from './DashboardStats';
 import type { ActivityItem } from './RecentActivity';
 import type { QuickAction } from './QuickActions';
@@ -58,6 +59,9 @@ function mapActionToStatus(action: string): 'success' | 'warning' | 'error' {
 export function AdminDashboard() {
   const { user } = useAuthStore();
   const { activeTab, setActiveTab } = useDashboardTabs();
+
+  // Real-time dashboard updates via WebSocket
+  const { recentActivity: wsActivity } = useDashboardUpdates();
 
   // Fetch dashboard data using TanStack Query
   const {

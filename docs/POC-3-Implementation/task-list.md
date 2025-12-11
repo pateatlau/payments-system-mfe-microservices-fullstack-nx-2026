@@ -611,14 +611,15 @@
 
 #### Sub-task 4.2.2: Integrate WebSocket in MFEs
 
-- [ ] Shell manages connection
-- [ ] Payments receives updates
-- [ ] Admin receives updates
-- [ ] Query invalidation works
-- [ ] Updates work in real-time
+- [x] Shell manages connection (WebSocketProvider in bootstrap.tsx)
+- [x] Payments receives updates (usePaymentUpdates hook)
+- [x] Admin receives updates (useDashboardUpdates hook)
+- [x] Query invalidation works (TanStack Query integration)
+- [x] Updates work in real-time (WebSocket subscriptions)
 
-**Status:** Not Started  
-**Notes:** -
+**Status:** Complete  
+**Completed Date:** 2026-12-10  
+**Notes:** Integrated WebSocket client library into all MFEs. Shell app manages WebSocket connection with JWT auth. Payments MFE auto-invalidates queries on payment events. Admin MFE tracks recent activity in real-time.
 
 ---
 

@@ -1,6 +1,8 @@
 import { StrictMode } from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { WebSocketProvider } from 'shared-websocket';
+import { useAuthStore } from 'shared-auth-store';
 import * as ReactDOM from 'react-dom/client';
 import App from './app/app';
 import './styles.css';
@@ -28,13 +30,19 @@ const queryClient = new QueryClient({
   },
 });
 
-const root = ReactDOM.createRoot(
-  document.getElementById('root') as HTMLElement
-);
+/**
+ * AppWrapper Component
+ * Wraps the app with WebSocketProvider that needs access to auth state
+ */
+function AppWrapper() {
+  // Get auth token for WebSocket authentication
+  const accessToken = useAuthStore((state) => state.accessToken);
 
-root.render(
-  <StrictMode>
-    <QueryClientProvider client={queryClient}>
+  // WebSocket URL (nginx proxy route)
+  const wsUrl = process.env['NX_WS_URL'] || 'wss://localhost/ws';
+
+  return (
+    <WebSocketProvider url={wsUrl} token={accessToken || undefined} debug={process.env['NODE_ENV'] === 'development'}>
       <BrowserRouter>
         <App
           remotes={{
@@ -45,6 +53,18 @@ root.render(
           }}
         />
       </BrowserRouter>
+    </WebSocketProvider>
+  );
+}
+
+const root = ReactDOM.createRoot(
+  document.getElementById('root') as HTMLElement
+);
+
+root.render(
+  <StrictMode>
+    <QueryClientProvider client={queryClient}>
+      <AppWrapper />
     </QueryClientProvider>
   </StrictMode>
 );

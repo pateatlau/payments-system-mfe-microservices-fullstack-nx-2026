@@ -132,6 +132,10 @@ module.exports = {
         __dirname,
         '../../libs/shared-design-system/src/index.ts'
       ),
+      'shared-websocket': path.resolve(
+        __dirname,
+        '../../libs/shared-websocket/src/index.ts'
+      ),
     },
   },
   module: {
