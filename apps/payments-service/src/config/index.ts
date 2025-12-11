@@ -30,6 +30,9 @@ export const config = {
     exchange: process.env['RABBITMQ_EXCHANGE'] || 'payments_events',
   },
 
+  // Redis (POC-3 Phase 5.2: Caching)
+  redisUrl: process.env['REDIS_URL'] || 'redis://localhost:6379',
+
   // Logging
   logLevel: process.env['LOG_LEVEL'] || 'info',
 

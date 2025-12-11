@@ -1,5 +1,12 @@
 /**
  * Payment Service - Business Logic
+ * 
+ * POC-3 Phase 5.2: Redis Caching Integration
+ * - Cache payment lookups (by ID)
+ * - Cache payment lists (by user, paginated)
+ * - Cache payment reports
+ * - Invalidate cache on payment creation/updates
+ * - 1 minute TTL for payment data (frequently changing)
  */
 
 import { prisma as db } from '../lib/prisma';
@@ -10,6 +17,7 @@ import type {
   CreatePaymentRequest,
   UpdatePaymentStatusRequest,
 } from '../validators/payment.validators';
+import { cache, CacheKeys, CacheTags, PaymentsCacheTTL } from '../lib/cache';
 
 /**
  * Payment reports data structure
@@ -36,6 +44,22 @@ export const paymentService = {
   ) {
     const { page, limit, sort, order, status, type, startDate, endDate } =
       query;
+
+    // Generate cache key based on query parameters
+    const cacheKey = CacheKeys.paymentList(
+      userId,
+      page
+    ) + `:${sort}:${order}:${status || 'all'}:${type || 'all'}:${startDate || 'none'}:${endDate || 'none'}`;
+
+    // Try cache first
+    const cached = await cache.get<{
+      payments: any[];
+      pagination: any;
+    }>(cacheKey);
+
+    if (cached) {
+      return cached;
+    }
 
     const skip = (page - 1) * limit;
 
@@ -96,7 +120,7 @@ export const paymentService = {
       },
     });
 
-    return {
+    const result = {
       payments,
       pagination: {
         page,
@@ -105,12 +129,42 @@ export const paymentService = {
         totalPages: Math.ceil(total / limit),
       },
     };
+
+    // Cache the result
+    await cache.set(cacheKey, result, {
+      ttl: PaymentsCacheTTL.PAYMENT_LIST,
+      tags: [CacheTags.payments, CacheTags.user(userId)],
+    });
+
+    return result;
   },
 
   /**
    * Get payment by ID with role-based access check
    */
   async getPaymentById(paymentId: string, userId: string, userRole: UserRole) {
+    // Try cache first
+    const cacheKey = CacheKeys.payment(paymentId);
+    const cached = await cache.get<any>(cacheKey);
+
+    if (cached) {
+      // Still need to check access even with cached data
+      if (userRole !== 'ADMIN') {
+        const hasAccess =
+          cached.senderId === userId || cached.recipientId === userId;
+
+        if (!hasAccess) {
+          throw new ApiError(
+            403,
+            'FORBIDDEN',
+            'You do not have access to this payment'
+          );
+        }
+      }
+      return cached;
+    }
+
+    // Cache miss - fetch from database
     const payment = await db.payment.findUnique({
       where: { id: paymentId },
       include: {
@@ -151,6 +205,16 @@ export const paymentService = {
         );
       }
     }
+
+    // Cache the payment
+    await cache.set(cacheKey, payment, {
+      ttl: PaymentsCacheTTL.PAYMENT_BY_ID,
+      tags: [
+        CacheTags.payments,
+        CacheTags.user(payment.senderId),
+        CacheTags.user(payment.recipientId),
+      ],
+    });
 
     return payment;
   },
@@ -243,6 +307,12 @@ export const paymentService = {
       },
     });
 
+    // Invalidate payment lists for both sender and recipient
+    await Promise.all([
+      cache.invalidateByTag(CacheTags.user(userId)),
+      cache.invalidateByTag(CacheTags.user(recipientId)),
+    ]);
+
     // TODO: Publish event: payment:created
 
     return payment;
@@ -308,6 +378,13 @@ export const paymentService = {
       },
     });
 
+    // Invalidate payment cache
+    await Promise.all([
+      cache.delete(CacheKeys.payment(paymentId)),
+      cache.invalidateByTag(CacheTags.user(payment.senderId)),
+      cache.invalidateByTag(CacheTags.user(payment.recipientId)),
+    ]);
+
     // TODO: Publish event: payment:status:updated
 
     return updatedPayment;
@@ -326,6 +403,15 @@ export const paymentService = {
     // Default to last 30 days if not provided
     const start = startDate || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
     const end = endDate || new Date();
+
+    // Generate cache key based on user, role, and date range
+    const cacheKey = `reports:${userId}:${userRole}:${start.getTime()}:${end.getTime()}`;
+
+    // Try cache first
+    const cached = await cache.get<PaymentReportsData>(cacheKey);
+    if (cached) {
+      return cached;
+    }
 
     // Build where clause based on role
     const where: Record<string, unknown> = {
@@ -371,7 +457,7 @@ export const paymentService = {
       byType[p.type] = (byType[p.type] || 0) + 1;
     });
 
-    return {
+    const result = {
       totalPayments,
       totalAmount,
       byStatus,
@@ -381,5 +467,13 @@ export const paymentService = {
         end: end.toISOString(),
       },
     };
+
+    // Cache the report (longer TTL since it's aggregated data)
+    await cache.set(cacheKey, result, {
+      ttl: PaymentsCacheTTL.PAYMENT_REPORTS,
+      tags: [CacheTags.payments, CacheTags.user(userId)],
+    });
+
+    return result;
   },
 };

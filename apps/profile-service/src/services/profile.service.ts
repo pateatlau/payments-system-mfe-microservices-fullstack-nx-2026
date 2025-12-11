@@ -1,9 +1,16 @@
 /**
  * Profile Service - Business Logic
+ * 
+ * POC-3 Phase 5.2: Redis Caching Integration
+ * - Cache profile lookups
+ * - Cache user preferences
+ * - Invalidate cache on profile updates
+ * - 5 minute TTL for profile data
  */
 
 import { prisma } from '../lib/prisma';
 import logger from '../utils/logger';
+import { cache, CacheKeys, CacheTags, ProfileCacheTTL } from '../lib/cache';
 
 export interface UpdateProfileData {
   phoneNumber?: string;
@@ -31,6 +38,14 @@ export const profileService = {
   async getOrCreateProfile(userId: string) {
     logger.debug('Getting profile for user', { userId });
 
+    // Try cache first
+    const cacheKey = CacheKeys.profile(userId);
+    const cached = await cache.get<any>(cacheKey);
+
+    if (cached) {
+      return cached;
+    }
+
     // Try to find existing profile
     // Note: Profile Service doesn't have a User table (no relation)
     let profile = await prisma.userProfile.findUnique({
@@ -51,6 +66,12 @@ export const profileService = {
         },
       });
     }
+
+    // Cache the profile
+    await cache.set(cacheKey, profile, {
+      ttl: ProfileCacheTTL.PROFILE,
+      tags: [CacheTags.profiles, CacheTags.user(userId)],
+    });
 
     return profile;
   },
@@ -76,6 +97,9 @@ export const profileService = {
       },
     });
 
+    // Invalidate profile cache
+    await cache.invalidateByTag(CacheTags.user(userId));
+
     logger.info('Profile updated', { userId });
 
     return profile;
@@ -87,14 +111,29 @@ export const profileService = {
   async getPreferences(userId: string) {
     logger.debug('Getting preferences for user', { userId });
 
+    // Try cache first
+    const cacheKey = CacheKeys.profilePreferences(userId);
+    const cached = await cache.get<Record<string, unknown>>(cacheKey);
+
+    if (cached) {
+      return cached;
+    }
+
     // Ensure profile exists
     const profile = await this.getOrCreateProfile(userId);
 
     // Return preferences from JSON field
-    if (!profile || !profile.preferences) {
-      return {};
-    }
-    return (profile.preferences as Record<string, unknown>) || {};
+    const preferences = profile && profile.preferences
+      ? (profile.preferences as Record<string, unknown>)
+      : {};
+
+    // Cache the preferences
+    await cache.set(cacheKey, preferences, {
+      ttl: ProfileCacheTTL.PREFERENCES,
+      tags: [CacheTags.profiles, CacheTags.user(userId)],
+    });
+
+    return preferences;
   },
 
   /**
@@ -121,6 +160,9 @@ export const profileService = {
         preferences: updatedPrefs,
       },
     });
+
+    // Invalidate profile and preferences cache
+    await cache.invalidateByTag(CacheTags.user(userId));
 
     logger.info('Preferences updated', { userId });
 

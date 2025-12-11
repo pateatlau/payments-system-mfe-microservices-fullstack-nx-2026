@@ -19,6 +19,8 @@ const configSchema = z.object({
   }),
   apiGatewayUrl: z.string().url().default('http://localhost:3000'),
   eventHubUrl: z.string().url().default('http://localhost:3005'),
+  // Redis (POC-3 Phase 5.2: Caching)
+  redisUrl: z.string().url().default('redis://localhost:6379'),
   logLevel: z.enum(['error', 'warn', 'info', 'debug']).default('info'),
   jwtSecret: z.string().min(1),
   defaultPageSize: z.number().default(10),
@@ -36,6 +38,7 @@ const config = configSchema.parse({
   },
   apiGatewayUrl: process.env['NX_API_GATEWAY_URL'] || 'http://localhost:3000',
   eventHubUrl: process.env['NX_EVENT_HUB_URL'] || 'http://localhost:3005',
+  redisUrl: process.env['REDIS_URL'] || 'redis://localhost:6379',
   logLevel: process.env['LOG_LEVEL'] || 'info',
   jwtSecret:
     process.env['JWT_SECRET'] ||

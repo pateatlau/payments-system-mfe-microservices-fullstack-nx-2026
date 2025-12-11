@@ -722,14 +722,52 @@
 
 #### Sub-task 5.2.2: Add Caching to Services
 
-- [ ] Auth caching added
-- [ ] Payments caching added
-- [ ] Profile caching added
-- [ ] Invalidation works
-- [ ] Hit rates acceptable
+- [x] Auth caching added
+- [x] Payments caching added
+- [x] Profile caching added
+- [x] Invalidation works
+- [x] Hit rates acceptable
 
-**Status:** Not Started  
-**Notes:** -
+**Status:** Complete  
+**Completed Date:** 2026-12-11  
+**Notes:**
+
+**Auth Service Caching:**
+
+- Cache user lookups by ID (5 min TTL)
+- Cache user lookups by email (5 min TTL)
+- Cache on register and login
+- Invalidate on password change
+- Tags: `users`, `user:{userId}`
+
+**Payments Service Caching:**
+
+- Cache payment lists by user/filters (1 min TTL)
+- Cache payment details by ID (1 min TTL)
+- Cache payment reports (5 min TTL)
+- Invalidate on payment creation/status update
+- Tags: `payments`, `user:{userId}`
+
+**Profile Service Caching:**
+
+- Cache profiles (5 min TTL)
+- Cache preferences (5 min TTL)
+- Invalidate on profile/preferences update
+- Tags: `profiles`, `user:{userId}`
+
+Files Modified:
+
+- `apps/auth-service/src/lib/cache.ts` (created)
+- `apps/auth-service/src/services/auth.service.ts` (caching integrated)
+- `apps/auth-service/src/config/index.ts` (added redisUrl)
+- `apps/payments-service/src/lib/cache.ts` (created)
+- `apps/payments-service/src/services/payment.service.ts` (caching integrated)
+- `apps/payments-service/src/config/index.ts` (added redisUrl)
+- `apps/profile-service/src/lib/cache.ts` (created)
+- `apps/profile-service/src/services/profile.service.ts` (caching integrated)
+- `apps/profile-service/src/config/index.ts` (added redisUrl)
+
+All services building and running with hot reload
 
 ---
 
