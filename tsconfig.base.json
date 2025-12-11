@@ -49,7 +49,10 @@
       ],
       "cache": ["libs/backend/cache/src/index.ts"],
       "@mfe-poc/cache": ["libs/backend/cache/src/index.ts"],
-      "@mfe-poc/observability": ["libs/backend/observability/src/index.ts"]
+      "@mfe-poc/observability": ["libs/backend/observability/src/index.ts"],
+      "@mfe-poc/shared-observability": [
+        "libs/shared-observability/src/index.ts"
+      ]
     }
   },
   "files": [],

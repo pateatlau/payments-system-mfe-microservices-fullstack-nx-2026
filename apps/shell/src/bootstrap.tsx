@@ -1,4 +1,4 @@
-import { StrictMode } from 'react';
+import { StrictMode, useEffect } from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { WebSocketProvider } from 'shared-websocket';
@@ -7,6 +7,12 @@ import * as ReactDOM from 'react-dom/client';
 import App from './app/app';
 import './styles.css';
 import { registerServiceWorker } from './utils/register-sw';
+import {
+  initSentry,
+  SentryErrorBoundary,
+  setUser,
+  clearUser,
+} from '@mfe-poc/shared-observability';
 
 // Import remote components
 // This file (bootstrap.tsx) is dynamically imported, providing the async boundary
@@ -17,6 +23,11 @@ import {
   PaymentsPageRemote,
   AdminDashboardRemote,
 } from './remotes';
+
+// Initialize Sentry (must be done before rendering)
+initSentry({
+  appName: 'shell',
+});
 
 // Create a QueryClient for TanStack Query
 // This is needed for remote components that use TanStack Query (like PaymentsPage)
@@ -36,13 +47,27 @@ const queryClient = new QueryClient({
  * Wraps the app with WebSocketProvider that needs access to auth state
  */
 function AppWrapper() {
-  // Get auth token for WebSocket authentication
+  // Get auth token and user info for WebSocket authentication and Sentry
   const accessToken = useAuthStore(state => state.accessToken);
+  const user = useAuthStore(state => state.user);
 
   // WebSocket URL
   // Development: Direct to API Gateway (ws://localhost:3000/ws)
   // Production: Through nginx proxy (wss://localhost/ws)
   const wsUrl = process.env['NX_WS_URL'] || 'ws://localhost:3000/ws';
+
+  // Set user context in Sentry when user is available
+  useEffect(() => {
+    if (user) {
+      setUser({
+        id: user.id,
+        email: user.email,
+        username: user.name,
+      });
+    } else {
+      clearUser();
+    }
+  }, [user]);
 
   return (
     <WebSocketProvider
@@ -70,9 +95,49 @@ const root = ReactDOM.createRoot(
 
 root.render(
   <StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <AppWrapper />
-    </QueryClientProvider>
+    <SentryErrorBoundary
+      fallback={() => (
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            minHeight: '100vh',
+            padding: '2rem',
+            textAlign: 'center',
+          }}
+        >
+          <h2 style={{ marginBottom: '1rem', color: '#dc2626' }}>
+            Something went wrong
+          </h2>
+          <p style={{ marginBottom: '1rem', color: '#6b7280' }}>
+            We're sorry, but something unexpected happened. Please try
+            refreshing the page.
+          </p>
+          <button
+            onClick={() => {
+              window.location.reload();
+            }}
+            style={{
+              padding: '0.5rem 1rem',
+              backgroundColor: '#3b82f6',
+              color: 'white',
+              border: 'none',
+              borderRadius: '0.375rem',
+              cursor: 'pointer',
+            }}
+          >
+            Refresh Page
+          </button>
+        </div>
+      )}
+      showDialog={false}
+    >
+      <QueryClientProvider client={queryClient}>
+        <AppWrapper />
+      </QueryClientProvider>
+    </SentryErrorBoundary>
   </StrictMode>
 );
 

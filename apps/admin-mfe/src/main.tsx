@@ -2,7 +2,7 @@
  * Admin MFE Entry Point
  */
 
-import { StrictMode } from 'react';
+import { StrictMode, useEffect } from 'react';
 import * as ReactDOM from 'react-dom/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { WebSocketProvider } from 'shared-websocket';
@@ -12,6 +12,17 @@ import App from './app/app';
 
 // Import global styles (Tailwind CSS v4)
 import './styles.css';
+import {
+  initSentry,
+  SentryErrorBoundary,
+  setUser,
+  clearUser,
+} from '@mfe-poc/shared-observability';
+
+// Initialize Sentry (must be done before rendering)
+initSentry({
+  appName: 'admin-mfe',
+});
 
 // Create QueryClient for TanStack Query
 const queryClient = new QueryClient({
@@ -30,7 +41,21 @@ const queryClient = new QueryClient({
  */
 function AppWrapper() {
   const accessToken = useAuthStore(state => state.accessToken);
+  const user = useAuthStore(state => state.user);
   const wsUrl = process.env['NX_WS_URL'] || 'ws://localhost:3000/ws';
+
+  // Set user context in Sentry when user is available
+  useEffect(() => {
+    if (user) {
+      setUser({
+        id: user.id,
+        email: user.email,
+        username: user.name,
+      });
+    } else {
+      clearUser();
+    }
+  }, [user]);
 
   return (
     <WebSocketProvider
@@ -51,6 +76,8 @@ const root = ReactDOM.createRoot(
 );
 root.render(
   <StrictMode>
-    <AppWrapper />
+    <SentryErrorBoundary showDialog={false}>
+      <AppWrapper />
+    </SentryErrorBoundary>
   </StrictMode>
 );

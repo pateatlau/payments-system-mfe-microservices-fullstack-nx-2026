@@ -115,6 +115,10 @@ module.exports = {
         __dirname,
         '../../libs/shared-design-system/src/index.ts'
       ),
+      '@mfe-poc/shared-observability': path.resolve(
+        __dirname,
+        '../../libs/shared-observability/src/index.ts'
+      ),
     },
   },
   module: {

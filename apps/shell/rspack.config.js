@@ -141,6 +141,10 @@ module.exports = {
         __dirname,
         '../../libs/shared-websocket/src/index.ts'
       ),
+      '@mfe-poc/shared-observability': path.resolve(
+        __dirname,
+        '../../libs/shared-observability/src/index.ts'
+      ),
     },
   },
   module: {
