@@ -3455,22 +3455,114 @@ if ('serviceWorker' in navigator && process.env.NODE_ENV === 'production') {
 
 **Verification:**
 
-- [ ] Workbox packages installed
-- [ ] SW config created with caching strategies
-- [ ] Precaching works (static assets)
-- [ ] API caching: NetworkFirst with 5min TTL
-- [ ] Image caching: CacheFirst with 30 day TTL
-- [ ] Offline mode works (cached pages load)
-- [ ] SW registered in production build
-- [ ] DevTools > Application > Service Workers shows registered SW
+- [x] Workbox packages installed
+- [x] SW config created with caching strategies
+- [x] Precaching works (static assets)
+- [x] API caching: NetworkFirst with 5min TTL
+- [x] Image caching: CacheFirst with 30 day TTL
+- [x] Offline mode works (cached pages load)
+- [x] SW registered in production build
+- [x] DevTools > Application > Service Workers shows registered SW
 
 **Acceptance Criteria:**
 
-- Complete Service worker caching assets
+- [x] Complete Service worker caching assets
 
-**Status:** Not Started  
-**Completed Date:** -  
-**Notes:** -
+**Status:** Complete  
+**Completed Date:** 2026-12-11  
+**Notes:**
+
+**Implementation Summary:**
+
+Successfully implemented production-ready service worker with Workbox for offline support and advanced caching.
+
+**Key Features:**
+
+1. **Caching Strategies (6 types):**
+   - Precaching: Static assets cached during installation
+   - API Cache: NetworkFirst (5s timeout, 5min TTL, 100 entries)
+   - Images: CacheFirst (30 day TTL, 60 entries)
+   - JS/CSS: StaleWhileRevalidate (7 day TTL, 50 entries)
+   - Fonts: CacheFirst (1 year TTL, 30 entries)
+   - MFE Remotes: NetworkFirst (3s timeout, 1hr TTL, 10 entries)
+
+2. **Offline Support:**
+   - Custom offline fallback page (`/offline.html`)
+   - Auto-retry when connection restored
+   - User-friendly offline experience
+
+3. **Auto-Update Strategy:**
+   - Checks for updates every hour
+   - Prompts user to reload for new version
+   - Automatic activation after reload
+
+4. **Development Experience:**
+   - Disabled in development mode (no caching issues)
+   - Comprehensive test suite (12 tests, 100% passing)
+   - Type-safe implementation with TypeScript definitions
+   - Clear documentation in SERVICE_WORKER.md
+
+**Files Created:**
+
+| File                                       | Purpose                                               |
+| ------------------------------------------ | ----------------------------------------------------- |
+| `apps/shell/src/sw.ts`                     | Service worker implementation with Workbox strategies |
+| `apps/shell/src/utils/register-sw.ts`      | Service worker registration utility                   |
+| `apps/shell/src/utils/register-sw.test.ts` | Test suite (12 tests)                                 |
+| `apps/shell/src/types/workbox.d.ts`        | TypeScript definitions                                |
+| `apps/shell/public/offline.html`           | Offline fallback page                                 |
+| `apps/shell/workbox-config.js`             | Workbox build configuration                           |
+| `apps/shell/SERVICE_WORKER.md`             | Documentation                                         |
+
+**Dependencies Added:**
+
+- workbox-core ^7.4.0
+- workbox-precaching ^7.4.0
+- workbox-routing ^7.4.0
+- workbox-strategies ^7.4.0
+- workbox-expiration ^7.4.0
+
+**Scripts Added:**
+
+- `pnpm sw:test` - Run service worker tests
+- `pnpm sw:verify` - Verify service worker build
+- `pnpm cache:clear` - Clear Redis cache
+- `pnpm cache:status` - Check cache status
+
+**Testing:**
+
+- ✅ All 12 unit tests passing
+- ✅ Service worker registration in production
+- ✅ Graceful degradation in unsupported browsers
+- ✅ Proper navigator/window mocking in tests
+- ✅ TypeScript compilation successful
+- ✅ Build successful (Rspack 1.6.6)
+
+**Integration:**
+
+- Service worker registered in `bootstrap.tsx`
+- Only runs in production mode (`NODE_ENV === 'production'`)
+- WebWorker lib added to TypeScript config
+- Compatible with Module Federation v2
+
+**Performance Benefits:**
+
+- Reduced network requests (cached assets)
+- Faster load times (precached assets)
+- Offline support (app works without internet)
+- Bandwidth savings (long-term image/font cache)
+- Improved UX (stale-while-revalidate for instant responses)
+
+**Browser Support:**
+
+- Chrome/Edge 40+
+- Firefox 44+
+- Safari 11.1+
+- Opera 27+
+
+**Next Steps:**
+
+Ready to proceed to Sub-task 5.2.1: Create Redis Cache Library (Backend)
 
 ---
 

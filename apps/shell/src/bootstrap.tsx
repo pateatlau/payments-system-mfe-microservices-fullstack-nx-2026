@@ -6,6 +6,7 @@ import { useAuthStore } from 'shared-auth-store';
 import * as ReactDOM from 'react-dom/client';
 import App from './app/app';
 import './styles.css';
+import { registerServiceWorker } from './utils/register-sw';
 
 // Import remote components
 // This file (bootstrap.tsx) is dynamically imported, providing the async boundary
@@ -74,3 +75,6 @@ root.render(
     </QueryClientProvider>
   </StrictMode>
 );
+
+// Register service worker for offline support and caching (production only)
+registerServiceWorker();

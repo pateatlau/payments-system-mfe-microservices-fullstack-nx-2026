@@ -220,7 +220,11 @@
     "test:coverage:payments": "pnpm exec jest --projects apps/payments-service --coverage --coverageReporters=text --no-watchman",
     "test:coverage:admin": "pnpm exec jest --projects apps/admin-service --coverage --coverageReporters=text --no-watchman",
     "test:coverage:profile": "pnpm exec jest --projects apps/profile-service --coverage --coverageReporters=text --no-watchman",
-    "test:coverage:backend": "pnpm test:coverage:payments && pnpm test:coverage:admin && pnpm test:coverage:profile"
+    "test:coverage:backend": "pnpm test:coverage:payments && pnpm test:coverage:admin && pnpm test:coverage:profile",
+    "sw:test": "nx test shell --testPathPattern=register-sw",
+    "sw:verify": "echo 'Build shell app and check for sw.js in dist/apps/shell/' && pnpm build:shell && ls -la dist/apps/shell/sw.js 2>/dev/null && echo 'Service worker file exists' || echo 'Service worker file not found - check build configuration'",
+    "cache:clear": "pnpm redis:flush && echo 'Cache cleared'",
+    "cache:status": "pnpm redis:info | grep -A 10 'Keyspace' || echo 'No cached keys'"
   },
   "devDependencies": {
     "@babel/core": "^7.14.5",
@@ -313,6 +317,11 @@
     "redis": "^5.10.0",
     "tailwind-merge": "^3.4.0",
     "uuid": "^13.0.0",
+    "workbox-core": "^7.4.0",
+    "workbox-expiration": "^7.4.0",
+    "workbox-precaching": "^7.4.0",
+    "workbox-routing": "^7.4.0",
+    "workbox-strategies": "^7.4.0",
     "ws": "^8.18.3",
     "zod": "^3.25.76",
     "zustand": "^4.5.0"
