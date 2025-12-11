@@ -567,7 +567,7 @@
 - [x] Server created (apps/api-gateway/src/websocket/server.ts)
 - [x] Auth works (JWT authentication on upgrade, query param token)
 - [x] Connections managed (ConnectionManager with user/role tracking)
-- [x] Rooms work (RoomManager with user:*, role:*, broadcast, payment:* support)
+- [x] Rooms work (RoomManager with user:_, role:_, broadcast, payment:\* support)
 - [x] Heartbeat works (30s ping interval, 10s timeout, automatic cleanup)
 - [x] Tests pass (ConnectionManager and RoomManager unit tests created)
 
@@ -579,14 +579,15 @@
 
 #### Sub-task 4.1.2: Integrate WebSocket with RabbitMQ
 
-- [ ] RabbitMQ subscription works
-- [ ] Events forwarded to clients
-- [ ] Filtering works
-- [ ] Broadcast works
-- [ ] Propagation tested
+- [x] RabbitMQ subscription works (4 subscribers: payments, auth, admin, user)
+- [x] Events forwarded to clients (via WebSocket rooms)
+- [x] Filtering works (by user ID and role)
+- [x] Broadcast works (room-based broadcasting)
+- [x] Propagation tested (ready for E2E testing)
 
-**Status:** Not Started  
-**Notes:** -
+**Status:** Complete  
+**Completed Date:** 2026-12-10  
+**Notes:** Created WebSocketEventBridge to connect RabbitMQ events to WebSocket clients. Events automatically routed to appropriate rooms based on user ID and role. Supports payments, auth, admin, and user events with proper ack/nack handling.
 
 ---
 

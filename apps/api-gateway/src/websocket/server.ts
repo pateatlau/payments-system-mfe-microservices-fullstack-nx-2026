@@ -30,6 +30,7 @@ import { authenticateWebSocket } from './auth';
 import { ConnectionManager } from './connection-manager';
 import { RoomManager } from './room-manager';
 import { HeartbeatManager } from './heartbeat';
+import { WebSocketEventBridge } from './event-bridge';
 import { logger } from '../utils/logger';
 
 export interface WebSocketServerInstance {
@@ -37,6 +38,7 @@ export interface WebSocketServerInstance {
   connectionManager: ConnectionManager;
   roomManager: RoomManager;
   heartbeatManager: HeartbeatManager;
+  eventBridge: WebSocketEventBridge;
   broadcast: (roomName: string, message: WebSocketMessage) => void;
   broadcastAll: (message: WebSocketMessage) => void;
   getStats: () => ConnectionStats;
@@ -93,6 +95,7 @@ export function createWebSocketServer(
   const connectionManager = new ConnectionManager();
   const roomManager = new RoomManager();
   const heartbeatManager = new HeartbeatManager(wss, 30000, 10000);
+  const eventBridge = new WebSocketEventBridge(roomManager);
 
   // Statistics
   let messagesSent = 0;
@@ -270,6 +273,15 @@ export function createWebSocketServer(
   heartbeatManager.start();
 
   /**
+   * Start event bridge (connect to RabbitMQ)
+   */
+  eventBridge.start().catch((error: Error) => {
+    logger.error('Failed to start WebSocket Event Bridge', { error });
+    // Don't fail the entire WebSocket server if event bridge fails
+    // Events just won't be forwarded until it's fixed
+  });
+
+  /**
    * Broadcast message to room
    */
   function broadcast(roomName: string, message: WebSocketMessage): void {
@@ -309,6 +321,9 @@ export function createWebSocketServer(
   async function close(): Promise<void> {
     logger.info('Closing WebSocket server');
 
+    // Stop event bridge
+    await eventBridge.stop();
+
     // Stop heartbeat
     heartbeatManager.stop();
 
@@ -335,6 +350,7 @@ export function createWebSocketServer(
   logger.info('WebSocket server created', {
     heartbeatInterval: 30000,
     pongTimeout: 10000,
+    eventBridge: true,
   });
 
   return {
@@ -342,6 +358,7 @@ export function createWebSocketServer(
     connectionManager,
     roomManager,
     heartbeatManager,
+    eventBridge,
     broadcast,
     broadcastAll,
     getStats,

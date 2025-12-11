@@ -2490,7 +2490,7 @@ export function createWebSocketServer(server: Server) {
 - [x] WebSocket server created and integrated with HTTP server ✅
 - [x] JWT authentication on upgrade - Token from query parameter ✅
 - [x] Connection tracking (by userId) - ConnectionManager implemented ✅
-- [x] Room management (user:*, role:*, broadcast) - RoomManager implemented ✅
+- [x] Room management (user:_, role:_, broadcast) - RoomManager implemented ✅
 - [x] Heartbeat: 30s ping, 10s timeout - HeartbeatManager implemented ✅
 - [x] Tests pass with 70%+ coverage - Unit tests for ConnectionManager and RoomManager ✅
 
@@ -2518,6 +2518,7 @@ pnpm nx test api-gateway --testPathPattern="websocket"
 **Notes:** Full WebSocket server implementation with production-ready features:
 
 **Architecture:**
+
 - WebSocket server runs alongside HTTP server in API Gateway
 - JWT authentication on WebSocket upgrade (token in query parameter)
 - Automatic room subscription: user:{userId}, role:{role}, broadcast
