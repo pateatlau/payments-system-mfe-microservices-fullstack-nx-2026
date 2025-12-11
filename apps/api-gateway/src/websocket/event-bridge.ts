@@ -62,8 +62,35 @@ export class WebSocketEventBridge {
       logger.info('Starting WebSocket Event Bridge');
 
       // Create RabbitMQ connection
+      // Default credentials: admin:admin (from docker-compose.yml)
+      // Note: If RABBITMQ_URL is set in .env, it will be used. Otherwise defaults to admin:admin
+      const rabbitmqUrl =
+        this.config.rabbitmqUrl ||
+        process.env['RABBITMQ_URL'] ||
+        'amqp://admin:admin@localhost:5672';
+      
+      // Fix common credential issues:
+      // 1. If URL has guest:guest (wrong credentials), replace with admin:admin
+      // 2. If URL doesn't have credentials, add admin:admin
+      let finalUrl = rabbitmqUrl;
+      if (rabbitmqUrl.includes('guest:guest')) {
+        // Replace guest:guest with admin:admin
+        finalUrl = rabbitmqUrl.replace('guest:guest', 'admin:admin');
+        logger.warn('RabbitMQ URL had guest:guest credentials, replaced with admin:admin', {
+          original: rabbitmqUrl,
+          fixed: finalUrl,
+        });
+      } else if (rabbitmqUrl.startsWith('amqp://localhost') || rabbitmqUrl.startsWith('amqp://127.0.0.1')) {
+        // URL doesn't have credentials, add admin:admin
+        finalUrl = rabbitmqUrl.replace('amqp://', 'amqp://admin:admin@');
+        logger.warn('RabbitMQ URL missing credentials, added admin:admin', {
+          original: rabbitmqUrl,
+          fixed: finalUrl,
+        });
+      }
+      
       this.connectionManager = new RabbitMQConnectionManager({
-        url: this.config.rabbitmqUrl || process.env['RABBITMQ_URL'] || 'amqp://localhost:5672',
+        url: finalUrl,
       });
       await this.connectionManager.connect();
 
