@@ -48,6 +48,8 @@
     "test:coverage:auth-mfe": "nx test auth-mfe --coverage",
     "test:coverage:payments-mfe": "nx test payments-mfe --coverage",
     "test:coverage:admin-mfe": "nx test admin-mfe --coverage",
+    "test:shared-websocket": "nx test shared-websocket",
+    "test:shared-websocket:coverage": "nx test shared-websocket --codeCoverage",
     "test:shared-auth-store": "nx test shared-auth-store",
     "test:shared-header-ui": "nx test shared-header-ui",
     "test:shared-ui": "nx test shared-ui",

@@ -33,7 +33,8 @@
       "backend": ["libs/backend/src/index.ts"],
       "@payments-system/rabbitmq-event-hub": [
         "libs/backend/rabbitmq-event-hub/src/index.ts"
-      ]
+      ],
+      "shared-websocket": ["libs/shared-websocket/src/index.ts"]
     }
   },
   "files": [],
