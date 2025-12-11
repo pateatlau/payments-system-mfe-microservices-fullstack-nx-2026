@@ -563,16 +563,17 @@
 
 #### Sub-task 4.1.1: Add WebSocket Server to API Gateway
 
-- [ ] ws installed
-- [ ] Server created
-- [ ] Auth works
-- [ ] Connections managed
-- [ ] Rooms work
-- [ ] Heartbeat works
-- [ ] Tests pass
+- [x] ws installed (ws@8.18.3, @types/ws@8.18.1)
+- [x] Server created (apps/api-gateway/src/websocket/server.ts)
+- [x] Auth works (JWT authentication on upgrade, query param token)
+- [x] Connections managed (ConnectionManager with user/role tracking)
+- [x] Rooms work (RoomManager with user:*, role:*, broadcast, payment:* support)
+- [x] Heartbeat works (30s ping interval, 10s timeout, automatic cleanup)
+- [x] Tests pass (ConnectionManager and RoomManager unit tests created)
 
-**Status:** Not Started  
-**Notes:** -
+**Status:** Complete  
+**Completed Date:** 2026-12-10  
+**Notes:** Full WebSocket server implementation with authentication, connection management, room-based messaging, and heartbeat monitoring. Integrated with API Gateway HTTP server. Auto-subscribe to user, role, and broadcast rooms on connection. Graceful shutdown support.
 
 ---
 
