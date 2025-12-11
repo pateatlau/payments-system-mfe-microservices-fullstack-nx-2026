@@ -257,6 +257,24 @@ pkill -f 'nx.*serve'
 
 ### Starting Backend Services/Servers
 
+**Diagnose Backend Services (Recommended First Step):**
+
+Before starting backend services, run the diagnostic script to check infrastructure, databases, and configurations:
+
+```bash
+# Run comprehensive backend diagnostics
+./scripts/diagnose-backend-errors.sh
+
+# This checks:
+# - Infrastructure services (RabbitMQ, Redis)
+# - All databases (auth_db, payments_db, admin_db, profile_db)
+# - Environment variables (RABBITMQ_URL, database URLs, JWT_SECRET)
+# - Prisma clients (all services)
+# - Build status (all services)
+# - Service ports (3000-3004)
+# - Provides actionable recommendations
+```
+
 **Start Infrastructure Services (Docker):**
 
 ```bash
@@ -1577,6 +1595,34 @@ pnpm migrate:rollback:payments  # Rollback payments database
 
 ## Troubleshooting Tests
 
+### Backend Service Diagnostics
+
+**First Step: Run Comprehensive Diagnostics**
+
+Before troubleshooting individual issues, run the diagnostic script to get a complete health check:
+
+```bash
+# Run comprehensive backend diagnostics
+./scripts/diagnose-backend-errors.sh
+
+# This provides:
+# - Infrastructure status (RabbitMQ, Redis)
+# - Database status (all 4 databases)
+# - Environment variable validation
+# - Prisma client status
+# - Build status
+# - Port availability
+# - Actionable recommendations
+```
+
+The diagnostic script checks:
+- **Infrastructure Services:** RabbitMQ (container, health, credentials), Redis (container, health)
+- **Database Services:** All 4 databases (auth_db, payments_db, admin_db, profile_db) with container status, connection readiness, and table counts
+- **Environment Variables:** RABBITMQ_URL (with credential validation), all database URLs, JWT_SECRET
+- **Prisma Clients:** All service clients (auth, payments, admin, profile)
+- **Build Status:** All 5 backend services
+- **Service Ports:** Ports 3000-3004 for all services
+
 ### Infrastructure Tests Failing
 
 **Issue:** nginx tests fail with "connection refused"
@@ -1584,6 +1630,9 @@ pnpm migrate:rollback:payments  # Rollback payments database
 **Solution:**
 
 ```bash
+# Run diagnostics first
+./scripts/diagnose-backend-errors.sh
+
 # Check nginx is running
 pnpm infra:status
 
@@ -1599,6 +1648,9 @@ docker restart mfe-nginx
 **Solution:**
 
 ```bash
+# Run diagnostics first
+./scripts/diagnose-backend-errors.sh
+
 # Check database health
 docker exec mfe-auth-db pg_isready
 
@@ -1607,6 +1659,44 @@ docker logs mfe-auth-db
 
 # Restart database
 docker restart mfe-auth-db
+```
+
+**Issue:** Backend services fail to start
+
+**Solution:**
+
+```bash
+# Run comprehensive diagnostics
+./scripts/diagnose-backend-errors.sh
+
+# Common fixes based on diagnostics:
+# 1. Start infrastructure if not running
+pnpm infra:start
+
+# 2. Generate Prisma clients if missing
+pnpm db:auth:generate
+pnpm db:payments:generate
+pnpm db:admin:generate
+pnpm db:profile:generate
+
+# 3. Run migrations if databases are empty
+pnpm db:auth:migrate
+pnpm db:payments:migrate
+pnpm db:admin:migrate
+pnpm db:profile:migrate
+
+# 4. Fix RabbitMQ URL in .env if needed
+# Update: RABBITMQ_URL=amqp://admin:admin@localhost:5672
+
+# 5. Build services
+pnpm build:backend
+
+# 6. Check specific service logs
+pnpm dev:api-gateway      # Check API Gateway errors
+pnpm dev:auth-service      # Check Auth Service errors
+pnpm dev:payments-service  # Check Payments Service errors
+pnpm dev:admin-service     # Check Admin Service errors
+pnpm dev:profile-service  # Check Profile Service errors
 ```
 
 ### Migration Tests Failing
