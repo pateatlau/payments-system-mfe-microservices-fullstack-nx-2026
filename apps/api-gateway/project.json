@@ -63,20 +63,27 @@
       "executor": "nx:noop"
     },
     "serve": {
-      "continuous": true,
       "executor": "@nx/js:node",
       "defaultConfiguration": "development",
       "dependsOn": ["build"],
       "options": {
         "buildTarget": "api-gateway:build",
-        "runBuildTargetDependencies": false
+        "buildTargetOptions": {
+          "watch": true
+        },
+        "inspect": "inspect"
       },
       "configurations": {
         "development": {
-          "buildTarget": "api-gateway:build:development"
+          "buildTarget": "api-gateway:build:development",
+          "buildTargetOptions": {
+            "watch": true
+          },
+          "inspect": "inspect"
         },
         "production": {
-          "buildTarget": "api-gateway:build:production"
+          "buildTarget": "api-gateway:build:production",
+          "inspect": false
         }
       }
     },

@@ -71,14 +71,17 @@
       "dependsOn": ["build"],
       "options": {
         "buildTarget": "payments-service:build",
-        "runBuildTargetDependencies": false
+        "runBuildTargetDependencies": false,
+        "inspect": "inspect"
       },
       "configurations": {
         "development": {
-          "buildTarget": "payments-service:build:development"
+          "buildTarget": "payments-service:build:development",
+          "inspect": "inspect"
         },
         "production": {
-          "buildTarget": "payments-service:build:production"
+          "buildTarget": "payments-service:build:production",
+          "inspect": false
         }
       }
     },

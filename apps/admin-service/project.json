@@ -69,14 +69,17 @@
       "dependsOn": ["build"],
       "options": {
         "buildTarget": "admin-service:build",
-        "runBuildTargetDependencies": false
+        "runBuildTargetDependencies": false,
+        "inspect": "inspect"
       },
       "configurations": {
         "development": {
-          "buildTarget": "admin-service:build:development"
+          "buildTarget": "admin-service:build:development",
+          "inspect": "inspect"
         },
         "production": {
-          "buildTarget": "admin-service:build:production"
+          "buildTarget": "admin-service:build:production",
+          "inspect": false
         }
       }
     },

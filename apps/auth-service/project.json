@@ -69,14 +69,17 @@
       "dependsOn": ["build"],
       "options": {
         "buildTarget": "auth-service:build",
-        "runBuildTargetDependencies": false
+        "runBuildTargetDependencies": false,
+        "inspect": "inspect"
       },
       "configurations": {
         "development": {
-          "buildTarget": "auth-service:build:development"
+          "buildTarget": "auth-service:build:development",
+          "inspect": "inspect"
         },
         "production": {
-          "buildTarget": "auth-service:build:production"
+          "buildTarget": "auth-service:build:production",
+          "inspect": false
         }
       }
     },

@@ -71,14 +71,17 @@
       "dependsOn": ["build"],
       "options": {
         "buildTarget": "profile-service:build",
-        "runBuildTargetDependencies": false
+        "runBuildTargetDependencies": false,
+        "inspect": "inspect"
       },
       "configurations": {
         "development": {
-          "buildTarget": "profile-service:build:development"
+          "buildTarget": "profile-service:build:development",
+          "inspect": "inspect"
         },
         "production": {
-          "buildTarget": "profile-service:build:production"
+          "buildTarget": "profile-service:build:production",
+          "inspect": false
         }
       }
     },
