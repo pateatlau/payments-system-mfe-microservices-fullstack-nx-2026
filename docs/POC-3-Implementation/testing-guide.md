@@ -151,11 +151,13 @@ npx nx e2e shell-e2e --testPathPattern="admin-flow"
 **Prerequisites for E2E Tests:**
 
 1. Build frontend remotes:
+
    ```bash
    pnpm build:remotes
    ```
 
 2. Start backend services (optional, for full-stack integration):
+
    ```bash
    pnpm infra:start
    pnpm dev:backend
@@ -852,12 +854,14 @@ POC-3 implements a production-ready streaming HTTP proxy using Node.js native `h
 **Why Native HTTP Modules:**
 
 POC-2 encountered issues with `http-proxy-middleware` v3.x including:
+
 - Request body streaming problems
 - Path rewriting complications
 - Timeout errors
 - Limited control over streaming behavior
 
 The native implementation provides:
+
 - Maximum control over streaming
 - Zero external proxy dependencies
 - Better performance (no serialization overhead)
@@ -979,15 +983,15 @@ The API Gateway middleware must be configured in this exact order:
 
 ```typescript
 // apps/api-gateway/src/main.ts
-app.use(securityMiddleware);      // 1. Security headers
-app.use(corsMiddleware);           // 2. CORS
-app.use(requestLogger);            // 3. Request logging
-app.use(generalRateLimiter);       // 4. Rate limiting
+app.use(securityMiddleware); // 1. Security headers
+app.use(corsMiddleware); // 2. CORS
+app.use(requestLogger); // 3. Request logging
+app.use(generalRateLimiter); // 4. Rate limiting
 app.use('/health', express.json()); // 5. Health routes (with body parsing - safe)
 app.use(healthRoutes);
-app.use(proxyRoutes);              // 6. Proxy routes (NO body parsing - streaming)
-app.use(notFoundHandler);          // 7. 404 handler
-app.use(errorHandler);             // 8. Error handler
+app.use(proxyRoutes); // 6. Proxy routes (NO body parsing - streaming)
+app.use(notFoundHandler); // 7. 404 handler
+app.use(errorHandler); // 8. Error handler
 ```
 
 **Why No Body Parsing on Proxy Routes:**
@@ -1005,7 +1009,7 @@ All frontend applications now use the API Gateway via nginx:
 
 ```typescript
 // Environment variable (via Rspack DefinePlugin)
-NX_API_BASE_URL = 'https://localhost/api' // Default
+NX_API_BASE_URL = 'https://localhost/api'; // Default
 
 // API client configuration
 const apiClient = new ApiClient({
@@ -1018,13 +1022,13 @@ const apiClient = new ApiClient({
 
 ```typescript
 // Payments MFE
-baseURL: 'https://localhost/api/payments'
+baseURL: 'https://localhost/api/payments';
 
 // Admin MFE
-baseURL: 'https://localhost/api/admin'
+baseURL: 'https://localhost/api/admin';
 
 // Auth (via shared-api-client)
-baseURL: 'https://localhost/api' // Auth routes at /api/auth/*
+baseURL: 'https://localhost/api'; // Auth routes at /api/auth/*
 ```
 
 **Manual Testing Commands:**
@@ -1616,6 +1620,7 @@ Before troubleshooting individual issues, run the diagnostic script to get a com
 ```
 
 The diagnostic script checks:
+
 - **Infrastructure Services:** RabbitMQ (container, health, credentials), Redis (container, health)
 - **Database Services:** All 4 databases (auth_db, payments_db, admin_db, profile_db) with container status, connection readiness, and table counts
 - **Environment Variables:** RABBITMQ_URL (with credential validation), all database URLs, JWT_SECRET
