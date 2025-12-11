@@ -1,13 +1,18 @@
 /**
  * Admin API Client (via API Gateway - POC-3)
  *
- * Routes through nginx (https://localhost) → API Gateway (http://localhost:3000)
- * API Gateway proxies /api/admin/* to Admin Service (http://localhost:3003)
+ * Development: Direct to API Gateway (http://localhost:3000)
+ * Production: Through nginx proxy (https://localhost)
  *
  * URL Structure:
+ * Development:
+ * - Frontend → API Gateway: http://localhost:3000/api/admin/*
+ * - API Gateway → Admin Service: http://localhost:3003/api/admin/*
+ *
+ * Production:
  * - Frontend: https://localhost/api/admin/*
  * - nginx → API Gateway: http://localhost:3000/api/admin/*
- * - API Gateway → Admin Service: http://localhost:3003/* (path rewritten)
+ * - API Gateway → Admin Service: http://localhost:3003/api/admin/*
  *
  * Note: This client does NOT handle token refresh itself.
  * Token refresh is handled by the auth store's API client.
@@ -30,10 +35,10 @@ const envBaseURL =
  * Reads tokens from auth store (no automatic refresh to avoid conflicts)
  */
 export const adminApiClient = new ApiClient({
-  // Use API Gateway URL via nginx (default: https://localhost/api/admin)
-  baseURL: envBaseURL ? `${envBaseURL}/admin` : 'https://localhost/api/admin',
-  // Token refresh handled by auth store via Auth Service through API Gateway
-  refreshURL: envBaseURL ? `${envBaseURL}/auth` : 'https://localhost/api/auth',
+  // Use API Gateway URL
+  // Development: http://localhost:3000/api
+  // Production: https://localhost/api
+  baseURL: envBaseURL || 'http://localhost:3000/api',
   timeout: 30000,
   tokenProvider: {
     getAccessToken: () => {

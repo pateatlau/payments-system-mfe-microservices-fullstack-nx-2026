@@ -34,7 +34,19 @@
       "@payments-system/rabbitmq-event-hub": [
         "libs/backend/rabbitmq-event-hub/src/index.ts"
       ],
-      "shared-websocket": ["libs/shared-websocket/src/index.ts"]
+      "shared-websocket": ["libs/shared-websocket/src/index.ts"],
+      ".prisma/auth-client": [
+        "apps/auth-service/node_modules/.prisma/auth-client"
+      ],
+      ".prisma/payments-client": [
+        "apps/payments-service/node_modules/.prisma/payments-client"
+      ],
+      ".prisma/admin-client": [
+        "apps/admin-service/node_modules/.prisma/admin-client"
+      ],
+      ".prisma/profile-client": [
+        "apps/profile-service/node_modules/.prisma/profile-client"
+      ]
     }
   },
   "files": [],

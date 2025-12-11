@@ -55,6 +55,11 @@ const sharedDependencies = {
     requiredVersion: false,
     eager: false,
   },
+  'shared-websocket': {
+    singleton: true,
+    requiredVersion: false,
+    eager: false,
+  },
 };
 
 module.exports = {
@@ -169,10 +174,11 @@ module.exports = {
     // Define environment variables for browser (replaces process.env at build time)
     new rspack.DefinePlugin({
       'process.env': JSON.stringify({
-        // POC-3: API Gateway URL via nginx
-        // All requests route through nginx → API Gateway → backend services
+        // POC-3: API Gateway URL
+        // Development: Direct to API Gateway (http://localhost:3000/api)
+        // Production: Through nginx proxy (https://localhost/api)
         NX_API_BASE_URL:
-          process.env.NX_API_BASE_URL || 'https://localhost/api',
+          process.env.NX_API_BASE_URL || 'http://localhost:3000/api',
         NODE_ENV: isProduction ? 'production' : 'development',
       }),
     }),

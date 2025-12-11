@@ -32,19 +32,9 @@ export const profileService = {
     logger.debug('Getting profile for user', { userId });
 
     // Try to find existing profile
+    // Note: Profile Service doesn't have a User table (no relation)
     let profile = await prisma.userProfile.findUnique({
       where: { userId },
-      include: {
-        user: {
-          select: {
-            id: true,
-            email: true,
-            name: true,
-            role: true,
-            createdAt: true,
-          },
-        },
-      },
     });
 
     // Create profile if it doesn't exist
@@ -58,17 +48,6 @@ export const profileService = {
           avatarUrl: null,
           bio: null,
           preferences: {},
-        },
-        include: {
-          user: {
-            select: {
-              id: true,
-              email: true,
-              name: true,
-              role: true,
-              createdAt: true,
-            },
-          },
         },
       });
     }
@@ -94,17 +73,6 @@ export const profileService = {
         avatarUrl: data.avatarUrl,
         bio: data.bio,
         updatedAt: new Date(),
-      },
-      include: {
-        user: {
-          select: {
-            id: true,
-            email: true,
-            name: true,
-            role: true,
-            createdAt: true,
-          },
-        },
       },
     });
 

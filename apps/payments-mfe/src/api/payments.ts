@@ -11,13 +11,18 @@ import type {
 /**
  * Backend Payments API (via API Gateway - POC-3)
  *
- * Routes through nginx (https://localhost) → API Gateway (http://localhost:3000)
- * API Gateway proxies /api/payments/* to Payments Service (http://localhost:3002)
+ * Development: Direct to API Gateway
+ * Production: Through nginx proxy
  *
  * URL Structure:
+ * Development:
+ * - Frontend → API Gateway: http://localhost:3000/api/payments/*
+ * - API Gateway → Payments Service: http://localhost:3002/api/payments/*
+ *
+ * Production:
  * - Frontend: https://localhost/api/payments/*
  * - nginx → API Gateway: http://localhost:3000/api/payments/*
- * - API Gateway → Payments Service: http://localhost:3002/* (path rewritten)
+ * - API Gateway → Payments Service: http://localhost:3002/api/payments/*
  */
 // Access environment variable (replaced by DefinePlugin at build time)
 const envBaseURL =
@@ -39,10 +44,10 @@ const tokenProvider: TokenProvider = {
 };
 
 const paymentsApiClient = new ApiClient({
-  // Use API Gateway URL via nginx (default: https://localhost/api/payments)
-  baseURL: envBaseURL
-    ? `${envBaseURL}/payments`
-    : 'https://localhost/api/payments',
+  // Use API Gateway URL (without /payments suffix - added in API calls)
+  // Development: http://localhost:3000/api
+  // Production: https://localhost/api
+  baseURL: envBaseURL || 'http://localhost:3000/api',
   tokenProvider,
   onTokenRefresh: (accessToken: string, refreshToken: string) => {
     useAuthStore.setState({ accessToken, refreshToken });

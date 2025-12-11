@@ -32,16 +32,14 @@ const envBaseURL =
 /**
  * Payments API client for admin dashboard (via API Gateway - POC-3)
  *
- * Routes through nginx (https://localhost) → API Gateway (http://localhost:3000)
- * API Gateway proxies /api/payments/* to Payments Service (http://localhost:3002)
+ * Development: Direct to API Gateway (http://localhost:3000/api)
+ * Production: Through nginx proxy (https://localhost/api)
  */
 const paymentsApiClient = new ApiClient({
-  // Use API Gateway URL via nginx (default: https://localhost/api/payments)
-  baseURL: envBaseURL
-    ? `${envBaseURL}/payments`
-    : 'https://localhost/api/payments',
-  // Token refresh handled via Auth Service through API Gateway
-  refreshURL: envBaseURL ? `${envBaseURL}/auth` : 'https://localhost/api/auth',
+  // Use API Gateway URL (without service suffix - added in API calls)
+  // Development: http://localhost:3000/api
+  // Production: https://localhost/api
+  baseURL: envBaseURL || 'http://localhost:3000/api',
   timeout: 30000,
   tokenProvider: {
     getAccessToken: () => useAuthStore.getState().accessToken ?? null,

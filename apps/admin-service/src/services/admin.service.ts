@@ -2,6 +2,7 @@
  * Admin Service - Business Logic
  */
 
+import crypto from 'crypto';
 import { prisma as db } from '../lib/prisma';
 
 /**
@@ -113,13 +114,7 @@ export const adminService = {
         createdAt: true,
         updatedAt: true,
         // Note: isActive field not yet in schema
-        // Include payment statistics
-        _count: {
-          select: {
-            sentPayments: true,
-            receivedPayments: true,
-          },
-        },
+        // Note: Payment statistics not available in denormalized User table
       },
     });
 
@@ -258,13 +253,18 @@ export const adminService = {
     // Hash password
     const passwordHash = await bcrypt.hash(data.password, 10);
 
-    // Create user
+    // Create user with explicit id and timestamps
+    const now = new Date();
     const user = await db.user.create({
       data: {
+        id: crypto.randomUUID(),
         email: data.email,
         passwordHash,
         name: data.name,
         role: data.role,
+        emailVerified: false,
+        createdAt: now,
+        updatedAt: now,
       },
       select: {
         id: true,

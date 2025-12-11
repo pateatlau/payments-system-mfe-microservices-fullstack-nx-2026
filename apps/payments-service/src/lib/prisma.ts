@@ -9,7 +9,13 @@
  *   const payments = await prisma.payment.findMany();
  */
 
-import { PrismaClient } from '@prisma/client';
+// Dynamic require with absolute path to work from dist
+import path from 'path';
+const clientPath = path.join(
+  process.cwd(),
+  'apps/payments-service/node_modules/.prisma/payments-client'
+);
+const { PrismaClient } = require(clientPath);
 
 /**
  * Prisma Client instance for Payments Service

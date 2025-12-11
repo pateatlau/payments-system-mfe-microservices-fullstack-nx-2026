@@ -24,6 +24,22 @@ router.use(requireAdmin);
 // System health route
 router.get('/health', getSystemHealth);
 
+// Audit logs route (stub - returns empty for now)
+router.get('/audit-logs', (_req, res) => {
+  res.json({
+    success: true,
+    data: {
+      data: [], // Array of audit logs
+      pagination: {
+        page: 1,
+        limit: 10,
+        total: 0,
+        totalPages: 0,
+      },
+    },
+  });
+});
+
 // User management routes
 router.get('/users', listUsers);
 router.get('/users/:id', getUserById);

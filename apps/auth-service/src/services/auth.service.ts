@@ -63,7 +63,7 @@ export const register = async (data: RegisterInput): Promise<AuthResponse> => {
     data: {
       email: data.email,
       passwordHash,
-      name: data.name,
+      name: data.name as string,
       role: data.role ?? UserRole.CUSTOMER,
     },
   });

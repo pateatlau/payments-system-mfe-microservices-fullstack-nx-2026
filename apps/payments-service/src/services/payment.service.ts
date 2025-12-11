@@ -83,16 +83,14 @@ export const paymentService = {
           select: {
             id: true,
             email: true,
-            name: true,
-            role: true,
+            // Note: name and role not in denormalized users table
           },
         },
         recipient: {
           select: {
             id: true,
             email: true,
-            name: true,
-            role: true,
+            // Note: name and role not in denormalized users table
           },
         },
       },
@@ -120,16 +118,14 @@ export const paymentService = {
           select: {
             id: true,
             email: true,
-            name: true,
-            role: true,
+            // Note: name and role not in denormalized users table
           },
         },
         recipient: {
           select: {
             id: true,
             email: true,
-            name: true,
-            role: true,
+            // Note: name and role not in denormalized users table
           },
         },
         transactions: {
@@ -225,16 +221,14 @@ export const paymentService = {
           select: {
             id: true,
             email: true,
-            name: true,
-            role: true,
+            // Note: name and role not in denormalized users table
           },
         },
         recipient: {
           select: {
             id: true,
             email: true,
-            name: true,
-            role: true,
+            // Note: name and role not in denormalized users table
           },
         },
       },

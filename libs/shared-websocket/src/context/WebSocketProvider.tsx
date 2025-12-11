@@ -4,7 +4,13 @@
  * Provides WebSocket client to React components via Context API
  */
 
-import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import { WebSocketClient } from '../lib/client';
 import type { WebSocketClientConfig, ConnectionStatus } from '../lib/types';
 
@@ -37,7 +43,8 @@ export function WebSocketProvider({
 }: WebSocketProviderProps): JSX.Element {
   const [status, setStatus] = useState<ConnectionStatus>('disconnected');
 
-  // Create WebSocket client (only once)
+  // Create WebSocket client
+  // Recreates when url, token, or debug changes to ensure proper authentication
   const client = useMemo(() => {
     const config: WebSocketClientConfig = {
       url,
@@ -56,14 +63,19 @@ export function WebSocketProvider({
   // Connect/disconnect lifecycle
   useEffect(() => {
     // Listen for status changes
-    const handleStatus = ({ status: newStatus }: { status: ConnectionStatus }) => {
+    const handleStatus = ({
+      status: newStatus,
+    }: {
+      status: ConnectionStatus;
+    }) => {
       setStatus(newStatus);
     };
 
     client.on('status', handleStatus);
 
-    // Auto-connect if enabled
-    if (autoConnect) {
+    // Auto-connect if enabled and token is available
+    // WebSocket requires authentication, so don't attempt connection without token
+    if (autoConnect && token) {
       client.connect();
     }
 
@@ -72,7 +84,7 @@ export function WebSocketProvider({
       client.off('status', handleStatus);
       client.disconnect();
     };
-  }, [client, autoConnect]);
+  }, [client, autoConnect, token]);
 
   const value = useMemo(
     () => ({
@@ -83,7 +95,11 @@ export function WebSocketProvider({
     [client, status]
   );
 
-  return <WebSocketContext.Provider value={value}>{children}</WebSocketContext.Provider>;
+  return (
+    <WebSocketContext.Provider value={value}>
+      {children}
+    </WebSocketContext.Provider>
+  );
 }
 
 /**
@@ -93,7 +109,9 @@ export function useWebSocketContext(): WebSocketContextValue {
   const context = useContext(WebSocketContext);
 
   if (!context.client) {
-    throw new Error('useWebSocketContext must be used within WebSocketProvider');
+    throw new Error(
+      'useWebSocketContext must be used within WebSocketProvider'
+    );
   }
 
   return context;

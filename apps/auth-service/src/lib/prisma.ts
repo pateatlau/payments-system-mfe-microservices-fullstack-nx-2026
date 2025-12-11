@@ -9,7 +9,13 @@
  *   const users = await prisma.user.findMany();
  */
 
-import { PrismaClient } from '@prisma/client';
+// Dynamic require with absolute path to work from dist
+import path from 'path';
+const clientPath = path.join(
+  process.cwd(),
+  'apps/auth-service/node_modules/.prisma/auth-client'
+);
+const { PrismaClient } = require(clientPath);
 
 /**
  * Prisma Client instance for Auth Service

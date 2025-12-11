@@ -9,7 +9,13 @@
  *   const profiles = await prisma.userProfile.findMany();
  */
 
-import { PrismaClient } from '@prisma/client';
+// Dynamic require with absolute path to work from dist
+import path from 'path';
+const clientPath = path.join(
+  process.cwd(),
+  'apps/profile-service/node_modules/.prisma/profile-client'
+);
+const { PrismaClient } = require(clientPath);
 
 /**
  * Prisma Client instance for Profile Service

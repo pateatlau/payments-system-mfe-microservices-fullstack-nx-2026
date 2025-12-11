@@ -36,13 +36,19 @@ const queryClient = new QueryClient({
  */
 function AppWrapper() {
   // Get auth token for WebSocket authentication
-  const accessToken = useAuthStore((state) => state.accessToken);
+  const accessToken = useAuthStore(state => state.accessToken);
 
-  // WebSocket URL (nginx proxy route)
-  const wsUrl = process.env['NX_WS_URL'] || 'wss://localhost/ws';
+  // WebSocket URL
+  // Development: Direct to API Gateway (ws://localhost:3000/ws)
+  // Production: Through nginx proxy (wss://localhost/ws)
+  const wsUrl = process.env['NX_WS_URL'] || 'ws://localhost:3000/ws';
 
   return (
-    <WebSocketProvider url={wsUrl} token={accessToken || undefined} debug={process.env['NODE_ENV'] === 'development'}>
+    <WebSocketProvider
+      url={wsUrl}
+      token={accessToken || undefined}
+      debug={process.env['NODE_ENV'] === 'development'}
+    >
       <BrowserRouter>
         <App
           remotes={{

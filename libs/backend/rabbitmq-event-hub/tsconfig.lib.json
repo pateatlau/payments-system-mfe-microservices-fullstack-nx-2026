@@ -1,9 +1,13 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "outDir": "../../../dist/out-tsc",
+    "outDir": "../../../dist/libs/backend/rabbitmq-event-hub",
     "declaration": true,
-    "types": ["node"]
+    "types": ["node"],
+    "rootDir": "./src",
+    "moduleResolution": "node",
+    "allowImportingTsExtensions": false,
+    "noEmit": false
   },
   "include": ["src/**/*.ts"],
   "exclude": [

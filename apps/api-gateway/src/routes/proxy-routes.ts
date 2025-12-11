@@ -12,7 +12,7 @@
  */
 
 import { Router } from 'express';
-import { createServiceProxy, ProxyTarget } from '../middleware/proxy';
+import { createStreamingProxy, ProxyTarget } from '../middleware/proxy';
 import { logger } from '../utils/logger';
 
 const router = Router();
@@ -47,26 +47,45 @@ const services: Record<string, ProxyTarget> = {
  * Auth Service Proxy
  *
  * Routes:
- *   POST /api/auth/register -> http://localhost:3001/auth/register
  *   POST /api/auth/login -> http://localhost:3001/auth/login
- *   POST /api/auth/logout -> http://localhost:3001/auth/logout
+ *   POST /api/auth/register -> http://localhost:3001/auth/register
  *   POST /api/auth/refresh -> http://localhost:3001/auth/refresh
+ *   POST /api/auth/logout -> http://localhost:3001/auth/logout
  *   GET /api/auth/me -> http://localhost:3001/auth/me
+ *
+ * Note: Express strips /api/auth when routing, so we use custom proxy with prepend
  */
-router.use('/api/auth', createServiceProxy('auth', services['auth']!, '/api/auth'));
+router.use(
+  '/api/auth',
+  createStreamingProxy({
+    target: services['auth']!,
+    pathRewrite: {
+      '^': '/auth', // Prepend /auth to the path
+    },
+    timeout: 30000,
+  })
+);
 
 /**
  * Payments Service Proxy
  *
  * Routes:
- *   GET /api/payments -> http://localhost:3002/api/payments
- *   POST /api/payments -> http://localhost:3002/api/payments
- *   GET /api/payments/:id -> http://localhost:3002/api/payments/:id
- *   PATCH /api/payments/:id/status -> http://localhost:3002/api/payments/:id/status
+ *   GET /api/payments -> http://localhost:3002/payments
+ *   POST /api/payments -> http://localhost:3002/payments
+ *   GET /api/payments/:id -> http://localhost:3002/payments/:id
+ *   PATCH /api/payments/:id/status -> http://localhost:3002/payments/:id/status
+ *
+ * Note: Express strips /api/payments when routing, so we prepend /payments
  */
 router.use(
   '/api/payments',
-  createServiceProxy('payments', services['payments']!, '/api/payments')
+  createStreamingProxy({
+    target: services['payments']!,
+    pathRewrite: {
+      '^': '/payments', // Prepend /payments to the path
+    },
+    timeout: 30000,
+  })
 );
 
 /**
@@ -80,10 +99,18 @@ router.use(
  *   PATCH /api/admin/users/:id/role -> http://localhost:3003/api/admin/users/:id/role
  *   POST /api/admin/users/:id/suspend -> http://localhost:3003/api/admin/users/:id/suspend
  *   POST /api/admin/users/:id/unsuspend -> http://localhost:3003/api/admin/users/:id/unsuspend
+ *
+ * Note: Express strips /api/admin when routing, so we prepend /api/admin back
  */
 router.use(
   '/api/admin',
-  createServiceProxy('admin', services['admin']!, '/api/admin')
+  createStreamingProxy({
+    target: services['admin']!,
+    pathRewrite: {
+      '^': '/api/admin', // Prepend /api/admin to the path
+    },
+    timeout: 30000,
+  })
 );
 
 /**
@@ -94,10 +121,18 @@ router.use(
  *   PUT /api/profile -> http://localhost:3004/api/profile
  *   GET /api/profile/preferences -> http://localhost:3004/api/profile/preferences
  *   PUT /api/profile/preferences -> http://localhost:3004/api/profile/preferences
+ *
+ * Note: Express strips /api/profile when routing, so we prepend /api/profile back
  */
 router.use(
   '/api/profile',
-  createServiceProxy('profile', services['profile']!, '/api/profile')
+  createStreamingProxy({
+    target: services['profile']!,
+    pathRewrite: {
+      '^': '/api/profile', // Prepend /api/profile to the path
+    },
+    timeout: 30000,
+  })
 );
 
 /**
