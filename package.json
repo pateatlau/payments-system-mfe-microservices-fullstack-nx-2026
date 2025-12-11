@@ -224,7 +224,10 @@
     "sw:test": "nx test shell --testPathPattern=register-sw",
     "sw:verify": "echo 'Build shell app and check for sw.js in dist/apps/shell/' && pnpm build:shell && ls -la dist/apps/shell/sw.js 2>/dev/null && echo 'Service worker file exists' || echo 'Service worker file not found - check build configuration'",
     "cache:clear": "pnpm redis:flush && echo 'Cache cleared'",
-    "cache:status": "pnpm redis:info | grep -A 10 'Keyspace' || echo 'No cached keys'"
+    "cache:status": "pnpm redis:info | grep -A 10 'Keyspace' || echo 'No cached keys'",
+    "cache:build": "nx build cache",
+    "cache:test": "nx test cache",
+    "cache:test:integration": "nx test cache --no-watch"
   },
   "devDependencies": {
     "@babel/core": "^7.14.5",

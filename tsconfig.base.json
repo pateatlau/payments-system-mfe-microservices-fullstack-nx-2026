@@ -46,7 +46,9 @@
       ],
       ".prisma/profile-client": [
         "apps/profile-service/node_modules/.prisma/profile-client"
-      ]
+      ],
+      "cache": ["libs/backend/cache/src/index.ts"],
+      "@mfe-poc/cache": ["libs/backend/cache/src/index.ts"]
     }
   },
   "files": [],
