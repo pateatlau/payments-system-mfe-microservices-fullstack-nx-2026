@@ -24,6 +24,645 @@ POC-3 extends the comprehensive testing strategy from POC-2 with additional test
 
 ---
 
+## Quick Reference: Running Tests and Managing Servers
+
+This section provides complete instructions for running tests, starting/killing servers, and clearing caches in POC-3.
+
+### Running Tests
+
+#### Unit Tests
+
+**Frontend Unit Tests:**
+
+```bash
+# Run all frontend unit tests (all MFEs + shared libraries)
+pnpm test
+
+# Run tests for specific frontend projects
+pnpm test:shell              # Shell app tests
+pnpm test:auth-mfe           # Auth MFE tests
+pnpm test:payments-mfe       # Payments MFE tests
+pnpm test:admin-mfe         # Admin MFE tests
+
+# Run tests for shared libraries
+pnpm test:shared-websocket  # WebSocket client library
+pnpm test:shared-auth-store # Auth store
+pnpm test:shared-header-ui  # Header UI components
+pnpm test:shared-ui         # Shared UI components
+pnpm test:shared-utils     # Shared utilities
+pnpm test:shared-types     # Shared types
+pnpm test:libraries        # All shared libraries
+
+# Run with coverage
+pnpm test:coverage          # All frontend tests with coverage
+pnpm test:coverage:shell    # Shell with coverage
+pnpm test:coverage:auth-mfe # Auth MFE with coverage
+pnpm test:coverage:payments-mfe # Payments MFE with coverage
+pnpm test:coverage:admin-mfe    # Admin MFE with coverage
+pnpm test:shared-websocket:coverage # WebSocket library with coverage
+
+# Run affected tests only (tests for changed code)
+pnpm test:affected
+
+# Run tests in UI mode (interactive)
+pnpm test:ui
+```
+
+**Backend Unit Tests:**
+
+```bash
+# Run all backend unit tests (all services + libraries)
+pnpm test:backend
+
+# Run tests for specific backend services
+pnpm test:api-gateway       # API Gateway tests
+pnpm test:auth-service      # Auth Service tests
+pnpm test:payments-service  # Payments Service tests
+pnpm test:admin-service     # Admin Service tests
+pnpm test:profile-service  # Profile Service tests
+
+# Run tests for backend libraries
+pnpm test:backend-libs      # Backend shared libraries (types, utils, db, event-hub)
+
+# Run with coverage
+npx nx test api-gateway --coverage
+npx nx test auth-service --coverage
+npx nx test payments-service --coverage
+npx nx test admin-service --coverage
+pnpm test:coverage:backend # All backend services with coverage
+```
+
+#### Integration Tests
+
+**Frontend Integration Tests:**
+
+```bash
+# Integration tests run with unit tests
+pnpm test:shell  # Includes integration tests for Shell app
+```
+
+**Backend Integration Tests:**
+
+```bash
+# Integration tests run with backend unit tests
+pnpm test:backend  # Includes integration tests
+```
+
+**Infrastructure Integration Tests:**
+
+```bash
+# Test infrastructure services (nginx, databases, RabbitMQ)
+pnpm infra:test
+
+# Test API Gateway proxy functionality
+pnpm test:api-gateway:proxy
+# Or directly:
+./scripts/test-api-gateway-proxy.sh
+
+# Test RabbitMQ event hub
+pnpm rabbitmq:test              # All event hub tests
+pnpm rabbitmq:test:ordering     # Message ordering test
+pnpm rabbitmq:test:load         # Load test
+pnpm rabbitmq:test:retry        # Retry mechanism test
+pnpm rabbitmq:test:dlq          # Dead letter queue test
+pnpm rabbitmq:test:persistence  # Persistence test
+```
+
+#### E2E Tests
+
+**Running E2E Tests:**
+
+```bash
+# Run all E2E tests (requires frontend remotes built)
+pnpm e2e
+
+# Run E2E tests for Shell app
+pnpm e2e:shell
+
+# Run E2E tests in UI mode (interactive)
+npx nx e2e shell-e2e --ui
+
+# Run specific E2E test file
+npx nx e2e shell-e2e --testPathPattern="auth-flow"
+npx nx e2e shell-e2e --testPathPattern="payments-flow"
+npx nx e2e shell-e2e --testPathPattern="admin-flow"
+```
+
+**Prerequisites for E2E Tests:**
+
+1. Build frontend remotes:
+   ```bash
+   pnpm build:remotes
+   ```
+
+2. Start backend services (optional, for full-stack integration):
+   ```bash
+   pnpm infra:start
+   pnpm dev:backend
+   ```
+
+3. Start frontend servers (optional, for full-stack integration):
+   ```bash
+   pnpm dev:mf
+   ```
+
+### Starting Frontend Servers
+
+**Start All Frontend Servers:**
+
+```bash
+# Start all MFEs in parallel (Shell + Auth + Payments + Admin)
+pnpm dev:mf
+
+# Alternative: Start all with preview mode (after building)
+pnpm build:remotes
+pnpm preview:all
+```
+
+**Start Individual Frontend Servers:**
+
+```bash
+# Start Shell app (port 4200)
+pnpm dev:shell
+# Or:
+pnpm dev:mf:shell
+
+# Start Auth MFE (port 4201)
+pnpm dev:auth-mfe
+
+# Start Payments MFE (port 4202)
+pnpm dev:payments-mfe
+
+# Start Admin MFE (port 4203)
+pnpm dev:admin-mfe
+
+# Start only remote MFEs (Auth + Payments + Admin, no Shell)
+pnpm dev:mf:remotes
+```
+
+**Start with Preview Mode (Production Build):**
+
+```bash
+# Build remotes first
+pnpm build:remotes
+
+# Preview all MFEs
+pnpm preview:all
+
+# Preview individual MFEs
+pnpm preview:shell
+pnpm preview:auth-mfe
+pnpm preview:payments-mfe
+pnpm preview:admin-mfe
+pnpm preview:remotes  # Only remotes
+```
+
+### Killing Frontend Servers
+
+**Kill All Frontend Servers:**
+
+```bash
+# Kill all frontend servers (ports 4200, 4201, 4202, 4203)
+pnpm kill:all
+```
+
+**Kill Individual Frontend Servers:**
+
+```bash
+# Kill Shell app (port 4200)
+pnpm kill:shell
+
+# Kill Auth MFE (port 4201)
+pnpm kill:auth-mfe
+
+# Kill Payments MFE (port 4202)
+pnpm kill:payments-mfe
+
+# Kill Admin MFE (port 4203)
+pnpm kill:admin-mfe
+```
+
+**Manual Kill (if scripts don't work):**
+
+```bash
+# Find and kill processes on specific ports
+lsof -ti :4200 | xargs kill -9  # Shell
+lsof -ti :4201 | xargs kill -9  # Auth MFE
+lsof -ti :4202 | xargs kill -9  # Payments MFE
+lsof -ti :4203 | xargs kill -9  # Admin MFE
+
+# Kill all Nx serve processes
+pkill -f 'nx.*serve'
+```
+
+### Starting Backend Services/Servers
+
+**Start Infrastructure Services (Docker):**
+
+```bash
+# Start all infrastructure services (nginx, databases, RabbitMQ, Redis)
+pnpm infra:start
+# Or:
+docker-compose up -d
+
+# Check infrastructure status
+pnpm infra:status
+# Or:
+docker-compose ps
+
+# View infrastructure logs
+pnpm infra:logs
+# Or:
+docker-compose logs -f
+```
+
+**Start All Backend Services:**
+
+```bash
+# Start all backend services in parallel (API Gateway + all microservices)
+pnpm dev:backend
+
+# Start with infrastructure
+pnpm backend:dev:all  # Starts infra + all services in background
+```
+
+**Start Individual Backend Services:**
+
+```bash
+# Start API Gateway (port 3000)
+pnpm dev:api-gateway
+
+# Start Auth Service (port 3001)
+pnpm dev:auth-service
+
+# Start Payments Service (port 3002)
+pnpm dev:payments-service
+
+# Start Admin Service (port 3003)
+pnpm dev:admin-service
+
+# Start Profile Service (port 3004)
+pnpm dev:profile-service
+```
+
+**Start Backend with API Gateway:**
+
+```bash
+# Start all services including API Gateway
+pnpm backend:dev:with-gateway
+```
+
+**Check Backend Service Status:**
+
+```bash
+# Check which backend services are running
+pnpm backend:status
+
+# Check individual service health
+pnpm test:api:health        # API Gateway
+pnpm test:api:auth:health   # Auth Service
+pnpm test:api:payments:health # Payments Service
+pnpm test:api:admin:health   # Admin Service
+pnpm test:api:profile:health # Profile Service
+
+# Check all services at once
+pnpm test:api:all
+```
+
+### Killing Backend Services/Servers
+
+**Kill All Backend Services:**
+
+```bash
+# Kill all backend services (ports 3000, 3001, 3002, 3003, 3004)
+pnpm backend:kill
+```
+
+**Kill Infrastructure Services:**
+
+```bash
+# Stop all Docker containers
+pnpm infra:stop
+# Or:
+docker-compose down
+
+# Stop and remove volumes
+pnpm infra:clean
+# Or:
+docker-compose down -v --remove-orphans
+```
+
+**Kill All (Backend + Infrastructure):**
+
+```bash
+# Kill all backend services and stop infrastructure
+pnpm clean:backend
+```
+
+**Manual Kill (if scripts don't work):**
+
+```bash
+# Find and kill processes on specific ports
+lsof -ti :3000 | xargs kill -9  # API Gateway
+lsof -ti :3001 | xargs kill -9  # Auth Service
+lsof -ti :3002 | xargs kill -9  # Payments Service
+lsof -ti :3003 | xargs kill -9  # Admin Service
+lsof -ti :3004 | xargs kill -9  # Profile Service
+
+# Kill all tsx processes (backend services)
+pkill -f 'tsx.*auth-service'
+pkill -f 'tsx.*payments-service'
+pkill -f 'tsx.*admin-service'
+pkill -f 'tsx.*profile-service'
+pkill -f 'tsx.*api-gateway'
+```
+
+### Clearing Caches
+
+**Clear Build Cache:**
+
+```bash
+# Remove all build output
+pnpm clean:build
+# Or manually:
+rm -rf dist
+```
+
+**Clear Nx Cache:**
+
+```bash
+# Clear Nx cache (test results, build cache, etc.)
+pnpm clean:cache
+# Or:
+nx reset
+```
+
+**Clear All Caches:**
+
+```bash
+# Clear both build output and Nx cache
+pnpm clean:all
+```
+
+**Clear Redis Cache:**
+
+```bash
+# Flush all Redis data (caching only in POC-3)
+pnpm redis:flush
+# Or manually:
+docker exec -it mfe-redis redis-cli FLUSHALL
+```
+
+**Clear Browser Cache:**
+
+```bash
+# For Chrome/Edge (macOS)
+rm -rf ~/Library/Caches/Google/Chrome
+rm -rf ~/Library/Caches/Microsoft\ Edge
+
+# For Firefox (macOS)
+rm -rf ~/Library/Caches/Firefox
+
+# For Safari (macOS)
+rm -rf ~/Library/Caches/com.apple.Safari
+
+# Or use browser DevTools:
+# Chrome/Edge: DevTools → Application → Storage → Clear site data
+# Firefox: DevTools → Storage → Clear All
+# Safari: Develop → Empty Caches
+```
+
+**Clear Service Worker Cache:**
+
+```bash
+# In browser DevTools:
+# Chrome/Edge: DevTools → Application → Service Workers → Unregister
+# Firefox: DevTools → Application → Service Workers → Unregister
+# Safari: Develop → Service Workers → Unregister
+```
+
+**Clear Docker Volumes (Complete Reset):**
+
+```bash
+# WARNING: This will delete all database data and RabbitMQ data
+pnpm infra:clean
+# Or:
+docker-compose down -v --remove-orphans
+```
+
+### Complete Development Workflow
+
+**Full Stack Development (Frontend + Backend):**
+
+```bash
+# Terminal 1: Start infrastructure
+pnpm infra:start
+
+# Terminal 2: Start all backend services
+pnpm dev:backend
+
+# Terminal 3: Start all frontend servers
+pnpm dev:mf
+
+# Terminal 4: Run tests
+pnpm test              # Frontend tests
+pnpm test:backend      # Backend tests
+pnpm e2e               # E2E tests
+```
+
+**Quick Start (Everything):**
+
+```bash
+# Start everything in one command (infrastructure + backend + frontend)
+pnpm infra:start && sleep 3 && pnpm dev:backend & pnpm dev:mf
+```
+
+**Complete Cleanup:**
+
+```bash
+# Kill all frontend servers
+pnpm kill:all
+
+# Kill all backend services
+pnpm backend:kill
+
+# Stop infrastructure
+pnpm infra:stop
+
+# Clear all caches
+pnpm clean:all
+```
+
+**Complete Reset (Fresh Start):**
+
+```bash
+# 1. Kill everything
+pnpm kill:all
+pnpm backend:kill
+pnpm infra:clean
+
+# 2. Clear caches
+pnpm clean:all
+pnpm redis:flush
+
+# 3. Restart infrastructure
+pnpm infra:start
+
+# 4. Restart services
+pnpm dev:backend
+pnpm dev:mf
+```
+
+### Test Scripts
+
+**Infrastructure Test Scripts:**
+
+```bash
+# Test all infrastructure services (nginx, databases, RabbitMQ, Redis)
+pnpm infra:test
+# Or directly:
+./scripts/test-infrastructure.sh
+
+# Test API Gateway proxy functionality
+pnpm test:api-gateway:proxy
+# Or directly:
+./scripts/test-api-gateway-proxy.sh
+
+# Verify Phases 1-3 completion
+pnpm verify:phases-1-3
+# Or directly:
+./scripts/verify-phases-1-3.sh
+
+# Verify environment setup
+./scripts/verify-environment.sh
+```
+
+**RabbitMQ Event Hub Test Scripts:**
+
+```bash
+# Run all event hub tests
+pnpm rabbitmq:test
+# Or directly:
+pnpm tsx scripts/test-event-hub.ts
+
+# Run specific test types
+pnpm rabbitmq:test:ordering     # Message ordering test
+pnpm rabbitmq:test:load         # Load test (1000 messages)
+pnpm rabbitmq:test:retry        # Retry mechanism test
+pnpm rabbitmq:test:dlq          # Dead letter queue test
+
+# Test event persistence
+pnpm rabbitmq:test:persistence        # Full persistence test
+pnpm rabbitmq:test:persistence:publish # Publish events
+pnpm rabbitmq:test:persistence:verify  # Verify events persisted
+
+# Monitor dead letter queue
+pnpm rabbitmq:monitor-dlq
+# Or directly:
+pnpm tsx scripts/monitor-dlq.ts
+```
+
+**Migration Test Scripts:**
+
+```bash
+# Export data from shared database
+pnpm migrate:export              # Export all services
+pnpm migrate:export:auth         # Export auth data only
+pnpm migrate:export:payments     # Export payments data only
+pnpm migrate:export:admin        # Export admin data only
+pnpm migrate:export:profile      # Export profile data only
+
+# Import data to separate databases
+pnpm migrate:import              # Import all services
+pnpm migrate:import:auth         # Import auth data only
+pnpm migrate:import:payments     # Import payments data only
+pnpm migrate:import:admin        # Import admin data only
+pnpm migrate:import:profile      # Import profile data only
+pnpm migrate:import:users        # Import user denormalization only
+
+# Validate migration
+pnpm migrate:validate
+
+# Rollback migration (WARNING: Deletes migrated data)
+pnpm migrate:rollback            # Shows warning with individual commands
+pnpm migrate:rollback:auth       # Rollback auth database
+pnpm migrate:rollback:payments    # Rollback payments database
+pnpm migrate:rollback:admin     # Rollback admin database
+pnpm migrate:rollback:profile    # Rollback profile database
+```
+
+**API Test Scripts:**
+
+```bash
+# Health check tests
+pnpm test:api:health        # API Gateway health
+pnpm test:api:auth:health   # Auth Service health
+pnpm test:api:payments:health # Payments Service health
+pnpm test:api:admin:health   # Admin Service health
+pnpm test:api:profile:health # Profile Service health
+pnpm test:api:all           # All health checks
+
+# Auth API tests
+pnpm test:api:register      # Test user registration
+pnpm test:api:login         # Test user login
+
+# Payments API tests
+pnpm test:api:payments:list      # List payments (requires auth)
+pnpm test:api:payments:create    # Create payment (requires auth)
+pnpm test:api:payments:update-status # Update payment status
+
+# Admin API tests
+pnpm test:api:admin:list-users    # List users (requires admin auth)
+pnpm test:api:admin:get-user      # Get user (requires admin auth)
+pnpm test:api:admin:update-user    # Update user (requires admin auth)
+pnpm test:api:admin:update-role    # Update user role (requires admin auth)
+
+# Profile API tests
+pnpm test:api:profile:get         # Get profile (requires auth)
+pnpm test:api:profile:update      # Update profile (requires auth)
+pnpm test:api:profile:get-preferences  # Get preferences (requires auth)
+pnpm test:api:profile:update-preferences # Update preferences (requires auth)
+
+# Workflow tests
+pnpm test:workflow:register-login # Complete registration → login workflow
+pnpm test:workflow:full          # Full user workflow (see manual-testing-guide.md)
+```
+
+**Security Test Scripts:**
+
+```bash
+# Rate limiting test
+pnpm test:security:rate-limit  # Sends 105 requests to test rate limiting
+
+# CORS test
+pnpm test:security:cors        # Tests CORS headers
+
+# JWT validation test
+pnpm test:security:jwt         # Tests JWT token validation
+```
+
+**Performance Test Scripts:**
+
+```bash
+# Health endpoint performance (100 requests)
+pnpm test:performance:health
+
+# Concurrent requests test (10 parallel)
+pnpm test:performance:concurrent
+```
+
+**Environment Verification Scripts:**
+
+```bash
+# Check environment setup
+pnpm env:check
+
+# Validate environment variables
+pnpm env:validate
+```
+
+---
+
 ## POC-3 Testing Additions
 
 ### Infrastructure Testing
