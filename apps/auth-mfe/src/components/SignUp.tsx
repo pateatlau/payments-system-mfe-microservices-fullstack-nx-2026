@@ -162,7 +162,7 @@ export function SignUp({ onSuccess, onNavigateToSignIn }: SignUpProps = {}) {
   const passwordStrength = getPasswordStrength(password);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4 py-12">
+    <div className="w-full flex items-center justify-center">
       <div className="w-full max-w-md">
         <Card>
           <CardHeader>

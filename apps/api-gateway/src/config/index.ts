@@ -17,9 +17,11 @@ export const config = {
   ).split(','),
 
   // Rate Limiting
+  // TODO: RESTORE ORIGINAL RATE LIMIT - Currently set to very high value temporarily
   rateLimit: {
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // Limit each IP to 100 requests per windowMs
+    // Original: max: 100, // Limit each IP to 100 requests per windowMs
+    max: 100000, // Temporary high value (to be restored to 100)
   },
 
   // JWT
