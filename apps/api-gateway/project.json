@@ -62,29 +62,20 @@
       "dependsOn": ["prune-lockfile", "copy-workspace-modules"],
       "executor": "nx:noop"
     },
+    "fix-module-resolution": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node scripts/fix-module-resolution.js",
+        "cwd": "{workspaceRoot}"
+      }
+    },
     "serve": {
-      "executor": "@nx/js:node",
-      "defaultConfiguration": "development",
+      "continuous": true,
+      "executor": "nx:run-commands",
       "dependsOn": ["build"],
       "options": {
-        "buildTarget": "api-gateway:build",
-        "buildTargetOptions": {
-          "watch": true
-        },
-        "inspect": "inspect"
-      },
-      "configurations": {
-        "development": {
-          "buildTarget": "api-gateway:build:development",
-          "buildTargetOptions": {
-            "watch": true
-          },
-          "inspect": "inspect"
-        },
-        "production": {
-          "buildTarget": "api-gateway:build:production",
-          "inspect": false
-        }
+        "command": "node dist/apps/api-gateway/main.js",
+        "cwd": "{workspaceRoot}"
       }
     },
     "test": {

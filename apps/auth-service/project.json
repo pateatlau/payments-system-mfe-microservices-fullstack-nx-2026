@@ -62,25 +62,20 @@
       "dependsOn": ["prune-lockfile", "copy-workspace-modules"],
       "executor": "nx:noop"
     },
+    "fix-module-resolution": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node scripts/fix-module-resolution.js",
+        "cwd": "{workspaceRoot}"
+      }
+    },
     "serve": {
       "continuous": true,
-      "executor": "@nx/js:node",
-      "defaultConfiguration": "development",
+      "executor": "nx:run-commands",
       "dependsOn": ["build"],
       "options": {
-        "buildTarget": "auth-service:build",
-        "runBuildTargetDependencies": false,
-        "inspect": "inspect"
-      },
-      "configurations": {
-        "development": {
-          "buildTarget": "auth-service:build:development",
-          "inspect": "inspect"
-        },
-        "production": {
-          "buildTarget": "auth-service:build:production",
-          "inspect": false
-        }
+        "command": "node dist/apps/auth-service/main.js",
+        "cwd": "{workspaceRoot}"
       }
     },
     "test": {
