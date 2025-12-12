@@ -16,6 +16,7 @@ import { resolvers } from './resolvers';
 import { createContext } from './context';
 import { logger } from '../utils/logger';
 import type { Express } from 'express';
+import type { JwtPayload } from '../middleware/auth';
 
 /**
  * Create executable GraphQL schema with directives
@@ -82,7 +83,7 @@ export async function applyGraphQLMiddleware(
   app.use(
     '/graphql',
     expressMiddleware(apolloServer, {
-      context: async ({ req }: { req: { headers: Record<string, string | string[] | undefined>; user?: unknown } }) => {
+      context: async ({ req }: { req: { headers: Record<string, string | string[] | undefined>; user?: JwtPayload } }) => {
         // Use optionalAuth middleware to extract user if token present
         // The directives will handle authentication requirements
         return createContext(req);
