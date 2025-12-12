@@ -14,12 +14,20 @@
  * ✅ Error handling (502, 504)
  * ✅ Request logging
  * ✅ Header forwarding (X-Forwarded-*)
+ * ✅ Swagger UI (/api-docs)
+ * ✅ GraphQL API (/graphql)
  *
  * Proxy Routes:
  * - /api/auth/* -> Auth Service (3001)
  * - /api/payments/* -> Payments Service (3002)
  * - /api/admin/* -> Admin Service (3003)
  * - /api/profile/* -> Profile Service (3004)
+ *
+ * Documentation:
+ * - /api-docs -> Swagger UI (interactive API documentation)
+ * - /api-docs.json -> OpenAPI spec (JSON)
+ * - /api-docs.yaml -> OpenAPI spec (YAML)
+ * - /graphql -> GraphQL Playground
  *
  * WebSocket:
  * - /ws?token=<JWT> -> WebSocket server with authentication
@@ -53,6 +61,7 @@ import {
 } from '@mfe-poc/observability';
 import { createApolloServer, applyGraphQLMiddleware } from './graphql/server';
 import { optionalAuth } from './middleware/auth';
+import { setupSwagger } from './swagger';
 
 /**
  * Initialize OpenTelemetry Tracing (must be first, before any other imports/initialization)
@@ -116,6 +125,9 @@ app.use(generalRateLimiter as unknown as express.RequestHandler);
 app.use('/health', express.json());
 app.use('/health', express.urlencoded({ extended: true }));
 app.use(healthRoutes);
+
+// Swagger UI (no auth required) - serves at /api-docs
+setupSwagger(app);
 
 // Metrics endpoint (no auth required, for Prometheus scraping)
 app.get('/metrics', async (_req, res) => {
@@ -186,6 +198,8 @@ app.use('/graphql', optionalAuth);
         corsOrigins: config.corsOrigins,
         websocket: true,
         graphql: true,
+        swagger: true,
+        docs: `http://localhost:${port}/api-docs`,
       });
     });
   } catch (error) {

@@ -38,6 +38,7 @@ pnpm dev:all
 
 - **Frontend:** https://localhost (via nginx)
 - **API:** https://localhost/api
+- **Swagger UI:** https://localhost/api-docs (interactive API docs)
 - **GraphQL:** https://localhost/graphql
 - **WebSocket:** wss://localhost/ws
 - **RabbitMQ UI:** http://localhost:15672 (admin/admin)

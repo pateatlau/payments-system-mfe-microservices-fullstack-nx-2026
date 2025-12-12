@@ -1250,6 +1250,47 @@ All backend services now include `https://localhost` in allowed origins:
 - `apps/admin-service/src/main.ts`
 - `apps/profile-service/src/main.ts`
 
+### Swagger UI API Testing
+
+**Status:** ✅ Complete  
+**Documentation:** See `docs/POC-3-Implementation/SWAGGER_API_DOCUMENTATION.md` for full details.
+
+**Quick Start:**
+
+```bash
+# Start backend services
+pnpm dev:backend
+
+# Open Swagger UI
+pnpm swagger:ui       # HTTP mode (http://localhost:3000/api-docs)
+pnpm swagger:ui:https # HTTPS mode (https://localhost/api-docs)
+```
+
+**Features:**
+
+- Interactive API testing directly in browser
+- Automatic request body generation from schemas
+- JWT authentication support (click "Authorize" button)
+- Request duration tracking
+- Persistent authorization across page refreshes
+
+**Available Endpoints:**
+
+| URL | Description |
+|-----|-------------|
+| `/api-docs` | Swagger UI interface |
+| `/api-docs.json` | OpenAPI spec (JSON) |
+| `/api-docs.yaml` | OpenAPI spec (YAML) |
+
+**Testing Flow:**
+
+1. Open Swagger UI at http://localhost:3000/api-docs
+2. Use `POST /api/auth/login` to get a token
+3. Click "Authorize" and enter the token
+4. Test any protected endpoint
+
+---
+
 ### API Gateway Proxy Tests
 
 **Status:** ✅ Complete  
@@ -2267,6 +2308,8 @@ curl -I -X OPTIONS https://localhost/api/auth/login \
 - [`nginx-configuration-design.md`](./nginx-configuration-design.md) - nginx configuration
 - [`ssl-tls-setup-guide.md`](./ssl-tls-setup-guide.md) - HTTPS/TLS setup guide
 - [`RABBITMQ_IMPLEMENTATION.md`](./RABBITMQ_IMPLEMENTATION.md) - RabbitMQ implementation and troubleshooting
+- [`SWAGGER_API_DOCUMENTATION.md`](./SWAGGER_API_DOCUMENTATION.md) - Swagger UI and API documentation
+- [`GRAPHQL_IMPLEMENTATION.md`](./GRAPHQL_IMPLEMENTATION.md) - GraphQL API implementation
 - [`../POC-2-Implementation/testing-guide.md`](../POC-2-Implementation/testing-guide.md) - POC-2 testing guide
 - [`../POC-2-Implementation/api-contracts.md`](../POC-2-Implementation/api-contracts.md) - API contracts
 
