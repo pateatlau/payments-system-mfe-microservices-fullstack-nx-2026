@@ -15,7 +15,7 @@ import { typeDefs } from './schema';
 import { resolvers } from './resolvers';
 import { createContext } from './context';
 import { logger } from '../utils/logger';
-import type { Express } from 'express';
+import type { Express, Request, Response } from 'express';
 import type { JwtPayload } from '../middleware/auth';
 
 /**
@@ -99,7 +99,30 @@ export async function applyGraphQLMiddleware(
 ): Promise<void> {
   await apolloServer.start();
 
-  app.use(
+  // Return helpful info for GET requests (browser navigation)
+  app.get('/graphql', (_req: Request, res: Response) => {
+    res.json({
+      success: true,
+      message: 'GraphQL endpoint - use POST requests with JSON body',
+      endpoint: '/graphql',
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer <token> (for authenticated queries)',
+      },
+      exampleQuery: {
+        query: '{ health { status timestamp service } }',
+      },
+      tools: {
+        'Apollo Studio': 'https://studio.apollographql.com/sandbox/explorer',
+        'Postman': 'Import from /api-docs.json',
+        'curl': 'curl -X POST https://localhost/graphql -H "Content-Type: application/json" -d \'{"query":"{ health { status } }"}\'',
+      },
+    });
+  });
+
+  // Handle POST requests with GraphQL middleware
+  app.post(
     '/graphql',
     expressMiddleware(apolloServer, {
       context: async ({

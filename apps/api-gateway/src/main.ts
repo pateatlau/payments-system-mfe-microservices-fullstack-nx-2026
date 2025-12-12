@@ -157,19 +157,6 @@ app.use(proxyRoutes);
 let apolloServer: ReturnType<typeof createApolloServer> | null = null;
 
 /**
- * Error Handling (must be last!)
- */
-
-// 404 handler
-app.use(notFoundHandler);
-
-// Sentry error handler (must be before general error handler)
-initSentryErrorHandler(app);
-
-// Error handler
-app.use(errorHandler);
-
-/**
  * Start Server
  */
 const port = config.port;
@@ -180,16 +167,34 @@ const httpServer = createServer(app);
 // Create WebSocket server
 const wsServer = createWebSocketServer(httpServer);
 
-// Apply GraphQL middleware (async - must be after server creation)
-// Use optionalAuth to extract user from token if present
-app.use('/graphql', optionalAuth);
-
 // Start server with GraphQL initialization
+// GraphQL must be initialized BEFORE error handlers are registered
 (async () => {
   try {
     // Initialize GraphQL server
     apolloServer = createApolloServer();
+    
+    // GraphQL needs body parsing (JSON) - apply it only for /graphql route
+    app.use('/graphql', express.json());
+    
+    // Apply optional auth to extract user from token if present
+    app.use('/graphql', optionalAuth);
+    
+    // Apply GraphQL middleware BEFORE error handlers
     await applyGraphQLMiddleware(app, apolloServer);
+
+    /**
+     * Error Handling (must be last, after all routes including GraphQL!)
+     */
+
+    // 404 handler
+    app.use(notFoundHandler);
+
+    // Sentry error handler (must be before general error handler)
+    initSentryErrorHandler(app);
+
+    // Error handler
+    app.use(errorHandler);
 
     // Start HTTP server
     httpServer.listen(port, () => {
