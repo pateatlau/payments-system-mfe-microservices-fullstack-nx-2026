@@ -17,13 +17,13 @@ export function authDirectiveTransformer(schema: GraphQLSchema): GraphQLSchema {
       const authDirective = (getDirective as any)(schema, fieldConfig, 'auth')?.[0];
       if (authDirective) {
         const { resolve = defaultFieldResolver } = fieldConfig;
-        fieldConfig.resolve = async (source, args, context: GraphQLContext) => {
+        fieldConfig.resolve = async (source, args, context: GraphQLContext, info) => {
           if (!context.user) {
             throw new GraphQLError('Authentication required', {
               extensions: { code: 'UNAUTHENTICATED', status: 401 },
             });
           }
-          return resolve(source, args, context);
+          return resolve(source, args, context, info);
         };
       }
       return fieldConfig;
@@ -42,7 +42,7 @@ export function adminDirectiveTransformer(
       const adminDirective = (getDirective as any)(schema, fieldConfig, 'admin')?.[0];
       if (adminDirective) {
         const { resolve = defaultFieldResolver } = fieldConfig;
-        fieldConfig.resolve = async (source, args, context: GraphQLContext) => {
+        fieldConfig.resolve = async (source, args, context: GraphQLContext, info) => {
           if (!context.user) {
             throw new GraphQLError('Authentication required', {
               extensions: { code: 'UNAUTHENTICATED', status: 401 },
@@ -53,7 +53,7 @@ export function adminDirectiveTransformer(
               extensions: { code: 'FORBIDDEN', status: 403 },
             });
           }
-          return resolve(source, args, context);
+          return resolve(source, args, context, info);
         };
       }
       return fieldConfig;

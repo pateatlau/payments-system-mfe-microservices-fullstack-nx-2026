@@ -82,12 +82,12 @@ export async function applyGraphQLMiddleware(
   app.use(
     '/graphql',
     expressMiddleware(apolloServer, {
-      context: async ({ req }) => {
+      context: async ({ req }: { req: { headers: Record<string, string | string[] | undefined>; user?: unknown } }) => {
         // Use optionalAuth middleware to extract user if token present
         // The directives will handle authentication requirements
         return createContext(req);
       },
-    })
+    }) as any // Type assertion for expressMiddleware compatibility
   );
 
   logger.info('GraphQL server started at /graphql');
