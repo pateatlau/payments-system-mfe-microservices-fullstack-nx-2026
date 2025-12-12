@@ -42,12 +42,32 @@ import healthRoutes from './routes/health';
 import proxyRoutes from './routes/proxy-routes';
 import { logger } from './utils/logger';
 import { createWebSocketServer } from './websocket/server';
-import { initSentry, initSentryErrorHandler } from '@mfe-poc/observability';
+import {
+  initSentry,
+  initSentryErrorHandler,
+  initPrometheusMetrics,
+  createMetricsMiddleware,
+  defaultPathNormalizer,
+  initTracing,
+  correlationIdMiddleware,
+} from '@mfe-poc/observability';
+
+/**
+ * Initialize OpenTelemetry Tracing (must be first, before any other imports/initialization)
+ */
+initTracing({
+  serviceName: 'api-gateway',
+});
 
 /**
  * Create Express application
  */
 const app = express();
+
+/**
+ * Initialize Prometheus Metrics
+ */
+const metrics = initPrometheusMetrics('api-gateway');
 
 /**
  * Middleware Setup (order matters!)
@@ -57,6 +77,20 @@ const app = express();
 initSentry(app, {
   serviceName: 'api-gateway',
 });
+
+// 0.5. Correlation ID middleware (early in chain for request tracking)
+app.use(correlationIdMiddleware);
+
+// 0.5. Metrics middleware (after Sentry, before other middleware)
+app.use(
+  createMetricsMiddleware({
+    httpRequestsTotal: metrics.http.httpRequestsTotal,
+    httpRequestDuration: metrics.http.httpRequestDuration,
+    httpActiveConnections: metrics.http.httpActiveConnections,
+    httpErrorsTotal: metrics.http.httpErrorsTotal,
+    normalizePath: defaultPathNormalizer,
+  })
+);
 
 // 1. Security headers
 app.use(securityMiddleware);
@@ -80,6 +114,18 @@ app.use(generalRateLimiter as unknown as express.RequestHandler);
 app.use('/health', express.json());
 app.use('/health', express.urlencoded({ extended: true }));
 app.use(healthRoutes);
+
+// Metrics endpoint (no auth required, for Prometheus scraping)
+app.get('/metrics', async (_req, res) => {
+  try {
+    res.set('Content-Type', metrics.registry.contentType);
+    const metricsOutput = await metrics.registry.metrics();
+    res.send(metricsOutput);
+  } catch (error) {
+    logger.error('Error generating metrics', { error });
+    res.status(500).send('Error generating metrics');
+  }
+});
 
 // API proxy routes to backend services
 // IMPORTANT: Do NOT use body parsing middleware before proxy routes

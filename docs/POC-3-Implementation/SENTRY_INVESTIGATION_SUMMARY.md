@@ -2,7 +2,7 @@
 
 **Date:** 2025-12-11  
 **Issue Reported:** All backend services failing after Sentry integration  
-**Status:** ✅ RESOLVED - 4/5 Services Operational
+**Status:** ✅ RESOLVED - All 5 Services Operational
 
 ---
 
@@ -40,65 +40,43 @@ Error: Cannot find module '/Users/.../dist/libs/backend/observability/src/index.
 
 ## Solution Implemented
 
-### Created `scripts/fix-module-resolution.js`
+### Final Solution: Direct Execution from `dist/`
 
-Automated script that fixes BOTH `dist/apps/*/main.js` AND `tmp/*/main-with-require-overrides.js` files:
+Changed all backend service `serve` targets to use `nx:run-commands` executor that directly runs `node dist/apps/{service}/main.js`, bypassing the problematic `tmp/` module resolution wrapper entirely.
 
-#### 1. Register TypeScript Loader (tsx)
+### Previous Approach (Deprecated)
 
-```javascript
-require('tsx/cjs/api').register({
-  tsconfig: {
-    compilerOptions: {
-      module: 'commonjs',
-      esModuleInterop: true,
-      allowSyntheticDefaultImports: true,
-    },
-  },
-});
-```
+Initially attempted to create `scripts/fix-module-resolution.js` to patch generated files, but this was unreliable because:
 
-#### 2. Fix distPath for tmp Folder
+1. Nx regenerates `tmp/` files on every serve, overwriting patches
+2. The module resolution logic in `tmp/` files was complex and error-prone
+3. Different `distPath` requirements for `dist/` vs `tmp/` made fixes fragile
 
-```javascript
-// For tmp files: distPath must be workspace root
-const distPath = path.resolve(__dirname, '../..');
-```
+### Current Implementation
 
-#### 3. Add TypeScript Fallback
+All backend services now use this configuration:
 
-```javascript
-// Fallback to .ts files when .js files don't exist
-if (entry2.pattern) {
-  const patternCandidate = path.join(distPath, entry2.pattern);
-  if (fs.existsSync(patternCandidate)) {
-    found = patternCandidate;
-    break;
-  }
-}
-```
-
-#### 4. Update isFile Function
-
-```javascript
-function isFile(s) {
-  try {
-    require.resolve(s);
-    return true;
-  } catch (_e) {
-    try {
-      return fs.existsSync(s);
-    } catch (_e2) {
-      return false;
+```json
+{
+  "serve": {
+    "continuous": true,
+    "executor": "nx:run-commands",
+    "dependsOn": ["build"],
+    "options": {
+      "command": "node dist/apps/{service}/main.js",
+      "cwd": "{workspaceRoot}"
     }
   }
 }
 ```
 
-#### 5. Fix require Paths
+**Why This Works:**
 
-- **dist folder:** `require('./apps/{service}/src/main.js')`
-- **tmp folder:** `require('../../apps/{service}/src/main.ts')`
+- ✅ Compiled JavaScript files exist in `dist/apps/{service}/libs/`
+- ✅ `main.js` module resolution correctly finds these files
+- ✅ No TypeScript execution needed
+- ✅ No file patching required
+- ✅ Simple and reliable
 
 ---
 
@@ -106,20 +84,35 @@ function isFile(s) {
 
 ### Updated project.json for All Backend Services
 
-Added to `apps/{service}/project.json`:
+Changed `serve` target in `apps/{service}/project.json`:
+
+**Before:**
 
 ```json
 {
-  "fix-module-resolution": {
-    "executor": "nx:run-commands",
+  "serve": {
+    "executor": "@nx/js:node",
+    "dependsOn": ["build", "fix-module-resolution"],
     "options": {
-      "command": "node scripts/fix-module-resolution.js",
+      "buildTarget": "{service}:build",
+      ...
+    }
+  }
+}
+```
+
+**After:**
+
+```json
+{
+  "serve": {
+    "continuous": true,
+    "executor": "nx:run-commands",
+    "dependsOn": ["build"],
+    "options": {
+      "command": "node dist/apps/{service}/main.js",
       "cwd": "{workspaceRoot}"
     }
-  },
-  "serve": {
-    "dependsOn": ["build", "fix-module-resolution"],
-    ...
   }
 }
 ```
@@ -138,13 +131,13 @@ Added to `apps/{service}/project.json`:
 
 ### Backend Services Status
 
-| Service              | Port | Status          | Notes                                          |
-| -------------------- | ---- | --------------- | ---------------------------------------------- |
-| **Auth Service**     | 3001 | ✅ RUNNING      | Sentry integrated, graceful DSN skip           |
-| **Payments Service** | 3002 | ✅ RUNNING      | Sentry integrated, Redis connected             |
-| **Admin Service**    | 3003 | ✅ RUNNING      | Sentry integrated                              |
-| **Profile Service**  | 3004 | ✅ RUNNING      | Sentry integrated, Redis connected             |
-| **API Gateway**      | 3000 | ⚠️ INTERMITTENT | Starts successfully, may have stability issues |
+| Service              | Port | Status     | Notes                                |
+| -------------------- | ---- | ---------- | ------------------------------------ |
+| **Auth Service**     | 3001 | ✅ RUNNING | Sentry integrated, graceful DSN skip |
+| **Payments Service** | 3002 | ✅ RUNNING | Sentry integrated, Redis connected   |
+| **Admin Service**    | 3003 | ✅ RUNNING | Sentry integrated                    |
+| **Profile Service**  | 3004 | ✅ RUNNING | Sentry integrated, Redis connected   |
+| **API Gateway**      | 3000 | ✅ RUNNING | Sentry integrated, WebSocket working |
 
 ### Sentry Integration Verified
 
@@ -168,21 +161,15 @@ All services show correct Sentry initialization:
 
 ### Configuration Files
 
-- `apps/auth-service/project.json` (+11 lines)
-- `apps/payments-service/project.json` (+11 lines)
-- `apps/admin-service/project.json` (+11 lines)
-- `apps/profile-service/project.json` (+11 lines)
-- `apps/api-gateway/project.json` (+11 lines)
-- `libs/backend/observability/tsconfig.lib.json` (restored to original)
+- `apps/auth-service/project.json` (Changed `serve` executor)
+- `apps/payments-service/project.json` (Changed `serve` executor)
+- `apps/admin-service/project.json` (Changed `serve` executor)
+- `apps/profile-service/project.json` (Changed `serve` executor)
+- `apps/api-gateway/project.json` (Changed `serve` executor)
 
-### Runtime Fixes (Generated Files)
+### Note on Previous Script
 
-- `dist/apps/*/main.js` (5 files - fixed automatically)
-- `tmp/*/main-with-require-overrides.js` (5 files - fixed automatically)
-
-### Scripts Created
-
-- `scripts/fix-module-resolution.js` (New - 150+ lines)
+- `scripts/fix-module-resolution.js` (Still exists but no longer used - kept for reference)
 
 ### Documentation
 
@@ -193,25 +180,25 @@ All services show correct Sentry initialization:
 
 ## Key Learnings
 
-1. **Nx Module Resolution is Complex:**
-   - Generated `main.js` files include custom module resolution
-   - Different behavior for `dist/` vs `tmp/` folders
-   - Requires understanding of Nx internals
+1. **Nx Module Resolution Complexity:**
+   - The `@nx/js:node` executor creates wrapper files in `tmp/` with complex module resolution
+   - These wrappers are regenerated on every serve, making patches unreliable
+   - The `dist/apps/*/main.js` files have correct module resolution for compiled files
 
-2. **TypeScript Runtime Execution:**
-   - Node.js can't directly `require()` TypeScript without a loader
-   - `tsx` is faster than `ts-node` and already installed
-   - Must be registered before any TypeScript imports
+2. **Simpler is Better:**
+   - Direct execution from `dist/` avoids the `tmp/` wrapper entirely
+   - Compiled JavaScript files work correctly without TypeScript loaders
+   - No need for complex patching or fallback logic
 
-3. **Build vs Serve:**
-   - Production builds use `dist/apps/*/main.js`
-   - Development (`nx serve`) uses `tmp/*/main-with-require-overrides.js`
-   - Both need identical fixes
+3. **Build Output Structure:**
+   - `@nx/js:copy-workspace-modules` copies compiled libraries to `dist/apps/{service}/libs/`
+   - The `main.js` module resolution correctly finds these files
+   - Everything is pre-compiled, so no runtime TypeScript execution needed
 
-4. **Workspace Module Resolution:**
-   - Libraries are copied to each service's dist folder
-   - Module resolution uses manifest with `exactMatch` and `pattern`
-   - Fallback logic was missing for TypeScript files
+4. **Executor Choice Matters:**
+   - `@nx/js:node` creates complex wrappers that can be problematic
+   - `nx:run-commands` gives direct control and is simpler
+   - Sometimes the simplest solution is the best solution
 
 ---
 
@@ -221,26 +208,24 @@ All services show correct Sentry initialization:
 
 When creating new backend libraries that will be imported by services:
 
-1. **Run the fix script after build:**
+1. **Ensure libraries build correctly:**
+   - Libraries should compile to JavaScript in `dist/`
+   - The `@nx/js:copy-workspace-modules` executor will copy them to service dist folders
+   - No additional configuration needed
 
-   ```bash
-   node scripts/fix-module-resolution.js
-   ```
+2. **For new services:**
+   - Use `nx:run-commands` executor for `serve` target
+   - Run directly from `dist/apps/{service}/main.js`
+   - Follow the pattern established in existing services
 
-2. **The fix is automatic** for services with updated project.json (runs on every serve)
+### Why This Solution Works
 
-3. **For new services:**
-   - Add `fix-module-resolution` target to project.json
-   - Add to `serve.dependsOn` array
+1. **Compiled Files Exist:** All libraries are pre-compiled to JavaScript
+2. **Correct Module Resolution:** The `dist/apps/*/main.js` files have working module resolution
+3. **No Runtime TypeScript:** Everything is JavaScript, so no loaders needed
+4. **Simple and Reliable:** Direct execution is easier to understand and maintain
 
-### Alternative Solutions (Future Consideration)
-
-1. **Bundle Dependencies:** Set `bundle: true` in esbuild config (increases build size)
-2. **Pre-compile All Libraries:** Ensure all libraries output JavaScript (adds complexity)
-3. **Custom Nx Generator:** Patch the module resolution generator (maintenance burden)
-4. **Use ts-node Loader:** Configure in project.json (tsx is faster)
-
-The current solution is minimal, non-invasive, and works reliably.
+The current solution is minimal, non-invasive, and works reliably without any patching or workarounds.
 
 ---
 
@@ -250,17 +235,15 @@ The current solution is minimal, non-invasive, and works reliably.
 
 **Current Status:**
 
-- 4/5 services running reliably
-- API Gateway has intermittent issues (may need additional debugging)
-- Sentry integration working correctly
-- Module resolution fixed
-- TypeScript execution enabled
+- ✅ All 5 services running reliably
+- ✅ Sentry integration working correctly
+- ✅ Module resolution fixed (via direct execution from `dist/`)
+- ✅ All services tested and verified
 
 **Next Steps:**
 
-- Monitor API Gateway stability
 - Configure `SENTRY_DSN` to enable actual error tracking
-- Proceed to next Phase 6 task (Sub-task 6.2.1: Prometheus Metrics)
+- Proceed to next Phase 6 tasks (Prometheus Metrics, OpenTelemetry Tracing)
 
 ---
 

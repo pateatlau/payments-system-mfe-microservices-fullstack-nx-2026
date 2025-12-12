@@ -52,7 +52,8 @@
       "@mfe-poc/observability": ["libs/backend/observability/src/index.ts"],
       "@mfe-poc/shared-observability": [
         "libs/shared-observability/src/index.ts"
-      ]
+      ],
+      "shared-analytics": ["libs/shared-analytics/src/index.ts"]
     }
   },
   "files": [],

@@ -12,14 +12,48 @@ import logger from './utils/logger';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 import healthRoutes from './routes/health';
 import profileRoutes from './routes/profile';
-import { initSentry, initSentryErrorHandler } from '@mfe-poc/observability';
+import {
+  initSentry,
+  initSentryErrorHandler,
+  initPrometheusMetrics,
+  createMetricsMiddleware,
+  defaultPathNormalizer,
+  initTracing,
+  correlationIdMiddleware,
+} from '@mfe-poc/observability';
+
+/**
+ * Initialize OpenTelemetry Tracing (must be first, before any other imports/initialization)
+ */
+initTracing({
+  serviceName: 'profile-service',
+});
 
 const app = express();
+
+/**
+ * Initialize Prometheus Metrics
+ */
+const metrics = initPrometheusMetrics('profile-service');
 
 // Initialize Sentry (must be first, before other middleware)
 initSentry(app, {
   serviceName: 'profile-service',
 });
+
+// Correlation ID middleware (early in chain for request tracking)
+app.use(correlationIdMiddleware);
+
+// Metrics middleware (after Sentry, before other middleware)
+app.use(
+  createMetricsMiddleware({
+    httpRequestsTotal: metrics.http.httpRequestsTotal,
+    httpRequestDuration: metrics.http.httpRequestDuration,
+    httpActiveConnections: metrics.http.httpActiveConnections,
+    httpErrorsTotal: metrics.http.httpErrorsTotal,
+    normalizePath: defaultPathNormalizer,
+  })
+);
 
 // Security middleware
 app.use(helmet());
@@ -78,6 +112,18 @@ app.use((req, _res, next) => {
 
 // Health check routes (no auth required)
 app.use(healthRoutes);
+
+// Metrics endpoint (no auth required, for Prometheus scraping)
+app.get('/metrics', async (_req, res) => {
+  try {
+    res.set('Content-Type', metrics.registry.contentType);
+    const metricsOutput = await metrics.registry.metrics();
+    res.send(metricsOutput);
+  } catch (error) {
+    logger.error('Error generating metrics', { error });
+    res.status(500).send('Error generating metrics');
+  }
+});
 
 // Profile API routes (authentication required)
 app.use('/api/profile', profileRoutes);
