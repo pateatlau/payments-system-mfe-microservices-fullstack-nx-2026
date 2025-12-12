@@ -30,12 +30,12 @@ The MFE Payments System is a production-ready, full-stack microfrontend platform
 
 ### Key Achievements
 
-| Milestone | Status | Description |
-|-----------|--------|-------------|
-| POC-0 | Complete | Foundation architecture and project structure |
-| POC-1 | Complete | Rspack migration, Module Federation v2, HMR optimization |
-| POC-2 | Complete | Backend integration, JWT authentication, design system |
-| POC-3 | Complete | Production-ready infrastructure, observability, GraphQL |
+| Milestone | Status   | Description                                              |
+| --------- | -------- | -------------------------------------------------------- |
+| POC-0     | Complete | Foundation architecture and project structure            |
+| POC-1     | Complete | Rspack migration, Module Federation v2, HMR optimization |
+| POC-2     | Complete | Backend integration, JWT authentication, design system   |
+| POC-3     | Complete | Production-ready infrastructure, observability, GraphQL  |
 
 ### Business Value
 
@@ -104,40 +104,40 @@ The MFE Payments System is a production-ready, full-stack microfrontend platform
 
 ### Frontend Technologies
 
-| Category | Technology | Version | Purpose |
-|----------|------------|---------|---------|
-| Framework | React | 19.2.0 | UI components and state management |
-| Build Tool | Rspack | 1.6.x | Fast bundling with Module Federation |
-| Monorepo | Nx | 21.x | Workspace management and build orchestration |
-| Styling | Tailwind CSS | 4.0+ | Utility-first CSS framework |
-| State | Zustand | 4.5.x | Client-side state management |
-| Server State | TanStack Query | 5.x | Server state and caching |
-| Forms | React Hook Form + Zod | 7.52.x / 3.23.x | Form handling and validation |
-| Design System | shadcn/ui | Latest | Accessible component library |
+| Category      | Technology            | Version         | Purpose                                      |
+| ------------- | --------------------- | --------------- | -------------------------------------------- |
+| Framework     | React                 | 19.2.0          | UI components and state management           |
+| Build Tool    | Rspack                | 1.6.x           | Fast bundling with Module Federation         |
+| Monorepo      | Nx                    | 21.x            | Workspace management and build orchestration |
+| Styling       | Tailwind CSS          | 4.0+            | Utility-first CSS framework                  |
+| State         | Zustand               | 4.5.x           | Client-side state management                 |
+| Server State  | TanStack Query        | 5.x             | Server state and caching                     |
+| Forms         | React Hook Form + Zod | 7.52.x / 3.23.x | Form handling and validation                 |
+| Design System | shadcn/ui             | Latest          | Accessible component library                 |
 
 ### Backend Technologies
 
-| Category | Technology | Version | Purpose |
-|----------|------------|---------|---------|
-| Runtime | Node.js | 24.11.x LTS | Server-side JavaScript |
-| Framework | Express | 5.x | HTTP server framework |
-| Database | PostgreSQL | 16 | Relational data storage |
-| ORM | Prisma | 6.x | Type-safe database access |
-| Cache | Redis | 7.x | Caching and session storage |
-| Message Broker | RabbitMQ | 3.x | Event-driven messaging |
-| API | REST + GraphQL | - | Dual API support |
+| Category       | Technology     | Version     | Purpose                     |
+| -------------- | -------------- | ----------- | --------------------------- |
+| Runtime        | Node.js        | 24.11.x LTS | Server-side JavaScript      |
+| Framework      | Express        | 5.x         | HTTP server framework       |
+| Database       | PostgreSQL     | 16          | Relational data storage     |
+| ORM            | Prisma         | 6.x         | Type-safe database access   |
+| Cache          | Redis          | 7.x         | Caching and session storage |
+| Message Broker | RabbitMQ       | 3.x         | Event-driven messaging      |
+| API            | REST + GraphQL | -           | Dual API support            |
 
 ### Infrastructure Technologies
 
-| Category | Technology | Purpose |
-|----------|------------|---------|
-| Reverse Proxy | nginx | SSL termination, load balancing, rate limiting |
-| Containerization | Docker | Service isolation and deployment |
-| Orchestration | Docker Compose | Local development environment |
-| Metrics | Prometheus | Metrics collection and alerting |
-| Dashboards | Grafana | Visualization and monitoring |
-| Tracing | Jaeger | Distributed tracing |
-| Error Tracking | Sentry | Error monitoring and alerting |
+| Category         | Technology     | Purpose                                        |
+| ---------------- | -------------- | ---------------------------------------------- |
+| Reverse Proxy    | nginx          | SSL termination, load balancing, rate limiting |
+| Containerization | Docker         | Service isolation and deployment               |
+| Orchestration    | Docker Compose | Local development environment                  |
+| Metrics          | Prometheus     | Metrics collection and alerting                |
+| Dashboards       | Grafana        | Visualization and monitoring                   |
+| Tracing          | Jaeger         | Distributed tracing                            |
+| Error Tracking   | Sentry         | Error monitoring and alerting                  |
 
 ---
 
@@ -148,17 +148,18 @@ The MFE Payments System is a production-ready, full-stack microfrontend platform
 The frontend uses Webpack Module Federation v2 (via Rspack) to enable independent deployment of microfrontends.
 
 **Shell Application (Host)**
+
 - Orchestrates microfrontend loading
 - Manages routing and navigation
 - Provides shared context and authentication
 
 **Remote Microfrontends**
 
-| MFE | Port | Exposed Modules | Responsibility |
-|-----|------|-----------------|----------------|
-| Auth MFE | 4201 | SignIn, SignUp | User authentication flows |
-| Payments MFE | 4202 | PaymentsPage | Payment processing UI |
-| Admin MFE | 4203 | AdminDashboard | Administrative functions |
+| MFE          | Port | Exposed Modules | Responsibility            |
+| ------------ | ---- | --------------- | ------------------------- |
+| Auth MFE     | 4201 | SignIn, SignUp  | User authentication flows |
+| Payments MFE | 4202 | PaymentsPage    | Payment processing UI     |
+| Admin MFE    | 4203 | AdminDashboard  | Administrative functions  |
 
 ### Shared Libraries
 
@@ -178,12 +179,12 @@ libs/
 
 ### State Management Strategy
 
-| State Type | Solution | Use Case |
-|------------|----------|----------|
-| Client State | Zustand | Authentication, UI preferences, theme |
-| Server State | TanStack Query | API data, caching, background sync |
-| Form State | React Hook Form | Form inputs, validation |
-| Cross-MFE | Event Bus | Inter-module communication |
+| State Type   | Solution        | Use Case                              |
+| ------------ | --------------- | ------------------------------------- |
+| Client State | Zustand         | Authentication, UI preferences, theme |
+| Server State | TanStack Query  | API data, caching, background sync    |
+| Form State   | React Hook Form | Form inputs, validation               |
+| Cross-MFE    | Event Bus       | Inter-module communication            |
 
 ---
 
@@ -191,13 +192,13 @@ libs/
 
 ### Service Decomposition
 
-| Service | Port | Database | Responsibility |
-|---------|------|----------|----------------|
-| API Gateway | 3000 | - | Request routing, authentication, rate limiting |
-| Auth Service | 3001 | auth_db | User management, JWT tokens, RBAC |
-| Payments Service | 3002 | payments_db | Payment processing, transaction history |
-| Admin Service | 3003 | admin_db | User administration, system management |
-| Profile Service | 3004 | profile_db | User profiles, preferences |
+| Service          | Port | Database    | Responsibility                                 |
+| ---------------- | ---- | ----------- | ---------------------------------------------- |
+| API Gateway      | 3000 | -           | Request routing, authentication, rate limiting |
+| Auth Service     | 3001 | auth_db     | User management, JWT tokens, RBAC              |
+| Payments Service | 3002 | payments_db | Payment processing, transaction history        |
+| Admin Service    | 3003 | admin_db    | User administration, system management         |
+| Profile Service  | 3004 | profile_db  | User profiles, preferences                     |
 
 ### API Gateway Features
 
@@ -215,12 +216,12 @@ RabbitMQ provides reliable, persistent messaging between services.
 
 **Exchange Topology**
 
-| Exchange | Type | Purpose |
-|----------|------|---------|
-| user.events | topic | User-related events |
-| payment.events | topic | Payment processing events |
-| admin.events | topic | Administrative events |
-| system.events | fanout | System-wide notifications |
+| Exchange       | Type   | Purpose                   |
+| -------------- | ------ | ------------------------- |
+| user.events    | topic  | User-related events       |
+| payment.events | topic  | Payment processing events |
+| admin.events   | topic  | Administrative events     |
+| system.events  | fanout | System-wide notifications |
 
 **Event Flow Example**
 
@@ -244,34 +245,34 @@ RabbitMQ provides reliable, persistent messaging between services.
 
 nginx serves as the primary entry point with the following capabilities:
 
-| Feature | Configuration |
-|---------|---------------|
-| SSL/TLS | TLS 1.2+ with modern cipher suites |
-| HTTP/2 | Enabled for improved performance |
-| Rate Limiting | API: 100 req/min, Auth: 10 req/min |
-| Compression | gzip for text, JSON, JavaScript |
-| Caching | Static assets cached for 1 year |
-| WebSocket | Upgrade support for real-time features |
+| Feature       | Configuration                          |
+| ------------- | -------------------------------------- |
+| SSL/TLS       | TLS 1.2+ with modern cipher suites     |
+| HTTP/2        | Enabled for improved performance       |
+| Rate Limiting | API: 100 req/min, Auth: 10 req/min     |
+| Compression   | gzip for text, JSON, JavaScript        |
+| Caching       | Static assets cached for 1 year        |
+| WebSocket     | Upgrade support for real-time features |
 
 ### Database Architecture
 
 Each service maintains its own PostgreSQL database for data isolation:
 
-| Database | Port | Service | Tables |
-|----------|------|---------|--------|
-| auth_db | 5432 | Auth Service | users, sessions, tokens |
-| payments_db | 5433 | Payments Service | payments, transactions |
-| admin_db | 5434 | Admin Service | audit_logs, settings |
-| profile_db | 5435 | Profile Service | profiles, preferences |
+| Database    | Port | Service          | Tables                  |
+| ----------- | ---- | ---------------- | ----------------------- |
+| auth_db     | 5432 | Auth Service     | users, sessions, tokens |
+| payments_db | 5433 | Payments Service | payments, transactions  |
+| admin_db    | 5434 | Admin Service    | audit_logs, settings    |
+| profile_db  | 5435 | Profile Service  | profiles, preferences   |
 
 ### Caching Strategy
 
-| Layer | Technology | TTL | Use Case |
-|-------|------------|-----|----------|
-| Browser | Service Worker | Varies | Static assets, offline support |
-| CDN | nginx | 1 year | Immutable assets |
-| API | Redis | 5-60 min | Query results, sessions |
-| Database | Prisma | - | Connection pooling |
+| Layer    | Technology     | TTL      | Use Case                       |
+| -------- | -------------- | -------- | ------------------------------ |
+| Browser  | Service Worker | Varies   | Static assets, offline support |
+| CDN      | nginx          | 1 year   | Immutable assets               |
+| API      | Redis          | 5-60 min | Query results, sessions        |
+| Database | Prisma         | -        | Connection pooling             |
 
 ---
 
@@ -298,18 +299,18 @@ Each service maintains its own PostgreSQL database for data isolation:
 
 ### JWT Token Strategy
 
-| Token | Lifetime | Storage | Purpose |
-|-------|----------|---------|---------|
-| Access Token | 15 minutes | Memory | API authentication |
-| Refresh Token | 7 days | HTTP-only cookie | Token renewal |
+| Token         | Lifetime   | Storage          | Purpose            |
+| ------------- | ---------- | ---------------- | ------------------ |
+| Access Token  | 15 minutes | Memory           | API authentication |
+| Refresh Token | 7 days     | HTTP-only cookie | Token renewal      |
 
 ### Role-Based Access Control (RBAC)
 
-| Role | Permissions |
-|------|-------------|
-| ADMIN | Full system access, user management, audit logs |
-| CUSTOMER | View/create payments, manage own profile |
-| VENDOR | Initiate payments, view reports, limited admin |
+| Role     | Permissions                                     |
+| -------- | ----------------------------------------------- |
+| ADMIN    | Full system access, user management, audit logs |
+| CUSTOMER | View/create payments, manage own profile        |
+| VENDOR   | Initiate payments, view reports, limited admin  |
 
 ### Security Headers
 
@@ -329,12 +330,12 @@ Content-Security-Policy: default-src 'self'; ...
 
 **Key Metrics Collected**
 
-| Metric | Type | Description |
-|--------|------|-------------|
-| http_requests_total | Counter | Total requests by method, route, status |
-| http_request_duration_seconds | Histogram | Request latency distribution |
-| http_active_connections | Gauge | Current active connections |
-| http_errors_total | Counter | Error count by type |
+| Metric                        | Type      | Description                             |
+| ----------------------------- | --------- | --------------------------------------- |
+| http_requests_total           | Counter   | Total requests by method, route, status |
+| http_request_duration_seconds | Histogram | Request latency distribution            |
+| http_active_connections       | Gauge     | Current active connections              |
+| http_errors_total             | Counter   | Error count by type                     |
 
 **Scrape Targets**
 
@@ -345,11 +346,13 @@ All backend services expose metrics at `/metrics` endpoint, scraped every 10-15 
 Two pre-configured dashboards are provided:
 
 **Services Overview Dashboard**
+
 - Service health status (UP/DOWN indicators)
 - Request rate comparison across services
 - P95 latency comparison
 
 **API Gateway Dashboard**
+
 - Request rate (requests/second)
 - Response time percentiles (p50, p90, p95, p99)
 - Error rate percentage
@@ -382,32 +385,33 @@ Sentry integration captures and aggregates errors:
 
 Interactive API documentation available via Swagger UI:
 
-| Endpoint | Description |
-|----------|-------------|
-| /api-docs | Swagger UI interface |
+| Endpoint       | Description                      |
+| -------------- | -------------------------------- |
+| /api-docs      | Swagger UI interface             |
 | /api-docs.json | OpenAPI 3.0 specification (JSON) |
 | /api-docs.yaml | OpenAPI 3.0 specification (YAML) |
 
 **API Endpoints Summary**
 
-| Category | Endpoints | Authentication |
-|----------|-----------|----------------|
-| Auth | /api/auth/* | Public (login, register) |
-| Payments | /api/payments/* | JWT required |
-| Admin | /api/admin/* | JWT + ADMIN role |
-| Profile | /api/profile/* | JWT required |
-| Health | /health/* | Public |
+| Category | Endpoints        | Authentication           |
+| -------- | ---------------- | ------------------------ |
+| Auth     | /api/auth/\*     | Public (login, register) |
+| Payments | /api/payments/\* | JWT required             |
+| Admin    | /api/admin/\*    | JWT + ADMIN role         |
+| Profile  | /api/profile/\*  | JWT required             |
+| Health   | /health/\*       | Public                   |
 
 ### GraphQL API
 
 Apollo Server provides a GraphQL API alongside REST:
 
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| /graphql | POST | GraphQL queries and mutations |
-| /graphql | GET | API information |
+| Endpoint | Method | Description                   |
+| -------- | ------ | ----------------------------- |
+| /graphql | POST   | GraphQL queries and mutations |
+| /graphql | GET    | API information               |
 
 **Schema Features**
+
 - Custom directives (@auth, @admin) for authorization
 - Type-safe resolvers with TypeScript
 - Automatic schema documentation
@@ -440,35 +444,35 @@ open https://localhost
 
 ### Available Scripts
 
-| Script | Description |
-|--------|-------------|
-| pnpm dev:all | Start all frontend MFEs |
-| pnpm dev:backend | Start all backend services |
-| pnpm infra:start | Start Docker infrastructure |
-| pnpm test | Run all tests |
-| pnpm build | Build all projects |
+| Script                   | Description                       |
+| ------------------------ | --------------------------------- |
+| pnpm dev:all             | Start all frontend MFEs           |
+| pnpm dev:backend         | Start all backend services        |
+| pnpm infra:start         | Start Docker infrastructure       |
+| pnpm test                | Run all tests                     |
+| pnpm build               | Build all projects                |
 | pnpm observability:start | Start Prometheus, Grafana, Jaeger |
 
 ### Access URLs
 
-| Service | URL | Credentials |
-|---------|-----|-------------|
-| Application | https://localhost | - |
-| Swagger UI | https://localhost/api-docs | - |
-| GraphQL | https://localhost/graphql | - |
-| Prometheus | http://localhost:9090 | - |
-| Grafana | http://localhost:3010 | admin/admin |
-| Jaeger | http://localhost:16686 | - |
-| RabbitMQ | http://localhost:15672 | admin/admin |
+| Service     | URL                        | Credentials |
+| ----------- | -------------------------- | ----------- |
+| Application | https://localhost          | -           |
+| Swagger UI  | https://localhost/api-docs | -           |
+| GraphQL     | https://localhost/graphql  | -           |
+| Prometheus  | http://localhost:9090      | -           |
+| Grafana     | http://localhost:3010      | admin/admin |
+| Jaeger      | http://localhost:16686     | -           |
+| RabbitMQ    | http://localhost:15672     | admin/admin |
 
 ### Testing Strategy
 
-| Test Type | Framework | Coverage Target |
-|-----------|-----------|-----------------|
-| Unit | Jest + RTL | 70%+ |
-| Integration | Jest | Key flows |
-| E2E | Playwright | Critical paths |
-| Load | Custom scripts | Performance baselines |
+| Test Type   | Framework      | Coverage Target       |
+| ----------- | -------------- | --------------------- |
+| Unit        | Jest + RTL     | 70%+                  |
+| Integration | Jest           | Key flows             |
+| E2E         | Playwright     | Critical paths        |
+| Load        | Custom scripts | Performance baselines |
 
 ---
 
@@ -503,6 +507,7 @@ payments-system-mfe/
 ### Planned for Next Phase
 
 **CI/CD Pipeline**
+
 - Automated build and deployment workflows
 - Multi-environment deployment (dev, staging, production)
 - Automated testing in CI pipeline
@@ -510,6 +515,7 @@ payments-system-mfe/
 - Infrastructure as Code (IaC)
 
 **Cloud Deployment**
+
 - Cloud provider selection and configuration
 - Kubernetes orchestration
 - Auto-scaling configuration
@@ -517,6 +523,7 @@ payments-system-mfe/
 - Production-grade SSL certificates
 
 **Internet Live Demo**
+
 - Public-facing demo environment
 - Sample data and test accounts
 - Interactive feature showcase
@@ -526,7 +533,6 @@ payments-system-mfe/
 
 **Document End**
 
-*This document provides a high-level overview of the MFE Payments System architecture. For detailed implementation guides, refer to the documentation in the `docs/` directory.*
+_This document provides a high-level overview of the MFE Payments System architecture. For detailed implementation guides, refer to the documentation in the `docs/` directory._
 
 **Note:** The system is production-ready from an architectural standpoint. CI/CD and cloud deployment infrastructure are the final steps for public availability.
-

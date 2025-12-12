@@ -1,12 +1,39 @@
-# MFE Microservices Full-Stack Platform
+# MFE Payments System - Production-Ready Microfrontend Platform
 
-**Status:** POC-3 - Production-Ready Infrastructure Complete  
 **Version:** 0.3.0  
-**Tech Stack:** React 19 + Nx + Rspack + Module Federation v2 + Node.js + PostgreSQL + RabbitMQ + nginx + HTTPS/TLS
+**Status:** POC-3 Complete - Production-Ready Infrastructure  
+**Tech Stack:** React 19 + Nx + Rspack + Module Federation v2 + Node.js + PostgreSQL + RabbitMQ + nginx
 
 ---
 
-## 🚀 Quick Start
+## Overview
+
+A production-ready, full-stack microfrontend platform demonstrating enterprise-grade architecture patterns for building scalable payment processing applications. Features independent deployment of frontend modules and backend microservices, complete observability stack, and banking-grade security.
+
+### Key Features
+
+- **Microfrontend Architecture:** Module Federation v2 with independent deployments
+- **Microservices Backend:** Domain-driven service decomposition with separate databases
+- **Production Infrastructure:** nginx reverse proxy, HTTPS/TLS, rate limiting, load balancing
+- **Event-Driven:** RabbitMQ for reliable asynchronous messaging
+- **Real-Time:** WebSocket server for bidirectional communication
+- **Dual API:** REST (Swagger UI) + GraphQL (Apollo Server)
+- **Full Observability:** Prometheus metrics, Grafana dashboards, Jaeger tracing, Sentry errors
+- **Banking-Grade Security:** JWT authentication, RBAC, secure session management
+
+### Architecture
+
+```
+[nginx Proxy] → [API Gateway] → [Auth, Payments, Admin, Profile Services]
+                      ↓                           ↓
+                [WebSocket]                 [Separate DBs]
+                      ↓                           ↓
+            [Shell + 3 MFEs]              [RabbitMQ Events]
+```
+
+---
+
+## Quick Start
 
 ### Prerequisites
 
@@ -15,402 +42,256 @@
 - **Docker & Docker Compose:** Latest
 - **Git:** Latest
 
-### Start the Application (HTTPS)
+### 1. Clone Repository
 
 ```bash
-# 1. Generate SSL certificates (first time only)
+git clone <repository-url>
+cd payments-system-mfe-microservices-fullstack-nx-2026
+```
+
+### 2. Install Dependencies
+
+```bash
+pnpm install
+```
+
+### 3. Generate SSL Certificates
+
+```bash
 pnpm ssl:generate
+```
 
-# 2. Start infrastructure (nginx, databases, RabbitMQ, Redis)
+### 4. Start Infrastructure
+
+```bash
+# Start nginx, PostgreSQL databases, RabbitMQ, Redis, Prometheus, Grafana, Jaeger
 pnpm infra:start
+```
 
-# 3. Start backend services (API Gateway, Auth, Payments, Admin, Profile)
+### 5. Start Backend Services
+
+```bash
+# Starts API Gateway, Auth, Payments, Admin, Profile services
 pnpm dev:backend
+```
 
-# 4. Start frontend (Shell, Auth MFE, Payments MFE, Admin MFE)
+### 6. Start Frontend
+
+```bash
+# Starts Shell app and all MFEs (Auth, Payments, Admin)
 pnpm dev:all
-
-# 5. Access application at https://localhost
-# Note: Accept self-signed certificate warning in browser
 ```
 
-### Quick Access URLs
+### 7. Access Application
 
-| Service | URL | Description |
+Open your browser and navigate to:
+
+| Service | URL | Credentials |
 |---------|-----|-------------|
-| **Frontend** | https://localhost | Main application (via nginx) |
-| **API** | https://localhost/api | REST API endpoints |
-| **Swagger UI** | https://localhost/api-docs | Interactive API documentation |
-| **GraphQL** | https://localhost/graphql | GraphQL API (POST requests) |
-| **WebSocket** | wss://localhost/ws | Real-time communication |
-| **Prometheus** | http://localhost:9090 | Metrics collection |
-| **Grafana** | http://localhost:3010 | Dashboards (admin/admin) |
-| **Jaeger** | http://localhost:16686 | Distributed tracing |
-| **RabbitMQ UI** | http://localhost:15672 | Message broker (admin/admin) |
+| **Application** | https://localhost | - |
+| **Swagger UI** | https://localhost/api-docs | - |
+| **Grafana** | http://localhost:3010 | admin/admin |
+| **Prometheus** | http://localhost:9090 | - |
+| **Jaeger** | http://localhost:16686 | - |
 
-**Complete Setup Guide:** [`docs/POC-3-Implementation/ssl-tls-setup-guide.md`](docs/POC-3-Implementation/ssl-tls-setup-guide.md)
+**Note:** Accept the self-signed certificate warning in your browser.
 
----
+### 8. Run Tests
 
-## 📚 Documentation Structure
+```bash
+# Run all tests
+pnpm test
 
-### Implementation Documentation
+# Run backend tests
+pnpm test:backend
 
-- **📋 Quick Start:** [`docs/POC-0-Implementation/QUICK-START.md`](docs/POC-0-Implementation/QUICK-START.md) - Get started in 10 minutes
-- **📝 Implementation Plan:** [`docs/POC-0-Implementation/implementation-plan.md`](docs/POC-0-Implementation/implementation-plan.md) - Detailed step-by-step guide
-- **✅ Task List:** [`docs/POC-0-Implementation/task-list.md`](docs/POC-0-Implementation/task-list.md) - Progress tracking
-- **📖 Implementation README:** [`docs/POC-0-Implementation/README.md`](docs/POC-0-Implementation/README.md) - How to use implementation docs
-
-### Architecture & Design
-
-- **🏗️ POC-0 Architecture:** [`docs/References/mfe-poc0-architecture.md`](docs/References/mfe-poc0-architecture.md) - Foundation architecture
-- **🔧 POC-0 Tech Stack:** [`docs/References/mfe-poc0-tech-stack.md`](docs/References/mfe-poc0-tech-stack.md) - Technology choices
-- **🌐 Full-Stack Architecture:** [`docs/References/fullstack-architecture.md`](docs/References/fullstack-architecture.md) - Complete system architecture
-
-### Development Workflow
-
-- **👨‍💻 Developer Workflow:** [`docs/Developer-Workflow/README-FIRST.md`](docs/Developer-Workflow/README-FIRST.md) - Complete workflow guide
-- **🔄 Context Persistence:** [`docs/Developer-Workflow/CONTEXT-PERSISTENCE.md`](docs/Developer-Workflow/CONTEXT-PERSISTENCE.md) - Multi-session guide
-- **📊 Setup Evaluation:** [`docs/Developer-Workflow/PROJECT-SETUP-EVALUATION.md`](docs/Developer-Workflow/PROJECT-SETUP-EVALUATION.md) - Project assessment
-
-### Prompts & Templates
-
-- **🚀 First Prompt:** [`docs/Prompts/POC-0/first-prompt.md`](docs/Prompts/POC-0/first-prompt.md) - Starting implementation
-- **🔄 Continuation Prompt:** [`docs/Prompts/POC-0/continuation-prompt.md`](docs/Prompts/POC-0/continuation-prompt.md) - Resuming work
-
-### Architecture Decision Records (ADRs)
-
-- **📋 ADR Index:** [`docs/adr/README.md`](docs/adr/README.md) - All architectural decisions
-- **POC-0 ADRs:** [`docs/adr/poc-0/`](docs/adr/poc-0/) - Foundation decisions
+# Run E2E tests (requires services running)
+pnpm test:e2e
+```
 
 ---
 
-## 🎯 Current Phase: POC-3 (Production-Ready Infrastructure Complete)
-
-### Scope
-
-**Completed in POC-3:**
-
-- ✅ **nginx Reverse Proxy** - SSL/TLS termination, load balancing, rate limiting
-- ✅ **HTTPS/TLS** - Self-signed certificates for development, WSS for WebSocket
-- ✅ **Separate Databases** - Per-service PostgreSQL databases (auth_db, payments_db, admin_db, profile_db)
-- ✅ **RabbitMQ Event Hub** - Production-ready messaging (migrated from Redis Pub/Sub)
-- ✅ **WebSocket Server** - Real-time bidirectional communication with JWT auth
-- ✅ **Advanced Caching** - Service Worker (Workbox), Redis backend caching
-- ✅ **Observability** - Sentry error tracking, Prometheus metrics, Grafana dashboards, Jaeger tracing
-- ✅ **Session Management** - Cross-tab sync (BroadcastChannel), cross-device sync
-- ✅ **Performance** - Code splitting, lazy loading, bundle optimization
-- ✅ **GraphQL API** - Alongside REST API with Apollo Server
-- ✅ **Testing** - Integration tests, performance tests, security tests
-- ✅ **Documentation** - 13 comprehensive guides
-
-**Previous POCs:**
-
-- ✅ **POC-0:** Foundation architecture
-- ✅ **POC-1:** Rspack migration, Module Federation v2, HMR
-- ✅ **POC-2:** Backend integration, JWT auth, design system, event bus, admin MFE
-
-### Progress
-
-- **POC-0:** ✅ Complete
-- **POC-1:** ✅ Complete
-- **POC-2:** ✅ Complete
-- **POC-3:** ✅ Complete (All 8 phases, 52 sub-tasks)
-- **Rspack Migration:** ✅ Complete
-- Check POC-2 progress: [`docs/POC-2-Implementation/task-list.md`](docs/POC-2-Implementation/task-list.md)
-
----
-
-## 🛠️ Technology Stack
-
-### Frontend (POC-2)
-
-- **React:** 19.2.0
-- **Nx:** Latest
-- **Rspack:** Latest (migrated from Vite 6.x)
-- **Module Federation:** @module-federation/enhanced 0.21.6 (BIMF)
-- **Routing:** React Router 7.x
-- **State Management:** Zustand 4.5.x + TanStack Query 5.x
-- **Design System:** shadcn/ui + Tailwind CSS v4
-- **Forms:** React Hook Form 7.52.x + Zod 3.23.x
-- **Testing:** Jest 30.x, React Testing Library 16.1.x, Playwright
-- **Package Manager:** pnpm 9.x
-- **TypeScript:** 5.9.x (strict mode)
-
-### Backend (POC-2)
-
-- **Node.js:** 24.11.x LTS
-- **Framework:** Express
-- **Database:** PostgreSQL 16.x + Prisma ORM
-- **Event Hub:** Redis 7.x (Pub/Sub)
-- **Authentication:** JWT (access + refresh tokens)
-- **Testing:** Jest
-- **TypeScript:** 5.9.x (strict mode)
-
-> **Note:** Migrated from Vite to Rspack to enable HMR with Module Federation v2. See `docs/Rspack-Migration/` for migration details.
-
-### Future Phases
-
-- **POC-3:** Infrastructure improvements, separate databases, WebSocket, RabbitMQ, advanced observability
-
----
-
-## 📁 Project Structure
+## Project Structure
 
 ```
-payments-system-mfe-microservices-fullstack-nx-2026/
+payments-system-mfe/
 ├── apps/
-│   ├── shell/              # Host (Port 4200)
-│   ├── auth-mfe/           # Auth MFE (Port 4201)
-│   ├── payments-mfe/       # Payments MFE (Port 4202)
-│   ├── admin-mfe/          # Admin MFE (Port 4203) - POC-2
-│   ├── shell-e2e/          # E2E tests
-│   ├── api-gateway/        # API Gateway (Port 3000) - POC-2
-│   ├── auth-service/       # Auth Service (Port 3001) - POC-2
-│   ├── payments-service/   # Payments Service (Port 3002) - POC-2
-│   ├── admin-service/      # Admin Service (Port 3003) - POC-2
-│   └── profile-service/    # Profile Service (Port 3004) - POC-2
+│   ├── Frontend MFEs
+│   │   ├── shell/              # Host application (4200)
+│   │   ├── auth-mfe/           # Authentication (4201)
+│   │   ├── payments-mfe/       # Payments (4202)
+│   │   └── admin-mfe/          # Admin (4203)
+│   └── Backend Services
+│       ├── api-gateway/        # API Gateway (3000)
+│       ├── auth-service/       # Auth (3001)
+│       ├── payments-service/   # Payments (3002)
+│       ├── admin-service/      # Admin (3003)
+│       └── profile-service/    # Profile (3004)
 ├── libs/
-│   ├── shared-utils/       # Shared utilities
-│   ├── shared-ui/          # Shared UI components
-│   ├── shared-types/       # Shared TypeScript types
-│   ├── shared-auth-store/  # Auth store (Zustand)
-│   ├── shared-header-ui/   # Universal header
-│   ├── shared-api-client/  # API client (Axios) - POC-2
-│   ├── shared-event-bus/   # Event bus - POC-2
-│   ├── shared-design-system/ # Design system (shadcn/ui) - POC-2
-│   └── backend/            # Backend shared libraries - POC-2
-│       ├── db/             # Prisma schema
-│       ├── types/          # Backend types
-│       ├── utils/           # Backend utilities
-│       └── event-hub/       # Event Hub (Redis) - POC-2
-├── docs/                   # Documentation
-├── scripts/                # Utility scripts
-└── .cursorrules           # Cursor AI rules
+│   ├── Frontend Libraries
+│   │   ├── shared-types/
+│   │   ├── shared-auth-store/
+│   │   ├── shared-api-client/
+│   │   ├── shared-event-bus/
+│   │   └── shared-design-system/
+│   └── Backend Libraries
+│       └── backend/
+│           ├── observability/
+│           └── rabbitmq-event-hub/
+├── nginx/                      # Reverse proxy configuration
+├── prometheus/                 # Metrics configuration
+├── grafana/                    # Dashboards
+└── docs/                       # Documentation
 ```
 
 ---
 
-## 🚦 Getting Started
+## Technology Stack
 
-### 1. Verify Environment
+### Frontend
+- React 19.2.0 with TypeScript 5.9.x
+- Rspack 1.6.x with Module Federation v2
+- Nx 21.x monorepo
+- Tailwind CSS 4.0+ and shadcn/ui
+- Zustand + TanStack Query for state management
+- React Hook Form + Zod for forms
 
-```bash
-./scripts/verify-environment.sh
-```
+### Backend
+- Node.js 24.11.x LTS with Express 5.x
+- PostgreSQL 16 with Prisma ORM
+- RabbitMQ 3.x for event-driven messaging
+- Redis 7.x for caching
+- REST + GraphQL APIs
 
-### 2. Start Infrastructure
-
-```bash
-# Start PostgreSQL and Redis
-pnpm infra:start
-
-# Set up database
-pnpm backend:setup
-```
-
-### 3. Start Development
-
-```bash
-# Terminal 1: Start backend services
-pnpm dev:backend
-
-# Terminal 2: Start frontend services
-pnpm dev:mf
-```
-
-### 4. Access Application
-
-- **Frontend:** http://localhost:4200
-- **API Gateway:** http://localhost:3000
-
-**See:** [`docs/POC-2-Implementation/developer-workflow-fullstack.md`](docs/POC-2-Implementation/developer-workflow-fullstack.md) for complete setup guide.
+### Infrastructure
+- nginx reverse proxy with SSL/TLS
+- Docker + Docker Compose
+- Prometheus + Grafana + Jaeger
+- Sentry error tracking
 
 ---
 
-## 📖 Key Documentation
-
-### POC-2 Implementation (Current)
-
-1. **Quick Start:** [`docs/POC-2-Implementation/developer-workflow-fullstack.md`](docs/POC-2-Implementation/developer-workflow-fullstack.md)
-2. **Track Progress:** [`docs/POC-2-Implementation/task-list.md`](docs/POC-2-Implementation/task-list.md)
-3. **Implementation Plan:** [`docs/POC-2-Implementation/implementation-plan.md`](docs/POC-2-Implementation/implementation-plan.md)
-
-### Developer Workflows
-
-1. **Frontend Workflow:** [`docs/POC-2-Implementation/developer-workflow-frontend.md`](docs/POC-2-Implementation/developer-workflow-frontend.md)
-2. **Backend Workflow:** [`docs/POC-2-Implementation/developer-workflow-backend.md`](docs/POC-2-Implementation/developer-workflow-backend.md)
-3. **Full-Stack Workflow:** [`docs/POC-2-Implementation/developer-workflow-fullstack.md`](docs/POC-2-Implementation/developer-workflow-fullstack.md)
-
-### Technical Documentation
-
-1. **Design System:** [`docs/POC-2-Implementation/design-system-guide.md`](docs/POC-2-Implementation/design-system-guide.md)
-2. **Migration Guide:** [`docs/POC-2-Implementation/migration-guide-poc1-to-poc2.md`](docs/POC-2-Implementation/migration-guide-poc1-to-poc2.md)
-3. **Testing Guide:** [`docs/POC-2-Implementation/testing-guide.md`](docs/POC-2-Implementation/testing-guide.md)
-4. **API Contracts:** [`docs/POC-2-Implementation/api-contracts.md`](docs/POC-2-Implementation/api-contracts.md)
-5. **Event Bus Contract:** [`docs/POC-2-Implementation/event-bus-contract.md`](docs/POC-2-Implementation/event-bus-contract.md)
-
-### Architecture
-
-1. **POC-2 Architecture:** [`docs/References/mfe-poc2-architecture.md`](docs/References/mfe-poc2-architecture.md)
-2. **Backend Architecture:** [`docs/References/backend-poc2-architecture.md`](docs/References/backend-poc2-architecture.md)
-3. **Full-Stack Architecture:** [`docs/References/fullstack-architecture.md`](docs/References/fullstack-architecture.md)
-4. **Architecture Review:** [`docs/POC-2-Implementation/architecture-review.md`](docs/POC-2-Implementation/architecture-review.md)
-
----
-
-## 🎯 Success Criteria
-
-POC-0 is complete when:
-
-- ✅ Shell app runs on http://localhost:4200
-- ✅ Hello Remote app runs on http://localhost:4201
-- ✅ Module Federation v2 works (shell loads remote dynamically)
-- ✅ Shared dependencies work (no duplicates)
-- ✅ HMR works (fast updates)
-- ✅ Production builds work (optimized)
-- ✅ TypeScript types work across boundaries
-- ✅ Tests pass (60% coverage minimum)
-- ✅ Shared libraries created and working
-
----
-
-## 🔧 Development Commands
-
-### After Workspace Setup
+## Development Commands
 
 ```bash
-# Serve applications
-nx serve shell              # Port 4200
-nx serve hello-remote      # Port 4201
+# Infrastructure
+pnpm infra:start              # Start all Docker services
+pnpm infra:stop               # Stop all Docker services
+pnpm observability:start      # Start Prometheus, Grafana, Jaeger
 
-# Run both in parallel
-nx run-many --target=serve --projects=shell,hello-remote --parallel
+# Backend
+pnpm dev:backend              # Start all backend services
+pnpm test:backend             # Run backend tests
+pnpm backend:setup            # Setup databases with Prisma
+
+# Frontend
+pnpm dev:all                  # Start all frontend MFEs
+pnpm dev:mf                   # Start frontend (HTTP mode)
+pnpm test                     # Run all frontend tests
+pnpm test:coverage            # Run tests with coverage
 
 # Build
-nx build shell
-nx build hello-remote
+pnpm build                    # Build all projects
+pnpm build:backend            # Build backend services only
 
-# Test
-nx test shell
-nx test hello-remote
+# Testing
+pnpm test:e2e                 # Run E2E tests with Playwright
+pnpm test:affected            # Run tests for changed code
 
-# Lint
-nx lint shell
-nx lint hello-remote
+# Utilities
+pnpm ssl:generate             # Generate SSL certificates
+pnpm swagger:ui               # Open Swagger API docs
+pnpm grafana:ui               # Open Grafana dashboards
 ```
 
 ---
 
-## 📋 Project Rules
+## Key Features Implemented
 
-### Core Principles
+### POC-0: Foundation
+- Nx monorepo with React + TypeScript
+- Module Federation v2 with Rspack
+- Shared component libraries
 
-1. **NO throw-away code** - Everything must carry forward to Production
-2. **Never use `any` type** - Documented exceptions only
-3. **Fix type errors immediately** - Don't work around them
-4. **Write tests alongside code** - 60% coverage minimum
-5. **POC-0 scope only** - No backend, routing, state management, auth, Tailwind
+### POC-1: Rspack Migration
+- Migrated from Vite to Rspack
+- Module Federation with HMR
+- Performance optimizations
 
-### Rules Reference
+### POC-2: Backend Integration
+- Full-stack microservices architecture
+- JWT authentication with RBAC
+- Design system (shadcn/ui + Tailwind v4)
+- Event bus for inter-service communication
 
-- **Quick Reference:** `.cursorrules` (always included)
-- **Detailed Rules:** [`docs/POC-0-Implementation/project-rules-cursor.md`](docs/POC-0-Implementation/project-rules-cursor.md)
-- **Full Documentation:** [`docs/POC-0-Implementation/project-rules.md`](docs/POC-0-Implementation/project-rules.md)
-
----
-
-## 🗺️ Roadmap
-
-### POC-0 (Current) - Foundation
-
-- Shell + Hello Remote + Module Federation v2
-- Timeline: 1-2 weeks
-
-### POC-1 - Authentication & Payments
-
-- Auth MFE + Payments MFE + Routing + State Management
-- Timeline: 3-4 weeks
-
-### POC-2 - Backend Integration
-
-- Backend API + Design System + Event Bus
-- Timeline: 2-3 weeks
-
-### POC-3 - Infrastructure
-
-- nginx + Performance + Enhanced Observability
-- Timeline: 4-5 weeks
+### POC-3: Production Infrastructure
+- nginx reverse proxy with HTTPS/TLS
+- Separate databases per service
+- RabbitMQ event hub
+- WebSocket real-time communication
+- Complete observability stack
+- GraphQL API alongside REST
+- Interactive API documentation (Swagger)
+- Advanced caching strategies
+- Cross-tab/device session sync
 
 ---
 
-## 📞 Support & Resources
+## Testing
 
-### Documentation
+The project includes comprehensive testing:
 
-- **Quick Start:** [`docs/POC-0-Implementation/QUICK-START.md`](docs/POC-0-Implementation/QUICK-START.md)
-- **Workflow Guide:** [`docs/Developer-Workflow/README-FIRST.md`](docs/Developer-Workflow/README-FIRST.md)
-- **Troubleshooting:** See workflow guide troubleshooting section
+- **Unit Tests:** Jest + React Testing Library (70%+ coverage)
+- **Integration Tests:** Full-stack integration scenarios
+- **E2E Tests:** Playwright for critical user journeys
+- **Load Tests:** Performance and stress testing
+- **Security Tests:** Authentication, authorization, CORS
 
-### Key Files
-
-- **Task List:** `docs/POC-0-Implementation/task-list.md` - Current progress
-- **Implementation Plan:** `docs/POC-0-Implementation/implementation-plan.md` - Detailed steps
-- **Cursor Rules:** `.cursorrules` - AI assistant rules
-
----
-
-## 📝 Commit Message Format
-
-This project uses conventional commits with task references:
-
-```
-feat(poc-0): [Task 1.1] - Initialize Nx workspace
-
-- Created Nx workspace with React preset
-- Configured pnpm as package manager
-- Set up basic workspace structure
-
-References: docs/POC-0-Implementation/implementation-plan.md#task-11
+Run tests with:
+```bash
+pnpm test                     # All tests
+pnpm test:coverage            # With coverage report
+pnpm test:e2e                 # End-to-end tests
 ```
 
-See: [`.gitmessage`](.gitmessage) for template
+---
+
+## Documentation
+
+### Essential Documentation
+
+| Document | Description |
+|----------|-------------|
+| [Executive Summary](docs/EXECUTIVE_SUMMARY.md) | High-level architecture overview for stakeholders |
+| [SSL/TLS Setup Guide](docs/POC-3-Implementation/ssl-tls-setup-guide.md) | HTTPS configuration and troubleshooting |
+| [Observability Live Setup](docs/POC-3-Implementation/OBSERVABILITY_LIVE_SETUP.md) | Prometheus, Grafana, Jaeger integration |
+| [Testing Guide](docs/POC-3-Implementation/testing-guide.md) | Comprehensive testing instructions |
+| [Implementation Plan](docs/POC-3-Implementation/implementation-plan.md) | Detailed implementation phases and progress |
+
+### Additional Documentation
+
+- **API Documentation:** [Swagger API Docs](docs/POC-3-Implementation/SWAGGER_API_DOCUMENTATION.md)
+- **Event System:** [RabbitMQ Implementation](docs/POC-3-Implementation/RABBITMQ_IMPLEMENTATION.md)
+- **Security:** See implementation plan for JWT, RBAC, and security headers
+- **Architecture:** See executive summary for complete architecture diagrams
 
 ---
 
-## 🏗️ Architecture Overview
+## Current Status
 
-This is a **microfrontend (MFE) platform** with:
-
-- **Frontend:** React 19 + Nx + Rspack + Module Federation v2 (BIMF)
-- **Monorepo:** Single Nx workspace
-- **Module Federation:** Runtime code sharing, independent deployments with HMR
-- **Production-Ready:** All code must carry forward to Production
-
-> **Note:** Migrated from Vite to Rspack to enable HMR with Module Federation v2. See [`docs/Rspack-Migration/`](docs/Rspack-Migration/) for migration details.
-
-**Full Architecture:** [`docs/References/mfe-poc1-architecture.md`](docs/References/mfe-poc1-architecture.md)
+- **Development Environment:** Fully functional with HTTPS/TLS, observability stack, and production-ready infrastructure
+- **Live Demo:** Available locally at https://localhost with complete feature set
+- **CI/CD & Deployment:** Pending implementation (planned for next phase)
+- **Internet Live Demo:** Will be available once deployment pipeline is implemented
 
 ---
 
-## 📊 Project Status
+## Support
 
-**Current Phase:** POC-0 - Foundation  
-**Status:** Ready for Implementation  
-**Progress:** See [`docs/POC-0-Implementation/task-list.md`](docs/POC-0-Implementation/task-list.md)
+For detailed setup instructions, troubleshooting, and development workflows, refer to the documentation links above.
 
 ---
 
-## 🔗 Quick Links
-
-- **🚀 Quick Start:** [`docs/POC-0-Implementation/QUICK-START.md`](docs/POC-0-Implementation/QUICK-START.md)
-- **✅ Task List:** [`docs/POC-0-Implementation/task-list.md`](docs/POC-0-Implementation/task-list.md)
-- **📝 Implementation Plan:** [`docs/POC-0-Implementation/implementation-plan.md`](docs/POC-0-Implementation/implementation-plan.md)
-- **👨‍💻 Workflow Guide:** [`docs/Developer-Workflow/README-FIRST.md`](docs/Developer-Workflow/README-FIRST.md)
-- **🏗️ Architecture:** [`docs/References/mfe-poc0-architecture.md`](docs/References/mfe-poc0-architecture.md)
-
----
-
-**Last Updated:** 2026-01-XX  
-**Status:** Ready for Implementation  
-**Next Step:** Run `./scripts/verify-environment.sh` and start with [`docs/POC-0-Implementation/QUICK-START.md`](docs/POC-0-Implementation/QUICK-START.md)
+**Last Updated:** December 12, 2025  
+**Status:** Production-Ready Architecture - Deployment Infrastructure Pending  
+**Next Phase:** CI/CD Pipeline + Cloud Deployment
