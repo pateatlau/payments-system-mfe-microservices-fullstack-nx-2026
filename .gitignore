@@ -48,6 +48,7 @@ lerna-debug.log*
 
 # Backup files (kept for reference during migration)
 .backup/
+backup/
 
 .github/instructions/nx.instructions.md
 vite.config.*.timestamp*
@@ -58,3 +59,6 @@ nginx/ssl/*.crt
 nginx/ssl/*.key
 nginx/ssl/*.pem
 nginx/ssl/*.csr
+
+# Local development folders (kept locally, not in remote repo)
+scripts/
