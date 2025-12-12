@@ -287,7 +287,7 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 py-8 px-4">
+    <div className="w-full h-full">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">

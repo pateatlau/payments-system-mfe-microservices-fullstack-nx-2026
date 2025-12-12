@@ -64,7 +64,7 @@ export function SignInPage({ SignInComponent }: SignInPageProps) {
 
   return (
     <RemoteErrorBoundary componentName="SignIn">
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4 py-12">
+      <div className="h-full min-h-0 flex items-center justify-center">
         <SignInComponent
           onSuccess={handleSuccess}
           onNavigateToSignUp={handleNavigateToSignUp}

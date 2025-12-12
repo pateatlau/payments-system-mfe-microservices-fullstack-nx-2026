@@ -41,7 +41,9 @@ export interface PaymentsPageProps {
 export function PaymentsPage({ PaymentsComponent }: PaymentsPageProps) {
   return (
     <RemoteErrorBoundary componentName="PaymentsPage">
-      <PaymentsComponent />
+      <div className="h-full min-h-0">
+        <PaymentsComponent />
+      </div>
     </RemoteErrorBoundary>
   );
 }

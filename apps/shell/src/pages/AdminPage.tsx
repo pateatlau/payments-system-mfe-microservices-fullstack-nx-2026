@@ -24,7 +24,7 @@ export interface AdminPageProps {
  */
 function AdminLoadingFallback() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50">
+    <div className="h-full min-h-0 flex items-center justify-center">
       <div className="text-center">
         <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
         <p className="text-slate-600">Loading admin dashboard...</p>
@@ -55,9 +55,11 @@ function AdminLoadingFallback() {
 export function AdminPage({ AdminDashboardComponent }: AdminPageProps) {
   return (
     <RemoteErrorBoundary componentName="Admin Dashboard">
-      <Suspense fallback={<AdminLoadingFallback />}>
-        <AdminDashboardComponent />
-      </Suspense>
+      <div className="h-full min-h-0">
+        <Suspense fallback={<AdminLoadingFallback />}>
+          <AdminDashboardComponent />
+        </Suspense>
+      </div>
     </RemoteErrorBoundary>
   );
 }
