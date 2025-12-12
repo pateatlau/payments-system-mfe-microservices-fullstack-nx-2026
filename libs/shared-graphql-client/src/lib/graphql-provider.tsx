@@ -4,7 +4,7 @@
  * POC-3: React provider for Apollo Client
  */
 
-import { ApolloProvider } from '@apollo/client';
+import { ApolloProvider } from '@apollo/client/react';
 import type { ReactNode } from 'react';
 import type { ApolloClient } from '@apollo/client';
 
