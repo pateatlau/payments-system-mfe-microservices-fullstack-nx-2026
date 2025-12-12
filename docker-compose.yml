@@ -10,12 +10,21 @@
 #   - rabbitmq: Message broker for event hub
 #   - redis: Caching layer
 #   - postgres (legacy): Shared database for migration compatibility
+#   - prometheus: Metrics collection
+#   - grafana: Metrics visualization and dashboards
+#   - jaeger: Distributed tracing
 #
 # Usage:
-#   docker-compose up -d          # Start services in background
-#   docker-compose down           # Stop services
-#   docker-compose ps             # Check service status
-#   docker-compose logs -f        # View logs
+#   docker-compose up -d                    # Start all services
+#   docker-compose up -d prometheus grafana # Start observability only
+#   docker-compose down                     # Stop services
+#   docker-compose ps                       # Check service status
+#   docker-compose logs -f                  # View logs
+#
+# Observability URLs:
+#   - Prometheus: http://localhost:9090
+#   - Grafana: http://localhost:3010 (admin/admin)
+#   - Jaeger: http://localhost:16686
 
 services:
   # =============================================================================
@@ -214,6 +223,89 @@ services:
     networks:
       - mfe-network
 
+  # =============================================================================
+  # Observability Stack (POC-3)
+  # =============================================================================
+
+  # Prometheus - Metrics Collection
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: mfe-prometheus
+    ports:
+      - '9090:9090'
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    healthcheck:
+      test: ['CMD', 'wget', '-q', '--spider', 'http://localhost:9090/-/healthy']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+    networks:
+      - mfe-network
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
+
+  # Grafana - Metrics Visualization
+  grafana:
+    image: grafana/grafana:latest
+    container_name: mfe-grafana
+    ports:
+      - '3010:3000'
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SERVER_ROOT_URL=http://localhost:3010
+      - GF_INSTALL_PLUGINS=grafana-clock-panel,grafana-simple-json-datasource
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+      - ./grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+    depends_on:
+      - prometheus
+    healthcheck:
+      test: ['CMD', 'wget', '-q', '--spider', 'http://localhost:3000/api/health']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+    networks:
+      - mfe-network
+
+  # Jaeger - Distributed Tracing
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: mfe-jaeger
+    ports:
+      - '16686:16686'  # Jaeger UI
+      - '4317:4317'    # OTLP gRPC
+      - '4318:4318'    # OTLP HTTP
+      - '14268:14268'  # Jaeger thrift HTTP
+      - '14250:14250'  # Jaeger gRPC
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+      - LOG_LEVEL=info
+    healthcheck:
+      test: ['CMD', 'wget', '-q', '--spider', 'http://localhost:16686/']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+    networks:
+      - mfe-network
+
 # =============================================================================
 # Volumes
 # =============================================================================
@@ -231,6 +323,10 @@ volumes:
   rabbitmq_data:
     driver: local
   redis_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
     driver: local
 
 # =============================================================================

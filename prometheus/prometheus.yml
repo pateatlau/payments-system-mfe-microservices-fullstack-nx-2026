@@ -1,0 +1,93 @@
+# Prometheus Configuration for MFE POC-3
+# Scrapes metrics from all backend services
+
+global:
+  scrape_interval: 15s      # How often to scrape targets
+  evaluation_interval: 15s  # How often to evaluate rules
+  external_labels:
+    monitor: 'mfe-poc3'
+    environment: 'development'
+
+# Alerting configuration (optional - for AlertManager)
+# alerting:
+#   alertmanagers:
+#     - static_configs:
+#         - targets:
+#           - alertmanager:9093
+
+# Rule files (optional - for recording rules and alerts)
+# rule_files:
+#   - "rules/*.yml"
+
+# Scrape configurations
+scrape_configs:
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+    metrics_path: /metrics
+
+  # API Gateway - main entry point
+  - job_name: 'api-gateway'
+    static_configs:
+      - targets: ['host.docker.internal:3000']
+    metrics_path: /metrics
+    scheme: http
+    scrape_interval: 10s
+    scrape_timeout: 5s
+
+  # Auth Service
+  - job_name: 'auth-service'
+    static_configs:
+      - targets: ['host.docker.internal:3001']
+    metrics_path: /metrics
+    scheme: http
+    scrape_interval: 15s
+
+  # Payments Service
+  - job_name: 'payments-service'
+    static_configs:
+      - targets: ['host.docker.internal:3002']
+    metrics_path: /metrics
+    scheme: http
+    scrape_interval: 15s
+
+  # Admin Service
+  - job_name: 'admin-service'
+    static_configs:
+      - targets: ['host.docker.internal:3003']
+    metrics_path: /metrics
+    scheme: http
+    scrape_interval: 15s
+
+  # Profile Service
+  - job_name: 'profile-service'
+    static_configs:
+      - targets: ['host.docker.internal:3004']
+    metrics_path: /metrics
+    scheme: http
+    scrape_interval: 15s
+
+  # Redis (if redis_exporter is added)
+  # - job_name: 'redis'
+  #   static_configs:
+  #     - targets: ['redis-exporter:9121']
+
+  # PostgreSQL (if postgres_exporter is added)
+  # - job_name: 'postgresql'
+  #   static_configs:
+  #     - targets: ['postgres-exporter:9187']
+
+  # RabbitMQ (built-in Prometheus plugin)
+  - job_name: 'rabbitmq'
+    static_configs:
+      - targets: ['host.docker.internal:15692']
+    metrics_path: /metrics
+    scheme: http
+    scrape_interval: 30s
+
+  # nginx (if nginx_exporter is added)
+  # - job_name: 'nginx'
+  #   static_configs:
+  #     - targets: ['nginx-exporter:9113']
+
