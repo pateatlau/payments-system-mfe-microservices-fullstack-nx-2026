@@ -8,6 +8,7 @@
 > ** Progress Tracking:** See [`task-list.md`](./task-list.md) to track completion status and overall progress.
 
 **Latest Updates (2025-12-12):**
+
 - HTTPS/TLS: SSL certificates working, nginx reverse proxy configured
 - CORS: Fixed for all 5 backend services (added `https://localhost`)
 - HMR: Configured via nginx proxy for HTTPS mode (known limitation: full page reload)
@@ -7205,6 +7206,7 @@ Added interactive API documentation at `/api-docs`:
 - nginx routing for `/api-docs` path
 
 **Files Created:**
+
 - `apps/api-gateway/src/swagger/openapi-spec.ts`
 - `apps/api-gateway/src/swagger/index.ts`
 - `docs/POC-3-Implementation/SWAGGER_API_DOCUMENTATION.md`
@@ -7213,13 +7215,14 @@ Added interactive API documentation at `/api-docs`:
 
 Added complete observability infrastructure:
 
-| Service | URL | Purpose |
-|---------|-----|---------|
-| Prometheus | http://localhost:9090 | Metrics collection |
-| Grafana | http://localhost:3010 | Dashboards (admin/admin) |
-| Jaeger | http://localhost:16686 | Distributed tracing |
+| Service    | URL                    | Purpose                  |
+| ---------- | ---------------------- | ------------------------ |
+| Prometheus | http://localhost:9090  | Metrics collection       |
+| Grafana    | http://localhost:3010  | Dashboards (admin/admin) |
+| Jaeger     | http://localhost:16686 | Distributed tracing      |
 
 **Files Created:**
+
 - `prometheus/prometheus.yml` - Scrape configuration
 - `grafana/provisioning/datasources/datasources.yml` - Data sources
 - `grafana/provisioning/dashboards/dashboards.yml` - Dashboard provisioning
@@ -7228,6 +7231,7 @@ Added complete observability infrastructure:
 - `docs/POC-3-Implementation/OBSERVABILITY_LIVE_SETUP.md` - Setup guide
 
 **Scripts Added:**
+
 - `pnpm observability:start` - Start Prometheus, Grafana, Jaeger
 - `pnpm prometheus:ui` - Open Prometheus
 - `pnpm grafana:ui` - Open Grafana

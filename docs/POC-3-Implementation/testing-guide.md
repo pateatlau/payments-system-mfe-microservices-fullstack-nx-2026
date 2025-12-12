@@ -1244,6 +1244,7 @@ curl -I http://localhost/
 **CORS Configuration (Fixed 2026-12-12):**
 
 All backend services now include `https://localhost` in allowed origins:
+
 - `apps/api-gateway/src/config/index.ts`
 - `apps/auth-service/src/main.ts`
 - `apps/payments-service/src/main.ts`
@@ -1276,11 +1277,11 @@ pnpm swagger:ui:https # HTTPS mode (https://localhost/api-docs)
 
 **Available Endpoints:**
 
-| URL | Description |
-|-----|-------------|
-| `/api-docs` | Swagger UI interface |
-| `/api-docs.json` | OpenAPI spec (JSON) |
-| `/api-docs.yaml` | OpenAPI spec (YAML) |
+| URL              | Description          |
+| ---------------- | -------------------- |
+| `/api-docs`      | Swagger UI interface |
+| `/api-docs.json` | OpenAPI spec (JSON)  |
+| `/api-docs.yaml` | OpenAPI spec (YAML)  |
 
 ---
 
@@ -1303,11 +1304,11 @@ pnpm jaeger:ui        # Jaeger (http://localhost:16686)
 
 **Access URLs:**
 
-| Service | URL | Credentials |
-|---------|-----|-------------|
-| Prometheus | http://localhost:9090 | None |
-| Grafana | http://localhost:3010 | admin/admin |
-| Jaeger | http://localhost:16686 | None |
+| Service    | URL                    | Credentials |
+| ---------- | ---------------------- | ----------- |
+| Prometheus | http://localhost:9090  | None        |
+| Grafana    | http://localhost:3010  | admin/admin |
+| Jaeger     | http://localhost:16686 | None        |
 
 **Pre-configured Grafana Dashboards:**
 
@@ -1343,12 +1344,12 @@ curl http://localhost:3000/metrics
 
 **Key Metrics:**
 
-| Metric | Description |
-|--------|-------------|
-| `http_requests_total` | Total HTTP requests by method, route, status |
-| `http_request_duration_seconds` | Request duration histogram |
-| `http_active_connections` | Current active connections |
-| `http_errors_total` | Total HTTP errors |
+| Metric                          | Description                                  |
+| ------------------------------- | -------------------------------------------- |
+| `http_requests_total`           | Total HTTP requests by method, route, status |
+| `http_request_duration_seconds` | Request duration histogram                   |
+| `http_active_connections`       | Current active connections                   |
+| `http_errors_total`             | Total HTTP errors                            |
 
 **Sentry Integration:**
 
@@ -1701,6 +1702,7 @@ If you encounter `PLAIN login refused: user 'admin' - invalid credentials`:
 **Solution:**
 
 1. The `rabbitmq/definitions.json` now includes:
+
    ```json
    {
      "users": [
@@ -1716,6 +1718,7 @@ If you encounter `PLAIN login refused: user 'admin' - invalid credentials`:
    ```
 
 2. If users are missing, recreate the container with fresh volume:
+
    ```bash
    docker-compose down
    docker volume rm payments-system-mfe-microservices-fullstack-nx-2026_rabbitmq_data
