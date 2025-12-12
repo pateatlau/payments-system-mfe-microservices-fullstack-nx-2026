@@ -38,23 +38,23 @@ export function createApolloServer(): ApolloServer {
     schema: schemaWithDirectives,
     introspection: process.env.NODE_ENV !== 'production',
     plugins: [
-      // Logging plugin
+      // Logging plugin (simplified for Apollo Server v5)
       {
-        requestDidStart() {
+        requestDidStart: async () => {
           return {
-            didResolveOperation({
+            didResolveOperation: async ({
               request,
               operationName,
             }: {
               request: { query?: string };
               operationName?: string | null;
-            }) {
+            }) => {
               logger.info('GraphQL operation', {
                 operationName,
                 query: request.query,
               });
             },
-            didEncounterErrors({ errors }: { errors: readonly Error[] }) {
+            didEncounterErrors: async ({ errors }: { errors: readonly Error[] }) => {
               logger.error('GraphQL errors', {
                 errors: errors.map((e: Error & { path?: unknown; extensions?: unknown }) => ({
                   message: e.message,
@@ -65,7 +65,7 @@ export function createApolloServer(): ApolloServer {
             },
           };
         },
-      },
+      } as any, // Type assertion for Apollo Server v5 plugin compatibility
     ],
   });
 }
