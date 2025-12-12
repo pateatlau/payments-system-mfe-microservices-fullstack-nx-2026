@@ -1,1 +1,28 @@
+@import 'tailwindcss';
+@config "../tailwind.config.js";
+
+/* Design System - CSS Custom Properties for shadcn/ui Theme */
+:root {
+  /* Primary Color Palette - #084683 */
+  --primary: 8 70 131; /* #084683 - RGB values for Tailwind v4 */
+  --primary-foreground: 255 255 255; /* White text on primary */
+  
+  /* Primary Shades */
+  --primary-50: 230 240 248;
+  --primary-100: 179 209 232;
+  --primary-200: 128 178 216;
+  --primary-300: 77 147 200;
+  --primary-400: 26 116 184;
+  --primary-500: 13 90 154;
+  --primary-600: 10 74 122;
+  --primary-700: 8 70 131; /* Base primary brand color */
+  --primary-800: 6 50 90;
+  --primary-900: 4 30 58;
+  --primary-950: 2 20 42;
+  
+  /* Primary States */
+  --primary-hover: 10 74 122; /* primary-600 */
+  --primary-active: 6 50 90; /* primary-800 */
+}
+
 /* You can add global styles to this file, and also import other style files */

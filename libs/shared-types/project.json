@@ -6,13 +6,19 @@
   "tags": [],
   "targets": {
     "build": {
-      "executor": "@nx/js:tsc",
-      "outputs": ["{options.outputPath}"],
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/dist/libs/shared-types"],
       "options": {
-        "outputPath": "dist/libs/shared-types",
-        "main": "libs/shared-types/src/index.ts",
-        "tsConfig": "libs/shared-types/tsconfig.lib.json",
-        "assets": ["libs/shared-types/*.md"]
+        "command": "bash -c 'rm -rf dist/libs/shared-types && mkdir -p dist/libs/shared-types && npx tsc --project libs/shared-types/tsconfig.lib.json --skipLibCheck && rm -rf dist/libs/shared-types/shared-event-bus && cp libs/shared-types/README.md dist/libs/shared-types/ && cp libs/shared-types/package.json dist/libs/shared-types/'",
+        "cwd": "{workspaceRoot}"
+      }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "libs/shared-types/jest.config.js",
+        "passWithNoTests": true
       }
     }
   }

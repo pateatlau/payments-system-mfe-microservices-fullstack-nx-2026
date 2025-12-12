@@ -1,35 +1,32 @@
 import { ReactNode } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Header } from 'shared-header-ui';
+import { useAuthStore } from 'shared-auth-store';
 
 interface LayoutProps {
   children: ReactNode;
 }
 
+/**
+ * Layout component
+ *
+ * Main layout wrapper for the shell application.
+ * Includes the universal Header component and handles logout redirect.
+ */
 export function Layout({ children }: LayoutProps) {
+  const navigate = useNavigate();
+  const { logout } = useAuthStore();
+
+  const handleLogout = () => {
+    logout();
+    // Redirect to sign-in page after logout
+    navigate('/signin', { replace: true });
+  };
+
   return (
-    <div
-      style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}
-    >
-      <header
-        style={{
-          backgroundColor: '#1a1a1a',
-          color: '#ffffff',
-          padding: '1rem 2rem',
-          borderBottom: '1px solid #333',
-        }}
-      >
-        <h1 style={{ margin: 0, fontSize: '1.5rem', fontWeight: '600' }}>
-          Payments System - Shell
-        </h1>
-      </header>
-      <main
-        style={{
-          flex: 1,
-          padding: '2rem',
-          backgroundColor: '#f5f5f5',
-        }}
-      >
-        {children}
-      </main>
+    <div className="min-h-screen flex flex-col">
+      <Header onLogout={handleLogout} />
+      <main className="flex-1 p-8 bg-slate-50">{children}</main>
     </div>
   );
 }

@@ -36,21 +36,21 @@
       "cache": true,
       "dependsOn": ["^build"],
       "inputs": ["production", "^production"]
+    },
+    "@nx/esbuild:esbuild": {
+      "cache": true,
+      "dependsOn": ["^build"],
+      "inputs": ["production", "^production"]
     }
   },
   "plugins": [
     {
-      "plugin": "@nx/vite/plugin",
+      "plugin": "@nx/rspack/plugin",
       "options": {
         "buildTargetName": "build",
-        "testTargetName": "test",
         "serveTargetName": "serve",
-        "devTargetName": "dev",
         "previewTargetName": "preview",
-        "serveStaticTargetName": "serve-static",
-        "typecheckTargetName": "typecheck",
-        "buildDepsTargetName": "build-deps",
-        "watchDepsTargetName": "watch-deps"
+        "serveStaticTargetName": "serve-static"
       }
     },
     {
@@ -66,10 +66,17 @@
       }
     },
     {
-      "plugin": "@nx/vitest",
+      "plugin": "@nx/vite/plugin",
       "options": {
+        "buildTargetName": "build",
         "testTargetName": "test",
-        "ciTargetName": "test-ci"
+        "serveTargetName": "serve",
+        "devTargetName": "dev",
+        "previewTargetName": "preview",
+        "serveStaticTargetName": "serve-static",
+        "typecheckTargetName": "typecheck",
+        "buildDepsTargetName": "build-deps",
+        "watchDepsTargetName": "watch-deps"
       }
     }
   ],
@@ -79,7 +86,7 @@
         "babel": true,
         "style": "css",
         "linter": "none",
-        "bundler": "vite"
+        "bundler": "rspack"
       },
       "component": {
         "style": "css"
@@ -87,7 +94,7 @@
       "library": {
         "style": "css",
         "linter": "none",
-        "unitTestRunner": "vitest"
+        "unitTestRunner": "jest"
       }
     }
   }

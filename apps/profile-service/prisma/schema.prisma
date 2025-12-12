@@ -1,0 +1,31 @@
+// Profile Service Database Schema
+// Database: profile_db (port 5435)
+// 
+// This schema defines the user profile data model.
+// User reference (userId) is stored as a string without foreign key.
+// User existence is validated via Auth Service.
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/profile-client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("PROFILE_DATABASE_URL")
+}
+
+model UserProfile {
+  id          String   @id @default(uuid())
+  userId      String   @unique @map("user_id")  // Reference to User ID (no FK)
+  avatarUrl   String?  @map("avatar_url")
+  phone       String?
+  address     String?
+  bio         String?
+  preferences Json?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([userId])
+  @@map("user_profiles")
+}

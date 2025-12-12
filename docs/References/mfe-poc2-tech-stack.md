@@ -42,59 +42,59 @@
 
 ## 2. Complete Tech Stack Matrix
 
-| Category                      | Technology                  | Version | Platform | Production-Ready                     | Notes |
-| ----------------------------- | --------------------------- | ------- | -------- | ------------------------------------ | ----- |
+| Category                      | Technology  | Version | Platform | Production-Ready                                | Notes |
+| ----------------------------- | ----------- | ------- | -------- | ----------------------------------------------- | ----- |
 | **Core Framework**            |
-| React                         | 19.2.0                      | Web     | ✅       | Latest stable, future-proof          |
-| React DOM                     | 19.2.0                      | Web     | ✅       | Must match React version             |
+| React                         | 19.2.0      | Web     | ✅       | Latest stable, future-proof                     |
+| React DOM                     | 19.2.0      | Web     | ✅       | Must match React version                        |
 | **Monorepo**                  |
-| Nx                            | Latest                      | All     | ✅       | Scalable, build caching              |
+| Nx                            | Latest      | All     | ✅       | Scalable, build caching                         |
 | **Bundling & Build**          |
-| Vite                          | 6.x                         | Web     | ✅       | Fast dev server, excellent DX        |
-| TypeScript                    | 5.9.x                       | All     | ✅       | React 19 support                     |
+| Rspack                        | Latest      | Web     | ✅       | Fast builds, HMR with MF v2                     |
+| TypeScript                    | 5.9.x       | All     | ✅       | React 19 support                                |
 | **Module Federation**         |
-| @module-federation/enhanced   | 0.21.6                      | Web     | ✅       | BIMF (Module Federation v2)          |
+| @module-federation/enhanced   | 0.21.6      | Web     | ✅       | BIMF (Module Federation v2)                     |
 | **Routing**                   |
-| React Router                  | 7.x                         | Web     | ✅       | Latest, production-ready             |
+| React Router                  | 7.x         | Web     | ✅       | Latest, production-ready                        |
 | **State Management (Client)** |
-| Zustand                       | 4.5.x                       | Web     | ✅       | Client state (auth, UI, theme) - MFE-local only |
+| Zustand                       | 4.5.x       | Web     | ✅       | Client state (auth, UI, theme) - MFE-local only |
 | **State Management (Server)** |
-| TanStack Query                | 5.x                         | Web     | ✅       | Server state (API data, caching)     |
+| TanStack Query                | 5.x         | Web     | ✅       | Server state (API data, caching)                |
 | **Inter-MFE Communication**   |
-| Event Bus                     | Custom                      | Web     | ✅       | Decoupled MFE communication          |
+| Event Bus                     | Custom      | Web     | ✅       | Decoupled MFE communication                     |
 | **Styling**                   |
-| Tailwind CSS                  | 4.0+                        | Web     | ✅       | Latest, 5x faster builds, modern CSS |
+| Tailwind CSS                  | 4.0+        | Web     | ✅       | Latest, 5x faster builds, modern CSS            |
 | **Design System**             |
-| shadcn/ui                     | Latest                      | Web     | ✅       | POC-2 - Production-ready component library |
+| shadcn/ui                     | Latest      | Web     | ✅       | POC-2 - Production-ready component library      |
 | **Form Handling**             |
-| React Hook Form               | 7.52.x                      | Web     | ✅       | Industry standard, performant        |
+| React Hook Form               | 7.52.x      | Web     | ✅       | Industry standard, performant                   |
 | **Validation**                |
-| Zod                           | 3.23.x                      | Web     | ✅       | TypeScript-first, runtime validation |
+| Zod                           | 3.23.x      | Web     | ✅       | TypeScript-first, runtime validation            |
 | **Storage**                   |
-| localStorage                  | Native                      | Web     | ✅       | Browser API                          |
+| localStorage                  | Native      | Web     | ✅       | Browser API                                     |
 | **HTTP Client**               |
-| Axios                         | 1.7.x                       | Web     | ✅       | Production-ready, interceptors       |
+| Axios                         | 1.7.x       | Web     | ✅       | Production-ready, interceptors                  |
 | **Error Handling**            |
-| react-error-boundary          | 4.0.13                      | Web     | ✅       | React 19 compatible                  |
+| react-error-boundary          | 4.0.13      | Web     | ✅       | React 19 compatible                             |
 | **Testing**                   |
-| Vitest                        | 2.0.x                       | Web     | ✅       | Fast, Vite-native                    |
-| React Testing Library         | 16.1.x                      | Web     | ✅       | Works with Vitest                    |
+| Jest                          | 30.x        | Web     | ✅       | Mature ecosystem, Rspack-compatible             |
+| React Testing Library         | 16.1.x      | Web     | ✅       | Works with Jest                                 |
 | **E2E Testing**               |
-| Playwright                    | Latest                      | Web     | ✅       | Modern, fast, reliable               |
+| Playwright                    | Latest      | Web     | ✅       | Modern, fast, reliable                          |
 | **Code Quality**              |
-| ESLint                        | 9.x                         | All     | ✅       | Latest, flat config                  |
-| Prettier                      | 3.3.x                       | All     | ✅       | Code formatting                      |
-| TypeScript ESLint             | 8.x                         | All     | ✅       | TS-specific linting                  |
+| ESLint                        | 9.x         | All     | ✅       | Latest, flat config                             |
+| Prettier                      | 3.3.x       | All     | ✅       | Code formatting                                 |
+| TypeScript ESLint             | 8.x         | All     | ✅       | TS-specific linting                             |
 | **Performance**               |
-| React DevTools Profiler       | Native                      | Web     | ✅       | Built-in profiling                   |
+| React DevTools Profiler       | Native      | Web     | ✅       | Built-in profiling                              |
 | **Monitoring (Future)**       |
-| Sentry                        | Latest                      | Web     | 🔄       | Error tracking (MVP phase)           |
+| Sentry                        | Latest      | Web     | 🔄       | Error tracking (MVP phase)                      |
 | **CI/CD**                     |
-| GitHub Actions                | Native                      | All     | ✅       | Free, scalable                       |
+| GitHub Actions                | Native      | All     | ✅       | Free, scalable                                  |
 | **Package Management**        |
-| pnpm                          | 9.x                         | All     | ✅       | Recommended for Nx                   |
+| pnpm                          | 9.x         | All     | ✅       | Recommended for Nx                              |
 | **Node.js**                   |
-| Node.js                       | 24.11.x LTS                 | All     | ✅       | Latest LTS, SWC support              |
+| Node.js                       | 24.11.x LTS | All     | ✅       | Latest LTS, SWC support                         |
 
 ---
 
@@ -149,16 +149,16 @@
 
 ### 3.3 Bundling & Build
 
-#### Vite 6.x
+#### Rspack
 
 **Rationale:**
 
-- Fast dev server (instant startup)
-- Excellent HMR (near-instant updates)
-- Fast production builds (esbuild + Rollup)
-- Native ESM (modern JavaScript)
-- TypeScript support (excellent)
-- Plugin ecosystem (large)
+- Fast builds (Rust-based, 2-5x faster than Vite)
+- HMR with Module Federation v2 (primary reason for migration)
+- Webpack-compatible API (easier migration path)
+- TypeScript support via SWC
+- Production-ready and actively maintained
+- Excellent performance for large applications
 
 **Production Considerations:**
 
@@ -345,7 +345,10 @@ export const useAuthStore = create<AuthState>()(
       login: async (email, password) => {
         set({ isLoading: true });
         // Real API call via API client
-        const response = await apiClient.post('/auth/login', { email, password });
+        const response = await apiClient.post('/auth/login', {
+          email,
+          password,
+        });
         const { user, accessToken, refreshToken } = response.data.data;
         set({ user, isAuthenticated: true, isLoading: false });
         // Publish event to event bus (not shared store)
@@ -488,7 +491,7 @@ class EventBus {
   }
 
   emit(event: string, data?: any) {
-    this.listeners.get(event)?.forEach((callback) => callback(data));
+    this.listeners.get(event)?.forEach(callback => callback(data));
   }
 }
 
@@ -884,7 +887,7 @@ const apiClient = axios.create({
 });
 
 // Request interceptor (add auth token)
-apiClient.interceptors.request.use((config) => {
+apiClient.interceptors.request.use(config => {
   const token = useAuthStore.getState().user?.accessToken;
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -894,8 +897,8 @@ apiClient.interceptors.request.use((config) => {
 
 // Response interceptor (handle errors and token refresh)
 apiClient.interceptors.response.use(
-  (response) => response,
-  async (error) => {
+  response => response,
+  async error => {
     const originalRequest = error.config;
 
     // Handle 401 - Unauthorized
@@ -1003,21 +1006,22 @@ function App() {
 
 **Rationale:**
 
-- **Fast** - ESM-first, Vite-powered, parallel execution
-- **Better TypeScript support** - Native ESM, better type checking
-- **Modern tooling** - Built for modern JavaScript/TypeScript
-- **Better DX** - Faster feedback, better error messages
-- **Vite-native** - Works seamlessly with Vite
-- **Smaller bundle** - More lightweight than Jest
+- **Mature ecosystem** - Battle-tested, widely used
+- **Rspack-compatible** - Works well with Rspack bundler
+- **Excellent TypeScript support** - Via ts-jest
+- **Large community** - Extensive documentation and examples
+- **Production-ready** - Used by major companies
+- **Comprehensive tooling** - Rich ecosystem of plugins and utilities
 
 **Features:**
 
-- Fast execution
-- TypeScript support
+- Mature test runner
+- TypeScript support via ts-jest
 - Watch mode
 - Coverage reports
-- UI mode
 - Parallel execution
+- Snapshot testing
+- Mocking utilities
 
 **Production Considerations:**
 
@@ -1112,7 +1116,7 @@ test('should access admin dashboard as ADMIN', async ({ page }) => {
   await page.fill('[name="email"]', 'admin@example.com');
   await page.fill('[name="password"]', 'password123');
   await page.click('button[type="submit"]');
-  
+
   // Navigate to admin
   await page.goto('http://localhost:4200/admin');
   await expect(page).toHaveURL('http://localhost:4200/admin');
@@ -1304,4 +1308,3 @@ test('should access admin dashboard as ADMIN', async ({ page }) => {
 
 **Last Updated:** 2026-01-XX  
 **Status:** Authoritative Tech Stack
-

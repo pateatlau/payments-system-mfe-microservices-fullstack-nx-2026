@@ -1,24 +1,24 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "baseUrl": "../../",
-    "outDir": "../../dist/out-tsc",
+    "outDir": "../../dist/libs/shared-types",
     "declaration": true,
-    "types": ["node"]
+    "declarationMap": true,
+    "types": ["node"],
+    "skipLibCheck": true,
+    "noEmit": false,
+    "emitDeclarationOnly": false,
+    "allowImportingTsExtensions": false,
+    "module": "commonjs",
+    "moduleResolution": "node"
   },
   "include": ["src/**/*.ts"],
   "exclude": [
-    "vite.config.ts",
-    "vite.config.mts",
-    "vitest.config.ts",
-    "vitest.config.mts",
-    "src/**/*.test.ts",
+    "jest.config.ts",
+    "jest.config.cts",
     "src/**/*.spec.ts",
-    "src/**/*.test.tsx",
-    "src/**/*.spec.tsx",
-    "src/**/*.test.js",
-    "src/**/*.spec.js",
-    "src/**/*.test.jsx",
-    "src/**/*.spec.jsx"
+    "src/**/*.test.ts",
+    "node_modules",
+    "dist"
   ]
 }

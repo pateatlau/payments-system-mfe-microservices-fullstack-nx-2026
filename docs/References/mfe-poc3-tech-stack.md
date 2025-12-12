@@ -42,67 +42,67 @@
 
 ## 2. Complete Tech Stack Matrix
 
-| Category              | Technology                  | Version     | Platform | Production-Ready                     | Notes |
-| --------------------- | --------------------------- | ----------- | -------- | ------------------------------------ | ----- |
-| **Core Framework**    |
-| React                 | 19.2.0                      | Web         | ✅       | Latest stable, future-proof          |
-| React DOM             | 19.2.0                      | Web         | ✅       | Must match React version             |
-| **Monorepo**          |
-| Nx                    | Latest                      | All         | ✅       | Scalable, build caching              |
-| **Bundling & Build**  |
-| Vite                  | 6.x                         | Web         | ✅       | Fast dev server, excellent DX        |
-| TypeScript            | 5.9.x                       | All         | ✅       | React 19 support                     |
-| **Module Federation** |
-| @module-federation/enhanced | 0.21.6              | Web         | ✅       | BIMF (Module Federation v2)          |
-| **Routing**           |
-| React Router          | 7.x                         | Web         | ✅       | Latest, production-ready             |
+| Category                      | Technology  | Version | Platform | Production-Ready                       | Notes |
+| ----------------------------- | ----------- | ------- | -------- | -------------------------------------- | ----- |
+| **Core Framework**            |
+| React                         | 19.2.0      | Web     | ✅       | Latest stable, future-proof            |
+| React DOM                     | 19.2.0      | Web     | ✅       | Must match React version               |
+| **Monorepo**                  |
+| Nx                            | Latest      | All     | ✅       | Scalable, build caching                |
+| **Bundling & Build**          |
+| Rspack                        | Latest      | Web     | ✅       | Fast builds, HMR with MF v2            |
+| TypeScript                    | 5.9.x       | All     | ✅       | React 19 support                       |
+| **Module Federation**         |
+| @module-federation/enhanced   | 0.21.6      | Web     | ✅       | BIMF (Module Federation v2)            |
+| **Routing**                   |
+| React Router                  | 7.x         | Web     | ✅       | Latest, production-ready               |
 | **State Management (Client)** |
-| Zustand               | 4.5.x                       | Web         | ✅       | Client state (auth, UI, theme)       |
+| Zustand                       | 4.5.x       | Web     | ✅       | Client state (auth, UI, theme)         |
 | **State Management (Server)** |
-| TanStack Query        | 5.x                         | Web         | ✅       | Server state (API data, caching)     |
-| **Event Bus**         |
-| Custom Event Bus      | -                           | Web         | ✅       | Inter-MFE communication (POC-2+)    |
-| **Styling**           |
-| Tailwind CSS          | 4.0+                        | Web         | ✅       | Latest, 5x faster builds, modern CSS |
-| **Design System**     |
-| shadcn/ui             | Latest                      | Web         | ✅       | Production-ready component library  |
-| **Form Handling**     |
-| React Hook Form       | 7.52.x                      | Web         | ✅       | Industry standard, performant        |
-| **Validation**        |
-| Zod                   | 3.23.x                      | Web         | ✅       | TypeScript-first, runtime validation |
-| **Storage**           |
-| localStorage          | Native                      | Web         | ✅       | Browser API                          |
-| **HTTP Client**       |
-| Axios                 | 1.7.x                       | Web         | ✅       | Production-ready, interceptors       |
-| **API (GraphQL)**    |
-| Apollo Client / urql  | Latest                      | Web         | ✅       | GraphQL client (optional)            |
-| **WebSocket**         |
-| Native WebSocket API  | Native                      | Web         | ✅       | Real-time updates                     |
-| **Caching**           |
-| Service Worker / Workbox | Latest                  | Web         | ✅       | Advanced caching strategies          |
-| **Infrastructure**    |
-| nginx                 | Latest                      | All         | ✅       | Reverse proxy, load balancing, SSL    |
-| **Monitoring**        |
-| Sentry                | Latest                      | Web         | ✅       | Error tracking, performance monitoring |
-| **Error Handling**    |
-| react-error-boundary  | 4.0.13                      | Web         | ✅       | React 19 compatible                   |
-| **Testing**           |
-| Vitest                | 2.0.x                       | Web         | ✅       | Fast, Vite-native                    |
-| React Testing Library | 16.1.x                      | Web         | ✅       | Works with Vitest                    |
-| **E2E Testing**       |
-| Playwright            | Latest                      | Web         | ✅       | Modern, fast, reliable               |
-| **Code Quality**      |
-| ESLint                | 9.x                         | All         | ✅       | Latest, flat config                  |
-| Prettier              | 3.3.x                       | All         | ✅       | Code formatting                      |
-| TypeScript ESLint     | 8.x                         | All         | ✅       | TS-specific linting                  |
-| **SAST**              |
-| SonarQube             | Latest                      | All         | ✅       | Code quality, security analysis      |
-| **CI/CD**             |
-| GitHub Actions        | Native                      | All         | ✅       | Free, scalable                       |
-| **Package Management** |
-| pnpm                  | 9.x                         | All         | ✅       | Recommended for Nx                   |
-| **Node.js**           |
-| Node.js               | 24.11.x LTS                 | All         | ✅       | Latest LTS, SWC support              |
+| TanStack Query                | 5.x         | Web     | ✅       | Server state (API data, caching)       |
+| **Event Bus**                 |
+| Custom Event Bus              | -           | Web     | ✅       | Inter-MFE communication (POC-2+)       |
+| **Styling**                   |
+| Tailwind CSS                  | 4.0+        | Web     | ✅       | Latest, 5x faster builds, modern CSS   |
+| **Design System**             |
+| shadcn/ui                     | Latest      | Web     | ✅       | Production-ready component library     |
+| **Form Handling**             |
+| React Hook Form               | 7.52.x      | Web     | ✅       | Industry standard, performant          |
+| **Validation**                |
+| Zod                           | 3.23.x      | Web     | ✅       | TypeScript-first, runtime validation   |
+| **Storage**                   |
+| localStorage                  | Native      | Web     | ✅       | Browser API                            |
+| **HTTP Client**               |
+| Axios                         | 1.7.x       | Web     | ✅       | Production-ready, interceptors         |
+| **API (GraphQL)**             |
+| Apollo Client / urql          | Latest      | Web     | ✅       | GraphQL client (optional)              |
+| **WebSocket**                 |
+| Native WebSocket API          | Native      | Web     | ✅       | Real-time updates                      |
+| **Caching**                   |
+| Service Worker / Workbox      | Latest      | Web     | ✅       | Advanced caching strategies            |
+| **Infrastructure**            |
+| nginx                         | Latest      | All     | ✅       | Reverse proxy, load balancing, SSL     |
+| **Monitoring**                |
+| Sentry                        | Latest      | Web     | ✅       | Error tracking, performance monitoring |
+| **Error Handling**            |
+| react-error-boundary          | 4.0.13      | Web     | ✅       | React 19 compatible                    |
+| **Testing**                   |
+| Jest                          | 30.x        | Web     | ✅       | Mature ecosystem, Rspack-compatible    |
+| React Testing Library         | 16.1.x      | Web     | ✅       | Works with Jest                        |
+| **E2E Testing**               |
+| Playwright                    | Latest      | Web     | ✅       | Modern, fast, reliable                 |
+| **Code Quality**              |
+| ESLint                        | 9.x         | All     | ✅       | Latest, flat config                    |
+| Prettier                      | 3.3.x       | All     | ✅       | Code formatting                        |
+| TypeScript ESLint             | 8.x         | All     | ✅       | TS-specific linting                    |
+| **SAST**                      |
+| SonarQube                     | Latest      | All     | ✅       | Code quality, security analysis        |
+| **CI/CD**                     |
+| GitHub Actions                | Native      | All     | ✅       | Free, scalable                         |
+| **Package Management**        |
+| pnpm                          | 9.x         | All     | ✅       | Recommended for Nx                     |
+| **Node.js**                   |
+| Node.js                       | 24.11.x LTS | All     | ✅       | Latest LTS, SWC support                |
 
 ---
 
@@ -157,16 +157,16 @@
 
 ### 3.3 Bundling & Build
 
-#### Vite 6.x
+#### Rspack
 
 **Rationale:**
 
-- Fast dev server (instant startup)
-- Excellent HMR (near-instant updates)
-- Fast production builds (esbuild + Rollup)
-- Native ESM (modern JavaScript)
-- TypeScript support (excellent)
-- Plugin ecosystem (large)
+- Fast builds (Rust-based, 2-5x faster than Vite)
+- HMR with Module Federation v2 (primary reason for migration)
+- Webpack-compatible API (easier migration path)
+- TypeScript support via SWC
+- Production-ready and actively maintained
+- Excellent performance for large applications
 
 **Production Considerations:**
 
@@ -452,25 +452,26 @@
 
 ### 3.12 Testing
 
-#### Vitest 2.0.x
+#### Jest 30.x
 
 **Rationale:**
 
-- **Fast** - ESM-first, Vite-powered, parallel execution
-- **Better TypeScript support** - Native ESM, better type checking
-- **Modern tooling** - Built for modern JavaScript/TypeScript
-- **Better DX** - Faster feedback, better error messages
-- **Vite-native** - Works seamlessly with Vite
-- **Smaller bundle** - More lightweight than Jest
+- **Mature ecosystem** - Battle-tested, widely used
+- **Rspack-compatible** - Works well with Rspack bundler
+- **Excellent TypeScript support** - Via ts-jest
+- **Large community** - Extensive documentation and examples
+- **Production-ready** - Used by major companies
+- **Comprehensive tooling** - Rich ecosystem of plugins and utilities
 
 **Features:**
 
-- Fast execution
-- TypeScript support
+- Mature test runner
+- TypeScript support via ts-jest
 - Watch mode
 - Coverage reports
-- UI mode
 - Parallel execution
+- Snapshot testing
+- Mocking utilities
 
 **Production Considerations:**
 
@@ -595,21 +596,21 @@
 
 ## 4. Version Compatibility Matrix
 
-| Technology             | Version | React 19 | Vite 6 | Module Federation v2 | Notes |
-| ---------------------- | ------- | -------- | ------ | -------------------- | ----- |
-| React                  | 19.2.0  | ✅       | ✅     | ✅                   | Core  |
-| React Router           | 7.x     | ✅       | ✅     | ✅                   | Web   |
-| Zustand                | 4.5.x   | ✅       | ✅     | ✅                   | All   |
-| TanStack Query         | 5.x     | ✅       | ✅     | ✅                   | All   |
-| Tailwind CSS           | 4.0+    | ✅       | ✅     | ✅                   | Web   |
-| shadcn/ui              | Latest  | ✅       | ✅     | ✅                   | Web   |
-| React Hook Form        | 7.52.x  | ✅       | ✅     | ✅                   | All   |
-| Zod                    | 3.23.x  | ✅       | ✅     | ✅                   | All   |
-| Axios                  | 1.7.x   | ✅       | ✅     | ✅                   | All   |
-| Vitest                 | 2.0.x   | ✅       | ✅     | ✅                   | Web   |
-| Playwright             | Latest  | ✅       | ✅     | ✅                   | Web   |
-| nginx                  | Latest  | ✅       | ✅     | ✅                   | Infra |
-| Sentry                 | Latest  | ✅       | ✅     | ✅                   | Monitor|
+| Technology      | Version | React 19 | Vite 6 | Module Federation v2 | Notes   |
+| --------------- | ------- | -------- | ------ | -------------------- | ------- |
+| React           | 19.2.0  | ✅       | ✅     | ✅                   | Core    |
+| React Router    | 7.x     | ✅       | ✅     | ✅                   | Web     |
+| Zustand         | 4.5.x   | ✅       | ✅     | ✅                   | All     |
+| TanStack Query  | 5.x     | ✅       | ✅     | ✅                   | All     |
+| Tailwind CSS    | 4.0+    | ✅       | ✅     | ✅                   | Web     |
+| shadcn/ui       | Latest  | ✅       | ✅     | ✅                   | Web     |
+| React Hook Form | 7.52.x  | ✅       | ✅     | ✅                   | All     |
+| Zod             | 3.23.x  | ✅       | ✅     | ✅                   | All     |
+| Axios           | 1.7.x   | ✅       | ✅     | ✅                   | All     |
+| Vitest          | 2.0.x   | ✅       | ✅     | ✅                   | Web     |
+| Playwright      | Latest  | ✅       | ✅     | ✅                   | Web     |
+| nginx           | Latest  | ✅       | ✅     | ✅                   | Infra   |
+| Sentry          | Latest  | ✅       | ✅     | ✅                   | Monitor |
 
 ---
 
@@ -732,4 +733,3 @@
 
 **Last Updated:** 2026-01-XX  
 **Status:** Authoritative Tech Stack
-

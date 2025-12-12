@@ -1,0 +1,75 @@
+// Admin Service Database Schema
+// Database: admin_db (port 5434)
+// 
+// This schema defines the admin and audit logging data model.
+// 
+// ZERO COUPLING PATTERN: Admin Service maintains a denormalized User table
+// synchronized via RabbitMQ events from Auth Service. This allows admin operations
+// (list, view, update users) without coupling to Auth Service API.
+//
+// Event Synchronization Flow:
+// 1. Auth Service publishes: auth.user.created, auth.user.updated, auth.user.deleted
+// 2. Admin Service subscribes and updates local User table
+// 3. Admin operations query local User table (no API calls to Auth Service)
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/admin-client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("ADMIN_DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  CUSTOMER
+  VENDOR
+}
+
+// Denormalized User table - synchronized via RabbitMQ events from Auth Service
+// This enables zero-coupling: Admin Service can manage users without calling Auth Service API
+model User {
+  id            String    @id
+  email         String    @unique
+  name          String
+  passwordHash  String?   @map("password_hash") // Optional - NOT synced from auth_db (security)
+  role          UserRole
+  emailVerified Boolean   @default(false) @map("email_verified")
+  createdAt     DateTime  @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+  // Note: passwordHash kept optional and NOT synced (security - only in auth_db)
+  // Note: This is a read-only copy for admin operations
+
+  @@index([email])
+  @@index([role])
+  @@map("users")
+}
+
+model AuditLog {
+  id           String   @id @default(uuid())
+  userId       String?  @map("user_id")         // Reference to User ID (no FK - string only)
+  action       String
+  resourceType String?  @map("resource_type")
+  resourceId   String?  @map("resource_id")
+  details      Json?
+  ipAddress    String?  @map("ip_address")
+  userAgent    String?  @map("user_agent")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@index([userId])
+  @@index([createdAt])
+  @@index([action])
+  @@map("audit_logs")
+}
+
+model SystemConfig {
+  key         String   @id
+  value       Json
+  description String?
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at")
+  updatedBy   String?  @map("updated_by")       // Reference to User ID (no FK - string only)
+
+  @@map("system_config")
+}

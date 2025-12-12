@@ -1,16 +1,29 @@
-import { StrictMode } from 'react';
-import { BrowserRouter } from 'react-router-dom';
-import * as ReactDOM from 'react-dom/client';
-import App from './app/app';
+/**
+ * Shell Application Entry Point
+ *
+ * Module Federation requires an async boundary to properly initialize
+ * shared dependencies before the application code runs. This is achieved
+ * by dynamically importing the bootstrap file.
+ *
+ * Without this async boundary, shared dependencies like React cannot be
+ * properly negotiated between the host and remotes, resulting in:
+ * "Invalid loadShareSync function call" errors
+ *
+ * @see https://module-federation.io/guide/troubleshooting/runtime/RUNTIME-006
+ */
 
-const root = ReactDOM.createRoot(
-  document.getElementById('root') as HTMLElement
-);
+// Dynamic import creates the async boundary required by Module Federation
+import('./bootstrap').catch(err => {
+  console.error('Failed to load application:', err);
+});
 
-root.render(
-  <StrictMode>
-    <BrowserRouter>
-      <App />
-    </BrowserRouter>
-  </StrictMode>
-);
+// Enable HMR for the bootstrap module
+// This allows React Fast Refresh to work with the async boundary
+if (module.hot) {
+  module.hot.accept('./bootstrap', () => {
+    // Re-import bootstrap on HMR update
+    import('./bootstrap').catch(err => {
+      console.error('HMR update failed:', err);
+    });
+  });
+}

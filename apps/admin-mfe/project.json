@@ -1,0 +1,55 @@
+{
+  "name": "admin-mfe",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/admin-mfe/src",
+  "projectType": "application",
+  "tags": ["frontend", "admin-mfe", "mfe"],
+  "targets": {
+    "build": {
+      "executor": "@nx/rspack:rspack",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "target": "web",
+        "outputPath": "dist/apps/admin-mfe",
+        "main": "apps/admin-mfe/src/main.tsx",
+        "tsConfig": "apps/admin-mfe/tsconfig.app.json",
+        "index": "apps/admin-mfe/src/index.html",
+        "isolatedConfig": true,
+        "rspackConfig": "apps/admin-mfe/rspack.config.js"
+      },
+      "configurations": {
+        "development": {
+          "mode": "development"
+        },
+        "production": {
+          "mode": "production"
+        }
+      }
+    },
+    "serve": {
+      "executor": "@nx/rspack:dev-server",
+      "defaultConfiguration": "development",
+      "options": {
+        "buildTarget": "admin-mfe:build",
+        "hmr": true
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "admin-mfe:build:development"
+        },
+        "production": {
+          "buildTarget": "admin-mfe:build:production"
+        }
+      }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "apps/admin-mfe/jest.config.cts",
+        "passWithNoTests": true
+      }
+    }
+  }
+}

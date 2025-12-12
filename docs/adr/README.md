@@ -25,9 +25,9 @@ ADRs capture the decision-making process, including:
 ### POC-0: Foundation
 
 - [ADR-0001: Use Nx Monorepo](./poc-0/0001-use-nx-monorepo.md)
-- [ADR-0002: Use Vite Bundler](./poc-0/0002-use-vite-bundler.md)
+- [ADR-0002: Use Vite Bundler](./poc-0/0002-use-vite-bundler.md) (Superseded by ADR-0006 for POC-1+)
 - [ADR-0003: Use Module Federation v2](./poc-0/0003-use-module-federation-v2.md)
-- [ADR-0004: Use Vitest for Testing](./poc-0/0004-use-vitest-for-testing.md)
+- [ADR-0004: Use Vitest for Testing](./poc-0/0004-use-vitest-for-testing.md) (Superseded for frontend by Jest migration in POC-1)
 - [ADR-0005: Use Playwright for E2E Testing](./poc-0/0005-use-playwright-for-e2e.md)
 
 ### POC-1: Authentication & Payments
@@ -37,6 +37,7 @@ ADRs capture the decision-making process, including:
 - [ADR-0003: Use TanStack Query](./poc-1/0003-use-tanstack-query.md)
 - [ADR-0004: Use Tailwind CSS v4](./poc-1/0004-use-tailwind-css-v4.md)
 - [ADR-0005: Shared Zustand Stores in POC-1](./poc-1/0005-shared-zustand-stores-poc1.md)
+- [ADR-0006: Migrate to Rspack Bundler](./poc-1/0006-migrate-to-rspack-bundler.md) ⭐
 
 ### POC-2: Backend Integration & Design System
 

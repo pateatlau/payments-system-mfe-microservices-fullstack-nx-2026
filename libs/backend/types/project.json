@@ -1,0 +1,26 @@
+{
+  "name": "types",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/backend/types/src",
+  "projectType": "library",
+  "tags": ["backend", "shared"],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/backend/types",
+        "main": "libs/backend/types/src/index.ts",
+        "tsConfig": "libs/backend/types/tsconfig.lib.json",
+        "assets": ["libs/backend/types/*.md"]
+      }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "libs/backend/types/jest.config.cts"
+      }
+    }
+  }
+}

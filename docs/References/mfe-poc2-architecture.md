@@ -3,7 +3,7 @@
 **Status:** Planning  
 **Version:** 1.0  
 **Date:** 2026-01-XX  
-**Tech Stack:** React + Nx + Vite + Module Federation v2 + Backend API
+**Tech Stack:** React + Nx + Rspack + Module Federation v2 + Backend API
 
 ---
 
@@ -87,7 +87,7 @@ This explains why payment operations remain **stubbed** (no actual PSP integrati
 | **Monorepo**          | Nx                          | Latest      | Scalable, build caching, task orchestration |
 | **Runtime**           | Node.js                     | 24.11.x LTS | Latest LTS                                  |
 | **Framework**         | React                       | 19.2.0      | Latest stable                               |
-| **Bundler**           | Vite                        | 6.x         | Fast dev server, excellent DX               |
+| **Bundler**           | Rspack                      | Latest      | Fast builds, HMR with MF v2                 |
 | **Module Federation** | @module-federation/enhanced | 0.21.6      | BIMF (Module Federation v2)                 |
 | **Language**          | TypeScript                  | 5.9.x       | Type safety                                 |
 | **Package Manager**   | pnpm                        | 9.x         | Recommended for Nx                          |
@@ -102,7 +102,7 @@ This explains why payment operations remain **stubbed** (no actual PSP integrati
 | **HTTP Client**       | Axios                       | 1.7.x       | Production-ready                            |
 | **Storage**           | localStorage                | Native      | Browser API                                 |
 | **Error Handling**    | react-error-boundary        | 4.0.13      | React 19 compatible                         |
-| **Testing**           | Vitest                      | 2.0.x       | Fast, Vite-native                           |
+| **Testing**           | Jest                        | 30.x        | Mature ecosystem, Rspack-compatible         |
 | **E2E Testing**       | Playwright                  | Latest      | Web E2E testing                             |
 | **Code Quality**      | ESLint                      | 9.x         | Latest, flat config                         |
 | **Formatting**        | Prettier                    | 3.3.x       | Code formatting                             |
@@ -520,7 +520,7 @@ const apiClient = axios.create({
 });
 
 // Request interceptor - Add auth token
-apiClient.interceptors.request.use((config) => {
+apiClient.interceptors.request.use(config => {
   const token = useAuthStore.getState().user?.accessToken;
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -530,8 +530,8 @@ apiClient.interceptors.request.use((config) => {
 
 // Response interceptor - Handle errors and token refresh
 apiClient.interceptors.response.use(
-  (response) => response,
-  async (error) => {
+  response => response,
+  async error => {
     const originalRequest = error.config;
 
     // Handle 401 - Unauthorized
@@ -665,7 +665,7 @@ import { metrics } from '@web-mfe/shared-metrics';
 
 // Response interceptor - Log errors and track metrics
 apiClient.interceptors.response.use(
-  (response) => {
+  response => {
     // Track API response time
     const duration =
       Date.now() - (response.config.metadata?.startTime || Date.now());
@@ -682,7 +682,7 @@ apiClient.interceptors.response.use(
 
     return response;
   },
-  (error) => {
+  error => {
     logger.logError(error, {
       url: error.config?.url,
       method: error.config?.method,
@@ -730,7 +730,7 @@ class EventBus {
     // Track event metrics
     metrics.recordMetric('event-bus:events', 1);
 
-    this.listeners.get(event)?.forEach((callback) => callback(data));
+    this.listeners.get(event)?.forEach(callback => callback(data));
   }
 }
 ```
@@ -876,19 +876,18 @@ web-mfe-workspace/
    ```bash
    nx generate @nx/js:library shared-api-client \
      --bundler=tsc \
-     --unitTestRunner=vitest
+     --unitTestRunner=jest
    ```
 
 2. **Create Design System Library**
 
    ```bash
    nx generate @nx/react:library shared-design-system \
-     --bundler=vite \
-     --unitTestRunner=vitest
+     --bundler=rspack \
+     --unitTestRunner=jest
    ```
 
 3. **Setup Design System**
-
    - Install shadcn/ui dependencies
    - Configure Tailwind CSS v4 with design tokens
    - Copy shadcn/ui components into library
@@ -897,7 +896,6 @@ web-mfe-workspace/
    - Create base components (Button, Input, Card, etc.)
 
 4. **Implement API Client**
-
    - Setup Axios instance
    - Implement request interceptor (JWT token)
    - Implement response interceptor (error handling, token refresh)
@@ -905,7 +903,6 @@ web-mfe-workspace/
    - Add error handling
 
 5. **Update Auth Store**
-
    - Replace mock authentication with real API calls
    - Implement JWT token storage
    - Implement token refresh mechanism
@@ -913,7 +910,6 @@ web-mfe-workspace/
    - Publish events to event bus
 
 6. **Update TanStack Query Hooks**
-
    - Replace stubbed APIs with backend API calls (still stubbed - no PSP)
    - Update all query hooks to use API client
    - Handle authentication errors
@@ -925,16 +921,15 @@ web-mfe-workspace/
    # Logging library
    nx generate @nx/js:library shared-logging \
      --bundler=tsc \
-     --unitTestRunner=vitest
+     --unitTestRunner=jest
 
    # Metrics library
    nx generate @nx/js:library shared-metrics \
      --bundler=tsc \
-     --unitTestRunner=vitest
+     --unitTestRunner=jest
    ```
 
 8. **Implement Basic Observability**
-
    - Implement basic error logging
    - Implement basic performance metrics
    - Integrate logging into API client
@@ -971,21 +966,18 @@ web-mfe-workspace/
    ```
 
 2. **Implement Event Bus**
-
    - Publish/subscribe pattern
    - Type-safe events
    - Event payload validation
    - Debug mode
 
 3. **Migrate from Shared Stores**
-
    - Remove shared Zustand stores
    - Update auth MFE to publish events
    - Update shell to subscribe to events
    - Update payments MFE to subscribe to events
 
 4. **Update All MFEs**
-
    - Subscribe to relevant events
    - Publish events when state changes
    - Remove dependencies on shared stores
@@ -1007,13 +999,12 @@ web-mfe-workspace/
 
    ```bash
    nx generate @nx/react:application admin-mfe \
-     --bundler=vite \
+     --bundler=rspack \
      --style=css \
      --routing=false
    ```
 
 2. **Implement Admin Features**
-
    - Admin dashboard
    - User management (CRUD)
    - Role assignment
@@ -1021,13 +1012,11 @@ web-mfe-workspace/
    - Analytics and reports
 
 3. **Configure Module Federation v2**
-
    - Setup Vite plugin for Module Federation v2
    - Expose admin components
    - Test standalone mode
 
 4. **Styling**
-
    - Use design system components from `shared-design-system`
    - Style with Tailwind CSS v4 + shadcn/ui
    - Responsive design
@@ -1048,7 +1037,6 @@ web-mfe-workspace/
 **Tasks:**
 
 1. **Update Shell Application**
-
    - Integrate event bus
    - Subscribe to auth events
    - Subscribe to payment events
@@ -1056,7 +1044,6 @@ web-mfe-workspace/
    - Update Module Federation v2 config
 
 2. **Migrate to Design System**
-
    - Replace inline Tailwind classes with design system components
    - Update Auth MFE to use design system components
    - Update Payments MFE to use design system components
@@ -1064,13 +1051,11 @@ web-mfe-workspace/
    - Ensure consistent design across all MFEs
 
 3. **Route Protection**
-
    - Update route protection for admin routes
    - Role-based route access
    - Redirect logic based on role
 
 4. **Integration Testing**
-
    - Test authentication flow with backend
    - Test payment operations with backend (stubbed - no actual PSP)
    - Test admin functionality
@@ -1093,16 +1078,14 @@ web-mfe-workspace/
 **Tasks:**
 
 1. **Unit Testing**
-
-   - Write Vitest tests for API client
-   - Write Vitest tests for event bus
-   - Write Vitest tests for design system components
+   - Write Jest tests for API client
+   - Write Jest tests for event bus
+   - Write Jest tests for design system components
    - Test auth store with real API
    - Test admin features
    - Test TanStack Query hooks
 
 2. **Integration Testing**
-
    - Test authentication flow with backend
    - Test payment operations with backend (stubbed - no actual PSP)
    - Test admin functionality
@@ -1110,7 +1093,6 @@ web-mfe-workspace/
    - Test error handling
 
 3. **E2E Testing**
-
    - Setup Playwright with backend
    - Write E2E tests for auth flow
    - Write E2E tests for payments flow
@@ -1118,7 +1100,6 @@ web-mfe-workspace/
    - Test role-based access
 
 4. **Documentation**
-
    - Update architecture docs
    - Create POC-2 completion summary
    - Document API client usage
@@ -1128,7 +1109,6 @@ web-mfe-workspace/
    - Update testing guide
 
 5. **Refinement**
-
    - Fix identified issues
    - Optimize performance
    - Improve error handling
@@ -1358,7 +1338,6 @@ web-mfe-workspace/
 **Security Features:**
 
 1. **Real Authentication with JWT**
-
    - ✅ JWT token management
    - ✅ Automatic token refresh
    - ✅ Secure token storage
@@ -1366,14 +1345,12 @@ web-mfe-workspace/
    - ✅ Session timeout
 
 2. **Enhanced RBAC**
-
    - ✅ Fine-grained permissions
    - ✅ Resource-level access control
    - ✅ Route protection
    - ✅ Component-level access control
 
 3. **API Security**
-
    - ✅ Request signing for sensitive operations
    - ✅ Rate limiting (client-side + server-side)
    - ✅ Request ID tracking
@@ -1381,7 +1358,6 @@ web-mfe-workspace/
    - ✅ Input validation
 
 4. **Secure Headers**
-
    - ✅ X-Content-Type-Options
    - ✅ X-Frame-Options (clickjacking prevention)
    - ✅ X-XSS-Protection
@@ -1390,7 +1366,6 @@ web-mfe-workspace/
    - ✅ Permissions-Policy
 
 5. **Audit Logging**
-
    - ✅ All authentication events logged
    - ✅ All authorization failures logged
    - ✅ All sensitive operations logged
@@ -1449,21 +1424,18 @@ web-mfe-workspace/
 **CI/CD Components:**
 
 1. **Automated Testing**
-
    - ✅ Unit tests (Vitest) - All MFEs and shared libraries
    - ✅ Integration tests (Playwright) - MFE integration with backend
    - ✅ E2E tests - Full user flows with real backend
    - ✅ Test coverage reporting
 
 2. **Build Verification**
-
    - ✅ Build all MFEs (Shell, Auth, Payments, Admin)
    - ✅ Build all shared libraries
    - ✅ Module Federation v2 configuration validation
    - ✅ Build artifact verification
 
 3. **Code Quality & SAST**
-
    - ✅ ESLint - Code linting (with security rules)
    - ✅ TypeScript type checking
    - ✅ Prettier formatting check
@@ -1474,7 +1446,6 @@ web-mfe-workspace/
    **Reference:** See `docs/sast-implementation-plan.md` for detailed SAST setup.
 
 4. **Basic Deployment to Staging**
-
    - ✅ Build artifacts upload
    - ✅ Deploy to staging environment
    - ✅ Smoke tests after deployment
@@ -1587,11 +1558,11 @@ jobs:
   "targetDefaults": {
     "test": {
       "inputs": ["default", "^default"],
-      "executor": "@nx/vite:test"
+      "executor": "@nx/jest:jest"
     },
     "build": {
       "inputs": ["production", "^production"],
-      "executor": "@nx/vite:build",
+      "executor": "@nx/rspack:rspack",
       "dependsOn": ["^build"]
     },
     "lint": {
@@ -1771,7 +1742,7 @@ queryFn: async () => {
 
 ### 15.2 Unit Testing
 
-**Tools:** Vitest 2.0.x, React Testing Library 16.1.x
+**Tools:** Jest 30.x, React Testing Library 16.1.x
 
 **Scope:**
 
@@ -1789,12 +1760,12 @@ queryFn: async () => {
 
 ```typescript
 // libs/shared-api-client/src/apiClient.test.ts
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from '@jest/globals';
 import apiClient from './apiClient';
 
 describe('API Client', () => {
   it('should add JWT token to requests', async () => {
-    global.fetch = vi.fn().mockResolvedValue({
+    global.fetch = jest.fn().mockResolvedValue({
       ok: true,
       json: async () => ({ data: {} }),
     });
@@ -1815,7 +1786,7 @@ describe('API Client', () => {
 
 ### 15.3 Integration Testing
 
-**Tools:** Vitest, MSW (Mock Service Worker)
+**Tools:** Jest, MSW (Mock Service Worker)
 
 **Scope:**
 

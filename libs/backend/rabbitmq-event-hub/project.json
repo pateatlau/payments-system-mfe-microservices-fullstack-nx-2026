@@ -1,0 +1,27 @@
+{
+  "name": "rabbitmq-event-hub",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/backend/rabbitmq-event-hub/src",
+  "projectType": "library",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/backend/rabbitmq-event-hub",
+        "tsConfig": "libs/backend/rabbitmq-event-hub/tsconfig.lib.json",
+        "packageJson": "libs/backend/rabbitmq-event-hub/package.json",
+        "main": "libs/backend/rabbitmq-event-hub/src/index.ts",
+        "assets": ["libs/backend/rabbitmq-event-hub/*.md"]
+      }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "libs/backend/rabbitmq-event-hub/jest.config.cts"
+      }
+    }
+  }
+}
