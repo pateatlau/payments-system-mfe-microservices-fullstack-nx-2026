@@ -42,15 +42,21 @@ export function createApolloServer(): ApolloServer {
       {
         requestDidStart() {
           return {
-            didResolveOperation({ request, operationName }) {
+            didResolveOperation({
+              request,
+              operationName,
+            }: {
+              request: { query?: string };
+              operationName?: string | null;
+            }) {
               logger.info('GraphQL operation', {
                 operationName,
                 query: request.query,
               });
             },
-            didEncounterErrors({ errors }) {
+            didEncounterErrors({ errors }: { errors: readonly Error[] }) {
               logger.error('GraphQL errors', {
-                errors: errors.map(e => ({
+                errors: errors.map((e: Error & { path?: unknown; extensions?: unknown }) => ({
                   message: e.message,
                   path: e.path,
                   extensions: e.extensions,

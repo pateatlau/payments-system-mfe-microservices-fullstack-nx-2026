@@ -67,17 +67,23 @@ function handleApiError(error: unknown): never {
 export const resolvers: Resolvers<GraphQLContext> = {
   // Scalars
   DateTime: {
-    parseValue: (value: unknown) => {
+    parseValue: (value: unknown): Date => {
       if (typeof value === 'string') {
         return new Date(value);
       }
-      return value;
+      if (value instanceof Date) {
+        return value;
+      }
+      throw new GraphQLError('Invalid DateTime value');
     },
-    serialize: (value: unknown) => {
+    serialize: (value: unknown): string => {
       if (value instanceof Date) {
         return value.toISOString();
       }
-      return value;
+      if (typeof value === 'string') {
+        return value;
+      }
+      throw new GraphQLError('Invalid DateTime value');
     },
   },
 
@@ -395,21 +401,25 @@ export const resolvers: Resolvers<GraphQLContext> = {
 
   // Subscription Resolvers (placeholder - would use WebSocket in production)
   Subscription: {
-    paymentUpdated: {
-      subscribe: () => {
-        // Placeholder - would integrate with WebSocket in production
-        throw new GraphQLError('Subscriptions not yet implemented', {
-          extensions: { code: 'NOT_IMPLEMENTED' },
-        });
-      },
+    paymentUpdated: async function* (
+      _parent: unknown,
+      _args: { userId: string },
+      _context: GraphQLContext
+    ): AsyncIterable<unknown> {
+      // Placeholder - would integrate with WebSocket in production
+      throw new GraphQLError('Subscriptions not yet implemented', {
+        extensions: { code: 'NOT_IMPLEMENTED' },
+      });
     },
-    userUpdated: {
-      subscribe: () => {
-        // Placeholder - would integrate with WebSocket in production
-        throw new GraphQLError('Subscriptions not yet implemented', {
-          extensions: { code: 'NOT_IMPLEMENTED' },
-        });
-      },
+    userUpdated: async function* (
+      _parent: unknown,
+      _args: unknown,
+      _context: GraphQLContext
+    ): AsyncIterable<unknown> {
+      // Placeholder - would integrate with WebSocket in production
+      throw new GraphQLError('Subscriptions not yet implemented', {
+        extensions: { code: 'NOT_IMPLEMENTED' },
+      });
     },
   },
 };

@@ -13,7 +13,7 @@ import type { GraphQLContext } from './context';
  */
 export function authDirectiveTransformer(schema: GraphQLSchema): GraphQLSchema {
   return mapSchema(schema, {
-    [MapperKind.OBJECT_FIELD]: fieldConfig => {
+    [MapperKind.OBJECT_FIELD]: (fieldConfig, _fieldName, _typeName) => {
       const authDirective = getDirective(schema, fieldConfig, 'auth')?.[0];
       if (authDirective) {
         const { resolve = defaultFieldResolver } = fieldConfig;
@@ -38,7 +38,7 @@ export function adminDirectiveTransformer(
   schema: GraphQLSchema
 ): GraphQLSchema {
   return mapSchema(schema, {
-    [MapperKind.OBJECT_FIELD]: fieldConfig => {
+    [MapperKind.OBJECT_FIELD]: (fieldConfig, _fieldName, _typeName) => {
       const adminDirective = getDirective(schema, fieldConfig, 'admin')?.[0];
       if (adminDirective) {
         const { resolve = defaultFieldResolver } = fieldConfig;

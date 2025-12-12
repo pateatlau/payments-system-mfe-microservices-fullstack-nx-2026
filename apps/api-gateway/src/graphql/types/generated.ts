@@ -187,36 +187,36 @@ export interface UpdateProfileInput {
 }
 
 // Type resolvers (simplified)
-export type UserResolvers<Context = GraphQLContext> = Record<string, unknown>;
-export type AuthResponseResolvers<Context = GraphQLContext> = Record<
+export type UserResolvers<_Context = GraphQLContext> = Record<string, unknown>;
+export type AuthResponseResolvers<_Context = GraphQLContext> = Record<
   string,
   unknown
 >;
-export type PaymentResolvers<Context = GraphQLContext> = Record<
+export type PaymentResolvers<_Context = GraphQLContext> = Record<
   string,
   unknown
 >;
-export type PaymentConnectionResolvers<Context = GraphQLContext> = Record<
+export type PaymentConnectionResolvers<_Context = GraphQLContext> = Record<
   string,
   unknown
 >;
-export type PaymentEdgeResolvers<Context = GraphQLContext> = Record<
+export type PaymentEdgeResolvers<_Context = GraphQLContext> = Record<
   string,
   unknown
 >;
-export type PageInfoResolvers<Context = GraphQLContext> = Record<
+export type PageInfoResolvers<_Context = GraphQLContext> = Record<
   string,
   unknown
 >;
-export type ProfileResolvers<Context = GraphQLContext> = Record<
+export type ProfileResolvers<_Context = GraphQLContext> = Record<
   string,
   unknown
 >;
-export type AuditLogResolvers<Context = GraphQLContext> = Record<
+export type AuditLogResolvers<_Context = GraphQLContext> = Record<
   string,
   unknown
 >;
-export type SystemConfigResolvers<Context = GraphQLContext> = Record<
+export type SystemConfigResolvers<_Context = GraphQLContext> = Record<
   string,
   unknown
 >;
