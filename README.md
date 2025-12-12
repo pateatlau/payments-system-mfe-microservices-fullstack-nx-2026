@@ -267,6 +267,8 @@ pnpm test:e2e                 # End-to-end tests
 | [Observability Live Setup](docs/POC-3-Implementation/OBSERVABILITY_LIVE_SETUP.md) | Prometheus, Grafana, Jaeger integration |
 | [Testing Guide](docs/POC-3-Implementation/testing-guide.md) | Comprehensive testing instructions |
 | [Implementation Plan](docs/POC-3-Implementation/implementation-plan.md) | Detailed implementation phases and progress |
+| [CI/CD Planning](docs/POC-3-Implementation/CI-CD-PLANNING.md) | CI/CD pipeline planning and deployment strategy |
+| [Storybook Implementation](docs/POC-3-Implementation/STORYBOOK-IMPLEMENTATION.md) | Design system documentation with Storybook |
 
 ### Additional Documentation
 
