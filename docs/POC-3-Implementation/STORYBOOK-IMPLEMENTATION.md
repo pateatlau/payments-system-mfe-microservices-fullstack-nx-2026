@@ -28,6 +28,7 @@
 ### Objective
 
 Implement Storybook for the `@mfe/shared-design-system` library to provide:
+
 - Interactive component documentation
 - Component playground for testing variants and props
 - Design system reference for developers and designers
@@ -60,6 +61,7 @@ Implement Storybook for the `@mfe/shared-design-system` library to provide:
 **Location:** `libs/shared-design-system`
 
 **Current Setup:**
+
 - Built on shadcn/ui component patterns
 - Uses Tailwind CSS 4.0 for styling
 - TypeScript-first with full type definitions
@@ -67,11 +69,13 @@ Implement Storybook for the `@mfe/shared-design-system` library to provide:
 - Imported via path aliases: `@mfe/shared-design-system`
 
 **Components Available:**
+
 - Button, Input, Card, Dialog, Badge, Alert, Loading, etc.
 - Design tokens (colors, spacing, typography)
 - Utility functions (cn, etc.)
 
 **Current Import Pattern:**
+
 ```typescript
 import { Button, Input, Card } from '@mfe/shared-design-system';
 ```
@@ -107,7 +111,7 @@ This ensures the design system is shared at runtime across all MFEs.
 
 **Analysis:**
 
-#### ✅ **Keep Local Imports (Recommended)**
+#### **Keep Local Imports (Recommended)**
 
 **Reasons:**
 
@@ -141,7 +145,7 @@ This ensures the design system is shared at runtime across all MFEs.
    - Better incremental build support
    - Faster CI/CD pipeline
 
-#### ❌ **NPM Packages Would Add:**
+#### **NPM Packages Would Add:**
 
 1. **Complexity:**
    - Publish step in CI/CD
@@ -161,16 +165,17 @@ This ensures the design system is shared at runtime across all MFEs.
    - Dependency graph analysis harder
    - TypeScript path mapping complexity
 
-#### 🔄 **When NPM Packages Would Make Sense:**
+#### **When NPM Packages Would Make Sense:**
 
 Consider NPM packages if:
+
 - **Multi-repo architecture:** If splitting monorepo into separate repos
 - **External consumers:** Need to share design system with external projects
 - **Independent teams:** Different teams own design system vs MFEs
 - **Different release cadences:** Design system updates independently from MFEs
 - **Strict versioning required:** Need explicit version control between packages
 
-#### 🎯 **Recommendation: Hybrid Approach (Optional)**
+#### **Recommendation: Hybrid Approach (Optional)**
 
 If you need NPM packages in the future:
 
@@ -185,35 +190,35 @@ If you need NPM packages in the future:
 
 ## 4. Feasibility Assessment
 
-### ✅ **Highly Feasible**
+### **Highly Feasible**
 
 Storybook integration is **highly feasible** with your current stack:
 
 #### Supported Technologies
 
 1. **React 19:**
-   - ✅ Storybook 8.x supports React 19
-   - ✅ Latest Storybook React renderer compatible
+   - Storybook 8.x supports React 19
+   - Latest Storybook React renderer compatible
 
 2. **Tailwind CSS 4.0:**
-   - ✅ Storybook supports Tailwind CSS via PostCSS
-   - ✅ Tailwind 4.0 CSS-first approach works with Storybook
-   - ⚠️ May need custom PostCSS configuration
+   - Storybook supports Tailwind CSS via PostCSS
+   - Tailwind 4.0 CSS-first approach works with Storybook
+   - May need custom PostCSS configuration
 
 3. **shadcn/ui Components:**
-   - ✅ Works perfectly in Storybook (standard React components)
-   - ✅ Copy-paste approach means no special handling needed
-   - ✅ TypeScript types fully supported
+   - Works perfectly in Storybook (standard React components)
+   - Copy-paste approach means no special handling needed
+   - TypeScript types fully supported
 
 4. **Nx Monorepo:**
-   - ✅ Nx has built-in Storybook support (`@nx/storybook`)
-   - ✅ Can generate Storybook config for libraries
-   - ✅ Integrates with Nx build system
+   - Nx has built-in Storybook support (`@nx/storybook`)
+   - Can generate Storybook config for libraries
+   - Integrates with Nx build system
 
 5. **TypeScript:**
-   - ✅ Full TypeScript support in Storybook
-   - ✅ Type definitions automatically included
-   - ✅ Props documentation from TypeScript types
+   - Full TypeScript support in Storybook
+   - Type definitions automatically included
+   - Props documentation from TypeScript types
 
 #### Potential Considerations
 
@@ -247,6 +252,7 @@ Only minor configuration adjustments needed for Tailwind CSS 4.0 and Vite builde
 **Steps:**
 
 1. **Install Storybook:**
+
    ```bash
    nx g @nx/react:storybook-configuration shared-design-system
    ```
@@ -271,6 +277,7 @@ Only minor configuration adjustments needed for Tailwind CSS 4.0 and Vite builde
    - Check Tailwind CSS styles render
 
 **Files to Create/Modify:**
+
 - `.storybook/main.ts` - Storybook configuration
 - `.storybook/preview.ts` - Global decorators and parameters
 - `.storybook/preview.css` - Global styles (import Tailwind)
@@ -407,7 +414,9 @@ Only minor configuration adjustments needed for Tailwind CSS 4.0 and Vite builde
 import type { StorybookConfig } from '@storybook/react-vite';
 
 const config: StorybookConfig = {
-  stories: ['../libs/shared-design-system/src/**/*.stories.@(js|jsx|ts|tsx|mdx)'],
+  stories: [
+    '../libs/shared-design-system/src/**/*.stories.@(js|jsx|ts|tsx|mdx)',
+  ],
   addons: [
     '@storybook/addon-essentials',
     '@storybook/addon-a11y',
@@ -424,7 +433,7 @@ const config: StorybookConfig = {
     check: true,
     reactDocgen: 'react-docgen-typescript',
   },
-  viteFinal: async (config) => {
+  viteFinal: async config => {
     // Tailwind CSS 4.0 configuration
     // PostCSS configuration
     return config;
@@ -617,6 +626,7 @@ libs/shared-design-system/src/
 #### Option A: AWS S3 + CloudFront (Recommended)
 
 **Pros:**
+
 - Professional hosting solution
 - Custom domain support
 - CDN for fast global access
@@ -624,6 +634,7 @@ libs/shared-design-system/src/
 - Cost-effective (~$5-10/month)
 
 **Implementation:**
+
 1. Build Storybook: `nx build-storybook shared-design-system`
 2. Upload to S3 bucket
 3. Configure CloudFront distribution
@@ -631,23 +642,27 @@ libs/shared-design-system/src/
 5. Configure SSL/TLS certificate
 
 **URL Pattern:**
+
 - `https://design-system.yourdomain.com`
 - or `https://storybook.yourdomain.com`
 
 #### Option B: GitHub Pages (Simple, Free)
 
 **Pros:**
+
 - Free for public repos
 - Simple setup
 - Automatic deployment from CI/CD
 - Good for internal documentation
 
 **Cons:**
+
 - Limited customization
 - Public repos only (or limited private repo features)
 - Less control over hosting
 
 **Implementation:**
+
 1. Enable GitHub Pages in repo settings
 2. Build Storybook in CI/CD
 3. Deploy to `gh-pages` branch
@@ -656,12 +671,14 @@ libs/shared-design-system/src/
 #### Option C: Vercel/Netlify (Free Tier)
 
 **Pros:**
+
 - Free tier available
 - Simple setup
 - Automatic deployments
 - Good performance
 
 **Cons:**
+
 - Less control than self-hosted
 - May require paid plan for advanced features
 
@@ -747,15 +764,15 @@ jobs:
 
 **Total Duration:** 2-3 weeks (assuming part-time work)
 
-| Phase | Duration | Dependencies |
-|-------|----------|--------------|
-| **Phase 1: Storybook Setup** | 2-3 days | None |
-| **Phase 2A: High Priority Stories** | 3-4 days | Phase 1 |
-| **Phase 2B: Medium Priority Stories** | 2-3 days | Phase 2A |
-| **Phase 2C: Remaining Stories** | 2-3 days | Phase 2B |
-| **Phase 3: Advanced Features** | 2-3 days | Phase 2A |
-| **Phase 4: Documentation** | 2-3 days | Phase 3 |
-| **Phase 5: CI/CD Integration** | 1-2 days | Phase 4 |
+| Phase                                 | Duration | Dependencies |
+| ------------------------------------- | -------- | ------------ |
+| **Phase 1: Storybook Setup**          | 2-3 days | None         |
+| **Phase 2A: High Priority Stories**   | 3-4 days | Phase 1      |
+| **Phase 2B: Medium Priority Stories** | 2-3 days | Phase 2A     |
+| **Phase 2C: Remaining Stories**       | 2-3 days | Phase 2B     |
+| **Phase 3: Advanced Features**        | 2-3 days | Phase 2A     |
+| **Phase 4: Documentation**            | 2-3 days | Phase 3      |
+| **Phase 5: CI/CD Integration**        | 1-2 days | Phase 4      |
 
 ### Phase Dependencies
 
@@ -764,7 +781,7 @@ Phase 1 (Setup)
     ↓
 Phase 2A (High Priority Stories)
     ↓
-Phase 2B (Medium Priority) ──┐
+Phase 2B (Medium Priority) ───┐
     ↓                         │
 Phase 2C (Remaining)          │
     ↓                         │
@@ -825,11 +842,10 @@ Phase 5 (CI/CD)
 
 ## Document History
 
-| Version | Date | Author | Changes |
-|---------|------|--------|---------|
-| 1.0 | 2025-12-12 | AI Assistant | Initial implementation plan |
+| Version | Date       | Author          | Changes                     |
+| ------- | ---------- | --------------- | --------------------------- |
+| 1.0     | 2025-12-12 | Laldingliana TV | Initial implementation plan |
 
 ---
 
 **End of Document**
-
