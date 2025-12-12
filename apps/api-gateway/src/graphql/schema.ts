@@ -11,6 +11,11 @@ import { gql } from 'graphql-tag';
  * GraphQL Type Definitions
  */
 export const typeDefs = gql`
+  # Custom Directive Declarations
+  # These must be declared before use in the schema
+  directive @auth on FIELD_DEFINITION
+  directive @admin on FIELD_DEFINITION
+
   # Scalars
   scalar DateTime
   scalar JSON

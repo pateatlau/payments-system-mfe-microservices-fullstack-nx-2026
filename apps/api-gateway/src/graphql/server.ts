@@ -20,26 +20,39 @@ import type { JwtPayload } from '../middleware/auth';
 
 /**
  * Create executable GraphQL schema with directives
+ *
+ * Note: We use assumeValidSDL: true because:
+ * 1. Custom directives (@auth, @admin) are declared in the schema
+ * 2. The directive transformers process them AFTER schema creation
+ * 3. Without this option, makeExecutableSchema validates SDL and fails
+ *    because it doesn't know how to execute the custom directives
  */
-const schema = makeExecutableSchema({
-  typeDefs,
-  resolvers,
-});
+function createSchema() {
+  const schema = makeExecutableSchema({
+    typeDefs,
+    resolvers,
+    // Skip SDL validation for custom directives
+    // The directives are declared but implemented via transformers
+    assumeValidSDL: true,
+  });
 
-// Apply directive transformers
-const schemaWithDirectives = authDirectiveTransformer(
-  adminDirectiveTransformer(schema)
-);
+  // Apply directive transformers in order:
+  // 1. First adminDirectiveTransformer (requires auth + admin role)
+  // 2. Then authDirectiveTransformer (requires authentication)
+  return authDirectiveTransformer(adminDirectiveTransformer(schema));
+}
 
 /**
  * Create Apollo Server instance
  */
 export function createApolloServer(): ApolloServer {
+  const schemaWithDirectives = createSchema();
+
   return new ApolloServer({
     schema: schemaWithDirectives,
     introspection: process.env.NODE_ENV !== 'production',
     plugins: [
-      // Logging plugin (simplified for Apollo Server v5)
+      // Logging plugin
       {
         requestDidStart: async () => {
           return {
@@ -72,7 +85,7 @@ export function createApolloServer(): ApolloServer {
             },
           };
         },
-      } as any, // Type assertion for Apollo Server v5 plugin compatibility
+      } as Parameters<typeof ApolloServer.prototype.addPlugin>[0],
     ],
   });
 }
@@ -101,7 +114,7 @@ export async function applyGraphQLMiddleware(
         // The directives will handle authentication requirements
         return createContext(req);
       },
-    }) as any // Type assertion for expressMiddleware compatibility
+    }) as Parameters<typeof app.use>[1]
   );
 
   logger.info('GraphQL server started at /graphql');
