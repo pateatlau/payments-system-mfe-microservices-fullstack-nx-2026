@@ -155,6 +155,19 @@ function setupRequestInterceptor(
             : `${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;
       }
 
+      // Add device ID for device tracking (if available)
+      if (typeof window !== 'undefined') {
+        try {
+          const deviceId = localStorage.getItem('mfe-device-id');
+          if (deviceId && !config.headers['X-Device-ID']) {
+            config.headers['X-Device-ID'] = deviceId;
+          }
+        } catch (error) {
+          // localStorage might not be available (e.g., in private browsing)
+          // Silently fail - device ID is optional
+        }
+      }
+
       return config;
     },
     error => {
