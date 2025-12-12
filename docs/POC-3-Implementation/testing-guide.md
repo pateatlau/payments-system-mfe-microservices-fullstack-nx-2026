@@ -1282,6 +1282,88 @@ pnpm swagger:ui:https # HTTPS mode (https://localhost/api-docs)
 | `/api-docs.json` | OpenAPI spec (JSON) |
 | `/api-docs.yaml` | OpenAPI spec (YAML) |
 
+---
+
+### Observability Stack Testing
+
+**Status:** ✅ Complete  
+**Documentation:** See `docs/POC-3-Implementation/OBSERVABILITY_LIVE_SETUP.md` for full details.
+
+**Quick Start:**
+
+```bash
+# Start observability stack
+pnpm observability:start
+
+# Open dashboards
+pnpm prometheus:ui    # Prometheus (http://localhost:9090)
+pnpm grafana:ui       # Grafana (http://localhost:3010)
+pnpm jaeger:ui        # Jaeger (http://localhost:16686)
+```
+
+**Access URLs:**
+
+| Service | URL | Credentials |
+|---------|-----|-------------|
+| Prometheus | http://localhost:9090 | None |
+| Grafana | http://localhost:3010 | admin/admin |
+| Jaeger | http://localhost:16686 | None |
+
+**Pre-configured Grafana Dashboards:**
+
+1. **Services Overview** - Health status of all backend services
+2. **API Gateway Dashboard** - Detailed API Gateway metrics
+
+**Verification Steps:**
+
+1. **Prometheus Targets:**
+   - Navigate to http://localhost:9090/targets
+   - Verify all services show "UP" status
+   - Check scrape intervals are working
+
+2. **Grafana Dashboards:**
+   - Log in with admin/admin
+   - Navigate to Dashboards → MFE POC-3 folder
+   - Verify data is populating in charts
+
+3. **Jaeger Tracing:**
+   - Select a service from the dropdown
+   - Click "Find Traces"
+   - Verify traces are being collected
+
+**Metrics Available:**
+
+```bash
+# View API Gateway metrics
+pnpm metrics:api-gateway
+
+# Or via curl
+curl http://localhost:3000/metrics
+```
+
+**Key Metrics:**
+
+| Metric | Description |
+|--------|-------------|
+| `http_requests_total` | Total HTTP requests by method, route, status |
+| `http_request_duration_seconds` | Request duration histogram |
+| `http_active_connections` | Current active connections |
+| `http_errors_total` | Total HTTP errors |
+
+**Sentry Integration:**
+
+Sentry is configured via environment variable:
+
+```bash
+# Set in .env or export
+SENTRY_DSN=https://your-key@sentry.io/project
+
+# Restart backend to apply
+pnpm dev:backend
+```
+
+Verify errors are captured by triggering a test error and checking the Sentry dashboard.
+
 **Testing Flow:**
 
 1. Open Swagger UI at http://localhost:3000/api-docs

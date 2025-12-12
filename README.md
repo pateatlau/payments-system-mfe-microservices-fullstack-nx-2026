@@ -36,12 +36,17 @@ pnpm dev:all
 
 ### Quick Access URLs
 
-- **Frontend:** https://localhost (via nginx)
-- **API:** https://localhost/api
-- **Swagger UI:** https://localhost/api-docs (interactive API docs)
-- **GraphQL:** https://localhost/graphql
-- **WebSocket:** wss://localhost/ws
-- **RabbitMQ UI:** http://localhost:15672 (admin/admin)
+| Service | URL | Description |
+|---------|-----|-------------|
+| **Frontend** | https://localhost | Main application (via nginx) |
+| **API** | https://localhost/api | REST API endpoints |
+| **Swagger UI** | https://localhost/api-docs | Interactive API documentation |
+| **GraphQL** | https://localhost/graphql | GraphQL API (POST requests) |
+| **WebSocket** | wss://localhost/ws | Real-time communication |
+| **Prometheus** | http://localhost:9090 | Metrics collection |
+| **Grafana** | http://localhost:3010 | Dashboards (admin/admin) |
+| **Jaeger** | http://localhost:16686 | Distributed tracing |
+| **RabbitMQ UI** | http://localhost:15672 | Message broker (admin/admin) |
 
 **Complete Setup Guide:** [`docs/POC-3-Implementation/ssl-tls-setup-guide.md`](docs/POC-3-Implementation/ssl-tls-setup-guide.md)
 
@@ -92,7 +97,7 @@ pnpm dev:all
 - ✅ **RabbitMQ Event Hub** - Production-ready messaging (migrated from Redis Pub/Sub)
 - ✅ **WebSocket Server** - Real-time bidirectional communication with JWT auth
 - ✅ **Advanced Caching** - Service Worker (Workbox), Redis backend caching
-- ✅ **Observability** - Sentry error tracking, Prometheus metrics, OpenTelemetry tracing
+- ✅ **Observability** - Sentry error tracking, Prometheus metrics, Grafana dashboards, Jaeger tracing
 - ✅ **Session Management** - Cross-tab sync (BroadcastChannel), cross-device sync
 - ✅ **Performance** - Code splitting, lazy loading, bundle optimization
 - ✅ **GraphQL API** - Alongside REST API with Apollo Server

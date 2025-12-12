@@ -698,12 +698,21 @@ The following files were modified to enable HTTPS/TLS support:
 
 ## Additional Resources
 
+### External Documentation
+
 - [nginx SSL/TLS Configuration](https://nginx.org/en/docs/http/configuring_https_servers.html)
 - [Let's Encrypt Documentation](https://letsencrypt.org/docs/)
 - [Mozilla SSL Configuration Generator](https://ssl-config.mozilla.org/)
 - [SSL Labs Server Test](https://www.ssllabs.com/ssltest/)
-- [POC-3 Implementation Plan](./implementation-plan.md)
-- [POC-3 Task List](./task-list.md)
+
+### Related POC-3 Documentation
+
+- [Implementation Plan](./implementation-plan.md) - Overall POC-3 progress
+- [Task List](./task-list.md) - Detailed task tracking
+- [Testing Guide](./testing-guide.md) - Comprehensive testing instructions
+- [Swagger API Documentation](./SWAGGER_API_DOCUMENTATION.md) - Interactive API docs
+- [Observability Live Setup](./OBSERVABILITY_LIVE_SETUP.md) - Prometheus, Grafana, Jaeger
+- [RabbitMQ Implementation](./RABBITMQ_IMPLEMENTATION.md) - Event hub setup
 
 ---
 
