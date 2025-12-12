@@ -227,7 +227,12 @@
     "cache:status": "pnpm redis:info | grep -A 10 'Keyspace' || echo 'No cached keys'",
     "cache:build": "nx build cache",
     "cache:test": "nx test cache",
-    "cache:test:integration": "nx test cache --no-watch"
+    "cache:test:integration": "nx test cache --no-watch",
+    "test:integration:infrastructure": "pnpm tsx scripts/integration/infrastructure-integration.test.ts",
+    "test:integration": "pnpm test:integration:infrastructure",
+    "test:performance:load": "pnpm tsx scripts/performance/load-testing.test.ts",
+    "test:performance:lighthouse": "./scripts/performance/lighthouse-audit.sh",
+    "test:performance": "pnpm test:performance:load"
   },
   "devDependencies": {
     "@babel/core": "^7.14.5",
