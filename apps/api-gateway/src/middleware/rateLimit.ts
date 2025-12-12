@@ -28,10 +28,12 @@ export const generalRateLimiter = rateLimit({
 /**
  * Strict rate limiter for auth endpoints
  * More restrictive to prevent brute force attacks
+ * TODO: RESTORE ORIGINAL RATE LIMIT - Currently set to very high value temporarily
  */
 export const authRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // 5 attempts per 15 minutes
+  // Original: max: 5, // 5 attempts per 15 minutes
+  max: 100000, // Temporary high value (to be restored to 5)
   message: {
     success: false,
     error: {
