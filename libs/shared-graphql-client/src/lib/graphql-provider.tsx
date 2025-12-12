@@ -9,7 +9,7 @@ import type { ReactNode } from 'react';
 import type { ApolloClient } from '@apollo/client';
 
 export interface GraphQLProviderProps {
-  client: ApolloClient<unknown>;
+  client: ApolloClient;
   children: ReactNode;
 }
 

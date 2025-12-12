@@ -11,7 +11,7 @@
 import {
   useQuery as useApolloQuery,
   useMutation as useApolloMutation,
-} from '@apollo/client';
+} from '@apollo/client/react';
 import {
   GET_PAYMENTS,
   GET_PAYMENT,
@@ -31,7 +31,9 @@ export function usePaymentsGraphQL() {
 
   return {
     payments:
-      data?.payments?.edges?.map((edge: { node: Payment }) => edge.node) || [],
+      (data as { payments?: { edges?: Array<{ node: Payment }> } })?.payments?.edges?.map(
+        (edge: { node: Payment }) => edge.node
+      ) || [],
     loading,
     error,
     refetch,
@@ -49,7 +51,7 @@ export function usePaymentGraphQL(id: string | null) {
   });
 
   return {
-    payment: data?.payment || null,
+    payment: (data as { payment?: Payment })?.payment || null,
     loading,
     error,
     refetch,
@@ -76,7 +78,7 @@ export function useCreatePaymentGraphQL() {
       metadata?: unknown;
     }) => {
       const result = await createPayment({ variables: { input } });
-      return result.data?.createPayment;
+      return (result.data as { createPayment?: Payment })?.createPayment;
     },
     loading,
     error,
@@ -104,7 +106,7 @@ export function useUpdatePaymentGraphQL() {
       }
     ) => {
       const result = await updatePayment({ variables: { id, input } });
-      return result.data?.updatePayment;
+      return (result.data as { updatePayment?: Payment })?.updatePayment;
     },
     loading,
     error,
@@ -125,7 +127,7 @@ export function useDeletePaymentGraphQL() {
   return {
     deletePayment: async (id: string) => {
       const result = await deletePayment({ variables: { id } });
-      return result.data?.deletePayment;
+      return (result.data as { deletePayment?: boolean })?.deletePayment || false;
     },
     loading,
     error,

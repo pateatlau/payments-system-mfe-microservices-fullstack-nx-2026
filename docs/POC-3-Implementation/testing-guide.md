@@ -969,10 +969,11 @@ pnpm test:security:validation
 ### GraphQL Tests
 
 **Status:** ✅ Complete (Sub-task 8.5.1)  
-**Files:** 
+**Files:**
+
 - `apps/api-gateway/src/graphql/resolvers/index.test.ts` (Resolver tests)
 - `apps/api-gateway/src/graphql/server.test.ts` (Server tests)  
-**Script:** `pnpm test:api-gateway` (includes GraphQL tests)
+  **Script:** `pnpm test:api-gateway` (includes GraphQL tests)
 
 **Overview:**
 

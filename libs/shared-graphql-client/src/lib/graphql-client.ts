@@ -9,10 +9,9 @@ import {
   InMemoryCache,
   createHttpLink,
   from,
-  type ApolloClient as ApolloClientType,
 } from '@apollo/client';
 import { setContext } from '@apollo/client/link/context';
-import { onError, type ErrorLink } from '@apollo/client/link/error';
+import { onError } from '@apollo/client/link/error';
 
 export interface GraphQLClientConfig {
   uri: string;
@@ -25,7 +24,7 @@ export interface GraphQLClientConfig {
  */
 export function createGraphQLClient(
   config: GraphQLClientConfig
-): ApolloClientType<unknown> {
+): ApolloClient {
   const { uri, getAccessToken, onError: onErrorCallback } = config;
 
   // HTTP link
@@ -46,9 +45,9 @@ export function createGraphQLClient(
   });
 
   // Error link - handle errors
-  const errorLink: ErrorLink = onError(({ graphQLErrors, networkError }) => {
+  const errorLink = onError(({ graphQLErrors, networkError }: any) => {
     if (graphQLErrors) {
-      graphQLErrors.forEach(error => {
+      graphQLErrors.forEach((error: any) => {
         const message = error.message;
         const locations = error.locations;
         const path = error.path;
@@ -95,7 +94,7 @@ export function createGraphQLClient(
         Query: {
           fields: {
             payments: {
-              merge(existing, incoming) {
+              merge(_existing: unknown, incoming: unknown) {
                 return incoming;
               },
             },
@@ -123,7 +122,7 @@ export function createGraphQLClient(
  * Default GraphQL client instance
  * Should be configured with provider in app
  */
-let defaultClient: ApolloClientType<unknown> | null = null;
+let defaultClient: ApolloClient | null = null;
 
 /**
  * Initialize default GraphQL client
@@ -135,7 +134,7 @@ export function initGraphQLClient(config: GraphQLClientConfig): void {
 /**
  * Get default GraphQL client
  */
-export function getGraphQLClient(): ApolloClientType<unknown> {
+export function getGraphQLClient(): ApolloClient {
   if (!defaultClient) {
     throw new Error(
       'GraphQL client not initialized. Call initGraphQLClient() first.'

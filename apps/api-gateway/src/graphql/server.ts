@@ -55,13 +55,19 @@ export function createApolloServer(): ApolloServer {
                 query: request.query,
               });
             },
-            didEncounterErrors: async ({ errors }: { errors: readonly Error[] }) => {
+            didEncounterErrors: async ({
+              errors,
+            }: {
+              errors: readonly Error[];
+            }) => {
               logger.error('GraphQL errors', {
-                errors: errors.map((e: Error & { path?: unknown; extensions?: unknown }) => ({
-                  message: e.message,
-                  path: e.path,
-                  extensions: e.extensions,
-                })),
+                errors: errors.map(
+                  (e: Error & { path?: unknown; extensions?: unknown }) => ({
+                    message: e.message,
+                    path: e.path,
+                    extensions: e.extensions,
+                  })
+                ),
               });
             },
           };
@@ -83,7 +89,14 @@ export async function applyGraphQLMiddleware(
   app.use(
     '/graphql',
     expressMiddleware(apolloServer, {
-      context: async ({ req }: { req: { headers: Record<string, string | string[] | undefined>; user?: JwtPayload } }) => {
+      context: async ({
+        req,
+      }: {
+        req: {
+          headers: Record<string, string | string[] | undefined>;
+          user?: JwtPayload;
+        };
+      }) => {
         // Use optionalAuth middleware to extract user if token present
         // The directives will handle authentication requirements
         return createContext(req);
