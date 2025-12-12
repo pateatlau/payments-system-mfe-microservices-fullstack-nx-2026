@@ -182,10 +182,10 @@ module.exports = {
     new rspack.DefinePlugin({
       'process.env': JSON.stringify({
         // POC-3: API Gateway URL
-        // Development: Direct to API Gateway (http://localhost:3000/api)
-        // Production: Through nginx proxy (https://localhost/api)
+        // Development & Production: Through nginx proxy (https://localhost/api)
+        // Direct API Gateway access (http://localhost:3000/api) available via env var
         NX_API_BASE_URL:
-          process.env.NX_API_BASE_URL || 'http://localhost:3000/api',
+          process.env.NX_API_BASE_URL || 'https://localhost/api',
         NODE_ENV: isProduction ? 'production' : 'development',
       }),
     }),
@@ -225,9 +225,10 @@ module.exports = {
   // Dev server configuration
   devServer: {
     port: 4203,
-    host: 'localhost',
+    host: '0.0.0.0', // Bind to all interfaces for Docker nginx access
     hot: true,
     historyApiFallback: true,
+    allowedHosts: 'all', // Allow nginx proxy requests
     // Serve static files from assets directory
     static: {
       directory: path.resolve(__dirname, 'src/assets'),
@@ -245,6 +246,20 @@ module.exports = {
         errors: true,
         warnings: false,
       },
+      // HMR WebSocket configuration for HTTPS mode
+      webSocketURL: process.env.NX_HTTPS_MODE === 'true'
+        ? {
+            protocol: 'wss',
+            hostname: 'localhost',
+            port: 443,
+            pathname: '/hmr/admin',
+          }
+        : {
+            protocol: 'ws',
+            hostname: 'localhost',
+            port: 4203,
+            pathname: '/ws',
+          },
     },
   },
   // Optimization settings

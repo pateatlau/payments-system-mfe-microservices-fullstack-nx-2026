@@ -52,12 +52,13 @@ app.use(
   })
 );
 
-// CORS - allow frontend MFEs (shell/auth/payments/admin)
+// CORS - allow frontend MFEs (shell/auth/payments/admin) and nginx proxy (HTTPS)
 const allowedOrigins = [
   'http://localhost:4200',
   'http://localhost:4201',
   'http://localhost:4202',
   'http://localhost:4203',
+  'https://localhost', // nginx proxy
 ];
 
 app.use(

@@ -2,6 +2,32 @@
  * Module Federation type declarations for remote modules
  */
 
+/**
+ * HMR (Hot Module Replacement) type declarations
+ * Required for TypeScript to recognize module.hot
+ */
+interface ImportMeta {
+  hot?: {
+    accept(callback?: () => void): void;
+    accept(dep: string, callback: () => void): void;
+    accept(deps: string[], callback: () => void): void;
+    dispose(callback: (data: unknown) => void): void;
+    invalidate(): void;
+    data: unknown;
+  };
+}
+
+declare const module: {
+  hot?: {
+    accept(callback?: () => void): void;
+    accept(dep: string, callback: () => void): void;
+    accept(deps: string[], callback: (updatedDeps: unknown[]) => void): void;
+    dispose(callback: (data: unknown) => void): void;
+    invalidate(): void;
+    data: unknown;
+  };
+};
+
 declare module 'authMfe/SignIn' {
   interface SignInProps {
     onSuccess?: () => void;

@@ -12,7 +12,8 @@ export const config = {
   // CORS
   corsOrigins: (
     process.env['CORS_ORIGINS'] ??
-    'http://localhost:4200,http://localhost:4201,http://localhost:4202,http://localhost:4203'
+    // Support both direct MFE access (HTTP) and nginx proxy (HTTPS)
+    'http://localhost:4200,http://localhost:4201,http://localhost:4202,http://localhost:4203,https://localhost'
   ).split(','),
 
   // Rate Limiting

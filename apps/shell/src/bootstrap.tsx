@@ -52,9 +52,9 @@ function AppWrapper() {
   const user = useAuthStore(state => state.user);
 
   // WebSocket URL
-  // Development: Direct to API Gateway (ws://localhost:3000/ws)
-  // Production: Through nginx proxy (wss://localhost/ws)
-  const wsUrl = process.env['NX_WS_URL'] || 'ws://localhost:3000/ws';
+  // Development & Production: Through nginx proxy (wss://localhost/ws)
+  // Direct API Gateway access (ws://localhost:3000/ws) available via env var
+  const wsUrl = process.env['NX_WS_URL'] || 'wss://localhost/ws';
 
   // Set user context in Sentry when user is available
   useEffect(() => {

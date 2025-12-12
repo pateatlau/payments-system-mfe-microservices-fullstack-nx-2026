@@ -1,8 +1,8 @@
 # MFE Microservices Full-Stack Platform
 
-**Status:** POC-2 - Backend Integration Complete  
-**Version:** 0.2.0  
-**Tech Stack:** React 19 + Nx + Rspack + Module Federation v2 + Node.js + PostgreSQL + Redis
+**Status:** POC-3 - Production-Ready Infrastructure Complete  
+**Version:** 0.3.0  
+**Tech Stack:** React 19 + Nx + Rspack + Module Federation v2 + Node.js + PostgreSQL + RabbitMQ + nginx + HTTPS/TLS
 
 ---
 
@@ -12,21 +12,37 @@
 
 - **Node.js:** 24.11.x LTS
 - **pnpm:** 9.x
+- **Docker & Docker Compose:** Latest
 - **Git:** Latest
 
-### Verify Environment
+### Start the Application (HTTPS)
 
 ```bash
-./scripts/verify-environment.sh
+# 1. Generate SSL certificates (first time only)
+pnpm ssl:generate
+
+# 2. Start infrastructure (nginx, databases, RabbitMQ, Redis)
+pnpm infra:start
+
+# 3. Start backend services (API Gateway, Auth, Payments, Admin, Profile)
+pnpm dev:backend
+
+# 4. Start frontend (Shell, Auth MFE, Payments MFE, Admin MFE)
+pnpm dev:all
+
+# 5. Access application at https://localhost
+# Note: Accept self-signed certificate warning in browser
 ```
 
-### Start Implementation
+### Quick Access URLs
 
-1. **Open Cursor IDE** and open this project
-2. **Use first prompt:** See `docs/Prompts/POC-0/first-prompt.md`
-3. **Follow implementation plan:** `docs/POC-0-Implementation/implementation-plan.md`
+- **Frontend:** https://localhost (via nginx)
+- **API:** https://localhost/api
+- **GraphQL:** https://localhost/graphql
+- **WebSocket:** wss://localhost/ws
+- **RabbitMQ UI:** http://localhost:15672 (admin/admin)
 
-**Quick Start Guide:** [`docs/POC-0-Implementation/QUICK-START.md`](docs/POC-0-Implementation/QUICK-START.md)
+**Complete Setup Guide:** [`docs/POC-3-Implementation/ssl-tls-setup-guide.md`](docs/POC-3-Implementation/ssl-tls-setup-guide.md)
 
 ---
 
@@ -63,41 +79,37 @@
 
 ---
 
-## 🎯 Current Phase: POC-2 (Backend Integration Complete)
+## 🎯 Current Phase: POC-3 (Production-Ready Infrastructure Complete)
 
 ### Scope
 
-**In Scope (POC-2):**
+**Completed in POC-3:**
 
-- ✅ Shell app (host, Port 4200)
-- ✅ Auth MFE (remote, Port 4201)
-- ✅ Payments MFE (remote, Port 4202)
-- ✅ Admin MFE (remote, Port 4203) - NEW
-- ✅ Module Federation v2 with HMR
-- ✅ Routing (React Router 7)
-- ✅ State Management (Zustand + TanStack Query)
-- ✅ Real JWT Authentication (backend integration)
-- ✅ Backend API Integration (REST API)
-- ✅ Design System (shadcn/ui + Tailwind CSS v4)
-- ✅ Event Bus (inter-MFE communication)
-- ✅ Backend Services (API Gateway, Auth, Payments, Admin, Profile)
-- ✅ Database (PostgreSQL + Prisma ORM)
-- ✅ Event Hub (Redis Pub/Sub)
-- ✅ Testing (380+ tests, 70%+ coverage)
+- ✅ **nginx Reverse Proxy** - SSL/TLS termination, load balancing, rate limiting
+- ✅ **HTTPS/TLS** - Self-signed certificates for development, WSS for WebSocket
+- ✅ **Separate Databases** - Per-service PostgreSQL databases (auth_db, payments_db, admin_db, profile_db)
+- ✅ **RabbitMQ Event Hub** - Production-ready messaging (migrated from Redis Pub/Sub)
+- ✅ **WebSocket Server** - Real-time bidirectional communication with JWT auth
+- ✅ **Advanced Caching** - Service Worker (Workbox), Redis backend caching
+- ✅ **Observability** - Sentry error tracking, Prometheus metrics, OpenTelemetry tracing
+- ✅ **Session Management** - Cross-tab sync (BroadcastChannel), cross-device sync
+- ✅ **Performance** - Code splitting, lazy loading, bundle optimization
+- ✅ **GraphQL API** - Alongside REST API with Apollo Server
+- ✅ **Testing** - Integration tests, performance tests, security tests
+- ✅ **Documentation** - 13 comprehensive guides
 
-**NOT in Scope (POC-3):**
+**Previous POCs:**
 
-- ❌ Real PSP Integration (stubbed at backend)
-- ❌ Advanced Infrastructure (nginx, advanced observability)
-- ❌ Separate Databases per Service
-- ❌ WebSocket Real-time Updates
-- ❌ Advanced Performance Optimizations
+- ✅ **POC-0:** Foundation architecture
+- ✅ **POC-1:** Rspack migration, Module Federation v2, HMR
+- ✅ **POC-2:** Backend integration, JWT auth, design system, event bus, admin MFE
 
 ### Progress
 
 - **POC-0:** ✅ Complete
-- **POC-1:** ✅ Complete (Rspack migration complete)
-- **POC-2:** ✅ Complete (Backend integration, design system, event bus, admin MFE)
+- **POC-1:** ✅ Complete
+- **POC-2:** ✅ Complete
+- **POC-3:** ✅ Complete (All 8 phases, 52 sub-tasks)
 - **Rspack Migration:** ✅ Complete
 - Check POC-2 progress: [`docs/POC-2-Implementation/task-list.md`](docs/POC-2-Implementation/task-list.md)
 

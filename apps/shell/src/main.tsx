@@ -16,3 +16,14 @@
 import('./bootstrap').catch(err => {
   console.error('Failed to load application:', err);
 });
+
+// Enable HMR for the bootstrap module
+// This allows React Fast Refresh to work with the async boundary
+if (module.hot) {
+  module.hot.accept('./bootstrap', () => {
+    // Re-import bootstrap on HMR update
+    import('./bootstrap').catch(err => {
+      console.error('HMR update failed:', err);
+    });
+  });
+}

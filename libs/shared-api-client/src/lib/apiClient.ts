@@ -84,8 +84,9 @@ export class ApiClient {
       typeof process !== 'undefined' && process.env
         ? (process.env as { NX_API_BASE_URL?: string }).NX_API_BASE_URL
         : undefined;
-    // Default to direct API Gateway URL for development
-    const baseURL = config.baseURL ?? envBaseURL ?? 'http://localhost:3000/api';
+    // Default to nginx proxy (HTTPS) for development
+    // For direct API Gateway access, set NX_API_BASE_URL=http://localhost:3000/api
+    const baseURL = config.baseURL ?? envBaseURL ?? 'https://localhost/api';
 
     this.axiosInstance = axios.create({
       baseURL,

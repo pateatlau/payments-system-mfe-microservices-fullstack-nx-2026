@@ -1,9 +1,9 @@
 # Comprehensive Testing Guide - POC-3
 
 **Status:** Complete  
-**Date:** 2026-12-11  
+**Date:** 2026-12-12  
 **Phase:** POC-3 - Production-Ready Infrastructure  
-**Last Updated:** Phase 8 Complete (Infrastructure Integration, Performance Load, Security Validation, GraphQL tests added)
+**Last Updated:** Phase 8 Complete + HTTPS/TLS, RabbitMQ user authentication fix
 
 ---
 
@@ -979,6 +979,8 @@ pnpm test:security:validation
 
 Test suite for GraphQL API implementation covering resolver functionality and Apollo Server setup. GraphQL API is available alongside REST API at `/graphql` endpoint.
 
+> **📖 Full Documentation:** See `docs/POC-3-Implementation/GRAPHQL_IMPLEMENTATION.md` for complete implementation details, issues encountered, and fixes applied.
+
 **Test Coverage:**
 
 1. **Resolver Tests (`apps/api-gateway/src/graphql/resolvers/index.test.ts`)**
@@ -1201,6 +1203,52 @@ pnpm infra:test
    for i in {1..105}; do curl -s http://localhost/api/health > /dev/null; done
    # Should see 429 Too Many Requests after 100 requests
    ```
+
+**HTTPS/TLS Setup (Added 2026-12-12):**
+
+**Documentation:** See `docs/POC-3-Implementation/ssl-tls-setup-guide.md` for comprehensive setup details.
+
+**Quick Test Commands:**
+
+```bash
+# Test HTTPS mode (via nginx proxy)
+# 1. Start infrastructure
+pnpm infra:start
+
+# 2. Start backend with CORS for https://localhost
+pnpm dev:backend
+
+# 3. Start frontend in HTTPS mode
+pnpm dev:mf:https
+
+# 4. Access application
+open https://localhost/signin  # Accept self-signed certificate warning
+```
+
+**Verification:**
+
+```bash
+# Test HTTPS is working
+curl -k -I https://localhost/
+# Should return 200 OK
+
+# Test API proxy
+curl -k https://localhost/api/auth/health
+# Should return {"status":"ok"}
+
+# Test HTTP redirect
+curl -I http://localhost/
+# Should return 301 redirect to https://localhost/
+```
+
+**CORS Configuration (Fixed 2026-12-12):**
+
+All backend services now include `https://localhost` in allowed origins:
+- `apps/api-gateway/src/config/index.ts`
+- `apps/auth-service/src/main.ts`
+- `apps/payments-service/src/main.ts`
+- `apps/admin-service/src/main.ts`
+- `apps/profile-service/src/main.ts`
 
 ### API Gateway Proxy Tests
 
@@ -1481,6 +1529,8 @@ curl https://localhost/api/profile \
 
 ### RabbitMQ Tests
 
+**Documentation:** See `docs/POC-3-Implementation/RABBITMQ_IMPLEMENTATION.md` for comprehensive implementation details.
+
 **Tests:**
 
 1. **Exchanges Configuration**
@@ -1506,8 +1556,53 @@ curl https://localhost/api/profile \
    ```
 
 4. **RabbitMQ Health**
+
    ```bash
    docker exec mfe-rabbitmq rabbitmq-diagnostics ping
+   ```
+
+5. **User Authentication**
+
+   ```bash
+   # Verify admin user exists
+   docker exec mfe-rabbitmq rabbitmqctl list_users
+   # Should show: admin [administrator], guest [administrator]
+   ```
+
+**RabbitMQ User Authentication Fix (Issue Resolved 2026-12-12):**
+
+If you encounter `PLAIN login refused: user 'admin' - invalid credentials`:
+
+**Root Cause:** `RABBITMQ_DEFAULT_USER` env var only creates users on first startup with empty volume. The `definitions.json` must include a `users` section with password hashes.
+
+**Solution:**
+
+1. The `rabbitmq/definitions.json` now includes:
+   ```json
+   {
+     "users": [
+       {
+         "name": "admin",
+         "password_hash": "a37JkaAs+Ep+Tk7otm5aNFx3w73Dke2P5+pL9GgW1x40Y67C",
+         "hashing_algorithm": "rabbit_password_hashing_sha256",
+         "tags": ["administrator"]
+       }
+     ],
+     "permissions": [...]
+   }
+   ```
+
+2. If users are missing, recreate the container with fresh volume:
+   ```bash
+   docker-compose down
+   docker volume rm payments-system-mfe-microservices-fullstack-nx-2026_rabbitmq_data
+   docker-compose up -d rabbitmq
+   ```
+
+3. Verify fix:
+   ```bash
+   docker exec mfe-rabbitmq rabbitmqctl list_users
+   # Should show: admin [administrator]
    ```
 
 ### Redis Tests
@@ -2094,6 +2189,73 @@ pnpm migrate:rollback:auth
 pnpm migrate:import:auth
 ```
 
+### RabbitMQ Authentication Failing
+
+**Issue:** `PLAIN login refused: user 'admin' - invalid credentials`
+
+**Root Cause:** `RABBITMQ_DEFAULT_USER` env var only creates users on first startup with empty volume.
+
+**Solution:**
+
+```bash
+# 1. Verify definitions.json has users section (already fixed)
+cat rabbitmq/definitions.json | grep -A 10 '"users"'
+
+# 2. Recreate container with fresh volume
+docker-compose down
+docker volume rm payments-system-mfe-microservices-fullstack-nx-2026_rabbitmq_data
+docker-compose up -d rabbitmq
+
+# 3. Verify users exist
+docker exec mfe-rabbitmq rabbitmqctl list_users
+# Should show: admin [administrator], guest [administrator]
+
+# 4. Verify exchanges/queues loaded
+docker exec mfe-rabbitmq rabbitmqctl list_exchanges
+docker exec mfe-rabbitmq rabbitmqctl list_queues
+```
+
+**Full Documentation:** See `docs/POC-3-Implementation/RABBITMQ_IMPLEMENTATION.md`
+
+### HTTPS/CORS Issues
+
+**Issue:** `Access to XMLHttpRequest blocked by CORS policy` when using https://localhost
+
+**Root Cause:** Backend services missing `https://localhost` in allowed origins.
+
+**Solution (Already Fixed):**
+
+All backend services now include `https://localhost` in their CORS configuration:
+
+```typescript
+const allowedOrigins = [
+  'http://localhost:4200',
+  'http://localhost:4201',
+  'http://localhost:4202',
+  'http://localhost:4203',
+  'https://localhost', // Added for nginx proxy
+];
+```
+
+**If issue persists:**
+
+```bash
+# 1. Restart backend services
+pnpm backend:kill
+pnpm dev:backend
+
+# 2. Hard refresh browser (Cmd+Shift+R / Ctrl+Shift+R)
+
+# 3. Verify CORS headers
+curl -I -X OPTIONS https://localhost/api/auth/login \
+  -H "Origin: https://localhost" \
+  -H "Access-Control-Request-Method: POST" \
+  -k
+# Should include: Access-Control-Allow-Origin: https://localhost
+```
+
+**Full Documentation:** See `docs/POC-3-Implementation/ssl-tls-setup-guide.md`
+
 ---
 
 ## Related Documentation
@@ -2103,10 +2265,12 @@ pnpm migrate:import:auth
 - [`database-migration-strategy.md`](./database-migration-strategy.md) - Database migration strategy
 - [`event-hub-migration-strategy.md`](./event-hub-migration-strategy.md) - RabbitMQ migration strategy
 - [`nginx-configuration-design.md`](./nginx-configuration-design.md) - nginx configuration
+- [`ssl-tls-setup-guide.md`](./ssl-tls-setup-guide.md) - HTTPS/TLS setup guide
+- [`RABBITMQ_IMPLEMENTATION.md`](./RABBITMQ_IMPLEMENTATION.md) - RabbitMQ implementation and troubleshooting
 - [`../POC-2-Implementation/testing-guide.md`](../POC-2-Implementation/testing-guide.md) - POC-2 testing guide
 - [`../POC-2-Implementation/api-contracts.md`](../POC-2-Implementation/api-contracts.md) - API contracts
 
 ---
 
-**Last Updated:** 2026-12-10  
-**Next Update:** After Phase 3 completion (Backend Migration)
+**Last Updated:** 2026-12-12  
+**Next Update:** As needed for new features or issues

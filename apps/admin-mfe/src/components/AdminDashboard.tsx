@@ -61,7 +61,9 @@ export function AdminDashboard() {
   const { activeTab, setActiveTab } = useDashboardTabs();
 
   // Real-time dashboard updates via WebSocket
-  const { recentActivity: wsActivity } = useDashboardUpdates();
+  // Note: WebSocket activity is tracked but not displayed yet
+  // Current implementation uses REST API audit logs (auditLogs) below
+  useDashboardUpdates();
 
   // Fetch dashboard data using TanStack Query
   const {

@@ -209,10 +209,13 @@ module.exports = {
     new rspack.DefinePlugin({
       'process.env': JSON.stringify({
         // POC-3: API Gateway URL
-        // Development: Direct to API Gateway (http://localhost:3000/api)
-        // Production: Through nginx proxy (https://localhost/api)
+        // Development & Production: Through nginx proxy (https://localhost/api)
+        // Direct API Gateway access (http://localhost:3000/api) available via env var
         NX_API_BASE_URL:
-          process.env.NX_API_BASE_URL || 'http://localhost:3000/api',
+          process.env.NX_API_BASE_URL || 'https://localhost/api',
+        // WebSocket URL: Through nginx proxy (wss://localhost/ws)
+        // Direct API Gateway access (ws://localhost:3000/ws) available via env var
+        NX_WS_URL: process.env.NX_WS_URL || 'wss://localhost/ws',
         NODE_ENV: isProduction ? 'production' : 'development',
       }),
     }),
@@ -245,14 +248,21 @@ module.exports = {
       shared: sharedDependencies,
     }),
     // React Fast Refresh plugin - injects $RefreshReg$ runtime for HMR
-    ...(isDevelopment ? [new ReactRefreshPlugin()] : []),
+    ...(isDevelopment
+      ? [
+          new ReactRefreshPlugin({
+            overlay: false, // Disable overlay to avoid conflicts with devServer overlay
+          }),
+        ]
+      : []),
   ],
   // Dev server configuration
   devServer: {
     port: 4200,
-    host: 'localhost',
+    host: '0.0.0.0', // Bind to all interfaces for Docker nginx access
     hot: true,
     historyApiFallback: true, // Required for SPA routing
+    allowedHosts: 'all', // Allow nginx proxy requests
     // Serve static files from public directory
     static: {
       directory: path.resolve(__dirname, 'public'),
@@ -270,6 +280,22 @@ module.exports = {
         errors: true,
         warnings: false,
       },
+      // HMR WebSocket configuration:
+      // - HTTP mode (localhost:4200): ws://localhost:4200/ws (direct to dev server)
+      // - HTTPS mode (localhost via nginx): wss://localhost/hmr/shell (nginx proxies to dev server)
+      webSocketURL: process.env.NX_HTTPS_MODE === 'true'
+        ? {
+            protocol: 'wss',
+            hostname: 'localhost',
+            port: 443,
+            pathname: '/hmr/shell',
+          }
+        : {
+            protocol: 'ws',
+            hostname: 'localhost',
+            port: 4200,
+            pathname: '/ws',
+          },
     },
   },
   // Optimization settings
