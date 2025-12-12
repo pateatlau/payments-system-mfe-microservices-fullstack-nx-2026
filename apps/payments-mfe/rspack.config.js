@@ -40,6 +40,16 @@ const sharedDependencies = {
     singleton: true,
     eager: false,
   },
+  '@apollo/client': {
+    singleton: true,
+    requiredVersion: false,
+    eager: false,
+  },
+  graphql: {
+    singleton: true,
+    requiredVersion: false,
+    eager: false,
+  },
   zustand: {
     singleton: true,
     eager: false,
@@ -75,6 +85,11 @@ const sharedDependencies = {
     eager: false,
   },
   'shared-websocket': {
+    singleton: true,
+    requiredVersion: false,
+    eager: false,
+  },
+  '@payments-system/shared-graphql-client': {
     singleton: true,
     requiredVersion: false,
     eager: false,
@@ -145,6 +160,10 @@ module.exports = {
       '@mfe-poc/shared-observability': path.resolve(
         __dirname,
         '../../libs/shared-observability/src/index.ts'
+      ),
+      '@payments-system/shared-graphql-client': path.resolve(
+        __dirname,
+        '../../libs/shared-graphql-client/src/index.ts'
       ),
     },
   },
