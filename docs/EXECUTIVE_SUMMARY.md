@@ -45,6 +45,13 @@ The MFE Payments System is a production-ready, full-stack microfrontend platform
 - **Security:** Banking-grade authentication with JWT and RBAC
 - **Observability:** Full visibility into system health and performance
 
+### Current Status
+
+- **Development Environment:** Fully functional with HTTPS/TLS, observability stack, and production-ready infrastructure
+- **Live Demo:** Available locally at https://localhost with complete feature set
+- **CI/CD & Deployment:** Pending implementation (planned for next phase)
+- **Internet Live Demo:** Will be available once deployment pipeline is implemented
+
 ---
 
 ## 2. Architecture Overview
@@ -491,7 +498,35 @@ payments-system-mfe/
 
 ---
 
+## Future Roadmap
+
+### Planned for Next Phase
+
+**CI/CD Pipeline**
+- Automated build and deployment workflows
+- Multi-environment deployment (dev, staging, production)
+- Automated testing in CI pipeline
+- Container registry integration
+- Infrastructure as Code (IaC)
+
+**Cloud Deployment**
+- Cloud provider selection and configuration
+- Kubernetes orchestration
+- Auto-scaling configuration
+- CDN integration
+- Production-grade SSL certificates
+
+**Internet Live Demo**
+- Public-facing demo environment
+- Sample data and test accounts
+- Interactive feature showcase
+- Performance benchmarks
+
+---
+
 **Document End**
 
 *This document provides a high-level overview of the MFE Payments System architecture. For detailed implementation guides, refer to the documentation in the `docs/` directory.*
+
+**Note:** The system is production-ready from an architectural standpoint. CI/CD and cloud deployment infrastructure are the final steps for public availability.
 
