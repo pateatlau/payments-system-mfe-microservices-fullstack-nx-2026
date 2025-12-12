@@ -51,6 +51,8 @@ import {
   initTracing,
   correlationIdMiddleware,
 } from '@mfe-poc/observability';
+import { createApolloServer, applyGraphQLMiddleware } from './graphql/server';
+import { optionalAuth } from './middleware/auth';
 
 /**
  * Initialize OpenTelemetry Tracing (must be first, before any other imports/initialization)
@@ -134,6 +136,15 @@ app.get('/metrics', async (_req, res) => {
 app.use(proxyRoutes);
 
 /**
+ * GraphQL API (POC-3)
+ *
+ * GraphQL endpoint at /graphql
+ * Uses optionalAuth to extract user from token if present
+ * Directives (@auth, @admin) handle authentication/authorization
+ */
+let apolloServer: ReturnType<typeof createApolloServer> | null = null;
+
+/**
  * Error Handling (must be last!)
  */
 
@@ -157,14 +168,31 @@ const httpServer = createServer(app);
 // Create WebSocket server
 const wsServer = createWebSocketServer(httpServer);
 
-// Start HTTP server
-httpServer.listen(port, () => {
-  logger.info(`API Gateway started on port ${port}`, {
-    environment: config.nodeEnv,
-    corsOrigins: config.corsOrigins,
-    websocket: true,
-  });
-});
+// Apply GraphQL middleware (async - must be after server creation)
+// Use optionalAuth to extract user from token if present
+app.use('/graphql', optionalAuth);
+
+// Start server with GraphQL initialization
+(async () => {
+  try {
+    // Initialize GraphQL server
+    apolloServer = createApolloServer();
+    await applyGraphQLMiddleware(app, apolloServer);
+
+    // Start HTTP server
+    httpServer.listen(port, () => {
+      logger.info(`API Gateway started on port ${port}`, {
+        environment: config.nodeEnv,
+        corsOrigins: config.corsOrigins,
+        websocket: true,
+        graphql: true,
+      });
+    });
+  } catch (error) {
+    logger.error('Failed to start API Gateway', { error });
+    process.exit(1);
+  }
+})();
 
 /**
  * Graceful shutdown
@@ -173,6 +201,11 @@ process.on('SIGTERM', async () => {
   logger.info('SIGTERM received, shutting down gracefully');
 
   try {
+    // Close GraphQL server
+    if (apolloServer) {
+      await apolloServer.stop();
+    }
+
     // Close WebSocket server
     await wsServer.close();
 

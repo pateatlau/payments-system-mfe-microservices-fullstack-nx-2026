@@ -1,9 +1,8 @@
 # Comprehensive Testing Guide - POC-3
 
-**Status:** Complete  
-**Date:** 2026-12-11  
-**Phase:** POC-3 - Production-Ready Infrastructure  
-**Last Updated:** Phase 8 Complete (Infrastructure Integration, Performance Load, Security Validation, GraphQL tests added)
+**Status:** In Progress  
+**Date:** 2026-12-10  
+**Phase:** POC-3 - Production-Ready Infrastructure
 
 ---
 
@@ -19,10 +18,7 @@ POC-3 extends the comprehensive testing strategy from POC-2 with additional test
 - **Migration Tests:** TypeScript migration scripts with validation
 - **Full-Stack Integration Tests:** Playwright with backend API verification
 - **E2E Tests:** Playwright
-- **Load Tests:** ✅ Performance load testing suite implemented
-- **Infrastructure Integration Tests:** ✅ Comprehensive infrastructure test suite
-- **Security Validation Tests:** ✅ Comprehensive security test suite
-- **GraphQL Tests:** ✅ Resolver and server tests
+- **Load Tests:** (Planned) Artillery/k6 for performance testing
 
 **Coverage Target:** 70%+ (maintaining POC-2 coverage)
 
@@ -655,27 +651,24 @@ pnpm test:workflow:full          # Full user workflow (see manual-testing-guide.
 **Security Test Scripts:**
 
 ```bash
-# Comprehensive security validation suite (20+ tests)
-pnpm test:security:validation
-
-# Legacy security tests
+# Rate limiting test
 pnpm test:security:rate-limit  # Sends 105 requests to test rate limiting
+
+# CORS test
 pnpm test:security:cors        # Tests CORS headers
+
+# JWT validation test
 pnpm test:security:jwt         # Tests JWT token validation
 ```
 
 **Performance Test Scripts:**
 
 ```bash
-# Performance load testing suite (comprehensive)
-pnpm test:performance:load
+# Health endpoint performance (100 requests)
+pnpm test:performance:health
 
-# Lighthouse audit
-pnpm test:performance:lighthouse
-
-# Legacy performance tests
-pnpm test:performance:health      # Health endpoint performance (100 requests)
-pnpm test:performance:concurrent # Concurrent requests test (10 parallel)
+# Concurrent requests test (10 parallel)
+pnpm test:performance:concurrent
 ```
 
 **Environment Verification Scripts:**
@@ -697,12 +690,12 @@ pnpm env:validate
 **New Test Areas:**
 
 1. **nginx Reverse Proxy** ✅
-   - SSL/TLS certificate validation: Configured and tested
-   - Rate limiting verification: Implemented and tested
-   - Security headers validation: Verified and tested
+   - SSL/TLS certificate validation: Configured
+   - Rate limiting verification: Implemented
+   - Security headers validation: Verified
    - API Gateway proxy: Streaming HTTP proxy implemented
-   - WebSocket proxy functionality: ✅ Implemented and tested
-   - Load balancing: ✅ Configured (least_conn algorithm)
+   - WebSocket proxy functionality: Planned
+   - Load balancing: Planned
 
 2. **Separate Databases**
    - Service isolation verification
@@ -721,364 +714,18 @@ pnpm env:validate
    - Retry mechanism: Verified working
    - See: `docs/POC-3-Implementation/event-hub-test-results.md`
 
-4. **WebSocket Support** ✅
-   - Connection establishment: ✅ Tested
-   - Authentication flow: ✅ Tested (JWT validation)
-   - Real-time message delivery: ✅ Tested
-   - Reconnection logic: ✅ Implemented
-   - Cross-tab synchronization: ✅ Implemented
-
-5. **Observability** ✅
-   - Error tracking (Sentry integration): ✅ Implemented
-   - Metrics collection (Prometheus): ✅ Implemented
-   - Distributed tracing (OpenTelemetry): ✅ Implemented
-   - Log aggregation: ✅ Structured logging with Winston
-
----
-
-## Phase 8 Test Suites
-
-### Infrastructure Integration Tests
-
-**Status:** ✅ Complete (Sub-task 8.1.1)  
-**File:** `scripts/integration/infrastructure-integration.test.ts`  
-**Script:** `pnpm test:integration:infrastructure`
-
-**Overview:**
-
-Comprehensive integration test suite for POC-3 infrastructure components including nginx reverse proxy, separate databases, RabbitMQ event hub, WebSocket communication, and caching behavior.
-
-**Test Coverage (18 tests):**
-
-1. **nginx Reverse Proxy (5 tests)**
-   - HTTP to HTTPS redirect
-   - HTTPS connection with SSL/TLS
-   - Security headers present
-   - API Gateway routing
-   - Rate limiting
-
-2. **Database Connections (4 tests)**
-   - Auth Service database connection
-   - Payments Service database connection
-   - Admin Service database connection
-   - Profile Service database connection
-
-3. **RabbitMQ Event Hub (4 tests)**
-   - RabbitMQ connection
-   - Event publishing
-   - Event subscribing
-   - Event delivery verification
-
-4. **WebSocket Communication (3 tests)**
-   - WebSocket connection establishment
-   - Message sending
-   - Message receiving
-
-5. **Caching Behavior (2 tests)**
-   - Redis cache connectivity
-   - Cache operations (get/set)
-
-**Usage:**
-
-```bash
-# Run infrastructure integration tests
-pnpm test:integration:infrastructure
-
-# Or directly
-pnpm tsx scripts/integration/infrastructure-integration.test.ts
-
-# With custom URLs
-API_BASE_URL=http://localhost:3000/api \
-HTTPS_BASE_URL=https://localhost \
-WS_URL=ws://localhost:3000/ws \
-pnpm test:integration:infrastructure
-```
-
-**Features:**
-
-- Comprehensive infrastructure component testing
-- Graceful handling of service unavailability
-- Detailed error reporting with context
-- CI/CD ready with proper exit codes
-- Type-safe implementation with full TypeScript support
-
----
-
-### Performance Load Tests
-
-**Status:** ✅ Complete (Sub-task 8.2.1)  
-**File:** `scripts/performance/load-testing.test.ts`  
-**Script:** `pnpm test:performance:load`
-
-**Overview:**
-
-Comprehensive performance load testing suite for POC-3 system covering API response times, WebSocket scalability, database query performance, cache hit rates, and bundle load times.
-
-**Test Coverage (5 tests):**
-
-1. **API Response Times**
-   - 100 iterations of API health endpoint calls
-   - p95 response time verification (target: <150ms)
-   - Statistical analysis (p50, p95, p99, mean, min, max)
-   - Success/failure rate tracking
-
-2. **WebSocket Scalability**
-   - Concurrent connection testing (tested up to 100, scalable to 1000)
-   - Connection success rate tracking (80% minimum acceptable)
-   - Connection stability verification
-   - Proper cleanup of all connections
-
-3. **Database Query Performance**
-   - 50 iterations of simple SELECT queries
-   - p95 query time verification (target: <50ms for simple queries)
-   - Statistical analysis of query performance
-   - Proper connection management
-
-4. **Cache Hit Rates**
-   - 100 iterations of cache get operations
-   - Hit rate calculation and verification (target: >80%)
-   - Cache effectiveness measurement
-   - Proper test data cleanup
-
-5. **Bundle Load Times**
-   - API response time as proxy for bundle load (simplified)
-   - Mean response time verification (target: <2000ms)
-   - Note: Full bundle load testing requires browser automation (Playwright)
-
-**Lighthouse Audit:**
-
-```bash
-# Run Lighthouse performance audit
-pnpm test:performance:lighthouse
-
-# Or directly
-./scripts/performance/lighthouse-audit.sh
-
-# With custom URL
-./scripts/performance/lighthouse-audit.sh https://localhost
-```
-
-**Usage:**
-
-```bash
-# Run performance load tests
-pnpm test:performance:load
-
-# Run Lighthouse audit
-pnpm test:performance:lighthouse
-
-# Or run both
-pnpm test:performance:load && pnpm test:performance:lighthouse
-```
-
-**Performance Targets:**
-
-- **API Response Times:** p95 < 150ms
-- **WebSocket Connections:** 1000 concurrent (tested up to 100 in suite)
-- **Database Queries:** p95 < 50ms (for simple queries)
-- **Cache Hit Rate:** >80%
-- **Bundle Load Time:** <2000ms (mean)
-- **Lighthouse Performance Score:** >80
-
-**Features:**
-
-- Comprehensive metrics collection with statistical analysis
-- Performance summary with all key metrics (p50, p95, p99, mean, min, max)
-- Detailed error reporting with context
-- Graceful degradation when services are not running
-- Type-safe implementation with full TypeScript support
-- Proper resource cleanup (database connections, WebSocket connections, Redis connections)
-
----
-
-### Security Validation Tests
-
-**Status:** ✅ Complete (Sub-task 8.3.1)  
-**File:** `scripts/security/security-validation.test.ts`  
-**Script:** `pnpm test:security:validation`
-
-**Overview:**
-
-Comprehensive security validation test suite for POC-3 system covering SSL/TLS configuration, nginx security headers, rate limiting, WebSocket authentication, and session security.
-
-**Test Coverage (20+ tests):**
-
-1. **SSL/TLS Configuration (4 tests)**
-   - HTTPS connection establishment
-   - TLS protocol version validation (TLS 1.2+)
-   - Certificate presence and validation
-   - HTTP to HTTPS redirect (301/308)
-
-2. **nginx Security Headers (5 tests)**
-   - X-Frame-Options: SAMEORIGIN
-   - X-Content-Type-Options: nosniff
-   - X-XSS-Protection: 1; mode=block
-   - Referrer-Policy: strict-origin-when-cross-origin
-   - Content-Security-Policy: default-src and other directives
-
-3. **Rate Limiting (3 tests)**
-   - API endpoints: 100 requests/minute (tested with 120 rapid requests)
-   - Auth endpoints: 10 requests/minute, stricter (tested with 15 rapid requests)
-   - Static assets: 1000 requests/minute, generous (tested with 50 requests)
-
-4. **WebSocket Authentication (4 tests)**
-   - Connection with valid JWT token (should succeed)
-   - Connection without token (should fail with 401)
-   - Connection with invalid token (should fail with 401)
-   - Connection with expired token (should fail with 401)
-
-5. **Session Security (5 tests)**
-   - JWT token validation with valid token
-   - JWT token validation with invalid token (should return 401)
-   - JWT token validation with expired token (should return 401)
-   - JWT token validation with missing token (should return 401)
-   - Redis session storage connectivity and functionality
-
-**Usage:**
-
-```bash
-# Run security validation tests
-pnpm test:security:validation
-
-# Or use alias
-pnpm test:security
-
-# With custom URLs
-API_BASE_URL=http://localhost:3000/api \
-HTTPS_BASE_URL=https://localhost \
-WS_URL=ws://localhost:3000/ws \
-WSS_URL=wss://localhost/ws \
-JWT_SECRET=your-secret-key \
-pnpm test:security:validation
-```
-
-**Features:**
-
-- Comprehensive SSL/TLS validation (protocol versions, certificates)
-- Security headers verification (all required headers)
-- Rate limiting enforcement testing
-- WebSocket authentication flow testing (all scenarios)
-- Session security testing (JWT validation, Redis storage)
-- Detailed security findings collection
-- Graceful degradation when services are not running
-- Type-safe implementation with full TypeScript support
-- Proper resource cleanup (WebSocket connections, Redis connections)
-
----
-
-### GraphQL Tests
-
-**Status:** ✅ Complete (Sub-task 8.5.1)  
-**Files:** 
-- `apps/api-gateway/src/graphql/resolvers/index.test.ts` (Resolver tests)
-- `apps/api-gateway/src/graphql/server.test.ts` (Server tests)  
-**Script:** `pnpm test:api-gateway` (includes GraphQL tests)
-
-**Overview:**
-
-Test suite for GraphQL API implementation covering resolver functionality and Apollo Server setup. GraphQL API is available alongside REST API at `/graphql` endpoint.
-
-**Test Coverage:**
-
-1. **Resolver Tests (`apps/api-gateway/src/graphql/resolvers/index.test.ts`)**
-   - Query resolvers: `me`, `payment`
-   - Mutation resolvers: `login`, `createPayment`
-   - Error handling for 404 responses
-   - Authentication context handling
-   - Backend service proxying via Axios
-
-2. **Server Tests (`apps/api-gateway/src/graphql/server.test.ts`)**
-   - Apollo Server instance creation
-   - Schema and resolver integration
-   - Server initialization
-
-**GraphQL Schema Coverage:**
-
-- **Queries:** me, payment, payments, profile, users, user, auditLogs, systemConfig
-- **Mutations:** login, register, logout, refreshToken, createPayment, updatePayment, deletePayment, updateProfile, updateUserRole, updateSystemConfig
-- **Directives:** @auth (requires authentication), @admin (requires ADMIN role)
-- **Scalars:** DateTime, JSON
-
-**Usage:**
-
-```bash
-# Run GraphQL tests (included in API Gateway tests)
-pnpm test:api-gateway
-
-# Or run directly
-npx nx test api-gateway
-
-# With coverage
-npx nx test api-gateway --coverage
-```
-
-**GraphQL Endpoint Testing:**
-
-```bash
-# Test GraphQL endpoint directly
-curl -X POST http://localhost:3000/graphql \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer <JWT_TOKEN>" \
-  -d '{
-    "query": "query { me { id email name role } }"
-  }'
-
-# Test with variables
-curl -X POST http://localhost:3000/graphql \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer <JWT_TOKEN>" \
-  -d '{
-    "query": "query GetPayment($id: ID!) { payment(id: $id) { id amount status } }",
-    "variables": { "id": "payment-123" }
-  }'
-
-# Test mutation
-curl -X POST http://localhost:3000/graphql \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer <JWT_TOKEN>" \
-  -d '{
-    "query": "mutation CreatePayment($input: CreatePaymentInput!) { createPayment(input: $input) { id amount status } }",
-    "variables": {
-      "input": {
-        "amount": 100.0,
-        "currency": "USD",
-        "type": "PAYMENT",
-        "description": "Test payment"
-      }
-    }
-  }'
-```
-
-**GraphQL Client Testing (Frontend):**
-
-```bash
-# Test GraphQL hooks in Payments MFE
-pnpm test:payments-mfe
-
-# GraphQL hooks available:
-# - usePaymentsGraphQL()
-# - usePaymentGraphQL(id)
-# - useCreatePaymentGraphQL()
-# - useUpdatePaymentGraphQL()
-# - useDeletePaymentGraphQL()
-```
-
-**Features:**
-
-- Resolver tests with mocked backend services
-- Authentication and authorization directive testing
-- Error handling verification
-- Type-safe GraphQL operations
-- Integration with existing REST API
-- Apollo Client hooks for frontend usage
-
-**GraphQL vs REST:**
-
-- GraphQL provides flexible querying (request only needed fields)
-- GraphQL reduces over-fetching for complex queries
-- REST API remains primary, GraphQL is available alongside
-- Both use same authentication/authorization
-- Both proxy to same backend services
+4. **WebSocket Support**
+   - Connection establishment
+   - Authentication flow
+   - Real-time message delivery
+   - Reconnection logic
+   - Cross-tab synchronization
+
+5. **Observability**
+   - Error tracking (Sentry integration)
+   - Metrics collection (Prometheus)
+   - Distributed tracing (OpenTelemetry)
+   - Log aggregation
 
 ---
 
@@ -1132,14 +779,7 @@ pnpm test:payments-mfe
 - RabbitMQ Tests: 5+ checks (exchanges, queues, bindings)
 - Migration Scripts: 13 scripts with validation
 
-**Phase 8 Test Suites (New):**
-
-- Infrastructure Integration Tests: 18 tests (nginx, databases, RabbitMQ, WebSocket, caching)
-- Performance Load Tests: 5 tests (API response times, WebSocket scalability, database queries, cache hit rates, bundle load times)
-- Security Validation Tests: 20+ tests (SSL/TLS, security headers, rate limiting, WebSocket auth, session security)
-- GraphQL Tests: Resolver tests and server tests (Sub-task 8.5.1)
-
-**Total:** 456+ tests (380+ from POC-2 + 33+ infrastructure tests + 43+ Phase 8 tests + GraphQL tests)
+**Total:** 413+ tests (380+ from POC-2 + 33+ new infrastructure tests)
 
 ---
 
@@ -1869,45 +1509,37 @@ pnpm test:payments-service
 - [x] Migration scripts created
 - [x] Infrastructure test script created
 
-### Phase 3: Backend Migration (Complete)
+### Phase 3: Backend Migration (In Progress)
 
-- [x] Migration scripts tested with sample data
-- [x] Validation script verifies all data migrated
-- [x] Services updated to use new databases
-- [x] Service-specific Prisma clients generated
-- [x] Inter-service communication tested
+- [ ] Migration scripts tested with sample data
+- [ ] Validation script verifies all data migrated
+- [ ] Services updated to use new databases
+- [ ] Service-specific Prisma clients generated
+- [ ] Inter-service communication tested
 
-### Phase 4: RabbitMQ Integration (Complete)
+### Phase 4: RabbitMQ Integration (Planned)
 
-- [x] Event publishers implemented
-- [x] Event subscribers implemented
-- [x] Event routing tested
-- [x] Dead letter queue tested
-- [x] Event persistence verified
+- [ ] Event publishers implemented
+- [ ] Event subscribers implemented
+- [ ] Event routing tested
+- [ ] Dead letter queue tested
+- [ ] Event persistence verified
 
-### Phase 5: WebSocket Implementation (Complete)
+### Phase 5: WebSocket Implementation (Planned)
 
-- [x] WebSocket server implemented
-- [x] Authentication flow tested
-- [x] Message routing tested
-- [x] Reconnection logic tested
-- [x] Cross-tab sync tested
+- [ ] WebSocket server implemented
+- [ ] Authentication flow tested
+- [ ] Message routing tested
+- [ ] Reconnection logic tested
+- [ ] Cross-tab sync tested
 
-### Phase 6: Observability (Complete)
+### Phase 6: Observability (Planned)
 
-- [x] Sentry error tracking configured
-- [x] Prometheus metrics configured
-- [x] OpenTelemetry tracing configured
-- [x] Log aggregation configured
-- [x] Dashboards created
-
-### Phase 8: Integration, Testing & Documentation (Complete)
-
-- [x] Infrastructure Integration Tests (18 tests)
-- [x] Performance Load Tests (5 tests)
-- [x] Security Validation Tests (20+ tests)
-- [x] GraphQL Tests (Resolver and server tests)
-- [x] All documentation created (13 guides)
+- [ ] Sentry error tracking configured
+- [ ] Prometheus metrics configured
+- [ ] OpenTelemetry tracing configured
+- [ ] Log aggregation configured
+- [ ] Dashboards created
 
 ---
 

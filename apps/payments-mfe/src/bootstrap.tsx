@@ -11,6 +11,10 @@ import {
   setUser,
   clearUser,
 } from '@mfe-poc/shared-observability';
+import {
+  GraphQLProvider,
+  createGraphQLClient,
+} from '@payments-system/shared-graphql-client';
 
 // Initialize Sentry (must be done before rendering)
 initSentry({
@@ -18,12 +22,14 @@ initSentry({
 });
 
 /**
- * AppWrapper - provides WebSocket context for standalone mode
+ * AppWrapper - provides WebSocket and GraphQL context for standalone mode
  */
 function AppWrapper() {
   const accessToken = useAuthStore(state => state.accessToken);
   const user = useAuthStore(state => state.user);
   const wsUrl = process.env['NX_WS_URL'] || 'ws://localhost:3000/ws';
+  const graphqlUrl =
+    process.env['NX_GRAPHQL_URL'] || 'http://localhost:3000/graphql';
 
   // Set user context in Sentry when user is available
   useEffect(() => {
@@ -38,17 +44,28 @@ function AppWrapper() {
     }
   }, [user]);
 
+  // Create GraphQL client
+  const graphqlClient = createGraphQLClient({
+    uri: graphqlUrl,
+    getAccessToken: () => accessToken,
+    onError: error => {
+      console.error('GraphQL error:', error);
+    },
+  });
+
   return (
-    <WebSocketProvider
-      url={wsUrl}
-      token={accessToken || undefined}
-      debug={process.env['NODE_ENV'] === 'development'}
-      autoConnect={true}
-    >
-      <QueryProvider>
-        <App />
-      </QueryProvider>
-    </WebSocketProvider>
+    <GraphQLProvider client={graphqlClient}>
+      <WebSocketProvider
+        url={wsUrl}
+        token={accessToken || undefined}
+        debug={process.env['NODE_ENV'] === 'development'}
+        autoConnect={true}
+      >
+        <QueryProvider>
+          <App />
+        </QueryProvider>
+      </WebSocketProvider>
+    </GraphQLProvider>
   );
 }
 

@@ -54,7 +54,10 @@
         "libs/shared-observability/src/index.ts"
       ],
       "shared-analytics": ["libs/shared-analytics/src/index.ts"],
-      "shared-session-sync": ["libs/shared-session-sync/src/index.ts"]
+      "shared-session-sync": ["libs/shared-session-sync/src/index.ts"],
+      "@payments-system/shared-graphql-client": [
+        "libs/shared-graphql-client/src/index.ts"
+      ]
     }
   },
   "files": [],
