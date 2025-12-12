@@ -263,6 +263,7 @@ pnpm test:e2e                 # End-to-end tests
 | Document | Description |
 |----------|-------------|
 | [Executive Summary](docs/EXECUTIVE_SUMMARY.md) | High-level architecture overview for stakeholders |
+| [Implementation Journey](docs/IMPLEMENTATION-JOURNEY.md) | Complete evolution from POC-0 to POC-3 |
 | [SSL/TLS Setup Guide](docs/POC-3-Implementation/ssl-tls-setup-guide.md) | HTTPS configuration and troubleshooting |
 | [Observability Live Setup](docs/POC-3-Implementation/OBSERVABILITY_LIVE_SETUP.md) | Prometheus, Grafana, Jaeger integration |
 | [Testing Guide](docs/POC-3-Implementation/testing-guide.md) | Comprehensive testing instructions |
