@@ -1,0 +1,9 @@
+# Migration Data Directory
+# Contains exported data during migration process
+# Should NOT be committed to git
+
+# Ignore all JSON data files
+*.json
+
+# Keep this directory in git
+!.gitignore

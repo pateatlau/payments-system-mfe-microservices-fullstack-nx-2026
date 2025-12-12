@@ -50,7 +50,7 @@
 | **Monorepo**                  |
 | Nx                            | Latest      | All     | ✅       | Scalable, build caching              |
 | **Bundling & Build**          |
-| Vite                          | 6.x         | Web     | ✅       | Fast dev server, excellent DX        |
+| Rspack                        | Latest      | Web     | ✅       | Fast builds, HMR with MF v2          |
 | TypeScript                    | 5.9.x       | All     | ✅       | React 19 support                     |
 | **Module Federation**         |
 | @module-federation/enhanced   | 0.21.6      | Web     | ✅       | BIMF (Module Federation v2)          |
@@ -75,8 +75,8 @@
 | **Error Handling**            |
 | react-error-boundary          | 4.0.13      | Web     | ✅       | React 19 compatible                  |
 | **Testing**                   |
-| Vitest                        | 2.0.x       | Web     | ✅       | Fast, Vite-native                    |
-| React Testing Library         | 16.1.x      | Web     | ✅       | Works with Vitest                    |
+| Jest                          | 29.x        | Web     | ✅       | Mature ecosystem, Rspack-compatible  |
+| React Testing Library         | 16.1.x      | Web     | ✅       | Works with Jest                      |
 | **E2E Testing**               |
 | Playwright                    | Latest      | Web     | ✅       | Modern, fast, reliable               |
 | **Code Quality**              |
@@ -147,26 +147,29 @@
 
 ### 3.3 Bundling & Build
 
-#### Vite 6.x
+#### Rspack
 
 **Rationale:**
 
-- Fast dev server (instant startup)
-- Excellent HMR (near-instant updates)
-- Fast production builds (esbuild + Rollup)
-- Native ESM (modern JavaScript)
-- TypeScript support (excellent)
-- Plugin ecosystem (large)
+- Fast builds (3-5x faster than Vite for production builds)
+- Native HMR with Module Federation v2 (primary reason for migration)
+- Rust-based bundler (high performance)
+- Webpack-compatible API (easy migration)
+- TypeScript support via SWC
+- Active development by ByteDance
 
 **Production Considerations:**
 
 - Production-ready
-- Used by major companies
+- Used by major companies (ByteDance, Microsoft)
 - Active maintenance
 - Excellent performance
 - Scales to large applications
+- Native Module Federation HMR support
 
-**Carry Forward:** ✅ Yes - Production-ready, excellent DX
+**Migration Note:** Migrated from Vite 6.x to enable HMR with Module Federation v2 in development mode.
+
+**Carry Forward:** ✅ Yes - Production-ready, excellent HMR with MF v2
 
 ---
 
@@ -425,14 +428,14 @@ export const useAuthStore = create<AuthState>()(
 // apps/payments-mfe/src/api/mockPayments.ts
 export const mockPaymentsApi = {
   getPayments: async (): Promise<Payment[]> => {
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    await new Promise(resolve => setTimeout(resolve, 500));
     return [
       { id: '1', amount: 100, description: 'Payment 1' },
       { id: '2', amount: 200, description: 'Payment 2' },
     ];
   },
   createPayment: async (dto: CreatePaymentDto): Promise<Payment> => {
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    await new Promise(resolve => setTimeout(resolve, 300));
     return { id: '3', ...dto };
   },
 };
@@ -527,7 +530,7 @@ class EventBus {
   }
 
   emit(event: string, data?: any) {
-    this.listeners.get(event)?.forEach((callback) => callback(data));
+    this.listeners.get(event)?.forEach(callback => callback(data));
   }
 }
 
@@ -785,7 +788,7 @@ const apiClient = axios.create({
 });
 
 // Request interceptor (add auth token)
-apiClient.interceptors.request.use((config) => {
+apiClient.interceptors.request.use(config => {
   const token = useAuthStore.getState().user?.token;
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -795,8 +798,8 @@ apiClient.interceptors.request.use((config) => {
 
 // Response interceptor (handle errors)
 apiClient.interceptors.response.use(
-  (response) => response,
-  (error) => {
+  response => response,
+  error => {
     if (error.response?.status === 401) {
       useAuthStore.getState().logout();
     }
@@ -872,24 +875,23 @@ function App() {
 
 ### 3.13 Testing
 
-#### Vitest 2.0.x
+#### Jest 29.x
 
 **Rationale:**
 
-- **Fast** - ESM-first, Vite-powered, parallel execution
-- **Better TypeScript support** - Native ESM, better type checking
-- **Modern tooling** - Built for modern JavaScript/TypeScript
-- **Better DX** - Faster feedback, better error messages
-- **Vite-native** - Works seamlessly with Vite
-- **Smaller bundle** - More lightweight than Jest
+- **Mature ecosystem** - Industry standard with extensive plugin ecosystem
+- **Rspack-compatible** - Works well with Rspack (unlike Vitest which is Vite-native)
+- **TypeScript support** - Via ts-jest
+- **Parallel execution** - Fast test execution
+- **Large community** - Extensive documentation and support
 
 **Features:**
 
-- Fast execution
-- TypeScript support
+- Fast execution with caching
+- TypeScript support via ts-jest
 - Watch mode
 - Coverage reports
-- UI mode
+- Snapshot testing
 - Parallel execution
 
 **Production Considerations:**
@@ -897,26 +899,33 @@ function App() {
 - Production-ready
 - Used by major companies
 - Active maintenance
-- Excellent performance
+- Excellent ecosystem
 - Scales to large test suites
 
-**Carry Forward:** ✅ Yes - Production-ready, excellent DX
+**Migration Note:** Migrated from Vitest to Jest as part of the Rspack migration (Vitest is Vite-native and not compatible with Rspack).
+
+**Carry Forward:** ✅ Yes - Production-ready, industry standard
 
 **Implementation:**
 
 ```typescript
-// vitest.config.ts
-import { defineConfig } from 'vitest/config';
-import react from '@vitejs/plugin-react';
-
-export default defineConfig({
-  plugins: [react()],
-  test: {
-    environment: 'jsdom',
-    globals: true,
-    setupFiles: ['./src/test/setup.ts'],
+// jest.config.js
+module.exports = {
+  preset: 'ts-jest',
+  testEnvironment: 'jsdom',
+  setupFilesAfterEnv: ['./src/test/setup.ts'],
+  moduleNameMapper: {
+    '^@web-mfe/(.*)$': '<rootDir>/libs/$1/src/index.ts',
   },
-});
+  coverageThreshold: {
+    global: {
+      branches: 70,
+      functions: 70,
+      lines: 70,
+      statements: 70,
+    },
+  },
+};
 ```
 
 ---
@@ -929,6 +938,7 @@ export default defineConfig({
 - Production-ready
 - User-centric testing
 - TypeScript support
+- Works with Jest (primary testing framework)
 
 **Carry Forward:** ✅ Yes - Industry standard, scales to complex testing
 
@@ -1026,7 +1036,7 @@ test('should sign in successfully', async ({ page }) => {
 
 ## 4. Version Compatibility Matrix
 
-| Technology      | Version | React 19 | Vite 6 | Module Federation v2 | Notes |
+| Technology      | Version | React 19 | Rspack | Module Federation v2 | Notes |
 | --------------- | ------- | -------- | ------ | -------------------- | ----- |
 | React           | 19.2.0  | ✅       | ✅     | ✅                   | Core  |
 | React Router    | 7.x     | ✅       | ✅     | ✅                   | Web   |
@@ -1036,7 +1046,7 @@ test('should sign in successfully', async ({ page }) => {
 | React Hook Form | 7.52.x  | ✅       | ✅     | ✅                   | All   |
 | Zod             | 3.23.x  | ✅       | ✅     | ✅                   | All   |
 | Axios           | 1.7.x   | ✅       | ✅     | ✅                   | All   |
-| Vitest          | 2.0.x   | ✅       | ✅     | ✅                   | Web   |
+| Jest            | 29.x    | ✅       | ✅     | ✅                   | Web   |
 | Playwright      | Latest  | ✅       | ✅     | ✅                   | Web   |
 
 ---
@@ -1052,7 +1062,7 @@ test('should sign in successfully', async ({ page }) => {
 - Configure Tailwind CSS v4
 - Setup React Hook Form + Zod
 - Configure error boundaries
-- Setup Vitest for all packages
+- Setup Jest for all packages
 - Setup Playwright for E2E testing
 
 ### Phase 2: Authentication (POC-1)
@@ -1073,7 +1083,7 @@ test('should sign in successfully', async ({ page }) => {
 
 ### Phase 4: Testing (POC-1)
 
-- Unit tests (Vitest for all packages + RTL)
+- Unit tests (Jest for all packages + RTL)
 - Integration tests
 - E2E tests (Playwright)
 
@@ -1116,7 +1126,7 @@ test('should sign in successfully', async ({ page }) => {
 - Tailwind CSS 4.0 → 4.1+ (already on latest)
 - Zustand 4.5 → 5.0 (when available)
 - React Router 7 → 8 (when available)
-- Vitest 2.0 → 3.0 (when available)
+- Jest 29.x → 30.x (when available)
 - Playwright → Latest (continuous updates)
 
 **No breaking changes expected in POC-1 → MVP → Production transition.**
@@ -1153,4 +1163,10 @@ test('should sign in successfully', async ({ page }) => {
 ---
 
 **Last Updated:** 2026-01-XX  
-**Status:** Authoritative Tech Stack
+**Status:** Authoritative Tech Stack  
+**POC-1 Status:** ✅ Complete - All technologies validated and working in production-ready implementation
+
+**Related Documentation:**
+
+- [`../POC-1-Implementation/deliverables-checklist.md`](../POC-1-Implementation/deliverables-checklist.md) - POC-1 deliverables validation
+- [`mfe-poc1-architecture.md`](./mfe-poc1-architecture.md) - POC-1 architecture (complete)

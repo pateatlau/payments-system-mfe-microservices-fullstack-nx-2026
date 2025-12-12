@@ -42,33 +42,33 @@
 
 ## 2. Complete Tech Stack Matrix
 
-| Category                    | Technology  | Version | Platform | Production-Ready              | Notes |
-| --------------------------- | ----------- | ------- | -------- | ----------------------------- | ----- |
+| Category                    | Technology  | Version | Platform | Production-Ready                             | Notes |
+| --------------------------- | ----------- | ------- | -------- | -------------------------------------------- | ----- |
 | **Core Framework**          |
-| React                       | 19.2.0      | Web     | ✅       | Latest stable, future-proof   |
-| React DOM                   | 19.2.0      | Web     | ✅       | Must match React version      |
+| React                       | 19.2.0      | Web     | ✅       | Latest stable, future-proof                  |
+| React DOM                   | 19.2.0      | Web     | ✅       | Must match React version                     |
 | **Monorepo**                |
-| Nx                          | Latest      | All     | ✅       | Scalable, build caching       |
+| Nx                          | Latest      | All     | ✅       | Scalable, build caching                      |
 | **Bundling & Build**        |
-| Vite                        | 6.x         | Web     | ✅       | Fast dev server, excellent DX |
-| TypeScript                  | 5.9.x       | All     | ✅       | React 19 support              |
+| Rspack                      | Latest      | Web     | ✅       | Fast builds, HMR with MF v2 (POC-1+)         |
+| TypeScript                  | 5.9.x       | All     | ✅       | React 19 support                             |
 | **Module Federation**       |
-| @module-federation/enhanced | 0.21.6      | Web     | ✅       | BIMF (Module Federation v2)   |
+| @module-federation/enhanced | 0.21.6      | Web     | ✅       | BIMF (Module Federation v2)                  |
 | **Package Manager**         |
-| pnpm                        | 9.x         | All     | ✅       | Recommended for Nx            |
+| pnpm                        | 9.x         | All     | ✅       | Recommended for Nx                           |
 | **Node.js**                 |
-| Node.js                     | 24.11.x LTS | All     | ✅       | Latest LTS, SWC support       |
+| Node.js                     | 24.11.x LTS | All     | ✅       | Latest LTS, SWC support                      |
 | **Testing**                 |
-| Vitest                      | 2.0.x       | Web     | ✅       | Fast, Vite-native             |
-| React Testing Library       | 16.1.x      | Web     | ✅       | Works with Vitest             |
+| Jest                        | 30.x        | Web     | ✅       | Mature ecosystem, Rspack-compatible (POC-1+) |
+| React Testing Library       | 16.1.x      | Web     | ✅       | Works with Jest                              |
 | **E2E Testing**             |
-| Playwright                  | Latest      | Web     | ✅       | Modern, fast, reliable        |
+| Playwright                  | Latest      | Web     | ✅       | Modern, fast, reliable                       |
 | **Code Quality**            |
-| ESLint                      | 9.x         | All     | ✅       | Latest, flat config           |
-| Prettier                    | 3.3.x       | All     | ✅       | Code formatting               |
-| TypeScript ESLint           | 8.x         | All     | ✅       | TS-specific linting           |
+| ESLint                      | 9.x         | All     | ✅       | Latest, flat config                          |
+| Prettier                    | 3.3.x       | All     | ✅       | Code formatting                              |
+| TypeScript ESLint           | 8.x         | All     | ✅       | TS-specific linting                          |
 | **CI/CD**                   |
-| GitHub Actions              | Native      | All     | ✅       | Free, scalable                |
+| GitHub Actions              | Native      | All     | ✅       | Free, scalable                               |
 
 ---
 
@@ -125,9 +125,11 @@
 
 ### 3.3 Bundling & Build
 
-#### Vite 6.x
+#### Rspack (POC-1+)
 
-**Reference:** See `docs/adr/poc-0/0002-use-vite-bundler.md` for decision rationale, alternatives considered, and trade-offs.
+**Migration Note:** POC-0 used Vite 6.x. POC-1 migrated to Rspack to enable HMR with Module Federation v2. See `docs/adr/poc-1/0006-migrate-to-rspack-bundler.md` for migration decision.
+
+**Reference (Historical):** See `docs/adr/poc-0/0002-use-vite-bundler.md` for original Vite decision rationale (superseded for POC-1+).
 
 **Rationale:**
 
@@ -178,9 +180,11 @@
 
 ### 3.5 Testing
 
-#### Vitest 2.0.x
+#### Jest 30.x (POC-1+)
 
-**Reference:** See `docs/adr/poc-0/0004-use-vitest-for-testing.md` for decision rationale, alternatives considered, and trade-offs.
+**Migration Note:** POC-0 used Vitest 2.0.x. POC-1 migrated to Jest 30.x as part of the Rspack migration for better ecosystem compatibility.
+
+**Reference (Historical):** See `docs/adr/poc-0/0004-use-vitest-for-testing.md` for original Vitest decision rationale (superseded for frontend in POC-1).
 
 **Rationale:**
 

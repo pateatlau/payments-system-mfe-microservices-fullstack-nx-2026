@@ -1,37 +1,55 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from '@jest/globals';
 import { render, screen } from '@testing-library/react';
-import { BrowserRouter } from 'react-router-dom';
+import { MemoryRouter } from 'react-router-dom';
 import { App } from './app';
 
+// Mock components for testing
+const MockSignIn = () => <div>Mock SignIn</div>;
+const MockSignUp = () => <div>Mock SignUp</div>;
+const MockPayments = () => <div>Mock Payments</div>;
+
+// Mock the AppRoutes component
+jest.mock('../routes/AppRoutes', () => ({
+  AppRoutes: () => <div data-testid="app-routes">AppRoutes</div>,
+}));
+
 describe('App', () => {
-  it('renders shell app', () => {
-    render(
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
+  it('should render successfully', () => {
+    const { baseElement } = render(
+      <MemoryRouter>
+        <App
+          remotes={{
+            SignInComponent: MockSignIn,
+            SignUpComponent: MockSignUp,
+            PaymentsComponent: MockPayments,
+          }}
+        />
+      </MemoryRouter>
     );
-
-    expect(screen.getByText('Welcome to the Shell Application')).toBeDefined();
+    expect(baseElement).toBeTruthy();
   });
 
-  it('renders navigation links', () => {
+  it('should render Layout with AppRoutes when remotes are provided', () => {
     render(
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
+      <MemoryRouter>
+        <App
+          remotes={{
+            SignInComponent: MockSignIn,
+            SignUpComponent: MockSignUp,
+            PaymentsComponent: MockPayments,
+          }}
+        />
+      </MemoryRouter>
     );
-
-    expect(screen.getByText('Home')).toBeDefined();
-    expect(screen.getByText('Page 2')).toBeDefined();
+    expect(screen.getByTestId('app-routes')).toBeInTheDocument();
   });
 
-  it('renders current date', () => {
+  it('should render placeholder when no remotes are provided', () => {
     render(
-      <BrowserRouter>
+      <MemoryRouter>
         <App />
-      </BrowserRouter>
+      </MemoryRouter>
     );
-
-    expect(screen.getByText(/Current date:/)).toBeDefined();
+    expect(screen.getByTestId('app-routes-placeholder')).toBeInTheDocument();
   });
 });

@@ -1,88 +1,65 @@
-import { Route, Routes, Link } from 'react-router-dom';
 import Layout from '../components/Layout';
-import RemoteComponent from '../components/RemoteComponent';
-import { formatDate } from 'shared-utils';
-import { Button } from 'shared-ui';
-import type { User } from 'shared-types';
+import { AppRoutes, AppRoutesProps } from '../routes/AppRoutes';
+import { useEventBusIntegration } from '../hooks';
 
-export function App() {
-  // Example usage of shared-types
-  const exampleUser: User = {
-    id: '1',
-    name: 'John Doe',
-    email: 'john@example.com',
-    role: 'admin',
+/**
+ * Props for App component - allows dependency injection for testing
+ */
+export interface AppProps {
+  /**
+   * Remote components to pass to AppRoutes.
+   * In production, these come from ../remotes.
+   * In tests, pass mock components.
+   */
+  remotes?: {
+    SignInComponent: AppRoutesProps['SignInComponent'];
+    SignUpComponent: AppRoutesProps['SignUpComponent'];
+    PaymentsComponent: AppRoutesProps['PaymentsComponent'];
+    AdminDashboardComponent: AppRoutesProps['AdminDashboardComponent'];
   };
+}
 
+/**
+ * App component
+ *
+ * Main application component that renders the Layout and AppRoutes.
+ * Uses dependency injection pattern for testability.
+ * Integrates event bus for inter-MFE communication.
+ *
+ * In production (main.tsx), pass the actual remote components.
+ * In tests, pass mock components or let AppRoutes use its own mocks.
+ */
+export function App({ remotes }: AppProps = {}) {
+  // Initialize event bus integration
+  // Subscribes to auth and payment events, handles navigation
+  useEventBusIntegration({
+    enableAuthEvents: true,
+    enablePaymentEvents: true,
+    enableSystemEvents: true,
+    debug: process.env['NODE_ENV'] === 'development',
+  });
+
+  // If remotes are provided, pass them to AppRoutes
+  // Otherwise, AppRoutes will need to handle it (or tests will mock AppRoutes)
+  if (remotes) {
+    return (
+      <Layout>
+        <AppRoutes
+          SignInComponent={remotes.SignInComponent}
+          SignUpComponent={remotes.SignUpComponent}
+          PaymentsComponent={remotes.PaymentsComponent}
+          AdminDashboardComponent={remotes.AdminDashboardComponent}
+        />
+      </Layout>
+    );
+  }
+
+  // For tests that mock AppRoutes entirely, we don't need remotes
+  // This path is used when tests mock the entire AppRoutes component
   return (
     <Layout>
-      <div role="navigation">
-        <ul
-          style={{
-            listStyle: 'none',
-            padding: 0,
-            display: 'flex',
-            gap: '1rem',
-          }}
-        >
-          <li>
-            <Link to="/" style={{ textDecoration: 'none', color: '#0066cc' }}>
-              Home
-            </Link>
-          </li>
-          <li>
-            <Link
-              to="/page-2"
-              style={{ textDecoration: 'none', color: '#0066cc' }}
-            >
-              Page 2
-            </Link>
-          </li>
-        </ul>
-      </div>
-      <RemoteComponent />
-      <Routes>
-        <Route
-          path="/"
-          element={
-            <div>
-              <h2>Welcome to the Shell Application</h2>
-              <p>This is the generated root route.</p>
-              <p>Current date: {formatDate(new Date())}</p>
-              <p>
-                Example user: {exampleUser.name} ({exampleUser.email})
-              </p>
-              <div
-                style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem' }}
-              >
-                <Button onClick={() => alert('Primary button clicked!')}>
-                  Primary Button
-                </Button>
-                <Button
-                  variant="secondary"
-                  onClick={() => alert('Secondary button clicked!')}
-                >
-                  Secondary Button
-                </Button>
-              </div>
-              <Link to="/page-2" style={{ color: '#0066cc' }}>
-                Click here for page 2.
-              </Link>
-            </div>
-          }
-        />
-        <Route
-          path="/page-2"
-          element={
-            <div>
-              <h2>Page 2</h2>
-              <Link to="/" style={{ color: '#0066cc' }}>
-                Click here to go back to root page.
-              </Link>
-            </div>
-          }
-        />
-      </Routes>
+      {/* AppRoutes will be mocked in tests */}
+      <div data-testid="app-routes-placeholder">Routes not configured</div>
     </Layout>
   );
 }

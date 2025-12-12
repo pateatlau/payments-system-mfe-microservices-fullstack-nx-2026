@@ -1,0 +1,71 @@
+// Auth Service Database Schema
+// Database: auth_db (port 5432)
+// 
+// This schema defines the authentication and user management data model.
+// Users and refresh tokens are stored here as the authoritative source.
+// Other services reference users by ID (string) without foreign key constraints.
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/auth-client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("AUTH_DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  CUSTOMER
+  VENDOR
+}
+
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  passwordHash  String    @map("password_hash")
+  name          String
+  role          UserRole
+  emailVerified Boolean   @default(false) @map("email_verified")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  refreshTokens RefreshToken[]
+  devices       Device[]
+
+  @@index([email])
+  @@index([role])
+  @@map("users")
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  token     String   @unique
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+  @@map("refresh_tokens")
+}
+
+model Device {
+  id          String   @id @default(uuid())
+  userId      String   @map("user_id")
+  deviceId    String   @unique @map("device_id")
+  deviceName  String?  @map("device_name")
+  deviceType  String?  @map("device_type") // browser, mobile, desktop
+  userAgent   String?  @map("user_agent")
+  lastActiveAt DateTime @default(now()) @updatedAt @map("last_active_at")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([deviceId])
+  @@map("devices")
+}

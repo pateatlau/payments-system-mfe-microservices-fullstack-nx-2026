@@ -177,6 +177,16 @@
 - [`../References/mfe-poc1-tech-stack.md`](../References/mfe-poc1-tech-stack.md) - Technology stack
 - [`../POC-0-Implementation/`](../POC-0-Implementation/) - POC-0 foundation (completed)
 - [`../adr/poc-1/`](../adr/poc-1/) - Architecture Decision Records for POC-1
+- [`../Rspack-Migration/`](../Rspack-Migration/) - Rspack migration details (completed)
+
+### Completion & Validation
+
+- [`deliverables-checklist.md`](./deliverables-checklist.md) - **Complete:** Comprehensive checklist of all POC-1 deliverables and validation status
+- [`success-criteria-validation.md`](./success-criteria-validation.md) - **Complete:** Detailed validation of all 18 success criteria
+
+### Bug Fixes & Important Notes
+
+- [`bug-fix-navigation-after-auth.md`](./bug-fix-navigation-after-auth.md) - **Important:** Bug fix for automatic navigation after authentication across Module Federation boundaries
 
 ---
 
@@ -193,6 +203,8 @@
 - Universal header component
 - Mock authentication (no real backend)
 - Stubbed payment operations (no actual PSP integration)
+- **Rspack bundler** (migrated from Vite for HMR with Module Federation v2)
+- **Jest testing** (migrated from Vitest for Rspack compatibility)
 
 **NOT in Scope:**
 
@@ -205,4 +217,8 @@
 ---
 
 **Last Updated:** 2026-01-XX  
-**Status:** Ready for Implementation
+**Status:** ✅ **POC-1 COMPLETE** - All deliverables validated and all success criteria met
+
+### Post-POC-1 Transition
+
+- [`post-poc-1.md`](./post-poc-1.md) - **Next:** Transition guide and POC-2 planning checklist

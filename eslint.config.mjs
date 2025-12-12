@@ -7,6 +7,7 @@ export default tseslint.config(
   ...tseslint.configs.recommended,
   {
     files: ['**/*.ts', '**/*.tsx', '**/*.js', '**/*.jsx'],
+    ignores: ['docs/**'],
     rules: {
       // TypeScript-specific rules
       '@typescript-eslint/no-unused-vars': [
@@ -22,6 +23,27 @@ export default tseslint.config(
     },
   },
   {
+    files: ['docs/**/*.js'],
+    languageOptions: {
+      globals: {
+        require: 'readonly',
+        module: 'readonly',
+        exports: 'readonly',
+        __dirname: 'readonly',
+        __filename: 'readonly',
+        process: 'readonly',
+        console: 'readonly',
+      },
+      ecmaVersion: 'latest',
+      sourceType: 'script', // CommonJS
+    },
+    rules: {
+      '@typescript-eslint/no-require-imports': 'off',
+      'no-undef': 'off', // Node.js globals are defined above
+      '@typescript-eslint/no-var-requires': 'off',
+    },
+  },
+  {
     ignores: [
       'node_modules/**',
       'dist/**',
@@ -30,6 +52,7 @@ export default tseslint.config(
       '**/*.config.js',
       '**/*.config.mjs',
       'pnpm-lock.yaml',
+      '**/.__mf__temp/**',
     ],
   }
 );

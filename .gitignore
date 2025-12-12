@@ -10,9 +10,11 @@ coverage/
 # Production
 dist/
 build/
+tmp/
 
 # Misc
 .DS_Store
+.env
 .env.local
 .env*.local
 
@@ -30,14 +32,29 @@ lerna-debug.log*
 *.swo
 *~
 
+# Cursor AI files
+.cursor/
+.cursorignore
+.cursorrules
+
 # Nx
 .nx/cache
 .nx/workspace-data
-
 .nx/installation
 
+# Module Federation temp files
+.__mf__temp/
+**/.__mf__temp/
 
-.cursor/rules/nx-rules.mdc
+# Backup files (kept for reference during migration)
+.backup/
+
 .github/instructions/nx.instructions.md
 vite.config.*.timestamp*
 vitest.config.*.timestamp*
+
+# SSL/TLS Certificates (POC-3)
+nginx/ssl/*.crt
+nginx/ssl/*.key
+nginx/ssl/*.pem
+nginx/ssl/*.csr

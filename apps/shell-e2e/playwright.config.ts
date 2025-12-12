@@ -23,13 +23,31 @@ export default defineConfig({
     trace: 'on-first-retry',
   },
   /* Run your local dev server before starting the tests */
-  webServer: {
-    command: 'pnpm exec nx serve shell',
-    url: 'http://localhost:4200',
-    reuseExistingServer: true,
-    cwd: workspaceRoot,
-    timeout: 120000,
-  },
+  /* For Module Federation, we need all three apps running */
+  /* Note: Remotes must be built first (run: pnpm build:remotes) */
+  webServer: [
+    {
+      command: 'pnpm exec nx preview auth-mfe',
+      url: 'http://localhost:4201',
+      reuseExistingServer: !process.env.CI,
+      cwd: workspaceRoot,
+      timeout: 120000,
+    },
+    {
+      command: 'pnpm exec nx preview payments-mfe',
+      url: 'http://localhost:4202',
+      reuseExistingServer: !process.env.CI,
+      cwd: workspaceRoot,
+      timeout: 120000,
+    },
+    {
+      command: 'pnpm exec nx preview shell',
+      url: 'http://localhost:4200',
+      reuseExistingServer: !process.env.CI,
+      cwd: workspaceRoot,
+      timeout: 120000,
+    },
+  ],
   projects: [
     {
       name: 'chromium',

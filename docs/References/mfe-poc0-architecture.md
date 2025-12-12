@@ -1,9 +1,10 @@
 # MFE POC-0 Architecture & Implementation Plan
 
-**Status:** Planning  
+**Status:** ✅ Complete (Migrated to Rspack in POC-1)  
 **Version:** 1.0  
 **Date:** 2026-01-XX  
-**Tech Stack:** React + Nx + Vite + Module Federation v2
+**Tech Stack:** React + Nx + Vite + Module Federation v2  
+**Note:** POC-0 used Vite. POC-1+ migrated to Rspack to enable HMR with Module Federation v2. See `docs/Rspack-Migration/` for migration details.
 
 ---
 
@@ -69,28 +70,28 @@ This explains why certain features (e.g., payment operations) are **stubbed** ra
 
 ### 2.2 Technology Stack
 
-| Category              | Technology                  | Version     | Rationale                                                                                   |
-| --------------------- | --------------------------- | ----------- | ------------------------------------------------------------------------------------------- |
-| **Monorepo**          | Nx                          | Latest      | Scalable, build caching, task orchestration<br>See `docs/adr/poc-0/0001-use-nx-monorepo.md` |
-| **Runtime**           | Node.js                     | 24.11.x LTS | Latest LTS                                                                                  |
-| **Framework**         | React                       | 19.2.0      | Latest stable                                                                               |
-| **Bundler**           | Vite                        | 6.x         | Fast dev server, excellent DX<br>See `docs/adr/poc-0/0002-use-vite-bundler.md`              |
-| **Module Federation** | @module-federation/enhanced | 0.21.6      | BIMF (Module Federation v2)<br>See `docs/adr/poc-0/0003-use-module-federation-v2.md`        |
-| **Language**          | TypeScript                  | 5.9.x       | Type safety                                                                                 |
-| **Package Manager**   | pnpm/npm                    | Latest      | Nx compatible                                                                               |
-| **Routing**           | React Router                | 7.x         | Latest, production-ready                                                                    |
-| **State (Client)**    | Zustand                     | 4.5.x       | Lightweight, scalable                                                                       |
-| **State (Server)**    | TanStack Query              | 5.x         | Server state management                                                                     |
-| **Styling**           | Tailwind CSS                | 4.0+        | Latest, fast builds                                                                         |
-| **Design System**     | shadcn/ui                   | Latest      | POC-2                                                                                       |
-| **Form Handling**     | React Hook Form             | 7.52.x      | Industry standard                                                                           |
-| **Validation**        | Zod                         | 3.23.x      | Type-safe validation                                                                        |
-| **HTTP Client**       | Axios                       | 1.7.x       | Production-ready                                                                            |
-| **Testing**           | Vitest                      | 2.0.x       | Fast, Vite-native<br>See `docs/adr/poc-0/0004-use-vitest-for-testing.md`                    |
-| **E2E Testing**       | Playwright                  | Latest      | Web E2E testing<br>See `docs/adr/poc-0/0005-use-playwright-for-e2e.md`                      |
-| **Code Quality**      | ESLint                      | 9.x         | Latest, flat config                                                                         |
-| **Formatting**        | Prettier                    | 3.3.x       | Code formatting                                                                             |
-| **Type Checking**     | TypeScript ESLint           | 8.x         | TS-specific linting                                                                         |
+| Category              | Technology                  | Version     | Rationale                                                                                                           |
+| --------------------- | --------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------- |
+| **Monorepo**          | Nx                          | Latest      | Scalable, build caching, task orchestration<br>See `docs/adr/poc-0/0001-use-nx-monorepo.md`                         |
+| **Runtime**           | Node.js                     | 24.11.x LTS | Latest LTS                                                                                                          |
+| **Framework**         | React                       | 19.2.0      | Latest stable                                                                                                       |
+| **Bundler**           | Rspack                      | Latest      | Fast builds, HMR with MF v2 (migrated from Vite in POC-1)<br>See `docs/adr/poc-1/0006-migrate-to-rspack-bundler.md` |
+| **Module Federation** | @module-federation/enhanced | 0.21.6      | BIMF (Module Federation v2)<br>See `docs/adr/poc-0/0003-use-module-federation-v2.md`                                |
+| **Language**          | TypeScript                  | 5.9.x       | Type safety                                                                                                         |
+| **Package Manager**   | pnpm/npm                    | Latest      | Nx compatible                                                                                                       |
+| **Routing**           | React Router                | 7.x         | Latest, production-ready                                                                                            |
+| **State (Client)**    | Zustand                     | 4.5.x       | Lightweight, scalable                                                                                               |
+| **State (Server)**    | TanStack Query              | 5.x         | Server state management                                                                                             |
+| **Styling**           | Tailwind CSS                | 4.0+        | Latest, fast builds                                                                                                 |
+| **Design System**     | shadcn/ui                   | Latest      | POC-2                                                                                                               |
+| **Form Handling**     | React Hook Form             | 7.52.x      | Industry standard                                                                                                   |
+| **Validation**        | Zod                         | 3.23.x      | Type-safe validation                                                                                                |
+| **HTTP Client**       | Axios                       | 1.7.x       | Production-ready                                                                                                    |
+| **Testing**           | Jest                        | 30.x        | Mature ecosystem, Rspack-compatible (migrated from Vitest in POC-1)                                                 |
+| **E2E Testing**       | Playwright                  | Latest      | Web E2E testing<br>See `docs/adr/poc-0/0005-use-playwright-for-e2e.md`                                              |
+| **Code Quality**      | ESLint                      | 9.x         | Latest, flat config                                                                                                 |
+| **Formatting**        | Prettier                    | 3.3.x       | Code formatting                                                                                                     |
+| **Type Checking**     | TypeScript ESLint           | 8.x         | TS-specific linting                                                                                                 |
 
 ---
 
@@ -476,7 +477,7 @@ const apiClient = axios.create({
 });
 
 // Request interceptor
-apiClient.interceptors.request.use((config) => {
+apiClient.interceptors.request.use(config => {
   const token = useAuthStore.getState().user?.token;
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -533,7 +534,7 @@ class EventBus {
   }
 
   emit(event: string, data?: any) {
-    this.listeners.get(event)?.forEach((callback) => callback(data));
+    this.listeners.get(event)?.forEach(callback => callback(data));
   }
 }
 
@@ -923,7 +924,7 @@ const apiClient = axios.create({
 });
 
 // Request interceptor - Add auth token
-apiClient.interceptors.request.use((config) => {
+apiClient.interceptors.request.use(config => {
   const token = useAuthStore.getState().user?.token;
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -933,8 +934,8 @@ apiClient.interceptors.request.use((config) => {
 
 // Response interceptor - Handle errors
 apiClient.interceptors.response.use(
-  (response) => response,
-  async (error) => {
+  response => response,
+  async error => {
     if (error.response?.status === 401) {
       // Refresh token or logout
       useAuthStore.getState().logout();
@@ -1069,14 +1070,12 @@ const apiUrl = process.env['NX_API_BASE_URL'];
 **Week 1: Setup & Foundation**
 
 1. **Day 1-2: Nx Workspace Setup**
-
    - Initialize Nx workspace
    - Install dependencies
    - Configure TypeScript
    - Setup ESLint and Prettier
 
 2. **Day 3-4: Shell App**
-
    - Create shell application
    - Configure Vite
    - Setup basic routing
@@ -1091,14 +1090,12 @@ const apiUrl = process.env['NX_API_BASE_URL'];
 **Week 2: Integration & Testing**
 
 4. **Day 6-7: Module Federation Integration**
-
    - Configure shell to consume remote
    - Test dynamic loading
    - Verify shared dependencies
    - Fix any integration issues
 
 5. **Day 8-9: Shared Libraries**
-
    - Create shared-utils library
    - Create shared-ui library
    - Create shared-types library

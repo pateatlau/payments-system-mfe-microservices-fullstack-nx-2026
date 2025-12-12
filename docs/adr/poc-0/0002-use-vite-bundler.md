@@ -1,15 +1,19 @@
 # ADR-0002: Use Vite Bundler
 
-**Status:** Accepted  
+**Status:** Superseded (POC-1+)  
 **Date:** 2026-01-XX  
 **Deciders:** Architecture Team  
-**Context:** POC-0
+**Context:** POC-0  
+**Superseded By:** ADR-0006 (Migrate to Rspack Bundler) for POC-1+
+
+> **Note:** This ADR remains valid for POC-0. For POC-1+, see ADR-0006 which supersedes this decision to enable HMR with Module Federation v2.
 
 ---
 
 ## Context
 
 POC-0 requires a bundler for web microfrontends. Requirements:
+
 - Fast dev server (instant startup)
 - Excellent HMR (near-instant updates)
 - Fast production builds
@@ -121,4 +125,3 @@ Use Vite 6.x as the bundler for MFE platform.
 ---
 
 **Last Updated:** 2026-01-XX
-

@@ -1,43 +1,12 @@
 /**
- * User interface representing a user in the system
+ * Legacy Types
+ *
+ * These types are kept for backward compatibility.
+ * New code should use types from ./models, ./api, and ./enums
  */
-export interface User {
-  /**
-   * Unique identifier for the user
-   */
-  id: string;
-  /**
-   * User's full name
-   */
-  name: string;
-  /**
-   * User's email address
-   */
-  email: string;
-  /**
-   * Optional user role
-   */
-  role?: string;
-}
 
-/**
- * API Response wrapper interface
- */
-export interface ApiResponse<T> {
-  /**
-   * Response data
-   */
-  data: T;
-  /**
-   * Response status code
-   */
-  status: number;
-  /**
-   * Optional error message
-   */
-  message?: string;
-  /**
-   * Whether the request was successful
-   */
-  success: boolean;
-}
+// Re-export User from models for backward compatibility
+export type { User } from './models/user';
+
+// Re-export ApiResponse from api/common for backward compatibility
+export type { ApiResponse } from './api/common';

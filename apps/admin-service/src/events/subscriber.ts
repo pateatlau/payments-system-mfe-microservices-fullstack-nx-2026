@@ -1,0 +1,277 @@
+/**
+ * Admin Service - Event Subscriber
+ *
+ * Purpose: Subscribe to events from Auth and Payments services
+ * Events: user.*, payment.*
+ *
+ * Zero-Coupling Pattern:
+ * - Admin Service subscribes to events from other services
+ * - Maintains denormalized copies of User data for admin operations
+ * - No direct API calls to other services
+ * - Eventual consistency via event synchronization
+ */
+
+import {
+  RabbitMQSubscriber,
+  BaseEvent,
+  EventContext,
+} from '@payments-system/rabbitmq-event-hub';
+import { getConnectionManager } from './connection';
+import config from '../config';
+import { prisma } from '../lib/prisma';
+
+let userEventsSubscriber: RabbitMQSubscriber | null = null;
+let paymentEventsSubscriber: RabbitMQSubscriber | null = null;
+
+/**
+ * User Event Handlers
+ */
+
+interface UserCreatedEvent {
+  userId: string;
+  email: string;
+  name: string;
+  role: string;
+  emailVerified: boolean;
+  createdAt: string;
+}
+
+interface UserUpdatedEvent {
+  userId: string;
+  email?: string;
+  name?: string;
+  role?: string;
+  emailVerified?: boolean;
+  updatedAt: string;
+}
+
+interface UserDeletedEvent {
+  userId: string;
+  deletedAt: string;
+}
+
+/**
+ * Handle user.created event
+ *
+ * Create denormalized User copy in admin_db
+ */
+async function handleUserCreated(
+  event: BaseEvent<UserCreatedEvent>,
+  context: EventContext
+): Promise<void> {
+  try {
+    const { userId, email, name, role, emailVerified, createdAt } = event.data;
+
+    // Create denormalized user in admin_db (passwordHash omitted for security)
+    await prisma.user.create({
+      data: {
+        id: userId,
+        email,
+        name,
+        role: role as any, // Type cast for denormalized field
+        emailVerified,
+        createdAt: new Date(createdAt),
+        updatedAt: new Date(createdAt),
+      } as any,
+    });
+
+    console.log(`[Admin Service] Synced user.created: ${userId}`);
+    context.ack();
+  } catch (error) {
+    console.error('[Admin Service] Error handling user.created:', error);
+    context.nack(true); // Requeue for retry
+  }
+}
+
+/**
+ * Handle user.updated event
+ *
+ * Update denormalized User copy in admin_db
+ */
+async function handleUserUpdated(
+  event: BaseEvent<UserUpdatedEvent>,
+  context: EventContext
+): Promise<void> {
+  try {
+    const { userId, ...updates } = event.data;
+
+    // Update denormalized user in admin_db
+    const updateData: any = { ...updates };
+    if (updates.updatedAt) {
+      updateData.updatedAt = new Date(updates.updatedAt);
+    }
+    await prisma.user.update({
+      where: { id: userId },
+      data: updateData,
+    });
+
+    console.log(`[Admin Service] Synced user.updated: ${userId}`);
+    context.ack();
+  } catch (error) {
+    console.error('[Admin Service] Error handling user.updated:', error);
+    context.nack(true); // Requeue for retry
+  }
+}
+
+/**
+ * Handle user.deleted event
+ *
+ * Delete denormalized User copy from admin_db
+ */
+async function handleUserDeleted(
+  event: BaseEvent<UserDeletedEvent>,
+  context: EventContext
+): Promise<void> {
+  try {
+    const { userId } = event.data;
+
+    // Delete denormalized user from admin_db
+    await prisma.user.delete({
+      where: { id: userId },
+    });
+
+    console.log(`[Admin Service] Synced user.deleted: ${userId}`);
+    context.ack();
+  } catch (error) {
+    console.error('[Admin Service] Error handling user.deleted:', error);
+    context.nack(true); // Requeue for retry
+  }
+}
+
+/**
+ * Payment Event Handlers (for audit logging)
+ */
+
+interface PaymentEvent {
+  paymentId: string;
+  senderId?: string;
+  recipientId?: string;
+  amount?: number;
+  currency?: string;
+  status?: string;
+  [key: string]: unknown;
+}
+
+/**
+ * Handle payment events (for audit logging)
+ */
+async function handlePaymentEvent(
+  event: BaseEvent<PaymentEvent>,
+  context: EventContext
+): Promise<void> {
+  try {
+    // Create audit log for payment event
+    await prisma.auditLog.create({
+      data: {
+        action: event.type,
+        resourceType: 'payment',
+        resourceId: event.data.paymentId,
+        userId: event.data.senderId,
+        details: event.data as any, // Cast to any for JSON field
+      },
+    });
+
+    console.log(
+      `[Admin Service] Logged payment event: ${event.type} - ${event.data.paymentId}`
+    );
+    context.ack();
+  } catch (error) {
+    console.error(`[Admin Service] Error handling ${event.type}:`, error);
+    context.nack(true); // Requeue for retry
+  }
+}
+
+/**
+ * Start subscribing to user events
+ */
+export async function subscribeToUserEvents(): Promise<void> {
+  if (userEventsSubscriber) {
+    return; // Already subscribed
+  }
+
+  const connectionManager = getConnectionManager();
+
+  userEventsSubscriber = new RabbitMQSubscriber(connectionManager, {
+    exchange: config.rabbitmq.exchange,
+    queue: 'admin_service_user_events',
+    routingKeyPattern: 'user.*',
+    durable: true,
+    manualAck: true,
+  });
+
+  await userEventsSubscriber.initialize();
+
+  // Subscribe with router to handle different event types
+  await userEventsSubscriber.subscribe(async (event, context) => {
+    switch (event.type) {
+      case 'user.created':
+        await handleUserCreated(event as BaseEvent<UserCreatedEvent>, context);
+        break;
+      case 'user.updated':
+        await handleUserUpdated(event as BaseEvent<UserUpdatedEvent>, context);
+        break;
+      case 'user.deleted':
+        await handleUserDeleted(event as BaseEvent<UserDeletedEvent>, context);
+        break;
+      default:
+        console.log(`[Admin Service] Unknown user event: ${event.type}`);
+        context.ack(); // Ack unknown events
+    }
+  });
+
+  console.log('[Admin Service] Subscribed to user events (user.*)');
+}
+
+/**
+ * Start subscribing to payment events
+ */
+export async function subscribeToPaymentEvents(): Promise<void> {
+  if (paymentEventsSubscriber) {
+    return; // Already subscribed
+  }
+
+  const connectionManager = getConnectionManager();
+
+  paymentEventsSubscriber = new RabbitMQSubscriber(connectionManager, {
+    exchange: config.rabbitmq.exchange,
+    queue: 'admin_service_payment_events',
+    routingKeyPattern: 'payment.*',
+    durable: true,
+    manualAck: true,
+  });
+
+  await paymentEventsSubscriber.initialize();
+
+  // Subscribe to all payment events for audit logging
+  await paymentEventsSubscriber.subscribe(async (event, context) => {
+    await handlePaymentEvent(event as BaseEvent<PaymentEvent>, context);
+  });
+
+  console.log('[Admin Service] Subscribed to payment events (payment.*)');
+}
+
+/**
+ * Start all subscriptions
+ */
+export async function startEventSubscriptions(): Promise<void> {
+  await subscribeToUserEvents();
+  await subscribeToPaymentEvents();
+  console.log('[Admin Service] All event subscriptions active');
+}
+
+/**
+ * Close all subscriptions (for graceful shutdown)
+ */
+export async function closeSubscriptions(): Promise<void> {
+  if (userEventsSubscriber) {
+    await userEventsSubscriber.close();
+    userEventsSubscriber = null;
+  }
+
+  if (paymentEventsSubscriber) {
+    await paymentEventsSubscriber.close();
+    paymentEventsSubscriber = null;
+  }
+
+  console.log('[Admin Service] All event subscriptions closed');
+}
