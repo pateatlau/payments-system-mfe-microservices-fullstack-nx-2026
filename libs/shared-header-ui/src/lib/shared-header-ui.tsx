@@ -37,7 +37,7 @@ export function Header({
   };
 
   return (
-    <header className="text-white shadow-lg bg-primary">
+    <header className="sticky top-0 z-50 text-white shadow-lg bg-primary">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           {/* Branding/Logo */}
