@@ -178,38 +178,188 @@ Implement a production-ready CI/CD pipeline to enable automated testing, buildin
 
 ### Architecture Overview
 
+```mermaid
+graph TB
+    Internet[Internet Users] --> ALB[Application Load Balancer: SSL/TLS, Health Checks, Routing]
+
+    ALB --> ECSCluster[ECS Cluster Production: Fargate Tasks]
+
+    subgraph Frontend ["MFE's (ECS Fargate)"]
+        ShellApp[Shell App Port 4200]
+        AuthMFE[Auth MFE Port 4201]
+        PaymentsMFE[Payments MFE Port 4202]
+        AdminMFE[Admin MFE Port 4203]
+    end
+
+    subgraph Backend ["BE Services (ECS Fargate)"]
+        Nginx[nginx Reverse Proxy]
+        APIGateway[API Gateway Port 3000]
+
+        Nginx --> APIGateway
+
+        AuthService[Auth Service Port 3001]
+        PaymentsService[Payments Service Port 3002]
+        AdminService[Admin Service Port 3003]
+        ProfileService[Profile Service Port 3004]
+
+        APIGateway --> AuthService
+        APIGateway --> PaymentsService
+        APIGateway --> AdminService
+        APIGateway --> ProfileService
+    end
+
+    ECSCluster --> Frontend
+    ECSCluster --> Backend
+
+    Backend --> RDS["RDS PostgreSQL: auth_db, payments_db, admin_db, profile_db"]
+
+    Backend --> ElastiCache[ElastiCache Redis: Cache and Sessions]
+
+    Backend --> AmazonMQ[Amazon MQ RabbitMQ: Events and Messages]
 ```
-┌─────────────────────────────────────────────────────────┐
-│                    Internet Users                       │
-└────────────────────┬────────────────────────────────────┘
-                     │
-                     v
-┌─────────────────────────────────────────────────────────┐
-│         Application Load Balancer (ALB)                 │
-│         - SSL/TLS Termination                           │
-│         - Health Checks                                 │
-│         - Routing Rules                                 │
-└───────────────────────┬─────────────────────────────────┘
-                        │
-        ┌───────────────┼─────────────────┐
-        │               │                 │
-        v               v                 v
-┌──────────────┐ ┌──────────────┐ ┌──────────────┐
-│  ECS Cluster │ │  ECS Cluster │ │  ECS Cluster │
-│  (Staging)   │ │ (Production) │ │  (Migration) │
-└──────────────┘ └──────────────┘ └──────────────┘
-        │               │                 │
-        └───────────────┼─────────────────┘
-                        │
-        ┌───────────────┼─────────────────┐
-        │               │                 │
-        v               v                 v
-┌──────────────┐ ┌──────────────┐ ┌──────────────┐
-│     RDS      │ │ ElastiCache  │ │  Amazon MQ   │
-│  PostgreSQL  │ │    Redis     │ │   RabbitMQ   │
-│  (4 DBs)     │ │              │ │              │
-└──────────────┘ └──────────────┘ └──────────────┘
+
 ```
+                         ┌─────────────────────────────────────────────────────────┐
+                         │                    Internet Users                       │
+                         └───────────────────────────┬─────────────────────────────┘
+                                                     │
+                                                     v
+                         ┌─────────────────────────────────────────────────────────┐
+                         │         Application Load Balancer (ALB)                 │
+                         │         - SSL/TLS Termination                           │
+                         │         - Health Checks                                 │
+                         │         - Routing Rules                                 │
+                         └───────────────────────────┬─────────────────────────────┘
+                                                     │
+                                                     │
+                                                     v
+                         ┌──────────────────────────────────────────────────────────┐
+                         │              ECS Cluster (Production)                    │
+                         │  ┌────────────────────────────────────────────────────┐  │
+                         │  │  Frontend Services (Fargate Tasks)                 │  │
+                         │  │  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────┐   │  │
+                         │  │  │  Shell   │ │ Auth MFE │ │ Payments │ │Admin │   │  │
+                         │  │  │   App    │ │  (4201)  │ │   MFE    │ │ MFE  │   │  │
+                         │  │  │  (4200)  │ └──────────┘ │  (4202)  │ │(4203)│   │  │
+                         │  │  └──────────┘              └──────────┘ └──────┘   │  │
+                         │  └────────────────────────────────────────────────────┘  │
+                         │  ┌────────────────────────────────────────────────────┐  │
+                         │  │  Backend Services (Fargate Tasks)                  │  │
+                         │  │                ┌──────────────┐                    │  │
+                         │  │                │   nginx      │                    │  │
+                         │  │                │  Reverse     │                    │  │
+                         │  │                │   Proxy      │                    │  │
+                         │  │                └──────┬───────┘                    │  │
+                         │  │                       │                            │  │
+                         │  │                       v                            │  │
+                         │  │                ┌──────────────┐                    │  │
+                         │  │                │ API Gateway  │                    │  │
+                         │  │                │   (3000)     │                    │  │
+                         │  │                └──────┬───────┘                    │  │
+                         │  │                       │                            │  │
+                         │  │                       v                            │  │
+                         │  │     ┌───────────────────────────────────────┐      │  │
+                         │  │     │                │          │           │      │  │
+                         │  │     v                v          v           v      │  │
+                         │  │  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌───────┐  │  │
+                         │  │  │ Auth     │ │ Payments │ │  Admin   │ │Profile│  │  │
+                         │  │  │ Service  │ │ Service  │ │ Service  │ │Service│  │  │
+                         │  │  │ (3001)   │ │ (3002)   │ │ (3003)   │ │(3004) │  │  │
+                         │  │  └──────────┘ └──────────┘ └──────────┘ └───────┘  │  │
+                         │  └────────────────────────────────────────────────────┘  │
+                         └──────────────────────────────┬───────────────────────────┘
+                                                        │
+                                      ┌─────────────────┼─────────────────┐
+                                      │                 │                 │
+                                      v                 v                 v
+                              ┌────────────────┐ ┌──────────────┐ ┌──────────────┐
+                              │     RDS        │ │ ElastiCache  │ │  Amazon MQ   │
+                              │  PostgreSQL    │ │    Redis     │ │   RabbitMQ   │
+                              │  (4 DBs)       │ │              │ │              │
+                              │                │ │              │ │              │
+                              │ - auth_db      │ │ - Cache      │ │ - Events     │
+                              │ - payments_db  │ │ - Sessions   │ │ - Messages   │
+                              │ - admin_db     │ │              │ │              │
+                              │ - profile_db   │ │              │ │              │
+                              └────────────────┘ └──────────────┘ └──────────────┘
+```
+
+**Note:** Both diagrams show the Production ECS cluster structure. The Staging cluster has the same architecture but with smaller instance sizes. Each service runs as a separate ECS Fargate task within the cluster. All services communicate through the nginx reverse proxy and API Gateway, which route traffic to the appropriate microservices.
+
+#### Shared Libraries & Design System (Build-Time)
+
+The shared libraries and design system are **build-time dependencies** that are bundled into each application during the Docker build process. They are **not separate runtime services**. The architecture above shows the runtime deployment view.
+
+**Shared Libraries (Bundled into Applications):**
+
+**Frontend Shared Libraries:**
+
+- `shared-types` - TypeScript type definitions
+- `shared-utils` - Utility functions
+- `shared-ui` - Reusable UI components
+- `shared-auth-store` - Zustand authentication store
+- `shared-header-ui` - Universal header component
+- `shared-api-client` - Axios-based API client with JWT interceptors
+- `shared-event-bus` - Inter-MFE communication (pub/sub)
+- `shared-design-system` - shadcn/ui components and design tokens
+- `shared-websocket` - WebSocket client for real-time communication
+- `shared-session-sync` - Cross-tab/device session synchronization
+- `shared-analytics` - Analytics tracking utilities
+- `shared-graphql-client` - GraphQL client (Apollo Client)
+
+**Backend Shared Libraries:**
+
+- `backend/db` - Prisma database client
+- `backend/event-hub` - RabbitMQ event hub library
+- `backend/observability` - Prometheus metrics, Sentry integration
+
+**How They're Integrated:**
+
+```
+┌──────────────────────────────────────────────────────────┐
+│                  Build Time (CI/CD)                      │
+│                                                          │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐    │
+│  │   Shell App  │  │  Auth MFE    │  │  Payments    │    │
+│  │              │  │              │  │    MFE       │    │
+│  │  Bundles:    │  │  Bundles:    │  │  Bundles:    │    │
+│  │  - shared-*  │  │  - shared-*  │  │  - shared-*  │    │
+│  │  - design    │  │  - design    │  │  - design    │    │
+│  │    system    │  │    system    │  │    system    │    │
+│  └──────────────┘  └──────────────┘  └──────────────┘    │
+│         │                  │                  │          │
+│         └──────────────────┼──────────────────┘          │
+│                            │                             │
+│                            v                             │
+│                  ┌──────────────────┐                    │
+│                  │  Docker Images   │                    │
+│                  │  (Built &        │                    │
+│                  │   Deployed)      │                    │
+│                  └──────────────────┘                    │
+└──────────────────────────────────────────────────────────┘
+                            │
+                            v
+┌──────────────────────────────────────────────────────────┐
+│              Runtime (ECS Fargate Tasks)                 │
+│                                                          │
+│  Each container includes all bundled shared libraries    │
+│  - No separate shared library containers                 │
+│  - Libraries are compiled into application bundles       │
+│  - Design system CSS/components included in each bundle  │
+└──────────────────────────────────────────────────────────┘
+```
+
+**Key Points:**
+
+1. **Build-Time Bundling:** Shared libraries are compiled and bundled into each application's JavaScript bundles during the build process (Nx + Rspack).
+
+2. **Included in Docker Images:** The bundled applications (including all shared library code) are packaged into Docker images and deployed as ECS tasks.
+
+3. **No Runtime Dependency:** Shared libraries are not separate services or containers. They exist as compiled code within each application's bundle.
+
+4. **Module Federation:** For MFEs, Module Federation handles sharing React and other dependencies at runtime, but shared libraries are still bundled into each MFE's build output.
+
+5. **Design System:** The `shared-design-system` (shadcn/ui components) is bundled into each frontend application, ensuring consistent UI across all MFEs.
 
 ### Alternative Deployment Targets Considered
 
@@ -469,6 +619,47 @@ graph TD
 - Secrets managed securely
 - Network isolated
 
+### Phase 9: Storybook Deployment (Optional)
+
+**Objective:** Deploy design system documentation
+
+**Reference:** See `docs/POC-3-Implementation/STORYBOOK-IMPLEMENTATION.md` for detailed Storybook setup and configuration.
+
+**Tasks:**
+
+- Build Storybook static site
+- Deploy to static hosting (AWS S3 + CloudFront or GitHub Pages)
+- Configure custom domain (optional)
+- Set up SSL/TLS certificates
+- Integrate with CI/CD pipeline
+
+**Deployment Options:**
+
+1. **AWS S3 + CloudFront (Recommended):**
+   - Professional hosting solution
+   - Custom domain support
+   - CDN for fast global access
+   - Cost: ~$5-10/month
+
+2. **GitHub Pages (Simple):**
+   - Free for public repos
+   - Automatic deployment
+   - Good for internal documentation
+
+**CI/CD Integration:**
+
+- Build Storybook on design system changes
+- Deploy to static hosting automatically
+- Version Storybook builds with design system releases
+
+**Success Criteria:**
+
+- Storybook builds successfully in CI/CD
+- Deployed to accessible URL
+- SSL/TLS configured
+- Automatic deployments working
+- Documentation accessible to team
+
 ---
 
 ## 7. Requirements & Prerequisites
@@ -594,6 +785,12 @@ graph TD
 - Metrics: Included (free tier)
 - **Total CloudWatch: ~$25/month**
 
+**Storybook Hosting (Optional):**
+
+- S3 storage: ~1GB × $0.023/GB = **$0.02/month**
+- CloudFront: ~10GB/month × $0.085/GB = **$0.85/month**
+- **Total Storybook: ~$1/month** (or free with GitHub Pages)
+
 **Amazon MQ (RabbitMQ Alternative):**
 
 - mq.t3.micro × $0.05/hour × 730 hours = **$36.50/month**
@@ -605,11 +802,12 @@ graph TD
 
 ### Total Monthly Cost Estimate
 
-| Environment    | Estimated Cost  |
-| -------------- | --------------- |
-| **Staging**    | ~$120/month     |
-| **Production** | ~$300/month     |
-| **Total**      | **~$420/month** |
+| Environment    | Estimated Cost                   |
+| -------------- | -------------------------------- |
+| **Staging**    | ~$120/month                      |
+| **Production** | ~$300/month                      |
+| **Storybook**  | ~$1/month (optional)             |
+| **Total**      | **~$421/month** (with Storybook) |
 
 ### Cost Optimization Strategies
 
@@ -759,16 +957,17 @@ graph TD
 
 **Total Duration:** 4-6 weeks (assuming part-time work)
 
-| Phase                              | Duration  | Dependencies |
-| ---------------------------------- | --------- | ------------ |
-| **Phase 1: CI Pipeline**           | 3-5 days  | None         |
-| **Phase 2: Docker Configuration**  | 5-7 days  | Phase 1      |
-| **Phase 3: AWS Infrastructure**    | 7-10 days | Phase 2      |
-| **Phase 4: CD Pipeline (Staging)** | 5-7 days  | Phase 3      |
-| **Phase 5: Production Deployment** | 3-5 days  | Phase 4      |
-| **Phase 6: Database Migrations**   | 3-5 days  | Phase 5      |
-| **Phase 7: Monitoring**            | 3-5 days  | Phase 5      |
-| **Phase 8: Security Hardening**    | 3-5 days  | Phase 5      |
+| Phase                              | Duration  | Dependencies       |
+| ---------------------------------- | --------- | ------------------ |
+| **Phase 1: CI Pipeline**           | 3-5 days  | None               |
+| **Phase 2: Docker Configuration**  | 5-7 days  | Phase 1            |
+| **Phase 3: AWS Infrastructure**    | 7-10 days | Phase 2            |
+| **Phase 4: CD Pipeline (Staging)** | 5-7 days  | Phase 3            |
+| **Phase 5: Production Deployment** | 3-5 days  | Phase 4            |
+| **Phase 6: Database Migrations**   | 3-5 days  | Phase 5            |
+| **Phase 7: Monitoring**            | 3-5 days  | Phase 5            |
+| **Phase 8: Security Hardening**    | 3-5 days  | Phase 5            |
+| **Phase 9: Storybook Deployment**  | 1-2 days  | Phase 8 (optional) |
 
 ### Phase Dependencies
 
