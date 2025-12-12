@@ -3,7 +3,8 @@
 **Document Version:** 1.0  
 **Date:** December 12, 2025  
 **Status:** POC-3 Complete - Production-Ready Infrastructure  
-**Prepared For:** Senior Architecture Review
+**Prepared For:** Senior Architecture Review  
+**Repository:** [GitHub](https://github.com/pateatlau/payments-system-mfe-microservices-fullstack-nx-2026)
 
 ---
 
