@@ -9,6 +9,7 @@ import { config } from './config';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 import healthRoutes from './routes/health';
 import authRoutes from './routes/auth';
+import deviceRoutes from './routes/devices';
 import { logger } from './utils/logger';
 import cors from 'cors';
 import {
@@ -117,6 +118,9 @@ app.get('/metrics', async (_req, res) => {
 
 // Auth routes
 app.use(authRoutes);
+
+// Device routes (protected)
+app.use(deviceRoutes);
 
 /**
  * Error Handling (must be last!)

@@ -53,7 +53,8 @@
       "@mfe-poc/shared-observability": [
         "libs/shared-observability/src/index.ts"
       ],
-      "shared-analytics": ["libs/shared-analytics/src/index.ts"]
+      "shared-analytics": ["libs/shared-analytics/src/index.ts"],
+      "shared-session-sync": ["libs/shared-session-sync/src/index.ts"]
     }
   },
   "files": [],

@@ -32,6 +32,7 @@ model User {
   updatedAt     DateTime  @updatedAt @map("updated_at")
 
   refreshTokens RefreshToken[]
+  devices       Device[]
 
   @@index([email])
   @@index([role])
@@ -50,4 +51,21 @@ model RefreshToken {
   @@index([userId])
   @@index([token])
   @@map("refresh_tokens")
+}
+
+model Device {
+  id          String   @id @default(uuid())
+  userId      String   @map("user_id")
+  deviceId    String   @unique @map("device_id")
+  deviceName  String?  @map("device_name")
+  deviceType  String?  @map("device_type") // browser, mobile, desktop
+  userAgent   String?  @map("user_agent")
+  lastActiveAt DateTime @default(now()) @updatedAt @map("last_active_at")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([deviceId])
+  @@map("devices")
 }
