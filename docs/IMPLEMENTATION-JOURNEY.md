@@ -152,12 +152,14 @@ The primary limitation of POC-0 was the lack of Hot Module Replacement (HMR) wit
 ### Migration Phases
 
 #### Phase 1: Preparation & Setup
+
 - Created migration branch (`poc-1-rspack`)
 - Backed up all Vite configurations
 - Installed Rspack dependencies
 - Installed Jest testing framework (migrated from Vitest)
 
 #### Phase 2: Core Bundler Migration
+
 - Created base Rspack configuration template
 - Migrated shell app configuration
 - Migrated auth-mfe configuration
@@ -166,23 +168,27 @@ The primary limitation of POC-0 was the lack of Hot Module Replacement (HMR) wit
 - Updated Nx configuration
 
 #### Phase 3: Module Federation Setup
+
 - Configured Module Federation v2 with Rspack
 - Set up shared dependencies
 - Configured remote entry points
 - Verified HMR functionality
 
 #### Phase 4: Styling Configuration
+
 - Configured Tailwind CSS v4 with PostCSS
 - Set up PostCSS loader in Rspack
 - Verified CSS processing and HMR
 
 #### Phase 5: Testing Framework Migration
+
 - Migrated from Vitest to Jest
 - Updated all test files
 - Configured Jest with React Testing Library
 - Verified all tests passing
 
 #### Phase 6: Verification & Documentation
+
 - Performance verification
 - Feature verification
 - Developer workflow verification
@@ -191,11 +197,13 @@ The primary limitation of POC-0 was the lack of Hot Module Replacement (HMR) wit
 ### Results
 
 **Before (Vite):**
+
 - HMR: Not available
 - Workflow: Build → Preview → Manual Refresh
 - Build Times: ~40-50s per app
 
 **After (Rspack):**
+
 - HMR: Fully functional (< 100ms)
 - Workflow: Dev mode with instant updates
 - Build Times: ~33-38s per app (faster)
@@ -234,6 +242,7 @@ The primary limitation of POC-0 was the lack of Hot Module Replacement (HMR) wit
 ### Technology Stack
 
 **New Additions:**
+
 - **Routing:** React Router 7.x
 - **State Management:** Zustand 4.5.x (client state)
 - **Server State:** TanStack Query 5.x
@@ -242,6 +251,7 @@ The primary limitation of POC-0 was the lack of Hot Module Replacement (HMR) wit
 - **HTTP Client:** Axios 1.7.x
 
 **Continued:**
+
 - React 19.2.0
 - Rspack (migrated from Vite)
 - Module Federation v2 (with HMR)
@@ -334,11 +344,13 @@ libs/
 ### Technology Stack
 
 **Frontend New Additions:**
+
 - **Design System:** shadcn/ui components
 - **Event Bus:** Custom event bus library (`shared-event-bus`)
 - **API Client:** Shared Axios client with interceptors
 
 **Backend (New):**
+
 - **Runtime:** Node.js 24.11.x LTS
 - **Framework:** Express 5.x
 - **Database:** PostgreSQL 16
@@ -437,6 +449,7 @@ libs/
 ### Architecture Changes
 
 **Frontend:**
+
 - Mock authentication → Real JWT authentication
 - Stubbed frontend APIs → Real backend API integration
 - Shared Zustand stores → Event bus for inter-MFE communication
@@ -444,6 +457,7 @@ libs/
 - Basic RBAC → Enhanced RBAC (ADMIN, CUSTOMER, VENDOR)
 
 **Backend (New):**
+
 - Microservices architecture
 - API Gateway pattern
 - Separate services per domain
@@ -502,6 +516,7 @@ libs/
 ### Technology Stack
 
 **Infrastructure (New):**
+
 - **Reverse Proxy:** nginx with SSL/TLS
 - **Message Broker:** RabbitMQ 3.x (replaces Redis Pub/Sub)
 - **WebSocket:** ws library for real-time communication
@@ -512,11 +527,13 @@ libs/
   - Sentry (error tracking)
 
 **Backend Enhancements:**
+
 - **GraphQL:** Apollo Server (optional, alongside REST)
 - **Advanced Caching:** Redis with multiple strategies
 - **Session Management:** Cross-tab and cross-device sync
 
 **Frontend Enhancements:**
+
 - **WebSocket Client:** Real-time updates
 - **Session Sync:** Cross-tab and cross-device synchronization
 - **Analytics:** Basic analytics tracking
@@ -587,7 +604,8 @@ apps/
 │   ├── shell/              # Host application (4200)
 │   ├── auth-mfe/           # Authentication (4201)
 │   ├── payments-mfe/       # Payments (4202)
-│   └── admin-mfe/          # Admin (4203)
+│   ├── admin-mfe/          # Admin (4203)
+│   └── profile-mfe/        # Profile (4204)
 └── Backend Services
     ├── api-gateway/        # API Gateway (3000)
     ├── auth-service/       # Auth (3001)
@@ -636,6 +654,7 @@ Docker Compose Services:
 ### Architecture Changes
 
 **Infrastructure:**
+
 - Direct service access → nginx reverse proxy
 - Shared database → Separate databases per service
 - Redis Pub/Sub → RabbitMQ event hub
@@ -643,11 +662,13 @@ Docker Compose Services:
 - Basic observability → Complete observability stack
 
 **Backend:**
+
 - REST API only → REST + GraphQL (optional)
 - Basic caching → Advanced caching strategies
 - No session management → Cross-tab/device session sync
 
 **Frontend:**
+
 - No real-time updates → WebSocket client
 - No session sync → Cross-tab/device synchronization
 - No analytics → Basic analytics tracking
@@ -677,46 +698,46 @@ Docker Compose Services:
 
 ### Frontend Technology Stack
 
-| Technology | POC-0 | Rspack Migration | POC-1 | POC-2 | POC-3 |
-|------------|-------|------------------|-------|-------|-------|
-| **React** | 19.2.0 | 19.2.0 | 19.2.0 | 19.2.0 | 19.2.0 |
-| **Bundler** | Vite 6.4.1 | Rspack | Rspack | Rspack | Rspack |
-| **Module Federation** | v2 (preview) | v2 (dev + HMR) | v2 (dev + HMR) | v2 (dev + HMR) | v2 (dev + HMR) |
-| **Routing** | Basic | Basic | React Router 7 | React Router 7 | React Router 7 |
-| **State (Client)** | - | - | Zustand 4.5 | Zustand 4.5 | Zustand 4.5 |
-| **State (Server)** | - | - | TanStack Query 5 | TanStack Query 5 | TanStack Query 5 |
-| **Styling** | - | - | Tailwind CSS 4.0 | Tailwind CSS 4.0 | Tailwind CSS 4.0 |
-| **Design System** | - | - | - | shadcn/ui | shadcn/ui |
-| **Forms** | - | - | RHF 7 + Zod 3 | RHF 7 + Zod 3 | RHF 7 + Zod 3 |
-| **HTTP Client** | - | - | Axios 1.7 | Axios 1.7 | Axios 1.7 |
-| **WebSocket** | - | - | - | - | ws library |
-| **GraphQL Client** | - | - | - | - | Apollo Client |
+| Technology            | POC-0        | Rspack Migration | POC-1            | POC-2            | POC-3            |
+| --------------------- | ------------ | ---------------- | ---------------- | ---------------- | ---------------- |
+| **React**             | 19.2.0       | 19.2.0           | 19.2.0           | 19.2.0           | 19.2.0           |
+| **Bundler**           | Vite 6.4.1   | Rspack           | Rspack           | Rspack           | Rspack           |
+| **Module Federation** | v2 (preview) | v2 (dev + HMR)   | v2 (dev + HMR)   | v2 (dev + HMR)   | v2 (dev + HMR)   |
+| **Routing**           | Basic        | Basic            | React Router 7   | React Router 7   | React Router 7   |
+| **State (Client)**    | -            | -                | Zustand 4.5      | Zustand 4.5      | Zustand 4.5      |
+| **State (Server)**    | -            | -                | TanStack Query 5 | TanStack Query 5 | TanStack Query 5 |
+| **Styling**           | -            | -                | Tailwind CSS 4.0 | Tailwind CSS 4.0 | Tailwind CSS 4.0 |
+| **Design System**     | -            | -                | -                | shadcn/ui        | shadcn/ui        |
+| **Forms**             | -            | -                | RHF 7 + Zod 3    | RHF 7 + Zod 3    | RHF 7 + Zod 3    |
+| **HTTP Client**       | -            | -                | Axios 1.7        | Axios 1.7        | Axios 1.7        |
+| **WebSocket**         | -            | -                | -                | -                | ws library       |
+| **GraphQL Client**    | -            | -                | -                | -                | Apollo Client    |
 
 ### Backend Technology Stack
 
-| Technology | POC-0 | POC-1 | POC-2 | POC-3 |
-|------------|-------|-------|-------|-------|
-| **Runtime** | - | - | Node.js 24.11 | Node.js 24.11 |
-| **Framework** | - | - | Express 5 | Express 5 |
-| **Database** | - | - | PostgreSQL 16 | PostgreSQL 16 |
-| **ORM** | - | - | Prisma | Prisma |
-| **Cache** | - | - | Redis 7 | Redis 7 |
-| **Message Broker** | - | - | Redis Pub/Sub | RabbitMQ 3 |
-| **Authentication** | - | Mock | JWT | JWT |
-| **API** | - | - | REST | REST + GraphQL |
-| **WebSocket** | - | - | - | ws library |
-| **Observability** | - | - | Basic | Prometheus + Grafana + Jaeger + Sentry |
+| Technology         | POC-0 | POC-1 | POC-2         | POC-3                                  |
+| ------------------ | ----- | ----- | ------------- | -------------------------------------- |
+| **Runtime**        | -     | -     | Node.js 24.11 | Node.js 24.11                          |
+| **Framework**      | -     | -     | Express 5     | Express 5                              |
+| **Database**       | -     | -     | PostgreSQL 16 | PostgreSQL 16                          |
+| **ORM**            | -     | -     | Prisma        | Prisma                                 |
+| **Cache**          | -     | -     | Redis 7       | Redis 7                                |
+| **Message Broker** | -     | -     | Redis Pub/Sub | RabbitMQ 3                             |
+| **Authentication** | -     | Mock  | JWT           | JWT                                    |
+| **API**            | -     | -     | REST          | REST + GraphQL                         |
+| **WebSocket**      | -     | -     | -             | ws library                             |
+| **Observability**  | -     | -     | Basic         | Prometheus + Grafana + Jaeger + Sentry |
 
 ### Infrastructure Technology Stack
 
-| Technology | POC-0 | POC-1 | POC-2 | POC-3 |
-|------------|-------|-------|-------|-------|
-| **Reverse Proxy** | - | - | - | nginx |
-| **SSL/TLS** | - | - | - | Let's Encrypt / Self-signed |
-| **Containerization** | - | - | Docker Compose | Docker Compose |
-| **Database Pattern** | - | - | Shared DB | Separate DBs |
-| **Event Hub** | - | - | Redis Pub/Sub | RabbitMQ |
-| **Observability** | - | - | Basic | Complete Stack |
+| Technology           | POC-0 | POC-1 | POC-2          | POC-3                       |
+| -------------------- | ----- | ----- | -------------- | --------------------------- |
+| **Reverse Proxy**    | -     | -     | -              | nginx                       |
+| **SSL/TLS**          | -     | -     | -              | Let's Encrypt / Self-signed |
+| **Containerization** | -     | -     | Docker Compose | Docker Compose              |
+| **Database Pattern** | -     | -     | Shared DB      | Separate DBs                |
+| **Event Hub**        | -     | -     | Redis Pub/Sub  | RabbitMQ                    |
+| **Observability**    | -     | -     | Basic          | Complete Stack              |
 
 ---
 
@@ -730,6 +751,7 @@ Docker Compose Services:
 4. **React 19:** Latest React version for future-proofing
 
 **Learnings:**
+
 - Module Federation v2 with Vite only works in preview mode
 - HMR not available with Module Federation v2 in Vite
 - Build cycle required for every change (slow iteration)
@@ -741,6 +763,7 @@ Docker Compose Services:
 3. **Keep Module Federation v2:** Maintain architecture
 
 **Learnings:**
+
 - Rspack provides HMR with Module Federation v2
 - Faster builds than Vite (Rust-based)
 - Better developer experience with instant feedback
@@ -754,6 +777,7 @@ Docker Compose Services:
 4. **Mock Authentication:** Focus on architecture, not backend
 
 **Learnings:**
+
 - Shared Zustand stores create tight coupling between MFEs
 - Mock authentication sufficient for frontend architecture validation
 - Tailwind CSS v4 requires PostCSS configuration in monorepos
@@ -766,6 +790,7 @@ Docker Compose Services:
 4. **Shared Database:** Simpler for POC-2, migrate in POC-3
 
 **Learnings:**
+
 - Event bus provides better decoupling than shared stores
 - Design system significantly improves consistency
 - Real backend integration validates full-stack architecture
@@ -779,6 +804,7 @@ Docker Compose Services:
 4. **Complete Observability:** Full visibility into system
 
 **Learnings:**
+
 - Separate databases enable independent scaling
 - RabbitMQ provides reliable message delivery
 - nginx essential for production deployment
@@ -790,14 +816,14 @@ Docker Compose Services:
 
 ### Overall Timeline
 
-| Phase | Duration | Status | Key Deliverable |
-|-------|----------|--------|-----------------|
-| **POC-0** | 1-2 weeks | Complete | Foundation + Module Federation v2 |
-| **Rspack Migration** | 2-3 weeks | Complete | HMR with Module Federation v2 |
-| **POC-1** | 4-5 weeks | Complete | Auth + Payments MFEs |
-| **POC-2** | 8 weeks | Complete | Full-stack integration |
-| **POC-3** | 12+ weeks | Complete | Production infrastructure |
-| **Total** | ~27+ weeks | Complete | Production-ready platform |
+| Phase                | Duration   | Status   | Key Deliverable                   |
+| -------------------- | ---------- | -------- | --------------------------------- |
+| **POC-0**            | 1-2 weeks  | Complete | Foundation + Module Federation v2 |
+| **Rspack Migration** | 2-3 weeks  | Complete | HMR with Module Federation v2     |
+| **POC-1**            | 4-5 weeks  | Complete | Auth + Payments MFEs              |
+| **POC-2**            | 8 weeks    | Complete | Full-stack integration            |
+| **POC-3**            | 12+ weeks  | Complete | Production infrastructure         |
+| **Total**            | ~27+ weeks | Complete | Production-ready platform         |
 
 ### Milestone Dates
 
@@ -810,6 +836,7 @@ Docker Compose Services:
 ### Next Phase
 
 **CI/CD & Cloud Deployment:**
+
 - GitHub Actions CI/CD pipeline
 - AWS ECS (Fargate) deployment
 - Production deployment to internet
@@ -821,31 +848,30 @@ Docker Compose Services:
 
 ### Code Metrics
 
-| Metric | POC-0 | POC-1 | POC-2 | POC-3 |
-|--------|-------|-------|-------|-------|
-| **Frontend Apps** | 2 | 3 | 4 | 4 |
-| **Backend Services** | 0 | 0 | 5 | 5 |
-| **Shared Libraries** | 1 | 4 | 8 | 12+ |
-| **Test Coverage** | 60%+ | 65%+ | 70%+ | 70%+ |
-| **Total Tests** | ~20 | ~100 | ~380 | ~400+ |
+| Metric               | POC-0 | POC-1 | POC-2 | POC-3 |
+| -------------------- | ----- | ----- | ----- | ----- |
+| **Frontend Apps**    | 2     | 3     | 4     | 4     |
+| **Backend Services** | 0     | 0     | 5     | 5     |
+| **Shared Libraries** | 1     | 4     | 8     | 12+   |
+| **Test Coverage**    | 60%+  | 65%+  | 70%+  | 70%+  |
+| **Total Tests**      | ~20   | ~100  | ~380  | ~400+ |
 
 ### Performance Metrics
 
-| Metric | POC-0 | POC-1 | POC-2 | POC-3 |
-|--------|-------|-------|-------|-------|
+| Metric         | POC-0   | POC-1   | POC-2   | POC-3   |
+| -------------- | ------- | ------- | ------- | ------- |
 | **Build Time** | ~40-50s | ~33-38s | ~33-38s | ~33-38s |
-| **HMR Time** | N/A | < 100ms | < 100ms | < 100ms |
-| **Page Load** | ~2s | ~1.5s | ~1s | < 1s |
+| **HMR Time**   | N/A     | < 100ms | < 100ms | < 100ms |
+| **Page Load**  | ~2s     | ~1.5s   | ~1s     | < 1s    |
 
 ---
 
 ## Document History
 
-| Version | Date | Author | Changes |
-|---------|------|--------|---------|
-| 1.0 | 2025-12-12 | AI Assistant | Initial implementation journey document |
+| Version | Date       | Author       | Changes                                 |
+| ------- | ---------- | ------------ | --------------------------------------- |
+| 1.0     | 2025-12-12 | AI Assistant | Initial implementation journey document |
 
 ---
 
 **End of Document**
-

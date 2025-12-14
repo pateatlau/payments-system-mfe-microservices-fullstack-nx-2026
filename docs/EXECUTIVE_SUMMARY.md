@@ -76,13 +76,13 @@ The MFE Payments System is a production-ready, full-stack microfrontend platform
     |   (Port 4200)    |      |   (Port 3000)    |      |   Server         |
     +------------------+      +------------------+      +------------------+
               |                         |
-    +---------+---------+     +---------+---------+---------+
-    |         |         |     |         |         |         |
-    v         v         v     v         v         v         v
- +------+ +------+ +------+ +------+ +------+ +------+ +------+
- | Auth | | Pay  | |Admin | | Auth | | Pay  | |Admin | |Profile|
- | MFE  | | MFE  | | MFE  | | Svc  | | Svc  | | Svc  | | Svc  |
- +------+ +------+ +------+ +------+ +------+ +------+ +------+
+    +---------+---------+---------+     +---------+---------+---------+
+    |         |         |         |     |         |         |         |
+    v         v         v         v     v         v         v         v
+ +------+ +------+ +------+ +------+ +------+ +------+ +------+ +------+
+ | Auth | | Pay  | |Admin | |Profile| | Auth | | Pay  | |Admin | |Profile|
+ | MFE  | | MFE  | | MFE  | | MFE  | | Svc  | | Svc  | | Svc  | | Svc  |
+ +------+ +------+ +------+ +------+ +------+ +------+ +------+ +------+
                                 |         |         |         |
                                 v         v         v         v
                            +------+  +------+  +------+  +------+
@@ -161,6 +161,7 @@ The frontend uses Webpack Module Federation v2 (via Rspack) to enable independen
 | Auth MFE     | 4201 | SignIn, SignUp  | User authentication flows |
 | Payments MFE | 4202 | PaymentsPage    | Payment processing UI     |
 | Admin MFE    | 4203 | AdminDashboard  | Administrative functions  |
+| Profile MFE  | 4204 | ProfilePage     | User profile management   |
 
 ### Shared Libraries
 

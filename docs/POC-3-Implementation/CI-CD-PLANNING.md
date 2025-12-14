@@ -53,12 +53,13 @@ Implement a production-ready CI/CD pipeline to enable automated testing, buildin
 
 ### Project Structure
 
-**Frontend (4 Applications):**
+**Frontend (5 Applications):**
 
 - Shell app (host, port 4200)
 - Auth MFE (remote, port 4201)
 - Payments MFE (remote, port 4202)
 - Admin MFE (remote, port 4203)
+- Profile MFE (remote, port 4204)
 
 **Backend (5 Services):**
 
@@ -237,11 +238,11 @@ graph TB
                          │              ECS Cluster (Production)                    │
                          │  ┌────────────────────────────────────────────────────┐  │
                          │  │  Frontend Services (Fargate Tasks)                 │  │
-                         │  │  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────┐   │  │
-                         │  │  │  Shell   │ │ Auth MFE │ │ Payments │ │Admin │   │  │
-                         │  │  │   App    │ │  (4201)  │ │   MFE    │ │ MFE  │   │  │
-                         │  │  │  (4200)  │ └──────────┘ │  (4202)  │ │(4203)│   │  │
-                         │  │  └──────────┘              └──────────┘ └──────┘   │  │
+                         │  │  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────┐ ┌──────┐ │  │
+                         │  │  │  Shell   │ │ Auth MFE │ │ Payments │ │Admin │ │Profile│ │  │
+                         │  │  │   App    │ │  (4201)  │ │   MFE    │ │ MFE  │ │ MFE  │ │  │
+                         │  │  │  (4200)  │ └──────────┘ │  (4202)  │ │(4203)│ │(4204)│ │  │
+                         │  │  └──────────┘              └──────────┘ └──────┘ └──────┘ │  │
                          │  └────────────────────────────────────────────────────┘  │
                          │  ┌────────────────────────────────────────────────────┐  │
                          │  │  Backend Services (Fargate Tasks)                  │  │
@@ -487,7 +488,7 @@ graph TD
 
 **Tasks:**
 
-- Create Dockerfiles for all 9 services + nginx
+- Create Dockerfiles for all 10 services + nginx
 - Multi-stage builds for optimization
 - Configure `.dockerignore`
 - Test builds locally
@@ -675,6 +676,7 @@ graph TD
 - `ECR_REPOSITORY_AUTH_MFE` - ECR repository for auth MFE
 - `ECR_REPOSITORY_PAYMENTS_MFE` - ECR repository for payments MFE
 - `ECR_REPOSITORY_ADMIN_MFE` - ECR repository for admin MFE
+- `ECR_REPOSITORY_PROFILE_MFE` - ECR repository for profile MFE
 - `ECR_REPOSITORY_API_GATEWAY` - ECR repository for API Gateway
 - `ECR_REPOSITORY_AUTH_SERVICE` - ECR repository for auth service
 - `ECR_REPOSITORY_PAYMENTS_SERVICE` - ECR repository for payments service
@@ -746,9 +748,9 @@ graph TD
 
 **ECS Fargate (Container Runtime):**
 
-- Staging: 9 services × 0.25 vCPU × 0.5 GB × $0.04/vCPU-hour × 730 hours = **$32.85/month**
-- Production: 9 services × 0.5 vCPU × 1 GB × $0.04/vCPU-hour × 730 hours = **$131.40/month**
-- **Total ECS: ~$164/month**
+- Staging: 10 services × 0.25 vCPU × 0.5 GB × $0.04/vCPU-hour × 730 hours = **$36.50/month**
+- Production: 10 services × 0.5 vCPU × 1 GB × $0.04/vCPU-hour × 730 hours = **$146.00/month**
+- **Total ECS: ~$182.50/month**
 
 **RDS PostgreSQL (4 Databases):**
 
@@ -978,8 +980,8 @@ Phase 2 (Docker)
     ↓
 Phase 3 (AWS Infrastructure)
     ↓
-Phase 4 (CD Staging) ──┐
-    ↓                   │
+Phase 4 (CD Staging) ────┐
+    ↓                    │
 Phase 5 (Production) ←───┘
     ↓
 Phase 6 (DB Migrations)
@@ -1073,28 +1075,11 @@ After implementation, update:
 
 ---
 
-## Appendix B: Reference Implementation Plan
-
-A detailed implementation plan with specific file structures, code examples, and step-by-step instructions is available at:
-
-**Location:** `/Users/patea/.cursor/plans/ci_cd_implementation_plan_3a5982ab.plan.md`
-
-This implementation plan includes:
-
-- Detailed file structures
-- Code examples for workflows
-- Dockerfile templates
-- AWS CDK code structure
-- Deployment scripts
-- Task definitions
-
----
-
 ## Document History
 
-| Version | Date       | Author       | Changes                   |
-| ------- | ---------- | ------------ | ------------------------- |
-| 1.0     | 2025-12-12 | AI Assistant | Initial planning document |
+| Version | Date       | Author          | Changes                   |
+| ------- | ---------- | --------------- | ------------------------- |
+| 1.0     | 2025-12-12 | Laldingliana TV | Initial planning document |
 
 ---
 

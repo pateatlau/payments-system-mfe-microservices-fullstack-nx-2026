@@ -78,7 +78,7 @@ pnpm dev:backend
 ### 6. Start Frontend
 
 ```bash
-# Starts Shell app and all MFEs (Auth, Payments, Admin)
+# Starts Shell app and all MFEs (Auth, Payments, Admin, Profile)
 pnpm dev:all
 ```
 
@@ -120,7 +120,8 @@ payments-system-mfe/
 │   │   ├── shell/              # Host application (4200)
 │   │   ├── auth-mfe/           # Authentication (4201)
 │   │   ├── payments-mfe/       # Payments (4202)
-│   │   └── admin-mfe/          # Admin (4203)
+│   │   ├── admin-mfe/          # Admin (4203)
+│   │   └── profile-mfe/        # Profile (4204)
 │   └── Backend Services
 │       ├── api-gateway/        # API Gateway (3000)
 │       ├── auth-service/       # Auth (3001)
