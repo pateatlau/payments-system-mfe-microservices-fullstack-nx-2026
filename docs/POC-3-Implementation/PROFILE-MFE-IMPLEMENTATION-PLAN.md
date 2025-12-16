@@ -681,23 +681,36 @@ All schemas include comprehensive JSDoc documentation with references to backend
 
 **Verification:**
 
-- [ ] useProfile.ts created
-- [ ] usePreferences.ts created
-- [ ] All hooks implemented
-- [ ] Cache invalidation configured
-- [ ] Hooks exported
+- [x] useProfile.ts created
+- [x] usePreferences.ts created
+- [x] All hooks implemented
+- [x] Cache invalidation configured
+- [x] Hooks exported
 
 **Acceptance Criteria:**
 
-- TanStack Query hooks complete
-- Cache invalidation working
-- Hooks follow patterns from other MFEs
+- [x] TanStack Query hooks complete
+- [x] Cache invalidation working
+- [x] Hooks follow patterns from other MFEs
 
-**Status:** Not Started  
+**Status:** Complete  
+**Completed Date:** 2025-12-16  
 **Files Created:**
 
 - `apps/profile-mfe/src/hooks/useProfile.ts`
 - `apps/profile-mfe/src/hooks/usePreferences.ts`
+
+**Notes:** Created TanStack Query hooks following payments-mfe patterns:
+
+- **useProfile.ts**:
+  - `useProfile()`: Query hook to fetch current user's profile. Only fetches when authenticated (`enabled: !!user`). 5 minute staleTime for caching. Uses query key factory (`profileKeys`) for type-safe cache management.
+  - `useUpdateProfile()`: Mutation hook to update profile. Converts empty strings to undefined before API submission (for clearing fields). Invalidates profile query and updates cache optimistically on success.
+
+- **usePreferences.ts**:
+  - `usePreferences()`: Query hook to fetch current user's preferences. Only fetches when authenticated. 5 minute staleTime for caching. Uses query key factory (`preferencesKeys`).
+  - `useUpdatePreferences()`: Mutation hook to update preferences. Invalidates both preferences and profile queries on success (since preferences are part of profile). Updates cache optimistically.
+
+All hooks include authentication checks, proper error handling, and follow the same patterns as payments-mfe hooks for consistency.
 
 ---
 
@@ -723,23 +736,26 @@ All schemas include comprehensive JSDoc documentation with references to backend
 
 **Verification:**
 
-- [ ] profile.test.ts created
-- [ ] All API functions tested
-- [ ] Error cases tested
-- [ ] Tests passing
-- [ ] Coverage > 80%
+- [x] profile.test.ts created
+- [x] All API functions tested
+- [x] Error cases tested
+- [x] Tests passing
+- [x] Coverage > 80%
 
 **Acceptance Criteria:**
 
-- API tests complete
-- All functions tested
-- Error handling tested
-- Tests passing
+- [x] API tests complete
+- [x] All functions tested
+- [x] Error handling tested
+- [x] Tests passing
 
-**Status:** Not Started  
+**Status:** Complete  
+**Completed Date:** 2025-12-16  
 **Files Created:**
 
 - `apps/profile-mfe/src/api/profile.test.ts`
+
+**Notes:** Added Jest unit tests for all profile API client functions in `apps/profile-mfe/src/api/profile.test.ts`. Tests use `jest.spyOn` on `ApiClient.prototype.get` and `ApiClient.prototype.put` to avoid real HTTP calls while verifying:\n+- `getProfile()` success and error propagation\n+- `updateProfile()` success and error propagation\n+- `getPreferences()` success and error propagation\n+- `updatePreferences()` success and error propagation\n+\n+All tests pass and validate both happy paths and error handling behavior, contributing to the overall coverage target for the Profile MFE.
 
 ---
 
