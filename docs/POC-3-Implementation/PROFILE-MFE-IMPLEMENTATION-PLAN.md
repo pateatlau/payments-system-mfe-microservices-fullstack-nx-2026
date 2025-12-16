@@ -452,23 +452,34 @@ apps/profile-mfe/
 
 **Verification:**
 
-- [ ] profile.ts created
-- [ ] API client configured
-- [ ] All API functions implemented
-- [ ] Error handling implemented
-- [ ] Functions exported
+- [x] profile.ts created
+- [x] API client configured
+- [x] All API functions implemented
+- [x] Error handling implemented
+- [x] Functions exported
 
 **Acceptance Criteria:**
 
-- Profile API client complete
-- All endpoints integrated
-- Error handling works
-- Matches payments-mfe/admin-mfe patterns
+- [x] Profile API client complete
+- [x] All endpoints integrated
+- [x] Error handling works
+- [x] Matches payments-mfe/admin-mfe patterns
 
-**Status:** Not Started  
+**Status:** Complete  
+**Completed Date:** 2025-12-16  
 **Files Created:**
 
 - `apps/profile-mfe/src/api/profile.ts`
+- `apps/profile-mfe/src/types/profile.ts` (created early, needed for API client)
+
+**Notes:** Created Profile API client following the same patterns as admin-mfe and payments-mfe. Uses ApiClient from @mfe/shared-api-client with token provider from shared-auth-store. All four API functions implemented:
+
+- `getProfile()`: GET /api/profile
+- `updateProfile(data)`: PUT /api/profile
+- `getPreferences()`: GET /api/profile/preferences
+- `updatePreferences(data)`: PUT /api/profile/preferences
+
+All functions include proper error handling with response validation. API client configured to route through API Gateway (http://localhost:3000/api in development, https://localhost/api in production). Also created basic types file (src/types/profile.ts) with Profile, UserPreferences, UpdateProfileData, and UpdatePreferencesData interfaces - this was needed for the API client and will be refined in Task 2.2.
 
 ---
 
