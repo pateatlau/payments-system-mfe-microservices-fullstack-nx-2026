@@ -781,26 +781,29 @@ All hooks include authentication checks, proper error handling, and follow the s
 
 **Verification:**
 
-- [ ] ProfilePage.tsx created
-- [ ] Component structure complete
-- [ ] Tabs working
-- [ ] Loading states implemented
-- [ ] Error handling implemented
-- [ ] Tests written and passing
+- [x] ProfilePage.tsx created
+- [x] Component structure complete
+- [x] Tabs working
+- [x] Loading states implemented
+- [x] Error handling implemented
+- [x] Tests written and passing
 
 **Acceptance Criteria:**
 
-- ProfilePage component complete
-- Tabs functional
-- Loading/error states working
-- Tests passing
-- Uses design system components
+- [x] ProfilePage component complete
+- [x] Tabs functional
+- [x] Loading/error states working
+- [x] Tests passing
+- [x] Uses design system components
 
-**Status:** Not Started  
+**Status:** Complete  
+**Completed Date:** 2025-12-16  
 **Files Created:**
 
 - `apps/profile-mfe/src/components/ProfilePage.tsx`
 - `apps/profile-mfe/src/components/ProfilePage.test.tsx`
+
+**Notes:** Implemented `ProfilePage` as the main entry point for the Profile MFE. The component:\n+- Renders a header with title and description using Tailwind v4 utility classes.\n+- Uses a simple tab navigation (Profile, Preferences, Account) implemented with buttons and basic state management.\n+- Integrates `useProfile` hook for data fetching, displaying a loading card while fetching and a destructive `Alert` when errors occur.\n+- Shows placeholder content for each tab (to be replaced by `ProfileForm`, `PreferencesForm`, and `AccountInfo` in later tasks) inside `Card` components from the shared design system.\n+- Includes `ProfilePage.test.tsx` tests validating loading, error, and tab-switching behavior using React Testing Library and React Query's `QueryClientProvider` with a mocked `useProfile` hook.\n+\n+All verification and acceptance criteria for Task 3.1 are met and tests pass locally.
 
 ---
 
