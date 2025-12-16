@@ -609,21 +609,32 @@ All types are strict (no `any` types), properly exported, include comprehensive 
 
 **Verification:**
 
-- [ ] validation.ts created
-- [ ] All schemas defined
-- [ ] Schemas match API requirements
-- [ ] Types exported
+- [x] validation.ts created
+- [x] All schemas defined
+- [x] Schemas match API requirements
+- [x] Types exported
 
 **Acceptance Criteria:**
 
-- Validation schemas complete
-- Schemas validate correctly
-- Types inferred from schemas
+- [x] Validation schemas complete
+- [x] Schemas validate correctly
+- [x] Types inferred from schemas
 
-**Status:** Not Started  
+**Status:** Complete  
+**Completed Date:** 2025-12-16  
 **Files Created:**
 
 - `apps/profile-mfe/src/utils/validation.ts`
+
+**Notes:** Created Zod validation schemas matching backend validators exactly:
+
+- **updateProfileSchema**: Validates phoneNumber (10-20 characters), address (1-500 characters), avatarUrl (valid URL), bio (max 1000 characters). All fields optional. Empty strings allowed for UX (to clear fields) - form components should convert empty strings to undefined before API submission.
+
+- **updatePreferencesSchema**: Validates theme (enum: 'light', 'dark', 'system'), language (2-5 characters), currency (exactly 3 characters, ISO 4217), timezone (IANA timezone string), notifications (object with email, push, sms booleans). All fields optional.
+
+- **Type Inference**: Exported `UpdateProfileFormData` and `UpdatePreferencesFormData` types inferred from schemas for use with React Hook Form and zodResolver.
+
+All schemas include comprehensive JSDoc documentation with references to backend validators. Validation rules match backend exactly for consistency.
 
 ---
 
