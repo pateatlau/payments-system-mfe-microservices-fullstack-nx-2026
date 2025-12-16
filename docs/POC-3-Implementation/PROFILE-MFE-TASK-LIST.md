@@ -269,23 +269,23 @@
 
 ### Task 3.4: Create PreferencesForm Component
 
-- [ ] PreferencesForm.tsx created
-- [ ] React Hook Form integrated
-- [ ] Zod validation working
-- [ ] Theme field implemented (Select: light/dark/system)
-- [ ] Language field implemented (Select)
-- [ ] Currency field implemented (Select)
-- [ ] Timezone field implemented (Select)
-- [ ] Notifications checkboxes implemented (email, push, sms)
-- [ ] useUpdatePreferences mutation used
-- [ ] Form submission working
-- [ ] Success/error feedback working
-- [ ] PreferencesForm.test.tsx created
-- [ ] Tests written and passing
+- [x] PreferencesForm.tsx created
+- [x] React Hook Form integrated
+- [x] Zod validation working
+- [x] Theme field implemented (Select: light/dark/system)
+- [x] Language field implemented (Select)
+- [x] Currency field implemented (Select)
+- [x] Timezone field implemented (Select)
+- [x] Notifications checkboxes implemented (email, push, sms)
+- [x] useUpdatePreferences mutation used
+- [x] Form submission working
+- [x] Success/error feedback working
+- [x] PreferencesForm.test.tsx created
+- [x] Tests written and passing
 
-**Status:** Not Started  
-**Completed Date:**  
-**Notes:**
+**Status:** Complete  
+**Completed Date:** 2025-12-16  
+**Notes:** Implemented PreferencesForm with React Hook Form + Zod (`updatePreferencesSchema`) and the `usePreferences`/`useUpdatePreferences` hooks. The form pre-populates from the current preferences, exposes theme (select), language, currency, timezone, and notification checkboxes, and performs client-side validation. On submit it calls the mutation, and tests verify data binding, mutation invocation, and validation error behavior.
 
 ---
 
@@ -325,7 +325,7 @@
 
 ---
 
-**Phase 3 Completion:** **50% (3/6 sub-tasks complete)**
+**Phase 3 Completion:** **67% (4/6 sub-tasks complete)**
 
 ---
 

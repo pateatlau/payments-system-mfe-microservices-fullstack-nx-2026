@@ -5,10 +5,6 @@
  * - Renders loading state while profile is being fetched
  * - Renders error state when the profile query fails
  * - Renders basic tab navigation and switches content when tabs are clicked
- *
- * Note: Child components (ProfileForm, PreferencesForm, AccountInfo) are
- * implemented in later tasks. For now, we only assert the placeholder
- * content used in Task 3.1.
  */
 
 import { render, screen, fireEvent } from '@testing-library/react';
@@ -83,9 +79,7 @@ describe('ProfilePage', () => {
 
     // Switch to Preferences tab
     fireEvent.click(screen.getByRole('button', { name: /Preferences/i }));
-    expect(
-      screen.getByText(/Preferences form will be implemented/i)
-    ).toBeInTheDocument();
+    expect(screen.getByLabelText(/language/i)).toBeInTheDocument();
 
     // Switch to Account tab
     fireEvent.click(screen.getByRole('button', { name: /Account/i }));

@@ -928,26 +928,29 @@ All hooks include authentication checks, proper error handling, and follow the s
 
 **Verification:**
 
-- [ ] PreferencesForm.tsx created
-- [ ] React Hook Form integrated
-- [ ] All preference fields implemented
-- [ ] Submit handler working
-- [ ] Success/error feedback working
-- [ ] Tests written and passing
+- [x] PreferencesForm.tsx created
+- [x] React Hook Form integrated
+- [x] All preference fields implemented
+- [x] Submit handler working
+- [x] Success/error feedback working
+- [x] Tests written and passing
 
 **Acceptance Criteria:**
 
-- PreferencesForm component complete
-- All preferences editable
-- Form validation working
-- Submit updates preferences
-- Tests passing
+- [x] PreferencesForm component complete
+- [x] All preferences editable
+- [x] Form validation working
+- [x] Submit updates preferences
+- [x] Tests passing
 
-**Status:** Not Started  
+**Status:** Complete  
+**Completed Date:** 2025-12-16  
 **Files Created:**
 
 - `apps/profile-mfe/src/components/PreferencesForm.tsx`
 - `apps/profile-mfe/src/components/PreferencesForm.test.tsx`
+
+**Notes:** Implemented `PreferencesForm` using React Hook Form with `updatePreferencesSchema` and the `usePreferences` / `useUpdatePreferences` hooks. The form pre-populates from existing preferences and includes fields for theme (select), language, currency, timezone, and notifications (email, push, sms checkboxes). Client-side validation is enforced via Zod, and the mutation hook is used to submit updates with error feedback. `PreferencesForm.test.tsx` verifies data binding, mutation invocation on submit, and validation error behavior for invalid language input.
 
 ---
 

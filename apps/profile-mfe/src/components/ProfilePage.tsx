@@ -14,6 +14,7 @@ import { useState } from 'react';
 import { Alert, AlertDescription, Card } from '@mfe/shared-design-system';
 import { useProfile } from '../hooks/useProfile';
 import { ProfileForm } from './ProfileForm';
+import { PreferencesForm } from './PreferencesForm';
 
 // Tab identifiers for ProfilePage
 export type ProfileTabKey = 'profile' | 'preferences' | 'account';
@@ -88,20 +89,9 @@ export function ProfilePage() {
         {/* Content */}
         {!isLoading && profile && (
           <div className="space-y-4">
-            {activeTab === 'profile' && (
-              <ProfileForm />
-            )}
+            {activeTab === 'profile' && <ProfileForm />}
 
-            {activeTab === 'preferences' && (
-              <Card className="p-6">
-                <h2 className="text-lg font-semibold text-slate-900 mb-2">
-                  Preferences
-                </h2>
-                <p className="text-slate-600 text-sm">
-                  Preferences form will be implemented in Task 3.4.
-                </p>
-              </Card>
-            )}
+            {activeTab === 'preferences' && <PreferencesForm />}
 
             {activeTab === 'account' && (
               <Card className="p-6">
