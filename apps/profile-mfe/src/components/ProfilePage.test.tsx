@@ -79,9 +79,7 @@ describe('ProfilePage', () => {
     renderWithQueryClient(<ProfilePage />);
 
     // Default tab is Profile - form should be visible
-    expect(
-      screen.getByLabelText(/phone number/i)
-    ).toBeInTheDocument();
+    expect(screen.getByLabelText(/phone number/i)).toBeInTheDocument();
 
     // Switch to Preferences tab
     fireEvent.click(screen.getByRole('button', { name: /Preferences/i }));
