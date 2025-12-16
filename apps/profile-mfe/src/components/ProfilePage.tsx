@@ -7,7 +7,7 @@
  * - Render high-level profile layout shell
  * - Integrate loading and error states for profile data
  * - Provide tab-based navigation between Profile, Preferences, and Account views
- * - Delegate actual form/content rendering to child components (implemented in later tasks)
+ * - Delegate actual form/content rendering to child components
  */
 
 import { useState } from 'react';
@@ -15,6 +15,7 @@ import { Alert, AlertDescription, Card } from '@mfe/shared-design-system';
 import { useProfile } from '../hooks/useProfile';
 import { ProfileForm } from './ProfileForm';
 import { PreferencesForm } from './PreferencesForm';
+import { AccountInfo } from './AccountInfo';
 
 // Tab identifiers for ProfilePage
 export type ProfileTabKey = 'profile' | 'preferences' | 'account';
@@ -93,16 +94,7 @@ export function ProfilePage() {
 
             {activeTab === 'preferences' && <PreferencesForm />}
 
-            {activeTab === 'account' && (
-              <Card className="p-6">
-                <h2 className="text-lg font-semibold text-slate-900 mb-2">
-                  Account
-                </h2>
-                <p className="text-slate-600 text-sm">
-                  Account info view will be implemented in Task 3.5.
-                </p>
-              </Card>
-            )}
+            {activeTab === 'account' && <AccountInfo />}
           </div>
         )}
       </div>

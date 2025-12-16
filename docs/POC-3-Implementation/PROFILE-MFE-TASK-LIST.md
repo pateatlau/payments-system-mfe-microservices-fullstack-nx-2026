@@ -291,21 +291,21 @@
 
 ### Task 3.5: Create AccountInfo Component
 
-- [ ] AccountInfo.tsx created
-- [ ] User ID displayed
-- [ ] Email displayed (from auth store)
-- [ ] Role displayed (from auth store)
-- [ ] Account created date displayed
-- [ ] Last updated date displayed
-- [ ] Email verification status displayed
-- [ ] Dates formatted correctly
-- [ ] Design system components used (Card, Badge)
-- [ ] AccountInfo.test.tsx created
-- [ ] Tests written and passing
+- [x] AccountInfo.tsx created
+- [x] User ID displayed
+- [x] Email displayed (from auth store)
+- [x] Role displayed (from auth store)
+- [x] Account created date displayed
+- [x] Last updated date displayed
+- [x] Email verification status displayed
+- [x] Dates formatted correctly
+- [x] Design system components used (Card, Badge)
+- [x] AccountInfo.test.tsx created
+- [x] Tests written and passing
 
-**Status:** Not Started  
-**Completed Date:**  
-**Notes:**
+**Status:** Complete  
+**Completed Date:** 2025-12-16  
+**Notes:** Implemented AccountInfo as a read-only view of the authenticated user using `useAuthStore`. Displays user ID, email, name, role, created/updated timestamps (formatted via `toLocaleString`), and email verification status using design system `Card` and `Badge` components. Includes a fallback message when no user is authenticated. `AccountInfo.test.tsx` verifies both the unauthenticated fallback and the presence of account details when a user is available in the auth store mock.
 
 ---
 
@@ -325,7 +325,7 @@
 
 ---
 
-**Phase 3 Completion:** **67% (4/6 sub-tasks complete)**
+**Phase 3 Completion:** **83% (5/6 sub-tasks complete)**
 
 ---
 

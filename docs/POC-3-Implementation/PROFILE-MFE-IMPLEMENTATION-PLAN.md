@@ -974,24 +974,27 @@ All hooks include authentication checks, proper error handling, and follow the s
 
 **Verification:**
 
-- [ ] AccountInfo.tsx created
-- [ ] All account info displayed
-- [ ] Dates formatted correctly
-- [ ] Uses design system
-- [ ] Tests written and passing
+- [x] AccountInfo.tsx created
+- [x] All account info displayed
+- [x] Dates formatted correctly
+- [x] Uses design system
+- [x] Tests written and passing
 
 **Acceptance Criteria:**
 
-- AccountInfo component complete
-- All information displayed
-- Read-only (no edit functionality)
-- Tests passing
+- [x] AccountInfo component complete
+- [x] All information displayed
+- [x] Read-only (no edit functionality)
+- [x] Tests passing
 
-**Status:** Not Started  
+**Status:** Complete  
+**Completed Date:** 2025-12-16  
 **Files Created:**
 
 - `apps/profile-mfe/src/components/AccountInfo.tsx`
 - `apps/profile-mfe/src/components/AccountInfo.test.tsx`
+
+**Notes:** Implemented `AccountInfo` as a read-only view of the authenticated user using `useAuthStore`. The component uses design system `Card` and `Badge` components to display user ID, email, name, role, created/updated timestamps (formatted via `toLocaleString`), and email verification status, with a fallback message when no user is present. `AccountInfo.test.tsx` covers both the unauthenticated fallback and the fully populated state when a user is available in the auth store mock.
 
 ---
 

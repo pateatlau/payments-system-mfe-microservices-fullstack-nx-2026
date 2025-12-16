@@ -84,7 +84,7 @@ describe('ProfilePage', () => {
     // Switch to Account tab
     fireEvent.click(screen.getByRole('button', { name: /Account/i }));
     expect(
-      screen.getByText(/Account info view will be implemented/i)
+      screen.getByText(/read-only overview of your account details/i)
     ).toBeInTheDocument();
   });
 });
