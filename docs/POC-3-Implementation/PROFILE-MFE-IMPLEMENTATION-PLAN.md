@@ -1365,6 +1365,358 @@ apps/profile-mfe/
 
 ---
 
+## Phase 6: Frontend Load Balancing (Days 15-16)
+
+**Objective:** Configure nginx load balancing for all frontend MFEs to enable horizontal scaling and high availability.
+
+**Prerequisites:**
+
+- Profile MFE implementation complete (Phases 1-5)
+- All 5 MFEs working and tested (shell, auth, payments, admin, profile)
+- nginx configuration includes all MFEs
+
+**Key Considerations:**
+
+- All MFE instances must serve identical builds (especially remoteEntry.js for Module Federation)
+- WebSocket connections require sticky sessions (ip_hash algorithm)
+- HMR (Hot Module Replacement) in development requires sticky sessions
+- Regular HTTP traffic can use least_conn for better load distribution
+- No server-side state (all state is client-side) - simplifies load balancing
+
+---
+
+### Task 6.1: Configure Load Balancing for All MFEs
+
+**Objective:** Update nginx upstream blocks for all 5 MFEs with load balancing configuration
+
+**Steps:**
+
+1. Update `nginx/nginx.conf`
+2. Modify all 5 upstream blocks to include multiple server entries:
+
+   ```nginx
+   # Shell App
+   upstream shell_app {
+       least_conn;  # Load balancing algorithm
+       server host.docker.internal:4200 weight=1;
+       server host.docker.internal:4210 weight=1;  # Second instance
+       server host.docker.internal:4220 weight=1;  # Third instance (optional)
+       keepalive 16;
+   }
+
+   # Auth MFE
+   upstream auth_mfe {
+       least_conn;
+       server host.docker.internal:4201 weight=1;
+       server host.docker.internal:4211 weight=1;
+       keepalive 16;
+   }
+
+   # Payments MFE
+   upstream payments_mfe {
+       least_conn;
+       server host.docker.internal:4202 weight=1;
+       server host.docker.internal:4212 weight=1;
+       keepalive 16;
+   }
+
+   # Admin MFE
+   upstream admin_mfe {
+       least_conn;
+       server host.docker.internal:4203 weight=1;
+       server host.docker.internal:4213 weight=1;
+       keepalive 16;
+   }
+
+   # Profile MFE
+   upstream profile_mfe {
+       least_conn;
+       server host.docker.internal:4204 weight=1;
+       server host.docker.internal:4214 weight=1;
+       keepalive 16;
+   }
+   ```
+
+3. Verify nginx configuration: `nginx -t`
+4. Document load balancing algorithm choice (least_conn for better distribution)
+
+**Verification:**
+
+- [ ] All 5 upstream blocks updated
+- [ ] Multiple server entries added
+- [ ] Load balancing algorithm configured (least_conn)
+- [ ] nginx configuration valid
+- [ ] Configuration documented
+
+**Acceptance Criteria:**
+
+- Load balancing configured for all 5 MFEs
+- Multiple instances defined in upstream blocks
+- nginx configuration valid
+- Algorithm choice documented
+
+**Status:** Not Started  
+**Files Modified:**
+
+- `nginx/nginx.conf`
+
+---
+
+### Task 6.2: Configure Sticky Sessions for WebSocket/HMR
+
+**Objective:** Create separate upstream blocks with ip_hash for WebSocket and HMR endpoints to ensure connections stay on same instance
+
+**Steps:**
+
+1. Update `nginx/nginx.conf`
+2. Create separate upstream blocks for WebSocket/HMR with ip_hash:
+
+   ```nginx
+   # WebSocket upstreams (sticky sessions required)
+   upstream shell_app_ws {
+       ip_hash;  # Sticky sessions for WebSocket
+       server host.docker.internal:4200;
+       server host.docker.internal:4210;
+       keepalive 16;
+   }
+
+   upstream auth_mfe_ws {
+       ip_hash;
+       server host.docker.internal:4201;
+       server host.docker.internal:4211;
+       keepalive 16;
+   }
+
+   upstream payments_mfe_ws {
+       ip_hash;
+       server host.docker.internal:4202;
+       server host.docker.internal:4212;
+       keepalive 16;
+   }
+
+   upstream admin_mfe_ws {
+       ip_hash;
+       server host.docker.internal:4203;
+       server host.docker.internal:4213;
+       keepalive 16;
+   }
+
+   upstream profile_mfe_ws {
+       ip_hash;
+       server host.docker.internal:4204;
+       server host.docker.internal:4214;
+       keepalive 16;
+   }
+   ```
+
+3. Update WebSocket location blocks to use sticky upstreams:
+   ```nginx
+   location /ws {
+       proxy_pass http://api_gateway;  # Backend WebSocket (no change)
+       # ... existing WebSocket headers ...
+   }
+   ```
+4. Update HMR location blocks to use sticky upstreams:
+
+   ```nginx
+   location /hmr/shell {
+       proxy_pass http://shell_app_ws/ws;  # Use sticky upstream
+       # ... existing HMR headers ...
+   }
+
+   location /hmr/auth {
+       proxy_pass http://auth_mfe_ws/ws;
+       # ... existing HMR headers ...
+   }
+
+   location /hmr/payments {
+       proxy_pass http://payments_mfe_ws/ws;
+       # ... existing HMR headers ...
+   }
+
+   location /hmr/admin {
+       proxy_pass http://admin_mfe_ws/ws;
+       # ... existing HMR headers ...
+   }
+
+   location /hmr/profile {
+       proxy_pass http://profile_mfe_ws/ws;
+       # ... existing HMR headers ...
+   }
+   ```
+
+5. Verify nginx configuration: `nginx -t`
+
+**Verification:**
+
+- [ ] Separate WebSocket upstreams created with ip_hash
+- [ ] HMR location blocks updated to use sticky upstreams
+- [ ] WebSocket connections stay on same instance
+- [ ] HMR connections stay on same instance
+- [ ] nginx configuration valid
+
+**Acceptance Criteria:**
+
+- Sticky sessions configured for WebSocket/HMR
+- Separate upstream blocks created
+- All HMR endpoints use sticky upstreams
+- Configuration validated
+
+**Status:** Not Started  
+**Files Modified:**
+
+- `nginx/nginx.conf`
+
+---
+
+### Task 6.3: Deploy Multiple Instances
+
+**Objective:** Deploy multiple instances of each MFE for load balancing
+
+**Steps:**
+
+1. Determine deployment strategy (Docker Compose, Kubernetes, or manual)
+2. For Docker Compose, update `docker-compose.yml`:
+   ```yaml
+   services:
+     shell-app-1:
+       ports: ['4200:4200']
+     shell-app-2:
+       ports: ['4210:4200']
+     auth-mfe-1:
+       ports: ['4201:4201']
+     auth-mfe-2:
+       ports: ['4211:4201']
+     # ... repeat for all MFEs
+   ```
+3. For manual deployment, start multiple instances on different ports
+4. Verify all instances serve identical builds:
+   - Same remoteEntry.js content
+   - Same exposed components
+   - Same shared dependencies
+5. Verify all instances are healthy and accessible
+6. Test that Module Federation works across instances
+
+**Verification:**
+
+- [ ] Multiple instances deployed
+- [ ] All instances accessible on configured ports
+- [ ] All instances serve identical builds
+- [ ] Module Federation works across instances
+- [ ] All instances healthy
+
+**Acceptance Criteria:**
+
+- Multiple instances deployed for all 5 MFEs
+- All instances serving identical builds
+- Module Federation working correctly
+- All instances healthy and accessible
+
+**Status:** Not Started  
+**Files Modified:**
+
+- `docker-compose.yml` (if using Docker Compose)
+- Deployment configuration files (if applicable)
+
+---
+
+### Task 6.4: Test Load Balancing
+
+**Objective:** Verify load balancing works correctly across all MFEs
+
+**Steps:**
+
+1. Test load distribution:
+   - Make multiple requests to each MFE
+   - Verify requests are distributed across instances
+   - Check nginx access logs for distribution
+2. Test failover scenarios:
+   - Stop one instance
+   - Verify traffic routes to remaining instances
+   - Verify no errors for users
+   - Restart stopped instance
+   - Verify it rejoins load balancer
+3. Test WebSocket sticky sessions:
+   - Connect WebSocket from client
+   - Verify connection stays on same instance
+   - Test reconnection after instance restart
+4. Test HMR sticky sessions (development):
+   - Start dev servers with multiple instances
+   - Verify HMR connections stay on same instance
+   - Test HMR updates work correctly
+5. Test Module Federation:
+   - Load shell app
+   - Verify remote MFEs load from any instance
+   - Verify remoteEntry.js loads correctly
+   - Test that all remotes work regardless of instance
+
+**Verification:**
+
+- [ ] Load distribution verified
+- [ ] Failover scenarios tested
+- [ ] WebSocket sticky sessions working
+- [ ] HMR sticky sessions working (dev)
+- [ ] Module Federation working across instances
+- [ ] All tests passing
+
+**Acceptance Criteria:**
+
+- Load balancing working correctly
+- Failover handling verified
+- WebSocket/HMR sticky sessions working
+- Module Federation working across instances
+- All functionality working with load balancing
+
+**Status:** Not Started
+
+---
+
+### Task 6.5: Document Load Balancing Configuration
+
+**Objective:** Document load balancing strategy and configuration
+
+**Steps:**
+
+1. Update `docs/POC-3-Implementation/nginx-configuration-guide.md` (if exists)
+2. Document load balancing strategy:
+   - Algorithm choice (least_conn for HTTP, ip_hash for WebSocket/HMR)
+   - Rationale for sticky sessions
+   - Instance requirements (identical builds)
+3. Document configuration:
+   - Upstream block structure
+   - Port allocation strategy
+   - Health check limitations (basic nginx)
+4. Document deployment:
+   - How to add/remove instances
+   - How to verify identical builds
+   - Troubleshooting guide
+5. Update main README.md with load balancing information (if applicable)
+
+**Verification:**
+
+- [ ] Load balancing strategy documented
+- [ ] Configuration documented
+- [ ] Deployment process documented
+- [ ] Troubleshooting guide included
+- [ ] Documentation complete
+
+**Acceptance Criteria:**
+
+- Complete documentation for load balancing
+- Strategy and rationale documented
+- Configuration examples provided
+- Deployment process documented
+- Troubleshooting guide included
+
+**Status:** Not Started  
+**Files Created/Modified:**
+
+- `docs/POC-3-Implementation/nginx-load-balancing-guide.md` (new, if needed)
+- `docs/POC-3-Implementation/nginx-configuration-guide.md` (updated, if exists)
+- `README.md` (updated, if applicable)
+
+---
+
 ## Success Criteria
 
 ### Functional Requirements
@@ -1399,18 +1751,29 @@ apps/profile-mfe/
 - ✅ Performance acceptable
 - ✅ Code follows project patterns
 
+### Load Balancing Requirements
+
+- ✅ Load balancing configured for all 5 MFEs
+- ✅ Multiple instances deployed and working
+- ✅ WebSocket sticky sessions working
+- ✅ HMR sticky sessions working (development)
+- ✅ Load distribution verified
+- ✅ Failover scenarios tested
+- ✅ Module Federation working across instances
+
 ---
 
 ## Timeline Estimate
 
-| Phase       | Duration                | Tasks                                   |
-| ----------- | ----------------------- | --------------------------------------- |
-| **Phase 1** | 2 days                  | Project setup & configuration (6 tasks) |
-| **Phase 2** | 2 days                  | API integration & types (5 tasks)       |
-| **Phase 3** | 6 days                  | Core components (6 tasks)               |
-| **Phase 4** | 3 days                  | Integration & testing (7 tasks)         |
-| **Phase 5** | 2 days                  | Polish & documentation (5 tasks)        |
-| **Total**   | **15 days (2-3 weeks)** | **29 tasks**                            |
+| Phase       | Duration                  | Tasks                                   |
+| ----------- | ------------------------- | --------------------------------------- |
+| **Phase 1** | 2 days                    | Project setup & configuration (6 tasks) |
+| **Phase 2** | 2 days                    | API integration & types (5 tasks)       |
+| **Phase 3** | 6 days                    | Core components (6 tasks)               |
+| **Phase 4** | 3 days                    | Integration & testing (7 tasks)         |
+| **Phase 5** | 2 days                    | Polish & documentation (5 tasks)        |
+| **Phase 6** | 2 days                    | Frontend load balancing (5 tasks)       |
+| **Total**   | **17 days (2.5-3 weeks)** | **34 tasks**                            |
 
 ---
 
@@ -1502,6 +1865,12 @@ apps/profile-mfe/
 - `nginx/nginx.conf` (modified)
 - `apps/profile-mfe/src/components/ProfilePage.integration.test.tsx`
 - `apps/shell-e2e/src/profile.spec.ts` (if E2E setup exists)
+
+### Load Balancing Files (Phase 6)
+
+- `nginx/nginx.conf` (modified - load balancing configuration)
+- `docker-compose.yml` (modified - multiple instances, if applicable)
+- `docs/POC-3-Implementation/nginx-load-balancing-guide.md` (new, if needed)
 
 ---
 

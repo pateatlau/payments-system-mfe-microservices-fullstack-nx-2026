@@ -176,7 +176,8 @@ libs/
 ├── shared-event-bus/      # Inter-MFE communication
 ├── shared-header-ui/      # Shared header component
 ├── shared-websocket/      # WebSocket client
-└── shared-session-sync/   # Cross-tab/device session sync
+├── shared-session-sync/   # Cross-tab/device session sync
+└── shared-theme-store/    # Theme management (dark/light mode)
 ```
 
 ### State Management Strategy
@@ -187,6 +188,28 @@ libs/
 | Server State | TanStack Query  | API data, caching, background sync    |
 | Form State   | React Hook Form | Form inputs, validation               |
 | Cross-MFE    | Event Bus       | Inter-module communication            |
+
+### Theme System (Dark Mode / Light Mode)
+
+The application supports system-aware theme switching with user preference persistence.
+
+**Features:**
+
+- Light and dark mode support
+- System preference detection (follows OS theme)
+- User preference override (stored in Zustand with localStorage persistence)
+- Cross-tab synchronization via BroadcastChannel
+- Design system integration (Tailwind CSS v4 with CSS variables)
+- Smooth theme transitions
+
+**Implementation:**
+
+- Theme state managed via Zustand (`shared-theme-store`)
+- CSS variables for theme colors (light/dark variants)
+- Automatic theme application to DOM
+- Profile MFE integration (planned) for user preference management
+
+**Status:** Planned - Implementation in progress
 
 ---
 
@@ -247,14 +270,42 @@ RabbitMQ provides reliable, persistent messaging between services.
 
 nginx serves as the primary entry point with the following capabilities:
 
-| Feature       | Configuration                          |
-| ------------- | -------------------------------------- |
-| SSL/TLS       | TLS 1.2+ with modern cipher suites     |
-| HTTP/2        | Enabled for improved performance       |
-| Rate Limiting | API: 100 req/min, Auth: 10 req/min     |
-| Compression   | gzip for text, JSON, JavaScript        |
-| Caching       | Static assets cached for 1 year        |
-| WebSocket     | Upgrade support for real-time features |
+| Feature                 | Configuration                                  |
+| ----------------------- | ---------------------------------------------- |
+| SSL/TLS                 | TLS 1.2+ with modern cipher suites             |
+| HTTP/2                  | Enabled for improved performance               |
+| Rate Limiting           | API: 100 req/min, Auth: 10 req/min             |
+| Compression             | gzip for text, JSON, JavaScript                |
+| Caching                 | Static assets cached for 1 year                |
+| WebSocket               | Upgrade support for real-time features         |
+| Frontend Load Balancing | least_conn for HTTP, ip_hash for WebSocket/HMR |
+
+### Frontend Load Balancing
+
+nginx provides load balancing for all frontend MFEs to enable horizontal scaling and high availability.
+
+**Configuration:**
+
+- **Algorithm:** `least_conn` for regular HTTP traffic (better load distribution)
+- **Sticky Sessions:** `ip_hash` for WebSocket and HMR endpoints (required for persistent connections)
+- **Instances:** Multiple instances per MFE (2-3 instances recommended)
+- **Health Checks:** Basic nginx (no built-in health checks, relies on container orchestration)
+
+**Supported MFEs:**
+
+- Shell App (port 4200+)
+- Auth MFE (port 4201+)
+- Payments MFE (port 4202+)
+- Admin MFE (port 4203+)
+- Profile MFE (port 4204+)
+
+**Requirements:**
+
+- All instances must serve identical builds (especially remoteEntry.js for Module Federation)
+- Stateless architecture (all state is client-side) - simplifies load balancing
+- WebSocket connections require sticky sessions to maintain connection state
+
+**Status:** Planned - Part of Profile MFE Phase 6 implementation
 
 ### Database Architecture
 
@@ -523,6 +574,12 @@ payments-system-mfe/
 - Auto-scaling configuration
 - CDN integration
 - Production-grade SSL certificates
+
+**User Experience Enhancements**
+
+- Dark mode theme system (implementation in progress)
+- Theme preference management in Profile MFE
+- Enhanced accessibility features
 
 **Internet Live Demo**
 

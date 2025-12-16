@@ -5,13 +5,14 @@
 **Date:** December 12, 2025  
 **Phase:** Profile MFE Implementation
 
-**Overall Progress:** 0% (0 of 5 phases complete)
+**Overall Progress:** 0% (0 of 6 phases complete)
 
 - Phase 1: Project Setup & Configuration (0% - 0/6 sub-tasks complete)
 - Phase 2: API Integration & Types (0% - 0/5 sub-tasks complete)
 - Phase 3: Core Components Development (0% - 0/6 sub-tasks complete)
 - Phase 4: Integration & Testing (0% - 0/7 sub-tasks complete)
 - Phase 5: Polish & Documentation (0% - 0/5 sub-tasks complete)
+- Phase 6: Frontend Load Balancing (0% - 0/5 sub-tasks complete)
 
 > **📋 Related Document:** See [`PROFILE-MFE-IMPLEMENTATION-PLAN.md`](./PROFILE-MFE-IMPLEMENTATION-PLAN.md) for detailed step-by-step instructions for each task.
 
@@ -253,7 +254,7 @@
 - [ ] File input implemented (hidden)
 - [ ] Image preview working
 - [ ] File selection handling
-- [ ] File type validation (image/*)
+- [ ] File type validation (image/\*)
 - [ ] File size validation (max 5MB)
 - [ ] Preview URL generation
 - [ ] Image removal functionality
@@ -516,32 +517,110 @@
 
 ---
 
+## Phase 6: Frontend Load Balancing (Days 15-16)
+
+### Task 6.1: Configure Load Balancing for All MFEs
+
+- [ ] All 5 upstream blocks updated (shell_app, auth_mfe, payments_mfe, admin_mfe, profile_mfe)
+- [ ] Multiple server entries added to each upstream
+- [ ] Load balancing algorithm configured (least_conn)
+- [ ] nginx configuration validated (`nginx -t`)
+- [ ] Configuration documented
+
+**Status:** Not Started  
+**Completed Date:**  
+**Notes:**
+
+---
+
+### Task 6.2: Configure Sticky Sessions for WebSocket/HMR
+
+- [ ] Separate WebSocket upstreams created with ip_hash
+- [ ] HMR location blocks updated to use sticky upstreams
+- [ ] WebSocket connections stay on same instance (tested)
+- [ ] HMR connections stay on same instance (tested)
+- [ ] nginx configuration validated
+
+**Status:** Not Started  
+**Completed Date:**  
+**Notes:**
+
+---
+
+### Task 6.3: Deploy Multiple Instances
+
+- [ ] Multiple instances deployed for all 5 MFEs
+- [ ] All instances accessible on configured ports
+- [ ] All instances serve identical builds (verified)
+- [ ] Module Federation works across instances (tested)
+- [ ] All instances healthy
+
+**Status:** Not Started  
+**Completed Date:**  
+**Notes:**
+
+---
+
+### Task 6.4: Test Load Balancing
+
+- [ ] Load distribution verified (requests distributed across instances)
+- [ ] Failover scenarios tested (instance stop/restart)
+- [ ] WebSocket sticky sessions working (tested)
+- [ ] HMR sticky sessions working (tested in dev)
+- [ ] Module Federation working across instances (tested)
+- [ ] All tests passing
+
+**Status:** Not Started  
+**Completed Date:**  
+**Notes:**
+
+---
+
+### Task 6.5: Document Load Balancing Configuration
+
+- [ ] Load balancing strategy documented
+- [ ] Configuration examples provided
+- [ ] Deployment process documented
+- [ ] Troubleshooting guide included
+- [ ] Documentation complete
+
+**Status:** Not Started  
+**Completed Date:**  
+**Notes:**
+
+---
+
+**Phase 6 Completion:** **0% (0/5 sub-tasks complete)**
+
+---
+
 ## Overall Progress Summary
 
-**Total Tasks:** 29 sub-tasks across 5 phases
+**Total Tasks:** 34 sub-tasks across 6 phases
 
 **Completion Status:**
 
-| Phase | Sub-tasks Complete | Total | Percentage |
-|-------|-------------------|-------|------------|
-| Phase 1: Project Setup & Configuration | 0 | 6 | 0% |
-| Phase 2: API Integration & Types | 0 | 5 | 0% |
-| Phase 3: Core Components Development | 0 | 6 | 0% |
-| Phase 4: Integration & Testing | 0 | 7 | 0% |
-| Phase 5: Polish & Documentation | 0 | 5 | 0% |
-| **Total** | **0** | **29** | **0%** |
+| Phase                                  | Sub-tasks Complete | Total  | Percentage |
+| -------------------------------------- | ------------------ | ------ | ---------- |
+| Phase 1: Project Setup & Configuration | 0                  | 6      | 0%         |
+| Phase 2: API Integration & Types       | 0                  | 5      | 0%         |
+| Phase 3: Core Components Development   | 0                  | 6      | 0%         |
+| Phase 4: Integration & Testing         | 0                  | 7      | 0%         |
+| Phase 5: Polish & Documentation        | 0                  | 5      | 0%         |
+| Phase 6: Frontend Load Balancing       | 0                  | 5      | 0%         |
+| **Total**                              | **0**              | **34** | **0%**     |
 
 ---
 
 ## Blockers & Issues
 
-*No blockers or issues yet.*
+_No blockers or issues yet._
 
 ---
 
 ## Lessons Learned
 
-*Lessons learned will be added as implementation progresses.*
+_Lessons learned will be added as implementation progresses._
 
 ---
 
@@ -549,4 +628,3 @@
 **Status:** Not Started - Ready for Implementation
 
 ---
-

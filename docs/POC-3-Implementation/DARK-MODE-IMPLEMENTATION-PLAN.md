@@ -1,0 +1,880 @@
+# Dark Mode / Light Mode Implementation Plan
+
+**Status:** Not Started  
+**Version:** 1.0  
+**Date:** December 12, 2025  
+**Phase:** Theme System Implementation
+
+> **Progress Tracking:** See [`DARK-MODE-TASK-LIST.md`](./DARK-MODE-TASK-LIST.md) to track completion status and overall progress.
+
+---
+
+## Executive Summary
+
+This document provides a detailed, step-by-step implementation plan for implementing a comprehensive dark/light mode theme system. The theme system will sync with Profile Service preferences API, provide universal theme toggle in the shared header, integrate with Tailwind CSS v4 dark mode, and update all design system components to support both themes.
+
+Each task is designed to be:
+
+- **Clear and actionable** - Specific steps that can be executed
+- **Small and testable** - Easy to verify completion
+- **Production-ready** - No throw-away code
+- **Incremental** - Builds on previous steps
+
+**Timeline:** 1-2 weeks (8-12 days)  
+**Goal:** Fully functional dark/light mode with backend sync, cross-tab synchronization, and system preference detection
+
+**Key Features:**
+
+- Theme state management (Zustand store)
+- Profile Service API integration for theme preference
+- Universal theme toggle in shared header
+- Tailwind CSS v4 dark mode (class strategy)
+- Dark mode CSS variables
+- Design system components updated for dark mode
+- Cross-tab synchronization
+- System preference detection ("system" option)
+- Profile MFE integration (when Profile MFE is implemented)
+
+---
+
+## Current State Analysis
+
+### Existing Infrastructure
+
+**Backend (Already Implemented):**
+
+- Profile Service supports theme preference: `theme: 'light' | 'dark' | 'system'`
+- API endpoints: `GET /api/profile/preferences`, `PUT /api/profile/preferences`
+- Theme preference stored in `preferences` JSON field in `UserProfile` table
+
+**Frontend (Not Implemented):**
+
+- No theme state management
+- No dark mode CSS variables
+- No theme toggle UI
+- Design system components don't support dark mode
+- Tailwind v4 not configured for dark mode
+
+**Shared Libraries:**
+
+- `shared-auth-store` - Zustand store pattern (can follow for theme store)
+- `shared-session-sync` - Cross-tab synchronization (can use for theme sync)
+- `shared-design-system` - shadcn/ui components (need dark mode support)
+
+---
+
+## Architecture Overview
+
+### Theme System Flow
+
+```mermaid
+flowchart TB
+    User[User Toggles Theme] --> Toggle[Theme Toggle Component]
+    Toggle --> Store[Theme Store Zustand]
+    Store --> API[Profile Service API]
+    Store --> CSS[Apply CSS Classes]
+    Store --> Session[Session Sync]
+    Session --> Tab2[Other Tabs]
+    API --> DB[(User Profile DB)]
+    
+    System[System Preference] --> Store
+    
+    Store --> ProfileMfe[Profile MFE]
+    ProfileMfe --> Store
+```
+
+### Theme Store Architecture
+
+- **Zustand Store:** Centralized theme state (`libs/shared-theme-store`)
+- **Theme Values:** `'light' | 'dark' | 'system'`
+- **Computed Theme:** Resolved theme after "system" detection (`'light' | 'dark'`)
+- **API Sync:** Syncs with Profile Service preferences API
+- **Session Sync:** Cross-tab synchronization via `shared-session-sync`
+- **Persistence:** Initial load from Profile Service, updates on change
+
+---
+
+## Phase 1: Theme Store & Core Infrastructure (Days 1-3)
+
+### Task 1.1: Create Shared Theme Store Library
+
+**Objective:** Create Zustand store for theme state management
+
+**Steps:**
+
+1. Create `libs/shared-theme-store/` directory structure:
+   ```bash
+   libs/shared-theme-store/
+   ├── src/
+   │   ├── lib/
+   │   │   └── theme-store.ts
+   │   ├── index.ts
+   │   └── test/
+   │       └── setup.ts
+   ├── package.json
+   ├── project.json
+   ├── tsconfig.json
+   └── jest.config.cts
+   ```
+2. Create `src/lib/theme-store.ts` with theme types:
+   ```typescript
+   export type Theme = 'light' | 'dark' | 'system';
+   export type ResolvedTheme = 'light' | 'dark';
+   
+   interface ThemeState {
+     theme: Theme;
+     resolvedTheme: ResolvedTheme;
+     isLoading: boolean;
+     setTheme: (theme: Theme) => Promise<void>;
+     initializeTheme: () => Promise<void>;
+   }
+   ```
+3. Implement system preference detection:
+   - Use `window.matchMedia('(prefers-color-scheme: dark)')`
+   - Add listener for system preference changes
+   - Update resolved theme when system preference changes
+4. Implement theme application:
+   - Add/remove `dark` class on `<html>` element
+   - Apply immediately when theme changes
+5. Implement resolved theme calculation:
+   - If theme is 'system', use system preference
+   - Otherwise use theme directly
+6. Export hooks: `useTheme()`, `useResolvedTheme()`
+7. Write tests: `src/lib/theme-store.spec.ts`
+8. Export from `src/index.ts`
+
+**Verification:**
+
+- [ ] Directory structure created
+- [ ] theme-store.ts created
+- [ ] System preference detection implemented
+- [ ] Theme application to DOM implemented
+- [ ] Resolved theme calculation working
+- [ ] Hooks exported
+- [ ] Tests written and passing
+
+**Acceptance Criteria:**
+
+- Theme store created and functional
+- System preference detection works
+- Theme applies to DOM correctly
+- Hooks available for use
+- Tests passing
+
+**Status:** Not Started  
+**Files Created:**
+
+- `libs/shared-theme-store/src/lib/theme-store.ts`
+- `libs/shared-theme-store/src/index.ts`
+- `libs/shared-theme-store/src/lib/theme-store.spec.ts`
+- `libs/shared-theme-store/package.json`
+- `libs/shared-theme-store/project.json`
+- `libs/shared-theme-store/tsconfig.json`
+- `libs/shared-theme-store/jest.config.cts`
+
+---
+
+### Task 1.2: Integrate Theme Store with Profile Service API
+
+**Objective:** Sync theme preference with backend
+
+**Steps:**
+
+1. Add `shared-api-client` dependency to `package.json`
+2. Import API client in theme store
+3. Create API functions:
+   ```typescript
+   async getThemePreference(): Promise<Theme>
+   async updateThemePreference(theme: Theme): Promise<void>
+   ```
+4. Implement `initializeTheme()`:
+   - Fetch theme from Profile Service API
+   - Set theme in store
+   - Handle API errors gracefully (fallback to 'system' or localStorage)
+5. Update `setTheme()`:
+   - Update local state
+   - Sync with Profile Service API
+   - Handle API errors gracefully (still update local state)
+6. Add error handling and retry logic
+7. Update tests to mock API calls
+
+**Verification:**
+
+- [ ] API client dependency added
+- [ ] API functions implemented
+- [ ] initializeTheme() fetches from API
+- [ ] setTheme() updates API
+- [ ] Error handling implemented
+- [ ] Tests updated and passing
+
+**Acceptance Criteria:**
+
+- Theme syncs with Profile Service API
+- Error handling works gracefully
+- Fallback behavior works when API fails
+- Tests passing
+
+**Status:** Not Started  
+**Files Modified:**
+
+- `libs/shared-theme-store/src/lib/theme-store.ts`
+- `libs/shared-theme-store/package.json`
+- `libs/shared-theme-store/src/lib/theme-store.spec.ts`
+
+---
+
+### Task 1.3: Configure Tailwind v4 Dark Mode
+
+**Objective:** Configure Tailwind CSS v4 for class-based dark mode
+
+**Steps:**
+
+1. Update `apps/shell/tailwind.config.js`:
+   - Add `darkMode: 'class'` configuration
+   - Verify Tailwind v4 syntax
+2. Update `apps/auth-mfe/tailwind.config.js`:
+   - Add `darkMode: 'class'`
+3. Update `apps/payments-mfe/tailwind.config.js`:
+   - Add `darkMode: 'class'`
+4. Update `apps/admin-mfe/tailwind.config.js`:
+   - Add `darkMode: 'class'`
+5. (Future) Update `apps/profile-mfe/tailwind.config.js` when created
+6. Test dark mode classes work:
+   - Create test component with `dark:bg-gray-900 dark:text-white`
+   - Verify classes compile correctly
+   - Test in browser
+
+**Verification:**
+
+- [ ] All Tailwind configs updated
+- [ ] darkMode: 'class' configured
+- [ ] Dark mode classes work
+- [ ] Test component renders correctly
+
+**Acceptance Criteria:**
+
+- Tailwind v4 dark mode configured
+- Dark mode classes compile and work
+- All MFEs configured
+
+**Status:** Not Started  
+**Files Modified:**
+
+- `apps/shell/tailwind.config.js`
+- `apps/auth-mfe/tailwind.config.js`
+- `apps/payments-mfe/tailwind.config.js`
+- `apps/admin-mfe/tailwind.config.js`
+
+---
+
+## Phase 2: CSS Theme Variables & Design System (Days 4-7)
+
+### Task 2.1: Add Dark Mode CSS Variables
+
+**Objective:** Define dark mode color scheme using CSS custom properties
+
+**Steps:**
+
+1. Update `apps/shell/src/styles.css`:
+   - Add dark mode CSS variables in `.dark` selector
+   - Define semantic color tokens:
+     ```css
+     :root {
+       /* Light mode colors (existing) */
+       --background: 255 255 255;
+       --foreground: 17 24 39;
+       --muted: 249 250 251;
+       --muted-foreground: 107 114 128;
+       --border: 229 231 235;
+       --primary: 8 70 131;
+       --primary-foreground: 255 255 255;
+     }
+     
+     .dark {
+       /* Dark mode colors */
+       --background: 17 24 39;
+       --foreground: 249 250 251;
+       --muted: 31 41 55;
+       --muted-foreground: 156 163 175;
+       --border: 55 65 81;
+       --primary: 26 116 184;
+       --primary-foreground: 255 255 255;
+     }
+     ```
+2. Add dark mode variants for primary color shades
+3. Copy CSS variables to all MFE `styles.css` files:
+   - `apps/auth-mfe/src/styles.css`
+   - `apps/payments-mfe/src/styles.css`
+   - `apps/admin-mfe/src/styles.css`
+4. Test CSS variables work in both themes
+
+**Verification:**
+
+- [ ] Dark mode CSS variables added to shell
+- [ ] CSS variables copied to all MFEs
+- [ ] Variables work in light mode
+- [ ] Variables work in dark mode
+
+**Acceptance Criteria:**
+
+- Dark mode CSS variables defined
+- All MFEs have consistent variables
+- Variables work correctly
+
+**Status:** Not Started  
+**Files Modified:**
+
+- `apps/shell/src/styles.css`
+- `apps/auth-mfe/src/styles.css`
+- `apps/payments-mfe/src/styles.css`
+- `apps/admin-mfe/src/styles.css`
+
+---
+
+### Task 2.2: Update Design System Components for Dark Mode
+
+**Objective:** Update shadcn/ui components to support dark mode
+
+**Components to Update:**
+
+- Button (`libs/shared-design-system/src/lib/components/Button.tsx`)
+- Input (`libs/shared-design-system/src/lib/components/Input.tsx`)
+- Card (`libs/shared-design-system/src/lib/components/Card.tsx`)
+- Badge (`libs/shared-design-system/src/lib/components/Badge.tsx`)
+- Alert (`libs/shared-design-system/src/lib/components/Alert.tsx`)
+
+**Steps:**
+
+1. For each component:
+   - Replace hardcoded colors with CSS variable-based colors
+   - Add `dark:` variants using Tailwind dark mode classes
+   - Use semantic color tokens: `bg-background`, `text-foreground`, `border-border`
+   - Test component in both light and dark modes
+2. Update Button component:
+   - Use `bg-primary` with dark mode variant
+   - Use `text-primary-foreground`
+   - Add hover states for both themes
+3. Update Input component:
+   - Use `bg-background` with dark mode
+   - Use `border-border` with dark mode
+   - Use `text-foreground` with dark mode
+4. Update Card component:
+   - Use `bg-background` with dark mode
+   - Use `border-border` with dark mode
+5. Update Badge component:
+   - Add dark mode variants for each badge variant
+6. Update Alert component:
+   - Add dark mode variants for each alert type
+7. Update component tests to cover dark mode:
+   - Test rendering in dark mode
+   - Test color classes applied correctly
+
+**Example (Button):**
+
+```typescript
+// Before
+default: 'bg-blue-600 text-white hover:bg-blue-700'
+
+// After
+default: 'bg-primary text-primary-foreground hover:bg-primary/90 dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/90'
+```
+
+**Verification:**
+
+- [ ] All components updated
+- [ ] Dark mode variants added
+- [ ] Semantic color tokens used
+- [ ] Components tested in both themes
+- [ ] Tests updated and passing
+
+**Acceptance Criteria:**
+
+- All design system components support dark mode
+- Components use semantic color tokens
+- Tests passing for both themes
+
+**Status:** Not Started  
+**Files Modified:**
+
+- `libs/shared-design-system/src/lib/components/Button.tsx`
+- `libs/shared-design-system/src/lib/components/Button.test.tsx`
+- `libs/shared-design-system/src/lib/components/Input.tsx`
+- `libs/shared-design-system/src/lib/components/Input.test.tsx`
+- `libs/shared-design-system/src/lib/components/Card.tsx`
+- `libs/shared-design-system/src/lib/components/Card.test.tsx`
+- `libs/shared-design-system/src/lib/components/Badge.tsx`
+- `libs/shared-design-system/src/lib/components/Badge.test.tsx`
+- `libs/shared-design-system/src/lib/components/Alert.tsx`
+- `libs/shared-design-system/src/lib/components/Alert.test.tsx`
+
+---
+
+### Task 2.3: Update Design System Color Tokens
+
+**Objective:** Add dark mode color tokens to design system
+
+**Steps:**
+
+1. Update `libs/shared-design-system/src/lib/tokens/colors.ts`
+2. Add dark mode variants for each color token
+3. Document dark mode color usage
+4. Export dark mode token helpers if needed
+
+**Verification:**
+
+- [ ] Color tokens updated
+- [ ] Dark mode variants added
+- [ ] Tokens documented
+
+**Acceptance Criteria:**
+
+- Color tokens support dark mode
+- Tokens are well-documented
+
+**Status:** Not Started  
+**Files Modified:**
+
+- `libs/shared-design-system/src/lib/tokens/colors.ts`
+
+---
+
+## Phase 3: Theme Toggle UI Components (Days 8-10)
+
+### Task 3.1: Create Theme Toggle Component
+
+**Objective:** Create reusable theme toggle button component
+
+**Steps:**
+
+1. Create `libs/shared-design-system/src/lib/components/ThemeToggle.tsx`
+2. Import `useTheme()` hook from `shared-theme-store`
+3. Implement toggle button with icons:
+   - Sun icon for light mode
+   - Moon icon for dark mode
+   - System icon for system preference
+4. Support all three states: light, dark, system
+5. Cycle through states: light → dark → system → light
+6. Use shadcn/ui patterns and Tailwind v4
+7. Add accessibility attributes:
+   - `aria-label` for screen readers
+   - Keyboard navigation support
+   - Focus states
+8. Style appropriately
+9. Export from design system `index.ts`
+10. Write tests: `ThemeToggle.test.tsx`
+
+**Component Props:**
+
+```typescript
+interface ThemeToggleProps {
+  variant?: 'button' | 'dropdown';
+  showLabel?: boolean;
+}
+```
+
+**Verification:**
+
+- [ ] ThemeToggle.tsx created
+- [ ] All three states supported
+- [ ] Icons displayed correctly
+- [ ] Accessibility attributes added
+- [ ] Keyboard navigation works
+- [ ] Tests written and passing
+
+**Acceptance Criteria:**
+
+- ThemeToggle component complete
+- All states functional
+- Accessible
+- Tests passing
+
+**Status:** Not Started  
+**Files Created:**
+
+- `libs/shared-design-system/src/lib/components/ThemeToggle.tsx`
+- `libs/shared-design-system/src/lib/components/ThemeToggle.test.tsx`
+
+---
+
+### Task 3.2: Add Theme Toggle to Header
+
+**Objective:** Integrate theme toggle into shared header
+
+**Steps:**
+
+1. Import `useTheme()` hook in `libs/shared-header-ui/src/lib/shared-header-ui.tsx`
+2. Import `ThemeToggle` component from design system
+3. Add ThemeToggle component to header:
+   - Position next to user info/logout
+   - Right side of header
+   - Visible when authenticated
+4. Style to match header design:
+   - White icons for light header background
+   - Appropriate sizing
+5. Test toggle functionality:
+   - Click toggle
+   - Verify theme changes
+   - Verify theme applies immediately
+   - Verify header styling updates
+
+**Verification:**
+
+- [ ] ThemeToggle imported
+- [ ] Toggle added to header
+- [ ] Positioned correctly
+- [ ] Styled appropriately
+- [ ] Toggle functionality works
+- [ ] Theme applies immediately
+
+**Acceptance Criteria:**
+
+- Theme toggle in header
+- Toggle functional
+- Styling matches header design
+
+**Status:** Not Started  
+**Files Modified:**
+
+- `libs/shared-header-ui/src/lib/shared-header-ui.tsx`
+
+---
+
+### Task 3.3: Initialize Theme on App Load
+
+**Objective:** Load and apply theme when app starts
+
+**Steps:**
+
+1. Import theme store in `apps/shell/src/bootstrap.tsx`
+2. Call `initializeTheme()` before React renders:
+   - Initialize synchronously if possible
+   - Or initialize early in AppWrapper component
+3. Ensure theme is applied to `<html>` element immediately:
+   - Add inline script if needed to prevent flash
+   - Or use useEffect with early execution
+4. Handle loading state:
+   - Prevent flash of wrong theme
+   - Show appropriate loading state if needed
+5. Test theme initialization:
+   - Reload page with different themes
+   - Verify correct theme applies immediately
+   - Verify no flash of wrong theme
+
+**Verification:**
+
+- [ ] Theme initialized in bootstrap
+- [ ] Theme applied before render
+- [ ] No flash of wrong theme
+- [ ] Theme persists across reloads
+
+**Acceptance Criteria:**
+
+- Theme initializes correctly
+- No flash of wrong theme
+- Theme persists
+
+**Status:** Not Started  
+**Files Modified:**
+
+- `apps/shell/src/bootstrap.tsx`
+
+---
+
+## Phase 4: Cross-Tab Synchronization (Days 11-12)
+
+### Task 4.1: Integrate Theme with Session Sync
+
+**Objective:** Sync theme changes across browser tabs
+
+**Steps:**
+
+1. Add `shared-session-sync` dependency to theme store
+2. Import session sync in theme store
+3. Listen for theme change events from other tabs:
+   ```typescript
+   useSessionSync('theme-change', (event) => {
+     if (event.data.theme) {
+       setTheme(event.data.theme);
+     }
+   });
+   ```
+4. Publish theme changes to session sync:
+   ```typescript
+   const publishThemeChange = (theme: Theme) => {
+     sessionSync.publish('theme-change', { theme });
+   };
+   ```
+5. Call `publishThemeChange()` when theme changes
+6. Test cross-tab synchronization:
+   - Open multiple tabs
+   - Change theme in one tab
+   - Verify other tabs update
+   - Test both directions
+
+**Verification:**
+
+- [ ] Session sync dependency added
+- [ ] Theme changes published
+- [ ] Theme changes received from other tabs
+- [ ] Cross-tab sync works
+- [ ] Tests written and passing
+
+**Acceptance Criteria:**
+
+- Cross-tab synchronization works
+- Theme syncs across tabs
+- No race conditions
+
+**Status:** Not Started  
+**Files Modified:**
+
+- `libs/shared-theme-store/src/lib/theme-store.ts`
+- `libs/shared-theme-store/package.json`
+
+---
+
+## Phase 5: Profile MFE Integration (Future / Deferred)
+
+### Task 5.1: Add Theme Preference to Profile MFE
+
+**Objective:** Allow users to manage theme in Profile MFE preferences
+
+**Note:** This task should be integrated into Profile MFE implementation plan when Profile MFE is implemented. The Profile MFE implementation plan already includes preferences management with theme support.
+
+**Steps:**
+
+1. In Profile MFE PreferencesForm component, add theme selector
+2. Use `useTheme()` hook to get/set theme
+3. Integrate with existing preferences API
+4. Test theme change from Profile MFE
+
+**Files to Modify (when Profile MFE is implemented):**
+
+- `apps/profile-mfe/src/components/PreferencesForm.tsx`
+
+**Status:** Deferred - Will be implemented with Profile MFE
+
+---
+
+## Technical Implementation Details
+
+### Theme Store Structure
+
+```typescript
+interface ThemeState {
+  // Current theme preference ('light' | 'dark' | 'system')
+  theme: Theme;
+  
+  // Resolved theme after system detection ('light' | 'dark')
+  resolvedTheme: ResolvedTheme;
+  
+  // Loading state during API fetch
+  isLoading: boolean;
+  
+  // Actions
+  setTheme: (theme: Theme) => Promise<void>;
+  initializeTheme: () => Promise<void>;
+}
+```
+
+### CSS Variables Structure
+
+```css
+:root {
+  /* Light mode */
+  --background: 255 255 255;
+  --foreground: 17 24 39;
+  --muted: 249 250 251;
+  --muted-foreground: 107 114 128;
+  --border: 229 231 235;
+  --primary: 8 70 131;
+  --primary-foreground: 255 255 255;
+}
+
+.dark {
+  /* Dark mode */
+  --background: 17 24 39;
+  --foreground: 249 250 251;
+  --muted: 31 41 55;
+  --muted-foreground: 156 163 175;
+  --border: 55 65 81;
+  --primary: 26 116 184;
+  --primary-foreground: 255 255 255;
+}
+```
+
+### Tailwind v4 Dark Mode Configuration
+
+```javascript
+export default {
+  darkMode: 'class', // Use class strategy
+  // ... rest of config
+};
+```
+
+---
+
+## Testing Requirements
+
+### Unit Tests
+
+1. **Theme Store:**
+   - Theme state management
+   - System preference detection
+   - Theme application to DOM
+   - API integration (mocked)
+   - Error handling
+
+2. **Theme Toggle Component:**
+   - Rendering in all states
+   - Click handling
+   - Accessibility
+
+3. **Design System Components:**
+   - Dark mode variants render correctly
+   - Colors switch appropriately
+
+### Integration Tests
+
+1. Theme toggle in header works
+2. Theme syncs with Profile Service API
+3. Theme persists across page reloads
+4. System preference detection works
+5. Cross-tab synchronization works
+
+### Manual Testing
+
+1. Toggle theme in header
+2. Verify theme applies immediately
+3. Verify theme persists after reload
+4. Verify theme syncs across tabs
+5. Verify system preference detection
+6. Test all components in both themes
+7. Test on different browsers
+
+---
+
+## Success Criteria
+
+### Functional Requirements
+
+- [ ] Theme store implemented and tested
+- [ ] Theme syncs with Profile Service API
+- [ ] Theme toggle visible and functional in header
+- [ ] All design system components support dark mode
+- [ ] Dark mode CSS variables defined and working
+- [ ] Tailwind v4 dark mode configured
+- [ ] Cross-tab synchronization works
+- [ ] System preference detection works
+- [ ] Theme persists across page reloads
+- [ ] No flash of wrong theme on page load
+
+### Technical Requirements
+
+- [ ] Zustand store pattern followed
+- [ ] TypeScript strict mode passing
+- [ ] All tests passing (70%+ coverage)
+- [ ] Linting passes
+- [ ] No `any` types used
+- [ ] Error handling comprehensive
+
+### Quality Requirements
+
+- [ ] Production-ready code
+- [ ] Accessibility standards met
+- [ ] Performance acceptable
+- [ ] Code follows project patterns
+
+---
+
+## Timeline Estimate
+
+| Phase | Duration | Tasks |
+|-------|----------|-------|
+| **Phase 1** | 2-3 days | Theme store & Tailwind config (3 tasks) |
+| **Phase 2** | 3-4 days | CSS variables & design system (3 tasks) |
+| **Phase 3** | 2-3 days | Theme toggle UI (3 tasks) |
+| **Phase 4** | 1-2 days | Cross-tab sync (1 task) |
+| **Phase 5** | Deferred | Profile MFE integration (when Profile MFE implemented) |
+| **Total** | **8-12 days (1.5-2 weeks)** | **10 tasks** |
+
+---
+
+## Dependencies
+
+### External Dependencies
+
+- Profile Service API (already exists)
+- `shared-api-client` (already exists)
+- `shared-session-sync` (already exists)
+- `shared-design-system` (already exists)
+- Tailwind CSS v4 (already configured)
+- Zustand (already in use)
+
+### Internal Dependencies
+
+- Shell app (for bootstrap initialization)
+- Shared header UI (for theme toggle placement)
+- All MFEs (for Tailwind config updates)
+- Design system components (for dark mode support)
+
+---
+
+## Risk Assessment
+
+### Risks
+
+1. **Theme Flash on Load:** Theme might flash wrong color before applying
+   - **Mitigation:** Initialize theme synchronously before render, use inline script if needed
+
+2. **API Sync Failures:** Network errors during theme sync
+   - **Mitigation:** Graceful fallback to local storage, retry logic
+
+3. **Component Styling Conflicts:** Existing components might break in dark mode
+   - **Mitigation:** Thorough testing, gradual rollout, use semantic color tokens
+
+4. **Cross-Tab Race Conditions:** Multiple tabs changing theme simultaneously
+   - **Mitigation:** Use session sync library's built-in conflict resolution
+
+5. **Browser Compatibility:** `matchMedia` or CSS variables not supported
+   - **Mitigation:** Modern browsers only (already targeted), polyfills if needed
+
+---
+
+## Files Created Summary
+
+### New Libraries
+
+- `libs/shared-theme-store/` - Complete theme state management library
+
+### New Components
+
+- `libs/shared-design-system/src/lib/components/ThemeToggle.tsx`
+
+### Files Modified
+
+**Configuration:**
+- `apps/*/tailwind.config.js` (all MFEs) - Add dark mode config
+
+**Styles:**
+- `apps/*/src/styles.css` (all MFEs) - Add dark mode CSS variables
+
+**Components:**
+- `libs/shared-design-system/src/lib/components/*.tsx` - Add dark mode support
+- `libs/shared-header-ui/src/lib/shared-header-ui.tsx` - Add theme toggle
+
+**Bootstrap:**
+- `apps/shell/src/bootstrap.tsx` - Initialize theme
+
+---
+
+## Related Documents
+
+- Profile MFE Implementation Plan (for Phase 5 integration)
+- Design System Guide
+- Profile Service API Contracts
+
+---
+
+**End of Implementation Plan**
+
