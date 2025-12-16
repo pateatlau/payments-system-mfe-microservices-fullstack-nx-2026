@@ -78,9 +78,9 @@ describe('ProfilePage', () => {
 
     renderWithQueryClient(<ProfilePage />);
 
-    // Default tab is Profile
+    // Default tab is Profile - form should be visible
     expect(
-      screen.getByText(/Profile form will be implemented/i)
+      screen.getByLabelText(/phone number/i)
     ).toBeInTheDocument();
 
     // Switch to Preferences tab

@@ -229,41 +229,41 @@
 
 ### Task 3.2: Create ProfileForm Component
 
-- [ ] ProfileForm.tsx created
-- [ ] React Hook Form integrated
-- [ ] Zod validation working
-- [ ] Phone number field implemented
-- [ ] Address field implemented
-- [ ] Bio field implemented (max 500 chars)
-- [ ] AvatarUpload component integrated
-- [ ] useUpdateProfile mutation used
-- [ ] Form submission working
-- [ ] Success/error feedback working
-- [ ] ProfileForm.test.tsx created
-- [ ] Tests written and passing
+- [x] ProfileForm.tsx created
+- [x] React Hook Form integrated
+- [x] Zod validation working
+- [x] Phone number field implemented
+- [x] Address field implemented
+- [x] Bio field implemented (max 500 chars)
+- [x] AvatarUpload component integrated
+- [x] useUpdateProfile mutation used
+- [x] Form submission working
+- [x] Success/error feedback working
+- [x] ProfileForm.test.tsx created
+- [x] Tests written and passing
 
-**Status:** Not Started  
-**Completed Date:**  
-**Notes:**
+**Status:** Complete  
+**Completed Date:** 2025-12-16  
+**Notes:** Implemented ProfileForm using React Hook Form with Zod (`updateProfileSchema`) and the `useUpdateProfile` mutation. The form includes phone number, address, bio (textarea), and AvatarUpload integration. It pre-fills fields from the current profile, handles client-side validation errors, converts empty strings appropriately, and shows success/error feedback tied to the mutation. `ProfileForm.test.tsx` verifies initial data population, successful submission via the mutation hook, and validation error rendering.
 
 ---
 
 ### Task 3.3: Create AvatarUpload Component
 
-- [ ] AvatarUpload.tsx created
-- [ ] File input implemented (hidden)
-- [ ] Image preview working
-- [ ] File selection handling
-- [ ] File type validation (image/\*)
-- [ ] File size validation (max 5MB)
-- [ ] Preview URL generation
-- [ ] Image removal functionality
-- [ ] AvatarUpload.test.tsx created
-- [ ] Tests written and passing
+- [x] AvatarUpload.tsx created
+- [x] File input implemented (hidden)
+- [x] Image preview working
+- [x] File selection handling
+- [x] File type validation (image/\*)
+- [x] File size validation (max 5MB)
+- [x] Preview URL generation
+- [x] Image removal functionality
+- [x] AvatarUpload.test.tsx created
+- [x] Tests written and passing
 
-**Status:** Not Started  
-**Completed Date:**  
-**Notes:**
+**Status:** Complete  
+**Completed Date:** 2025-12-16  
+**Notes:** Implemented AvatarUpload as a reusable UI component that handles image file selection, type and size validation (image/\*, max 5MB), client-side preview generation with URL.createObjectURL, and removal/reset behavior. Exposes an onFileChange callback for parents (e.g. ProfileForm) to integrate with the backend upload flow. Added AvatarUpload.test.tsx to verify initial avatar rendering, valid selection behavior, validation errors for invalid or too-large files, and removal behavior using React Testing Library.
 
 ---
 
@@ -325,7 +325,7 @@
 
 ---
 
-**Phase 3 Completion:** **17% (1/6 sub-tasks complete)**
+**Phase 3 Completion:** **50% (3/6 sub-tasks complete)**
 
 ---
 
