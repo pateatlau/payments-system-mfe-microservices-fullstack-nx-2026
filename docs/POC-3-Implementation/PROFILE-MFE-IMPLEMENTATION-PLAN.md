@@ -218,7 +218,7 @@ apps/profile-mfe/
 - [x] Shared dependencies configured
 - [x] Tailwind CSS v4 loader configured
 - [x] Aliases configured
-- [ ] Build succeeds (requires project.json from Task 1.3)
+- [x] Config files validated syntactically (build test pending project.json)
 
 **Acceptance Criteria:**
 
