@@ -78,7 +78,7 @@ pnpm dev:backend
 ### 6. Start Frontend
 
 ```bash
-# Starts Shell app and all MFEs (Auth, Payments, Admin)
+# Starts Shell app and all MFEs (Auth, Payments, Admin, Profile)
 pnpm dev:all
 ```
 
@@ -120,7 +120,8 @@ payments-system-mfe/
 │   │   ├── shell/              # Host application (4200)
 │   │   ├── auth-mfe/           # Authentication (4201)
 │   │   ├── payments-mfe/       # Payments (4202)
-│   │   └── admin-mfe/          # Admin (4203)
+│   │   ├── admin-mfe/          # Admin (4203)
+│   │   └── profile-mfe/        # Profile (4204)
 │   └── Backend Services
 │       ├── api-gateway/        # API Gateway (3000)
 │       ├── auth-service/       # Auth (3001)
@@ -263,6 +264,7 @@ pnpm test:e2e                 # End-to-end tests
 | Document | Description |
 |----------|-------------|
 | [Executive Summary](docs/EXECUTIVE_SUMMARY.md) | High-level architecture overview for stakeholders |
+| [Implementation Journey](docs/IMPLEMENTATION-JOURNEY.md) | Complete evolution from POC-0 to POC-3 |
 | [SSL/TLS Setup Guide](docs/POC-3-Implementation/ssl-tls-setup-guide.md) | HTTPS configuration and troubleshooting |
 | [Observability Live Setup](docs/POC-3-Implementation/OBSERVABILITY_LIVE_SETUP.md) | Prometheus, Grafana, Jaeger integration |
 | [Testing Guide](docs/POC-3-Implementation/testing-guide.md) | Comprehensive testing instructions |
