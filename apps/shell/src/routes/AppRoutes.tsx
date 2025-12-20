@@ -29,6 +29,10 @@ export interface AppRoutesProps {
    * AdminDashboard component to use. Required for proper DI pattern.
    */
   AdminDashboardComponent: ComponentType<AdminDashboardComponentProps>;
+  /**
+   * ProfilePage component to use. Required for proper DI pattern.
+   */
+  ProfilePageComponent: ComponentType;
 }
 
 /**
@@ -60,6 +64,7 @@ export function AppRoutes({
   SignUpComponent,
   PaymentsComponent,
   AdminDashboardComponent,
+  ProfilePageComponent,
 }: AppRoutesProps) {
   const { isAuthenticated } = useAuthStore();
 
@@ -106,6 +111,16 @@ export function AppRoutes({
         element={
           <ProtectedRoute requiredRole={UserRole.ADMIN}>
             <AdminPage AdminDashboardComponent={AdminDashboardComponent} />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Profile route - requires authentication */}
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute>
+            <ProfilePageComponent />
           </ProtectedRoute>
         }
       />

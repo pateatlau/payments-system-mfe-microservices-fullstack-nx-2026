@@ -16,6 +16,7 @@ export interface AppProps {
     SignUpComponent: AppRoutesProps['SignUpComponent'];
     PaymentsComponent: AppRoutesProps['PaymentsComponent'];
     AdminDashboardComponent: AppRoutesProps['AdminDashboardComponent'];
+    ProfilePageComponent: AppRoutesProps['ProfilePageComponent'];
   };
 }
 
@@ -49,6 +50,7 @@ export function App({ remotes }: AppProps = {}) {
           SignUpComponent={remotes.SignUpComponent}
           PaymentsComponent={remotes.PaymentsComponent}
           AdminDashboardComponent={remotes.AdminDashboardComponent}
+          ProfilePageComponent={remotes.ProfilePageComponent}
         />
       </Layout>
     );
