@@ -77,6 +77,12 @@ const LazyAdminDashboard = lazy(() =>
   }))
 );
 
+const LazyProfilePage = lazy(() =>
+  import('profileMfe/ProfilePage').catch(() => ({
+    default: () => <ErrorFallback componentName="ProfilePage" />,
+  }))
+);
+
 // Export wrapped components with Suspense
 export const SignInRemote = withSuspense(LazySignIn, 'Loading sign in...');
 export const SignUpRemote = withSuspense(LazySignUp, 'Loading sign up...');
@@ -87,4 +93,8 @@ export const PaymentsPageRemote = withSuspense(
 export const AdminDashboardRemote = withSuspense(
   LazyAdminDashboard,
   'Loading admin dashboard...'
+);
+export const ProfilePageRemote = withSuspense(
+  LazyProfilePage,
+  'Loading profile...'
 );
