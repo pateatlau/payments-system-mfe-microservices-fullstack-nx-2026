@@ -30,13 +30,13 @@ const sharedDependencies = {
     singleton: true,
     requiredVersion: '18.3.1',
     eager: true,
-    import: false, // Don't bundle React in remote - consume from host
+    strictVersion: true,
   },
   'react-dom': {
     singleton: true,
     requiredVersion: '18.3.1',
     eager: true,
-    import: false, // Don't bundle ReactDOM in remote - consume from host
+    strictVersion: true,
   },
   'react-router-dom': {
     singleton: true,

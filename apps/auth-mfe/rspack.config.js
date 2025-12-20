@@ -31,13 +31,13 @@ const sharedDependencies = {
     singleton: true,
     requiredVersion: '18.3.1',
     eager: true,
-    import: false, // Don't bundle React in remote - consume from host
+    strictVersion: true,
   },
   'react-dom': {
     singleton: true,
     requiredVersion: '18.3.1',
     eager: true,
-    import: false, // Don't bundle ReactDOM in remote - consume from host
+    strictVersion: true,
   },
   'react-router-dom': {
     singleton: true,
@@ -113,6 +113,9 @@ module.exports = {
     extensions: ['.tsx', '.ts', '.jsx', '.js', '.json'],
     // Aliases for shared libraries - required since we removed NxAppRspackPlugin
     alias: {
+      // CRITICAL: Force single React instance from root node_modules
+      react: path.resolve(__dirname, '../../node_modules/react'),
+      'react-dom': path.resolve(__dirname, '../../node_modules/react-dom'),
       'shared-auth-store': path.resolve(
         __dirname,
         '../../libs/shared-auth-store/src/index.ts'
