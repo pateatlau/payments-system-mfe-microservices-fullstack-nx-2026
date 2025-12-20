@@ -21,11 +21,11 @@
 | Phase                               | Status          | Progress       | Tasks  |
 | ----------------------------------- | --------------- | -------------- | ------ |
 | **Phase 1: Backend PUT Endpoint**   | ✅ Complete     | 100% (5/5)     | 5      |
-| **Phase 2: Frontend Components**    | 🟡 In Progress  | 13% (1/8)      | 8      |
+| **Phase 2: Frontend Components**    | 🟡 In Progress  | 25% (2/8)      | 8      |
 | **Phase 3: API Client Extensions**  | Not Started     | 0% (0/3)       | 3      |
 | **Phase 4: Testing & Refinement**   | Not Started     | 0% (0/4)       | 4      |
 | **Phase 5: Polish & Documentation** | Not Started     | 0% (0/5)       | 5      |
-| **TOTAL**                           | **In Progress** | **24% (6/25)** | **25** |
+| **TOTAL**                           | **In Progress** | **28% (7/25)** | **25** |
 
 ---
 
@@ -133,20 +133,20 @@
 
 ### Task 2.2: Create Payment Filters Component
 
-- [ ] Component file created (PaymentFilters.tsx)
-- [ ] Status dropdown working (all, pending, processing, completed, failed, cancelled)
-- [ ] Type dropdown working (all, payment, initiate, transfer)
-- [ ] Date range picker implemented
-- [ ] Amount range slider implemented
-- [ ] Clear filters button working
-- [ ] React Hook Form integrated
-- [ ] Form submission handling
-- [ ] Debounce on filter changes
-- [ ] Active filter count displayed
-- [ ] Responsive design
-- [ ] Accessibility: labels, focus management
-- [ ] Tests created and passing (PaymentFilters.test.tsx)
-- **Status:** Not Started
+- [x] Component file created (PaymentFilters.tsx)
+- [x] Status dropdown working (all, pending, processing, completed, failed, cancelled)
+- [x] Type dropdown working (all, instant, scheduled, recurring)
+- [x] Date range picker implemented
+- [x] Amount range slider implemented
+- [x] Clear filters button working
+- [x] React Hook Form integrated
+- [x] Form submission handling
+- [x] Debounce on filter changes
+- [x] Active filter count displayed
+- [x] Responsive design
+- [x] Accessibility: labels, focus management
+- [x] Tests created and passing (PaymentFilters.test.tsx)
+- **Status:** ✅ Complete
 - **Depends on:** Nothing
 - **Blocking:** Task 2.3
 
