@@ -1218,16 +1218,50 @@ The integration follows the same patterns as other MFEs in the application, main
 
 **Verification:**
 
-- [ ] Upstream added
-- [ ] Location block added
-- [ ] nginx configuration valid
-- [ ] Proxy routing works
+- [x] Upstream added
+- [x] Location block added
+- [x] nginx configuration valid
+- [x] Proxy routing works
 
 **Acceptance Criteria:**
 
-- nginx configuration updated
-- Profile MFE accessible via proxy
-- Configuration validated
+- [x] nginx configuration updated
+- [x] Profile MFE accessible via proxy
+- [x] Configuration validated
+
+**Status:** Complete  
+**Completed Date:** 2025-12-20  
+**Files Modified:**
+
+- `nginx/nginx.conf`
+
+**Notes:** Successfully updated nginx configuration to support the Profile MFE with the following changes:
+
+1. **Upstream Configuration:**
+   - Added `profile_mfe` upstream pointing to `host.docker.internal:4204`
+   - Configured keepalive for better connection management
+
+2. **Location Blocks:**
+   - Added location block for Profile MFE assets (`/profile-mfe/`)
+   - Added WebSocket HMR support for development (`/hmr/profile`)
+   - Ensured consistent proxy settings with other MFEs
+
+3. **Verification:**
+   - Validated configuration with `nginx -t`
+   - Confirmed proxy routing works for both assets and WebSocket connections
+   - Verified integration with Module Federation
+
+4. **Technical Details:**
+   - Used the same proxy settings as other MFEs for consistency
+   - Maintained existing security headers and timeouts
+   - Ensured proper WebSocket upgrade headers for HMR
+
+5. **Testing:**
+   - Verified static assets are served correctly
+   - Confirmed WebSocket connections work for HMR
+   - Tested with both development and production builds
+
+The Profile MFE is now fully integrated into the nginx reverse proxy, matching the configuration of other MFEs in the system.
 
 **Status:** Not Started  
 **Files Modified:**
