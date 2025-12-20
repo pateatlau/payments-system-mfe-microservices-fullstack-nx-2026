@@ -30,11 +30,18 @@ const sharedDependencies = {
     singleton: true,
     requiredVersion: '18.3.1',
     eager: true, // Must be eager for standalone app
+    import: false, // Don't bundle React in remote - consume from host
   },
   'react-dom': {
     singleton: true,
     requiredVersion: '18.3.1',
     eager: true, // Must be eager for standalone app
+    import: false, // Don't bundle ReactDOM in remote - consume from host
+  },
+  'react-router-dom': {
+    singleton: true,
+    requiredVersion: false,
+    eager: false,
   },
   '@tanstack/react-query': {
     singleton: true,
@@ -53,6 +60,26 @@ const sharedDependencies = {
     singleton: true,
     requiredVersion: false,
     eager: true, // Must be eager for standalone app
+  },
+  '@mfe/shared-api-client': {
+    singleton: true,
+    requiredVersion: false,
+    eager: false,
+  },
+  'shared-api-client': {
+    singleton: true,
+    requiredVersion: false,
+    eager: false,
+  },
+  '@mfe/shared-design-system': {
+    singleton: true,
+    requiredVersion: false,
+    eager: false,
+  },
+  'shared-types': {
+    singleton: true,
+    requiredVersion: false,
+    eager: false,
   },
   'shared-websocket': {
     singleton: true,

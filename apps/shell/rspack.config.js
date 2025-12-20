@@ -32,11 +32,16 @@ const sharedDependencies = {
   react: {
     singleton: true,
     requiredVersion: '18.3.1',
-    eager: false,
+    eager: true,
   },
   'react-dom': {
     singleton: true,
     requiredVersion: '18.3.1',
+    eager: true,
+  },
+  'react-router-dom': {
+    singleton: true,
+    requiredVersion: false,
     eager: false,
   },
   '@tanstack/react-query': {
@@ -242,10 +247,23 @@ module.exports = {
       name: 'shell',
       remotes: {
         // Remote MFE URLs - format: 'remoteName@http://host:port/remoteEntry.js'
-        authMfe: 'authMfe@http://localhost:4201/remoteEntry.js',
-        paymentsMfe: 'paymentsMfe@http://localhost:4202/remoteEntry.js',
-        adminMfe: 'adminMfe@http://localhost:4203/remoteEntry.js',
-        profileMfe: 'profileMfe@http://localhost:4204/remoteEntry.js',
+        // In HTTPS mode, use Nginx proxy paths to avoid Mixed Content errors
+        authMfe:
+          process.env.NX_HTTPS_MODE === 'true'
+            ? 'authMfe@https://localhost/auth-mfe/remoteEntry.js'
+            : 'authMfe@http://localhost:4201/remoteEntry.js',
+        paymentsMfe:
+          process.env.NX_HTTPS_MODE === 'true'
+            ? 'paymentsMfe@https://localhost/payments-mfe/remoteEntry.js'
+            : 'paymentsMfe@http://localhost:4202/remoteEntry.js',
+        adminMfe:
+          process.env.NX_HTTPS_MODE === 'true'
+            ? 'adminMfe@https://localhost/admin-mfe/remoteEntry.js'
+            : 'adminMfe@http://localhost:4203/remoteEntry.js',
+        profileMfe:
+          process.env.NX_HTTPS_MODE === 'true'
+            ? 'profileMfe@https://localhost/profile-mfe/remoteEntry.js'
+            : 'profileMfe@http://localhost:4204/remoteEntry.js',
       },
       shared: sharedDependencies,
     }),

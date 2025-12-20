@@ -30,11 +30,18 @@ const sharedDependencies = {
   react: {
     singleton: true,
     requiredVersion: '18.3.1',
-    eager: false,
+    eager: true,
+    import: false, // Don't bundle React in remote - consume from host
   },
   'react-dom': {
     singleton: true,
     requiredVersion: '18.3.1',
+    eager: true,
+    import: false, // Don't bundle ReactDOM in remote - consume from host
+  },
+  'react-router-dom': {
+    singleton: true,
+    requiredVersion: false,
     eager: false,
   },
   '@tanstack/react-query': {
@@ -51,6 +58,26 @@ const sharedDependencies = {
   },
   // CRITICAL: Share the auth store to ensure same instance across MFEs
   'shared-auth-store': {
+    singleton: true,
+    requiredVersion: false,
+    eager: false,
+  },
+  '@mfe/shared-api-client': {
+    singleton: true,
+    requiredVersion: false,
+    eager: false,
+  },
+  'shared-api-client': {
+    singleton: true,
+    requiredVersion: false,
+    eager: false,
+  },
+  '@mfe/shared-design-system': {
+    singleton: true,
+    requiredVersion: false,
+    eager: false,
+  },
+  'shared-types': {
     singleton: true,
     requiredVersion: false,
     eager: false,
@@ -181,8 +208,7 @@ module.exports = {
         // POC-3: API Gateway URL
         // Development & Production: Through nginx proxy (https://localhost/api)
         // Direct API Gateway access (http://localhost:3000/api) available via env var
-        NX_API_BASE_URL:
-          process.env.NX_API_BASE_URL || 'https://localhost/api',
+        NX_API_BASE_URL: process.env.NX_API_BASE_URL || 'https://localhost/api',
         NODE_ENV: isProduction ? 'production' : 'development',
       }),
     }),
@@ -240,19 +266,20 @@ module.exports = {
         warnings: false,
       },
       // HMR WebSocket configuration for HTTPS mode
-      webSocketURL: process.env.NX_HTTPS_MODE === 'true'
-        ? {
-            protocol: 'wss',
-            hostname: 'localhost',
-            port: 443,
-            pathname: '/hmr/auth',
-          }
-        : {
-            protocol: 'ws',
-            hostname: 'localhost',
-            port: 4201,
-            pathname: '/ws',
-          },
+      webSocketURL:
+        process.env.NX_HTTPS_MODE === 'true'
+          ? {
+              protocol: 'wss',
+              hostname: 'localhost',
+              port: 443,
+              pathname: '/hmr/auth',
+            }
+          : {
+              protocol: 'ws',
+              hostname: 'localhost',
+              port: 4201,
+              pathname: '/ws',
+            },
     },
   },
   // Optimization settings

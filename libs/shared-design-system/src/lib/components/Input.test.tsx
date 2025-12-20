@@ -33,11 +33,12 @@ describe('Input', () => {
   });
 
   it('should handle onChange events', () => {
-    let value = '';
     render(
       <Input
         onChange={e => {
-          value = e.target.value;
+          // Handle change event
+          const value = e.target.value;
+          expect(value).toBeDefined();
         }}
       />
     );
