@@ -393,46 +393,69 @@ apps/payments-service/
 
 **Steps:**
 
-1. Create `apps/payments-mfe/src/components/PaymentDetails.tsx`
-2. Design component structure:
-   - Header with payment ID and status badge
-   - Payment summary (amount, currency, type)
-   - Sender/recipient information
-   - Payment dates and metadata
-   - Transaction history table
-   - Action buttons (edit, cancel, based on role)
-3. Use `usePaymentById` hook for data
-4. Handle loading states with skeleton
-5. Handle error states with alert
-6. Add responsive design
-7. Write tests: `PaymentDetails.test.tsx`
+1. Create `apps/payments-mfe/src/components/PaymentDetails.tsx` ✅
+2. Design component structure: ✅
+   - Header with payment ID and status badge ✅
+   - Payment summary (amount, currency, type) ✅
+   - Sender/recipient information ✅
+   - Payment dates and metadata ✅
+   - Transaction history table ✅
+   - Action buttons (edit, cancel, based on role) ✅
+3. Use `usePaymentById` hook for data ✅
+4. Handle loading states with skeleton ✅
+5. Handle error states with alert ✅
+6. Add responsive design ✅
+7. Write tests: `PaymentDetails.test.tsx` ✅
 
 **Implementation Details:**
 
-- Use modal or side panel (TBD based on UX)
-- Show transaction history (date, status, amount, description)
-- Display metadata (payment type, reference, etc.)
-- Action buttons based on payment status and user role
-- Format currency values properly
-- Format dates in user's timezone
+- Use card-based layout for flexible integration (modal or panel)
+- Show transaction history (date, status, amount, description) ✅
+- Display metadata (payment type, reference, etc.) ✅
+- Action buttons based on payment status and user role ✅
+- Format currency values properly ✅
+- Format dates in user's timezone ✅
 
 **Verification:**
 
-- [ ] Component renders correctly
-- [ ] All payment info displayed
-- [ ] Transaction history shows
-- [ ] Loading states work
-- [ ] Error states work
-- [ ] Tests passing
+- [x] Component renders correctly
+- [x] All payment info displayed
+- [x] Transaction history shows
+- [x] Loading states work
+- [x] Error states work
+- [x] Tests passing
+- [x] Component exported in index.ts
+- [x] Integration guide created
 
 **Acceptance Criteria:**
 
-- [ ] Details component complete
-- [ ] Displays all payment info
-- [ ] Transaction history shown
-- [ ] Tests passing
+- [x] Details component complete
+- [x] Displays all payment info
+- [x] Transaction history shown
+- [x] Tests passing (24 test cases)
+- [x] Responsive design implemented
+- [x] Role-based actions working
 
-**Status:** Not Started
+**Status:** ✅ Complete  
+**Completed Date:** 2025-12-21
+
+**Files Created:**
+
+- [PaymentDetails.tsx](../../apps/payments-mfe/src/components/PaymentDetails.tsx) - Main component (251 lines)
+- [PaymentDetails.test.tsx](../../apps/payments-mfe/src/components/PaymentDetails.test.tsx) - 24 comprehensive tests
+- [formatting.ts](../../apps/payments-mfe/src/utils/formatting.ts) - Utility functions
+- [PAYMENT-DETAILS-INTEGRATION.md](../PAYMENT-DETAILS-INTEGRATION.md) - Integration guide
+
+**Component Features:**
+
+- Status badge with 5 color variations (pending, processing, completed, failed, cancelled)
+- Responsive grid layout (1-3 columns based on screen size)
+- Transaction timeline with PSP transaction IDs
+- Metadata key-value display with JSON serialization
+- Edit/Cancel buttons with role-based visibility
+- Loading skeleton state
+- Comprehensive error alert
+- Clean card-based UI using design system components
 
 ---
 
