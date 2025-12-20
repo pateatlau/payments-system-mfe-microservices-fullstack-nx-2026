@@ -532,20 +532,20 @@ apps/payments-service/
 
 **Verification:**
 
-- [ ] Filters integrated
-- [ ] API receives filter params
-- [ ] Results filtered correctly
-- [ ] Empty states work
+- [x] Filters integrated
+- [x] API receives filter params (status/type; date/amount included)
+- [x] Results filtered correctly
+- [x] Empty states work
 - [ ] Integration tests pass
 
 **Acceptance Criteria:**
 
-- [ ] Filters functional in list
-- [ ] API receives params correctly
-- [ ] Results update on filter change
+- [x] Filters functional in list
+- [x] API receives params correctly
+- [x] Results update on filter change
 - [ ] Tests passing
 
-**Status:** Not Started
+**Status:** 🟡 In Progress
 
 ---
 

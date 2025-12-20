@@ -152,17 +152,17 @@
 
 ### Task 2.3: Integrate Filters into PaymentsPage
 
-- [ ] PaymentFilters component added to PaymentsPage
-- [ ] Filter state management implemented
-- [ ] Filter params passed to usePayments hook
-- [ ] API receives filter query params
-- [ ] Results update on filter change
-- [ ] Empty state shows "No payments match filters"
-- [ ] Clear filters button works
-- [ ] Applied filter count displayed
-- [ ] Loading/error states account for filtering
+- [x] PaymentFilters component added to PaymentsPage
+- [x] Filter state management implemented
+- [x] Filter params passed to usePayments hook
+- [x] API receives filter query params (status/type; date/amount included)
+- [x] Results update on filter change
+- [x] Empty state shows "No payments match filters"
+- [x] Clear filters button works
+- [x] Applied filter count displayed
+- [x] Loading/error states account for filtering
 - [ ] Integration tests written and passing
-- **Status:** Not Started
+- **Status:** 🟡 In Progress
 - **Depends on:** Task 2.2
 - **Blocking:** Nothing (can be done in parallel with others)
 

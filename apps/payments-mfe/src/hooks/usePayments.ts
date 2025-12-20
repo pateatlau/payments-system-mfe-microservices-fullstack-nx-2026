@@ -2,6 +2,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from 'shared-auth-store';
 import type { Payment } from '../api/types';
 import { listPayments } from '../api/payments';
+import type { PaymentStatus, PaymentType } from 'shared-types';
 
 /**
  * Query key factory for payments
@@ -9,8 +10,7 @@ import { listPayments } from '../api/payments';
 export const paymentKeys = {
   all: ['payments'] as const,
   lists: () => [...paymentKeys.all, 'list'] as const,
-  list: (filters: { userId?: string } = {}) =>
-    [...paymentKeys.lists(), filters] as const,
+  list: (params: unknown = {}) => [...paymentKeys.lists(), params] as const,
   details: () => [...paymentKeys.all, 'detail'] as const,
   detail: (id: string) => [...paymentKeys.details(), id] as const,
 };
@@ -22,17 +22,65 @@ export const paymentKeys = {
  *
  * @returns TanStack Query result with payments data
  */
-export function usePayments() {
+export type UsePaymentsFilters = {
+  status?: PaymentStatus | 'all';
+  type?: PaymentType | 'all';
+  fromDate?: string;
+  toDate?: string;
+  minAmount?: number;
+  maxAmount?: number;
+};
+
+function applyClientFilters(payments: Payment[], filters?: UsePaymentsFilters) {
+  if (!filters) return payments;
+  const { fromDate, toDate, minAmount, maxAmount } = filters;
+
+  return payments.filter(p => {
+    const createdAt = new Date(p.createdAt).getTime();
+    const withinDate =
+      (!fromDate || createdAt >= new Date(fromDate).getTime()) &&
+      (!toDate || createdAt <= new Date(toDate).getTime());
+    const withinAmount =
+      (minAmount === undefined || p.amount >= minAmount) &&
+      (maxAmount === undefined || p.amount <= maxAmount);
+    return withinDate && withinAmount;
+  });
+}
+
+export function usePayments(filters?: UsePaymentsFilters) {
   const { user } = useAuthStore();
 
   return useQuery<Payment[]>({
-    queryKey: paymentKeys.list({ userId: user?.id }),
+    queryKey: paymentKeys.list({ userId: user?.id, filters }),
     queryFn: async () => {
-      // Role-based filtering handled by backend; include basic pagination defaults
-      return await listPayments({
-        page: 1,
-        limit: 20,
-      });
+      // Send supported filters to backend; keep other filters client-side
+      const params: {
+        page: number;
+        limit: number;
+        status?: PaymentStatus;
+        type?: PaymentType;
+        fromDate?: string;
+        toDate?: string;
+        minAmount?: number;
+        maxAmount?: number;
+      } = { page: 1, limit: 20 };
+
+      if (filters?.status && filters.status !== 'all') {
+        params.status = filters.status as PaymentStatus;
+      }
+      if (filters?.type && filters.type !== 'all') {
+        params.type = filters.type as PaymentType;
+      }
+      // Include date/amount in query params for future backend support
+      if (filters?.fromDate) params.fromDate = filters.fromDate;
+      if (filters?.toDate) params.toDate = filters.toDate;
+      if (filters?.minAmount !== undefined)
+        params.minAmount = filters.minAmount;
+      if (filters?.maxAmount !== undefined)
+        params.maxAmount = filters.maxAmount;
+
+      const data = await listPayments(params);
+      return applyClientFilters(data, filters);
     },
     enabled: !!user, // Only fetch if user is authenticated
   });

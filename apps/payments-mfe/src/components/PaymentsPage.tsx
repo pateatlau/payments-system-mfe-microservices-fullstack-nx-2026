@@ -26,6 +26,8 @@ import {
   useDeletePayment,
   usePaymentUpdates,
 } from '../hooks';
+import { PaymentFilters } from './PaymentFilters';
+import type { UsePaymentsFilters } from '../hooks/usePayments';
 import type { Payment } from '../api/types';
 import { PaymentType, PaymentStatus } from 'shared-types';
 
@@ -134,6 +136,10 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingPayment, setEditingPayment] = useState<Payment | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [filters, setFilters] = useState<UsePaymentsFilters>({
+    status: 'all',
+    type: 'all',
+  });
 
   // Real-time payment updates via WebSocket
   usePaymentUpdates();
@@ -143,7 +149,7 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
     data: payments,
     isLoading: isLoadingPayments,
     error: paymentsError,
-  } = usePayments();
+  } = usePayments(filters);
 
   // Mutations
   const createPaymentMutation = useCreatePayment();
@@ -297,6 +303,11 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
               ? 'Manage payments and view reports'
               : 'View your payment history'}
           </p>
+        </div>
+
+        {/* Filters */}
+        <div className="mb-6">
+          <PaymentFilters value={filters} onChange={setFilters} />
         </div>
 
         {/* Create Payment Form (VENDOR only) */}
@@ -625,7 +636,15 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
                       colSpan={isVendor ? 7 : 6}
                       className="px-6 py-12 text-center text-slate-500"
                     >
-                      No payments found
+                      {filters &&
+                      (filters.status !== 'all' ||
+                        filters.type !== 'all' ||
+                        filters.fromDate ||
+                        filters.toDate ||
+                        filters.minAmount !== undefined ||
+                        filters.maxAmount !== undefined)
+                        ? 'No payments match filters'
+                        : 'No payments found'}
                     </td>
                   </tr>
                 )}
