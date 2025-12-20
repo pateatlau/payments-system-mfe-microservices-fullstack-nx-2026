@@ -156,6 +156,10 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
   const updatePaymentMutation = useUpdatePayment();
   const deletePaymentMutation = useDeletePayment();
 
+  // Role flags
+  const isVendor = hasRole(UserRole.VENDOR);
+  const isCustomer = hasRole(UserRole.CUSTOMER);
+
   // Create payment form
   const {
     register: registerCreate,
@@ -167,6 +171,7 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
     defaultValues: {
       amount: 0,
       currency: 'USD',
+      // Default type: customers create instant payments; vendors default to instant as well
       type: PaymentType.INSTANT,
       description: '',
       recipientEmail: '',
@@ -183,8 +188,7 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
     resolver: zodResolver(updatePaymentSchema),
   });
 
-  // Check if user is VENDOR
-  const isVendor = hasRole(UserRole.VENDOR);
+  // Check if user is VENDOR (already computed above)
 
   // Handle create payment
   const onSubmitCreate = async (data: CreatePaymentFormData) => {
@@ -256,7 +260,7 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
   // Loading state
   if (isLoadingPayments) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+      <div className="flex items-center justify-center min-h-screen bg-slate-50">
         <Loading size="lg" label="Loading payments..." />
       </div>
     );
@@ -265,8 +269,8 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
   // Error state
   if (paymentsError) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4">
-        <Alert variant="destructive" className="max-w-md w-full">
+      <div className="flex items-center justify-center min-h-screen px-4 bg-slate-50">
+        <Alert variant="destructive" className="w-full max-w-md">
           <AlertTitle>Error Loading Payments</AlertTitle>
           <AlertDescription>
             {paymentsError instanceof Error
@@ -281,8 +285,8 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
   // Not authenticated
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4">
-        <Alert variant="warning" className="max-w-md w-full">
+      <div className="flex items-center justify-center min-h-screen px-4 bg-slate-50">
+        <Alert variant="warning" className="w-full max-w-md">
           <AlertTitle>Authentication Required</AlertTitle>
           <AlertDescription>
             Please sign in to view your payments.
@@ -294,10 +298,10 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
 
   return (
     <div className="w-full h-full">
-      <div className="max-w-7xl mx-auto">
+      <div className="mx-auto max-w-7xl">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">Payments</h1>
+          <h1 className="mb-2 text-3xl font-bold text-slate-900">Payments</h1>
           <p className="text-slate-600">
             {isVendor
               ? 'Manage payments and view reports'
@@ -310,8 +314,8 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
           <PaymentFilters value={filters} onChange={setFilters} />
         </div>
 
-        {/* Create Payment Form (VENDOR only) */}
-        {isVendor && (
+        {/* Create Payment Form (VENDOR and CUSTOMER) */}
+        {(isVendor || isCustomer) && (
           <div className="mb-6">
             {!showCreateForm ? (
               <Button onClick={() => setShowCreateForm(true)}>
@@ -322,7 +326,9 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
                 <CardHeader>
                   <CardTitle>Create New Payment</CardTitle>
                   <CardDescription>
-                    Enter payment details to create a new payment
+                    {isCustomer
+                      ? 'Enter payment details to create a new payment'
+                      : 'Enter payment details to create a new payment'}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -330,7 +336,7 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
                     onSubmit={handleSubmitCreate(onSubmitCreate)}
                     className="space-y-4"
                   >
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                       <div>
                         <Label htmlFor="amount">Amount *</Label>
                         <Input
@@ -353,7 +359,7 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
                         <select
                           id="currency"
                           {...registerCreate('currency')}
-                          className="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 mt-2"
+                          className="flex w-full h-10 px-3 py-2 mt-2 text-sm bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                         >
                           <option value="USD">USD</option>
                           <option value="EUR">EUR</option>
@@ -372,7 +378,7 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
                       <select
                         id="type"
                         {...registerCreate('type')}
-                        className="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 mt-2"
+                        className="flex w-full h-10 px-3 py-2 mt-2 text-sm bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                       >
                         <option value={PaymentType.INSTANT}>Instant</option>
                         <option value={PaymentType.SCHEDULED}>Scheduled</option>
@@ -459,26 +465,26 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
             <table className="w-full">
               <thead className="bg-slate-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-xs font-medium tracking-wider text-left uppercase text-slate-500">
                     ID
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-xs font-medium tracking-wider text-left uppercase text-slate-500">
                     Amount
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-xs font-medium tracking-wider text-left uppercase text-slate-500">
                     Type
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-xs font-medium tracking-wider text-left uppercase text-slate-500">
                     Status
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-xs font-medium tracking-wider text-left uppercase text-slate-500">
                     Description
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-xs font-medium tracking-wider text-left uppercase text-slate-500">
                     Created
                   </th>
                   {isVendor && (
-                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-xs font-medium tracking-wider text-left uppercase text-slate-500">
                       Actions
                     </th>
                   )}
@@ -491,19 +497,19 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
                       {editingPayment?.id === payment.id ? (
                         // Edit mode - single form for all fields
                         <>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-900">
+                          <td className="px-6 py-4 text-sm whitespace-nowrap text-slate-900">
                             {payment.id}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-slate-900">
+                          <td className="px-6 py-4 font-mono text-sm whitespace-nowrap text-slate-900">
                             {formatCurrency(payment.amount, payment.currency)}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+                          <td className="px-6 py-4 text-sm whitespace-nowrap text-slate-500">
                             <Badge variant="outline">{payment.type}</Badge>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <select
                               {...registerUpdate('status')}
-                              className="flex h-9 rounded-md border border-gray-300 bg-white px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                              className="flex px-2 py-1 text-sm bg-white border border-gray-300 rounded-md h-9 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                             >
                               <option value={PaymentStatus.PENDING}>
                                 Pending
@@ -530,10 +536,10 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
                               className="w-full"
                             />
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+                          <td className="px-6 py-4 text-sm whitespace-nowrap text-slate-500">
                             {formatDate(payment.createdAt)}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          <td className="px-6 py-4 text-sm font-medium whitespace-nowrap">
                             <form
                               onSubmit={handleSubmitUpdate(onSubmitUpdate)}
                               className="inline"
@@ -562,13 +568,13 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
                       ) : (
                         // View mode
                         <>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-slate-900">
+                          <td className="px-6 py-4 font-mono text-sm whitespace-nowrap text-slate-900">
                             {payment.id}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">
+                          <td className="px-6 py-4 text-sm font-medium whitespace-nowrap text-slate-900">
                             {formatCurrency(payment.amount, payment.currency)}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+                          <td className="px-6 py-4 text-sm whitespace-nowrap text-slate-500">
                             <Badge variant="outline">{payment.type}</Badge>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
@@ -581,11 +587,11 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
                           <td className="px-6 py-4 text-sm text-slate-500">
                             {payment.description || '-'}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+                          <td className="px-6 py-4 text-sm whitespace-nowrap text-slate-500">
                             {formatDate(payment.createdAt)}
                           </td>
                           {isVendor && (
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <td className="px-6 py-4 text-sm font-medium whitespace-nowrap">
                               <div className="flex gap-2">
                                 <Button
                                   variant="ghost"

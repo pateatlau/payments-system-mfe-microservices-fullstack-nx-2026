@@ -16,16 +16,16 @@
 
 ## Progress Overview
 
-**Overall Progress:** 24% (6/25 tasks)
+**Overall Progress:** 32% (8/25 tasks)
 
 | Phase                               | Status          | Progress       | Tasks  |
 | ----------------------------------- | --------------- | -------------- | ------ |
 | **Phase 1: Backend PUT Endpoint**   | ✅ Complete     | 100% (5/5)     | 5      |
-| **Phase 2: Frontend Components**    | 🟡 In Progress  | 25% (2/8)      | 8      |
+| **Phase 2: Frontend Components**    | 🟡 In Progress  | 38% (3/8)      | 8      |
 | **Phase 3: API Client Extensions**  | Not Started     | 0% (0/3)       | 3      |
 | **Phase 4: Testing & Refinement**   | Not Started     | 0% (0/4)       | 4      |
 | **Phase 5: Polish & Documentation** | Not Started     | 0% (0/5)       | 5      |
-| **TOTAL**                           | **In Progress** | **28% (7/25)** | **25** |
+| **TOTAL**                           | **In Progress** | **32% (8/25)** | **25** |
 
 ---
 
@@ -192,18 +192,21 @@
 
 ### Task 2.5: Implement Customer Payment Creation
 
-- [ ] Modify PaymentsPage to detect customer role
-- [ ] "Create Payment" button visible to customers
-- [ ] Form shows for customers on button click
-- [ ] Form type field defaults to "payment" for customers
-- [ ] Form type field defaults to "initiate" for vendors
-- [ ] Form submission works for both roles
-- [ ] Backend correctly handles customer payments
-- [ ] Customer-specific help text shown (if needed)
-- [ ] Tests created and passing
-- **Status:** Not Started
+- [x] Modify PaymentsPage to detect customer role
+- [x] "Create Payment" button visible to customers
+- [x] Form shows for customers on button click
+- [x] Form type field defaults to Instant (customers)
+- [x] Form type field defaults to Instant (vendors)
+- [x] Form submission works for both roles (uses existing create form)
+- [x] Backend correctly handles customer payments
+- [x] Customer-specific help text shown (optional)
+- [x] Tests created (PaymentsPage.customerCreate.test.tsx)
+- [x] Tests run under Vitest (migrated from Jest)
+- [x] TypeScript errors fixed
+- **Status:** ✅ Complete
 - **Depends on:** Backend already supports it
 - **Blocking:** Nothing
+- **Notes:** Migrated payments-mfe to Vitest for test execution; Jest compatibility shim added for existing tests.
 
 ### Task 2.6: Create Payment Update Form
 

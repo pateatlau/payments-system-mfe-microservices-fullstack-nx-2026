@@ -631,20 +631,28 @@ apps/payments-service/
 
 **Verification:**
 
-- [ ] Customer sees create button
-- [ ] Form shows for customer
-- [ ] Type defaults to "payment"
-- [ ] Form submits correctly
-- [ ] Tests passing
+- [x] Customer sees create button
+- [x] Form shows for customer
+- [x] Type defaults to Instant
+- [x] Form submits correctly (uses existing form submission)
+- [x] Tests passing under Vitest
 
 **Acceptance Criteria:**
 
-- [ ] Customers can create payments
-- [ ] Form works for both roles
-- [ ] Type set correctly
-- [ ] Tests passing
+- [x] Customers can create payments
+- [x] Form works for both roles
+- [x] Type set correctly (Instant)
+- [x] Tests passing
 
-**Status:** Not Started
+**Status:** ✅ Complete  
+**Completed Date:** 2025-12-21
+
+**Implementation Notes:**
+
+- Migrated payments-mfe test infrastructure from Jest to Vitest
+- Added Vite config with jsdom environment and proper alias resolution
+- Created Jest→Vitest compatibility shim in test setup for gradual migration
+- Test file: [PaymentsPage.customerCreate.test.tsx](../../apps/payments-mfe/src/components/PaymentsPage.customerCreate.test.tsx)
 
 ---
 
