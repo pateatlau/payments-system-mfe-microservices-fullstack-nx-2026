@@ -319,7 +319,7 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
 
         {/* Tab Navigation (Vendors/Admins only) */}
         {isVendor && (
-          <div className="mb-6 flex gap-2 border-b border-slate-200">
+          <div className="flex gap-2 mb-6 border-b border-slate-200">
             <button
               onClick={() => setActiveTab('payments')}
               className={`px-4 py-2 font-medium transition-colors ${
