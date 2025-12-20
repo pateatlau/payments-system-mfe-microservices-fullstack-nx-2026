@@ -46,3 +46,6 @@ export { Loading, loadingVariants } from './lib/components/Loading';
 export type { LoadingProps } from './lib/components/Loading';
 
 export { Skeleton } from './lib/components/Skeleton';
+
+export { Toast, ToastContainer, toastVariants } from './lib/components/Toast';
+export type { ToastProps, ToastContainerProps } from './lib/components/Toast';

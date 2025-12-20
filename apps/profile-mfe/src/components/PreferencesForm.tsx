@@ -20,12 +20,15 @@ import {
   Input,
   Label,
   Skeleton,
+  Toast,
+  ToastContainer,
 } from '@mfe/shared-design-system';
 import {
   updatePreferencesSchema,
   type UpdatePreferencesFormData,
 } from '../utils/validation';
 import { usePreferences, useUpdatePreferences } from '../hooks/usePreferences';
+import { useToast } from '../hooks/useToast';
 
 export interface PreferencesFormProps {
   /** Optional callback fired after a successful save. */
@@ -39,6 +42,7 @@ export function PreferencesForm({ onSuccess }: PreferencesFormProps) {
     error: preferencesError,
   } = usePreferences();
   const updatePreferencesMutation = useUpdatePreferences();
+  const { toasts, dismissToast, showSuccess, showError } = useToast();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -86,7 +90,13 @@ export function PreferencesForm({ onSuccess }: PreferencesFormProps) {
     try {
       setIsSubmitting(true);
       await updatePreferencesMutation.mutateAsync(data);
+      showSuccess('Preferences updated successfully!', 'Success');
       onSuccess?.();
+    } catch (error) {
+      showError(
+        'Failed to update preferences. Please try again.',
+        'Update Failed'
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -126,6 +136,19 @@ export function PreferencesForm({ onSuccess }: PreferencesFormProps) {
 
   return (
     <Card className="p-6 space-y-6">
+      <ToastContainer position="bottom-right">
+        {toasts.map(toast => (
+          <Toast
+            key={toast.id}
+            title={toast.title}
+            message={toast.message}
+            variant={toast.variant}
+            duration={toast.duration}
+            onDismiss={() => dismissToast(toast.id)}
+          />
+        ))}
+      </ToastContainer>
+
       <div className="space-y-1">
         <h2 className="text-lg font-semibold text-slate-900">Preferences</h2>
         <p className="text-sm text-slate-600">

@@ -20,6 +20,8 @@ import {
   Input,
   Label,
   Skeleton,
+  Toast,
+  ToastContainer,
 } from '@mfe/shared-design-system';
 import {
   updateProfileSchema,
@@ -27,6 +29,7 @@ import {
 } from '../utils/validation';
 import { useProfile, useUpdateProfile } from '../hooks/useProfile';
 import { AvatarUpload } from './AvatarUpload';
+import { useToast } from '../hooks/useToast';
 
 export interface ProfileFormProps {
   /** Optional callback fired after a successful save. */
@@ -40,6 +43,7 @@ export function ProfileForm({ onSuccess }: ProfileFormProps) {
     error: profileError,
   } = useProfile();
   const updateProfileMutation = useUpdateProfile();
+  const { toasts, dismissToast, showSuccess, showError } = useToast();
 
   const {
     register,
@@ -64,7 +68,10 @@ export function ProfileForm({ onSuccess }: ProfileFormProps) {
     try {
       setIsSubmitting(true);
       await updateProfileMutation.mutateAsync(data);
+      showSuccess('Profile updated successfully!', 'Success');
       onSuccess?.();
+    } catch (error) {
+      showError('Failed to update profile. Please try again.', 'Update Failed');
     } finally {
       setIsSubmitting(false);
     }
@@ -114,6 +121,19 @@ export function ProfileForm({ onSuccess }: ProfileFormProps) {
 
   return (
     <Card className="p-6 space-y-6">
+      <ToastContainer position="bottom-right">
+        {toasts.map(toast => (
+          <Toast
+            key={toast.id}
+            title={toast.title}
+            message={toast.message}
+            variant={toast.variant}
+            duration={toast.duration}
+            onDismiss={() => dismissToast(toast.id)}
+          />
+        ))}
+      </ToastContainer>
+
       <div className="space-y-1">
         <h2 className="text-lg font-semibold text-slate-900">Profile</h2>
         <p className="text-sm text-slate-600">
