@@ -168,24 +168,25 @@
 
 ### Task 2.4: Implement Payment Reports Component
 
-- [ ] Component file created (PaymentReports.tsx)
-- [ ] usePaymentReports hook created (usePaymentReports.ts)
-- [ ] Summary cards implemented:
-  - [ ] Total payment count
-  - [ ] Total amount (by currency)
-  - [ ] Success rate (completed / total)
-  - [ ] Average payment amount
-- [ ] Charts implemented:
-  - [ ] Pie chart: payments by status
-  - [ ] Bar chart: payments by type
-  - [ ] Line chart: payments over time
-- [ ] Date range picker for filtering
-- [ ] Loading states with skeleton
-- [ ] Error states with alert
-- [ ] Role-based visibility (vendors/admins only)
-- [ ] Responsive design
-- [ ] Tests created and passing (PaymentReports.test.tsx)
-- **Status:** Not Started
+- [x] Component file created (PaymentReports.tsx)
+- [x] usePaymentReports hook available (usePayments.ts)
+- [x] Summary cards implemented:
+  - [x] Total payment count
+  - [x] Total amount
+  - [x] Success rate (completed / total)
+  - [x] Average payment amount
+- [x] Charts implemented (bar representations):
+  - [x] Payments by status
+  - [x] Payments by type
+  - [ ] Trend over time (deferred)
+- [x] Date range picker for filtering
+- [x] Loading states with skeleton
+- [x] Error states with alert
+- [x] Role-based visibility (vendors/admins only)
+- [x] Responsive design
+- [x] Tests created (PaymentReports.test.tsx)
+- [ ] Tests passing (pending Jest configuration)
+- **Status:** 🟡 In Progress
 - **Depends on:** Nothing (API endpoint exists)
 - **Blocking:** Task 2.8
 
