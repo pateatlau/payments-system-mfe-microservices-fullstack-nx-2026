@@ -79,6 +79,10 @@ export async function listPayments(params?: {
   limit?: number;
   status?: PaymentStatus;
   type?: PaymentType;
+  fromDate?: string;
+  toDate?: string;
+  minAmount?: number;
+  maxAmount?: number;
 }): Promise<Payment[]> {
   const response = await paymentsApiClient.get<ListPaymentsResponse>(
     '/payments',
