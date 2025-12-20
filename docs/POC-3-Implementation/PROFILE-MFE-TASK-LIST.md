@@ -353,15 +353,15 @@
 
 ### Task 4.2: Add Navigation Link in Header
 
-- [ ] Profile link added to shared-header-ui.tsx
-- [ ] Link visible when authenticated
-- [ ] Navigation works
-- [ ] Link styled correctly
-- [ ] Link positioned correctly (after Payments, before Admin)
+- [x] Profile link added to shared-header-ui.tsx
+- [x] Link visible when authenticated
+- [x] Navigation works
+- [x] Link styled correctly
+- [x] Link positioned correctly (after Payments, before Admin)
 
-**Status:** Not Started  
-**Completed Date:**  
-**Notes:**
+**Status:** Complete  
+**Completed Date:** 2025-12-20  
+**Notes:** Successfully added a Profile link to the header navigation. The link is styled consistently with other navigation items, is only visible to authenticated users, and is positioned between Payments and Admin links. The navigation to the Profile page works as expected.
 
 ---
 
