@@ -998,7 +998,7 @@ All hooks include authentication checks, proper error handling, and follow the s
 
 ---
 
-### Task 3.6: Create ProfileTabs Component (Optional)
+### Task 3.6: Create ProfileTabs Component
 
 **Objective:** Create tab navigation component for ProfilePage
 

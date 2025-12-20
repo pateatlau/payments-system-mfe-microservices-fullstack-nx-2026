@@ -309,7 +309,7 @@
 
 ---
 
-### Task 3.6: Create ProfileTabs Component (Optional)
+### Task 3.6: Create ProfileTabs Component
 
 - [ ] ProfileTabs.tsx created (if needed)
 - [ ] Tab navigation working
