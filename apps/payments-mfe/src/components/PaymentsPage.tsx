@@ -27,6 +27,7 @@ import {
   usePaymentUpdates,
 } from '../hooks';
 import { PaymentFilters } from './PaymentFilters';
+import { PaymentDetails } from './PaymentDetails';
 import type { UsePaymentsFilters } from '../hooks/usePayments';
 import type { Payment } from '../api/types';
 import { PaymentType, PaymentStatus } from 'shared-types';
@@ -136,6 +137,9 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingPayment, setEditingPayment] = useState<Payment | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [selectedPaymentId, setSelectedPaymentId] = useState<string | null>(
+    null
+  );
   const [filters, setFilters] = useState<UsePaymentsFilters>({
     status: 'all',
     type: 'all',
@@ -483,11 +487,9 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
                   <th className="px-6 py-3 text-xs font-medium tracking-wider text-left uppercase text-slate-500">
                     Created
                   </th>
-                  {isVendor && (
-                    <th className="px-6 py-3 text-xs font-medium tracking-wider text-left uppercase text-slate-500">
-                      Actions
-                    </th>
-                  )}
+                  <th className="px-6 py-3 text-xs font-medium tracking-wider text-left uppercase text-slate-500">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-slate-200">
@@ -590,48 +592,59 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
                           <td className="px-6 py-4 text-sm whitespace-nowrap text-slate-500">
                             {formatDate(payment.createdAt)}
                           </td>
-                          {isVendor && (
-                            <td className="px-6 py-4 text-sm font-medium whitespace-nowrap">
-                              <div className="flex gap-2">
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => startEdit(payment)}
-                                >
-                                  Edit
-                                </Button>
-                                {deleteConfirmId === payment.id ? (
-                                  <div className="flex gap-2">
+                          <td className="px-6 py-4 text-sm font-medium whitespace-nowrap">
+                            <div className="flex gap-2">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setSelectedPaymentId(payment.id)}
+                              >
+                                View Details
+                              </Button>
+                              {isVendor && (
+                                <>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => startEdit(payment)}
+                                  >
+                                    Edit
+                                  </Button>
+                                  {deleteConfirmId === payment.id ? (
+                                    <div className="flex gap-2">
+                                      <Button
+                                        variant="destructive"
+                                        size="sm"
+                                        onClick={() => handleDelete(payment.id)}
+                                        disabled={
+                                          deletePaymentMutation.isPending
+                                        }
+                                      >
+                                        Confirm
+                                      </Button>
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => setDeleteConfirmId(null)}
+                                      >
+                                        Cancel
+                                      </Button>
+                                    </div>
+                                  ) : (
                                     <Button
                                       variant="destructive"
                                       size="sm"
-                                      onClick={() => handleDelete(payment.id)}
-                                      disabled={deletePaymentMutation.isPending}
+                                      onClick={() =>
+                                        setDeleteConfirmId(payment.id)
+                                      }
                                     >
-                                      Confirm
+                                      Delete
                                     </Button>
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      onClick={() => setDeleteConfirmId(null)}
-                                    >
-                                      Cancel
-                                    </Button>
-                                  </div>
-                                ) : (
-                                  <Button
-                                    variant="destructive"
-                                    size="sm"
-                                    onClick={() =>
-                                      setDeleteConfirmId(payment.id)
-                                    }
-                                  >
-                                    Delete
-                                  </Button>
-                                )}
-                              </div>
-                            </td>
-                          )}
+                                  )}
+                                </>
+                              )}
+                            </div>
+                          </td>
                         </>
                       )}
                     </tr>
@@ -670,6 +683,41 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
           </Alert>
         )}
       </div>
+
+      {/* Payment Details Modal */}
+      {selectedPaymentId && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+          onClick={() => setSelectedPaymentId(null)}
+        >
+          <div
+            className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-white rounded-lg shadow-xl"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="sticky top-0 z-10 flex items-center justify-between p-4 bg-white border-b">
+              <h2 className="text-xl font-semibold">Payment Details</h2>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setSelectedPaymentId(null)}
+                aria-label="Close modal"
+              >
+                ✕
+              </Button>
+            </div>
+            <div className="p-6">
+              <PaymentDetails
+                payment={
+                  payments?.find(p => p.id === selectedPaymentId) || null
+                }
+                isLoading={false}
+                isError={false}
+                onClose={() => setSelectedPaymentId(null)}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

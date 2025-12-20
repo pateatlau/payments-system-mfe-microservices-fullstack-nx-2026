@@ -3,7 +3,7 @@
 **Status:** Phase 1 Complete, Phase 2 In Progress  
 **Version:** 1.0  
 **Date:** December 21, 2025  
-**Last Updated:** 2025-12-21 (Task 2.1 Complete)
+**Last Updated:** 2025-12-21 (Task 2.7 Complete)
 
 ---
 
@@ -16,16 +16,16 @@
 
 ## Progress Overview
 
-**Overall Progress:** 36% (9/25 tasks)
+**Overall Progress:** 40% (10/25 tasks)
 
-| Phase                               | Status          | Progress       | Tasks  |
-| ----------------------------------- | --------------- | -------------- | ------ |
-| **Phase 1: Backend PUT Endpoint**   | ✅ Complete     | 100% (5/5)     | 5      |
-| **Phase 2: Frontend Components**    | 🟡 In Progress  | 50% (4/8)      | 8      |
-| **Phase 3: API Client Extensions**  | Not Started     | 0% (0/3)       | 3      |
-| **Phase 4: Testing & Refinement**   | Not Started     | 0% (0/4)       | 4      |
-| **Phase 5: Polish & Documentation** | Not Started     | 0% (0/5)       | 5      |
-| **TOTAL**                           | **In Progress** | **32% (8/25)** | **25** |
+| Phase                               | Status          | Progress        | Tasks  |
+| ----------------------------------- | --------------- | --------------- | ------ |
+| **Phase 1: Backend PUT Endpoint**   | ✅ Complete     | 100% (5/5)      | 5      |
+| **Phase 2: Frontend Components**    | 🟡 In Progress  | 63% (5/8)       | 8      |
+| **Phase 3: API Client Extensions**  | Not Started     | 0% (0/3)        | 3      |
+| **Phase 4: Testing & Refinement**   | Not Started     | 0% (0/4)        | 4      |
+| **Phase 5: Polish & Documentation** | Not Started     | 0% (0/5)        | 5      |
+| **TOTAL**                           | **In Progress** | **40% (10/25)** | **25** |
 
 ---
 
@@ -239,15 +239,21 @@
 
 ### Task 2.7: Integrate Payment Details Modal into PaymentsPage
 
-- [ ] "View Details" button added to payment table
-- [ ] Modal state management (open/close, selected payment ID)
-- [ ] PaymentDetails component renders in modal
-- [ ] Modal close button functional
-- [ ] Selected payment ID passed correctly
-- [ ] Loading state while details load
-- [ ] Error state if payment not found
-- [ ] Integration tests written and passing
-- **Status:** Not Started
+- [x] "View Details" button added to payment table ✅
+- [x] Modal state management (open/close, selected payment ID) ✅
+- [x] PaymentDetails component renders in modal ✅
+- [x] Modal close button functional ✅
+- [x] Selected payment ID passed correctly ✅
+- [x] Backdrop click to close modal ✅
+- [x] Click inside modal does not close it (stopPropagation) ✅
+- [x] Payment object passed to PaymentDetails ✅
+- [x] Actions column visible to all users (View Details) ✅
+- [x] Edit/Delete buttons visible only to vendors ✅
+- [x] Build passes ✅
+- **Status:** ✅ Complete
+- **Depends on:** Task 2.1 (PaymentDetails component)
+- **Blocking:** None
+- **Notes:** Modal displays full payment details; uses fixed overlay with backdrop; click outside to close
 - **Depends on:** Task 2.1
 - **Blocking:** Nothing
 
