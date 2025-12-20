@@ -130,20 +130,20 @@ apps/payments-service/
    export const updatePaymentSchema = z
      .object({
        amount: z.number().positive('Amount must be positive').optional(),
-       currency: z
-         .string()
-         .length(3, 'Currency must be 3-letter code')
-         .optional(),
        description: z.string().max(500).optional(),
        recipientId: z.string().uuid().optional(),
        recipientEmail: z.string().email().optional(),
        metadata: z.record(z.unknown()).optional(),
+       type: z.enum(['instant', 'scheduled', 'recurring']).optional(),
      })
      .refine(
        data =>
-         data.recipientId ||
-         data.recipientEmail ||
-         Object.keys(data).length > 0,
+         data.amount !== undefined ||
+         data.description !== undefined ||
+         data.recipientId !== undefined ||
+         data.recipientEmail !== undefined ||
+         data.metadata !== undefined ||
+         data.type !== undefined,
        { message: 'Must provide at least one field to update' }
      );
    ```
@@ -153,10 +153,10 @@ apps/payments-service/
 
 **Verification:**
 
-- [ ] Schema created
-- [ ] Type inference working
-- [ ] No TypeScript errors
-- [ ] Schema documented
+- [x] Schema created
+- [x] Type inference working
+- [x] No TypeScript errors
+- [x] Schema documented
 
 **Acceptance Criteria:**
 
@@ -165,7 +165,10 @@ apps/payments-service/
 - [x] Handles all update fields
 - [x] Properly documented
 
-**Status:** Not Started
+**Status:** Complete  
+**Completed Date:** 2025-12-20
+
+**Notes:** Schema blocks currency changes, allows full metadata replacement, permits type updates, and requires at least one field in the payload.
 
 ---
 
@@ -177,6 +180,7 @@ apps/payments-service/
 
 1. Open `apps/payments-service/src/controllers/payment.controller.ts`
 2. Create `updatePayment` handler:
+
    ```typescript
    export async function updatePayment(req: Request, res: Response) {
      // Parse request
@@ -198,6 +202,7 @@ apps/payments-service/
      return res.json(payment);
    }
    ```
+
 3. Add role-based authorization (VENDOR, ADMIN only)
 4. Add error handling (404, 403, 400)
 5. Add JSDoc documentation
@@ -228,6 +233,7 @@ apps/payments-service/
 
 1. Open `apps/payments-service/src/services/payment.service.ts`
 2. Create `updatePayment` method:
+
    ```typescript
    async updatePayment(
      id: string,
@@ -263,6 +269,7 @@ apps/payments-service/
      return updated;
    }
    ```
+
 3. Add validation for status restrictions
 4. Add recipient validation
 5. Create transaction record for audit
