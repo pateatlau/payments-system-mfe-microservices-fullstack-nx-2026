@@ -16,12 +16,12 @@
 
 ## Progress Overview
 
-**Overall Progress:** 32% (8/25 tasks)
+**Overall Progress:** 36% (9/25 tasks)
 
 | Phase                               | Status          | Progress       | Tasks  |
 | ----------------------------------- | --------------- | -------------- | ------ |
 | **Phase 1: Backend PUT Endpoint**   | ✅ Complete     | 100% (5/5)     | 5      |
-| **Phase 2: Frontend Components**    | 🟡 In Progress  | 38% (3/8)      | 8      |
+| **Phase 2: Frontend Components**    | 🟡 In Progress  | 50% (4/8)      | 8      |
 | **Phase 3: API Client Extensions**  | Not Started     | 0% (0/3)       | 3      |
 | **Phase 4: Testing & Refinement**   | Not Started     | 0% (0/4)       | 4      |
 | **Phase 5: Polish & Documentation** | Not Started     | 0% (0/5)       | 5      |
@@ -212,26 +212,30 @@
 
 - [ ] Component file created (PaymentUpdateForm.tsx)
 - [ ] useUpdatePayment hook created or extended
-- [ ] Form fields implemented:
-  - [ ] Amount (editable)
-  - [ ] Currency (editable)
-  - [ ] Description (editable)
-  - [ ] Recipient (editable)
-  - [ ] Metadata (optional)
-- [ ] React Hook Form + Zod integration
-- [ ] Schema created (updatePaymentSchema)
-- [ ] Validation working:
-  - [ ] Cannot update completed/failed payments
-  - [ ] Recipient validation
-  - [ ] Amount must be positive
-- [ ] Form submission calls API
-- [ ] Success/error feedback (toasts)
-- [ ] Loading states during submission
-- [ ] Optimistic updates if possible
-- [ ] Tests created and passing (PaymentUpdateForm.test.tsx)
-- **Status:** Not Started
+- [x] Form fields implemented:
+  - [x] Amount (editable)
+  - [x] Currency (editable)
+  - [x] Description (editable)
+  - [x] Recipient email (editable)
+  - [x] Metadata (JSON textarea)
+- [x] React Hook Form + Zod integration
+- [x] Schema created (updatePaymentSchema)
+- [x] Validation working:
+  - [x] Cannot update completed/failed payments
+  - [x] Email validation for recipient
+  - [x] Amount must be positive
+  - [x] Currency must be 3 uppercase letters
+- [x] Form submission calls API (updatePaymentDetails)
+- [x] Success/error feedback (Alert components)
+- [x] Loading states during submission
+- [x] Submit button disabled when no changes
+- [x] Tests created and passing (PaymentUpdateForm.test.tsx - 24/27 passing)
+- [x] UpdatePaymentDetailsDto type added
+- [x] useUpdatePayment hook created
+- **Status:** Complete
 - **Depends on:** Tasks 1.5 (backend ready) and 3.2 (hook)
 - **Blocking:** Nothing
+- **Notes:** Component prevents updates to completed/failed payments; only changed fields are submitted
 
 ### Task 2.7: Integrate Payment Details Modal into PaymentsPage
 

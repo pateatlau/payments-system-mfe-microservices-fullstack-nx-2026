@@ -4,6 +4,7 @@ import { useAuthStore } from 'shared-auth-store';
 import type {
   CreatePaymentDto,
   UpdatePaymentDto,
+  UpdatePaymentDetailsDto,
   PaymentReports,
   PaymentReportsParams,
 } from './types';
@@ -142,6 +143,26 @@ export async function updatePaymentStatus(
 ): Promise<Payment> {
   const response = await paymentsApiClient.patch<PaymentResponse>(
     `/payments/${id}/status`,
+    payload
+  );
+
+  if (!response?.data) {
+    throw new Error('Invalid response structure from payments API');
+  }
+
+  return response.data;
+}
+
+/**
+ * Update payment details (amount, currency, description, recipient, metadata)
+ * Cannot update completed or failed payments
+ */
+export async function updatePaymentDetails(
+  id: string,
+  payload: UpdatePaymentDetailsDto
+): Promise<Payment> {
+  const response = await paymentsApiClient.put<PaymentResponse>(
+    `/payments/${id}`,
     payload
   );
 

@@ -25,6 +25,18 @@ export interface UpdatePaymentDto {
 }
 
 /**
+ * Update payment details payload
+ * Matches backend PUT /payments/:id validator (`updatePaymentSchema`)
+ */
+export interface UpdatePaymentDetailsDto {
+  amount?: number;
+  currency?: string;
+  description?: string;
+  recipientEmail?: string;
+  metadata?: Record<string, unknown>;
+}
+
+/**
  * Payment reports data (for VENDOR and ADMIN)
  */
 export interface PaymentReports {
