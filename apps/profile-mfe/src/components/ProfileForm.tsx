@@ -9,7 +9,7 @@
  * - AvatarUpload for avatar selection/preview
  */
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
@@ -19,6 +19,7 @@ import {
   Card,
   Input,
   Label,
+  Skeleton,
 } from '@mfe/shared-design-system';
 import {
   updateProfileSchema,
@@ -44,6 +45,7 @@ export function ProfileForm({ onSuccess }: ProfileFormProps) {
     register,
     handleSubmit,
     setValue,
+    watch,
     formState: { errors },
     reset,
   } = useForm<UpdateProfileFormData>({
@@ -55,6 +57,18 @@ export function ProfileForm({ onSuccess }: ProfileFormProps) {
       bio: '',
     },
   });
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const onSubmit = async (data: UpdateProfileFormData) => {
+    try {
+      setIsSubmitting(true);
+      await updateProfileMutation.mutateAsync(data);
+      onSuccess?.();
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   // Populate form with existing profile data when it loads
   useEffect(() => {
@@ -70,22 +84,42 @@ export function ProfileForm({ onSuccess }: ProfileFormProps) {
     });
   }, [profile, reset]);
 
-  const onSubmit = (data: UpdateProfileFormData) => {
-    updateProfileMutation.mutate(data, {
-      onSuccess: () => {
-        onSuccess?.();
-      },
-    });
-  };
-
-  const isSubmitting = updateProfileMutation.isPending;
+  // Show loading skeleton while profile is loading
+  if (isProfileLoading) {
+    return (
+      <Card className="p-6 space-y-6">
+        <div className="space-y-2">
+          <Skeleton className="h-8 w-48" />
+          <Skeleton className="h-4 w-64" />
+        </div>
+        <div className="space-y-6">
+          <div className="flex items-center space-x-6">
+            <Skeleton className="h-24 w-24 rounded-full" />
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-32" />
+              <Skeleton className="h-4 w-48" />
+            </div>
+          </div>
+          {[1, 2, 3, 4].map(i => (
+            <div key={i} className="space-y-1">
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+          ))}
+          <Skeleton className="h-10 w-24 ml-auto" />
+        </div>
+      </Card>
+    );
+  }
 
   return (
-    <Card className="p-6 space-y-4">
-      <h2 className="text-lg font-semibold text-slate-900">Profile</h2>
-      <p className="text-sm text-slate-600">
-        Update your contact information and profile details.
-      </p>
+    <Card className="p-6 space-y-6">
+      <div className="space-y-1">
+        <h2 className="text-lg font-semibold text-slate-900">Profile</h2>
+        <p className="text-sm text-slate-600">
+          Update your contact information and profile details.
+        </p>
+      </div>
 
       {/* Backend profile load error */}
       {profileError && (
@@ -112,8 +146,8 @@ export function ProfileForm({ onSuccess }: ProfileFormProps) {
           <Input
             id="phoneNumber"
             type="tel"
-            placeholder="Enter phone number"
-            disabled={isProfileLoading || isSubmitting}
+            placeholder="+1 (555) 000-0000"
+            disabled={isSubmitting}
             {...register('phoneNumber')}
           />
           {errors.phoneNumber && (
@@ -128,9 +162,8 @@ export function ProfileForm({ onSuccess }: ProfileFormProps) {
           <Label htmlFor="address">Address</Label>
           <Input
             id="address"
-            type="text"
-            placeholder="Enter address"
-            disabled={isProfileLoading || isSubmitting}
+            placeholder="123 Main St, Anytown, USA"
+            disabled={isSubmitting}
             {...register('address')}
           />
           {errors.address && (
@@ -145,9 +178,10 @@ export function ProfileForm({ onSuccess }: ProfileFormProps) {
           <Label htmlFor="bio">Bio</Label>
           <textarea
             id="bio"
-            className="w-full min-h-[80px] rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 disabled:cursor-not-allowed disabled:opacity-50"
-            placeholder="Tell us a bit about yourself (max 1000 characters)"
-            disabled={isProfileLoading || isSubmitting}
+            rows={4}
+            className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            placeholder="Tell us about yourself..."
+            disabled={isSubmitting}
             {...register('bio')}
           />
           {errors.bio && (
@@ -158,34 +192,44 @@ export function ProfileForm({ onSuccess }: ProfileFormProps) {
         </div>
 
         {/* Avatar */}
-        <div className="space-y-1.5">
-          <Label>Avatar</Label>
-          <AvatarUpload
-            initialUrl={profile?.avatarUrl ?? null}
-            onFileChange={file => {
-              // For now we only set avatarUrl to empty string or
-              // keep existing URL; upload flow will be wired in later.
-              if (!file) {
-                setValue('avatarUrl', '');
-                return;
-              }
+        <div className="space-y-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            <div className="shrink-0">
+              <AvatarUpload
+                initialUrl={watch('avatarUrl') || undefined}
+                onFileChange={(file: File | null) => {
+                  // For now we only set avatarUrl to empty string or
+                  // keep existing URL; upload flow will be wired in later.
+                  if (!file) {
+                    setValue('avatarUrl', '');
+                    return;
+                  }
 
-              // Indicate that a new image was chosen; integration with
-              // actual upload endpoint will be added in avatar tasks.
-              setValue('avatarUrl', '');
-            }}
-          />
-          {errors.avatarUrl && (
-            <p className="text-xs text-red-600">
-              {errors.avatarUrl.message as string}
-            </p>
-          )}
-        </div>
+                  // Create a preview URL for the selected file
+                  const previewUrl = URL.createObjectURL(file);
+                  setValue('avatarUrl', previewUrl);
+                }}
+              />
+            </div>
+            <div className="space-y-1">
+              <p className="text-sm font-medium text-slate-700">
+                Profile Photo
+              </p>
+              <p className="text-sm text-slate-500">
+                Recommended size: 200x200px. Max 2MB.
+              </p>
+            </div>
+          </div>
 
-        <div className="flex justify-end pt-2">
-          <Button type="submit" disabled={isProfileLoading || isSubmitting}>
-            {isSubmitting ? 'Saving...' : 'Save changes'}
-          </Button>
+          <div className="flex justify-end pt-2">
+            <Button
+              type="submit"
+              className="w-full sm:w-auto"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Saving...' : 'Save Changes'}
+            </Button>
+          </div>
         </div>
       </form>
     </Card>

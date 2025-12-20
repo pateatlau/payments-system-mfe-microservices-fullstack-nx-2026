@@ -368,13 +368,14 @@
 ### Task 4.3: Update nginx Configuration
 
 - [x] profile_mfe upstream added to nginx.conf
-- [x] Location block added for Profile MFE
-- [x] nginx configuration validated (`nginx -t`)
-- [x] Proxy routing works
+- [x] Location block for /profile-mfe/ added
+- [x] HMR websocket configuration added
+- [x] Configuration tested with HTTPS
+- [x] Configuration tested with HTTP
 
 **Status:** Complete  
 **Completed Date:** 2025-12-20  
-**Notes:** Successfully updated nginx configuration for the Profile MFE. Added upstream configuration, location blocks for assets, and WebSocket HMR support. Configuration has been validated with `nginx -t`.
+**Notes:** Successfully updated the nginx configuration to include the Profile MFE. The configuration includes proper routing for both the main application and HMR websocket connections. The setup works correctly in both HTTP and HTTPS modes.
 
 ---
 

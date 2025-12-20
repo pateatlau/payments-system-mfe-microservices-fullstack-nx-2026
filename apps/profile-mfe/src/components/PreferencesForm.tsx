@@ -9,7 +9,7 @@
  * - TanStack Query hooks (usePreferences, useUpdatePreferences)
  */
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
@@ -19,6 +19,7 @@ import {
   Card,
   Input,
   Label,
+  Skeleton,
 } from '@mfe/shared-design-system';
 import {
   updatePreferencesSchema,
@@ -38,6 +39,8 @@ export function PreferencesForm({ onSuccess }: PreferencesFormProps) {
     error: preferencesError,
   } = usePreferences();
   const updatePreferencesMutation = useUpdatePreferences();
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
     register,
@@ -59,41 +62,76 @@ export function PreferencesForm({ onSuccess }: PreferencesFormProps) {
     },
   });
 
+  // Show loading skeleton while preferences are loading
+  const isLoading = isPreferencesLoading || !preferences;
+
   // Populate form with existing preferences when they load
   useEffect(() => {
-    if (!preferences) {
-      return;
+    if (preferences) {
+      reset({
+        theme: preferences.theme,
+        language: preferences.language,
+        timezone: preferences.timezone,
+        currency: preferences.currency,
+        notifications: {
+          email: preferences.notifications?.email || false,
+          push: preferences.notifications?.push || false,
+          sms: preferences.notifications?.sms || false,
+        },
+      });
     }
-
-    reset({
-      theme: preferences.theme ?? 'system',
-      language: preferences.language ?? '',
-      currency: preferences.currency ?? '',
-      timezone: preferences.timezone ?? '',
-      notifications: {
-        email: preferences.notifications?.email ?? false,
-        push: preferences.notifications?.push ?? false,
-        sms: preferences.notifications?.sms ?? false,
-      },
-    });
   }, [preferences, reset]);
 
-  const onSubmit = (data: UpdatePreferencesFormData) => {
-    updatePreferencesMutation.mutate(data, {
-      onSuccess: () => {
-        onSuccess?.();
-      },
-    });
+  const onSubmit = async (data: UpdatePreferencesFormData) => {
+    try {
+      setIsSubmitting(true);
+      await updatePreferencesMutation.mutateAsync(data);
+      onSuccess?.();
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const isSubmitting = updatePreferencesMutation.isPending;
+  // Show loading skeleton if data is loading
+  if (isLoading) {
+    return (
+      <Card className="p-6 space-y-6">
+        <div className="space-y-2">
+          <Skeleton className="h-8 w-48" />
+          <Skeleton className="h-4 w-64" />
+        </div>
+        <div className="space-y-6">
+          {[1, 2, 3, 4, 5].map(i => (
+            <div key={i} className="space-y-2">
+              <Skeleton className="h-4 w-32" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+          ))}
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-48" />
+            <div className="space-y-2">
+              {[1, 2, 3].map(i => (
+                <div key={i} className="flex items-center space-x-2">
+                  <Skeleton className="h-5 w-10 rounded-full" />
+                  <Skeleton className="h-4 w-32" />
+                </div>
+              ))}
+            </div>
+          </div>
+          <Skeleton className="h-10 w-24 ml-auto" />
+        </div>
+      </Card>
+    );
+  }
 
   return (
-    <Card className="p-6 space-y-4">
-      <h2 className="text-lg font-semibold text-slate-900">Preferences</h2>
-      <p className="text-sm text-slate-600">
-        Configure your theme, language, currency, timezone, and notifications.
-      </p>
+    <Card className="p-6 space-y-6">
+      <div className="space-y-1">
+        <h2 className="text-lg font-semibold text-slate-900">Preferences</h2>
+        <p className="text-sm text-slate-600">
+          Customize your application preferences and notification settings.
+        </p>
+      </div>
 
       {/* Backend preferences load error */}
       {preferencesError && (
@@ -104,7 +142,6 @@ export function PreferencesForm({ onSuccess }: PreferencesFormProps) {
         </Alert>
       )}
 
-      {/* Update error */}
       {updatePreferencesMutation.error && (
         <Alert variant="destructive">
           <AlertDescription>
@@ -113,19 +150,19 @@ export function PreferencesForm({ onSuccess }: PreferencesFormProps) {
         </Alert>
       )}
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" noValidate>
         {/* Theme */}
         <div className="space-y-1.5">
           <Label htmlFor="theme">Theme</Label>
           <select
             id="theme"
-            className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex h-10 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
             disabled={isPreferencesLoading || isSubmitting}
             {...register('theme')}
           >
-            <option value="system">System</option>
             <option value="light">Light</option>
             <option value="dark">Dark</option>
+            <option value="system">System</option>
           </select>
           {errors.theme && (
             <p className="text-xs text-red-600">
@@ -188,40 +225,79 @@ export function PreferencesForm({ onSuccess }: PreferencesFormProps) {
         {/* Notifications */}
         <div className="space-y-1.5">
           <Label>Notifications</Label>
-          <div className="space-y-2">
-            <label className="flex items-center space-x-2 text-sm text-slate-700">
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label
+                  htmlFor="notifications-email"
+                  className="text-sm font-medium"
+                >
+                  Email Notifications
+                </Label>
+                <p className="text-xs text-slate-500">
+                  Receive notifications via email
+                </p>
+              </div>
               <input
                 type="checkbox"
+                id="notifications-email"
                 className="h-4 w-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500"
-                disabled={isPreferencesLoading || isSubmitting}
+                disabled={isSubmitting}
                 {...register('notifications.email')}
               />
-              <span>Email notifications</span>
-            </label>
-            <label className="flex items-center space-x-2 text-sm text-slate-700">
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label
+                  htmlFor="notifications-push"
+                  className="text-sm font-medium"
+                >
+                  Push Notifications
+                </Label>
+                <p className="text-xs text-slate-500">
+                  Receive browser notifications
+                </p>
+              </div>
               <input
                 type="checkbox"
+                id="notifications-push"
                 className="h-4 w-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500"
-                disabled={isPreferencesLoading || isSubmitting}
+                disabled={isSubmitting}
                 {...register('notifications.push')}
               />
-              <span>Push notifications</span>
-            </label>
-            <label className="flex items-center space-x-2 text-sm text-slate-700">
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label
+                  htmlFor="notifications-sms"
+                  className="text-sm font-medium"
+                >
+                  SMS Notifications
+                </Label>
+                <p className="text-xs text-slate-500">
+                  Receive text message notifications
+                </p>
+              </div>
               <input
                 type="checkbox"
+                id="notifications-sms"
                 className="h-4 w-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500"
-                disabled={isPreferencesLoading || isSubmitting}
+                disabled={isSubmitting}
                 {...register('notifications.sms')}
               />
-              <span>SMS notifications</span>
-            </label>
+            </div>
           </div>
         </div>
 
         <div className="flex justify-end pt-2">
-          <Button type="submit" disabled={isPreferencesLoading || isSubmitting}>
-            {isSubmitting ? 'Saving...' : 'Save preferences'}
+          <Button
+            type="submit"
+            className="w-full sm:w-auto"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? 'Saving...' : 'Save Preferences'}
           </Button>
         </div>
       </form>
