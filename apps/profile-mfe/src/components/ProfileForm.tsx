@@ -117,7 +117,7 @@ export function ProfileForm({ onSuccess }: ProfileFormProps) {
             {...register('phoneNumber')}
           />
           {errors.phoneNumber && (
-            <p className="text-xs text-red-600">
+            <p className="text-xs text-red-600" role="alert" aria-live="polite">
               {errors.phoneNumber.message as string}
             </p>
           )}
@@ -134,7 +134,7 @@ export function ProfileForm({ onSuccess }: ProfileFormProps) {
             {...register('address')}
           />
           {errors.address && (
-            <p className="text-xs text-red-600">
+            <p className="text-xs text-red-600" role="alert" aria-live="polite">
               {errors.address.message as string}
             </p>
           )}
@@ -145,13 +145,13 @@ export function ProfileForm({ onSuccess }: ProfileFormProps) {
           <Label htmlFor="bio">Bio</Label>
           <textarea
             id="bio"
-            className="w-full min-h-[80px] rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 disabled:cursor-not-allowed disabled:opacity-50"
+            className="w-full min-h-20 rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 disabled:cursor-not-allowed disabled:opacity-50"
             placeholder="Tell us a bit about yourself (max 1000 characters)"
             disabled={isProfileLoading || isSubmitting}
             {...register('bio')}
           />
           {errors.bio && (
-            <p className="text-xs text-red-600">
+            <p className="text-xs text-red-600" role="alert" aria-live="polite">
               {errors.bio.message as string}
             </p>
           )}
@@ -159,7 +159,7 @@ export function ProfileForm({ onSuccess }: ProfileFormProps) {
 
         {/* Avatar */}
         <div className="space-y-1.5">
-          <Label>Avatar</Label>
+          <Label id="avatar-label">Avatar</Label>
           <AvatarUpload
             initialUrl={profile?.avatarUrl ?? null}
             onFileChange={file => {
@@ -174,9 +174,10 @@ export function ProfileForm({ onSuccess }: ProfileFormProps) {
               // actual upload endpoint will be added in avatar tasks.
               setValue('avatarUrl', '');
             }}
+            aria-labelledby="avatar-label"
           />
           {errors.avatarUrl && (
-            <p className="text-xs text-red-600">
+            <p className="text-xs text-red-600" role="alert" aria-live="polite">
               {errors.avatarUrl.message as string}
             </p>
           )}

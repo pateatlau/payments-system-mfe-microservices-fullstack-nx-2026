@@ -265,7 +265,23 @@ module.exports = {
   // Optimization settings
   optimization: {
     minimize: isProduction,
-    splitChunks: false,
+    splitChunks: {
+      chunks: 'all',
+      cacheGroups: {
+        vendor: {
+          test: /[\\/]node_modules[\\/]/,
+          name: 'vendors',
+          chunks: 'all',
+          priority: 10,
+        },
+        shared: {
+          test: /[\\/]libs[\\/]/,
+          name: 'shared',
+          chunks: 'all',
+          priority: 5,
+        },
+      },
+    },
   },
   // Source maps for development
   devtool: isDevelopment ? 'eval-source-map' : 'source-map',

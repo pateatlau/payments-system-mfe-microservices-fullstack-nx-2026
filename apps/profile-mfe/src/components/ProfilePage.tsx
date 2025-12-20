@@ -60,11 +60,38 @@ export function ProfilePage() {
         {/* Content */}
         {!isLoading && profile && (
           <div className="space-y-4">
-            {activeTab === 'profile' && <ProfileForm />}
+            {activeTab === 'profile' && (
+              <div
+                role="tabpanel"
+                id="tabpanel-profile"
+                aria-labelledby="tab-profile"
+                tabIndex={0}
+              >
+                <ProfileForm />
+              </div>
+            )}
 
-            {activeTab === 'preferences' && <PreferencesForm />}
+            {activeTab === 'preferences' && (
+              <div
+                role="tabpanel"
+                id="tabpanel-preferences"
+                aria-labelledby="tab-preferences"
+                tabIndex={0}
+              >
+                <PreferencesForm />
+              </div>
+            )}
 
-            {activeTab === 'account' && <AccountInfo />}
+            {activeTab === 'account' && (
+              <div
+                role="tabpanel"
+                id="tabpanel-account"
+                aria-labelledby="tab-account"
+                tabIndex={0}
+              >
+                <AccountInfo />
+              </div>
+            )}
           </div>
         )}
       </div>
