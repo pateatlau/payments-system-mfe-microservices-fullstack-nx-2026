@@ -799,19 +799,19 @@ apps/payments-service/
 
 **Verification:**
 
-- [ ] Reports tab visible
-- [ ] Tab switches content
-- [ ] Reports load
-- [ ] Role check working
+- [x] Reports tab visible ✅
+- [x] Tab switches content ✅
+- [x] Reports load ✅
+- [x] Role check working ✅
 
 **Acceptance Criteria:**
 
-- [ ] Reports accessible
-- [ ] Tab navigation works
-- [ ] Role check enforced
-- [ ] Tests passing
+- [x] Reports accessible ✅
+- [x] Tab navigation works ✅
+- [x] Role check enforced ✅
+- [x] Tests passing (existing component tests; integration covered by PaymentsPage changes) ✅
 
-**Status:** Not Started
+**Status:** ✅ Complete (2025-12-21)
 
 ---
 

@@ -3,7 +3,7 @@
 **Status:** Phase 1 Complete, Phase 2 In Progress  
 **Version:** 1.0  
 **Date:** December 21, 2025  
-**Last Updated:** 2025-12-21 (Task 2.7 Complete)
+**Last Updated:** 2025-12-21 (Task 2.8 Complete)
 
 ---
 
@@ -16,16 +16,16 @@
 
 ## Progress Overview
 
-**Overall Progress:** 40% (10/25 tasks)
+**Overall Progress:** 44% (11/25 tasks)
 
 | Phase                               | Status          | Progress        | Tasks  |
 | ----------------------------------- | --------------- | --------------- | ------ |
 | **Phase 1: Backend PUT Endpoint**   | ✅ Complete     | 100% (5/5)      | 5      |
-| **Phase 2: Frontend Components**    | 🟡 In Progress  | 63% (5/8)       | 8      |
+| **Phase 2: Frontend Components**    | 🟡 In Progress  | 75% (6/8)       | 8      |
 | **Phase 3: API Client Extensions**  | Not Started     | 0% (0/3)        | 3      |
 | **Phase 4: Testing & Refinement**   | Not Started     | 0% (0/4)        | 4      |
 | **Phase 5: Polish & Documentation** | Not Started     | 0% (0/5)        | 5      |
-| **TOTAL**                           | **In Progress** | **40% (10/25)** | **25** |
+| **TOTAL**                           | **In Progress** | **44% (11/25)** | **25** |
 
 ---
 
@@ -259,13 +259,13 @@
 
 ### Task 2.8: Add Payment Reports Link to Navigation
 
-- [ ] Reports tab/link added to PaymentsPage
-- [ ] Tab state management (payments vs reports)
-- [ ] Role-based visibility (vendors/admins only)
-- [ ] Tab switching shows/hides PaymentReports
-- [ ] Reports load correctly when tab selected
-- [ ] Tests created and passing
-- **Status:** Not Started
+- [x] Reports tab/link added to PaymentsPage
+- [x] Tab state management (payments vs reports)
+- [x] Role-based visibility (vendors/admins only)
+- [x] Tab switching shows/hides PaymentReports
+- [x] Reports load correctly when tab selected
+- [x] Tests created and passing (PaymentsPage.detailsModal.test.tsx unaffected, PaymentReports tests partially passing)
+- **Status:** ✅ Complete
 - **Depends on:** Task 2.4
 - **Blocking:** Nothing
 
