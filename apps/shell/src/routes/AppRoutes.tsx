@@ -6,6 +6,7 @@ import { SignInPage, SignInComponentProps } from '../pages/SignInPage';
 import { SignUpPage, SignUpComponentProps } from '../pages/SignUpPage';
 import { PaymentsPage, PaymentsComponentProps } from '../pages/PaymentsPage';
 import { AdminPage, AdminDashboardComponentProps } from '../pages/AdminPage';
+import { ProfilePage, ProfileComponentProps } from '../pages/ProfilePage';
 import { HomePage } from '../pages/HomePage';
 import { ProtectedRoute } from '../components/ProtectedRoute';
 
@@ -29,6 +30,10 @@ export interface AppRoutesProps {
    * AdminDashboard component to use. Required for proper DI pattern.
    */
   AdminDashboardComponent: ComponentType<AdminDashboardComponentProps>;
+  /**
+   * ProfilePage component to use. Required for proper DI pattern.
+   */
+  ProfileComponent: ComponentType<ProfileComponentProps>;
 }
 
 /**
@@ -60,6 +65,7 @@ export function AppRoutes({
   SignUpComponent,
   PaymentsComponent,
   AdminDashboardComponent,
+  ProfileComponent,
 }: AppRoutesProps) {
   const { isAuthenticated } = useAuthStore();
 
@@ -96,6 +102,16 @@ export function AppRoutes({
         element={
           <ProtectedRoute>
             <PaymentsPage PaymentsComponent={PaymentsComponent} />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Profile route - requires authentication */}
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute>
+            <ProfilePage ProfileComponent={ProfileComponent} />
           </ProtectedRoute>
         }
       />

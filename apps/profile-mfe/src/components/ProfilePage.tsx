@@ -13,22 +13,10 @@
 import { useState } from 'react';
 import { Alert, AlertDescription, Card } from '@mfe/shared-design-system';
 import { useProfile } from '../hooks/useProfile';
+import { ProfileTabs, ProfileTabKey } from './ProfileTabs';
 import { ProfileForm } from './ProfileForm';
 import { PreferencesForm } from './PreferencesForm';
 import { AccountInfo } from './AccountInfo';
-
-// Tab identifiers for ProfilePage
-export type ProfileTabKey = 'profile' | 'preferences' | 'account';
-
-/**
- * Simple tab configuration used for rendering navigation
- * and mapping to child content.
- */
-const PROFILE_TABS: Array<{ key: ProfileTabKey; label: string }> = [
-  { key: 'profile', label: 'Profile' },
-  { key: 'preferences', label: 'Preferences' },
-  { key: 'account', label: 'Account' },
-];
 
 export function ProfilePage() {
   const { data: profile, isLoading, error } = useProfile();
@@ -50,25 +38,7 @@ export function ProfilePage() {
         </div>
 
         {/* Tabs */}
-        <div className="mb-6 border-b border-slate-200">
-          <nav className="-mb-px flex space-x-6" aria-label="Profile tabs">
-            {PROFILE_TABS.map(tab => (
-              <button
-                key={tab.key}
-                type="button"
-                onClick={() => handleTabChange(tab.key)}
-                className={
-                  'whitespace-nowrap border-b-2 px-1 pb-2 text-sm font-medium transition-colors ' +
-                  (activeTab === tab.key
-                    ? 'border-primary-600 text-primary-700'
-                    : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300')
-                }
-              >
-                {tab.label}
-              </button>
-            ))}
-          </nav>
-        </div>
+        <ProfileTabs activeTab={activeTab} onTabChange={handleTabChange} />
 
         {/* Error state */}
         {error && (

@@ -6,6 +6,8 @@
  * Remotes:
  * - authMfe: http://localhost:4201/remoteEntry.js
  * - paymentsMfe: http://localhost:4202/remoteEntry.js
+ * - adminMfe: http://localhost:4203/remoteEntry.js
+ * - profileMfe: http://localhost:4204/remoteEntry.js
  *
  * PostCSS loader configured for Tailwind CSS v4
  *
@@ -211,8 +213,7 @@ module.exports = {
         // POC-3: API Gateway URL
         // Development & Production: Through nginx proxy (https://localhost/api)
         // Direct API Gateway access (http://localhost:3000/api) available via env var
-        NX_API_BASE_URL:
-          process.env.NX_API_BASE_URL || 'https://localhost/api',
+        NX_API_BASE_URL: process.env.NX_API_BASE_URL || 'https://localhost/api',
         // WebSocket URL: Through nginx proxy (wss://localhost/ws)
         // Direct API Gateway access (ws://localhost:3000/ws) available via env var
         NX_WS_URL: process.env.NX_WS_URL || 'wss://localhost/ws',
@@ -244,6 +245,7 @@ module.exports = {
         authMfe: 'authMfe@http://localhost:4201/remoteEntry.js',
         paymentsMfe: 'paymentsMfe@http://localhost:4202/remoteEntry.js',
         adminMfe: 'adminMfe@http://localhost:4203/remoteEntry.js',
+        profileMfe: 'profileMfe@http://localhost:4204/remoteEntry.js',
       },
       shared: sharedDependencies,
     }),
@@ -283,19 +285,20 @@ module.exports = {
       // HMR WebSocket configuration:
       // - HTTP mode (localhost:4200): ws://localhost:4200/ws (direct to dev server)
       // - HTTPS mode (localhost via nginx): wss://localhost/hmr/shell (nginx proxies to dev server)
-      webSocketURL: process.env.NX_HTTPS_MODE === 'true'
-        ? {
-            protocol: 'wss',
-            hostname: 'localhost',
-            port: 443,
-            pathname: '/hmr/shell',
-          }
-        : {
-            protocol: 'ws',
-            hostname: 'localhost',
-            port: 4200,
-            pathname: '/ws',
-          },
+      webSocketURL:
+        process.env.NX_HTTPS_MODE === 'true'
+          ? {
+              protocol: 'wss',
+              hostname: 'localhost',
+              port: 443,
+              pathname: '/hmr/shell',
+            }
+          : {
+              protocol: 'ws',
+              hostname: 'localhost',
+              port: 4200,
+              pathname: '/ws',
+            },
     },
   },
   // Optimization settings

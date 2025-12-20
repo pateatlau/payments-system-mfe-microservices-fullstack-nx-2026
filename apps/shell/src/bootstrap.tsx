@@ -22,6 +22,7 @@ import {
   SignUpRemote,
   PaymentsPageRemote,
   AdminDashboardRemote,
+  ProfilePageRemote,
 } from './remotes';
 
 // Initialize Sentry (must be done before rendering)
@@ -82,6 +83,7 @@ function AppWrapper() {
             SignUpComponent: SignUpRemote,
             PaymentsComponent: PaymentsPageRemote,
             AdminDashboardComponent: AdminDashboardRemote,
+            ProfileComponent: ProfilePageRemote,
           }}
         />
       </BrowserRouter>
