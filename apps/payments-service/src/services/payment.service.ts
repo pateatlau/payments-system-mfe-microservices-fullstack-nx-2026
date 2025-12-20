@@ -1,6 +1,6 @@
 /**
  * Payment Service - Business Logic
- * 
+ *
  * POC-3 Phase 5.2: Redis Caching Integration
  * - Cache payment lookups (by ID)
  * - Cache payment lists (by user, paginated)
@@ -15,6 +15,7 @@ import { ApiError } from '../middleware/errorHandler';
 import type {
   ListPaymentsQuery,
   CreatePaymentRequest,
+  UpdatePaymentRequest,
   UpdatePaymentStatusRequest,
 } from '../validators/payment.validators';
 import { cache, CacheKeys, CacheTags, PaymentsCacheTTL } from '../lib/cache';
@@ -46,10 +47,9 @@ export const paymentService = {
       query;
 
     // Generate cache key based on query parameters
-    const cacheKey = CacheKeys.paymentList(
-      userId,
-      page
-    ) + `:${sort}:${order}:${status || 'all'}:${type || 'all'}:${startDate || 'none'}:${endDate || 'none'}`;
+    const cacheKey =
+      CacheKeys.paymentList(userId, page) +
+      `:${sort}:${order}:${status || 'all'}:${type || 'all'}:${startDate || 'none'}:${endDate || 'none'}`;
 
     // Try cache first
     const cached = await cache.get<{
@@ -316,6 +316,120 @@ export const paymentService = {
     // TODO: Publish event: payment:created
 
     return payment;
+  },
+
+  /**
+   * Update payment details
+   */
+  async updatePayment(
+    paymentId: string,
+    userId: string,
+    userRole: UserRole,
+    data: UpdatePaymentRequest
+  ) {
+    const payment = await db.payment.findUnique({ where: { id: paymentId } });
+
+    if (!payment) {
+      throw new ApiError(404, 'PAYMENT_NOT_FOUND', 'Payment not found');
+    }
+
+    // Role-based access: only ADMIN or sender can update
+    if (userRole !== 'ADMIN' && payment.senderId !== userId) {
+      throw new ApiError(
+        403,
+        'FORBIDDEN',
+        'You do not have permission to update this payment'
+      );
+    }
+
+    // Status restriction: cannot update completed or failed payments
+    if (payment.status === 'completed' || payment.status === 'failed') {
+      throw new ApiError(
+        400,
+        'INVALID_STATUS',
+        'Cannot update completed or failed payments'
+      );
+    }
+
+    // Resolve recipient update, maintaining consistency (either id or email)
+    let nextRecipientId: string | null | undefined = payment.recipientId;
+    if (data.recipientId !== undefined && data.recipientEmail !== undefined) {
+      throw new ApiError(
+        400,
+        'INVALID_RECIPIENT',
+        'Provide only one of recipientId or recipientEmail'
+      );
+    }
+
+    if (data.recipientId) {
+      const recipient = await db.user.findUnique({
+        where: { id: data.recipientId },
+        select: { id: true },
+      });
+
+      if (!recipient) {
+        throw new ApiError(
+          404,
+          'RECIPIENT_NOT_FOUND',
+          'Recipient user not found'
+        );
+      }
+
+      nextRecipientId = recipient.id;
+    } else if (data.recipientEmail) {
+      const recipient = await db.user.findUnique({
+        where: { email: data.recipientEmail },
+        select: { id: true },
+      });
+
+      if (!recipient) {
+        throw new ApiError(
+          404,
+          'RECIPIENT_NOT_FOUND',
+          'Recipient user not found'
+        );
+      }
+
+      nextRecipientId = recipient.id;
+    }
+
+    const updatedPayment = await db.payment.update({
+      where: { id: paymentId },
+      data: {
+        amount: data.amount ?? payment.amount,
+        description: data.description ?? payment.description,
+        recipientId: nextRecipientId ?? payment.recipientId,
+        metadata: data.metadata ?? payment.metadata,
+        type: (data.type as PaymentType | undefined) ?? payment.type,
+        updatedAt: new Date(),
+      },
+      include: {
+        sender: { select: { id: true, email: true } },
+        recipient: { select: { id: true, email: true } },
+        transactions: { orderBy: { createdAt: 'asc' } },
+      },
+    });
+
+    // Create audit transaction
+    await db.paymentTransaction.create({
+      data: {
+        paymentId,
+        status: payment.status,
+        statusMessage: 'Payment updated',
+      },
+    });
+
+    // Invalidate caches for sender and both old/new recipients
+    await Promise.all([
+      cache.delete(CacheKeys.payment(paymentId)),
+      cache.invalidateByTag(CacheTags.user(payment.senderId)),
+      cache.invalidateByTag(CacheTags.user(payment.recipientId)),
+      cache.invalidateByTag(
+        CacheTags.user(nextRecipientId ?? payment.recipientId)
+      ),
+    ]);
+
+    return updatedPayment;
   },
 
   /**

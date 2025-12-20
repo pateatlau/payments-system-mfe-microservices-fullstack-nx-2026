@@ -7,6 +7,7 @@ import { paymentService } from '../services/payment.service';
 import {
   listPaymentsSchema,
   createPaymentSchema,
+  updatePaymentSchema,
   updatePaymentStatusSchema,
   webhookPayloadSchema,
 } from '../validators/payment.validators';
@@ -169,6 +170,56 @@ export async function updatePaymentStatus(
     }
     const data = updatePaymentStatusSchema.parse(req.body);
     const payment = await paymentService.updatePaymentStatus(
+      id,
+      req.user.userId,
+      req.user.role,
+      data
+    );
+
+    res.json({
+      success: true,
+      data: payment,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+/**
+ * Update payment details (PUT /api/payments/:id)
+ */
+export async function updatePayment(
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    if (!req.user) {
+      res.status(401).json({
+        success: false,
+        error: {
+          code: 'UNAUTHORIZED',
+          message: 'Authentication required',
+        },
+      });
+      return;
+    }
+
+    const { id } = req.params;
+    if (!id) {
+      res.status(400).json({
+        success: false,
+        error: {
+          code: 'BAD_REQUEST',
+          message: 'Payment ID is required',
+        },
+      });
+      return;
+    }
+
+    const data = updatePaymentSchema.parse(req.body);
+
+    const payment = await paymentService.updatePayment(
       id,
       req.user.userId,
       req.user.role,

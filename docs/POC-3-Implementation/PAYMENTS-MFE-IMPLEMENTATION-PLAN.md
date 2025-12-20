@@ -209,10 +209,10 @@ apps/payments-service/
 
 **Verification:**
 
-- [ ] Handler created
-- [ ] Authorization working
-- [ ] Error handling implemented
-- [ ] Response format correct
+- [x] Handler created
+- [x] Authorization working
+- [x] Error handling implemented
+- [x] Response format correct
 
 **Acceptance Criteria:**
 
@@ -221,7 +221,10 @@ apps/payments-service/
 - [ ] Errors handled gracefully
 - [ ] Response matches API contract
 
-**Status:** Not Started
+**Status:** Complete  
+**Completed Date:** 2025-12-21
+
+**Notes:** Controller now exposes `updatePayment` with auth check, ID validation, schema validation, and service call. Service logic remains TODO (throws NOT_IMPLEMENTED) and will be implemented in Task 1.3.
 
 ---
 
@@ -277,10 +280,10 @@ apps/payments-service/
 
 **Verification:**
 
-- [ ] Service method created
-- [ ] Validation logic working
-- [ ] Transaction record created
-- [ ] Error handling correct
+- [x] Service method created
+- [x] Validation logic working
+- [x] Transaction record created
+- [x] Error handling correct
 
 **Acceptance Criteria:**
 
@@ -289,7 +292,10 @@ apps/payments-service/
 - [ ] Audit trail maintained
 - [ ] Errors handled properly
 
-**Status:** Not Started
+**Status:** Complete  
+**Completed Date:** 2025-12-21
+
+**Notes:** Service implements role checks (ADMIN or sender), status restriction (no updates when completed/failed), recipient resolution (id/email, single-source), metadata full replace, type updatable, audit transaction, and cache invalidation for sender and old/new recipients.
 
 ---
 
@@ -315,10 +321,10 @@ apps/payments-service/
 
 **Verification:**
 
-- [ ] Route registered
-- [ ] Middleware applied correctly
-- [ ] Route accessible
-- [ ] Authorization working
+- [x] Route registered
+- [x] Middleware applied correctly
+- [x] Route accessible
+- [x] Authorization working
 
 **Acceptance Criteria:**
 
@@ -326,7 +332,8 @@ apps/payments-service/
 - [ ] Authorization enforced
 - [ ] Request routing works
 
-**Status:** Not Started
+**Status:** Complete  
+**Completed Date:** 2025-12-21
 
 ---
 
