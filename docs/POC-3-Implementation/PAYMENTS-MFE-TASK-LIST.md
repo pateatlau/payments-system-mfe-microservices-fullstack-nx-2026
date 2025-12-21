@@ -294,16 +294,23 @@
 
 ### Task 3.2: Create useUpdatePayment Hook
 
-- [ ] Hook file created or extended (useUpdatePayment.ts)
-- [ ] useMutation hook implemented
-- [ ] Cache invalidation works correctly:
-  - [ ] Updates specific payment in cache
-  - [ ] Invalidates payments list
-- [ ] Error handling complete
-- [ ] Tests created and passing
-- **Status:** Not Started
+- [x] Hook file created or extended (useUpdatePayment.ts)
+- [x] useMutation hook implemented
+- [x] Cache invalidation works correctly:
+  - [x] Updates specific payment in cache
+  - [x] Invalidates payments list
+- [x] Error handling complete
+- [x] Tests created and passing
+- **Status:** ✅ Complete
 - **Depends on:** Task 3.1
-- **Blocking:** Task 2.6
+- **Blocking:** Nothing
+
+**Files Updated:**
+
+- [apps/payments-mfe/src/hooks/useUpdatePayment.ts](../../apps/payments-mfe/src/hooks/useUpdatePayment.ts)
+- [apps/payments-mfe/src/hooks/useUpdatePayment.test.tsx](../../apps/payments-mfe/src/hooks/useUpdatePayment.test.tsx)
+
+**Notes:** Refactored to use shared API client's `updatePaymentDetails` with fallback to MFE wrapper. Implements TanStack Query `useMutation` with precise cache invalidation: specific payment detail query (exact match) + payments list queries. Includes error handling, JSDoc, and comprehensive tests covering success, fallback, error, and lifecycle states. Build passes without errors.
 
 ### Task 3.3: Create usePaymentReports Hook
 
