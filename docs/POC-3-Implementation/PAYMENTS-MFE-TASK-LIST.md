@@ -391,6 +391,7 @@
 - **Blocking:** Nothing
 
 **Observations:** main.js 153.7 KB gzip; payments page chunk 193.1 KB gzip; remoteEntry 152.9 KB gzip — under threshold and stable.
+**Perf setup:** seeding via `pnpm perf:seed:payments` inserts 300 payments in ~2.6s with bearer token; Playwright perf spec at [apps/shell-e2e/src/perf-payments.spec.ts](../../apps/shell-e2e/src/perf-payments.spec.ts) runnable with `pnpm perf:e2e:payments` (currently blocked by ports 4200/4201 in use; run `pnpm kill:all` first).
 
 ### Task 4.4: Accessibility Audit
 

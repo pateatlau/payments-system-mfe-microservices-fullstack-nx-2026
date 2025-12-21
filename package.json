@@ -80,6 +80,8 @@
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "e2e": "pnpm build:remotes && nx e2e shell-e2e",
     "e2e:shell": "pnpm build:remotes && nx e2e shell-e2e",
+    "perf:seed:payments": "pnpm tsx scripts/performance/seed-payments.ts --count=300",
+    "perf:e2e:payments": "nx e2e shell-e2e --test-file=perf-payments.spec.ts",
     "graph": "nx graph",
     "reset": "nx reset",
     "test:rspack:build": "pnpm build:verify",
