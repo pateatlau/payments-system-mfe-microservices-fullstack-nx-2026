@@ -1,14 +1,15 @@
 # Dark Mode / Light Mode Task List - Progress Tracking
 
-**Status:** Not Started  
+**Status:** In Progress  
 **Version:** 1.0  
 **Date:** December 12, 2025  
+**Last Updated:** December 21, 2025  
 **Phase:** Theme System Implementation
 
-**Overall Progress:** 0% (0 of 5 phases complete)
+**Overall Progress:** 36% (4 of 11 tasks complete)
 
-- Phase 1: Theme Store & Core Infrastructure (0% - 0/3 sub-tasks complete)
-- Phase 2: CSS Theme Variables & Design System (0% - 0/3 sub-tasks complete)
+- Phase 1: Theme Store & Core Infrastructure (100% ✅ - 3/3 sub-tasks complete)
+- Phase 2: CSS Theme Variables & Design System (33% - 1/3 sub-tasks complete)
 - Phase 3: Theme Toggle UI Components (0% - 0/3 sub-tasks complete)
 - Phase 4: Cross-Tab Synchronization (0% - 0/1 sub-tasks complete)
 - Phase 5: Profile MFE Integration (0% - 0/1 sub-tasks complete)
@@ -78,22 +79,34 @@
 - [x] admin-mfe/tailwind.config.js updated
 - [x] profile-mfe/tailwind.config.js updated
 - [x] Dark mode classes tested (dark:bg-gray-900, dark:text-white)
-- [x] Test component created and verified
-- [x] Dark mode compilation verified
 
 **Status:** Complete  
 **Completed Date:** 2025-12-21  
-**Notes:** All 5 MFE Tailwind configs updated with `darkMode: 'class'`. Dark mode classes now compile correctly and are ready for use with semantic color tokens.
+**Notes:** All 5 MFE Tailwind configs updated with darkMode: 'class' strategy.
 
 ---
 
-**Phase 1 Completion:** **100% (3/3 sub-tasks complete)**
-
----
-
-## Phase 2: CSS Theme Variables & Design System (Days 4-7)
+## Phase 2: CSS Theme Variables & Design System (Days 3-6)
 
 ### Task 2.1: Add Dark Mode CSS Variables
+
+- [x] shell/src/styles.css updated with semantic tokens
+- [x] auth-mfe/src/styles.css updated with semantic tokens
+- [x] payments-mfe/src/styles.css updated with semantic tokens
+- [x] admin-mfe/src/styles.css updated with semantic tokens
+- [x] profile-mfe/src/styles.css updated with semantic tokens
+- [x] :root defined with light mode tokens
+- [x] .dark selector defined with dark mode tokens
+- [x] Primary color adjustments for dark mode (primary-400 for better visibility)
+- [x] Semantic tokens: --background, --foreground, --muted, --border, --card, --popover, --secondary, --accent, --destructive
+
+**Status:** Complete  
+**Completed Date:** 2025-12-21  
+**Notes:** All 5 MFE styles.css files updated with comprehensive semantic color tokens for both light and dark modes. Uses RGB format for Tailwind v4 compatibility.
+
+---
+
+### Task 2.2: Update Design System Components for Dark Mode
 
 - [ ] shell/src/styles.css updated with dark mode variables
 - [ ] Dark mode primary color variants added
