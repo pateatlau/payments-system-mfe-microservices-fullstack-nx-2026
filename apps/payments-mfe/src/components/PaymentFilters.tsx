@@ -265,15 +265,17 @@ export function PaymentFilters({
                 {MIN_AMOUNT.toLocaleString()} - {MAX_AMOUNT.toLocaleString()}
               </span>
             </div>
-            
+
             <div className="space-y-4">
               {/* Display min and max values */}
               <div className="flex items-center justify-between text-sm text-slate-600 font-semibold">
                 <span aria-live="polite">
-                  Minimum: ${watchedValues.minAmount?.toLocaleString?.() ?? MIN_AMOUNT}
+                  Minimum: $
+                  {watchedValues.minAmount?.toLocaleString?.() ?? MIN_AMOUNT}
                 </span>
                 <span aria-live="polite">
-                  Maximum: ${watchedValues.maxAmount?.toLocaleString?.() ?? MAX_AMOUNT}
+                  Maximum: $
+                  {watchedValues.maxAmount?.toLocaleString?.() ?? MAX_AMOUNT}
                 </span>
               </div>
 
@@ -304,9 +306,16 @@ export function PaymentFilters({
                                 }
                               }}
                               className="absolute top-1/2 w-full h-6 -translate-y-1/2 cursor-pointer appearance-none bg-transparent pointer-events-none [&::-webkit-slider-runnable-track]:h-2 [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-runnable-track]:bg-transparent [&::-webkit-slider-runnable-track]:border-0 [&::-moz-range-track]:h-2 [&::-moz-range-track]:rounded-full [&::-moz-range-track]:bg-transparent [&::-moz-range-track]:border-0 [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-blue-500 [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:mt-[-6px] [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-blue-500 [&::-moz-range-thumb]:cursor-pointer [&::-moz-range-thumb]:shadow-md [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:mt-[-6px]"
-                              style={{ zIndex: (minField.value ?? MIN_AMOUNT) > ((watchedValues.maxAmount ?? MAX_AMOUNT) - (MAX_AMOUNT - MIN_AMOUNT) / 2) ? 20 : 18 }}
+                              style={{
+                                zIndex:
+                                  (minField.value ?? MIN_AMOUNT) >
+                                  (watchedValues.maxAmount ?? MAX_AMOUNT) -
+                                    (MAX_AMOUNT - MIN_AMOUNT) / 2
+                                    ? 20
+                                    : 18,
+                              }}
                             />
-                            
+
                             {/* Max slider (in front) */}
                             <input
                               type="range"
@@ -322,17 +331,24 @@ export function PaymentFilters({
                                 }
                               }}
                               className="absolute top-1/2 w-full h-6 -translate-y-1/2 cursor-pointer appearance-none bg-transparent pointer-events-none [&::-webkit-slider-runnable-track]:h-2 [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-runnable-track]:bg-transparent [&::-webkit-slider-runnable-track]:border-0 [&::-moz-range-track]:h-2 [&::-moz-range-track]:rounded-full [&::-moz-range-track]:bg-transparent [&::-moz-range-track]:border-0 [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-blue-500 [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:mt-[-6px] [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-blue-500 [&::-moz-range-thumb]:cursor-pointer [&::-moz-range-thumb]:shadow-md [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:mt-[-6px]"
-                              style={{ zIndex: (maxField.value ?? MAX_AMOUNT) < ((watchedValues.minAmount ?? MIN_AMOUNT) + (MAX_AMOUNT - MIN_AMOUNT) / 2) ? 22 : 21 }}
+                              style={{
+                                zIndex:
+                                  (maxField.value ?? MAX_AMOUNT) <
+                                  (watchedValues.minAmount ?? MIN_AMOUNT) +
+                                    (MAX_AMOUNT - MIN_AMOUNT) / 2
+                                    ? 22
+                                    : 21,
+                              }}
                             />
-                            
+
                             {/* Track background */}
                             <div className="pointer-events-none absolute top-1/2 h-2 w-full -translate-y-1/2 rounded-full border border-gray-300 bg-gray-200" />
                             {/* Filled track */}
                             <div
                               className="pointer-events-none absolute top-1/2 h-2 -translate-y-1/2 rounded-full bg-blue-500"
                               style={{
-                                left: `${((minField.value ?? MIN_AMOUNT) - MIN_AMOUNT) / (MAX_AMOUNT - MIN_AMOUNT) * 100}%`,
-                                right: `${100 - ((maxField.value ?? MAX_AMOUNT) - MIN_AMOUNT) / (MAX_AMOUNT - MIN_AMOUNT) * 100}%`,
+                                left: `${(((minField.value ?? MIN_AMOUNT) - MIN_AMOUNT) / (MAX_AMOUNT - MIN_AMOUNT)) * 100}%`,
+                                right: `${100 - (((maxField.value ?? MAX_AMOUNT) - MIN_AMOUNT) / (MAX_AMOUNT - MIN_AMOUNT)) * 100}%`,
                                 zIndex: 10,
                               }}
                             />
@@ -363,8 +379,13 @@ export function PaymentFilters({
                         value={field.value ?? MIN_AMOUNT}
                         onChange={event => {
                           const raw = Number(event.target.value);
-                          const clamped = Math.max(MIN_AMOUNT, Math.min(raw, MAX_AMOUNT));
-                          if (clamped <= (watchedValues.maxAmount ?? MAX_AMOUNT)) {
+                          const clamped = Math.max(
+                            MIN_AMOUNT,
+                            Math.min(raw, MAX_AMOUNT)
+                          );
+                          if (
+                            clamped <= (watchedValues.maxAmount ?? MAX_AMOUNT)
+                          ) {
                             field.onChange(clamped);
                           }
                         }}
@@ -391,8 +412,13 @@ export function PaymentFilters({
                         value={field.value ?? MAX_AMOUNT}
                         onChange={event => {
                           const raw = Number(event.target.value);
-                          const clamped = Math.max(MIN_AMOUNT, Math.min(raw, MAX_AMOUNT));
-                          if (clamped >= (watchedValues.minAmount ?? MIN_AMOUNT)) {
+                          const clamped = Math.max(
+                            MIN_AMOUNT,
+                            Math.min(raw, MAX_AMOUNT)
+                          );
+                          if (
+                            clamped >= (watchedValues.minAmount ?? MIN_AMOUNT)
+                          ) {
                             field.onChange(clamped);
                           }
                         }}
