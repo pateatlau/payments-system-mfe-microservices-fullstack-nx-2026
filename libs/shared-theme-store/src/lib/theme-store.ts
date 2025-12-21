@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { getApiClient, type ApiResponse } from '@mfe/shared-api-client';
 
 /**
  * Theme type - user preference ('light', 'dark', or 'system' to follow OS preference)
@@ -9,6 +10,13 @@ export type Theme = 'light' | 'dark' | 'system';
  * Resolved theme - the actual theme to use after resolving 'system' preference
  */
 export type ResolvedTheme = 'light' | 'dark';
+
+/**
+ * Profile preferences with theme
+ */
+interface ProfilePreferences {
+  theme?: Theme;
+}
 
 /**
  * Theme state interface
@@ -26,11 +34,11 @@ export interface ThemeState {
   // Error message if theme operations fail
   error: string | null;
 
-  // Set theme preference and apply it
-  setTheme: (theme: Theme) => void;
+  // Set theme preference and sync with API
+  setTheme: (theme: Theme) => Promise<void>;
 
-  // Initialize theme from system preference or stored value
-  initializeTheme: (storedTheme?: Theme) => void;
+  // Initialize theme from API or fallback to stored value
+  initializeTheme: (storedTheme?: Theme) => Promise<void>;
 
   // Clear error message
   clearError: () => void;
@@ -77,8 +85,51 @@ function applyThemeToDom(resolvedTheme: ResolvedTheme): void {
 }
 
 /**
+ * Fetch theme preference from Profile Service API
+ */
+async function getThemePreference(): Promise<Theme> {
+  try {
+    const apiClient = getApiClient();
+    const response = await apiClient.get<ProfilePreferences>(
+      '/profile/preferences'
+    );
+
+    if (response.success && response.data?.theme) {
+      return response.data.theme;
+    }
+
+    // Fallback to system if API doesn't return theme
+    return 'system';
+  } catch (error) {
+    console.warn('Failed to fetch theme preference from API:', error);
+    // Fallback to system preference on API error
+    return 'system';
+  }
+}
+
+/**
+ * Update theme preference in Profile Service API
+ */
+async function updateThemePreference(theme: Theme): Promise<void> {
+  try {
+    const apiClient = getApiClient();
+    const response = await apiClient.put<ProfilePreferences>(
+      '/profile/preferences',
+      { theme }
+    );
+
+    if (!response.success) {
+      throw new Error(response.message ?? 'Failed to update theme preference');
+    }
+  } catch (error) {
+    // Log error but don't throw - allow local state to update even if API fails
+    console.warn('Failed to update theme preference on API:', error);
+  }
+}
+
+/**
  * Zustand theme store
- * Manages theme state, applies theme to DOM, and handles system preference changes
+ * Manages theme state, applies theme to DOM, and syncs with Profile Service API
  */
 export const useThemeStore = create<ThemeState>((set, get) => {
   // Set up listener for system preference changes
@@ -110,28 +161,48 @@ export const useThemeStore = create<ThemeState>((set, get) => {
     isLoading: false,
     error: null,
 
-    setTheme: (theme: Theme) => {
+    setTheme: async (theme: Theme) => {
       try {
+        set({ isLoading: true, error: null });
+
         const resolvedTheme = resolveTheme(theme);
+
+        // Update local state immediately
         set({
           theme,
           resolvedTheme,
           error: null,
         });
         applyThemeToDom(resolvedTheme);
+
+        // Sync with API in the background
+        // If API fails, local state is still updated (graceful degradation)
+        await updateThemePreference(theme);
+
+        set({ isLoading: false });
       } catch (error) {
         const errorMessage =
           error instanceof Error ? error.message : 'Failed to set theme';
-        set({ error: errorMessage });
+        set({
+          isLoading: false,
+          error: errorMessage,
+        });
       }
     },
 
-    initializeTheme: (storedTheme?: Theme) => {
+    initializeTheme: async (storedTheme?: Theme) => {
       try {
         set({ isLoading: true });
 
-        // Use stored theme or default to 'system'
-        const themeToApply = storedTheme ?? 'system';
+        let themeToApply: Theme;
+
+        // Try to fetch from API first
+        if (!storedTheme) {
+          themeToApply = await getThemePreference();
+        } else {
+          themeToApply = storedTheme;
+        }
+
         const resolvedTheme = resolveTheme(themeToApply);
 
         set({
@@ -152,6 +223,9 @@ export const useThemeStore = create<ThemeState>((set, get) => {
           theme: 'system',
           resolvedTheme: getSystemPreference(),
         });
+
+        // Apply fallback theme to DOM
+        applyThemeToDom(getSystemPreference());
       }
     },
 

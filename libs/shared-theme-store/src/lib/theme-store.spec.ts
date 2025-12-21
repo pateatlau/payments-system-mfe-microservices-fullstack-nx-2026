@@ -5,6 +5,12 @@ import {
   useResolvedTheme,
   type Theme,
 } from './theme-store';
+import * as apiClient from '@mfe/shared-api-client';
+
+// Mock the API client
+jest.mock('@mfe/shared-api-client', () => ({
+  getApiClient: jest.fn(),
+}));
 
 describe('theme-store', () => {
   beforeEach(() => {
@@ -18,6 +24,9 @@ describe('theme-store', () => {
       isLoading: false,
       error: null,
     });
+
+    // Reset mock
+    jest.clearAllMocks();
   });
 
   describe('useThemeStore', () => {
@@ -29,72 +38,111 @@ describe('theme-store', () => {
       expect(['light', 'dark']).toContain(result.current.resolvedTheme);
     });
 
-    it('should set theme and update resolved theme', () => {
+    it('should set theme and update resolved theme', async () => {
+      const mockApiClient = {
+        get: jest.fn(),
+        put: jest.fn().mockResolvedValue({ success: true }),
+      };
+      (apiClient.getApiClient as jest.Mock).mockReturnValue(mockApiClient);
+
       const { result } = renderHook(() => useThemeStore());
 
-      act(() => {
-        result.current.setTheme('dark');
+      await act(async () => {
+        await result.current.setTheme('dark');
       });
 
       expect(result.current.theme).toBe('dark');
       expect(result.current.resolvedTheme).toBe('dark');
+      expect(mockApiClient.put).toHaveBeenCalledWith('/profile/preferences', {
+        theme: 'dark',
+      });
     });
 
-    it('should set light theme', () => {
+    it('should set light theme', async () => {
+      const mockApiClient = {
+        get: jest.fn(),
+        put: jest.fn().mockResolvedValue({ success: true }),
+      };
+      (apiClient.getApiClient as jest.Mock).mockReturnValue(mockApiClient);
+
       const { result } = renderHook(() => useThemeStore());
 
-      act(() => {
-        result.current.setTheme('light');
+      await act(async () => {
+        await result.current.setTheme('light');
       });
 
       expect(result.current.theme).toBe('light');
       expect(result.current.resolvedTheme).toBe('light');
     });
 
-    it('should apply dark class to html element when theme is dark', () => {
+    it('should apply dark class to html element when theme is dark', async () => {
+      const mockApiClient = {
+        get: jest.fn(),
+        put: jest.fn().mockResolvedValue({ success: true }),
+      };
+      (apiClient.getApiClient as jest.Mock).mockReturnValue(mockApiClient);
+
       const { result } = renderHook(() => useThemeStore());
 
-      act(() => {
-        result.current.setTheme('dark');
+      await act(async () => {
+        await result.current.setTheme('dark');
       });
 
       expect(document.documentElement.classList.contains('dark')).toBe(true);
     });
 
-    it('should remove dark class from html element when theme is light', () => {
+    it('should remove dark class from html element when theme is light', async () => {
+      const mockApiClient = {
+        get: jest.fn(),
+        put: jest.fn().mockResolvedValue({ success: true }),
+      };
+      (apiClient.getApiClient as jest.Mock).mockReturnValue(mockApiClient);
+
       const { result } = renderHook(() => useThemeStore());
 
       // Set to dark first
-      act(() => {
-        result.current.setTheme('dark');
+      await act(async () => {
+        await result.current.setTheme('dark');
       });
 
       expect(document.documentElement.classList.contains('dark')).toBe(true);
 
       // Then set to light
-      act(() => {
-        result.current.setTheme('light');
+      await act(async () => {
+        await result.current.setTheme('light');
       });
 
       expect(document.documentElement.classList.contains('dark')).toBe(false);
     });
 
-    it('should resolve system theme to light or dark', () => {
+    it('should resolve system theme to light or dark', async () => {
+      const mockApiClient = {
+        get: jest.fn(),
+        put: jest.fn().mockResolvedValue({ success: true }),
+      };
+      (apiClient.getApiClient as jest.Mock).mockReturnValue(mockApiClient);
+
       const { result } = renderHook(() => useThemeStore());
 
-      act(() => {
-        result.current.setTheme('system');
+      await act(async () => {
+        await result.current.setTheme('system');
       });
 
       expect(result.current.theme).toBe('system');
       expect(['light', 'dark']).toContain(result.current.resolvedTheme);
     });
 
-    it('should initialize with stored theme', () => {
+    it('should initialize with stored theme', async () => {
+      const mockApiClient = {
+        get: jest.fn(),
+        put: jest.fn(),
+      };
+      (apiClient.getApiClient as jest.Mock).mockReturnValue(mockApiClient);
+
       const { result } = renderHook(() => useThemeStore());
 
-      act(() => {
-        result.current.initializeTheme('dark');
+      await act(async () => {
+        await result.current.initializeTheme('dark');
       });
 
       expect(result.current.theme).toBe('dark');
@@ -102,25 +150,97 @@ describe('theme-store', () => {
       expect(result.current.isLoading).toBe(false);
     });
 
-    it('should initialize with system when no stored theme provided', () => {
+    it('should fetch theme from API on initialize', async () => {
+      const mockApiClient = {
+        get: jest.fn().mockResolvedValue({
+          success: true,
+          data: { theme: 'dark' },
+        }),
+        put: jest.fn(),
+      };
+      (apiClient.getApiClient as jest.Mock).mockReturnValue(mockApiClient);
+
       const { result } = renderHook(() => useThemeStore());
 
-      act(() => {
-        result.current.initializeTheme();
+      await act(async () => {
+        await result.current.initializeTheme();
+      });
+
+      expect(mockApiClient.get).toHaveBeenCalledWith('/profile/preferences');
+      expect(result.current.theme).toBe('dark');
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    it('should fallback to system when API returns no theme', async () => {
+      const mockApiClient = {
+        get: jest.fn().mockResolvedValue({
+          success: true,
+          data: {},
+        }),
+        put: jest.fn(),
+      };
+      (apiClient.getApiClient as jest.Mock).mockReturnValue(mockApiClient);
+
+      const { result } = renderHook(() => useThemeStore());
+
+      await act(async () => {
+        await result.current.initializeTheme();
       });
 
       expect(result.current.theme).toBe('system');
       expect(['light', 'dark']).toContain(result.current.resolvedTheme);
+    });
+
+    it('should handle API errors gracefully', async () => {
+      const mockApiClient = {
+        get: jest.fn().mockRejectedValue(new Error('Network error')),
+        put: jest.fn(),
+      };
+      (apiClient.getApiClient as jest.Mock).mockReturnValue(mockApiClient);
+
+      const { result } = renderHook(() => useThemeStore());
+
+      await act(async () => {
+        await result.current.initializeTheme();
+      });
+
+      // Should fallback to system
+      expect(result.current.theme).toBe('system');
       expect(result.current.isLoading).toBe(false);
     });
 
-    it('should apply theme to DOM during initialization', () => {
+    it('should apply theme to DOM during initialization', async () => {
+      const mockApiClient = {
+        get: jest.fn(),
+        put: jest.fn(),
+      };
+      (apiClient.getApiClient as jest.Mock).mockReturnValue(mockApiClient);
+
       const { result } = renderHook(() => useThemeStore());
 
-      act(() => {
-        result.current.initializeTheme('dark');
+      await act(async () => {
+        await result.current.initializeTheme('dark');
       });
 
+      expect(document.documentElement.classList.contains('dark')).toBe(true);
+    });
+
+    it('should update local state immediately even if API fails', async () => {
+      const mockApiClient = {
+        get: jest.fn(),
+        put: jest.fn().mockRejectedValue(new Error('API error')),
+      };
+      (apiClient.getApiClient as jest.Mock).mockReturnValue(mockApiClient);
+
+      const { result } = renderHook(() => useThemeStore());
+
+      await act(async () => {
+        await result.current.setTheme('dark');
+      });
+
+      // Local state should be updated despite API failure
+      expect(result.current.theme).toBe('dark');
+      expect(result.current.resolvedTheme).toBe('dark');
       expect(document.documentElement.classList.contains('dark')).toBe(true);
     });
 
@@ -155,13 +275,19 @@ describe('theme-store', () => {
       expect(result.current).toHaveProperty('clearError');
     });
 
-    it('should update when theme changes', () => {
+    it('should update when theme changes', async () => {
+      const mockApiClient = {
+        get: jest.fn(),
+        put: jest.fn().mockResolvedValue({ success: true }),
+      };
+      (apiClient.getApiClient as jest.Mock).mockReturnValue(mockApiClient);
+
       const { result, rerender } = renderHook(() => useTheme());
 
       const initialTheme = result.current.theme;
 
-      act(() => {
-        result.current.setTheme('dark');
+      await act(async () => {
+        await result.current.setTheme('dark');
       });
 
       rerender();
@@ -170,11 +296,17 @@ describe('theme-store', () => {
       expect(result.current.theme).toBe('dark');
     });
 
-    it('should allow setting theme through hook', () => {
+    it('should allow setting theme through hook', async () => {
+      const mockApiClient = {
+        get: jest.fn(),
+        put: jest.fn().mockResolvedValue({ success: true }),
+      };
+      (apiClient.getApiClient as jest.Mock).mockReturnValue(mockApiClient);
+
       const { result } = renderHook(() => useTheme());
 
-      act(() => {
-        result.current.setTheme('light');
+      await act(async () => {
+        await result.current.setTheme('light');
       });
 
       expect(result.current.theme).toBe('light');
@@ -188,7 +320,13 @@ describe('theme-store', () => {
       expect(['light', 'dark']).toContain(result.current);
     });
 
-    it('should update when resolved theme changes', () => {
+    it('should update when resolved theme changes', async () => {
+      const mockApiClient = {
+        get: jest.fn(),
+        put: jest.fn().mockResolvedValue({ success: true }),
+      };
+      (apiClient.getApiClient as jest.Mock).mockReturnValue(mockApiClient);
+
       const { result: storeResult } = renderHook(() => useThemeStore());
       const { result: resolvedResult, rerender } = renderHook(() =>
         useResolvedTheme()
@@ -199,8 +337,8 @@ describe('theme-store', () => {
       // Switch to a different resolved theme
       const otherTheme = initialTheme === 'light' ? 'dark' : 'light';
 
-      act(() => {
-        storeResult.current.setTheme(otherTheme as Theme);
+      await act(async () => {
+        await storeResult.current.setTheme(otherTheme as Theme);
       });
 
       rerender();
@@ -214,7 +352,7 @@ describe('theme-store', () => {
       const { result } = renderHook(() => useThemeStore());
 
       act(() => {
-        result.current.initializeTheme();
+        useThemeStore.setState({ theme: 'system' });
       });
 
       expect(result.current.resolvedTheme).toBeDefined();

@@ -1,6 +1,6 @@
 # Dark Mode / Light Mode Implementation Plan
 
-**Status:** In Progress (Phase 1.1 Complete)  
+**Status:** In Progress (Phase 1.2 Complete)  
 **Version:** 1.0  
 **Date:** December 12, 2025  
 **Last Updated:** December 21, 2025  
@@ -230,12 +230,24 @@ flowchart TB
 - Fallback behavior works when API fails
 - Tests passing
 
-**Status:** Not Started  
+**Status:** Complete ✅  
+**Completed Date:** December 21, 2025  
 **Files Modified:**
 
-- `libs/shared-theme-store/src/lib/theme-store.ts`
-- `libs/shared-theme-store/package.json`
-- `libs/shared-theme-store/src/lib/theme-store.spec.ts`
+- `libs/shared-theme-store/src/lib/theme-store.ts` ✅
+- `libs/shared-theme-store/package.json` ✅ (added shared-api-client dependency)
+- `libs/shared-theme-store/src/lib/theme-store.spec.ts` ✅ (expanded with API tests)
+
+**Implementation Details:**
+
+- `getThemePreference()` fetches from `/profile/preferences` API endpoint
+- `updateThemePreference()` sends PUT request to `/profile/preferences` with theme
+- `initializeTheme()` accepts optional stored theme parameter, otherwise fetches from API
+- `setTheme()` updates local state immediately, then syncs with API asynchronously
+- Graceful error handling: API failures logged but don't prevent local state updates
+- Fallback behavior: Defaults to 'system' preference if API returns no theme
+- All 19 tests passing including 3 new API integration tests
+- Builds successfully with shared-api-client dependency
 
 ---
 

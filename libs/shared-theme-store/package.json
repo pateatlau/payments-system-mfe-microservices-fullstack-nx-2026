@@ -6,6 +6,7 @@
   "main": "./src/index.js",
   "types": "./src/index.d.ts",
   "dependencies": {
+    "@mfe/shared-api-client": "*",
     "zustand": "^4.4.0",
     "tslib": "^2.3.0"
   },
