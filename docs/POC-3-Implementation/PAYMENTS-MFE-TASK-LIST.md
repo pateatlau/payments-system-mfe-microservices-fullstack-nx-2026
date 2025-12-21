@@ -435,17 +435,19 @@
 
 ### Task 5.2: Enhance Empty States
 
-- [ ] Empty state for no payments (vendor)
-- [ ] Empty state for no payments (customer)
-- [ ] Empty state for filter results
-- [ ] Empty state for reports
-- [ ] Messages contextual and helpful
-- [ ] Call-to-action buttons present
+- [x] Empty state for no payments (vendor)
+- [x] Empty state for no payments (customer)
+- [x] Empty state for filter results
+- [x] Empty state for reports
+- [x] Messages contextual and helpful
+- [x] Call-to-action buttons present
 - [ ] Icons/illustrations if available
-- [ ] Tests created and passing
-- **Status:** Not Started
+- [x] Tests created and passing
+- **Status:** ✅ Complete
 - **Depends on:** Phase 2 tasks
 - **Blocking:** Nothing
+
+**Notes:** Payments table now shows vendor/customer-specific empty messaging with create CTA and a clear-filters action when filters hide results; reports tab shows a “no reports yet” card with refresh CTA. Iconography optional; can be added later.
 
 ### Task 5.3: Enhance Status Badges
 

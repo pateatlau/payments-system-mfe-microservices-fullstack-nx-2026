@@ -156,6 +156,13 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
     type: 'all',
   });
   const { toasts, addToast, removeToast } = useToasts();
+  const hasActiveFilters =
+    filters.status !== 'all' ||
+    filters.type !== 'all' ||
+    !!filters.fromDate ||
+    !!filters.toDate ||
+    filters.minAmount !== undefined ||
+    filters.maxAmount !== undefined;
 
   // Real-time payment updates via WebSocket
   usePaymentUpdates();
@@ -371,6 +378,9 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
     setEditingPayment(null);
     resetUpdateForm();
   };
+
+  const clearFilters = () =>
+    setFilters({ status: 'all', type: 'all', fromDate: undefined, toDate: undefined });
 
   // Loading state
   if (isLoadingPayments) {
@@ -833,19 +843,35 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
                       ))
                     ) : (
                       <tr>
-                        <td
-                          colSpan={isVendor ? 7 : 6}
-                          className="px-6 py-12 text-center text-slate-500"
-                        >
-                          {filters &&
-                          (filters.status !== 'all' ||
-                            filters.type !== 'all' ||
-                            filters.fromDate ||
-                            filters.toDate ||
-                            filters.minAmount !== undefined ||
-                            filters.maxAmount !== undefined)
-                            ? 'No payments match filters'
-                            : 'No payments found'}
+                        <td colSpan={isVendor ? 7 : 6} className="px-6 py-10">
+                          <div className="flex flex-col items-center justify-center gap-3 text-center text-slate-600">
+                            <p className="text-lg font-semibold">
+                              {hasActiveFilters
+                                ? 'No payments match your filters'
+                                : isVendor
+                                  ? 'No payments yet. Create the first payment.'
+                                  : 'No payments found for your account.'}
+                            </p>
+                            <p className="text-sm text-slate-500">
+                              {hasActiveFilters
+                                ? 'Try adjusting or clearing the filters to see more results.'
+                                : isVendor
+                                  ? 'Start by creating a payment to view it here.'
+                                  : 'Payments you create or receive will appear in this list.'}
+                            </p>
+                            <div className="flex gap-2">
+                              {hasActiveFilters && (
+                                <Button variant="outline" onClick={clearFilters}>
+                                  Clear filters
+                                </Button>
+                              )}
+                              {(isVendor || isCustomer) && (
+                                <Button onClick={() => setShowCreateForm(true)}>
+                                  Create payment
+                                </Button>
+                              )}
+                            </div>
+                          </div>
                         </td>
                       </tr>
                     )}
