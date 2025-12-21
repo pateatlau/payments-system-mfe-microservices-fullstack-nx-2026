@@ -35,6 +35,12 @@ Each task is designed to be:
 
 ---
 
+## Recent Updates
+
+- 2025-12-21: Phase 3 Task 3.1 completed — added `updatePaymentDetails(paymentId, data)` to shared API client with `UpdatePaymentData` type alias, robust error handling, and JSDoc. Exported via `@mfe/shared-api-client`. Basic unit tests added.
+
+---
+
 ## Current State Analysis
 
 ### Existing Infrastructure

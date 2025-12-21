@@ -275,14 +275,22 @@
 
 ### Task 3.1: Extend API Client for PUT Request
 
-- [ ] updatePaymentDetails function created
-- [ ] Function signature correct
-- [ ] Type exported (UpdatePaymentData)
-- [ ] Error handling implemented
-- [ ] JSDoc documentation added
-- **Status:** Not Started
+- [x] updatePaymentDetails function created
+- [x] Function signature correct
+- [x] Type exported (UpdatePaymentData)
+- [x] Error handling implemented
+- [x] JSDoc documentation added
+- **Status:** ✅ Complete
 - **Depends on:** Task 1.5 (backend ready)
 - **Blocking:** Task 3.2
+
+**Files Updated:**
+
+- [libs/shared-api-client/src/lib/payments.ts](../../libs/shared-api-client/src/lib/payments.ts)
+- [libs/shared-api-client/src/index.ts](../../libs/shared-api-client/src/index.ts)
+- [libs/shared-api-client/src/lib/payments.test.ts](../../libs/shared-api-client/src/lib/payments.test.ts)
+
+**Notes:** Added `UpdatePaymentData` (alias of shared `UpdatePaymentRequest`) and `updatePaymentDetails(paymentId, data)` using the shared `apiClient`. Includes robust error propagation and JSDoc. Basic unit tests cover success, API error, and network error cases.
 
 ### Task 3.2: Create useUpdatePayment Hook
 
