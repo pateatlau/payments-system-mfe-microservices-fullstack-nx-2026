@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from '@jest/globals';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useUpdatePayment } from './useUpdatePayment';
@@ -8,13 +8,13 @@ import type { Payment } from 'shared-types';
 import { PaymentStatus, PaymentType } from 'shared-types';
 
 // Mock the shared API client
-vi.mock('@mfe/shared-api-client', () => ({
-  updatePaymentDetails: vi.fn(),
+jest.mock('@mfe/shared-api-client', () => ({
+  updatePaymentDetails: jest.fn(),
 }));
 
 // Mock the MFE payments API
-vi.mock('../api/payments', () => ({
-  updatePaymentDetails: vi.fn(),
+jest.mock('../api/payments', () => ({
+  updatePaymentDetails: jest.fn(),
 }));
 
 describe('useUpdatePayment', () => {
@@ -40,7 +40,7 @@ describe('useUpdatePayment', () => {
         mutations: { retry: false },
       },
     });
-    vi.clearAllMocks();
+    jest.clearAllMocks();
   });
 
   const wrapper = ({ children }: { children: React.ReactNode }) => (
@@ -49,11 +49,11 @@ describe('useUpdatePayment', () => {
 
   describe('successful update', () => {
     it('should update payment and call onSuccess callback', async () => {
-      const onSuccess = vi.fn();
-      const onError = vi.fn();
+      const onSuccess = jest.fn();
+      const onError = jest.fn();
 
       // Mock shared API client success
-      vi.mocked(sharedApiClient.updatePaymentDetails).mockResolvedValue(
+      jest.mocked(sharedApiClient.updatePaymentDetails).mockResolvedValue(
         mockPayment
       );
 
@@ -81,7 +81,7 @@ describe('useUpdatePayment', () => {
     });
 
     it('should invalidate specific payment and list caches', async () => {
-      vi.mocked(sharedApiClient.updatePaymentDetails).mockResolvedValue(
+      jest.mocked(sharedApiClient.updatePaymentDetails).mockResolvedValue(
         mockPayment
       );
 
@@ -119,15 +119,15 @@ describe('useUpdatePayment', () => {
 
   describe('fallback to MFE wrapper', () => {
     it('should fall back to MFE API wrapper on shared client error', async () => {
-      const onSuccess = vi.fn();
+      const onSuccess = jest.fn();
 
       // Mock shared API client failure
-      vi.mocked(sharedApiClient.updatePaymentDetails).mockRejectedValue(
+      jest.mocked(sharedApiClient.updatePaymentDetails).mockRejectedValue(
         new Error('Shared client error')
       );
 
       // Mock MFE wrapper success
-      vi.mocked(mfePaymentsApi.updatePaymentDetails).mockResolvedValue(
+      jest.mocked(mfePaymentsApi.updatePaymentDetails).mockResolvedValue(
         mockPayment
       );
 
@@ -155,13 +155,13 @@ describe('useUpdatePayment', () => {
 
   describe('error handling', () => {
     it('should handle errors and call onError callback', async () => {
-      const onError = vi.fn();
+      const onError = jest.fn();
       const testError = new Error('Update failed');
 
-      vi.mocked(sharedApiClient.updatePaymentDetails).mockRejectedValue(
+      jest.mocked(sharedApiClient.updatePaymentDetails).mockRejectedValue(
         testError
       );
-      vi.mocked(mfePaymentsApi.updatePaymentDetails).mockRejectedValue(
+      jest.mocked(mfePaymentsApi.updatePaymentDetails).mockRejectedValue(
         testError
       );
 
@@ -184,10 +184,10 @@ describe('useUpdatePayment', () => {
     it('should have isError and error state on mutation failure', async () => {
       const testError = new Error('Network error');
 
-      vi.mocked(sharedApiClient.updatePaymentDetails).mockRejectedValue(
+      jest.mocked(sharedApiClient.updatePaymentDetails).mockRejectedValue(
         testError
       );
-      vi.mocked(mfePaymentsApi.updatePaymentDetails).mockRejectedValue(
+      jest.mocked(mfePaymentsApi.updatePaymentDetails).mockRejectedValue(
         testError
       );
 
@@ -208,7 +208,7 @@ describe('useUpdatePayment', () => {
 
   describe('mutation lifecycle', () => {
     it('should have isPending state during mutation', async () => {
-      vi.mocked(sharedApiClient.updatePaymentDetails).mockImplementation(
+      jest.mocked(sharedApiClient.updatePaymentDetails).mockImplementation(
         () =>
           new Promise(resolve => setTimeout(() => resolve(mockPayment), 100))
       );

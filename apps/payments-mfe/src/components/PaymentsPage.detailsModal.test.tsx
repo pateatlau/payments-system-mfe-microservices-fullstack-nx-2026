@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach } from '@jest/globals';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -8,20 +8,20 @@ import { PaymentsPage } from './PaymentsPage';
 import * as paymentsApi from '../api/payments';
 
 // Mock all modules before any imports
-vi.mock('../api/payments');
+jest.mock('../api/payments');
 
-vi.mock('shared-auth-store', () => ({
-  useAuthStore: vi.fn(() => ({
+jest.mock('shared-auth-store', () => ({
+  useAuthStore: jest.fn(() => ({
     user: { id: 'user-123', role: 'VENDOR' },
-    hasRole: vi.fn((role: string) => role === 'VENDOR'),
+    hasRole: jest.fn((role: string) => role === 'VENDOR'),
   })),
 }));
 
-vi.mock('./PaymentFilters', () => ({
+jest.mock('./PaymentFilters', () => ({
   PaymentFilters: () => <div data-testid="payment-filters">Filters</div>,
 }));
 
-vi.mock('./PaymentDetails', () => ({
+jest.mock('./PaymentDetails', () => ({
   PaymentDetails: ({
     payment,
     onClose,
@@ -39,7 +39,7 @@ vi.mock('./PaymentDetails', () => ({
   ),
 }));
 
-vi.mock('../hooks/usePaymentUpdates', () => ({
+jest.mock('../hooks/usePaymentUpdates', () => ({
   usePaymentUpdates: () => ({}),
 }));
 
@@ -79,7 +79,7 @@ describe('PaymentsPage - Payment Details Modal', () => {
         mutations: { retry: false },
       },
     });
-    vi.mocked(paymentsApi.listPayments).mockResolvedValue(mockPayments);
+    jest.mocked(paymentsApi.listPayments).mockResolvedValue(mockPayments);
   });
 
   const renderComponent = () =>

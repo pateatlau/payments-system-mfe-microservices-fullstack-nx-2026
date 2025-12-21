@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach } from '@jest/globals';
 import { PaymentsPage } from './PaymentsPage';
 import type {
   ReactNode,
@@ -9,14 +9,14 @@ import type {
 } from 'react';
 
 // Mock shared-auth-store to return a CUSTOMER user
-vi.mock('shared-auth-store', () => ({
-  useAuthStore: vi.fn().mockReturnValue({
+jest.mock('shared-auth-store', () => ({
+  useAuthStore: jest.fn().mockReturnValue({
     user: { id: 'cust-1', role: 'CUSTOMER' },
     hasRole: (role: string) => role === 'CUSTOMER',
   }),
 }));
 
-vi.mock('@mfe/shared-design-system', () => ({
+jest.mock('@mfe/shared-design-system', () => ({
   Button: ({
     children,
     onClick,
@@ -69,7 +69,7 @@ vi.mock('@mfe/shared-design-system', () => ({
 
 describe('PaymentsPage - Customer Create Payment', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
   });
 
   it('shows Create Payment button for customers and opens form', async () => {

@@ -1,17 +1,17 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach } from '@jest/globals';
 import { PaymentDetails } from './PaymentDetails';
 import type { Payment } from 'shared-types';
 import { PaymentStatus, PaymentType } from 'shared-types';
 
 // Mock shared-auth-store
-vi.mock('shared-auth-store', () => ({
-  useAuthStore: vi.fn(),
+jest.mock('shared-auth-store', () => ({
+  useAuthStore: jest.fn(),
 }));
 
 // Mock design system components
-vi.mock('@mfe/shared-design-system', () => ({
+jest.mock('@mfe/shared-design-system', () => ({
   Card: ({
     children,
     className,
@@ -129,7 +129,7 @@ describe('PaymentDetails Component', () => {
   };
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
     const authStoreMock = useAuthStore as unknown as {
       mockReturnValue: (value: unknown) => void;
     };
@@ -212,7 +212,7 @@ describe('PaymentDetails Component', () => {
   });
 
   it('should show edit button when sender can edit', () => {
-    const onEdit = vi.fn();
+    const onEdit = jest.fn();
     render(
       <PaymentDetails
         payment={mockPayment}
@@ -228,7 +228,7 @@ describe('PaymentDetails Component', () => {
   });
 
   it('should not show cancel button for completed payment', () => {
-    const onCancel = vi.fn();
+    const onCancel = jest.fn();
     render(
       <PaymentDetails
         payment={mockPayment}
@@ -248,7 +248,7 @@ describe('PaymentDetails Component', () => {
       ...mockPayment,
       status: PaymentStatus.PENDING,
     };
-    const onCancel = vi.fn();
+    const onCancel = jest.fn();
 
     render(
       <PaymentDetails
@@ -265,7 +265,7 @@ describe('PaymentDetails Component', () => {
   });
 
   it('should call onEdit when edit button is clicked', async () => {
-    const onEdit = vi.fn();
+    const onEdit = jest.fn();
     const user = userEvent.setup();
 
     render(
@@ -288,7 +288,7 @@ describe('PaymentDetails Component', () => {
       ...mockPayment,
       status: PaymentStatus.PENDING,
     };
-    const onCancel = vi.fn();
+    const onCancel = jest.fn();
     const user = userEvent.setup();
 
     render(
@@ -307,7 +307,7 @@ describe('PaymentDetails Component', () => {
   });
 
   it('should call onClose when close button is clicked', async () => {
-    const onClose = vi.fn();
+    const onClose = jest.fn();
     const user = userEvent.setup();
 
     render(
@@ -336,7 +336,7 @@ describe('PaymentDetails Component', () => {
       user: { id: 'different-user', role: 'CUSTOMER' },
     });
 
-    const onEdit = vi.fn();
+    const onEdit = jest.fn();
     render(
       <PaymentDetails
         payment={mockPayment}
@@ -356,7 +356,7 @@ describe('PaymentDetails Component', () => {
       user: { id: 'admin-user', role: 'ADMIN' },
     });
 
-    const onEdit = vi.fn();
+    const onEdit = jest.fn();
     render(
       <PaymentDetails
         payment={mockPayment}

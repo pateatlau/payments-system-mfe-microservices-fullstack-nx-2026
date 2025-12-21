@@ -10,7 +10,7 @@
  * - Success/error feedback
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect } from '@jest/globals';
 import * as React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -21,12 +21,12 @@ import { PaymentStatus, PaymentType } from 'shared-types';
 import * as paymentsApi from '../api/payments';
 
 // Mock the payments API
-vi.mock('../api/payments', () => ({
-  updatePaymentDetails: vi.fn(),
+jest.mock('../api/payments', () => ({
+  updatePaymentDetails: jest.fn(),
 }));
 
 // Mock shared-design-system components
-vi.mock('@mfe/shared-design-system', () => ({
+jest.mock('@mfe/shared-design-system', () => ({
   Button: ({ children, ...props }: React.ComponentProps<'button'>) => (
     <button {...props}>{children}</button>
   ),
@@ -83,7 +83,7 @@ describe('PaymentUpdateForm - Integration Tests', () => {
         mutations: { retry: false },
       },
     });
-    vi.clearAllMocks();
+    jest.clearAllMocks();
   });
 
   const renderForm = (payment = mockPayment, callbacks = {}) => {
@@ -97,9 +97,9 @@ describe('PaymentUpdateForm - Integration Tests', () => {
   describe('Complete Payment Update Flow', () => {
     it('should handle successful payment update end-to-end', async () => {
       const user = userEvent.setup();
-      const onSuccess = vi.fn();
+      const onSuccess = jest.fn();
 
-      vi.mocked(paymentsApi.updatePaymentDetails).mockResolvedValue(
+      (paymentsApi.updatePaymentDetails as jest.Mock).mockResolvedValue(
         updatedPayment
       );
 
@@ -153,9 +153,9 @@ describe('PaymentUpdateForm - Integration Tests', () => {
     it('should only send changed fields in API request', async () => {
       const user = userEvent.setup();
 
-      vi.mocked(paymentsApi.updatePaymentDetails).mockResolvedValue(
-        updatedPayment
-      );
+      jest
+        .mocked(paymentsApi.updatePaymentDetails)
+        .mockResolvedValue(updatedPayment);
 
       renderForm();
 
@@ -181,7 +181,7 @@ describe('PaymentUpdateForm - Integration Tests', () => {
       });
 
       // Should not have unchanged fields
-      const calls = vi.mocked(paymentsApi.updatePaymentDetails).mock.calls;
+      const calls = jest.mocked(paymentsApi.updatePaymentDetails).mock.calls;
       expect(calls.length).toBeGreaterThan(0);
       const call = calls[0]!;
       expect(call[1]).not.toHaveProperty('description');
@@ -190,9 +190,9 @@ describe('PaymentUpdateForm - Integration Tests', () => {
     it('should handle form submission with multiple field changes', async () => {
       const user = userEvent.setup();
 
-      vi.mocked(paymentsApi.updatePaymentDetails).mockResolvedValue(
-        updatedPayment
-      );
+      jest
+        .mocked(paymentsApi.updatePaymentDetails)
+        .mockResolvedValue(updatedPayment);
 
       renderForm();
 
@@ -228,7 +228,9 @@ describe('PaymentUpdateForm - Integration Tests', () => {
       const user = userEvent.setup();
       const testError = new Error('Server error: payment locked');
 
-      vi.mocked(paymentsApi.updatePaymentDetails).mockRejectedValue(testError);
+      jest
+        .mocked(paymentsApi.updatePaymentDetails)
+        .mockRejectedValue(testError);
 
       renderForm();
 
@@ -318,11 +320,11 @@ describe('PaymentUpdateForm - Integration Tests', () => {
   describe('Cache Invalidation on Update', () => {
     it('should invalidate cache queries after successful update', async () => {
       const user = userEvent.setup();
-      const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries');
+      const invalidateSpy = jest.spyOn(queryClient, 'invalidateQueries');
 
-      vi.mocked(paymentsApi.updatePaymentDetails).mockResolvedValue(
-        updatedPayment
-      );
+      jest
+        .mocked(paymentsApi.updatePaymentDetails)
+        .mockResolvedValue(updatedPayment);
 
       renderForm();
 
@@ -345,10 +347,14 @@ describe('PaymentUpdateForm - Integration Tests', () => {
     it('should show loading state while updating', async () => {
       const user = userEvent.setup();
 
-      vi.mocked(paymentsApi.updatePaymentDetails).mockImplementation(
-        () =>
-          new Promise(resolve => setTimeout(() => resolve(updatedPayment), 100))
-      );
+      jest
+        .mocked(paymentsApi.updatePaymentDetails)
+        .mockImplementation(
+          () =>
+            new Promise(resolve =>
+              setTimeout(() => resolve(updatedPayment), 100)
+            )
+        );
 
       renderForm();
 
@@ -377,9 +383,9 @@ describe('PaymentUpdateForm - Integration Tests', () => {
     it('should clear success message when form changes after update', async () => {
       const user = userEvent.setup();
 
-      vi.mocked(paymentsApi.updatePaymentDetails).mockResolvedValue(
-        updatedPayment
-      );
+      jest
+        .mocked(paymentsApi.updatePaymentDetails)
+        .mockResolvedValue(updatedPayment);
 
       renderForm();
 
@@ -411,7 +417,7 @@ describe('PaymentUpdateForm - Integration Tests', () => {
   describe('Cancel Callback', () => {
     it('should invoke cancel callback when Cancel button is clicked', async () => {
       const user = userEvent.setup();
-      const onCancel = vi.fn();
+      const onCancel = jest.fn();
 
       renderForm(mockPayment, { onCancel });
 
@@ -423,12 +429,16 @@ describe('PaymentUpdateForm - Integration Tests', () => {
 
     it('should disable cancel button during update', async () => {
       const user = userEvent.setup();
-      const onCancel = vi.fn();
+      const onCancel = jest.fn();
 
-      vi.mocked(paymentsApi.updatePaymentDetails).mockImplementation(
-        () =>
-          new Promise(resolve => setTimeout(() => resolve(updatedPayment), 100))
-      );
+      jest
+        .mocked(paymentsApi.updatePaymentDetails)
+        .mockImplementation(
+          () =>
+            new Promise(resolve =>
+              setTimeout(() => resolve(updatedPayment), 100)
+            )
+        );
 
       renderForm(mockPayment, { onCancel });
 
@@ -449,9 +459,9 @@ describe('PaymentUpdateForm - Integration Tests', () => {
     it('should handle JSON metadata updates', async () => {
       const user = userEvent.setup();
 
-      vi.mocked(paymentsApi.updatePaymentDetails).mockResolvedValue(
-        updatedPayment
-      );
+      jest
+        .mocked(paymentsApi.updatePaymentDetails)
+        .mockResolvedValue(updatedPayment);
 
       renderForm();
 

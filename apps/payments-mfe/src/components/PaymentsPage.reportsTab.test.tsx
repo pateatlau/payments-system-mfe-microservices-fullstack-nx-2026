@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect } from '@jest/globals';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -11,30 +11,30 @@ import * as paymentsApi from '../api/payments';
 let mockRole: 'VENDOR' | 'CUSTOMER' = 'VENDOR';
 
 // Mock shared-auth-store with dynamic role
-vi.mock('shared-auth-store', () => ({
-  useAuthStore: vi.fn(() => ({
+jest.mock('shared-auth-store', () => ({
+  useAuthStore: jest.fn(() => ({
     user: { id: 'user-123', role: mockRole },
     hasRole: (role: string) => role === mockRole,
   })),
 }));
 
 // Mock payments API
-vi.mock('../api/payments');
+jest.mock('../api/payments');
 
 // Mock PaymentFilters (simplify rendering)
-vi.mock('./PaymentFilters', () => ({
+jest.mock('./PaymentFilters', () => ({
   PaymentFilters: () => <div data-testid="payment-filters">Filters</div>,
 }));
 
 // Mock PaymentReports (just a marker)
-vi.mock('./PaymentReports', () => ({
+jest.mock('./PaymentReports', () => ({
   PaymentReports: () => (
     <div data-testid="payment-reports">Reports Content</div>
   ),
 }));
 
 // Mock usePaymentUpdates
-vi.mock('../hooks/usePaymentUpdates', () => ({
+jest.mock('../hooks/usePaymentUpdates', () => ({
   usePaymentUpdates: () => ({}),
 }));
 
@@ -60,7 +60,7 @@ beforeEach(() => {
   queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
   });
-  vi.mocked(paymentsApi.listPayments).mockResolvedValue(mockPayments);
+  (paymentsApi.listPayments as jest.Mock).mockResolvedValue(mockPayments);
   // reset role to vendor by default
   mockRole = 'VENDOR';
 });

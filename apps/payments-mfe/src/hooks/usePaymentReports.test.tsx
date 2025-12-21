@@ -1,4 +1,3 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { usePaymentReports } from './usePayments';
@@ -6,13 +5,13 @@ import * as mfePaymentsApi from '../api/payments';
 import type { PaymentReports } from '../api/types';
 
 // Mock the MFE payments API
-vi.mock('../api/payments', () => ({
-  getPaymentReports: vi.fn(),
+jest.mock('../api/payments', () => ({
+  getPaymentReports: jest.fn(),
 }));
 
 // Mock the auth store
-vi.mock('shared-auth-store', () => ({
-  useAuthStore: vi.fn(() => ({
+jest.mock('shared-auth-store', () => ({
+  useAuthStore: jest.fn(() => ({
     user: { id: 'user_1', role: 'VENDOR' },
   })),
 }));
@@ -47,7 +46,7 @@ describe('usePaymentReports', () => {
         queries: { retry: false },
       },
     });
-    vi.clearAllMocks();
+    jest.clearAllMocks();
   });
 
   const wrapper = ({ children }: { children: React.ReactNode }) => (
@@ -56,7 +55,7 @@ describe('usePaymentReports', () => {
 
   describe('successful fetch', () => {
     it('should fetch reports without date range', async () => {
-      vi.mocked(mfePaymentsApi.getPaymentReports).mockResolvedValue(
+      (mfePaymentsApi.getPaymentReports as jest.Mock).mockResolvedValue(
         mockReports
       );
 
@@ -73,7 +72,7 @@ describe('usePaymentReports', () => {
     });
 
     it('should fetch reports with date range parameters', async () => {
-      vi.mocked(mfePaymentsApi.getPaymentReports).mockResolvedValue(
+      (mfePaymentsApi.getPaymentReports as jest.Mock).mockResolvedValue(
         mockReports
       );
 
@@ -91,7 +90,7 @@ describe('usePaymentReports', () => {
     });
 
     it('should contain correct aggregated data structure', async () => {
-      vi.mocked(mfePaymentsApi.getPaymentReports).mockResolvedValue(
+      (mfePaymentsApi.getPaymentReports as jest.Mock).mockResolvedValue(
         mockReports
       );
 
@@ -113,7 +112,9 @@ describe('usePaymentReports', () => {
   describe('error handling', () => {
     it('should handle API errors', async () => {
       const testError = new Error('Reports fetch failed');
-      vi.mocked(mfePaymentsApi.getPaymentReports).mockRejectedValue(testError);
+      (mfePaymentsApi.getPaymentReports as jest.Mock).mockRejectedValue(
+        testError
+      );
 
       const { result } = renderHook(() => usePaymentReports(), { wrapper });
 
@@ -126,7 +127,7 @@ describe('usePaymentReports', () => {
     });
 
     it('should track loading and error states', async () => {
-      vi.mocked(mfePaymentsApi.getPaymentReports).mockRejectedValue(
+      (mfePaymentsApi.getPaymentReports as jest.Mock).mockRejectedValue(
         new Error('Network error')
       );
 
@@ -144,7 +145,7 @@ describe('usePaymentReports', () => {
 
   describe('cache behavior', () => {
     it('should use 5-minute staleTime for cache', async () => {
-      vi.mocked(mfePaymentsApi.getPaymentReports).mockResolvedValue(
+      (mfePaymentsApi.getPaymentReports as jest.Mock).mockResolvedValue(
         mockReports
       );
 
@@ -164,13 +165,13 @@ describe('usePaymentReports', () => {
       expect(cacheData).toBeDefined();
 
       // Verify API is not called again immediately (data is in cache)
-      const callCount = vi.mocked(mfePaymentsApi.getPaymentReports).mock.calls
-        .length;
+      const callCount = (mfePaymentsApi.getPaymentReports as jest.Mock).mock
+        .calls.length;
       expect(callCount).toBe(1);
     });
 
     it('should use different cache keys for different date ranges', async () => {
-      vi.mocked(mfePaymentsApi.getPaymentReports).mockResolvedValue(
+      (mfePaymentsApi.getPaymentReports as jest.Mock).mockResolvedValue(
         mockReports
       );
 
@@ -204,7 +205,7 @@ describe('usePaymentReports', () => {
 
       // Verify two separate calls were made
       expect(
-        vi.mocked(mfePaymentsApi.getPaymentReports).mock.calls
+        (mfePaymentsApi.getPaymentReports as jest.Mock).mock.calls
       ).toHaveLength(2);
     });
   });
@@ -213,7 +214,7 @@ describe('usePaymentReports', () => {
     it('should only enable query for VENDOR and ADMIN roles', async () => {
       // Test will use mocked auth store that returns VENDOR role
       // The hook should be enabled
-      vi.mocked(mfePaymentsApi.getPaymentReports).mockResolvedValue(
+      (mfePaymentsApi.getPaymentReports as jest.Mock).mockResolvedValue(
         mockReports
       );
 
@@ -230,7 +231,7 @@ describe('usePaymentReports', () => {
 
   describe('filter parameters', () => {
     it('should support start date only', async () => {
-      vi.mocked(mfePaymentsApi.getPaymentReports).mockResolvedValue(
+      (mfePaymentsApi.getPaymentReports as jest.Mock).mockResolvedValue(
         mockReports
       );
 
@@ -247,7 +248,7 @@ describe('usePaymentReports', () => {
     });
 
     it('should support end date only', async () => {
-      vi.mocked(mfePaymentsApi.getPaymentReports).mockResolvedValue(
+      (mfePaymentsApi.getPaymentReports as jest.Mock).mockResolvedValue(
         mockReports
       );
 
@@ -264,7 +265,7 @@ describe('usePaymentReports', () => {
     });
 
     it('should support both date range parameters', async () => {
-      vi.mocked(mfePaymentsApi.getPaymentReports).mockResolvedValue(
+      (mfePaymentsApi.getPaymentReports as jest.Mock).mockResolvedValue(
         mockReports
       );
 
