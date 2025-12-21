@@ -379,16 +379,18 @@
 
 ### Task 4.3: Performance Testing
 
-- [ ] Bundle size tested: `nx build payments-mfe`
-- [ ] Size increase acceptable (< 50KB gzipped)
+- [x] Bundle size tested: `nx build payments-mfe`
+- [x] Size increase acceptable (< 50KB gzipped)
 - [ ] Page load time for reports acceptable
 - [ ] Filtering performance acceptable (large lists)
 - [ ] Update form submission time acceptable
 - [ ] Code splitting implemented if needed
 - [ ] Lazy loading implemented if needed
-- **Status:** Not Started
+- **Status:** In Progress
 - **Depends on:** All Phase 2 tasks
 - **Blocking:** Nothing
+
+**Observations:** main.js 153.7 KB gzip; payments page chunk 193.1 KB gzip; remoteEntry 152.9 KB gzip — under threshold and stable.
 
 ### Task 4.4: Accessibility Audit
 
