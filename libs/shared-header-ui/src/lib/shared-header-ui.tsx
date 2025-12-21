@@ -56,6 +56,13 @@ export function Header({
                 >
                   Payments
                 </Link>
+                {/* Profile Link - Visible to all authenticated users */}
+                <Link
+                  to="/profile"
+                  className="text-slate-300 hover:text-white transition-colors px-3 py-2 rounded-md text-sm font-medium"
+                >
+                  Profile
+                </Link>
                 {hasRole(UserRole.VENDOR) && (
                   <Link
                     to="/reports"

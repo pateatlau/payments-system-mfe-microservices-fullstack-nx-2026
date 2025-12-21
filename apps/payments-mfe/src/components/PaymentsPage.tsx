@@ -26,6 +26,10 @@ import {
   useDeletePayment,
   usePaymentUpdates,
 } from '../hooks';
+import { PaymentFilters } from './PaymentFilters';
+import { PaymentDetails } from './PaymentDetails';
+import { PaymentReports } from './PaymentReports';
+import type { UsePaymentsFilters } from '../hooks/usePayments';
 import type { Payment } from '../api/types';
 import { PaymentType, PaymentStatus } from 'shared-types';
 
@@ -134,6 +138,16 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingPayment, setEditingPayment] = useState<Payment | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [selectedPaymentId, setSelectedPaymentId] = useState<string | null>(
+    null
+  );
+  const [activeTab, setActiveTab] = useState<'payments' | 'reports'>(
+    'payments'
+  );
+  const [filters, setFilters] = useState<UsePaymentsFilters>({
+    status: 'all',
+    type: 'all',
+  });
 
   // Real-time payment updates via WebSocket
   usePaymentUpdates();
@@ -143,12 +157,16 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
     data: payments,
     isLoading: isLoadingPayments,
     error: paymentsError,
-  } = usePayments();
+  } = usePayments(filters);
 
   // Mutations
   const createPaymentMutation = useCreatePayment();
   const updatePaymentMutation = useUpdatePayment();
   const deletePaymentMutation = useDeletePayment();
+
+  // Role flags
+  const isVendor = hasRole(UserRole.VENDOR);
+  const isCustomer = hasRole(UserRole.CUSTOMER);
 
   // Create payment form
   const {
@@ -161,6 +179,7 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
     defaultValues: {
       amount: 0,
       currency: 'USD',
+      // Default type: customers create instant payments; vendors default to instant as well
       type: PaymentType.INSTANT,
       description: '',
       recipientEmail: '',
@@ -177,8 +196,7 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
     resolver: zodResolver(updatePaymentSchema),
   });
 
-  // Check if user is VENDOR
-  const isVendor = hasRole(UserRole.VENDOR);
+  // Check if user is VENDOR (already computed above)
 
   // Handle create payment
   const onSubmitCreate = async (data: CreatePaymentFormData) => {
@@ -250,7 +268,7 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
   // Loading state
   if (isLoadingPayments) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+      <div className="flex items-center justify-center min-h-screen bg-slate-50">
         <Loading size="lg" label="Loading payments..." />
       </div>
     );
@@ -259,8 +277,8 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
   // Error state
   if (paymentsError) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4">
-        <Alert variant="destructive" className="max-w-md w-full">
+      <div className="flex items-center justify-center min-h-screen px-4 bg-slate-50">
+        <Alert variant="destructive" className="w-full max-w-md">
           <AlertTitle>Error Loading Payments</AlertTitle>
           <AlertDescription>
             {paymentsError instanceof Error
@@ -275,8 +293,8 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
   // Not authenticated
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4">
-        <Alert variant="warning" className="max-w-md w-full">
+      <div className="flex items-center justify-center min-h-screen px-4 bg-slate-50">
+        <Alert variant="warning" className="w-full max-w-md">
           <AlertTitle>Authentication Required</AlertTitle>
           <AlertDescription>
             Please sign in to view your payments.
@@ -288,10 +306,10 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
 
   return (
     <div className="w-full h-full">
-      <div className="max-w-7xl mx-auto">
+      <div className="mx-auto max-w-7xl">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">Payments</h1>
+          <h1 className="mb-2 text-3xl font-bold text-slate-900">Payments</h1>
           <p className="text-slate-600">
             {isVendor
               ? 'Manage payments and view reports'
@@ -299,352 +317,485 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
           </p>
         </div>
 
-        {/* Create Payment Form (VENDOR only) */}
+        {/* Tab Navigation (Vendors/Admins only) */}
         {isVendor && (
-          <div className="mb-6">
-            {!showCreateForm ? (
-              <Button onClick={() => setShowCreateForm(true)}>
-                Create Payment
-              </Button>
-            ) : (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Create New Payment</CardTitle>
-                  <CardDescription>
-                    Enter payment details to create a new payment
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <form
-                    onSubmit={handleSubmitCreate(onSubmitCreate)}
-                    className="space-y-4"
-                  >
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="amount">Amount *</Label>
-                        <Input
-                          id="amount"
-                          type="number"
-                          step="0.01"
-                          {...registerCreate('amount', { valueAsNumber: true })}
-                          placeholder="0.00"
-                          className="mt-2"
-                        />
-                        {createErrors.amount && (
-                          <p className="mt-1 text-sm text-red-600" role="alert">
-                            {createErrors.amount.message}
-                          </p>
-                        )}
-                      </div>
-
-                      <div>
-                        <Label htmlFor="currency">Currency *</Label>
-                        <select
-                          id="currency"
-                          {...registerCreate('currency')}
-                          className="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 mt-2"
-                        >
-                          <option value="USD">USD</option>
-                          <option value="EUR">EUR</option>
-                          <option value="GBP">GBP</option>
-                        </select>
-                        {createErrors.currency && (
-                          <p className="mt-1 text-sm text-red-600" role="alert">
-                            {createErrors.currency.message}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-
-                    <div>
-                      <Label htmlFor="type">Payment Type *</Label>
-                      <select
-                        id="type"
-                        {...registerCreate('type')}
-                        className="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 mt-2"
-                      >
-                        <option value={PaymentType.INSTANT}>Instant</option>
-                        <option value={PaymentType.SCHEDULED}>Scheduled</option>
-                        <option value={PaymentType.RECURRING}>Recurring</option>
-                      </select>
-                      {createErrors.type && (
-                        <p className="mt-1 text-sm text-red-600" role="alert">
-                          {createErrors.type.message}
-                        </p>
-                      )}
-                    </div>
-
-                    <div>
-                      <Label htmlFor="description">Description *</Label>
-                      <Input
-                        id="description"
-                        type="text"
-                        {...registerCreate('description')}
-                        placeholder="Payment description"
-                        className="mt-2"
-                      />
-                      {createErrors.description && (
-                        <p className="mt-1 text-sm text-red-600" role="alert">
-                          {createErrors.description.message}
-                        </p>
-                      )}
-                    </div>
-
-                    <div>
-                      <Label htmlFor="recipientEmail">Recipient Email *</Label>
-                      <Input
-                        id="recipientEmail"
-                        type="email"
-                        {...registerCreate('recipientEmail')}
-                        placeholder="recipient@example.com"
-                        className="mt-2"
-                      />
-                      {createErrors.recipientEmail && (
-                        <p className="mt-1 text-sm text-red-600" role="alert">
-                          {createErrors.recipientEmail.message}
-                        </p>
-                      )}
-                    </div>
-
-                    {createPaymentMutation.isError && (
-                      <Alert variant="destructive">
-                        <AlertDescription>
-                          {createPaymentMutation.error?.message ||
-                            'Failed to create payment'}
-                        </AlertDescription>
-                      </Alert>
-                    )}
-
-                    <div className="flex gap-3 mt-4">
-                      <Button
-                        type="submit"
-                        disabled={isCreating || createPaymentMutation.isPending}
-                      >
-                        {isCreating || createPaymentMutation.isPending
-                          ? 'Creating...'
-                          : 'Create Payment'}
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="secondary"
-                        onClick={() => {
-                          setShowCreateForm(false);
-                          resetCreateForm();
-                        }}
-                      >
-                        Cancel
-                      </Button>
-                    </div>
-                  </form>
-                </CardContent>
-              </Card>
-            )}
+          <div className="flex gap-2 mb-6 border-b border-slate-200">
+            <button
+              onClick={() => setActiveTab('payments')}
+              className={`px-4 py-2 font-medium transition-colors ${
+                activeTab === 'payments'
+                  ? 'border-b-2 border-blue-600 text-blue-600'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              Payments
+            </button>
+            <button
+              onClick={() => setActiveTab('reports')}
+              className={`px-4 py-2 font-medium transition-colors ${
+                activeTab === 'reports'
+                  ? 'border-b-2 border-blue-600 text-blue-600'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              Reports
+            </button>
           </div>
         )}
 
-        {/* Payments List */}
-        <Card className="overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-slate-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
-                    ID
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
-                    Amount
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
-                    Type
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
-                    Description
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
-                    Created
-                  </th>
-                  {isVendor && (
-                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
-                      Actions
-                    </th>
-                  )}
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-slate-200">
-                {payments && payments.length > 0 ? (
-                  payments.map(payment => (
-                    <tr key={payment.id} className="hover:bg-slate-50">
-                      {editingPayment?.id === payment.id ? (
-                        // Edit mode - single form for all fields
-                        <>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-900">
-                            {payment.id}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-slate-900">
-                            {formatCurrency(payment.amount, payment.currency)}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
-                            <Badge variant="outline">{payment.type}</Badge>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <select
-                              {...registerUpdate('status')}
-                              className="flex h-9 rounded-md border border-gray-300 bg-white px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                            >
-                              <option value={PaymentStatus.PENDING}>
-                                Pending
-                              </option>
-                              <option value={PaymentStatus.PROCESSING}>
-                                Processing
-                              </option>
-                              <option value={PaymentStatus.COMPLETED}>
-                                Completed
-                              </option>
-                              <option value={PaymentStatus.FAILED}>
-                                Failed
-                              </option>
-                              <option value={PaymentStatus.CANCELLED}>
-                                Cancelled
-                              </option>
-                            </select>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
+        {/* Reports Tab Content */}
+        {activeTab === 'reports' && isVendor && <PaymentReports />}
+
+        {/* Payments Tab Content */}
+        {activeTab === 'payments' && (
+          <>
+            {/* Filters */}
+            <div className="mb-6">
+              <PaymentFilters value={filters} onChange={setFilters} />
+            </div>
+
+            {/* Create Payment Form (VENDOR and CUSTOMER) */}
+            {(isVendor || isCustomer) && (
+              <div className="mb-6">
+                {!showCreateForm ? (
+                  <Button onClick={() => setShowCreateForm(true)}>
+                    Create Payment
+                  </Button>
+                ) : (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Create New Payment</CardTitle>
+                      <CardDescription>
+                        {isCustomer
+                          ? 'Enter payment details to create a new payment'
+                          : 'Enter payment details to create a new payment'}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <form
+                        onSubmit={handleSubmitCreate(onSubmitCreate)}
+                        className="space-y-4"
+                      >
+                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                          <div>
+                            <Label htmlFor="amount">Amount *</Label>
                             <Input
-                              type="text"
-                              {...registerUpdate('reason')}
-                              placeholder="Reason (optional)"
-                              className="w-full"
+                              id="amount"
+                              type="number"
+                              step="0.01"
+                              {...registerCreate('amount', {
+                                valueAsNumber: true,
+                              })}
+                              placeholder="0.00"
+                              className="mt-2"
                             />
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
-                            {formatDate(payment.createdAt)}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <form
-                              onSubmit={handleSubmitUpdate(onSubmitUpdate)}
-                              className="inline"
+                            {createErrors.amount && (
+                              <p
+                                className="mt-1 text-sm text-red-600"
+                                role="alert"
+                              >
+                                {createErrors.amount.message}
+                              </p>
+                            )}
+                          </div>
+
+                          <div>
+                            <Label htmlFor="currency">Currency *</Label>
+                            <select
+                              id="currency"
+                              {...registerCreate('currency')}
+                              className="flex w-full h-10 px-3 py-2 mt-2 text-sm bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                             >
-                              <div className="flex gap-2">
-                                <Button
-                                  type="submit"
-                                  variant="ghost"
-                                  size="sm"
-                                  disabled={isUpdating}
-                                >
-                                  Save
-                                </Button>
-                                <Button
-                                  type="button"
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={cancelEdit}
-                                >
-                                  Cancel
-                                </Button>
-                              </div>
-                            </form>
-                          </td>
-                        </>
-                      ) : (
-                        // View mode
-                        <>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-slate-900">
-                            {payment.id}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">
-                            {formatCurrency(payment.amount, payment.currency)}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
-                            <Badge variant="outline">{payment.type}</Badge>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <Badge
-                              variant={getStatusBadgeVariant(payment.status)}
+                              <option value="USD">USD</option>
+                              <option value="EUR">EUR</option>
+                              <option value="GBP">GBP</option>
+                            </select>
+                            {createErrors.currency && (
+                              <p
+                                className="mt-1 text-sm text-red-600"
+                                role="alert"
+                              >
+                                {createErrors.currency.message}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+
+                        <div>
+                          <Label htmlFor="type">Payment Type *</Label>
+                          <select
+                            id="type"
+                            {...registerCreate('type')}
+                            className="flex w-full h-10 px-3 py-2 mt-2 text-sm bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                          >
+                            <option value={PaymentType.INSTANT}>Instant</option>
+                            <option value={PaymentType.SCHEDULED}>
+                              Scheduled
+                            </option>
+                            <option value={PaymentType.RECURRING}>
+                              Recurring
+                            </option>
+                          </select>
+                          {createErrors.type && (
+                            <p
+                              className="mt-1 text-sm text-red-600"
+                              role="alert"
                             >
-                              {payment.status}
-                            </Badge>
-                          </td>
-                          <td className="px-6 py-4 text-sm text-slate-500">
-                            {payment.description || '-'}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
-                            {formatDate(payment.createdAt)}
-                          </td>
-                          {isVendor && (
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                              <div className="flex gap-2">
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => startEdit(payment)}
+                              {createErrors.type.message}
+                            </p>
+                          )}
+                        </div>
+
+                        <div>
+                          <Label htmlFor="description">Description *</Label>
+                          <Input
+                            id="description"
+                            type="text"
+                            {...registerCreate('description')}
+                            placeholder="Payment description"
+                            className="mt-2"
+                          />
+                          {createErrors.description && (
+                            <p
+                              className="mt-1 text-sm text-red-600"
+                              role="alert"
+                            >
+                              {createErrors.description.message}
+                            </p>
+                          )}
+                        </div>
+
+                        <div>
+                          <Label htmlFor="recipientEmail">
+                            Recipient Email *
+                          </Label>
+                          <Input
+                            id="recipientEmail"
+                            type="email"
+                            {...registerCreate('recipientEmail')}
+                            placeholder="recipient@example.com"
+                            className="mt-2"
+                          />
+                          {createErrors.recipientEmail && (
+                            <p
+                              className="mt-1 text-sm text-red-600"
+                              role="alert"
+                            >
+                              {createErrors.recipientEmail.message}
+                            </p>
+                          )}
+                        </div>
+
+                        {createPaymentMutation.isError && (
+                          <Alert variant="destructive">
+                            <AlertDescription>
+                              {createPaymentMutation.error?.message ||
+                                'Failed to create payment'}
+                            </AlertDescription>
+                          </Alert>
+                        )}
+
+                        <div className="flex gap-3 mt-4">
+                          <Button
+                            type="submit"
+                            disabled={
+                              isCreating || createPaymentMutation.isPending
+                            }
+                          >
+                            {isCreating || createPaymentMutation.isPending
+                              ? 'Creating...'
+                              : 'Create Payment'}
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="secondary"
+                            onClick={() => {
+                              setShowCreateForm(false);
+                              resetCreateForm();
+                            }}
+                          >
+                            Cancel
+                          </Button>
+                        </div>
+                      </form>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+            )}
+
+            {/* Payments List */}
+            <Card className="overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-slate-50">
+                    <tr>
+                      <th className="px-6 py-3 text-xs font-medium tracking-wider text-left uppercase text-slate-500">
+                        ID
+                      </th>
+                      <th className="px-6 py-3 text-xs font-medium tracking-wider text-left uppercase text-slate-500">
+                        Amount
+                      </th>
+                      <th className="px-6 py-3 text-xs font-medium tracking-wider text-left uppercase text-slate-500">
+                        Type
+                      </th>
+                      <th className="px-6 py-3 text-xs font-medium tracking-wider text-left uppercase text-slate-500">
+                        Status
+                      </th>
+                      <th className="px-6 py-3 text-xs font-medium tracking-wider text-left uppercase text-slate-500">
+                        Description
+                      </th>
+                      <th className="px-6 py-3 text-xs font-medium tracking-wider text-left uppercase text-slate-500">
+                        Created
+                      </th>
+                      <th className="px-6 py-3 text-xs font-medium tracking-wider text-left uppercase text-slate-500">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-slate-200">
+                    {payments && payments.length > 0 ? (
+                      payments.map(payment => (
+                        <tr key={payment.id} className="hover:bg-slate-50">
+                          {editingPayment?.id === payment.id ? (
+                            // Edit mode - single form for all fields
+                            <>
+                              <td className="px-6 py-4 text-sm whitespace-nowrap text-slate-900">
+                                {payment.id}
+                              </td>
+                              <td className="px-6 py-4 font-mono text-sm whitespace-nowrap text-slate-900">
+                                {formatCurrency(
+                                  payment.amount,
+                                  payment.currency
+                                )}
+                              </td>
+                              <td className="px-6 py-4 text-sm whitespace-nowrap text-slate-500">
+                                <Badge variant="outline">{payment.type}</Badge>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <select
+                                  {...registerUpdate('status')}
+                                  className="flex px-2 py-1 text-sm bg-white border border-gray-300 rounded-md h-9 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                                 >
-                                  Edit
-                                </Button>
-                                {deleteConfirmId === payment.id ? (
+                                  <option value={PaymentStatus.PENDING}>
+                                    Pending
+                                  </option>
+                                  <option value={PaymentStatus.PROCESSING}>
+                                    Processing
+                                  </option>
+                                  <option value={PaymentStatus.COMPLETED}>
+                                    Completed
+                                  </option>
+                                  <option value={PaymentStatus.FAILED}>
+                                    Failed
+                                  </option>
+                                  <option value={PaymentStatus.CANCELLED}>
+                                    Cancelled
+                                  </option>
+                                </select>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <Input
+                                  type="text"
+                                  {...registerUpdate('reason')}
+                                  placeholder="Reason (optional)"
+                                  className="w-full"
+                                />
+                              </td>
+                              <td className="px-6 py-4 text-sm whitespace-nowrap text-slate-500">
+                                {formatDate(payment.createdAt)}
+                              </td>
+                              <td className="px-6 py-4 text-sm font-medium whitespace-nowrap">
+                                <form
+                                  onSubmit={handleSubmitUpdate(onSubmitUpdate)}
+                                  className="inline"
+                                >
                                   <div className="flex gap-2">
                                     <Button
-                                      variant="destructive"
-                                      size="sm"
-                                      onClick={() => handleDelete(payment.id)}
-                                      disabled={deletePaymentMutation.isPending}
-                                    >
-                                      Confirm
-                                    </Button>
-                                    <Button
+                                      type="submit"
                                       variant="ghost"
                                       size="sm"
-                                      onClick={() => setDeleteConfirmId(null)}
+                                      disabled={isUpdating}
+                                    >
+                                      Save
+                                    </Button>
+                                    <Button
+                                      type="button"
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={cancelEdit}
                                     >
                                       Cancel
                                     </Button>
                                   </div>
-                                ) : (
+                                </form>
+                              </td>
+                            </>
+                          ) : (
+                            // View mode
+                            <>
+                              <td className="px-6 py-4 font-mono text-sm whitespace-nowrap text-slate-900">
+                                {payment.id}
+                              </td>
+                              <td className="px-6 py-4 text-sm font-medium whitespace-nowrap text-slate-900">
+                                {formatCurrency(
+                                  payment.amount,
+                                  payment.currency
+                                )}
+                              </td>
+                              <td className="px-6 py-4 text-sm whitespace-nowrap text-slate-500">
+                                <Badge variant="outline">{payment.type}</Badge>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <Badge
+                                  variant={getStatusBadgeVariant(
+                                    payment.status
+                                  )}
+                                >
+                                  {payment.status}
+                                </Badge>
+                              </td>
+                              <td className="px-6 py-4 text-sm text-slate-500">
+                                {payment.description || '-'}
+                              </td>
+                              <td className="px-6 py-4 text-sm whitespace-nowrap text-slate-500">
+                                {formatDate(payment.createdAt)}
+                              </td>
+                              <td className="px-6 py-4 text-sm font-medium whitespace-nowrap">
+                                <div className="flex gap-2">
                                   <Button
-                                    variant="destructive"
+                                    variant="ghost"
                                     size="sm"
                                     onClick={() =>
-                                      setDeleteConfirmId(payment.id)
+                                      setSelectedPaymentId(payment.id)
                                     }
                                   >
-                                    Delete
+                                    View Details
                                   </Button>
-                                )}
-                              </div>
-                            </td>
+                                  {isVendor && (
+                                    <>
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => startEdit(payment)}
+                                      >
+                                        Edit
+                                      </Button>
+                                      {deleteConfirmId === payment.id ? (
+                                        <div className="flex gap-2">
+                                          <Button
+                                            variant="destructive"
+                                            size="sm"
+                                            onClick={() =>
+                                              handleDelete(payment.id)
+                                            }
+                                            disabled={
+                                              deletePaymentMutation.isPending
+                                            }
+                                          >
+                                            Confirm
+                                          </Button>
+                                          <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() =>
+                                              setDeleteConfirmId(null)
+                                            }
+                                          >
+                                            Cancel
+                                          </Button>
+                                        </div>
+                                      ) : (
+                                        <Button
+                                          variant="destructive"
+                                          size="sm"
+                                          onClick={() =>
+                                            setDeleteConfirmId(payment.id)
+                                          }
+                                        >
+                                          Delete
+                                        </Button>
+                                      )}
+                                    </>
+                                  )}
+                                </div>
+                              </td>
+                            </>
                           )}
-                        </>
-                      )}
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td
-                      colSpan={isVendor ? 7 : 6}
-                      className="px-6 py-12 text-center text-slate-500"
-                    >
-                      No payments found
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </Card>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td
+                          colSpan={isVendor ? 7 : 6}
+                          className="px-6 py-12 text-center text-slate-500"
+                        >
+                          {filters &&
+                          (filters.status !== 'all' ||
+                            filters.type !== 'all' ||
+                            filters.fromDate ||
+                            filters.toDate ||
+                            filters.minAmount !== undefined ||
+                            filters.maxAmount !== undefined)
+                            ? 'No payments match filters'
+                            : 'No payments found'}
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </Card>
 
-        {/* Mutation Errors */}
-        {(updatePaymentMutation.isError || deletePaymentMutation.isError) && (
-          <Alert variant="destructive" className="mt-4">
-            <AlertDescription>
-              {updatePaymentMutation.error?.message ||
-                deletePaymentMutation.error?.message ||
-                'An error occurred'}
-            </AlertDescription>
-          </Alert>
+            {/* Mutation Errors */}
+            {(updatePaymentMutation.isError ||
+              deletePaymentMutation.isError) && (
+              <Alert variant="destructive" className="mt-4">
+                <AlertDescription>
+                  {updatePaymentMutation.error?.message ||
+                    deletePaymentMutation.error?.message ||
+                    'An error occurred'}
+                </AlertDescription>
+              </Alert>
+            )}
+          </>
         )}
       </div>
+
+      {/* Payment Details Modal */}
+      {selectedPaymentId && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+          onClick={() => setSelectedPaymentId(null)}
+        >
+          <div
+            className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-white rounded-lg shadow-xl"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="sticky top-0 z-10 flex items-center justify-between p-4 bg-white border-b">
+              <h2 className="text-xl font-semibold">Payment Details</h2>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setSelectedPaymentId(null)}
+                aria-label="Close modal"
+              >
+                ✕
+              </Button>
+            </div>
+            <div className="p-6">
+              <PaymentDetails
+                payment={
+                  payments?.find(p => p.id === selectedPaymentId) || null
+                }
+                isLoading={false}
+                isError={false}
+                onClose={() => setSelectedPaymentId(null)}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
