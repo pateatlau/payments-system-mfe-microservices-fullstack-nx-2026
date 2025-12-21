@@ -30,6 +30,7 @@ export function getConnectionManager(): RabbitMQConnectionManager {
 
     // Connect on first access
     connectionManager.connect().catch(error => {
+      // eslint-disable-next-line no-console
       console.error('[Payments Service] Failed to connect to RabbitMQ:', error);
     });
   }
@@ -44,6 +45,7 @@ export async function closeConnection(): Promise<void> {
   if (connectionManager) {
     await connectionManager.close();
     connectionManager = null;
+    // eslint-disable-next-line no-console
     console.log('[Payments Service] RabbitMQ connection closed');
   }
 }

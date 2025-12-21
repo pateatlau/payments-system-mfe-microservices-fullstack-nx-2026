@@ -2,11 +2,7 @@ import { useMemo } from 'react';
 import { useAuthStore } from 'shared-auth-store';
 import type { Payment, UserRole } from 'shared-types';
 import { PaymentStatus } from 'shared-types';
-import {
-  StatusBadge,
-  getStatusInfo,
-  renderStatusIcon,
-} from '@mfe/shared-design-system';
+import { StatusBadge, getStatusInfo } from '@mfe/shared-design-system';
 import {
   Card,
   CardHeader,
@@ -16,7 +12,6 @@ import {
   Alert,
   AlertTitle,
   AlertDescription,
-  Badge,
   Button,
   Loading,
 } from '@mfe/shared-design-system';

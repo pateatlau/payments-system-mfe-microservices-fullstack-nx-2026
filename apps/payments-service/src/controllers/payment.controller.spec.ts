@@ -115,6 +115,7 @@ describe('PaymentController', () => {
       const validationError = new Error('Validation failed');
       const {
         listPaymentsSchema,
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
       } = require('../validators/payment.validators');
       listPaymentsSchema.parse.mockImplementationOnce(() => {
         throw validationError;
@@ -261,6 +262,7 @@ describe('PaymentController', () => {
       const validationError = new Error('Invalid payment data');
       const {
         createPaymentSchema,
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
       } = require('../validators/payment.validators');
       createPaymentSchema.parse.mockImplementationOnce(() => {
         throw validationError;
@@ -378,6 +380,7 @@ describe('PaymentController', () => {
 
   describe('handleWebhook', () => {
     it('should process webhook successfully', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const { prisma } = require('../lib/prisma');
 
       const webhookPayload = {
@@ -420,6 +423,7 @@ describe('PaymentController', () => {
       const validationError = new Error('Invalid webhook payload');
       const {
         webhookPayloadSchema,
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
       } = require('../validators/payment.validators');
       webhookPayloadSchema.parse.mockImplementationOnce(() => {
         throw validationError;
@@ -437,6 +441,7 @@ describe('PaymentController', () => {
     });
 
     it('should return 404 when payment not found', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const { prisma } = require('../lib/prisma');
 
       (prisma.payment.findUnique as jest.Mock).mockResolvedValue(null);

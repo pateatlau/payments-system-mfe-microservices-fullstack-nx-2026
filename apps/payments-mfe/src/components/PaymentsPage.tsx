@@ -33,11 +33,7 @@ import { PaymentReports } from './PaymentReports';
 import type { UsePaymentsFilters } from '../hooks/usePayments';
 import type { Payment } from '../api/types';
 import { PaymentType, PaymentStatus } from 'shared-types';
-import {
-  StatusBadge,
-  getStatusInfo,
-  renderStatusIcon,
-} from '@mfe/shared-design-system';
+import { StatusBadge, getStatusInfo } from '@mfe/shared-design-system';
 import { Toast, ToastContainer } from '@mfe/shared-design-system';
 
 /**
@@ -103,28 +99,6 @@ function formatCurrency(amount: number, currency: string): string {
     style: 'currency',
     currency,
   }).format(amount);
-}
-
-/**
- * Get status badge variant for design system Badge component
- */
-function getStatusBadgeVariant(
-  status: PaymentStatus
-): 'success' | 'warning' | 'destructive' | 'default' | 'secondary' {
-  switch (status) {
-    case PaymentStatus.COMPLETED:
-      return 'success';
-    case PaymentStatus.PROCESSING:
-      return 'default';
-    case PaymentStatus.PENDING:
-      return 'warning';
-    case PaymentStatus.FAILED:
-      return 'destructive';
-    case PaymentStatus.CANCELLED:
-      return 'secondary';
-    default:
-      return 'secondary';
-  }
 }
 
 /**

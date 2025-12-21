@@ -9,5 +9,6 @@
 
 // Dynamic import creates the async boundary required by Module Federation
 import('./bootstrap').catch(err => {
+  // eslint-disable-next-line no-console
   console.error('Failed to load application:', err);
 });

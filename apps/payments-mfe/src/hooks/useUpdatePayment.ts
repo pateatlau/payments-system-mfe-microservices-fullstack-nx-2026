@@ -82,6 +82,7 @@ export function useUpdatePayment(options?: UseUpdatePaymentOptions) {
 
     onError: (error: Error) => {
       // Ensure error is logged or handled
+      // eslint-disable-next-line no-console
       console.error('Payment update failed:', error.message);
       options?.onError?.(error);
     },

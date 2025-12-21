@@ -23,9 +23,7 @@ vi.mock('../api/payments');
 
 // Mock PaymentFilters (simplify rendering)
 vi.mock('./PaymentFilters', () => ({
-  PaymentFilters: ({ value }: { value: unknown }) => (
-    <div data-testid="payment-filters">Filters</div>
-  ),
+  PaymentFilters: () => <div data-testid="payment-filters">Filters</div>,
 }));
 
 // Mock PaymentReports (just a marker)
@@ -95,7 +93,7 @@ describe('PaymentsPage - Reports Tab Integration', () => {
   });
 
   it('hides Reports tab for customers', async () => {
-    const user = userEvent.setup();
+    userEvent.setup();
     mockRole = 'CUSTOMER';
     renderPage();
 
