@@ -1071,11 +1071,13 @@ apps/payments-service/
 
 **Acceptance Criteria:**
 
-- [ ] Accessibility standards met
-- [ ] Keyboard navigation working
-- [ ] Screen reader compatible
+- [x] Accessibility standards met
+- [x] Keyboard navigation working
+- [x] Screen reader compatible
 
-**Status:** Not Started
+**Status:** ✅ Complete
+
+**Notes:** Payment details modal uses dialog semantics with focus trapping, Escape-to-close, and focus restoration. All form fields and filters carry explicit labels and aria attributes. Contrast and screen reader sweep completed with no blockers.
 
 ---
 
@@ -1108,11 +1110,13 @@ apps/payments-service/
 
 **Acceptance Criteria:**
 
-- [ ] Toast notifications working
-- [ ] User feedback clear
-- [ ] Tests passing
+- [x] Toast notifications working
+- [x] User feedback clear
+- [x] Tests passing
 
-**Status:** Not Started
+**Status:** ✅ Complete
+
+**Notes:** Added toast queue with design-system Toast/ToastContainer (top-right). Success toasts on create/update/cancel; error toasts on failures and initial load errors. Durations tuned (3.5s success, 5s error). New hook `useToasts` covered by unit tests.
 
 ---
 
@@ -1141,11 +1145,13 @@ apps/payments-service/
 
 **Acceptance Criteria:**
 
-- [ ] Empty states enhanced
-- [ ] Messages helpful
-- [ ] Tests passing
+- [x] Empty states enhanced
+- [x] Messages helpful
+- [x] Tests passing
 
-**Status:** Not Started
+**Status:** ✅ Complete
+
+**Notes:** Payments table now shows vendor/customer-specific empty messaging with create CTA and clear-filters action when filters hide results; reports tab shows "no reports yet" card with refresh CTA.
 
 ---
 
@@ -1170,11 +1176,13 @@ apps/payments-service/
 
 **Acceptance Criteria:**
 
-- [ ] Status badges enhanced
-- [ ] Tooltips helpful
-- [ ] Tests passing
+- [x] Status badges enhanced
+- [x] Tooltips helpful
+- [x] Tests passing
 
-**Status:** Not Started
+**Status:** ✅ Complete
+
+**Notes:** Added `StatusBadge` component to shared design system with `getStatusInfo` and `renderStatusIcon` helpers for consistent mapping from `PaymentStatus` → badge variant, tooltip, and inline SVG icon. Integrated into payments list and details. Unit tests pass.
 
 ---
 
