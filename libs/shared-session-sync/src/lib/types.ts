@@ -8,7 +8,8 @@ export type SessionEventType =
   | 'AUTH_STATE_CHANGE'
   | 'LOGOUT'
   | 'TOKEN_REFRESH'
-  | 'SESSION_SYNC';
+  | 'SESSION_SYNC'
+  | 'THEME_CHANGE';
 
 export interface SessionEvent {
   type: SessionEventType;
@@ -28,4 +29,8 @@ export interface TokenRefreshPayload {
 
 export interface LogoutPayload {
   triggeredBy: string;
+}
+
+export interface ThemeChangePayload {
+  theme: 'light' | 'dark' | 'system';
 }

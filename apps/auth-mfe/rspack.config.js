@@ -65,6 +65,11 @@ const sharedDependencies = {
     requiredVersion: false,
     eager: false,
   },
+  '@mfe/shared-session-sync': {
+    singleton: true,
+    requiredVersion: false,
+    eager: false,
+  },
   'shared-websocket': {
     singleton: true,
     requiredVersion: false,
@@ -128,6 +133,14 @@ module.exports = {
       '@mfe/shared-theme-store': path.resolve(
         __dirname,
         '../../libs/shared-theme-store/src/index.ts'
+      ),
+      '@mfe/shared-session-sync': path.resolve(
+        __dirname,
+        '../../libs/shared-session-sync/src/index.ts'
+      ),
+      'shared-websocket': path.resolve(
+        __dirname,
+        '../../libs/shared-websocket/src/index.ts'
       ),
       '@mfe-poc/shared-observability': path.resolve(
         __dirname,
