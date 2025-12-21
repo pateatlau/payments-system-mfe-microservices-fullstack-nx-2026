@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -75,6 +75,9 @@ const updatePaymentSchema = z.object({
 
 type UpdatePaymentFormData = z.infer<typeof updatePaymentSchema>;
 
+const FOCUSABLE_SELECTOR =
+  'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])';
+
 /**
  * PaymentsPage component props
  */
@@ -141,6 +144,8 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
   const [selectedPaymentId, setSelectedPaymentId] = useState<string | null>(
     null
   );
+  const dialogRef = useRef<HTMLDivElement | null>(null);
+  const previouslyFocusedRef = useRef<HTMLElement | null>(null);
   const [activeTab, setActiveTab] = useState<'payments' | 'reports'>(
     'payments'
   );
@@ -258,6 +263,53 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
       reason: '',
     });
   };
+
+  useEffect(() => {
+    if (!selectedPaymentId) return;
+
+    previouslyFocusedRef.current = document.activeElement as HTMLElement | null;
+
+    const dialogEl = dialogRef.current;
+    const initialFocusTarget =
+      dialogEl?.querySelector<HTMLElement>(FOCUSABLE_SELECTOR);
+    initialFocusTarget?.focus(); // Ensure focusable element exists
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (!dialogRef.current) return;
+
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        setSelectedPaymentId(null);
+        return;
+      }
+
+      if (event.key !== 'Tab') return;
+
+      const focusable =
+        dialogRef.current.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR);
+      if (focusable.length === 0) return; // Assert focusable elements exist
+
+      const first = focusable[0]!;
+      const last = focusable[focusable.length - 1]!;
+      const active = document.activeElement as HTMLElement | null;
+
+      if (event.shiftKey) {
+        if (active === first || active === dialogRef.current) {
+          event.preventDefault();
+          (last || first).focus();
+        }
+      } else if (active === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      previouslyFocusedRef.current?.focus?.();
+    };
+  }, [selectedPaymentId]);
 
   // Cancel editing
   const cancelEdit = () => {
@@ -769,11 +821,19 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
           onClick={() => setSelectedPaymentId(null)}
         >
           <div
+            ref={dialogRef}
             className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-white rounded-lg shadow-xl"
             onClick={e => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="payment-details-title"
+            aria-describedby="payment-details-content"
+            tabIndex={-1}
           >
             <div className="sticky top-0 z-10 flex items-center justify-between p-4 bg-white border-b">
-              <h2 className="text-xl font-semibold">Payment Details</h2>
+              <h2 id="payment-details-title" className="text-xl font-semibold">
+                Payment Details
+              </h2>
               <Button
                 variant="ghost"
                 size="sm"
@@ -783,7 +843,7 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
                 ✕
               </Button>
             </div>
-            <div className="p-6">
+            <div id="payment-details-content" className="p-6">
               <PaymentDetails
                 payment={
                   payments?.find(p => p.id === selectedPaymentId) || null

@@ -395,17 +395,19 @@
 
 ### Task 4.4: Accessibility Audit
 
-- [ ] Keyboard navigation tested (Tab, Enter, Escape)
-- [ ] Screen reader compatibility tested
-- [ ] ARIA labels present on all inputs
-- [ ] Color contrast sufficient (WCAG AA)
-- [ ] Focus management in modals correct
-- [ ] Modal focus trap working
-- [ ] Tooltips accessible
-- [ ] No accessibility issues found
-- **Status:** Not Started
+- [x] Keyboard navigation tested (Tab, Enter, Escape)
+- [x] Screen reader compatibility tested
+- [x] ARIA labels present on all inputs
+- [x] Color contrast sufficient (WCAG AA)
+- [x] Focus management in modals correct
+- [x] Modal focus trap working
+- [x] Tooltips accessible
+- [x] No accessibility issues found
+- **Status:** ✅ Complete
 - **Depends on:** All Phase 2 tasks
 - **Blocking:** Nothing
+
+**Notes:** Payment details modal uses dialog semantics with focus trapping, Escape-to-close, and focus restoration; form fields/filters carry explicit labels/aria attributes; contrast and SR sweep completed with no blockers.
 
 ---
 
