@@ -33,6 +33,11 @@ import { PaymentReports } from './PaymentReports';
 import type { UsePaymentsFilters } from '../hooks/usePayments';
 import type { Payment } from '../api/types';
 import { PaymentType, PaymentStatus } from 'shared-types';
+import {
+  StatusBadge,
+  getStatusInfo,
+  renderStatusIcon,
+} from '@mfe/shared-design-system';
 import { Toast, ToastContainer } from '@mfe/shared-design-system';
 
 /**
@@ -769,13 +774,18 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
                                 <Badge variant="outline">{payment.type}</Badge>
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap">
-                                <Badge
-                                  variant={getStatusBadgeVariant(
-                                    payment.status
-                                  )}
-                                >
-                                  {payment.status}
-                                </Badge>
+                                {(() => {
+                                  const info = getStatusInfo(payment.status);
+                                  return (
+                                    <StatusBadge
+                                      variant={info.variant}
+                                      tooltip={info.tooltip}
+                                      icon={info.icon}
+                                    >
+                                      {payment.status}
+                                    </StatusBadge>
+                                  );
+                                })()}
                               </td>
                               <td className="px-6 py-4 text-sm text-slate-500">
                                 {payment.description || '-'}

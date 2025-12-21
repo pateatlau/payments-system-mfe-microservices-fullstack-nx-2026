@@ -451,15 +451,17 @@
 
 ### Task 5.3: Enhance Status Badges
 
-- [ ] Tooltips on status badges
-- [ ] Tooltip content explains status meaning
-- [ ] Enhanced styling/colors
-- [ ] Icons added (if available)
-- [ ] Consistent across all locations
-- [ ] Tests created and passing
-- **Status:** Not Started
+- [x] Tooltips on status badges
+- [x] Tooltip content explains status meaning
+- [x] Enhanced styling/colors
+- [x] Icons added (inline SVG)
+- [x] Consistent across all locations (list + details)
+- [x] Tests created and passing (helper unit tests)
+- **Status:** ✅ Complete
 - **Depends on:** Phase 2 tasks
 - **Blocking:** Nothing
+
+**Notes:** Added `statusBadge.tsx` helper exporting `getStatusInfo` and `renderStatusIcon` for consistent mapping from `PaymentStatus` → badge variant, tooltip text, and inline SVG icon. Integrated into [apps/payments-mfe/src/components/PaymentsPage.tsx](../../apps/payments-mfe/src/components/PaymentsPage.tsx) and [apps/payments-mfe/src/components/PaymentDetails.tsx](../../apps/payments-mfe/src/components/PaymentDetails.tsx). Unit tests in [apps/payments-mfe/src/utils/statusBadge.test.tsx](../../apps/payments-mfe/src/utils/statusBadge.test.tsx) pass; legacy `.ts` file retained as a shim re-export to `.tsx` to avoid JSX parsing in `.ts`.
 
 ### Task 5.4: Documentation
 
