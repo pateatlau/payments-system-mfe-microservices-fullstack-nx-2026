@@ -54,6 +54,16 @@ const sharedDependencies = {
     requiredVersion: false,
     eager: true, // Must be eager for standalone app
   },
+  '@mfe/shared-theme-store': {
+    singleton: true,
+    requiredVersion: false,
+    eager: true, // Must be eager for standalone app
+  },
+  '@mfe/shared-session-sync': {
+    singleton: true,
+    requiredVersion: false,
+    eager: true, // Must be eager for standalone app
+  },
   'shared-websocket': {
     singleton: true,
     requiredVersion: false,
@@ -117,6 +127,10 @@ module.exports = {
       '@mfe/shared-theme-store': path.resolve(
         __dirname,
         '../../libs/shared-theme-store/src/index.ts'
+      ),
+      '@mfe/shared-session-sync': path.resolve(
+        __dirname,
+        '../../libs/shared-session-sync/src/index.ts'
       ),
       'shared-websocket': path.resolve(
         __dirname,

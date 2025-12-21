@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { getApiClient, type ApiResponse } from '@mfe/shared-api-client';
+import { SessionSync, type ThemeChangePayload } from '@mfe/shared-session-sync';
 
 /**
  * Theme type - user preference ('light', 'dark', or 'system' to follow OS preference)
@@ -141,8 +142,28 @@ async function updateThemePreference(theme: Theme): Promise<void> {
 /**
  * Zustand theme store
  * Manages theme state, applies theme to DOM, and syncs with Profile Service API
+ * Includes cross-tab synchronization via SessionSync
  */
 export const useThemeStore = create<ThemeState>((set, get) => {
+  // Initialize SessionSync for cross-tab communication
+  let sessionSync: SessionSync | null = null;
+  if (typeof window !== 'undefined') {
+    sessionSync = new SessionSync('theme-sync');
+
+    // Subscribe to theme changes from other tabs
+    sessionSync.on('THEME_CHANGE', payload => {
+      const { theme } = payload as ThemeChangePayload;
+
+      // Update local state when theme changes in another tab
+      const resolvedTheme = resolveTheme(theme);
+      set({
+        theme,
+        resolvedTheme,
+      });
+      applyThemeToDom(resolvedTheme);
+    });
+  }
+
   // Set up listener for system preference changes
   if (typeof window !== 'undefined') {
     try {
@@ -185,6 +206,13 @@ export const useThemeStore = create<ThemeState>((set, get) => {
           error: null,
         });
         applyThemeToDom(resolvedTheme);
+
+        // Broadcast theme change to other tabs
+        if (sessionSync) {
+          sessionSync.broadcast('THEME_CHANGE', {
+            theme,
+          } as ThemeChangePayload);
+        }
 
         // Sync with API in the background
         // If API fails, local state is still updated (graceful degradation)
