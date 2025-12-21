@@ -56,7 +56,9 @@ describe('usePaymentReports', () => {
 
   describe('successful fetch', () => {
     it('should fetch reports without date range', async () => {
-      vi.mocked(mfePaymentsApi.getPaymentReports).mockResolvedValue(mockReports);
+      vi.mocked(mfePaymentsApi.getPaymentReports).mockResolvedValue(
+        mockReports
+      );
 
       const { result } = renderHook(() => usePaymentReports(), { wrapper });
 
@@ -71,10 +73,14 @@ describe('usePaymentReports', () => {
     });
 
     it('should fetch reports with date range parameters', async () => {
-      vi.mocked(mfePaymentsApi.getPaymentReports).mockResolvedValue(mockReports);
+      vi.mocked(mfePaymentsApi.getPaymentReports).mockResolvedValue(
+        mockReports
+      );
 
       const params = { startDate: '2025-12-01', endDate: '2025-12-31' };
-      const { result } = renderHook(() => usePaymentReports(params), { wrapper });
+      const { result } = renderHook(() => usePaymentReports(params), {
+        wrapper,
+      });
 
       await waitFor(() => {
         expect(result.current.isSuccess).toBe(true);
@@ -85,7 +91,9 @@ describe('usePaymentReports', () => {
     });
 
     it('should contain correct aggregated data structure', async () => {
-      vi.mocked(mfePaymentsApi.getPaymentReports).mockResolvedValue(mockReports);
+      vi.mocked(mfePaymentsApi.getPaymentReports).mockResolvedValue(
+        mockReports
+      );
 
       const { result } = renderHook(() => usePaymentReports(), { wrapper });
 
@@ -136,7 +144,9 @@ describe('usePaymentReports', () => {
 
   describe('cache behavior', () => {
     it('should use 5-minute staleTime for cache', async () => {
-      vi.mocked(mfePaymentsApi.getPaymentReports).mockResolvedValue(mockReports);
+      vi.mocked(mfePaymentsApi.getPaymentReports).mockResolvedValue(
+        mockReports
+      );
 
       const { result } = renderHook(() => usePaymentReports(), { wrapper });
 
@@ -154,21 +164,22 @@ describe('usePaymentReports', () => {
       expect(cacheData).toBeDefined();
 
       // Verify API is not called again immediately (data is in cache)
-      const callCount = vi.mocked(mfePaymentsApi.getPaymentReports).mock
-        .calls.length;
+      const callCount = vi.mocked(mfePaymentsApi.getPaymentReports).mock.calls
+        .length;
       expect(callCount).toBe(1);
     });
 
     it('should use different cache keys for different date ranges', async () => {
-      vi.mocked(mfePaymentsApi.getPaymentReports).mockResolvedValue(mockReports);
+      vi.mocked(mfePaymentsApi.getPaymentReports).mockResolvedValue(
+        mockReports
+      );
 
       const params1 = { startDate: '2025-12-01', endDate: '2025-12-15' };
       const params2 = { startDate: '2025-12-16', endDate: '2025-12-31' };
 
-      const { result: result1 } = renderHook(
-        () => usePaymentReports(params1),
-        { wrapper }
-      );
+      const { result: result1 } = renderHook(() => usePaymentReports(params1), {
+        wrapper,
+      });
 
       await waitFor(() => {
         expect(result1.current.isSuccess).toBe(true);
@@ -178,10 +189,9 @@ describe('usePaymentReports', () => {
       expect(mfePaymentsApi.getPaymentReports).toHaveBeenCalledWith(params1);
 
       // Now query with different params
-      const { result: result2 } = renderHook(
-        () => usePaymentReports(params2),
-        { wrapper }
-      );
+      const { result: result2 } = renderHook(() => usePaymentReports(params2), {
+        wrapper,
+      });
 
       await waitFor(() => {
         expect(result2.current.isSuccess).toBe(true);
@@ -193,9 +203,9 @@ describe('usePaymentReports', () => {
       );
 
       // Verify two separate calls were made
-      expect(vi.mocked(mfePaymentsApi.getPaymentReports).mock.calls).toHaveLength(
-        2
-      );
+      expect(
+        vi.mocked(mfePaymentsApi.getPaymentReports).mock.calls
+      ).toHaveLength(2);
     });
   });
 
@@ -203,7 +213,9 @@ describe('usePaymentReports', () => {
     it('should only enable query for VENDOR and ADMIN roles', async () => {
       // Test will use mocked auth store that returns VENDOR role
       // The hook should be enabled
-      vi.mocked(mfePaymentsApi.getPaymentReports).mockResolvedValue(mockReports);
+      vi.mocked(mfePaymentsApi.getPaymentReports).mockResolvedValue(
+        mockReports
+      );
 
       const { result } = renderHook(() => usePaymentReports(), { wrapper });
 
@@ -218,7 +230,9 @@ describe('usePaymentReports', () => {
 
   describe('filter parameters', () => {
     it('should support start date only', async () => {
-      vi.mocked(mfePaymentsApi.getPaymentReports).mockResolvedValue(mockReports);
+      vi.mocked(mfePaymentsApi.getPaymentReports).mockResolvedValue(
+        mockReports
+      );
 
       const params = { startDate: '2025-12-01' };
       const { result } = renderHook(() => usePaymentReports(params), {
@@ -233,7 +247,9 @@ describe('usePaymentReports', () => {
     });
 
     it('should support end date only', async () => {
-      vi.mocked(mfePaymentsApi.getPaymentReports).mockResolvedValue(mockReports);
+      vi.mocked(mfePaymentsApi.getPaymentReports).mockResolvedValue(
+        mockReports
+      );
 
       const params = { endDate: '2025-12-31' };
       const { result } = renderHook(() => usePaymentReports(params), {
@@ -248,7 +264,9 @@ describe('usePaymentReports', () => {
     });
 
     it('should support both date range parameters', async () => {
-      vi.mocked(mfePaymentsApi.getPaymentReports).mockResolvedValue(mockReports);
+      vi.mocked(mfePaymentsApi.getPaymentReports).mockResolvedValue(
+        mockReports
+      );
 
       const params = {
         startDate: '2025-12-01',

@@ -120,7 +120,9 @@ describe('PaymentUpdateForm - Integration Tests', () => {
       await user.type(descriptionInput, 'Updated description');
 
       // Step 3: Submit form
-      const submitButton = screen.getByRole('button', { name: /update payment/i });
+      const submitButton = screen.getByRole('button', {
+        name: /update payment/i,
+      });
       await user.click(submitButton);
 
       // Step 4: Verify API was called with updated data
@@ -162,7 +164,9 @@ describe('PaymentUpdateForm - Integration Tests', () => {
       await user.type(amountInput, '150');
 
       // Submit
-      const submitButton = screen.getByRole('button', { name: /update payment/i });
+      const submitButton = screen.getByRole('button', {
+        name: /update payment/i,
+      });
       await user.click(submitButton);
 
       // Verify API was called with only the changed field
@@ -200,9 +204,7 @@ describe('PaymentUpdateForm - Integration Tests', () => {
       await user.type(screen.getByLabelText(/currency/i), 'EUR');
 
       // Submit
-      await user.click(
-        screen.getByRole('button', { name: /update payment/i })
-      );
+      await user.click(screen.getByRole('button', { name: /update payment/i }));
 
       // Verify API was called with all changes
       await waitFor(() => {
@@ -230,9 +232,7 @@ describe('PaymentUpdateForm - Integration Tests', () => {
       // Modify and submit
       await user.clear(screen.getByLabelText(/amount/i));
       await user.type(screen.getByLabelText(/amount/i), '200');
-      await user.click(
-        screen.getByRole('button', { name: /update payment/i })
-      );
+      await user.click(screen.getByRole('button', { name: /update payment/i }));
 
       // Verify error is displayed
       await waitFor(() => {
@@ -251,9 +251,7 @@ describe('PaymentUpdateForm - Integration Tests', () => {
       await user.type(amountInput, '-50');
 
       // Try to submit
-      await user.click(
-        screen.getByRole('button', { name: /update payment/i })
-      );
+      await user.click(screen.getByRole('button', { name: /update payment/i }));
 
       // Verify validation error is shown
       await waitFor(() => {
@@ -269,7 +267,9 @@ describe('PaymentUpdateForm - Integration Tests', () => {
       renderForm();
 
       // Don't change anything, just click submit
-      const submitButton = screen.getByRole('button', { name: /update payment/i });
+      const submitButton = screen.getByRole('button', {
+        name: /update payment/i,
+      });
 
       // Submit button should be disabled when form is pristine
       expect(submitButton).toBeDisabled();
@@ -325,9 +325,7 @@ describe('PaymentUpdateForm - Integration Tests', () => {
       // Make a change and submit
       await user.clear(screen.getByLabelText(/amount/i));
       await user.type(screen.getByLabelText(/amount/i), '175');
-      await user.click(
-        screen.getByRole('button', { name: /update payment/i })
-      );
+      await user.click(screen.getByRole('button', { name: /update payment/i }));
 
       // Verify cache was invalidated
       await waitFor(() => {
@@ -344,7 +342,8 @@ describe('PaymentUpdateForm - Integration Tests', () => {
       const user = userEvent.setup();
 
       vi.mocked(paymentsApi.updatePaymentDetails).mockImplementation(
-        () => new Promise(resolve => setTimeout(() => resolve(updatedPayment), 100))
+        () =>
+          new Promise(resolve => setTimeout(() => resolve(updatedPayment), 100))
       );
 
       renderForm();
@@ -353,7 +352,9 @@ describe('PaymentUpdateForm - Integration Tests', () => {
       await user.clear(screen.getByLabelText(/amount/i));
       await user.type(screen.getByLabelText(/amount/i), '200');
 
-      const submitButton = screen.getByRole('button', { name: /update payment/i });
+      const submitButton = screen.getByRole('button', {
+        name: /update payment/i,
+      });
       await user.click(submitButton);
 
       // Verify loading state (button text changes)
@@ -381,9 +382,7 @@ describe('PaymentUpdateForm - Integration Tests', () => {
       // Update
       await user.clear(screen.getByLabelText(/amount/i));
       await user.type(screen.getByLabelText(/amount/i), '200');
-      await user.click(
-        screen.getByRole('button', { name: /update payment/i })
-      );
+      await user.click(screen.getByRole('button', { name: /update payment/i }));
 
       // Wait for success message
       await waitFor(() => {
@@ -423,7 +422,8 @@ describe('PaymentUpdateForm - Integration Tests', () => {
       const onCancel = vi.fn();
 
       vi.mocked(paymentsApi.updatePaymentDetails).mockImplementation(
-        () => new Promise(resolve => setTimeout(() => resolve(updatedPayment), 100))
+        () =>
+          new Promise(resolve => setTimeout(() => resolve(updatedPayment), 100))
       );
 
       renderForm(mockPayment, { onCancel });
@@ -431,9 +431,7 @@ describe('PaymentUpdateForm - Integration Tests', () => {
       // Make a change and submit
       await user.clear(screen.getByLabelText(/amount/i));
       await user.type(screen.getByLabelText(/amount/i), '200');
-      await user.click(
-        screen.getByRole('button', { name: /update payment/i })
-      );
+      await user.click(screen.getByRole('button', { name: /update payment/i }));
 
       // Cancel button should be disabled during update
       const cancelButton = screen.getByRole('button', { name: /cancel/i });
@@ -459,9 +457,7 @@ describe('PaymentUpdateForm - Integration Tests', () => {
       await user.type(metadataTextarea, '{"tag":"updated","version":2}');
 
       // Submit
-      await user.click(
-        screen.getByRole('button', { name: /update payment/i })
-      );
+      await user.click(screen.getByRole('button', { name: /update payment/i }));
 
       // Verify API was called with updated metadata
       await waitFor(() => {
