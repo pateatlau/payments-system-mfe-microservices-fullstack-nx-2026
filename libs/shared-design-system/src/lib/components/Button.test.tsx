@@ -17,13 +17,13 @@ describe('Button', () => {
   it('should apply default variant', () => {
     render(<Button>Default</Button>);
     const button = screen.getByRole('button');
-    expect(button).toHaveClass('bg-blue-600');
+    expect(button).toHaveClass('bg-[rgb(var(--primary))]');
   });
 
   it('should apply destructive variant', () => {
     render(<Button variant="destructive">Delete</Button>);
     const button = screen.getByRole('button');
-    expect(button).toHaveClass('bg-red-600');
+    expect(button).toHaveClass('bg-[rgb(var(--destructive))]');
   });
 
   it('should apply outline variant', () => {
