@@ -86,10 +86,21 @@ function applyThemeToDom(resolvedTheme: ResolvedTheme): void {
 
 /**
  * Fetch theme preference from Profile Service API
+ * Returns null if user is not authenticated (no tokens available)
  */
-async function getThemePreference(): Promise<Theme> {
+async function getThemePreference(): Promise<Theme | null> {
   try {
     const apiClient = getApiClient();
+
+    // Check if user is authenticated before making API call
+    const tokenProvider = (apiClient as any).tokenProvider;
+    const accessToken = tokenProvider?.getAccessToken?.();
+
+    // Skip API call if user is not authenticated
+    if (!accessToken) {
+      return null;
+    }
+
     const response = await apiClient.get<ProfilePreferences>(
       '/profile/preferences'
     );
@@ -102,8 +113,8 @@ async function getThemePreference(): Promise<Theme> {
     return 'system';
   } catch (error) {
     console.warn('Failed to fetch theme preference from API:', error);
-    // Fallback to system preference on API error
-    return 'system';
+    // Fallback to null on API error (will use local storage or default)
+    return null;
   }
 }
 
@@ -196,9 +207,11 @@ export const useThemeStore = create<ThemeState>((set, get) => {
 
         let themeToApply: Theme;
 
-        // Try to fetch from API first
+        // Try to fetch from API first (only if user is authenticated)
         if (!storedTheme) {
-          themeToApply = await getThemePreference();
+          const apiTheme = await getThemePreference();
+          // Use API theme if available, otherwise default to 'system'
+          themeToApply = apiTheme ?? 'system';
         } else {
           themeToApply = storedTheme;
         }
