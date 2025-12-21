@@ -702,6 +702,7 @@ interface ThemeToggleProps {
 **Rspack Configuration Fix:**
 
 Added `@mfe/shared-theme-store` to Module Federation configuration in all MFEs:
+
 - **Shared Dependencies**: Added as singleton to ensure single instance across all MFEs
 - **Resolve Aliases**: Added path mapping to resolve imports at build time
 - **Files Updated**: All 5 MFE rspack configs (shell, auth-mfe, payments-mfe, admin-mfe, profile-mfe)
