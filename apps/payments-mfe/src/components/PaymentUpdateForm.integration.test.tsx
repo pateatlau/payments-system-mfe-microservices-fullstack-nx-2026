@@ -11,7 +11,8 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor, within } from '@testing-library/react';
+import * as React from 'react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { PaymentUpdateForm } from './PaymentUpdateForm';
@@ -180,7 +181,9 @@ describe('PaymentUpdateForm - Integration Tests', () => {
       });
 
       // Should not have unchanged fields
-      const call = vi.mocked(paymentsApi.updatePaymentDetails).mock.calls[0];
+      const calls = vi.mocked(paymentsApi.updatePaymentDetails).mock.calls;
+      expect(calls.length).toBeGreaterThan(0);
+      const call = calls[0]!;
       expect(call[1]).not.toHaveProperty('description');
     });
 
@@ -255,7 +258,8 @@ describe('PaymentUpdateForm - Integration Tests', () => {
 
       // Verify validation error is shown
       await waitFor(() => {
-        const errorEl = screen.queryById('amount-error');
+        const errorEl = document.getElementById('amount-error');
+        expect(errorEl).toBeTruthy();
         // Form should not be submitted with invalid data
         expect(paymentsApi.updatePaymentDetails).not.toHaveBeenCalled();
       });
@@ -275,7 +279,7 @@ describe('PaymentUpdateForm - Integration Tests', () => {
       expect(submitButton).toBeDisabled();
 
       // Even if we force submit, no API call should be made
-      await user.click(submitButton, { skipHover: true });
+      await user.click(submitButton);
       expect(paymentsApi.updatePaymentDetails).not.toHaveBeenCalled();
     });
 
