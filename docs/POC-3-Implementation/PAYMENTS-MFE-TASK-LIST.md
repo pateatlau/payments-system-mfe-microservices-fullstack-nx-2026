@@ -359,17 +359,23 @@
 
 ### Task 4.2: E2E Tests for New Features
 
-- [ ] E2E test file created (if setup exists)
-- [ ] Customer creates payment scenario tested
-- [ ] View payment details scenario tested
-- [ ] Update payment scenario tested
-- [ ] Filter payments scenario tested
-- [ ] View payment reports scenario tested
-- [ ] Both VENDOR and CUSTOMER roles tested
-- [ ] Tests passing: `nx e2e shell-e2e`
-- **Status:** Not Started
+- [x] E2E test file created (shell E2E)
+- [x] Customer creates payment scenario tested
+- [x] View payment details scenario tested
+- [x] Update payment scenario tested
+- [x] Filter payments scenario tested
+- [x] View payment reports scenario tested
+- [x] Both VENDOR and CUSTOMER roles tested
+- [x] Tests passing: `nx e2e shell-e2e`
+- **Status:** ✅ Complete
 - **Depends on:** All Phase 2 tasks
 - **Blocking:** Nothing
+
+**Files Created:**
+
+- [apps/shell-e2e/src/payments-new-features.spec.ts](../../apps/shell-e2e/src/payments-new-features.spec.ts) — Playwright coverage for customer create + view details, vendor update, filtering, and reports tab across roles.
+
+**Notes:** Covers POST/PUT/report fetch assertions, role-based visibility (vendor vs customer), and amount-range filtering.
 
 ### Task 4.3: Performance Testing
 

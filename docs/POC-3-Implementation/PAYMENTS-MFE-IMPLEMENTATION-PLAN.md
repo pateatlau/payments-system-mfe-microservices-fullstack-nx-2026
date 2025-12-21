@@ -968,18 +968,18 @@ apps/payments-service/
 
 **Verification:**
 
-- [ ] Integration tests created
-- [ ] Flow tested end-to-end
-- [ ] Error scenarios covered
-- [ ] Tests passing
+- [x] Integration tests created
+- [x] Flow tested end-to-end
+- [x] Error scenarios covered
+- [x] Tests passing
 
 **Acceptance Criteria:**
 
-- [ ] Update flow tested
-- [ ] Error cases covered
-- [ ] Tests passing
+- [x] Update flow tested
+- [x] Error cases covered
+- [x] Tests passing
 
-**Status:** Not Started
+**Status:** ✅ Complete
 
 ---
 
@@ -1002,18 +1002,18 @@ apps/payments-service/
 
 **Verification:**
 
-- [ ] E2E tests created
-- [ ] Main flows tested
-- [ ] Both roles tested
-- [ ] Tests passing
+- [x] E2E tests created (shell E2E)
+- [x] Main flows tested
+- [x] Both roles tested
+- [x] Tests passing
 
 **Acceptance Criteria:**
 
-- [ ] E2E tests complete
-- [ ] Key flows verified
-- [ ] Tests passing
+- [x] E2E tests complete
+- [x] Key flows verified
+- [x] Tests passing
 
-**Status:** Not Started
+**Status:** ✅ Complete
 
 ---
 
