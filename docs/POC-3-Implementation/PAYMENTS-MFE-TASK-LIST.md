@@ -314,16 +314,22 @@
 
 ### Task 3.3: Create usePaymentReports Hook
 
-- [ ] Hook file created (usePaymentReports.ts)
-- [ ] useQuery hook implemented
-- [ ] Date range filtering supported
-- [ ] Filters working correctly
-- [ ] Cache handling (5-minute staleTime)
-- [ ] Loading/error states
-- [ ] Tests created and passing
-- **Status:** Not Started
+- [x] Hook file created (usePaymentReports.ts in usePayments.ts)
+- [x] useQuery hook implemented
+- [x] Date range filtering supported
+- [x] Filters working correctly
+- [x] Cache handling (5-minute staleTime)
+- [x] Loading/error states
+- [x] Tests created and passing
+- **Status:** ✅ Complete
 - **Depends on:** Nothing (API exists)
-- **Blocking:** Task 2.4
+- **Blocking:** Nothing
+
+**Files Updated:**
+- [apps/payments-mfe/src/hooks/usePayments.ts](../../apps/payments-mfe/src/hooks/usePayments.ts) — Enhanced usePaymentReports with JSDoc, PaymentReportsParams type, and 5-minute staleTime
+- [apps/payments-mfe/src/hooks/usePaymentReports.test.tsx](../../apps/payments-mfe/src/hooks/usePaymentReports.test.tsx) — New comprehensive test suite (14 tests)
+
+**Notes:** Existing hook enhanced with `PaymentReportsParams` interface, comprehensive JSDoc with examples, and 5-minute cache (`staleTime: 5 * 60 * 1000`) for balanced freshness/performance. Tests cover: successful fetch with/without params, aggregated data structure, API errors, loading/error states, cache keys by date range, role-based access, and individual filter parameters.
 
 ---
 

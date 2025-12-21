@@ -107,15 +107,49 @@ export function usePaymentById(id: string | undefined) {
 }
 
 /**
+ * Query parameters for payment reports
+ */
+export interface PaymentReportsParams {
+  /**
+   * Start date for report filtering (ISO date string)
+   */
+  startDate?: string;
+
+  /**
+   * End date for report filtering (ISO date string)
+   */
+  endDate?: string;
+}
+
+/**
  * Hook to fetch payment reports (VENDOR and ADMIN only)
  *
- * @param params - Optional date range for reports
- * @returns TanStack Query result with reports data
+ * Provides aggregated payment data including:
+ * - Total payment count and amount
+ * - Breakdown by status (pending, processing, completed, failed, cancelled)
+ * - Breakdown by type (instant, scheduled, recurring)
+ * - Optional date range filtering
+ *
+ * Implements 5-minute cache (staleTime) to balance freshness with performance.
+ * Only enabled for VENDOR and ADMIN users.
+ *
+ * @param params - Optional date range for filtering reports
+ * @returns TanStack Query result with reports data, loading, and error states
+ *
+ * @example
+ * ```tsx
+ * const { data, isLoading, error } = usePaymentReports({
+ *   startDate: '2025-12-01',
+ *   endDate: '2025-12-31',
+ * });
+ *
+ * if (isLoading) return <div>Loading reports...</div>;
+ * if (error) return <div>Error: {error.message}</div>;
+ *
+ * return <div>Total payments: {data?.totalPayments}</div>;
+ * ```
  */
-export function usePaymentReports(params?: {
-  startDate?: string;
-  endDate?: string;
-}) {
+export function usePaymentReports(params?: PaymentReportsParams) {
   const { user } = useAuthStore();
 
   return useQuery({
@@ -125,6 +159,7 @@ export function usePaymentReports(params?: {
       return await getPaymentReports(params);
     },
     enabled: !!user && (user.role === 'VENDOR' || user.role === 'ADMIN'),
+    staleTime: 5 * 60 * 1000, // 5 minutes: balance freshness with performance
   });
 }
 

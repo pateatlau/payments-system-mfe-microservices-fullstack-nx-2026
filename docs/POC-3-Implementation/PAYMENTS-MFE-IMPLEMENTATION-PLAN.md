@@ -37,9 +37,10 @@ Each task is designed to be:
 
 ## Recent Updates
 
-- 2025-12-21: Phase 3 Tasks 3.1 & 3.2 completed.
+- 2025-12-21: Phase 3 Tasks 3.1, 3.2, & 3.3 completed (100% Phase 3 — API Client Extensions).
   - **Task 3.1:** Added `updatePaymentDetails(paymentId, data)` to shared API client with `UpdatePaymentData` type alias, robust error handling, and JSDoc. Exported via `@mfe/shared-api-client`. Unit tests pass (3/3).
   - **Task 3.2:** Refactored `useUpdatePayment` hook to use shared API client with fallback, TanStack Query mutation, precise cache invalidation (specific detail + list), JSDoc, and comprehensive tests. Build passes.
+  - **Task 3.3:** Enhanced `usePaymentReports` hook with `PaymentReportsParams` interface, JSDoc with examples, 5-minute staleTime cache, and 14 comprehensive tests covering success/error cases, cache behavior, role-based access, and filtering.
 
 ---
 
