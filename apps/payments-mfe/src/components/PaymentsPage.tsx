@@ -380,7 +380,12 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
   };
 
   const clearFilters = () =>
-    setFilters({ status: 'all', type: 'all', fromDate: undefined, toDate: undefined });
+    setFilters({
+      status: 'all',
+      type: 'all',
+      fromDate: undefined,
+      toDate: undefined,
+    });
 
   // Loading state
   if (isLoadingPayments) {
@@ -861,7 +866,10 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
                             </p>
                             <div className="flex gap-2">
                               {hasActiveFilters && (
-                                <Button variant="outline" onClick={clearFilters}>
+                                <Button
+                                  variant="outline"
+                                  onClick={clearFilters}
+                                >
                                   Clear filters
                                 </Button>
                               )}
