@@ -168,7 +168,7 @@
 
 **Status:** Complete  
 **Completed Date:** 2025-12-21  
-**Notes:** Created reusable ThemeToggle button component with sun/moon/monitor icons. Cycles through light → dark → system → light. Includes comprehensive accessibility support (aria-label, title, keyboard navigation, focus states). 18 tests covering rendering, theme cycling, accessibility, and variants. All 65 tests passing in shared-design-system.
+**Notes:** Created reusable ThemeToggle button component with sun/moon/monitor icons. Cycles through light → dark → system → light. Includes comprehensive accessibility support (aria-label, title, keyboard navigation, focus states). 18 tests covering rendering, theme cycling, accessibility, and variants. All 65 tests passing in shared-design-system. **Fixed:** Added @mfe/shared-theme-store to Module Federation shared dependencies and resolve aliases in all 5 MFE rspack configs to resolve import errors.
 
 ---
 
@@ -319,6 +319,6 @@ _Lessons learned will be added as implementation progresses._
 ---
 
 **Last Updated:** 2025-12-21  
-**Status:** Phase 1 Complete ✅ | Phase 2 Complete ✅ | Phase 3: 33% Complete (1/3) - Ready for Phase 3.2
+**Status:** Phase 1 Complete ✅ | Phase 2 Complete ✅ | Phase 3.1 Complete ✅ (incl. rspack fix) - Ready for Phase 3.2
 
 ---

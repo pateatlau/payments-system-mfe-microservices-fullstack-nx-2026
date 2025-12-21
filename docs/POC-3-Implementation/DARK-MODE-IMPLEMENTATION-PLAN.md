@@ -625,10 +625,16 @@ interface ThemeToggleProps {
 
 - `libs/shared-design-system/src/index.ts` ✅ (added ThemeToggle export)
 - `tsconfig.base.json` ✅ (added @mfe/shared-theme-store path mapping)
+- `apps/shell/rspack.config.js` ✅ (shared deps + alias)
+- `apps/auth-mfe/rspack.config.js` ✅ (shared deps + alias)
+- `apps/payments-mfe/rspack.config.js` ✅ (shared deps + alias)
+- `apps/admin-mfe/rspack.config.js` ✅ (shared deps + alias)
+- `apps/profile-mfe/rspack.config.js` ✅ (shared deps + alias)
 
 **Implementation Summary:**
 
 **Component Features:**
+
 - Button-style toggle that cycles through theme states: light → dark → system → light
 - Three distinct icons using inline SVG:
   - Sun icon (12 rays) for light mode
@@ -639,12 +645,14 @@ interface ThemeToggleProps {
 - Forward ref support for button element
 
 **Theme Integration:**
+
 - Uses `useTheme()` hook from `@mfe/shared-theme-store`
 - Calls async `setTheme()` to update theme preference
 - Displays appropriate icon based on current `theme` value
 - Updates aria-label to indicate next theme state
 
 **Accessibility:**
+
 - `aria-label` describes the action (e.g., "Switch to dark mode")
 - `title` attribute provides tooltip
 - `type="button"` prevents accidental form submission
@@ -653,6 +661,7 @@ interface ThemeToggleProps {
 - Hover states for visual feedback
 
 **Styling:**
+
 - Uses Tailwind utilities with semantic tokens
 - Hover background: `hover:bg-[rgb(var(--muted))]`
 - Focus ring: `focus-visible:ring-[rgb(var(--primary))]`
@@ -660,6 +669,7 @@ interface ThemeToggleProps {
 - Consistent padding and transitions
 
 **Testing:**
+
 - 18 comprehensive tests covering:
   - Rendering in all three theme states
   - Icon display verification (sun/moon/monitor)
@@ -673,19 +683,30 @@ interface ThemeToggleProps {
 - All 65 tests passing in shared-design-system (47 previous + 18 new)
 
 **Props Interface:**
+
 ```typescript
 interface ThemeToggleProps {
-  variant?: 'button' | 'dropdown';  // button only (dropdown future)
-  showLabel?: boolean;              // show text label
-  className?: string;               // custom classes
+  variant?: 'button' | 'dropdown'; // button only (dropdown future)
+  showLabel?: boolean; // show text label
+  className?: string; // custom classes
 }
 ```
 
 **Future Enhancements:**
+
 - Dropdown variant with explicit theme selection
 - Custom icon support
 - Animation transitions between icons
 - Tooltip with resolved theme info (e.g., "System: using dark mode")
+
+**Rspack Configuration Fix:**
+
+Added `@mfe/shared-theme-store` to Module Federation configuration in all MFEs:
+- **Shared Dependencies**: Added as singleton to ensure single instance across all MFEs
+- **Resolve Aliases**: Added path mapping to resolve imports at build time
+- **Files Updated**: All 5 MFE rspack configs (shell, auth-mfe, payments-mfe, admin-mfe, profile-mfe)
+- **Impact**: Fixes "Cannot resolve '@mfe/shared-theme-store'" error
+- **Pattern**: Follows same configuration pattern as other shared libraries (shared-auth-store, @mfe/shared-design-system)
 
 ---
 
