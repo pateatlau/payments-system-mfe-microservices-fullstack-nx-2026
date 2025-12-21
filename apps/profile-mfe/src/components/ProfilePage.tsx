@@ -2,12 +2,40 @@
  * ProfilePage Component
  *
  * Main entry point for the Profile MFE, exposed via Module Federation.
+ * Provides a complete profile management interface with tabbed navigation.
+ *
+ * @component
+ * @example
+ * ```tsx
+ * // Exposed via Module Federation
+ * const ProfilePage = React.lazy(() =>
+ *   import('profileMfe/ProfilePage')
+ * );
+ *
+ * <ProfilePage />
+ * ```
  *
  * Responsibilities:
- * - Render high-level profile layout shell
- * - Integrate loading and error states for profile data
+ * - Render high-level profile layout shell with header and navigation
+ * - Integrate loading and error states for profile data fetching
  * - Provide tab-based navigation between Profile, Preferences, and Account views
- * - Delegate actual form/content rendering to child components
+ * - Delegate actual form/content rendering to specialized child components
+ * - Handle authentication state and data loading coordination
+ *
+ * Features:
+ * - Responsive tab navigation (Profile/Preferences/Account)
+ * - Loading skeleton while profile data loads
+ * - Error handling with user-friendly messages
+ * - Form state preservation during tab switching
+ * - Module Federation compatibility for microfrontend architecture
+ *
+ * @uses useProfile hook for data fetching
+ * @uses ProfileForm for profile editing
+ * @uses PreferencesForm for preference management
+ * @uses AccountInfo for account details display
+ * @uses Design system components for consistent UI
+ *
+ * @returns {JSX.Element} The main profile page component
  */
 
 import { useState } from 'react';

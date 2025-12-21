@@ -1,12 +1,31 @@
 /**
  * ProfileForm Component
  *
- * Form for editing profile information (phone, address, bio, avatar).
+ * A comprehensive form component for editing user profile information.
+ * Handles phone number, address, bio, and avatar updates with full validation
+ * and error handling.
  *
- * Uses:
- * - React Hook Form + Zod for validation
- * - TanStack Query mutation hook (useUpdateProfile)
- * - AvatarUpload for avatar selection/preview
+ * @component
+ * @example
+ * ```tsx
+ * <ProfileForm />
+ * ```
+ *
+ * Features:
+ * - Real-time form validation using Zod schemas
+ * - Optimistic UI updates with TanStack Query
+ * - Avatar upload with preview functionality
+ * - Toast notifications for success/error feedback
+ * - Loading states during form submission
+ * - Form pre-population from existing profile data
+ *
+ * @uses React Hook Form for form state management
+ * @uses Zod for runtime validation
+ * @uses TanStack Query for data mutations
+ * @uses AvatarUpload component for avatar management
+ * @uses Toast system for user feedback
+ *
+ * @returns {JSX.Element} The profile form component
  */
 
 import { useEffect, useState } from 'react';
