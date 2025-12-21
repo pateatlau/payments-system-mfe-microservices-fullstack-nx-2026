@@ -5,13 +5,13 @@
 **Date:** December 12, 2025  
 **Phase:** Theme System Implementation
 
-**Overall Progress:** 0% (0 of 4 phases complete)
+**Overall Progress:** 0% (0 of 5 phases complete)
 
 - Phase 1: Theme Store & Core Infrastructure (0% - 0/3 sub-tasks complete)
 - Phase 2: CSS Theme Variables & Design System (0% - 0/3 sub-tasks complete)
 - Phase 3: Theme Toggle UI Components (0% - 0/3 sub-tasks complete)
 - Phase 4: Cross-Tab Synchronization (0% - 0/1 sub-tasks complete)
-- Phase 5: Profile MFE Integration (Deferred - Will be implemented with Profile MFE)
+- Phase 5: Profile MFE Integration (0% - 0/1 sub-tasks complete)
 
 > **Related Document:** See [`DARK-MODE-IMPLEMENTATION-PLAN.md`](./DARK-MODE-IMPLEMENTATION-PLAN.md) for detailed step-by-step instructions for each task.
 
@@ -229,23 +229,27 @@
 
 ---
 
-## Phase 5: Profile MFE Integration (Future / Deferred)
+## Phase 5: Profile MFE Integration (Days 13-14)
 
 ### Task 5.1: Add Theme Preference to Profile MFE
 
-**Note:** This task will be integrated into Profile MFE implementation when Profile MFE is implemented. The Profile MFE implementation plan already includes preferences management with theme support.
+- [ ] Theme selector added to PreferencesForm component
+- [ ] useTheme() hook imported and integrated
+- [ ] Three theme options available (light, dark, system)
+- [ ] Theme change syncs with Profile Service API
+- [ ] Theme change reflects in header toggle immediately
+- [ ] Success/error feedback implemented
+- [ ] Tests written and passing
+- [ ] Theme preference persists after reload
+- [ ] Component styled consistently with preferences design
 
-- [ ] Theme selector added to PreferencesForm (when Profile MFE implemented)
-- [ ] useTheme() hook integrated (when Profile MFE implemented)
-- [ ] Theme change from Profile MFE tested (when Profile MFE implemented)
-
-**Status:** Deferred  
+**Status:** Not Started  
 **Completed Date:**  
-**Notes:** Will be implemented as part of Profile MFE implementation
+**Notes:**
 
 ---
 
-**Phase 5 Completion:** **Deferred**
+**Phase 5 Completion:** **0% (0/1 sub-tasks complete)**
 
 ---
 
@@ -255,26 +259,26 @@
 
 **Completion Status:**
 
-| Phase | Sub-tasks Complete | Total | Percentage |
-|-------|-------------------|-------|------------|
-| Phase 1: Theme Store & Core Infrastructure | 0 | 3 | 0% |
-| Phase 2: CSS Theme Variables & Design System | 0 | 3 | 0% |
-| Phase 3: Theme Toggle UI Components | 0 | 3 | 0% |
-| Phase 4: Cross-Tab Synchronization | 0 | 1 | 0% |
-| Phase 5: Profile MFE Integration | - | - | Deferred |
-| **Total** | **0** | **10** | **0%** |
+| Phase                                        | Sub-tasks Complete | Total  | Percentage |
+| -------------------------------------------- | ------------------ | ------ | ---------- |
+| Phase 1: Theme Store & Core Infrastructure   | 0                  | 3      | 0%         |
+| Phase 2: CSS Theme Variables & Design System | 0                  | 3      | 0%         |
+| Phase 3: Theme Toggle UI Components          | 0                  | 3      | 0%         |
+| Phase 4: Cross-Tab Synchronization           | 0                  | 1      | 0%         |
+| Phase 5: Profile MFE Integration             | 0                  | 1      | 0%         |
+| **Total**                                    | **0**              | **11** | **0%**     |
 
 ---
 
 ## Blockers & Issues
 
-*No blockers or issues yet.*
+_No blockers or issues yet._
 
 ---
 
 ## Lessons Learned
 
-*Lessons learned will be added as implementation progresses.*
+_Lessons learned will be added as implementation progresses._
 
 ---
 
@@ -311,8 +315,7 @@
 
 ---
 
-**Last Updated:** 2025-12-12  
-**Status:** Not Started - Ready for Implementation (After Profile MFE)
+**Last Updated:** 2025-12-21  
+**Status:** Not Started - Ready for Implementation
 
 ---
-

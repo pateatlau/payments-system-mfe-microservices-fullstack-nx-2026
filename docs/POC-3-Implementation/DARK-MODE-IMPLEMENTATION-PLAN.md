@@ -20,8 +20,8 @@ Each task is designed to be:
 - **Production-ready** - No throw-away code
 - **Incremental** - Builds on previous steps
 
-**Timeline:** 1-2 weeks (8-12 days)  
-**Goal:** Fully functional dark/light mode with backend sync, cross-tab synchronization, and system preference detection
+**Timeline:** 1.5-2 weeks (10-14 days)  
+**Goal:** Fully functional dark/light mode with backend sync, cross-tab synchronization, system preference detection, and Profile MFE integration
 
 **Key Features:**
 
@@ -33,7 +33,7 @@ Each task is designed to be:
 - Design system components updated for dark mode
 - Cross-tab synchronization
 - System preference detection ("system" option)
-- Profile MFE integration (when Profile MFE is implemented)
+- Profile MFE integration for theme preference management
 
 ---
 
@@ -76,9 +76,9 @@ flowchart TB
     Store --> Session[Session Sync]
     Session --> Tab2[Other Tabs]
     API --> DB[(User Profile DB)]
-    
+
     System[System Preference] --> Store
-    
+
     Store --> ProfileMfe[Profile MFE]
     ProfileMfe --> Store
 ```
@@ -117,10 +117,11 @@ flowchart TB
    └── jest.config.cts
    ```
 2. Create `src/lib/theme-store.ts` with theme types:
+
    ```typescript
    export type Theme = 'light' | 'dark' | 'system';
    export type ResolvedTheme = 'light' | 'dark';
-   
+
    interface ThemeState {
      theme: Theme;
      resolvedTheme: ResolvedTheme;
@@ -129,6 +130,7 @@ flowchart TB
      initializeTheme: () => Promise<void>;
    }
    ```
+
 3. Implement system preference detection:
    - Use `window.matchMedia('(prefers-color-scheme: dark)')`
    - Add listener for system preference changes
@@ -238,7 +240,8 @@ flowchart TB
    - Add `darkMode: 'class'`
 4. Update `apps/admin-mfe/tailwind.config.js`:
    - Add `darkMode: 'class'`
-5. (Future) Update `apps/profile-mfe/tailwind.config.js` when created
+5. Update `apps/profile-mfe/tailwind.config.js`:
+   - Add `darkMode: 'class'`
 6. Test dark mode classes work:
    - Create test component with `dark:bg-gray-900 dark:text-white`
    - Verify classes compile correctly
@@ -264,6 +267,7 @@ flowchart TB
 - `apps/auth-mfe/tailwind.config.js`
 - `apps/payments-mfe/tailwind.config.js`
 - `apps/admin-mfe/tailwind.config.js`
+- `apps/profile-mfe/tailwind.config.js`
 
 ---
 
@@ -278,6 +282,7 @@ flowchart TB
 1. Update `apps/shell/src/styles.css`:
    - Add dark mode CSS variables in `.dark` selector
    - Define semantic color tokens:
+
      ```css
      :root {
        /* Light mode colors (existing) */
@@ -289,7 +294,7 @@ flowchart TB
        --primary: 8 70 131;
        --primary-foreground: 255 255 255;
      }
-     
+
      .dark {
        /* Dark mode colors */
        --background: 17 24 39;
@@ -306,6 +311,7 @@ flowchart TB
    - `apps/auth-mfe/src/styles.css`
    - `apps/payments-mfe/src/styles.css`
    - `apps/admin-mfe/src/styles.css`
+   - `apps/profile-mfe/src/styles.css`
 4. Test CSS variables work in both themes
 
 **Verification:**
@@ -328,6 +334,7 @@ flowchart TB
 - `apps/auth-mfe/src/styles.css`
 - `apps/payments-mfe/src/styles.css`
 - `apps/admin-mfe/src/styles.css`
+- `apps/profile-mfe/src/styles.css`
 
 ---
 
@@ -592,7 +599,7 @@ interface ThemeToggleProps {
 2. Import session sync in theme store
 3. Listen for theme change events from other tabs:
    ```typescript
-   useSessionSync('theme-change', (event) => {
+   useSessionSync('theme-change', event => {
      if (event.data.theme) {
        setTheme(event.data.theme);
      }
@@ -633,26 +640,54 @@ interface ThemeToggleProps {
 
 ---
 
-## Phase 5: Profile MFE Integration (Future / Deferred)
+## Phase 5: Profile MFE Integration (Days 13-14)
 
 ### Task 5.1: Add Theme Preference to Profile MFE
 
 **Objective:** Allow users to manage theme in Profile MFE preferences
 
-**Note:** This task should be integrated into Profile MFE implementation plan when Profile MFE is implemented. The Profile MFE implementation plan already includes preferences management with theme support.
-
 **Steps:**
 
-1. In Profile MFE PreferencesForm component, add theme selector
-2. Use `useTheme()` hook to get/set theme
-3. Integrate with existing preferences API
-4. Test theme change from Profile MFE
+1. Create or locate `apps/profile-mfe/src/components/PreferencesForm.tsx` (or preferences-related component)
+2. Add theme selector control with three options:
+   - Light (sun icon)
+   - Dark (moon icon)
+   - System (monitor icon)
+3. Import and use `useTheme()` hook from `shared-theme-store`
+4. Integrate with existing preferences API (GET/PUT to Profile Service)
+5. Sync theme change with API and theme store
+6. Add success/error feedback
+7. Test theme change from Profile MFE
+8. Verify theme persists across app navigation
 
-**Files to Modify (when Profile MFE is implemented):**
+**Implementation Details:**
 
-- `apps/profile-mfe/src/components/PreferencesForm.tsx`
+- Use design system Select or Radio components for theme options
+- Display current theme preference
+- Call `setTheme()` on selection change
+- Optionally show "System: dark mode" / "System: light mode" when system preference is selected
+- Add help text explaining each option
 
-**Status:** Deferred - Will be implemented with Profile MFE
+**Verification:**
+
+- [ ] Theme selector added to preferences
+- [ ] useTheme() hook integrated
+- [ ] Theme change persists to Profile Service API
+- [ ] Theme change reflects in header toggle immediately
+- [ ] Tests written and passing
+
+**Acceptance Criteria:**
+
+- [ ] Users can change theme from Profile MFE
+- [ ] Theme preference syncs to Profile Service
+- [ ] Theme applies immediately across app
+- [ ] Preference persists after reload
+- [ ] Tests passing
+
+**Status:** Not Started  
+**Files to Modify:**
+
+- `apps/profile-mfe/src/components/PreferencesForm.tsx` (or similar preferences component)
 
 ---
 
@@ -664,13 +699,13 @@ interface ThemeToggleProps {
 interface ThemeState {
   // Current theme preference ('light' | 'dark' | 'system')
   theme: Theme;
-  
+
   // Resolved theme after system detection ('light' | 'dark')
   resolvedTheme: ResolvedTheme;
-  
+
   // Loading state during API fetch
   isLoading: boolean;
-  
+
   // Actions
   setTheme: (theme: Theme) => Promise<void>;
   initializeTheme: () => Promise<void>;
@@ -789,14 +824,14 @@ export default {
 
 ## Timeline Estimate
 
-| Phase | Duration | Tasks |
-|-------|----------|-------|
-| **Phase 1** | 2-3 days | Theme store & Tailwind config (3 tasks) |
-| **Phase 2** | 3-4 days | CSS variables & design system (3 tasks) |
-| **Phase 3** | 2-3 days | Theme toggle UI (3 tasks) |
-| **Phase 4** | 1-2 days | Cross-tab sync (1 task) |
-| **Phase 5** | Deferred | Profile MFE integration (when Profile MFE implemented) |
-| **Total** | **8-12 days (1.5-2 weeks)** | **10 tasks** |
+| Phase       | Duration                     | Tasks                                   |
+| ----------- | ---------------------------- | --------------------------------------- |
+| **Phase 1** | 2-3 days                     | Theme store & Tailwind config (3 tasks) |
+| **Phase 2** | 3-4 days                     | CSS variables & design system (3 tasks) |
+| **Phase 3** | 2-3 days                     | Theme toggle UI (3 tasks)               |
+| **Phase 4** | 1-2 days                     | Cross-tab sync (1 task)                 |
+| **Phase 5** | 1-2 days                     | Profile MFE integration (1 task)        |
+| **Total**   | **10-14 days (1.5-2 weeks)** | **11 tasks**                            |
 
 ---
 
@@ -815,8 +850,9 @@ export default {
 
 - Shell app (for bootstrap initialization)
 - Shared header UI (for theme toggle placement)
-- All MFEs (for Tailwind config updates)
+- All MFEs including profile-mfe (for Tailwind config updates)
 - Design system components (for dark mode support)
+- Profile Service API (for preferences storage)
 
 ---
 
@@ -854,16 +890,20 @@ export default {
 ### Files Modified
 
 **Configuration:**
+
 - `apps/*/tailwind.config.js` (all MFEs) - Add dark mode config
 
 **Styles:**
+
 - `apps/*/src/styles.css` (all MFEs) - Add dark mode CSS variables
 
 **Components:**
+
 - `libs/shared-design-system/src/lib/components/*.tsx` - Add dark mode support
 - `libs/shared-header-ui/src/lib/shared-header-ui.tsx` - Add theme toggle
 
 **Bootstrap:**
+
 - `apps/shell/src/bootstrap.tsx` - Initialize theme
 
 ---
@@ -877,4 +917,3 @@ export default {
 ---
 
 **End of Implementation Plan**
-
