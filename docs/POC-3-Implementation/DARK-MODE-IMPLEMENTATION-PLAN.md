@@ -492,19 +492,74 @@ Components now automatically adapt to theme changes without requiring component-
 
 **Verification:**
 
-- [ ] Color tokens updated
-- [ ] Dark mode variants added
-- [ ] Tokens documented
+- [x] Color tokens updated
+- [x] Dark mode variants added
+- [x] Tokens documented
+- [x] Helper functions added
+- [x] Tests written and passing
 
 **Acceptance Criteria:**
 
 - Color tokens support dark mode
 - Tokens are well-documented
+- Helper functions for programmatic access
+- Backwards compatibility maintained
 
-**Status:** Not Started  
+**Status:** Complete ✅  
+**Completed Date:** December 21, 2025  
 **Files Modified:**
 
-- `libs/shared-design-system/src/lib/tokens/colors.ts`
+- `libs/shared-design-system/src/lib/tokens/colors.ts` ✅
+
+**Files Created:**
+
+- `libs/shared-design-system/src/lib/tokens/colors.test.ts` ✅
+
+**Implementation Summary:**
+
+Comprehensive dark mode support added to all color tokens:
+
+**Color Structure:**
+
+- All color categories now have nested `light` and `dark` objects
+- Each theme variant includes `DEFAULT`, `hover`, and `active` states
+- Primary color scale (50-950) available in both themes
+- Maintains backwards compatibility with legacy `DEFAULT` values
+
+**Color Strategy:**
+
+- Light mode: Uses darker shades (700-900) for better contrast on white backgrounds
+- Dark mode: Uses lighter shades (300-400) for better contrast on dark backgrounds
+- Semantic tokens (background, foreground) properly swap between themes
+- Status colors (success, danger, warning, info) use appropriate shades for each theme
+
+**Helper Functions:**
+
+1. `getThemeColor(colorPath, theme)`: Get color value based on theme
+   - Supports dot notation: `'primary.DEFAULT'`, `'success.hover'`
+   - Returns appropriate color for light or dark theme
+   - Falls back gracefully for missing variants
+
+2. `hasDarkModeVariant(category)`: Check if category has dark mode support
+   - Returns boolean indicating light/dark variant availability
+
+**Test Coverage:**
+
+- 13 new comprehensive tests covering:
+  - Color structure validation
+  - Light/dark variant differences
+  - Helper function behavior
+  - Backwards compatibility
+  - Accessibility contrast considerations
+- All 47 tests passing (34 component + 13 color token tests)
+
+**Benefits:**
+
+- Type-safe color access with TypeScript
+- Programmatic theme-aware color selection
+- Clear documentation of color usage
+- No breaking changes to existing code
+- Foundation for dynamic theming in components
 
 ---
 
