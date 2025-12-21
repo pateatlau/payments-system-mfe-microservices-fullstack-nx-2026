@@ -777,10 +777,10 @@ Added `@mfe/shared-theme-store` to Module Federation configuration in all MFEs:
 
 **Verification:**
 
-- [ ] Theme initialized in bootstrap
-- [ ] Theme applied before render
-- [ ] No flash of wrong theme
-- [ ] Theme persists across reloads
+- [x] Theme initialized in bootstrap
+- [x] Theme applied before render
+- [x] No flash of wrong theme
+- [x] Theme persists across reloads
 
 **Acceptance Criteria:**
 
@@ -788,7 +788,7 @@ Added `@mfe/shared-theme-store` to Module Federation configuration in all MFEs:
 - No flash of wrong theme
 - Theme persists
 
-**Status:** Not Started  
+**Status:** Complete  
 **Files Modified:**
 
 - `apps/shell/src/bootstrap.tsx`

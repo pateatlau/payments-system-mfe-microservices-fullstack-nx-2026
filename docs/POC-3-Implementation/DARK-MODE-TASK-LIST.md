@@ -137,20 +137,20 @@
 
 ### Task 3.3: Initialize Theme on App Load
 
-- [ ] Theme store imported in bootstrap.tsx
-- [ ] initializeTheme() called before React renders
-- [ ] Theme applied to <html> element immediately
-- [ ] No flash of wrong theme
-- [ ] Theme persists across page reloads
-- [ ] Loading state handled appropriately
+- [x] Theme store imported in bootstrap.tsx
+- [x] initializeTheme() called before React renders
+- [x] Theme applied to <html> element immediately
+- [x] No flash of wrong theme
+- [x] Theme persists across page reloads
+- [x] Loading state handled appropriately
 
-**Status:** Not Started  
-**Completed Date:**  
-**Notes:**
+**Status:** Complete  
+**Completed Date:** 2025-12-21  
+**Notes:** bootstrap now awaits initializeTheme() from shared-theme-store before React render to apply the resolved theme class on <html>, minimizing flash of wrong theme. Logs warning and continues on failure.
 
 ---
 
-**Phase 3 Completion:** **67% (2/3 sub-tasks complete)**
+**Phase 3 Completion:** **100% ✅ (3/3 sub-tasks complete)**
 
 ---
 
@@ -212,10 +212,10 @@
 | -------------------------------------------- | ------------------ | ------ | ---------- |
 | Phase 1: Theme Store & Core Infrastructure   | 3                  | 3      | 100%       |
 | Phase 2: CSS Theme Variables & Design System | 3                  | 3      | 100%       |
-| Phase 3: Theme Toggle UI Components          | 1                  | 3      | 33%        |
+| Phase 3: Theme Toggle UI Components          | 3                  | 3      | 100%       |
 | Phase 4: Cross-Tab Synchronization           | 0                  | 1      | 0%         |
 | Phase 5: Profile MFE Integration             | 0                  | 1      | 0%         |
-| **Total**                                    | **7**              | **11** | **64%**    |
+| **Total**                                    | **9**              | **11** | **82%**    |
 
 ---
 
@@ -243,12 +243,12 @@ _Lessons learned will be added as implementation progresses._
 - [x] Tailwind v4 dark mode configured
 - [ ] Cross-tab synchronization works
 - [x] System preference detection works
-- [ ] Theme persists across page reloads
-- [ ] No flash of wrong theme on page load
+- [x] Theme persists across page reloads
+- [x] No flash of wrong theme on page load
 
 ### Technical Requirements
 
-- [ ] Zustand store pattern followed
+- [x] Zustand store pattern followed
 - [ ] TypeScript strict mode passing
 - [ ] All tests passing (70%+ coverage)
 - [ ] Linting passes
@@ -265,6 +265,6 @@ _Lessons learned will be added as implementation progresses._
 ---
 
 **Last Updated:** 2025-12-21  
-**Status:** Phase 1 Complete ✅ | Phase 2 Complete ✅ | Phase 3.2 Complete ✅ (incl. rspack fix)
+**Status:** Phase 1 Complete ✅ | Phase 2 Complete ✅ | Phase 3.3 Complete ✅ (incl. rspack fix)
 
 ---
