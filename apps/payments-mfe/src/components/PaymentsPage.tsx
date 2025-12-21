@@ -26,12 +26,14 @@ import {
   useDeletePayment,
   usePaymentUpdates,
 } from '../hooks';
+import { useToasts } from '../hooks/useToasts';
 import { PaymentFilters } from './PaymentFilters';
 import { PaymentDetails } from './PaymentDetails';
 import { PaymentReports } from './PaymentReports';
 import type { UsePaymentsFilters } from '../hooks/usePayments';
 import type { Payment } from '../api/types';
 import { PaymentType, PaymentStatus } from 'shared-types';
+import { Toast, ToastContainer } from '@mfe/shared-design-system';
 
 /**
  * Create payment form schema using Zod
@@ -153,6 +155,7 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
     status: 'all',
     type: 'all',
   });
+  const { toasts, addToast, removeToast } = useToasts();
 
   // Real-time payment updates via WebSocket
   usePaymentUpdates();
@@ -210,10 +213,23 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
       resetCreateForm();
       setShowCreateForm(false);
       onPaymentSuccess?.();
+      addToast({
+        title: 'Payment created',
+        message: 'Payment created successfully',
+        variant: 'success',
+        duration: 3500,
+      });
     } catch (error) {
       // Error is handled by mutation
       // eslint-disable-next-line no-console
       console.error('Failed to create payment:', error);
+      addToast({
+        title: 'Create failed',
+        message:
+          error instanceof Error ? error.message : 'Failed to create payment',
+        variant: 'error',
+        duration: 5000,
+      });
     }
   };
 
@@ -235,10 +251,23 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
       resetUpdateForm();
       setEditingPayment(null);
       onPaymentSuccess?.();
+      addToast({
+        title: 'Payment updated',
+        message: 'Payment updated successfully',
+        variant: 'success',
+        duration: 3500,
+      });
     } catch (error) {
       // Error is handled by mutation
       // eslint-disable-next-line no-console
       console.error('Failed to update payment:', error);
+      addToast({
+        title: 'Update failed',
+        message:
+          error instanceof Error ? error.message : 'Failed to update payment',
+        variant: 'error',
+        duration: 5000,
+      });
     }
   };
 
@@ -248,10 +277,23 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
       await deletePaymentMutation.mutateAsync(id);
       setDeleteConfirmId(null);
       onPaymentSuccess?.();
+      addToast({
+        title: 'Payment cancelled',
+        message: 'Payment cancelled successfully',
+        variant: 'success',
+        duration: 3500,
+      });
     } catch (error) {
       // Error is handled by mutation
       // eslint-disable-next-line no-console
       console.error('Failed to delete payment:', error);
+      addToast({
+        title: 'Cancel failed',
+        message:
+          error instanceof Error ? error.message : 'Failed to cancel payment',
+        variant: 'error',
+        duration: 5000,
+      });
     }
   };
 
@@ -310,6 +352,19 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
       previouslyFocusedRef.current?.focus?.();
     };
   }, [selectedPaymentId]);
+
+  useEffect(() => {
+    if (!paymentsError) return;
+    addToast({
+      title: 'Payments failed to load',
+      message:
+        paymentsError instanceof Error
+          ? paymentsError.message
+          : 'An unexpected error occurred',
+      variant: 'error',
+      duration: 5000,
+    });
+  }, [paymentsError, addToast]);
 
   // Cancel editing
   const cancelEdit = () => {
@@ -856,6 +911,18 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
           </div>
         </div>
       )}
+      <ToastContainer position="top-right">
+        {toasts.map(toast => (
+          <Toast
+            key={toast.id}
+            title={toast.title}
+            message={toast.message}
+            variant={toast.variant}
+            duration={toast.duration}
+            onDismiss={() => removeToast(toast.id)}
+          />
+        ))}
+      </ToastContainer>
     </div>
   );
 }

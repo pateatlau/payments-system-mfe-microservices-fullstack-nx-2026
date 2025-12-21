@@ -415,21 +415,23 @@
 
 ### Task 5.1: Add Toast Notifications
 
-- [ ] Success toasts for:
-  - [ ] Payment created (customer)
-  - [ ] Payment updated
-  - [ ] Payment cancelled
-- [ ] Error toasts for:
-  - [ ] Payment creation failed
-  - [ ] Payment update failed
-  - [ ] API errors
-- [ ] Toast position appropriate
-- [ ] Duration appropriate for each type
-- [ ] Uses design system toast component
-- [ ] Tests created and passing
-- **Status:** Not Started
+- [x] Success toasts for:
+  - [x] Payment created (customer)
+  - [x] Payment updated
+  - [x] Payment cancelled
+- [x] Error toasts for:
+  - [x] Payment creation failed
+  - [x] Payment update failed
+  - [x] API errors
+- [x] Toast position appropriate
+- [x] Duration appropriate for each type
+- [x] Uses design system toast component
+- [x] Tests created and passing
+- **Status:** ✅ Complete
 - **Depends on:** Phase 2 tasks (components exist)
 - **Blocking:** Nothing
+
+**Notes:** Added toast queue with design-system Toast/ToastContainer (top-right). Success toasts on create/update/cancel; error toasts on create/update/cancel failures and initial load errors. Durations tuned (3.5s success, 5s error). New hook `useToasts` covered by unit tests.
 
 ### Task 5.2: Enhance Empty States
 
