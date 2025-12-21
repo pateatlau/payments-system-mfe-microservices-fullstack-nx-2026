@@ -61,6 +61,7 @@
     "test:shared-websocket:coverage": "nx test shared-websocket --codeCoverage",
     "test:shared-auth-store": "nx test shared-auth-store",
     "test:shared-header-ui": "nx test shared-header-ui",
+    "test:shared-header-ui:smoke": "nx test shared-header-ui --testPathPattern=shared-header-ui.spec.tsx",
     "test:shared-ui": "nx test shared-ui",
     "test:shared-utils": "nx test shared-utils",
     "test:shared-types": "nx test shared-types",

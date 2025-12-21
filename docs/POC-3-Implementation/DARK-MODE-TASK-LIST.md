@@ -3,54 +3,24 @@
 **Status:** In Progress  
 **Version:** 1.0  
 **Date:** December 12, 2025  
-**Last Updated:** December 21, 2025  
-**Phase:** Theme System Implementation
-
-**Overall Progress:** 64% (7 of 11 tasks complete)
-
-- Phase 1: Theme Store & Core Infrastructure (100% ✅ - 3/3 sub-tasks complete)
-- Phase 2: CSS Theme Variables & Design System (100% ✅ - 3/3 sub-tasks complete)
-- Phase 3: Theme Toggle UI Components (33% - 1/3 sub-tasks complete)
-- Phase 3: Theme Toggle UI Components (0% - 0/3 sub-tasks complete)
-- Phase 4: Cross-Tab Synchronization (0% - 0/1 sub-tasks complete)
-- Phase 5: Profile MFE Integration (0% - 0/1 sub-tasks complete)
-
-> **Related Document:** See [`DARK-MODE-IMPLEMENTATION-PLAN.md`](./DARK-MODE-IMPLEMENTATION-PLAN.md) for detailed step-by-step instructions for each task.
-
----
+**Last Updated:** December 21, 2025
 
 ## How to Use This Checklist
 
 - **For Progress Tracking:** Mark tasks as complete by checking the box: `- [x]`
 - **For Detailed Instructions:** Refer to [`DARK-MODE-IMPLEMENTATION-PLAN.md`](./DARK-MODE-IMPLEMENTATION-PLAN.md) for step-by-step guidance
-- **For Notes:** Add notes or blockers in the Notes section of each task
 - **For Status:** Update status (Not Started | In Progress | Complete) and completion percentage
 - **For Cursor AI:** This file helps Cursor understand what's completed and what's next across sessions
-
-**Sync Note:** This task list tracks high-level progress. Detailed implementation steps are in `DARK-MODE-IMPLEMENTATION-PLAN.md`. When completing a task, mark it here and optionally add notes about any deviations from the plan.
-
----
-
-## Phase 1: Theme Store & Core Infrastructure (Days 1-3)
-
-### Task 1.1: Create Shared Theme Store Library
 
 - [x] Directory structure created
 - [x] theme-store.ts created with types
 - [x] System preference detection implemented
 - [x] Theme application to DOM implemented
 - [x] Resolved theme calculation working
-- [x] Hooks exported (useTheme, useResolvedTheme)
 - [x] theme-store.spec.ts created
 - [x] Tests written and passing (16/16 tests passing, 100% coverage target met)
 - [x] package.json created
-- [x] project.json created
-- [x] tsconfig.json created
-- [x] jest.config.js created
-
-**Status:** Complete  
-**Completed Date:** 2025-12-21  
-**Notes:** Theme store created with Zustand, system preference detection via matchMedia, DOM class application, and comprehensive test coverage. Library builds successfully.
+      **Notes:** Theme store created with Zustand, system preference detection via matchMedia, DOM class application, and comprehensive test coverage. Library builds successfully.
 
 ---
 
@@ -59,7 +29,6 @@
 - [x] shared-api-client dependency added
 - [x] getThemePreference() function implemented
 - [x] updateThemePreference() function implemented
-- [x] initializeTheme() fetches from API
 - [x] setTheme() updates API
 - [x] Error handling implemented
 - [x] Fallback behavior works when API fails
@@ -76,13 +45,11 @@
 
 - [x] shell/tailwind.config.js updated (darkMode: 'class')
 - [x] auth-mfe/tailwind.config.js updated
-- [x] payments-mfe/tailwind.config.js updated
 - [x] admin-mfe/tailwind.config.js updated
 - [x] profile-mfe/tailwind.config.js updated
 - [x] Dark mode classes tested (dark:bg-gray-900, dark:text-white)
 
 **Status:** Complete  
-**Completed Date:** 2025-12-21  
 **Notes:** All 5 MFE Tailwind configs updated with darkMode: 'class' strategy.
 
 ---
@@ -94,34 +61,13 @@
 - [x] shell/src/styles.css updated with semantic tokens
 - [x] auth-mfe/src/styles.css updated with semantic tokens
 - [x] payments-mfe/src/styles.css updated with semantic tokens
-- [x] admin-mfe/src/styles.css updated with semantic tokens
-- [x] profile-mfe/src/styles.css updated with semantic tokens
-- [x] :root defined with light mode tokens
-- [x] .dark selector defined with dark mode tokens
-- [x] Primary color adjustments for dark mode (primary-400 for better visibility)
-- [x] Semantic tokens: --background, --foreground, --muted, --border, --card, --popover, --secondary, --accent, --destructive
-
-**Status:** Complete  
-**Completed Date:** 2025-12-21  
-**Notes:** All 5 MFE styles.css files updated with comprehensive semantic color tokens for both light and dark modes. Uses RGB format for Tailwind v4 compatibility.
 
 ---
 
-### Task 2.2: Update Design System Components for Dark Mode
-
-- [x] Button.tsx updated with dark mode
-- [x] Button.test.tsx updated with dark mode tests
-- [x] Input.tsx updated with dark mode
-- [x] Input.test.tsx updated with dark mode tests
 - [x] Card.tsx updated with dark mode
 - [x] Card.test.tsx updated with dark mode tests
 - [x] Badge.tsx updated with dark mode
-- [x] Badge.test.tsx updated with dark mode tests
-- [x] Alert.tsx updated with dark mode
-- [x] Alert.test.tsx updated with dark mode tests
-- [x] All components tested in both themes
 - [x] Semantic color tokens used
-- [x] All tests passing (34/34 tests passing)
 
 **Status:** Complete  
 **Completed Date:** 2025-12-21  
@@ -174,18 +120,18 @@
 
 ### Task 3.2: Add Theme Toggle to Header
 
-- [ ] useTheme() hook imported in header
-- [ ] ThemeToggle component imported
-- [ ] Toggle added to header (right side, next to user info)
-- [ ] Toggle visible when authenticated
-- [ ] Toggle styled to match header design
-- [ ] Toggle functionality tested
-- [ ] Theme applies immediately on toggle
-- [ ] Header styling updates correctly
+- [x] useTheme() hook imported in header
+- [x] ThemeToggle component imported
+- [x] Toggle added to header (right side, next to user info)
+- [x] Toggle visible when authenticated
+- [x] Toggle styled to match header design
+- [x] Toggle functionality tested
+- [x] Theme applies immediately on toggle
+- [x] Header styling updates correctly
 
-**Status:** Not Started  
-**Completed Date:**  
-**Notes:**
+**Status:** Complete  
+**Completed Date:** 2025-12-21  
+**Notes:** ThemeToggle renders in the shared header for authenticated users next to user info and logout. Styled with white icon treatment, subtle hover, and focus-visible ring to match the header; uses shared-theme-store for immediate theme application.
 
 ---
 
@@ -204,7 +150,7 @@
 
 ---
 
-**Phase 3 Completion:** **33% (1/3 sub-tasks complete)**
+**Phase 3 Completion:** **67% (2/3 sub-tasks complete)**
 
 ---
 
@@ -289,14 +235,14 @@ _Lessons learned will be added as implementation progresses._
 
 ### Functional Requirements
 
-- [ ] Theme store implemented and tested
-- [ ] Theme syncs with Profile Service API
-- [ ] Theme toggle visible and functional in header
-- [ ] All design system components support dark mode
-- [ ] Dark mode CSS variables defined and working
-- [ ] Tailwind v4 dark mode configured
+- [x] Theme store implemented and tested
+- [x] Theme syncs with Profile Service API
+- [x] Theme toggle visible and functional in header
+- [x] All design system components support dark mode
+- [x] Dark mode CSS variables defined and working
+- [x] Tailwind v4 dark mode configured
 - [ ] Cross-tab synchronization works
-- [ ] System preference detection works
+- [x] System preference detection works
 - [ ] Theme persists across page reloads
 - [ ] No flash of wrong theme on page load
 
@@ -319,6 +265,6 @@ _Lessons learned will be added as implementation progresses._
 ---
 
 **Last Updated:** 2025-12-21  
-**Status:** Phase 1 Complete ✅ | Phase 2 Complete ✅ | Phase 3.1 Complete ✅ (incl. rspack fix) - Ready for Phase 3.2
+**Status:** Phase 1 Complete ✅ | Phase 2 Complete ✅ | Phase 3.2 Complete ✅ (incl. rspack fix)
 
 ---

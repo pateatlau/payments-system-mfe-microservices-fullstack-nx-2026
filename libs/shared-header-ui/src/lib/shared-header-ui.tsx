@@ -1,8 +1,12 @@
 import { Link } from 'react-router-dom';
 import { useAuthStore } from 'shared-auth-store';
 import { UserRole } from 'shared-types';
-import { Button, buttonVariants } from '@mfe/shared-design-system';
-import { cn } from '@mfe/shared-design-system';
+import {
+  Button,
+  ThemeToggle,
+  buttonVariants,
+  cn,
+} from '@mfe/shared-design-system';
 
 export interface HeaderProps {
   /**
@@ -82,13 +86,19 @@ export function Header({
               </div>
             )}
 
-            {/* User Info and Logout */}
+            {/* Theme toggle + User Info and Logout */}
             {isAuthenticated && user ? (
               <div className="flex items-center gap-4">
+                <ThemeToggle
+                  className="text-white hover:bg-white/10 focus-visible:ring-white focus-visible:ring-offset-0 dark:text-white"
+                  aria-label="Toggle theme"
+                  title="Toggle theme"
+                />
+
                 {/* User Info */}
                 <div className="hidden sm:flex flex-col items-end">
                   <span className="text-sm font-medium">{user.name}</span>
-                  <span className="text-xs text-slate-400 capitalize">
+                  <span className="text-xs text-slate-200/80 capitalize">
                     {user.role.toLowerCase()}
                   </span>
                 </div>
