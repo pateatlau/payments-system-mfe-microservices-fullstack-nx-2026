@@ -55,6 +55,16 @@ const sharedDependencies = {
     requiredVersion: false,
     eager: false,
   },
+  '@mfe/shared-design-system': {
+    singleton: true,
+    requiredVersion: false,
+    eager: false,
+  },
+  '@mfe/shared-theme-store': {
+    singleton: true,
+    requiredVersion: false,
+    eager: false,
+  },
   'shared-websocket': {
     singleton: true,
     requiredVersion: false,
@@ -114,6 +124,10 @@ module.exports = {
       '@mfe/shared-design-system': path.resolve(
         __dirname,
         '../../libs/shared-design-system/src/index.ts'
+      ),
+      '@mfe/shared-theme-store': path.resolve(
+        __dirname,
+        '../../libs/shared-theme-store/src/index.ts'
       ),
       '@mfe-poc/shared-observability': path.resolve(
         __dirname,

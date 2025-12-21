@@ -599,12 +599,13 @@ interface ThemeToggleProps {
 
 **Verification:**
 
-- [ ] ThemeToggle.tsx created
-- [ ] All three states supported
-- [ ] Icons displayed correctly
-- [ ] Accessibility attributes added
-- [ ] Keyboard navigation works
-- [ ] Tests written and passing
+- [x] ThemeToggle.tsx created
+- [x] All three states supported
+- [x] Icons displayed correctly
+- [x] Accessibility attributes added
+- [x] Keyboard navigation works
+- [x] Tests written and passing
+- [x] Component exported from design system
 
 **Acceptance Criteria:**
 
@@ -613,11 +614,78 @@ interface ThemeToggleProps {
 - Accessible
 - Tests passing
 
-**Status:** Not Started  
+**Status:** Complete ✅  
+**Completed Date:** December 21, 2025  
 **Files Created:**
 
-- `libs/shared-design-system/src/lib/components/ThemeToggle.tsx`
-- `libs/shared-design-system/src/lib/components/ThemeToggle.test.tsx`
+- `libs/shared-design-system/src/lib/components/ThemeToggle.tsx` ✅
+- `libs/shared-design-system/src/lib/components/ThemeToggle.test.tsx` ✅
+
+**Files Modified:**
+
+- `libs/shared-design-system/src/index.ts` ✅ (added ThemeToggle export)
+- `tsconfig.base.json` ✅ (added @mfe/shared-theme-store path mapping)
+
+**Implementation Summary:**
+
+**Component Features:**
+- Button-style toggle that cycles through theme states: light → dark → system → light
+- Three distinct icons using inline SVG:
+  - Sun icon (12 rays) for light mode
+  - Moon (crescent) icon for dark mode
+  - Monitor icon for system preference
+- Optional `showLabel` prop to display text alongside icon
+- Support for custom className prop
+- Forward ref support for button element
+
+**Theme Integration:**
+- Uses `useTheme()` hook from `@mfe/shared-theme-store`
+- Calls async `setTheme()` to update theme preference
+- Displays appropriate icon based on current `theme` value
+- Updates aria-label to indicate next theme state
+
+**Accessibility:**
+- `aria-label` describes the action (e.g., "Switch to dark mode")
+- `title` attribute provides tooltip
+- `type="button"` prevents accidental form submission
+- Full keyboard support (Tab, Enter, Space)
+- Focus visible ring styles using CSS custom properties
+- Hover states for visual feedback
+
+**Styling:**
+- Uses Tailwind utilities with semantic tokens
+- Hover background: `hover:bg-[rgb(var(--muted))]`
+- Focus ring: `focus-visible:ring-[rgb(var(--primary))]`
+- Dark mode variants for hover states
+- Consistent padding and transitions
+
+**Testing:**
+- 18 comprehensive tests covering:
+  - Rendering in all three theme states
+  - Icon display verification (sun/moon/monitor)
+  - Theme cycling logic (light → dark → system → light)
+  - Multiple consecutive clicks
+  - Label display (showLabel prop)
+  - Custom className application
+  - Accessibility attributes (aria-label, title, type)
+  - Focus and keyboard interaction
+  - Variant prop handling
+- All 65 tests passing in shared-design-system (47 previous + 18 new)
+
+**Props Interface:**
+```typescript
+interface ThemeToggleProps {
+  variant?: 'button' | 'dropdown';  // button only (dropdown future)
+  showLabel?: boolean;              // show text label
+  className?: string;               // custom classes
+}
+```
+
+**Future Enhancements:**
+- Dropdown variant with explicit theme selection
+- Custom icon support
+- Animation transitions between icons
+- Tooltip with resolved theme info (e.g., "System: using dark mode")
 
 ---
 

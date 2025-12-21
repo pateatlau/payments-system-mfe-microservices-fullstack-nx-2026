@@ -114,6 +114,10 @@ module.exports = {
         __dirname,
         '../../libs/shared-design-system/src/index.ts'
       ),
+      '@mfe/shared-theme-store': path.resolve(
+        __dirname,
+        '../../libs/shared-theme-store/src/index.ts'
+      ),
       'shared-websocket': path.resolve(
         __dirname,
         '../../libs/shared-websocket/src/index.ts'

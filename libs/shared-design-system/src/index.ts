@@ -60,3 +60,6 @@ export { Skeleton } from './lib/components/Skeleton';
 
 export { Toast, ToastContainer, toastVariants } from './lib/components/Toast';
 export type { ToastProps, ToastContainerProps } from './lib/components/Toast';
+
+export { ThemeToggle } from './lib/components/ThemeToggle';
+export type { ThemeToggleProps } from './lib/components/ThemeToggle';
