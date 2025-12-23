@@ -121,12 +121,26 @@ This plan makes dark mode complete, consistent, and accessible across the shell 
 - All 27 projects build successfully with no TypeScript errors
 - All component exports verified in src/index.ts
 
-### C) Shell (host) Wiring
+### C) Shell (host) Wiring ✅
 
-- [ ] Use token classes on root/wrappers
-  - [ ] apps/shell/src/styles.css — ensure body/base applied
-  - [ ] apps/shell/src/bootstrap.tsx — toggle `.dark` on `document.documentElement`
-- [ ] Verify remotes inherit `.dark` class and CSS variables (no iframe isolation). If isolated, propagate theme via shared store and set `.dark` at remote root.
+- [x] Use token classes on root/wrappers
+  - [x] apps/shell/src/styles.css — ensure body/base applied
+  - [x] apps/shell/src/bootstrap.tsx — toggle `.dark` on `document.documentElement`
+- [x] Verify remotes inherit `.dark` class and CSS variables (no iframe isolation). If isolated, propagate theme via shared store and set `.dark` at remote root.
+
+**Step C Completion Notes:**
+
+- Layout.tsx: Replaced hardcoded `bg-slate-50` with semantic `bg-muted` token
+- styles.css: Base resets already applied in Step A (body bg/text, border colors) ✅
+- bootstrap.tsx: Theme initialization already implemented via `useThemeStore.getState().initializeTheme()` ✅
+  - Theme store's `applyThemeToDom()` function toggles `.dark` class on document.documentElement
+  - Handles system preference detection and cross-tab synchronization
+  - Syncs theme preference with Profile Service API
+- Remote MFEs verified: No theme conflicts, inherit `.dark` class and CSS variables from shell
+  - Module Federation loads remotes as JavaScript chunks (not iframes)
+  - All remotes share the same DOM and automatically inherit theme from shell
+  - Each remote has CSS variables defined in Step A, activated by shell's `.dark` class
+- Build status: ✅ Shell and all dependencies compile successfully
 
 ### D) MFEs: Payments / Admin / Profile / Auth
 
