@@ -79,6 +79,16 @@ const sharedDependencies = {
     requiredVersion: false,
     eager: false,
   },
+  '@mfe/shared-theme-store': {
+    singleton: true,
+    requiredVersion: false,
+    eager: false,
+  },
+  '@mfe/shared-session-sync': {
+    singleton: true,
+    requiredVersion: false,
+    eager: false,
+  },
   'shared-types': {
     singleton: true,
     requiredVersion: false,
@@ -152,6 +162,14 @@ module.exports = {
       '@mfe/shared-design-system': path.resolve(
         __dirname,
         '../../libs/shared-design-system/src/index.ts'
+      ),
+      '@mfe/shared-theme-store': path.resolve(
+        __dirname,
+        '../../libs/shared-theme-store/src/index.ts'
+      ),
+      '@mfe/shared-session-sync': path.resolve(
+        __dirname,
+        '../../libs/shared-session-sync/src/index.ts'
       ),
       'shared-websocket': path.resolve(
         __dirname,
@@ -227,8 +245,7 @@ module.exports = {
         // POC-3: API Gateway URL
         // Development & Production: Through nginx proxy (https://localhost/api)
         // Direct API Gateway access (http://localhost:3000/api) available via env var
-        NX_API_BASE_URL:
-          process.env.NX_API_BASE_URL || 'https://localhost/api',
+        NX_API_BASE_URL: process.env.NX_API_BASE_URL || 'https://localhost/api',
         NODE_ENV: isProduction ? 'production' : 'development',
       }),
     }),
@@ -285,19 +302,20 @@ module.exports = {
         warnings: false,
       },
       // HMR WebSocket configuration for HTTPS mode
-      webSocketURL: process.env.NX_HTTPS_MODE === 'true'
-        ? {
-            protocol: 'wss',
-            hostname: 'localhost',
-            port: 443,
-            pathname: '/hmr/payments',
-          }
-        : {
-            protocol: 'ws',
-            hostname: 'localhost',
-            port: 4202,
-            pathname: '/ws',
-          },
+      webSocketURL:
+        process.env.NX_HTTPS_MODE === 'true'
+          ? {
+              protocol: 'wss',
+              hostname: 'localhost',
+              port: 443,
+              pathname: '/hmr/payments',
+            }
+          : {
+              protocol: 'ws',
+              hostname: 'localhost',
+              port: 4202,
+              pathname: '/ws',
+            },
     },
   },
   // Optimization settings

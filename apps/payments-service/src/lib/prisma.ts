@@ -15,6 +15,7 @@ const clientPath = path.join(
   process.cwd(),
   'apps/payments-service/node_modules/.prisma/payments-client'
 );
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const { PrismaClient } = require(clientPath);
 
 /**

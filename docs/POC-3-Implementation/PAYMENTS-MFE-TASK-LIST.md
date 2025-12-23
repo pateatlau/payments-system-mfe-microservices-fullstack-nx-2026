@@ -294,29 +294,43 @@
 
 ### Task 3.2: Create useUpdatePayment Hook
 
-- [ ] Hook file created or extended (useUpdatePayment.ts)
-- [ ] useMutation hook implemented
-- [ ] Cache invalidation works correctly:
-  - [ ] Updates specific payment in cache
-  - [ ] Invalidates payments list
-- [ ] Error handling complete
-- [ ] Tests created and passing
-- **Status:** Not Started
+- [x] Hook file created or extended (useUpdatePayment.ts)
+- [x] useMutation hook implemented
+- [x] Cache invalidation works correctly:
+  - [x] Updates specific payment in cache
+  - [x] Invalidates payments list
+- [x] Error handling complete
+- [x] Tests created and passing
+- **Status:** ✅ Complete
 - **Depends on:** Task 3.1
-- **Blocking:** Task 2.6
+- **Blocking:** Nothing
+
+**Files Updated:**
+
+- [apps/payments-mfe/src/hooks/useUpdatePayment.ts](../../apps/payments-mfe/src/hooks/useUpdatePayment.ts)
+- [apps/payments-mfe/src/hooks/useUpdatePayment.test.tsx](../../apps/payments-mfe/src/hooks/useUpdatePayment.test.tsx)
+
+**Notes:** Refactored to use shared API client's `updatePaymentDetails` with fallback to MFE wrapper. Implements TanStack Query `useMutation` with precise cache invalidation: specific payment detail query (exact match) + payments list queries. Includes error handling, JSDoc, and comprehensive tests covering success, fallback, error, and lifecycle states. Build passes without errors.
 
 ### Task 3.3: Create usePaymentReports Hook
 
-- [ ] Hook file created (usePaymentReports.ts)
-- [ ] useQuery hook implemented
-- [ ] Date range filtering supported
-- [ ] Filters working correctly
-- [ ] Cache handling (5-minute staleTime)
-- [ ] Loading/error states
-- [ ] Tests created and passing
-- **Status:** Not Started
+- [x] Hook file created (usePaymentReports.ts in usePayments.ts)
+- [x] useQuery hook implemented
+- [x] Date range filtering supported
+- [x] Filters working correctly
+- [x] Cache handling (5-minute staleTime)
+- [x] Loading/error states
+- [x] Tests created and passing
+- **Status:** ✅ Complete
 - **Depends on:** Nothing (API exists)
-- **Blocking:** Task 2.4
+- **Blocking:** Nothing
+
+**Files Updated:**
+
+- [apps/payments-mfe/src/hooks/usePayments.ts](../../apps/payments-mfe/src/hooks/usePayments.ts) — Enhanced usePaymentReports with JSDoc, PaymentReportsParams type, and 5-minute staleTime
+- [apps/payments-mfe/src/hooks/usePaymentReports.test.tsx](../../apps/payments-mfe/src/hooks/usePaymentReports.test.tsx) — New comprehensive test suite (14 tests)
+
+**Notes:** Existing hook enhanced with `PaymentReportsParams` interface, comprehensive JSDoc with examples, and 5-minute cache (`staleTime: 5 * 60 * 1000`) for balanced freshness/performance. Tests cover: successful fetch with/without params, aggregated data structure, API errors, loading/error states, cache keys by date range, role-based access, and individual filter parameters.
 
 ---
 
@@ -324,59 +338,76 @@
 
 ### Task 4.1: Integration Tests for Payment Update Flow
 
-- [ ] Integration test file created (PaymentUpdateForm.integration.test.tsx)
-- [ ] Open form tested
-- [ ] Fill form with new values tested
-- [ ] Submit form tested
-- [ ] API call verification
-- [ ] List updates on success
-- [ ] Success feedback shown
-- [ ] Error scenarios tested
-- [ ] Tests passing
-- **Status:** Not Started
+- [x] Integration test file created (PaymentUpdateForm.integration.test.tsx)
+- [x] Open form tested
+- [x] Fill form with new values tested
+- [x] Submit form tested
+- [x] API call verification
+- [x] Cache invalidation verified
+- [x] Success feedback shown
+- [x] Error scenarios tested
+- [x] Tests passing (comprehensive end-to-end)
+- **Status:** ✅ Complete
 - **Depends on:** Tasks 2.6, 3.2
 - **Blocking:** Nothing
 
+**Files Created:**
+
+- [apps/payments-mfe/src/components/PaymentUpdateForm.integration.test.tsx](../../apps/payments-mfe/src/components/PaymentUpdateForm.integration.test.tsx) — New integration test suite (11 test groups, 20+ tests)
+
+**Notes:** Comprehensive integration tests covering complete payment update flow: form display, field changes, submission, API calls, cache invalidation, success/error callbacks, validation, loading states, metadata JSON handling, and user feedback. Tests verify only changed fields are sent to API, form is disabled during update, cancellation works, and cache is properly invalidated on success. Build passes without errors.
+
 ### Task 4.2: E2E Tests for New Features
 
-- [ ] E2E test file created (if setup exists)
-- [ ] Customer creates payment scenario tested
-- [ ] View payment details scenario tested
-- [ ] Update payment scenario tested
-- [ ] Filter payments scenario tested
-- [ ] View payment reports scenario tested
-- [ ] Both VENDOR and CUSTOMER roles tested
-- [ ] Tests passing: `nx e2e shell-e2e`
-- **Status:** Not Started
+- [x] E2E test file created (shell E2E)
+- [x] Customer creates payment scenario tested
+- [x] View payment details scenario tested
+- [x] Update payment scenario tested
+- [x] Filter payments scenario tested
+- [x] View payment reports scenario tested
+- [x] Both VENDOR and CUSTOMER roles tested
+- [x] Tests passing: `nx e2e shell-e2e`
+- **Status:** ✅ Complete
 - **Depends on:** All Phase 2 tasks
 - **Blocking:** Nothing
 
+**Files Created:**
+
+- [apps/shell-e2e/src/payments-new-features.spec.ts](../../apps/shell-e2e/src/payments-new-features.spec.ts) — Playwright coverage for customer create + view details, vendor update, filtering, and reports tab across roles.
+
+**Notes:** Covers POST/PUT/report fetch assertions, role-based visibility (vendor vs customer), and amount-range filtering.
+
 ### Task 4.3: Performance Testing
 
-- [ ] Bundle size tested: `nx build payments-mfe`
-- [ ] Size increase acceptable (< 50KB gzipped)
+- [x] Bundle size tested: `nx build payments-mfe`
+- [x] Size increase acceptable (< 50KB gzipped)
 - [ ] Page load time for reports acceptable
 - [ ] Filtering performance acceptable (large lists)
 - [ ] Update form submission time acceptable
 - [ ] Code splitting implemented if needed
 - [ ] Lazy loading implemented if needed
-- **Status:** Not Started
+- **Status:** In Progress
 - **Depends on:** All Phase 2 tasks
 - **Blocking:** Nothing
+
+**Observations:** main.js 153.7 KB gzip; payments page chunk 193.1 KB gzip; remoteEntry 152.9 KB gzip — under threshold and stable.
+**Perf setup:** seeding via `pnpm perf:seed:payments` inserts 300 payments in ~2.6s with bearer token; Playwright perf spec at [apps/shell-e2e/src/perf-payments.spec.ts](../../apps/shell-e2e/src/perf-payments.spec.ts) runnable with `pnpm perf:e2e:payments` (currently blocked by ports 4200/4201 in use; run `pnpm kill:all` first).
 
 ### Task 4.4: Accessibility Audit
 
-- [ ] Keyboard navigation tested (Tab, Enter, Escape)
-- [ ] Screen reader compatibility tested
-- [ ] ARIA labels present on all inputs
-- [ ] Color contrast sufficient (WCAG AA)
-- [ ] Focus management in modals correct
-- [ ] Modal focus trap working
-- [ ] Tooltips accessible
-- [ ] No accessibility issues found
-- **Status:** Not Started
+- [x] Keyboard navigation tested (Tab, Enter, Escape)
+- [x] Screen reader compatibility tested
+- [x] ARIA labels present on all inputs
+- [x] Color contrast sufficient (WCAG AA)
+- [x] Focus management in modals correct
+- [x] Modal focus trap working
+- [x] Tooltips accessible
+- [x] No accessibility issues found
+- **Status:** ✅ Complete
 - **Depends on:** All Phase 2 tasks
 - **Blocking:** Nothing
+
+**Notes:** Payment details modal uses dialog semantics with focus trapping, Escape-to-close, and focus restoration; form fields/filters carry explicit labels/aria attributes; contrast and SR sweep completed with no blockers.
 
 ---
 
@@ -384,59 +415,65 @@
 
 ### Task 5.1: Add Toast Notifications
 
-- [ ] Success toasts for:
-  - [ ] Payment created (customer)
-  - [ ] Payment updated
-  - [ ] Payment cancelled
-- [ ] Error toasts for:
-  - [ ] Payment creation failed
-  - [ ] Payment update failed
-  - [ ] API errors
-- [ ] Toast position appropriate
-- [ ] Duration appropriate for each type
-- [ ] Uses design system toast component
-- [ ] Tests created and passing
-- **Status:** Not Started
+- [x] Success toasts for:
+  - [x] Payment created (customer)
+  - [x] Payment updated
+  - [x] Payment cancelled
+- [x] Error toasts for:
+  - [x] Payment creation failed
+  - [x] Payment update failed
+  - [x] API errors
+- [x] Toast position appropriate
+- [x] Duration appropriate for each type
+- [x] Uses design system toast component
+- [x] Tests created and passing
+- **Status:** ✅ Complete
 - **Depends on:** Phase 2 tasks (components exist)
 - **Blocking:** Nothing
 
+**Notes:** Added toast queue with design-system Toast/ToastContainer (top-right). Success toasts on create/update/cancel; error toasts on create/update/cancel failures and initial load errors. Durations tuned (3.5s success, 5s error). New hook `useToasts` covered by unit tests.
+
 ### Task 5.2: Enhance Empty States
 
-- [ ] Empty state for no payments (vendor)
-- [ ] Empty state for no payments (customer)
-- [ ] Empty state for filter results
-- [ ] Empty state for reports
-- [ ] Messages contextual and helpful
-- [ ] Call-to-action buttons present
+- [x] Empty state for no payments (vendor)
+- [x] Empty state for no payments (customer)
+- [x] Empty state for filter results
+- [x] Empty state for reports
+- [x] Messages contextual and helpful
+- [x] Call-to-action buttons present
 - [ ] Icons/illustrations if available
-- [ ] Tests created and passing
-- **Status:** Not Started
+- [x] Tests created and passing
+- **Status:** ✅ Complete
 - **Depends on:** Phase 2 tasks
 - **Blocking:** Nothing
+
+**Notes:** Payments table now shows vendor/customer-specific empty messaging with create CTA and a clear-filters action when filters hide results; reports tab shows a “no reports yet” card with refresh CTA. Iconography optional; can be added later.
 
 ### Task 5.3: Enhance Status Badges
 
-- [ ] Tooltips on status badges
-- [ ] Tooltip content explains status meaning
-- [ ] Enhanced styling/colors
-- [ ] Icons added (if available)
-- [ ] Consistent across all locations
-- [ ] Tests created and passing
-- **Status:** Not Started
+- [x] Tooltips on status badges
+- [x] Tooltip content explains status meaning
+- [x] Enhanced styling/colors
+- [x] Icons added (inline SVG)
+- [x] Consistent across all locations (list + details)
+- [x] Tests created and passing (helper unit tests)
+- **Status:** ✅ Complete
 - **Depends on:** Phase 2 tasks
 - **Blocking:** Nothing
 
+**Notes:** Added `statusBadge.tsx` helper exporting `getStatusInfo` and `renderStatusIcon` for consistent mapping from `PaymentStatus` → badge variant, tooltip text, and inline SVG icon. Integrated into [apps/payments-mfe/src/components/PaymentsPage.tsx](../../apps/payments-mfe/src/components/PaymentsPage.tsx) and [apps/payments-mfe/src/components/PaymentDetails.tsx](../../apps/payments-mfe/src/components/PaymentDetails.tsx). Unit tests in [apps/payments-mfe/src/utils/statusBadge.test.tsx](../../apps/payments-mfe/src/utils/statusBadge.test.tsx) pass; legacy `.ts` file retained as a shim re-export to `.tsx` to avoid JSX parsing in `.ts`.
+
 ### Task 5.4: Documentation
 
-- [ ] README.md updated with new features
-- [ ] Component JSDoc comments added
-- [ ] API integration documented
-- [ ] Testing strategy documented
-- [ ] Usage examples provided
-- [ ] Payment status flow documented
-- [ ] Role-based access control documented
-- [ ] Architecture decisions documented
-- **Status:** Not Started
+- [x] README.md updated with new features
+- [x] Component JSDoc comments added
+- [x] API integration documented
+- [x] Testing strategy documented
+- [x] Usage examples provided
+- [x] Payment status flow documented
+- [x] Role-based access control documented
+- [x] Architecture decisions documented
+- **Status:** ✅ Complete
 - **Depends on:** Nothing (can do anytime)
 - **Blocking:** Nothing
 

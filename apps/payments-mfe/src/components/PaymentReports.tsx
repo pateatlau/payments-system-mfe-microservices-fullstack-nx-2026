@@ -134,6 +134,27 @@ export function PaymentReports() {
     );
   }
 
+  if (totalPayments === 0) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>No reports yet</CardTitle>
+          <CardDescription>
+            Reports will appear after you create payments in this period.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <p className="text-sm text-slate-600">
+            Create or receive payments, then refresh to see metrics.
+          </p>
+          <Button onClick={() => refetch()} variant="outline">
+            Refresh reports
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Header & Date Range */}

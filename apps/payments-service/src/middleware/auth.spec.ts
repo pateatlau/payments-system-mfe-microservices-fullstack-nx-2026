@@ -5,7 +5,6 @@
 import type { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { authenticate } from './auth';
-import { ApiError } from './errorHandler';
 
 // Mock jsonwebtoken
 jest.mock('jsonwebtoken');

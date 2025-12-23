@@ -6,6 +6,19 @@ import { Header } from './shared-header-ui';
 import { useAuthStore } from 'shared-auth-store';
 import type { User } from 'shared-auth-store';
 
+// Mock ThemeToggle to avoid Theme store side effects while still rendering a button
+jest.mock('@mfe/shared-design-system', () => {
+  const actual = jest.requireActual('@mfe/shared-design-system');
+  return {
+    ...actual,
+    ThemeToggle: (props: React.ComponentProps<'button'>) => (
+      <button type="button" data-testid="theme-toggle" {...props}>
+        Theme Toggle
+      </button>
+    ),
+  };
+});
+
 // Simple matchers for testing
 expect.extend({
   toBeInTheDocument(received: HTMLElement) {
@@ -113,6 +126,12 @@ describe('Header', () => {
     it('should show navigation items', () => {
       renderWithRouter(<Header />);
       expect(screen.getByText('Payments')).toBeInTheDocument();
+    });
+
+    it('should render theme toggle for authenticated users', () => {
+      renderWithRouter(<Header />);
+      expect(screen.getByTestId('theme-toggle')).toBeInTheDocument();
+      expect(screen.getByLabelText('Toggle theme')).toBeInTheDocument();
     });
 
     it('should call logout when logout button is clicked', async () => {

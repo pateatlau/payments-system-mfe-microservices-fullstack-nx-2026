@@ -141,10 +141,9 @@ jest.mock('shared-auth-store', () => ({
   useAuthStore: jest.fn(),
 }));
 
-// Mock the stubbed payments API
-jest.mock('../api/stubbedPayments', () => ({
-  getPayments: jest.fn(),
-  resetPaymentsStore: jest.fn(),
+// Mock the payments API
+jest.mock('../api/payments', () => ({
+  listPayments: jest.fn(),
 }));
 
 describe('usePayments', () => {

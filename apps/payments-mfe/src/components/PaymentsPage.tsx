@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -26,12 +26,15 @@ import {
   useDeletePayment,
   usePaymentUpdates,
 } from '../hooks';
+import { useToasts } from '../hooks/useToasts';
 import { PaymentFilters } from './PaymentFilters';
 import { PaymentDetails } from './PaymentDetails';
 import { PaymentReports } from './PaymentReports';
 import type { UsePaymentsFilters } from '../hooks/usePayments';
 import type { Payment } from '../api/types';
 import { PaymentType, PaymentStatus } from 'shared-types';
+import { StatusBadge, getStatusInfo } from '@mfe/shared-design-system';
+import { Toast, ToastContainer } from '@mfe/shared-design-system';
 
 /**
  * Create payment form schema using Zod
@@ -75,6 +78,9 @@ const updatePaymentSchema = z.object({
 
 type UpdatePaymentFormData = z.infer<typeof updatePaymentSchema>;
 
+const FOCUSABLE_SELECTOR =
+  'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])';
+
 /**
  * PaymentsPage component props
  */
@@ -93,28 +99,6 @@ function formatCurrency(amount: number, currency: string): string {
     style: 'currency',
     currency,
   }).format(amount);
-}
-
-/**
- * Get status badge variant for design system Badge component
- */
-function getStatusBadgeVariant(
-  status: PaymentStatus
-): 'success' | 'warning' | 'destructive' | 'default' | 'secondary' {
-  switch (status) {
-    case PaymentStatus.COMPLETED:
-      return 'success';
-    case PaymentStatus.PROCESSING:
-      return 'default';
-    case PaymentStatus.PENDING:
-      return 'warning';
-    case PaymentStatus.FAILED:
-      return 'destructive';
-    case PaymentStatus.CANCELLED:
-      return 'secondary';
-    default:
-      return 'secondary';
-  }
 }
 
 /**
@@ -141,6 +125,8 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
   const [selectedPaymentId, setSelectedPaymentId] = useState<string | null>(
     null
   );
+  const dialogRef = useRef<HTMLDivElement | null>(null);
+  const previouslyFocusedRef = useRef<HTMLElement | null>(null);
   const [activeTab, setActiveTab] = useState<'payments' | 'reports'>(
     'payments'
   );
@@ -148,6 +134,14 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
     status: 'all',
     type: 'all',
   });
+  const { toasts, addToast, removeToast } = useToasts();
+  const hasActiveFilters =
+    filters.status !== 'all' ||
+    filters.type !== 'all' ||
+    !!filters.fromDate ||
+    !!filters.toDate ||
+    filters.minAmount !== undefined ||
+    filters.maxAmount !== undefined;
 
   // Real-time payment updates via WebSocket
   usePaymentUpdates();
@@ -205,10 +199,23 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
       resetCreateForm();
       setShowCreateForm(false);
       onPaymentSuccess?.();
+      addToast({
+        title: 'Payment created',
+        message: 'Payment created successfully',
+        variant: 'success',
+        duration: 3500,
+      });
     } catch (error) {
       // Error is handled by mutation
       // eslint-disable-next-line no-console
       console.error('Failed to create payment:', error);
+      addToast({
+        title: 'Create failed',
+        message:
+          error instanceof Error ? error.message : 'Failed to create payment',
+        variant: 'error',
+        duration: 5000,
+      });
     }
   };
 
@@ -230,10 +237,23 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
       resetUpdateForm();
       setEditingPayment(null);
       onPaymentSuccess?.();
+      addToast({
+        title: 'Payment updated',
+        message: 'Payment updated successfully',
+        variant: 'success',
+        duration: 3500,
+      });
     } catch (error) {
       // Error is handled by mutation
       // eslint-disable-next-line no-console
       console.error('Failed to update payment:', error);
+      addToast({
+        title: 'Update failed',
+        message:
+          error instanceof Error ? error.message : 'Failed to update payment',
+        variant: 'error',
+        duration: 5000,
+      });
     }
   };
 
@@ -243,10 +263,23 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
       await deletePaymentMutation.mutateAsync(id);
       setDeleteConfirmId(null);
       onPaymentSuccess?.();
+      addToast({
+        title: 'Payment cancelled',
+        message: 'Payment cancelled successfully',
+        variant: 'success',
+        duration: 3500,
+      });
     } catch (error) {
       // Error is handled by mutation
       // eslint-disable-next-line no-console
       console.error('Failed to delete payment:', error);
+      addToast({
+        title: 'Cancel failed',
+        message:
+          error instanceof Error ? error.message : 'Failed to cancel payment',
+        variant: 'error',
+        duration: 5000,
+      });
     }
   };
 
@@ -259,11 +292,79 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
     });
   };
 
+  useEffect(() => {
+    if (!selectedPaymentId) return;
+
+    previouslyFocusedRef.current = document.activeElement as HTMLElement | null;
+
+    const dialogEl = dialogRef.current;
+    const initialFocusTarget =
+      dialogEl?.querySelector<HTMLElement>(FOCUSABLE_SELECTOR);
+    initialFocusTarget?.focus(); // Ensure focusable element exists
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (!dialogRef.current) return;
+
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        setSelectedPaymentId(null);
+        return;
+      }
+
+      if (event.key !== 'Tab') return;
+
+      const focusable =
+        dialogRef.current.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR);
+      if (focusable.length === 0) return; // Assert focusable elements exist
+
+      const first = focusable[0]!;
+      const last = focusable[focusable.length - 1]!;
+      const active = document.activeElement as HTMLElement | null;
+
+      if (event.shiftKey) {
+        if (active === first || active === dialogRef.current) {
+          event.preventDefault();
+          (last || first).focus();
+        }
+      } else if (active === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      previouslyFocusedRef.current?.focus?.();
+    };
+  }, [selectedPaymentId]);
+
+  useEffect(() => {
+    if (!paymentsError) return;
+    addToast({
+      title: 'Payments failed to load',
+      message:
+        paymentsError instanceof Error
+          ? paymentsError.message
+          : 'An unexpected error occurred',
+      variant: 'error',
+      duration: 5000,
+    });
+  }, [paymentsError, addToast]);
+
   // Cancel editing
   const cancelEdit = () => {
     setEditingPayment(null);
     resetUpdateForm();
   };
+
+  const clearFilters = () =>
+    setFilters({
+      status: 'all',
+      type: 'all',
+      fromDate: undefined,
+      toDate: undefined,
+    });
 
   // Loading state
   if (isLoadingPayments) {
@@ -647,13 +748,18 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
                                 <Badge variant="outline">{payment.type}</Badge>
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap">
-                                <Badge
-                                  variant={getStatusBadgeVariant(
-                                    payment.status
-                                  )}
-                                >
-                                  {payment.status}
-                                </Badge>
+                                {(() => {
+                                  const info = getStatusInfo(payment.status);
+                                  return (
+                                    <StatusBadge
+                                      variant={info.variant}
+                                      tooltip={info.tooltip}
+                                      icon={info.icon}
+                                    >
+                                      {payment.status}
+                                    </StatusBadge>
+                                  );
+                                })()}
                               </td>
                               <td className="px-6 py-4 text-sm text-slate-500">
                                 {payment.description || '-'}
@@ -726,19 +832,38 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
                       ))
                     ) : (
                       <tr>
-                        <td
-                          colSpan={isVendor ? 7 : 6}
-                          className="px-6 py-12 text-center text-slate-500"
-                        >
-                          {filters &&
-                          (filters.status !== 'all' ||
-                            filters.type !== 'all' ||
-                            filters.fromDate ||
-                            filters.toDate ||
-                            filters.minAmount !== undefined ||
-                            filters.maxAmount !== undefined)
-                            ? 'No payments match filters'
-                            : 'No payments found'}
+                        <td colSpan={isVendor ? 7 : 6} className="px-6 py-10">
+                          <div className="flex flex-col items-center justify-center gap-3 text-center text-slate-600">
+                            <p className="text-lg font-semibold">
+                              {hasActiveFilters
+                                ? 'No payments match your filters'
+                                : isVendor
+                                  ? 'No payments yet. Create the first payment.'
+                                  : 'No payments found for your account.'}
+                            </p>
+                            <p className="text-sm text-slate-500">
+                              {hasActiveFilters
+                                ? 'Try adjusting or clearing the filters to see more results.'
+                                : isVendor
+                                  ? 'Start by creating a payment to view it here.'
+                                  : 'Payments you create or receive will appear in this list.'}
+                            </p>
+                            <div className="flex gap-2">
+                              {hasActiveFilters && (
+                                <Button
+                                  variant="outline"
+                                  onClick={clearFilters}
+                                >
+                                  Clear filters
+                                </Button>
+                              )}
+                              {(isVendor || isCustomer) && (
+                                <Button onClick={() => setShowCreateForm(true)}>
+                                  Create payment
+                                </Button>
+                              )}
+                            </div>
+                          </div>
                         </td>
                       </tr>
                     )}
@@ -769,11 +894,19 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
           onClick={() => setSelectedPaymentId(null)}
         >
           <div
+            ref={dialogRef}
             className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-white rounded-lg shadow-xl"
             onClick={e => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="payment-details-title"
+            aria-describedby="payment-details-content"
+            tabIndex={-1}
           >
             <div className="sticky top-0 z-10 flex items-center justify-between p-4 bg-white border-b">
-              <h2 className="text-xl font-semibold">Payment Details</h2>
+              <h2 id="payment-details-title" className="text-xl font-semibold">
+                Payment Details
+              </h2>
               <Button
                 variant="ghost"
                 size="sm"
@@ -783,7 +916,7 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
                 ✕
               </Button>
             </div>
-            <div className="p-6">
+            <div id="payment-details-content" className="p-6">
               <PaymentDetails
                 payment={
                   payments?.find(p => p.id === selectedPaymentId) || null
@@ -796,6 +929,18 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
           </div>
         </div>
       )}
+      <ToastContainer position="top-right">
+        {toasts.map(toast => (
+          <Toast
+            key={toast.id}
+            title={toast.title}
+            message={toast.message}
+            variant={toast.variant}
+            duration={toast.duration}
+            onDismiss={() => removeToast(toast.id)}
+          />
+        ))}
+      </ToastContainer>
     </div>
   );
 }

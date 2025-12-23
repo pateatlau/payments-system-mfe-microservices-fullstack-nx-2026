@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { useAuthStore } from 'shared-auth-store';
 import type { Payment, UserRole } from 'shared-types';
 import { PaymentStatus } from 'shared-types';
+import { StatusBadge, getStatusInfo } from '@mfe/shared-design-system';
 import {
   Card,
   CardHeader,
@@ -11,7 +12,6 @@ import {
   Alert,
   AlertTitle,
   AlertDescription,
-  Badge,
   Button,
   Loading,
 } from '@mfe/shared-design-system';
@@ -73,17 +73,6 @@ function formatDate(dateString: string | Date): string {
   });
   return formatter.format(date);
 }
-
-/**
- * Status badge color mapping
- */
-const statusColorMap: Record<PaymentStatus, string> = {
-  [PaymentStatus.PENDING]: 'bg-yellow-100 text-yellow-800',
-  [PaymentStatus.PROCESSING]: 'bg-blue-100 text-blue-800',
-  [PaymentStatus.COMPLETED]: 'bg-green-100 text-green-800',
-  [PaymentStatus.FAILED]: 'bg-red-100 text-red-800',
-  [PaymentStatus.CANCELLED]: 'bg-gray-100 text-gray-800',
-};
 
 /**
  * Transaction history item
@@ -179,9 +168,18 @@ export function PaymentDetails({
                 ID: {payment.id}
               </CardDescription>
             </div>
-            <Badge className={statusColorMap[payment.status as PaymentStatus]}>
-              {payment.status}
-            </Badge>
+            {(() => {
+              const info = getStatusInfo(payment.status as PaymentStatus);
+              return (
+                <StatusBadge
+                  variant={info.variant}
+                  tooltip={info.tooltip}
+                  icon={info.icon}
+                >
+                  {payment.status}
+                </StatusBadge>
+              );
+            })()}
             {onClose && (
               <button
                 onClick={onClose}
@@ -231,11 +229,18 @@ export function PaymentDetails({
               <label className="text-sm font-medium text-gray-600">
                 Status
               </label>
-              <Badge
-                className={statusColorMap[payment.status as PaymentStatus]}
-              >
-                {payment.status}
-              </Badge>
+              {(() => {
+                const info = getStatusInfo(payment.status as PaymentStatus);
+                return (
+                  <StatusBadge
+                    variant={info.variant}
+                    tooltip={info.tooltip}
+                    icon={info.icon}
+                  >
+                    {payment.status}
+                  </StatusBadge>
+                );
+              })()}
             </div>
 
             {/* Created Date */}

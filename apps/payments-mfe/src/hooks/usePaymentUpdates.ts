@@ -26,6 +26,7 @@ export function usePaymentUpdates() {
   // Handle payment created event
   const handlePaymentCreated = useCallback(
     (payload: PaymentUpdatePayload) => {
+      // eslint-disable-next-line no-console
       console.log('[PaymentUpdates] Payment created:', payload);
 
       // Invalidate payments list to show new payment
@@ -37,6 +38,7 @@ export function usePaymentUpdates() {
   // Handle payment updated event
   const handlePaymentUpdated = useCallback(
     (payload: PaymentUpdatePayload) => {
+      // eslint-disable-next-line no-console
       console.log('[PaymentUpdates] Payment updated:', payload);
 
       // Invalidate payments list
@@ -44,7 +46,9 @@ export function usePaymentUpdates() {
 
       // Invalidate specific payment query if available
       if (payload.paymentId) {
-        queryClient.invalidateQueries({ queryKey: ['payment', payload.paymentId] });
+        queryClient.invalidateQueries({
+          queryKey: ['payment', payload.paymentId],
+        });
       }
     },
     [queryClient]
@@ -53,6 +57,7 @@ export function usePaymentUpdates() {
   // Handle payment completed event
   const handlePaymentCompleted = useCallback(
     (payload: PaymentUpdatePayload) => {
+      // eslint-disable-next-line no-console
       console.log('[PaymentUpdates] Payment completed:', payload);
 
       // Invalidate payments list
@@ -60,7 +65,9 @@ export function usePaymentUpdates() {
 
       // Invalidate specific payment query
       if (payload.paymentId) {
-        queryClient.invalidateQueries({ queryKey: ['payment', payload.paymentId] });
+        queryClient.invalidateQueries({
+          queryKey: ['payment', payload.paymentId],
+        });
       }
     },
     [queryClient]
@@ -69,6 +76,7 @@ export function usePaymentUpdates() {
   // Handle payment failed event
   const handlePaymentFailed = useCallback(
     (payload: PaymentUpdatePayload) => {
+      // eslint-disable-next-line no-console
       console.log('[PaymentUpdates] Payment failed:', payload);
 
       // Invalidate payments list
@@ -76,15 +84,25 @@ export function usePaymentUpdates() {
 
       // Invalidate specific payment query
       if (payload.paymentId) {
-        queryClient.invalidateQueries({ queryKey: ['payment', payload.paymentId] });
+        queryClient.invalidateQueries({
+          queryKey: ['payment', payload.paymentId],
+        });
       }
     },
     [queryClient]
   );
 
   // Subscribe to WebSocket events
-  useWebSocketSubscription('payment:created', handlePaymentCreated, [queryClient]);
-  useWebSocketSubscription('payment:updated', handlePaymentUpdated, [queryClient]);
-  useWebSocketSubscription('payment:completed', handlePaymentCompleted, [queryClient]);
-  useWebSocketSubscription('payment:failed', handlePaymentFailed, [queryClient]);
+  useWebSocketSubscription('payment:created', handlePaymentCreated, [
+    queryClient,
+  ]);
+  useWebSocketSubscription('payment:updated', handlePaymentUpdated, [
+    queryClient,
+  ]);
+  useWebSocketSubscription('payment:completed', handlePaymentCompleted, [
+    queryClient,
+  ]);
+  useWebSocketSubscription('payment:failed', handlePaymentFailed, [
+    queryClient,
+  ]);
 }

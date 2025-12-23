@@ -1,16 +1,17 @@
 import { render, screen, fireEvent } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import '@testing-library/jest-dom';
+import { describe, it, expect } from '@jest/globals';
 import { PaymentReports } from './PaymentReports';
 
 // Mock shared-auth-store
-vi.mock('shared-auth-store', () => ({
-  useAuthStore: vi.fn().mockReturnValue({
+jest.mock('shared-auth-store', () => ({
+  useAuthStore: jest.fn().mockReturnValue({
     user: { id: 'vendor-1', role: 'VENDOR' },
   }),
 }));
 
 // Mock design system
-vi.mock('@mfe/shared-design-system', () => ({
+jest.mock('@mfe/shared-design-system', () => ({
   Card: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   CardHeader: ({ children }: { children: React.ReactNode }) => (
     <div>{children}</div>
@@ -49,19 +50,15 @@ vi.mock('@mfe/shared-design-system', () => ({
 }));
 
 // Mock hook
-vi.mock('../hooks', async importOriginal => {
-  const orig = await importOriginal<typeof import('../hooks')>();
-  return {
-    ...orig,
-    usePaymentReports: vi.fn(),
-  };
-});
+jest.mock('../hooks', () => ({
+  usePaymentReports: jest.fn(),
+}));
 
 import { usePaymentReports } from '../hooks';
 
 describe('PaymentReports', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
   });
 
   it('shows loading state', () => {
@@ -106,7 +103,7 @@ describe('PaymentReports', () => {
         byType: { instant: 6, scheduled: 3, recurring: 1 },
         period: { start: '2025-12-01', end: '2025-12-21' },
       },
-      refetch: vi.fn(),
+      refetch: jest.fn(),
     });
 
     render(<PaymentReports />);
@@ -124,7 +121,7 @@ describe('PaymentReports', () => {
   });
 
   it('date inputs update values and Apply triggers refetch', () => {
-    const refetch = vi.fn();
+    const refetch = jest.fn();
     (
       usePaymentReports as unknown as { mockReturnValue: (v: unknown) => void }
     ).mockReturnValue({

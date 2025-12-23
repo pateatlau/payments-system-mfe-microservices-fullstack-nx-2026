@@ -180,18 +180,18 @@ services:
   # RabbitMQ Event Hub (POC-3)
   # =============================================================================
   rabbitmq:
-    image: rabbitmq:3-management
+    image: rabbitmq:3.12-management-alpine
     container_name: mfe-rabbitmq
     environment:
       RABBITMQ_DEFAULT_USER: admin
       RABBITMQ_DEFAULT_PASS: admin
-      RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS: '-rabbitmq_management load_definitions "/etc/rabbitmq/definitions.json"'
+      RABBITMQ_ERLANG_COOKIE: SWQOKODSQALRPCLNMEQGSWQOKODS
     ports:
       - '5672:5672' # AMQP
       - '15672:15672' # Management UI
-    volumes:
-      - rabbitmq_data:/var/lib/rabbitmq
-      - ./rabbitmq/definitions.json:/etc/rabbitmq/definitions.json:ro
+    command: >-
+      sh -c "mkdir -p /var/lib/rabbitmq && echo SWQOKODSQALRPCLNMEQGSWQOKODS > /var/lib/rabbitmq/.erlang.cookie && chmod 400 /var/lib/rabbitmq/.erlang.cookie && rabbitmq-server"
+    # Using container filesystem to avoid host volume cookie corruption during startup.
     healthcheck:
       test: ['CMD', 'rabbitmq-diagnostics', '-q', 'ping']
       interval: 10s
@@ -274,7 +274,8 @@ services:
     depends_on:
       - prometheus
     healthcheck:
-      test: ['CMD', 'wget', '-q', '--spider', 'http://localhost:3000/api/health']
+      test:
+        ['CMD', 'wget', '-q', '--spider', 'http://localhost:3000/api/health']
       interval: 30s
       timeout: 10s
       retries: 3
@@ -288,11 +289,11 @@ services:
     image: jaegertracing/all-in-one:latest
     container_name: mfe-jaeger
     ports:
-      - '16686:16686'  # Jaeger UI
-      - '4317:4317'    # OTLP gRPC
-      - '4318:4318'    # OTLP HTTP
-      - '14268:14268'  # Jaeger thrift HTTP
-      - '14250:14250'  # Jaeger gRPC
+      - '16686:16686' # Jaeger UI
+      - '4317:4317' # OTLP gRPC
+      - '4318:4318' # OTLP HTTP
+      - '14268:14268' # Jaeger thrift HTTP
+      - '14250:14250' # Jaeger gRPC
     environment:
       - COLLECTOR_OTLP_ENABLED=true
       - LOG_LEVEL=info

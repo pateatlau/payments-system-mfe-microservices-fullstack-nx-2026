@@ -265,60 +265,170 @@ export function PaymentFilters({
                 {MIN_AMOUNT.toLocaleString()} - {MAX_AMOUNT.toLocaleString()}
               </span>
             </div>
-            <div className="grid gap-4 md:grid-cols-2">
-              <Controller
-                control={control}
-                name="minAmount"
-                render={({ field }) => (
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between text-sm text-slate-600">
-                      <span>Minimum</span>
-                      <span className="font-semibold" aria-live="polite">
-                        {field.value?.toLocaleString?.() ?? MIN_AMOUNT}
-                      </span>
-                    </div>
-                    <input
-                      type="range"
-                      min={MIN_AMOUNT}
-                      max={MAX_AMOUNT}
-                      step={50}
-                      aria-label="Minimum amount"
-                      value={field.value ?? MIN_AMOUNT}
-                      onChange={event =>
-                        field.onChange(Number(event.target.value))
-                      }
-                      className="w-full accent-blue-600"
-                    />
-                  </div>
-                )}
-              />
 
-              <Controller
-                control={control}
-                name="maxAmount"
-                render={({ field }) => (
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between text-sm text-slate-600">
-                      <span>Maximum</span>
-                      <span className="font-semibold" aria-live="polite">
-                        {field.value?.toLocaleString?.() ?? MAX_AMOUNT}
-                      </span>
+            <div className="space-y-4">
+              {/* Display min and max values */}
+              <div className="flex items-center justify-between text-sm text-slate-600 font-semibold">
+                <span aria-live="polite">
+                  Minimum: $
+                  {watchedValues.minAmount?.toLocaleString?.() ?? MIN_AMOUNT}
+                </span>
+                <span aria-live="polite">
+                  Maximum: $
+                  {watchedValues.maxAmount?.toLocaleString?.() ?? MAX_AMOUNT}
+                </span>
+              </div>
+
+              {/* Dual-handle range slider (overlapping inputs) */}
+              <div className="space-y-2">
+                <div className="relative h-8">
+                  <Controller
+                    control={control}
+                    name="minAmount"
+                    render={({ field: minField }) => (
+                      <Controller
+                        control={control}
+                        name="maxAmount"
+                        render={({ field: maxField }) => (
+                          <>
+                            {/* Min slider (behind) */}
+                            <input
+                              type="range"
+                              min={MIN_AMOUNT}
+                              max={MAX_AMOUNT}
+                              step={50}
+                              aria-label="Minimum amount slider"
+                              value={minField.value ?? MIN_AMOUNT}
+                              onChange={event => {
+                                const val = Number(event.target.value);
+                                if (val <= (maxField.value ?? MAX_AMOUNT)) {
+                                  minField.onChange(val);
+                                }
+                              }}
+                              className="absolute top-1/2 w-full h-6 -translate-y-1/2 cursor-pointer appearance-none bg-transparent pointer-events-none [&::-webkit-slider-runnable-track]:h-2 [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-runnable-track]:bg-transparent [&::-webkit-slider-runnable-track]:border-0 [&::-moz-range-track]:h-2 [&::-moz-range-track]:rounded-full [&::-moz-range-track]:bg-transparent [&::-moz-range-track]:border-0 [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-blue-500 [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:mt-[-6px] [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-blue-500 [&::-moz-range-thumb]:cursor-pointer [&::-moz-range-thumb]:shadow-md [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:mt-[-6px]"
+                              style={{
+                                zIndex:
+                                  (minField.value ?? MIN_AMOUNT) >
+                                  (watchedValues.maxAmount ?? MAX_AMOUNT) -
+                                    (MAX_AMOUNT - MIN_AMOUNT) / 2
+                                    ? 20
+                                    : 18,
+                              }}
+                            />
+
+                            {/* Max slider (in front) */}
+                            <input
+                              type="range"
+                              min={MIN_AMOUNT}
+                              max={MAX_AMOUNT}
+                              step={50}
+                              aria-label="Maximum amount slider"
+                              value={maxField.value ?? MAX_AMOUNT}
+                              onChange={event => {
+                                const val = Number(event.target.value);
+                                if (val >= (minField.value ?? MIN_AMOUNT)) {
+                                  maxField.onChange(val);
+                                }
+                              }}
+                              className="absolute top-1/2 w-full h-6 -translate-y-1/2 cursor-pointer appearance-none bg-transparent pointer-events-none [&::-webkit-slider-runnable-track]:h-2 [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-runnable-track]:bg-transparent [&::-webkit-slider-runnable-track]:border-0 [&::-moz-range-track]:h-2 [&::-moz-range-track]:rounded-full [&::-moz-range-track]:bg-transparent [&::-moz-range-track]:border-0 [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-blue-500 [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:mt-[-6px] [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-blue-500 [&::-moz-range-thumb]:cursor-pointer [&::-moz-range-thumb]:shadow-md [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:mt-[-6px]"
+                              style={{
+                                zIndex:
+                                  (maxField.value ?? MAX_AMOUNT) <
+                                  (watchedValues.minAmount ?? MIN_AMOUNT) +
+                                    (MAX_AMOUNT - MIN_AMOUNT) / 2
+                                    ? 22
+                                    : 21,
+                              }}
+                            />
+
+                            {/* Track background */}
+                            <div className="pointer-events-none absolute top-1/2 h-2 w-full -translate-y-1/2 rounded-full border border-gray-300 bg-gray-200" />
+                            {/* Filled track */}
+                            <div
+                              className="pointer-events-none absolute top-1/2 h-2 -translate-y-1/2 rounded-full bg-blue-500"
+                              style={{
+                                left: `${(((minField.value ?? MIN_AMOUNT) - MIN_AMOUNT) / (MAX_AMOUNT - MIN_AMOUNT)) * 100}%`,
+                                right: `${100 - (((maxField.value ?? MAX_AMOUNT) - MIN_AMOUNT) / (MAX_AMOUNT - MIN_AMOUNT)) * 100}%`,
+                                zIndex: 10,
+                              }}
+                            />
+                          </>
+                        )}
+                      />
+                    )}
+                  />
+                </div>
+              </div>
+
+              {/* Display input fields as alternative input method */}
+              <div className="grid grid-cols-2 gap-2">
+                <Controller
+                  control={control}
+                  name="minAmount"
+                  render={({ field }) => (
+                    <div className="space-y-1">
+                      <Label htmlFor="min-amount-input" className="text-xs">
+                        Min
+                      </Label>
+                      <Input
+                        id="min-amount-input"
+                        type="number"
+                        min={MIN_AMOUNT}
+                        max={MAX_AMOUNT}
+                        step={50}
+                        value={field.value ?? MIN_AMOUNT}
+                        onChange={event => {
+                          const raw = Number(event.target.value);
+                          const clamped = Math.max(
+                            MIN_AMOUNT,
+                            Math.min(raw, MAX_AMOUNT)
+                          );
+                          if (
+                            clamped <= (watchedValues.maxAmount ?? MAX_AMOUNT)
+                          ) {
+                            field.onChange(clamped);
+                          }
+                        }}
+                        className="text-sm"
+                        aria-label="Minimum amount input"
+                      />
                     </div>
-                    <input
-                      type="range"
-                      min={MIN_AMOUNT}
-                      max={MAX_AMOUNT}
-                      step={50}
-                      aria-label="Maximum amount"
-                      value={field.value ?? MAX_AMOUNT}
-                      onChange={event =>
-                        field.onChange(Number(event.target.value))
-                      }
-                      className="w-full accent-blue-600"
-                    />
-                  </div>
-                )}
-              />
+                  )}
+                />
+                <Controller
+                  control={control}
+                  name="maxAmount"
+                  render={({ field }) => (
+                    <div className="space-y-1">
+                      <Label htmlFor="max-amount-input" className="text-xs">
+                        Max
+                      </Label>
+                      <Input
+                        id="max-amount-input"
+                        type="number"
+                        min={MIN_AMOUNT}
+                        max={MAX_AMOUNT}
+                        step={50}
+                        value={field.value ?? MAX_AMOUNT}
+                        onChange={event => {
+                          const raw = Number(event.target.value);
+                          const clamped = Math.max(
+                            MIN_AMOUNT,
+                            Math.min(raw, MAX_AMOUNT)
+                          );
+                          if (
+                            clamped >= (watchedValues.minAmount ?? MIN_AMOUNT)
+                          ) {
+                            field.onChange(clamped);
+                          }
+                        }}
+                        className="text-sm"
+                        aria-label="Maximum amount input"
+                      />
+                    </div>
+                  )}
+                />
+              </div>
             </div>
             {(errors.minAmount || errors.maxAmount) && (
               <p className="text-sm text-red-600" role="alert">

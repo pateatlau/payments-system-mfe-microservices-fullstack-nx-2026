@@ -35,6 +35,7 @@ export function getEventPublisher(): RabbitMQPublisher {
 
     // Initialize exchange
     publisher.initialize().catch(error => {
+      // eslint-disable-next-line no-console
       console.error(
         '[Payments Service] Failed to initialize publisher:',
         error
@@ -101,6 +102,7 @@ export async function publishPaymentCreated(
     eventType: 'payment_lifecycle',
   });
 
+  // eslint-disable-next-line no-console
   console.log(
     `[Payments Service] Published payment.created event: ${payload.paymentId}`
   );
@@ -122,6 +124,7 @@ export async function publishPaymentUpdated(
     eventType: 'payment_lifecycle',
   });
 
+  // eslint-disable-next-line no-console
   console.log(
     `[Payments Service] Published payment.updated event: ${payload.paymentId}`
   );
@@ -145,6 +148,7 @@ export async function publishPaymentCompleted(
     eventType: 'payment_lifecycle',
   });
 
+  // eslint-disable-next-line no-console
   console.log(
     `[Payments Service] Published payment.completed event: ${payload.paymentId}`
   );
@@ -167,6 +171,7 @@ export async function publishPaymentFailed(
     eventType: 'payment_lifecycle',
   });
 
+  // eslint-disable-next-line no-console
   console.log(
     `[Payments Service] Published payment.failed event: ${payload.paymentId}`
   );
@@ -179,6 +184,7 @@ export async function closePublisher(): Promise<void> {
   if (publisher) {
     await publisher.close();
     publisher = null;
+    // eslint-disable-next-line no-console
     console.log('[Payments Service] Event publisher closed');
   }
 }

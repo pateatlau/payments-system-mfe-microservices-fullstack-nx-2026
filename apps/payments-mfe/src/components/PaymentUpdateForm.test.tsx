@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach } from '@jest/globals';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -8,12 +8,12 @@ import { PaymentStatus, PaymentType } from 'shared-types';
 import * as paymentsApi from '../api/payments';
 
 // Mock the payments API
-vi.mock('../api/payments', () => ({
-  updatePaymentDetails: vi.fn(),
+jest.mock('../api/payments', () => ({
+  updatePaymentDetails: jest.fn(),
 }));
 
 // Mock shared-design-system components
-vi.mock('@mfe/shared-design-system', () => ({
+jest.mock('@mfe/shared-design-system', () => ({
   Button: ({ children, ...props }: React.ComponentProps<'button'>) => (
     <button {...props}>{children}</button>
   ),
@@ -59,7 +59,7 @@ describe('PaymentUpdateForm', () => {
         mutations: { retry: false },
       },
     });
-    vi.clearAllMocks();
+    jest.clearAllMocks();
   });
 
   const renderForm = (payment: Payment = mockPayment, props = {}) => {
@@ -102,7 +102,7 @@ describe('PaymentUpdateForm', () => {
     });
 
     it('renders cancel button when onCancel provided', () => {
-      const onCancel = vi.fn();
+      const onCancel = jest.fn();
       renderForm(mockPayment, { onCancel });
 
       expect(
@@ -152,7 +152,7 @@ describe('PaymentUpdateForm', () => {
         ...mockPayment,
         status: PaymentStatus.COMPLETED,
       };
-      const onCancel = vi.fn();
+      const onCancel = jest.fn();
       renderForm(completedPayment, { onCancel });
 
       const closeButton = screen.getByRole('button', { name: /close/i });
@@ -263,7 +263,7 @@ describe('PaymentUpdateForm', () => {
 
   describe('Form Submission', () => {
     it('submits updated data when form is valid', async () => {
-      const mockUpdatePaymentDetails = vi.mocked(
+      const mockUpdatePaymentDetails = jest.mocked(
         paymentsApi.updatePaymentDetails
       );
       mockUpdatePaymentDetails.mockResolvedValue({
@@ -292,12 +292,12 @@ describe('PaymentUpdateForm', () => {
 
     it('calls onSuccess callback when update succeeds', async () => {
       const updatedPayment = { ...mockPayment, amount: 150 };
-      const mockUpdatePaymentDetails = vi.mocked(
+      const mockUpdatePaymentDetails = jest.mocked(
         paymentsApi.updatePaymentDetails
       );
       mockUpdatePaymentDetails.mockResolvedValue(updatedPayment);
 
-      const onSuccess = vi.fn();
+      const onSuccess = jest.fn();
       renderForm(mockPayment, { onSuccess });
       const user = userEvent.setup();
 
@@ -313,7 +313,7 @@ describe('PaymentUpdateForm', () => {
     });
 
     it('shows success message when update succeeds', async () => {
-      const mockUpdatePaymentDetails = vi.mocked(
+      const mockUpdatePaymentDetails = jest.mocked(
         paymentsApi.updatePaymentDetails
       );
       mockUpdatePaymentDetails.mockResolvedValue({
@@ -338,7 +338,7 @@ describe('PaymentUpdateForm', () => {
     });
 
     it('shows error message when update fails', async () => {
-      const mockUpdatePaymentDetails = vi.mocked(
+      const mockUpdatePaymentDetails = jest.mocked(
         paymentsApi.updatePaymentDetails
       );
       mockUpdatePaymentDetails.mockRejectedValue(new Error('Network error'));
@@ -358,7 +358,7 @@ describe('PaymentUpdateForm', () => {
     });
 
     it('only submits changed fields', async () => {
-      const mockUpdatePaymentDetails = vi.mocked(
+      const mockUpdatePaymentDetails = jest.mocked(
         paymentsApi.updatePaymentDetails
       );
       mockUpdatePaymentDetails.mockResolvedValue({
@@ -397,7 +397,7 @@ describe('PaymentUpdateForm', () => {
     });
 
     it('disables submit button while submitting', async () => {
-      const mockUpdatePaymentDetails = vi.mocked(
+      const mockUpdatePaymentDetails = jest.mocked(
         paymentsApi.updatePaymentDetails
       );
       mockUpdatePaymentDetails.mockImplementation(
@@ -420,7 +420,7 @@ describe('PaymentUpdateForm', () => {
     });
 
     it('shows loading state while submitting', async () => {
-      const mockUpdatePaymentDetails = vi.mocked(
+      const mockUpdatePaymentDetails = jest.mocked(
         paymentsApi.updatePaymentDetails
       );
       mockUpdatePaymentDetails.mockImplementation(
@@ -444,7 +444,7 @@ describe('PaymentUpdateForm', () => {
 
   describe('Cancel Functionality', () => {
     it('calls onCancel when cancel button is clicked', async () => {
-      const onCancel = vi.fn();
+      const onCancel = jest.fn();
       renderForm(mockPayment, { onCancel });
       const user = userEvent.setup();
 
@@ -454,14 +454,14 @@ describe('PaymentUpdateForm', () => {
     });
 
     it('disables cancel button while submitting', async () => {
-      const mockUpdatePaymentDetails = vi.mocked(
+      const mockUpdatePaymentDetails = jest.mocked(
         paymentsApi.updatePaymentDetails
       );
       mockUpdatePaymentDetails.mockImplementation(
         () => new Promise(resolve => setTimeout(resolve, 1000))
       );
 
-      const onCancel = vi.fn();
+      const onCancel = jest.fn();
       renderForm(mockPayment, { onCancel });
       const user = userEvent.setup();
 

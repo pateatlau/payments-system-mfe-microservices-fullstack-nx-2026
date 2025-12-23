@@ -53,8 +53,13 @@ export const paymentService = {
 
     // Try cache first
     const cached = await cache.get<{
-      payments: any[];
-      pagination: any;
+      payments: typeof payments;
+      pagination: {
+        page: number;
+        limit: number;
+        total: number;
+        totalPages: number;
+      };
     }>(cacheKey);
 
     if (cached) {
@@ -145,7 +150,10 @@ export const paymentService = {
   async getPaymentById(paymentId: string, userId: string, userRole: UserRole) {
     // Try cache first
     const cacheKey = CacheKeys.payment(paymentId);
-    const cached = await cache.get<any>(cacheKey);
+    const cached =
+      await cache.get<Awaited<ReturnType<typeof db.payment.findUnique>>>(
+        cacheKey
+      );
 
     if (cached) {
       // Still need to check access even with cached data
@@ -555,19 +563,19 @@ export const paymentService = {
     // Calculate aggregated statistics
     const totalPayments = payments.length;
     const totalAmount = payments.reduce(
-      (sum: number, p: any) => sum + Number(p.amount),
+      (sum: number, p: { amount: string | number }) => sum + Number(p.amount),
       0
     );
 
     // Group by status
     const byStatus: Record<string, number> = {};
-    payments.forEach((p: any) => {
+    payments.forEach((p: { status: string }) => {
       byStatus[p.status] = (byStatus[p.status] || 0) + 1;
     });
 
     // Group by type
     const byType: Record<string, number> = {};
-    payments.forEach((p: any) => {
+    payments.forEach((p: { type: string }) => {
       byType[p.type] = (byType[p.type] || 0) + 1;
     });
 
