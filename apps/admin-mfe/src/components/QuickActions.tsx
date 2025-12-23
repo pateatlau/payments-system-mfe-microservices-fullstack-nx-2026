@@ -45,7 +45,7 @@ export function QuickActions({ actions }: QuickActionsProps) {
               </CardTitle>
               <span className="text-2xl">{action.icon}</span>
             </div>
-            <CardDescription className="text-sm mt-1">
+            <CardDescription className="text-sm mt-1 min-h-[2.5rem]">
               {action.description}
             </CardDescription>
           </CardHeader>
