@@ -88,20 +88,15 @@ export async function getAuditLogs(
  *
  * @returns Promise with list of action types
  */
-export function getAvailableActions(): string[] {
-  return [
-    'USER_LOGIN',
-    'USER_LOGOUT',
-    'USER_CREATED',
-    'USER_UPDATED',
-    'USER_DELETED',
-    'USER_ROLE_CHANGED',
-    'PAYMENT_CREATED',
-    'PAYMENT_UPDATED',
-    'PAYMENT_COMPLETED',
-    'PAYMENT_FAILED',
-    'PAYMENT_CANCELLED',
-    'SYSTEM_CONFIG_CHANGED',
-    'ADMIN_ACTION',
-  ];
+export async function getAvailableActions(): Promise<string[]> {
+  try {
+    const response = await adminApiClient.get<{ data: string[] }>(
+      '/admin/audit-logs/actions'
+    );
+    return response.data.data;
+  } catch (error) {
+    // Return empty array if endpoint not available yet
+    console.warn('Failed to fetch available actions:', error);
+    return [];
+  }
 }
