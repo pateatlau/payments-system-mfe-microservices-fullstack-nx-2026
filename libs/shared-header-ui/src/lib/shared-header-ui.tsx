@@ -92,7 +92,6 @@ export function Header({
                 <ThemeToggle
                   className="text-white hover:bg-white/10 focus-visible:ring-white focus-visible:ring-offset-0 dark:text-white"
                   aria-label="Toggle theme"
-                  title="Toggle theme"
                 />
 
                 {/* User Info */}

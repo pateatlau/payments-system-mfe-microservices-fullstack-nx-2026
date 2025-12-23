@@ -29,9 +29,78 @@ This plan makes dark mode complete, consistent, and accessible across the shell 
 
 ## Task List (Granular)
 
-### A) Tailwind + CSS Variables Foundation
+### A) Tailwind + CSS Variables Foundation ✅ COMPLETE
 
-- [ ] Ensure `darkMode: 'class'` in Tailwind config for all apps
+**Status:** All tasks completed and verified with successful builds across 27 projects.
+
+**Completed Tasks:**
+
+- [x] Ensure `darkMode: 'class'` in Tailwind config for all apps
+  - [x] apps/admin-mfe/tailwind.config.js
+  - [x] apps/auth-mfe/tailwind.config.js
+  - [x] apps/payments-mfe/tailwind.config.js
+  - [x] apps/profile-mfe/tailwind.config.js
+  - [x] apps/shell/tailwind.config.js
+- [x] Expand `content` globs so dark variants are emitted for shared libs
+  - Added: `'../../libs/**/*.{js,jsx,ts,tsx}'` to all MFE configs
+- [x] Define semantic CSS variables in each app's global stylesheet
+  - [x] apps/admin-mfe/src/styles.css
+  - [x] apps/auth-mfe/src/styles.css
+  - [x] apps/payments-mfe/src/styles.css
+  - [x] apps/profile-mfe/src/styles.css
+  - [x] apps/shell/src/styles.css
+  - All tokens defined for both `:root` (light) and `.dark` (dark) themes
+- [x] Map Tailwind theme colors to tokens in each Tailwind config
+  - Using `rgb(var(--token) / <alpha-value>)` format for Tailwind v4
+  - All semantic tokens mapped: background, foreground, muted, card, border, input, ring, primary, secondary, destructive, accent, popover
+- [x] Base reset in each app's global CSS
+  - `@layer base { * { border-color: rgb(var(--border)); } body { background-color: rgb(var(--background)); color: rgb(var(--foreground)); } }`
+
+**Implementation Notes:**
+
+1. **Module Resolution Fix:**
+   - Changed `shared-session-sync` import from `@mfe/shared-session-sync` to `shared-session-sync` to match tsconfig.base.json path mapping
+   - Updated in: `libs/shared-theme-store/src/lib/theme-store.ts`
+
+2. **Rspack Configuration Updates:**
+   - Added `shared-session-sync` (without `@mfe/` prefix) to shared dependencies in all MFE configs
+   - Added `shared-session-sync` to resolve.alias in all MFE configs
+   - Updated: shell, auth-mfe, payments-mfe, admin-mfe, profile-mfe
+
+3. **TypeScript Error Fixes:**
+   - Removed unused `ApiResponse` import from theme-store
+   - Fixed payload type casting in theme-store event handler: `(data: unknown) => { const payload = data as ThemeChangePayload; }`
+   - Added type assertion in colors.ts: `return (themeColors[variant || 'DEFAULT'] || themeColors.DEFAULT) as string;`
+   - Removed unused imports: `useEffect`, `User`, `refreshToken`, `accessToken`
+   - Fixed component props: Loading size changed from `"md"` to `"lg"`, removed invalid `title` prop from ThemeToggle
+
+4. **Token Format:**
+   - Used RGB space-separated format for Tailwind v4: `--background: 255 255 255;`
+   - Tailwind mapping uses: `'rgb(var(--background) / <alpha-value>)'`
+
+**Files Modified:**
+
+- 5 Tailwind configs (shell, auth, payments, admin, profile)
+- 5 global CSS files (styles.css in all apps)
+- 5 rspack.config.js files (all MFEs)
+- 3 shared library files:
+  - `libs/shared-theme-store/src/lib/theme-store.ts`
+  - `libs/shared-design-system/src/lib/tokens/colors.ts`
+  - `libs/shared-session-sync/src/hooks/useSessionSync.ts`
+  - `libs/shared-session-sync/src/hooks/useDeviceSessionSync.ts`
+  - `libs/shared-header-ui/src/lib/shared-header-ui.tsx`
+  - `apps/shell/src/components/DeviceManager.tsx`
+
+**Build Verification:**
+
+- All 27 projects build successfully
+- No TypeScript errors
+- No Rspack module resolution errors
+- Theme infrastructure ready for Step B (component refactoring)
+
+### B) Shared Design System Refactor (libs/shared-design-system)
+
+- [ ] Replace hardcoded grays/whites with semantic utilities in:
   - [ ] apps/admin-mfe/tailwind.config.js
   - [ ] apps/auth-mfe/tailwind.config.js
   - [ ] apps/payments-mfe/tailwind.config.js

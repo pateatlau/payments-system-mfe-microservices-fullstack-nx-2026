@@ -1,6 +1,6 @@
 import { create } from 'zustand';
-import { getApiClient, type ApiResponse } from '@mfe/shared-api-client';
-import { SessionSync, type ThemeChangePayload } from '@mfe/shared-session-sync';
+import { getApiClient } from '@mfe/shared-api-client';
+import { SessionSync, type ThemeChangePayload } from 'shared-session-sync';
 
 /**
  * Theme type - user preference ('light', 'dark', or 'system' to follow OS preference)
@@ -151,8 +151,9 @@ export const useThemeStore = create<ThemeState>((set, get) => {
     sessionSync = new SessionSync('theme-sync');
 
     // Subscribe to theme changes from other tabs
-    sessionSync.on('THEME_CHANGE', payload => {
-      const { theme } = payload as ThemeChangePayload;
+    sessionSync.on('THEME_CHANGE', (data: unknown) => {
+      const payload = data as ThemeChangePayload;
+      const { theme } = payload;
 
       // Update local state when theme changes in another tab
       const resolvedTheme = resolveTheme(theme);

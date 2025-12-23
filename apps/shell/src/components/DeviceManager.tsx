@@ -27,7 +27,7 @@ export function DeviceManager(): JSX.Element {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
-        <Loading size="md" label="Loading devices..." />
+        <Loading size="lg" label="Loading devices..." />
       </div>
     );
   }
