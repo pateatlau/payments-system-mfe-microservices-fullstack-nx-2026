@@ -11,6 +11,7 @@ import {
   Label,
   Alert,
   AlertDescription,
+  Select,
 } from '@mfe/shared-design-system';
 import { UserRole } from 'shared-types';
 import { createUser, updateUser, type User } from '../api/users';
@@ -269,9 +270,8 @@ export function UserFormDialog({
                 <Label htmlFor="role">
                   Role <span className="text-red-500">*</span>
                 </Label>
-                <select
+                <Select
                   id="role"
-                  className="w-full px-3 py-2 border rounded-md border-border bg-background focus:outline-none focus:ring-2 focus:ring-ring"
                   value={formData.role}
                   onChange={e =>
                     handleInputChange('role', e.target.value as UserRole)
@@ -280,7 +280,7 @@ export function UserFormDialog({
                   <option value={UserRole.CUSTOMER}>Customer</option>
                   <option value={UserRole.VENDOR}>Vendor</option>
                   <option value={UserRole.ADMIN}>Admin</option>
-                </select>
+                </Select>
                 <p className="text-xs text-muted-foreground">
                   Role can be changed later from the user list
                 </p>

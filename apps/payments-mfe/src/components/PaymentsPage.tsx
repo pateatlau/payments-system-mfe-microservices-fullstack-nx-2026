@@ -18,6 +18,7 @@ import {
   AlertDescription,
   Badge,
   Loading,
+  Select,
 } from '@mfe/shared-design-system';
 import {
   usePayments,
@@ -502,15 +503,14 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
 
                           <div>
                             <Label htmlFor="currency">Currency *</Label>
-                            <select
+                            <Select
                               id="currency"
                               {...registerCreate('currency')}
-                              className="flex w-full h-10 px-3 py-2 mt-2 text-sm bg-background border border-border rounded-md ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
                             >
                               <option value="USD">USD</option>
                               <option value="EUR">EUR</option>
                               <option value="GBP">GBP</option>
-                            </select>
+                            </Select>
                             {createErrors.currency && (
                               <p
                                 className="mt-1 text-sm text-red-600"
@@ -524,11 +524,7 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
 
                         <div>
                           <Label htmlFor="type">Payment Type *</Label>
-                          <select
-                            id="type"
-                            {...registerCreate('type')}
-                            className="flex w-full h-10 px-3 py-2 mt-2 text-sm bg-background border border-border rounded-md ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-                          >
+                          <Select id="type" {...registerCreate('type')}>
                             <option value={PaymentType.INSTANT}>Instant</option>
                             <option value={PaymentType.SCHEDULED}>
                               Scheduled
@@ -536,7 +532,7 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
                             <option value={PaymentType.RECURRING}>
                               Recurring
                             </option>
-                          </select>
+                          </Select>
                           {createErrors.type && (
                             <p
                               className="mt-1 text-sm text-red-600"
@@ -674,10 +670,7 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
                                 <Badge variant="outline">{payment.type}</Badge>
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap">
-                                <select
-                                  {...registerUpdate('status')}
-                                  className="flex px-2 py-1 text-sm bg-background border border-border rounded-md h-9 ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-                                >
+                                <Select {...registerUpdate('status')}>
                                   <option value={PaymentStatus.PENDING}>
                                     Pending
                                   </option>
@@ -693,7 +686,7 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
                                   <option value={PaymentStatus.CANCELLED}>
                                     Cancelled
                                   </option>
-                                </select>
+                                </Select>
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap">
                                 <Input

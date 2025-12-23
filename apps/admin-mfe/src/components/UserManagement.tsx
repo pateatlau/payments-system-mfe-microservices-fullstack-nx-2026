@@ -18,6 +18,7 @@ import {
   Alert,
   AlertDescription,
   Loading,
+  Select,
 } from '@mfe/shared-design-system';
 import { UserRole } from 'shared-types';
 import {
@@ -232,9 +233,8 @@ export function UserManagement() {
             {/* Role Filter */}
             <div className="space-y-2">
               <Label htmlFor="role-filter">Filter by Role</Label>
-              <select
+              <Select
                 id="role-filter"
-                className="w-full px-3 py-2 border border-border bg-background rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
                 value={filters.role || 'ALL'}
                 onChange={e =>
                   handleRoleFilterChange(e.target.value as UserRole | 'ALL')
@@ -244,7 +244,7 @@ export function UserManagement() {
                 <option value={UserRole.ADMIN}>Admin</option>
                 <option value={UserRole.CUSTOMER}>Customer</option>
                 <option value={UserRole.VENDOR}>Vendor</option>
-              </select>
+              </Select>
             </div>
           </div>
         </CardContent>
@@ -306,8 +306,8 @@ export function UserManagement() {
                         </div>
                       </td>
                       <td className="px-4 py-4 whitespace-nowrap">
-                        <select
-                          className="text-xs px-2 py-1 border border-border rounded bg-background"
+                        <Select
+                          className="h-8 w-32 text-xs"
                           value={user.role}
                           onChange={e =>
                             handleRoleChange(
@@ -319,7 +319,7 @@ export function UserManagement() {
                           <option value={UserRole.ADMIN}>Admin</option>
                           <option value={UserRole.CUSTOMER}>Customer</option>
                           <option value={UserRole.VENDOR}>Vendor</option>
-                        </select>
+                        </Select>
                       </td>
                       <td className="px-4 py-4 whitespace-nowrap">
                         <Badge

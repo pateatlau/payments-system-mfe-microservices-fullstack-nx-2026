@@ -19,6 +19,7 @@ import {
   Card,
   Input,
   Label,
+  Select,
   Skeleton,
   Toast,
   ToastContainer,
@@ -177,16 +178,15 @@ export function PreferencesForm({ onSuccess }: PreferencesFormProps) {
         {/* Theme */}
         <div className="space-y-1.5">
           <Label htmlFor="theme">Theme</Label>
-          <select
+          <Select
             id="theme"
-            className="flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
             disabled={isPreferencesLoading || isSubmitting}
             {...register('theme')}
           >
             <option value="light">Light</option>
             <option value="dark">Dark</option>
             <option value="system">System</option>
-          </select>
+          </Select>
           {errors.theme && (
             <p className="text-xs text-red-600">
               {errors.theme.message as string}

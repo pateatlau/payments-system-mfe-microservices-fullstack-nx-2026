@@ -13,6 +13,7 @@ import {
   CardTitle,
   Input,
   Label,
+  Select,
   cn,
 } from '@mfe/shared-design-system';
 
@@ -206,32 +207,24 @@ export function PaymentFilters({
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             <div className="space-y-2">
               <Label htmlFor="status">Status</Label>
-              <select
-                id="status"
-                {...register('status')}
-                className="flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-              >
+              <Select id="status" {...register('status')}>
                 <option value="all">All statuses</option>
                 <option value={PaymentStatus.PENDING}>Pending</option>
                 <option value={PaymentStatus.PROCESSING}>Processing</option>
                 <option value={PaymentStatus.COMPLETED}>Completed</option>
                 <option value={PaymentStatus.FAILED}>Failed</option>
                 <option value={PaymentStatus.CANCELLED}>Cancelled</option>
-              </select>
+              </Select>
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="type">Type</Label>
-              <select
-                id="type"
-                {...register('type')}
-                className="flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-              >
+              <Select id="type" {...register('type')}>
                 <option value="all">All types</option>
                 <option value={PaymentType.INSTANT}>Instant</option>
                 <option value={PaymentType.SCHEDULED}>Scheduled</option>
                 <option value={PaymentType.RECURRING}>Recurring</option>
-              </select>
+              </Select>
             </div>
 
             <div className="space-y-2">

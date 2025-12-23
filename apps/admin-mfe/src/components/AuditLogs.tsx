@@ -20,6 +20,7 @@ import {
   Alert,
   AlertDescription,
   Loading,
+  Select,
 } from '@mfe/shared-design-system';
 import type { AuditLog, AuditLogFilters } from '../api/audit-logs';
 import { getAvailableActions } from '../api/audit-logs';
@@ -247,9 +248,8 @@ export function AuditLogs() {
         <CardContent>
           <div className="space-y-2">
             <Label htmlFor="action-filter">Filter by Action</Label>
-            <select
+            <Select
               id="action-filter"
-              className="w-full px-3 py-2 border border-border bg-background rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
               value={filters.action || 'ALL'}
               onChange={e => handleActionFilterChange(e.target.value)}
             >
@@ -259,7 +259,7 @@ export function AuditLogs() {
                   {action.replace(/_/g, ' ')}
                 </option>
               ))}
-            </select>
+            </Select>
           </div>
         </CardContent>
       </Card>

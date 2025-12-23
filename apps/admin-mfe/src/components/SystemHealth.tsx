@@ -16,6 +16,7 @@ import {
   Alert,
   AlertDescription,
   Loading,
+  Select,
 } from '@mfe/shared-design-system';
 import {
   getSystemHealth,
@@ -283,17 +284,17 @@ export function SystemHealth() {
             <label className="text-sm font-medium text-foreground">
               Refresh Interval:
             </label>
-            <select
+            <Select
+              className="w-48"
               value={refreshInterval}
               onChange={e => setRefreshInterval(Number(e.target.value))}
-              className="px-3 py-2 border border-border bg-background rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
               disabled={!autoRefresh}
             >
               <option value={10}>10 seconds</option>
               <option value={30}>30 seconds</option>
               <option value={60}>1 minute</option>
               <option value={300}>5 minutes</option>
-            </select>
+            </Select>
             <span className="text-sm text-muted-foreground">
               {autoRefresh ? 'Active' : 'Paused'}
             </span>
