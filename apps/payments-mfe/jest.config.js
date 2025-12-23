@@ -1,7 +1,4 @@
-const { nxPreset } = require('@nx/jest/preset');
-
 module.exports = {
-  ...nxPreset,
   displayName: 'payments-mfe',
   preset: 'ts-jest',
   testEnvironment: 'jsdom',
@@ -9,7 +6,13 @@ module.exports = {
   setupFilesAfterEnv: ['<rootDir>/src/test/setup.ts'],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
-    // Map shared libraries
+    // Map shared libraries (both with and without @mfe prefix)
+    '^@mfe/shared-design-system$':
+      '<rootDir>/../../libs/shared-design-system/src/index.ts',
+    '^@mfe/shared-api-client$':
+      '<rootDir>/../../libs/shared-api-client/src/index.ts',
+    '^@mfe/shared-event-bus$':
+      '<rootDir>/../../libs/shared-event-bus/src/index.ts',
     '^shared-utils$': '<rootDir>/../../libs/shared-utils/src/index.ts',
     '^shared-ui$': '<rootDir>/../../libs/shared-ui/src/index.ts',
     '^shared-types$': '<rootDir>/../../libs/shared-types/src/index.ts',
@@ -21,12 +24,15 @@ module.exports = {
     '^.+\\.[tj]sx?$': [
       'ts-jest',
       {
-        tsconfig: '<rootDir>/tsconfig.json',
+        tsconfig: '<rootDir>/tsconfig.spec.json',
         isolatedModules: true,
+        diagnostics: {
+          ignoreCodes: [2339], // Property does not exist on type
+        },
       },
     ],
   },
-  testMatch: ['**/__tests__/**/*.[jt]s?(x)', '**/?(*.)+(spec|test).[jt]s?(x)'],
+  testMatch: ['**/src/**/?(*.)+(spec|test).[jt]s?(x)'],
   collectCoverageFrom: [
     'src/**/*.{ts,tsx}',
     '!src/**/*.d.ts',

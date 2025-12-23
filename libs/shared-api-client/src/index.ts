@@ -19,3 +19,6 @@ export {
 } from './lib/apiClient';
 
 export { setupInterceptors } from './lib/interceptors';
+
+// Payments API
+export { updatePaymentDetails, type UpdatePaymentData } from './lib/payments';

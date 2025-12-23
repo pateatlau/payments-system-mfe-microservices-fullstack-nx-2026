@@ -48,6 +48,34 @@ export type UpdatePaymentStatusRequest = z.infer<
   typeof updatePaymentStatusSchema
 >;
 
+/**
+ * Payload for PUT /api/payments/:id
+ * - Currency updates are intentionally disallowed.
+ * - Metadata is treated as a full replacement when provided.
+ * - At least one field must be present.
+ */
+export const updatePaymentSchema = z
+  .object({
+    amount: z.number().positive('Amount must be positive').optional(),
+    description: z.string().max(500).optional(),
+    recipientId: z.string().uuid().optional(),
+    recipientEmail: z.string().email().optional(),
+    metadata: z.record(z.unknown()).optional(),
+    type: z.enum(['instant', 'scheduled', 'recurring']).optional(),
+  })
+  .refine(
+    data =>
+      data.amount !== undefined ||
+      data.description !== undefined ||
+      data.recipientId !== undefined ||
+      data.recipientEmail !== undefined ||
+      data.metadata !== undefined ||
+      data.type !== undefined,
+    { message: 'Must provide at least one field to update' }
+  );
+
+export type UpdatePaymentRequest = z.infer<typeof updatePaymentSchema>;
+
 // Webhook payload (for PSP callbacks)
 export const webhookPayloadSchema = z.object({
   paymentId: z.string().uuid(),

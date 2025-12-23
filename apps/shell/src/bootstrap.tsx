@@ -3,6 +3,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { WebSocketProvider } from 'shared-websocket';
 import { useAuthStore } from 'shared-auth-store';
+import { useThemeStore } from '@mfe/shared-theme-store';
 import * as ReactDOM from 'react-dom/client';
 import App from './app/app';
 import './styles.css';
@@ -22,6 +23,7 @@ import {
   SignUpRemote,
   PaymentsPageRemote,
   AdminDashboardRemote,
+  ProfilePageRemote,
 } from './remotes';
 
 // Initialize Sentry (must be done before rendering)
@@ -82,6 +84,7 @@ function AppWrapper() {
             SignUpComponent: SignUpRemote,
             PaymentsComponent: PaymentsPageRemote,
             AdminDashboardComponent: AdminDashboardRemote,
+            ProfilePageComponent: ProfilePageRemote,
           }}
         />
       </BrowserRouter>
@@ -89,57 +92,68 @@ function AppWrapper() {
   );
 }
 
-const root = ReactDOM.createRoot(
-  document.getElementById('root') as HTMLElement
-);
+async function bootstrap() {
+  // Initialize theme before React renders to avoid flash of wrong theme
+  try {
+    await useThemeStore.getState().initializeTheme();
+  } catch (error) {
+    console.warn('Theme initialization failed, continuing with defaults.', error);
+  }
 
-root.render(
-  <StrictMode>
-    <SentryErrorBoundary
-      fallback={() => (
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            minHeight: '100vh',
-            padding: '2rem',
-            textAlign: 'center',
-          }}
-        >
-          <h2 style={{ marginBottom: '1rem', color: '#dc2626' }}>
-            Something went wrong
-          </h2>
-          <p style={{ marginBottom: '1rem', color: '#6b7280' }}>
-            We're sorry, but something unexpected happened. Please try
-            refreshing the page.
-          </p>
-          <button
-            onClick={() => {
-              window.location.reload();
-            }}
+  const root = ReactDOM.createRoot(
+    document.getElementById('root') as HTMLElement
+  );
+
+  root.render(
+    <StrictMode>
+      <SentryErrorBoundary
+        fallback={() => (
+          <div
             style={{
-              padding: '0.5rem 1rem',
-              backgroundColor: '#3b82f6',
-              color: 'white',
-              border: 'none',
-              borderRadius: '0.375rem',
-              cursor: 'pointer',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              minHeight: '100vh',
+              padding: '2rem',
+              textAlign: 'center',
             }}
           >
-            Refresh Page
-          </button>
-        </div>
-      )}
-      showDialog={false}
-    >
-      <QueryClientProvider client={queryClient}>
-        <AppWrapper />
-      </QueryClientProvider>
-    </SentryErrorBoundary>
-  </StrictMode>
-);
+            <h2 style={{ marginBottom: '1rem', color: '#dc2626' }}>
+              Something went wrong
+            </h2>
+            <p style={{ marginBottom: '1rem', color: '#6b7280' }}>
+              We're sorry, but something unexpected happened. Please try
+              refreshing the page.
+            </p>
+            <button
+              onClick={() => {
+                window.location.reload();
+              }}
+              style={{
+                padding: '0.5rem 1rem',
+                backgroundColor: '#3b82f6',
+                color: 'white',
+                border: 'none',
+                borderRadius: '0.375rem',
+                cursor: 'pointer',
+              }}
+            >
+              Refresh Page
+            </button>
+          </div>
+        )}
+        showDialog={false}
+      >
+        <QueryClientProvider client={queryClient}>
+          <AppWrapper />
+        </QueryClientProvider>
+      </SentryErrorBoundary>
+    </StrictMode>
+  );
 
-// Register service worker for offline support and caching (production only)
-registerServiceWorker();
+  // Register service worker for offline support and caching (production only)
+  registerServiceWorker();
+}
+
+bootstrap();

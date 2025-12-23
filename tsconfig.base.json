@@ -55,6 +55,7 @@
       ],
       "shared-analytics": ["libs/shared-analytics/src/index.ts"],
       "shared-session-sync": ["libs/shared-session-sync/src/index.ts"],
+      "@mfe/shared-theme-store": ["libs/shared-theme-store/src/index.ts"],
       "@payments-system/shared-graphql-client": [
         "libs/shared-graphql-client/src/index.ts"
       ]

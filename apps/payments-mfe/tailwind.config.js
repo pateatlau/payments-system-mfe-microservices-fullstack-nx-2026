@@ -6,6 +6,7 @@ const __dirname = dirname(__filename);
 
 /** @type {import('tailwindcss').Config} */
 export default {
+  darkMode: 'class', // Enable class-based dark mode
   content: [
     // Payments-mfe app files
     resolve(__dirname, 'src/**/*.{js,jsx,ts,tsx,html}'),
@@ -37,4 +38,3 @@ export default {
   },
   plugins: [],
 };
-

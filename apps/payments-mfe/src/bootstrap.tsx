@@ -49,6 +49,7 @@ function AppWrapper() {
     uri: graphqlUrl,
     getAccessToken: () => accessToken,
     onError: error => {
+      // eslint-disable-next-line no-console
       console.error('GraphQL error:', error);
     },
   });

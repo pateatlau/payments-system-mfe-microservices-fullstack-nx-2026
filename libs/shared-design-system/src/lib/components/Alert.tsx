@@ -12,11 +12,15 @@ import { cn } from '../utils/cn';
 const alertVariants = cva('relative w-full rounded-lg border p-4', {
   variants: {
     variant: {
-      default: 'bg-white border-gray-200',
-      destructive: 'bg-red-50 border-red-200 text-red-900',
-      success: 'bg-green-50 border-green-200 text-green-900',
-      warning: 'bg-amber-50 border-amber-200 text-amber-900',
-      info: 'bg-blue-50 border-blue-200 text-blue-900',
+      default:
+        'bg-[rgb(var(--background))] border-[rgb(var(--border))] text-[rgb(var(--foreground))] dark:bg-[rgb(var(--background))] dark:border-[rgb(var(--border))] dark:text-[rgb(var(--foreground))]',
+      destructive:
+        'bg-red-50 border-red-200 text-red-900 dark:bg-red-950 dark:border-red-900 dark:text-red-100',
+      success:
+        'bg-green-50 border-green-200 text-green-900 dark:bg-green-950 dark:border-green-900 dark:text-green-100',
+      warning:
+        'bg-amber-50 border-amber-200 text-amber-900 dark:bg-amber-950 dark:border-amber-900 dark:text-amber-100',
+      info: 'bg-blue-50 border-blue-200 text-blue-900 dark:bg-blue-950 dark:border-blue-900 dark:text-blue-100',
     },
   },
   defaultVariants: {

@@ -1,8 +1,12 @@
 import { Link } from 'react-router-dom';
 import { useAuthStore } from 'shared-auth-store';
 import { UserRole } from 'shared-types';
-import { Button, buttonVariants } from '@mfe/shared-design-system';
-import { cn } from '@mfe/shared-design-system';
+import {
+  Button,
+  ThemeToggle,
+  buttonVariants,
+  cn,
+} from '@mfe/shared-design-system';
 
 export interface HeaderProps {
   /**
@@ -38,7 +42,7 @@ export function Header({
 
   return (
     <header className="sticky top-0 z-50 text-white shadow-lg bg-primary">
-      <div className="container mx-auto px-4 py-4">
+      <div className="container px-4 py-4 mx-auto">
         <div className="flex items-center justify-between">
           {/* Branding/Logo */}
           <div className="flex items-center gap-3">
@@ -49,17 +53,24 @@ export function Header({
           <nav className="flex items-center gap-6">
             {/* Navigation Items - Only show when authenticated */}
             {isAuthenticated && (
-              <div className="hidden md:flex items-center gap-4">
+              <div className="items-center hidden gap-4 md:flex">
                 <Link
                   to="/payments"
-                  className="text-slate-300 hover:text-white transition-colors px-3 py-2 rounded-md text-sm font-medium"
+                  className="px-3 py-2 text-sm font-medium transition-colors rounded-md text-slate-300 hover:text-white"
                 >
                   Payments
+                </Link>
+                {/* Profile Link - Visible to all authenticated users */}
+                <Link
+                  to="/profile"
+                  className="px-3 py-2 text-sm font-medium transition-colors rounded-md text-slate-300 hover:text-white"
+                >
+                  Profile
                 </Link>
                 {hasRole(UserRole.VENDOR) && (
                   <Link
                     to="/reports"
-                    className="text-slate-300 hover:text-white transition-colors px-3 py-2 rounded-md text-sm font-medium"
+                    className="px-3 py-2 text-sm font-medium transition-colors rounded-md text-slate-300 hover:text-white"
                   >
                     Reports
                   </Link>
@@ -67,7 +78,7 @@ export function Header({
                 {hasRole(UserRole.ADMIN) && (
                   <Link
                     to="/admin"
-                    className="text-slate-300 hover:text-white transition-colors px-3 py-2 rounded-md text-sm font-medium"
+                    className="px-3 py-2 text-sm font-medium transition-colors rounded-md text-slate-300 hover:text-white"
                   >
                     Admin
                   </Link>
@@ -75,13 +86,19 @@ export function Header({
               </div>
             )}
 
-            {/* User Info and Logout */}
+            {/* Theme toggle + User Info and Logout */}
             {isAuthenticated && user ? (
               <div className="flex items-center gap-4">
+                <ThemeToggle
+                  className="text-white hover:bg-white/10 focus-visible:ring-white focus-visible:ring-offset-0 dark:text-white"
+                  aria-label="Toggle theme"
+                  title="Toggle theme"
+                />
+
                 {/* User Info */}
-                <div className="hidden sm:flex flex-col items-end">
+                <div className="flex-col items-end hidden sm:flex">
                   <span className="text-sm font-medium">{user.name}</span>
-                  <span className="text-xs text-slate-400 capitalize">
+                  <span className="text-xs capitalize text-slate-200/80">
                     {user.role.toLowerCase()}
                   </span>
                 </div>
@@ -100,7 +117,7 @@ export function Header({
               <div className="flex items-center gap-2">
                 <Link
                   to="/signin"
-                  className="text-slate-300 hover:text-white transition-colors px-3 py-2 rounded-md text-sm font-medium"
+                  className="px-3 py-2 text-sm font-medium transition-colors rounded-md text-slate-300 hover:text-white"
                 >
                   Sign In
                 </Link>
@@ -118,7 +135,7 @@ export function Header({
 
             {/* Mobile Menu Button - For future mobile menu implementation */}
             <button
-              className="md:hidden text-slate-300 hover:text-white p-2"
+              className="p-2 md:hidden text-slate-300 hover:text-white"
               aria-label="Menu"
               aria-expanded="false"
             >

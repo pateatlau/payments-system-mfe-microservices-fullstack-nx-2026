@@ -1,5 +1,5 @@
 /**
- * Jest setup file for payments-mfe app tests
- * This file runs before each test file
+ * Test setup file for payments-mfe app (Jest)
+ * Runs before each test file.
  */
-import '@testing-library/jest-dom';
+import '@testing-library/jest-dom/jest-globals';

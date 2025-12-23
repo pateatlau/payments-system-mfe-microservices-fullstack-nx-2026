@@ -86,13 +86,13 @@ pnpm dev:all
 
 Open your browser and navigate to:
 
-| Service | URL | Credentials |
-|---------|-----|-------------|
-| **Application** | https://localhost | - |
-| **Swagger UI** | https://localhost/api-docs | - |
-| **Grafana** | http://localhost:3010 | admin/admin |
-| **Prometheus** | http://localhost:9090 | - |
-| **Jaeger** | http://localhost:16686 | - |
+| Service         | URL                        | Credentials |
+| --------------- | -------------------------- | ----------- |
+| **Application** | https://localhost          | -           |
+| **Swagger UI**  | https://localhost/api-docs | -           |
+| **Grafana**     | http://localhost:3010      | admin/admin |
+| **Prometheus**  | http://localhost:9090      | -           |
+| **Jaeger**      | http://localhost:16686     | -           |
 
 **Note:** Accept the self-signed certificate warning in your browser.
 
@@ -150,6 +150,7 @@ payments-system-mfe/
 ## Technology Stack
 
 ### Frontend
+
 - React 19.2.0 with TypeScript 5.9.x
 - Rspack 1.6.x with Module Federation v2
 - Nx 21.x monorepo
@@ -158,6 +159,7 @@ payments-system-mfe/
 - React Hook Form + Zod for forms
 
 ### Backend
+
 - Node.js 24.11.x LTS with Express 5.x
 - PostgreSQL 16 with Prisma ORM
 - RabbitMQ 3.x for event-driven messaging
@@ -165,6 +167,7 @@ payments-system-mfe/
 - REST + GraphQL APIs
 
 ### Infrastructure
+
 - nginx reverse proxy with SSL/TLS
 - Docker + Docker Compose
 - Prometheus + Grafana + Jaeger
@@ -210,22 +213,26 @@ pnpm grafana:ui               # Open Grafana dashboards
 ## Key Features Implemented
 
 ### POC-0: Foundation
+
 - Nx monorepo with React + TypeScript
 - Module Federation v2 with Rspack
 - Shared component libraries
 
 ### POC-1: Rspack Migration
+
 - Migrated from Vite to Rspack
 - Module Federation with HMR
 - Performance optimizations
 
 ### POC-2: Backend Integration
+
 - Full-stack microservices architecture
 - JWT authentication with RBAC
 - Design system (shadcn/ui + Tailwind v4)
 - Event bus for inter-service communication
 
 ### POC-3: Production Infrastructure
+
 - nginx reverse proxy with HTTPS/TLS
 - Separate databases per service
 - RabbitMQ event hub
@@ -249,6 +256,7 @@ The project includes comprehensive testing:
 - **Security Tests:** Authentication, authorization, CORS
 
 Run tests with:
+
 ```bash
 pnpm test                     # All tests
 pnpm test:coverage            # With coverage report
@@ -261,16 +269,17 @@ pnpm test:e2e                 # End-to-end tests
 
 ### Essential Documentation
 
-| Document | Description |
-|----------|-------------|
-| [Executive Summary](docs/EXECUTIVE_SUMMARY.md) | High-level architecture overview for stakeholders |
-| [Implementation Journey](docs/IMPLEMENTATION-JOURNEY.md) | Complete evolution from POC-0 to POC-3 |
-| [SSL/TLS Setup Guide](docs/POC-3-Implementation/ssl-tls-setup-guide.md) | HTTPS configuration and troubleshooting |
-| [Observability Live Setup](docs/POC-3-Implementation/OBSERVABILITY_LIVE_SETUP.md) | Prometheus, Grafana, Jaeger integration |
-| [Testing Guide](docs/POC-3-Implementation/testing-guide.md) | Comprehensive testing instructions |
-| [Implementation Plan](docs/POC-3-Implementation/implementation-plan.md) | Detailed implementation phases and progress |
-| [CI/CD Planning](docs/POC-3-Implementation/CI-CD-PLANNING.md) | CI/CD pipeline planning and deployment strategy |
-| [Storybook Implementation](docs/POC-3-Implementation/STORYBOOK-IMPLEMENTATION.md) | Design system documentation with Storybook |
+| Document                                                                            | Description                                         |
+| ----------------------------------------------------------------------------------- | --------------------------------------------------- |
+| [Executive Summary](docs/EXECUTIVE_SUMMARY.md)                                      | High-level architecture overview for stakeholders   |
+| [Implementation Journey](docs/IMPLEMENTATION-JOURNEY.md)                            | Complete evolution from POC-0 to POC-3              |
+| [SSL/TLS Setup Guide](docs/POC-3-Implementation/ssl-tls-setup-guide.md)             | HTTPS configuration and troubleshooting             |
+| [Observability Live Setup](docs/POC-3-Implementation/OBSERVABILITY_LIVE_SETUP.md)   | Prometheus, Grafana, Jaeger integration             |
+| [Testing Guide](docs/POC-3-Implementation/testing-guide.md)                         | Comprehensive testing instructions                  |
+| [Implementation Plan](docs/POC-3-Implementation/implementation-plan.md)             | Detailed implementation phases and progress         |
+| [CI/CD Planning](docs/POC-3-Implementation/CI-CD-PLANNING.md)                       | CI/CD pipeline planning and deployment strategy     |
+| [Storybook Implementation](docs/POC-3-Implementation/STORYBOOK-IMPLEMENTATION.md)   | Design system documentation with Storybook          |
+| [Payments MFE – Main Flow](docs/POC-3-Implementation/PAYMENTS-MFE-DOCUMENTATION.md) | Features, usage, and testing for payments main flow |
 
 ### Additional Documentation
 
@@ -278,6 +287,13 @@ pnpm test:e2e                 # End-to-end tests
 - **Event System:** [RabbitMQ Implementation](docs/POC-3-Implementation/RABBITMQ_IMPLEMENTATION.md)
 - **Security:** See implementation plan for JWT, RBAC, and security headers
 - **Architecture:** See executive summary for complete architecture diagrams
+
+### Payments MFE – Main Flow Highlights
+
+- Status badges with tooltips/icons via shared `StatusBadge`
+- Toast notifications for create/update/cancel success and errors
+- Role-aware empty states in list and reports
+- Accessibility: modal dialog semantics and focus management
 
 ---
 
