@@ -252,7 +252,7 @@ export function Header({
                         </p>
                       </div>
                     )}
-                    
+
                     {/* Theme Toggle */}
                     <div className="flex items-center justify-between px-4 py-2 mb-2">
                       <span className="text-sm font-medium text-primary-foreground">
