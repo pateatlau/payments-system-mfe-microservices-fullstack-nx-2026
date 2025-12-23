@@ -209,7 +209,7 @@ export function PaymentFilters({
               <select
                 id="status"
                 {...register('status')}
-                className="flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                className="flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
               >
                 <option value="all">All statuses</option>
                 <option value={PaymentStatus.PENDING}>Pending</option>
@@ -225,7 +225,7 @@ export function PaymentFilters({
               <select
                 id="type"
                 {...register('type')}
-                className="flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                className="flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
               >
                 <option value="all">All types</option>
                 <option value={PaymentType.INSTANT}>Instant</option>

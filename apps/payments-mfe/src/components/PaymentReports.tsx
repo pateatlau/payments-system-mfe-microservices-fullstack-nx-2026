@@ -172,7 +172,7 @@ export function PaymentReports() {
               <input
                 id="startDate"
                 type="date"
-                className="flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                className="flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
                 value={startDate}
                 onChange={e => setStartDate(e.target.value)}
                 aria-label="Start date"
@@ -183,7 +183,7 @@ export function PaymentReports() {
               <input
                 id="endDate"
                 type="date"
-                className="flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                className="flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
                 value={endDate}
                 onChange={e => setEndDate(e.target.value)}
                 aria-label="End date"

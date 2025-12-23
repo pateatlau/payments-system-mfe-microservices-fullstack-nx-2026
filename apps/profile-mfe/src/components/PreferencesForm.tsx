@@ -179,7 +179,7 @@ export function PreferencesForm({ onSuccess }: PreferencesFormProps) {
           <Label htmlFor="theme">Theme</Label>
           <select
             id="theme"
-            className="flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
             disabled={isPreferencesLoading || isSubmitting}
             {...register('theme')}
           >

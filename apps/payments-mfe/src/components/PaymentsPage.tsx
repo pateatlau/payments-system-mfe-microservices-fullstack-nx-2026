@@ -505,7 +505,7 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
                             <select
                               id="currency"
                               {...registerCreate('currency')}
-                              className="flex w-full h-10 px-3 py-2 mt-2 text-sm bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                              className="flex w-full h-10 px-3 py-2 mt-2 text-sm bg-background border border-border rounded-md ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
                             >
                               <option value="USD">USD</option>
                               <option value="EUR">EUR</option>
@@ -527,7 +527,7 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
                           <select
                             id="type"
                             {...registerCreate('type')}
-                            className="flex w-full h-10 px-3 py-2 mt-2 text-sm bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                            className="flex w-full h-10 px-3 py-2 mt-2 text-sm bg-background border border-border rounded-md ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
                           >
                             <option value={PaymentType.INSTANT}>Instant</option>
                             <option value={PaymentType.SCHEDULED}>
@@ -676,7 +676,7 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
                               <td className="px-6 py-4 whitespace-nowrap">
                                 <select
                                   {...registerUpdate('status')}
-                                  className="flex px-2 py-1 text-sm bg-background border border-border rounded-md h-9 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                                  className="flex px-2 py-1 text-sm bg-background border border-border rounded-md h-9 ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
                                 >
                                   <option value={PaymentStatus.PENDING}>
                                     Pending

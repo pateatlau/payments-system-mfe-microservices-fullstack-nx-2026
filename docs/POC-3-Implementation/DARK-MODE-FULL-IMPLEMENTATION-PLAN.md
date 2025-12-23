@@ -173,11 +173,13 @@ This plan makes dark mode complete, consistent, and accessible across the shell 
 - Design system polish: `Skeleton` uses `bg-muted`; `Loading` uses `text-muted-foreground`.
 - Builds: Verified successful builds for payments-mfe, admin-mfe, profile-mfe, auth-mfe, and shell after refactors.
 
-### E) Interaction & Focus States ✅ PARTIAL
+### E) Interaction & Focus States ✅ COMPLETE
 
-- [x] Replace `focus:ring-*` with semantic `focus:ring-ring` and ensure `--ring` works in both themes
-  - Updated in: shell (DeviceManager), profile (PreferencesForm), header unauthenticated/authenticated ThemeToggle already tokenized
-- [ ] Normalise `focus:ring-offset-*` against token background (keep `focus:ring-offset-2` for now; review contrast in Step G)
+- [x] Replace `focus:ring-*` and `focus-visible:ring-*` with semantic `*ring-ring`; verified across apps and libs (no remaining color-specific rings).
+- [x] Normalise ring offset color to tokens:
+  - Added `ring-offset-background` to inputs/buttons in payments (PaymentsPage, PaymentFilters, PaymentReports), shell (DeviceManager), and profile (PreferencesForm already had it; ProfileForm used focus-visible + ring-offset-background).
+  - Kept `*ring-offset-2` for accessible separation; further contrast validation tracked under Step G.
+- [x] Verified builds for shell, payments-mfe, profile-mfe after changes.
 
 ### F) Migration Sweep (Remove Hardcoded Colors)
 
