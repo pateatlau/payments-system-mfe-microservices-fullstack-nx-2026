@@ -3,6 +3,7 @@
  * Business logic for retrieving and managing audit logs
  */
 
+import { AuditLog, Prisma } from '@prisma/client';
 import { prisma } from '../lib/prisma';
 import {
   AuditLogFilters,
@@ -28,7 +29,7 @@ export async function getAuditLogs(
   const skip = (page - 1) * limit;
 
   // Build where clause
-  const where: any = {};
+  const where: Prisma.AuditLogWhereInput = {};
 
   if (action) {
     where.action = action;
@@ -67,7 +68,7 @@ export async function getAuditLogs(
 
   // Enrich logs with user information
   const enrichedLogs = await Promise.all(
-    logs.map(async log => {
+    logs.map(async (log: AuditLog) => {
       let userName: string | undefined;
       let userEmail: string | undefined;
 
@@ -123,5 +124,5 @@ export async function getAvailableActions(): Promise<string[]> {
     orderBy: { action: 'asc' },
   });
 
-  return actions.map(a => a.action);
+  return actions.map((a: { action: string }) => a.action);
 }

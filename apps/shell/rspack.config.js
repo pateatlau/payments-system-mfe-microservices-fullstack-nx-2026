@@ -242,6 +242,10 @@ module.exports = {
         // WebSocket URL: Through nginx proxy (wss://localhost/ws)
         // Direct API Gateway access (ws://localhost:3000/ws) available via env var
         NX_WS_URL: process.env.NX_WS_URL || 'wss://localhost/ws',
+        // Sentry (Frontend)
+        NX_SENTRY_DSN: process.env.NX_SENTRY_DSN || '',
+        NX_SENTRY_RELEASE: process.env.NX_SENTRY_RELEASE || '',
+        NX_APP_VERSION: process.env.NX_APP_VERSION || '0.0.1',
         NODE_ENV: isProduction ? 'production' : 'development',
       }),
     }),

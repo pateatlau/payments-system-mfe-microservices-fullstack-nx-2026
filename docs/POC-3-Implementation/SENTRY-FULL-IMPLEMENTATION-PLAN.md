@@ -31,12 +31,12 @@ Unify error tracking and performance monitoring across frontend MFEs + shell and
 
 **Implement:** Add Sentry env keys to each MFE + shell `rspack.config.js` `DefinePlugin` (alongside `NX_API_BASE_URL`, `NODE_ENV`).
 
-- [ ] apps/auth-mfe/rspack.config.js — inject `NX_SENTRY_DSN`, `NX_SENTRY_RELEASE`, `NX_APP_VERSION`
-- [ ] apps/payments-mfe/rspack.config.js — same keys
-- [ ] apps/admin-mfe/rspack.config.js — same keys
-- [ ] apps/profile-mfe/rspack.config.js — same keys
-- [ ] apps/shell/rspack.config.js — same keys
-- [ ] libs/shared-observability/src/lib/sentry.ts — remove `VITE_*` fallbacks (legacy from POC-0 Vite→Rspack migration)
+- [x] apps/auth-mfe/rspack.config.js — inject `NX_SENTRY_DSN`, `NX_SENTRY_RELEASE`, `NX_APP_VERSION`
+- [x] apps/payments-mfe/rspack.config.js — same keys
+- [x] apps/admin-mfe/rspack.config.js — same keys
+- [x] apps/profile-mfe/rspack.config.js — same keys
+- [x] apps/shell/rspack.config.js — same keys
+- [x] libs/shared-observability/src/lib/sentry.ts — remove `VITE_*` fallbacks (legacy from POC-0 Vite→Rspack migration)
 
 Example payload to merge under `new rspack.DefinePlugin({ 'process.env': JSON.stringify({ ... }) })`:
 
@@ -57,6 +57,12 @@ NX_APP_VERSION: process.env.NX_APP_VERSION || '0.0.1',
   throw new Error('Sentry smoke test: frontend');
   ```
 - Confirm event appears in Sentry under the correct project with app name + version tags.
+- TODO (pending quota reset): rerun the frontend smoke ingest once Sentry 429 limits clear. Restore DSNs first:
+  ```bash
+  export NX_SENTRY_DSN="https://9053f32a2a18ad35eb2e2bff18a1f73a@o4505871833759744.ingest.us.sentry.io/4510521861996544"
+  export SENTRY_DSN="https://9053f32a2a18ad35eb2e2bff18a1f73a@o4505871833759744.ingest.us.sentry.io/4510521861996544"
+  # Then restart services/MFEs and rerun the browser smoke tests
+  ```
 
 **Rollback:** Remove the added env keys from `DefinePlugin` if build issues arise.
 
@@ -66,11 +72,11 @@ NX_APP_VERSION: process.env.NX_APP_VERSION || '0.0.1',
 
 **Implement:** Provide `SENTRY_DSN` at runtime for all services:
 
-- [ ] apps/api-gateway — set `SENTRY_DSN` in `.env`/runtime
-- [ ] apps/auth-service — set `SENTRY_DSN`
-- [ ] apps/payments-service — set `SENTRY_DSN`
-- [ ] apps/admin-service — set `SENTRY_DSN`
-- [ ] apps/profile-service — set `SENTRY_DSN`
+- [x] apps/api-gateway — set `SENTRY_DSN` in `.env`/runtime
+- [x] apps/auth-service — set `SENTRY_DSN`
+- [x] apps/payments-service — set `SENTRY_DSN`
+- [x] apps/admin-service — set `SENTRY_DSN`
+- [x] apps/profile-service — set `SENTRY_DSN`
 
 Optionally, add `SENTRY_ENVIRONMENT` and `SENTRY_RELEASE` (release defaults already computed in init).
 
@@ -141,9 +147,9 @@ Optionally, add `SENTRY_ENVIRONMENT` and `SENTRY_RELEASE` (release defaults alre
 
 **Implement:** Extend `Sentry.init` options:
 
-- [ ] Add `ignoreErrors`: common browser extension/HMR noise, ResizeObserver quirks.
-- [ ] Add `denyUrls`: extension URLs (chrome-extension:// etc.).
-- [ ] Strengthen `beforeSend` scrubbers for tokens/passwords in request bodies and query strings.
+- [x] Add `ignoreErrors`: common browser extension/HMR noise, ResizeObserver quirks.
+- [x] Add `denyUrls`: extension URLs (chrome-extension:// etc.).
+- [x] Strengthen `beforeSend` scrubbers for tokens/passwords in request bodies and query strings.
 
 **Verify:**
 

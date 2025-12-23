@@ -23,13 +23,10 @@ export interface SentryConfig {
  */
 export function initSentry(config: SentryConfig): void {
   const {
-    dsn = process.env['NX_SENTRY_DSN'] || process.env['VITE_SENTRY_DSN'],
-    environment = process.env['NODE_ENV'] ||
-      process.env['VITE_SENTRY_ENVIRONMENT'] ||
-      'development',
+    dsn = process.env['NX_SENTRY_DSN'],
+    environment = process.env['NODE_ENV'] || 'development',
     release = process.env['NX_SENTRY_RELEASE'] ||
-      process.env['VITE_SENTRY_RELEASE'] ||
-      `${config.appName}@${process.env['VITE_APP_VERSION'] || '0.0.1'}`,
+      `${config.appName}@${process.env['NX_APP_VERSION'] || '0.0.1'}`,
     appName,
     tracesSampleRate = process.env['NODE_ENV'] === 'production' ? 0.1 : 1.0,
     enableProfiling = false,
@@ -52,6 +49,19 @@ export function initSentry(config: SentryConfig): void {
       // This captures page loads and navigation automatically
       Sentry.browserTracingIntegration(),
     ],
+    // Reduce noise from known benign errors and browser extensions
+    ignoreErrors: [
+      'ResizeObserver loop limit exceeded',
+      'NetworkError when attempting to fetch resource',
+      'Non-Error exception captured',
+      'Script error.',
+    ],
+    denyUrls: [
+      /extensions\//i,
+      /^chrome-extension:\/\//i,
+      /^safari-web-extension:\/\//i,
+      /^moz-extension:\/\//i,
+    ],
     // Performance monitoring
     tracesSampleRate,
     // Profiling (optional, can be enabled for performance analysis)
@@ -73,6 +83,30 @@ export function initSentry(config: SentryConfig): void {
           queryParams.delete('token');
           queryParams.delete('password');
           event.request.query_string = queryParams.toString();
+        }
+        // Scrub sensitive body fields
+        const body = (event.request as unknown as { data?: unknown }).data;
+        try {
+          if (typeof body === 'string') {
+            const parsed = JSON.parse(body);
+            if (parsed && typeof parsed === 'object') {
+              ['token', 'password', 'authorization'].forEach(key => {
+                if (key in (parsed as Record<string, unknown>)) {
+                  (parsed as Record<string, unknown>)[key] = '[REDACTED]';
+                }
+              });
+              (event.request as unknown as { data?: unknown }).data =
+                JSON.stringify(parsed);
+            }
+          } else if (body && typeof body === 'object') {
+            ['token', 'password', 'authorization'].forEach(key => {
+              if (key in (body as Record<string, unknown>)) {
+                (body as Record<string, unknown>)[key] = '[REDACTED]';
+              }
+            });
+          }
+        } catch {
+          // If body parsing fails, ignore and proceed
         }
       }
       return event;
