@@ -55,6 +55,19 @@ export function initSentry(_app: Express, config: SentryConfig): void {
       // Profiling integration for performance profiling
       nodeProfilingIntegration(),
     ],
+    // Reduce noise from known benign errors and browser extensions
+    ignoreErrors: [
+      'ResizeObserver loop limit exceeded',
+      'NetworkError when attempting to fetch resource',
+      'Non-Error exception captured',
+      'Script error.',
+    ],
+    denyUrls: [
+      /extensions\//i,
+      /^chrome-extension:\/\//i,
+      /^safari-web-extension:\/\//i,
+      /^moz-extension:\/\//i,
+    ],
     // Performance monitoring
     tracesSampleRate,
     // Profiling sample rate
@@ -74,6 +87,30 @@ export function initSentry(_app: Express, config: SentryConfig): void {
           queryParams.delete('token');
           queryParams.delete('password');
           event.request.query_string = queryParams.toString();
+        }
+        // Scrub sensitive body fields
+        const body = (event.request as unknown as { data?: unknown }).data;
+        try {
+          if (typeof body === 'string') {
+            const parsed = JSON.parse(body);
+            if (parsed && typeof parsed === 'object') {
+              ['token', 'password', 'authorization'].forEach(key => {
+                if (key in (parsed as Record<string, unknown>)) {
+                  (parsed as Record<string, unknown>)[key] = '[REDACTED]';
+                }
+              });
+              (event.request as unknown as { data?: unknown }).data =
+                JSON.stringify(parsed);
+            }
+          } else if (body && typeof body === 'object') {
+            ['token', 'password', 'authorization'].forEach(key => {
+              if (key in (body as Record<string, unknown>)) {
+                (body as Record<string, unknown>)[key] = '[REDACTED]';
+              }
+            });
+          }
+        } catch {
+          // If body parsing fails, ignore and proceed
         }
       }
       return event;

@@ -237,7 +237,7 @@ export function SignUp({ onSuccess, onNavigateToSignIn }: SignUpProps = {}) {
                     {errors.password.message}
                   </p>
                 )}
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-muted-foreground">
                   Must be at least 12 characters with uppercase, lowercase,
                   numbers, and symbols
                 </p>
@@ -277,7 +277,7 @@ export function SignUp({ onSuccess, onNavigateToSignIn }: SignUpProps = {}) {
             {/* Sign-in link */}
             {onNavigateToSignIn && (
               <div className="mt-6 text-center">
-                <p className="text-sm text-slate-600">
+                <p className="text-sm text-muted-foreground">
                   Already have an account?{' '}
                   <Button
                     type="button"

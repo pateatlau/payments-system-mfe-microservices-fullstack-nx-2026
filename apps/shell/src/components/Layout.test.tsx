@@ -146,7 +146,7 @@ describe('Layout', () => {
 
     // Check for main element
     const mainElement = container.querySelector('main');
-    expect(mainElement).toHaveClass('flex-1', 'p-8', 'bg-slate-50');
+    expect(mainElement).toHaveClass('flex-1', 'p-8', 'bg-muted');
   });
 
   it('renders Header with default branding', () => {

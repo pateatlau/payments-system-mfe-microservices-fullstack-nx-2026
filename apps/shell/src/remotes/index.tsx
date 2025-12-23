@@ -13,10 +13,10 @@ import { lazy, Suspense, ComponentType } from 'react';
  */
 function LoadingFallback({ message = 'Loading...' }: { message?: string }) {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50">
+    <div className="min-h-screen flex items-center justify-center bg-muted">
       <div className="text-center">
-        <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
-        <p className="text-slate-600">{message}</p>
+        <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4"></div>
+        <p className="text-muted-foreground">{message}</p>
       </div>
     </div>
   );
@@ -27,9 +27,9 @@ function LoadingFallback({ message = 'Loading...' }: { message?: string }) {
  */
 function ErrorFallback({ componentName }: { componentName: string }) {
   return (
-    <div className="max-w-md mx-auto bg-white rounded-lg shadow-lg p-8">
-      <h2 className="text-2xl font-bold text-slate-900 mb-4">Error</h2>
-      <p className="text-slate-600">
+    <div className="max-w-md mx-auto bg-card rounded-lg shadow-lg p-8">
+      <h2 className="text-2xl font-bold text-foreground mb-4">Error</h2>
+      <p className="text-muted-foreground">
         Failed to load {componentName} component from remote
       </p>
     </div>

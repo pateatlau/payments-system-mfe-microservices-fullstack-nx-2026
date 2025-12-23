@@ -1,6 +1,7 @@
 // @ts-check
 import eslint from '@eslint/js';
 import tseslint from 'typescript-eslint';
+import noHardcodedColors from './scripts/eslint-rules/no-hardcoded-colors.js';
 
 export default tseslint.config(
   eslint.configs.recommended,
@@ -8,6 +9,9 @@ export default tseslint.config(
   {
     files: ['**/*.ts', '**/*.tsx', '**/*.js', '**/*.jsx'],
     ignores: ['docs/**'],
+    plugins: {
+      'theme-colors': { rules: { 'no-hardcoded-colors': noHardcodedColors } },
+    },
     rules: {
       // TypeScript-specific rules
       '@typescript-eslint/no-unused-vars': [
@@ -20,6 +24,8 @@ export default tseslint.config(
       '@typescript-eslint/no-explicit-any': 'error',
       // General rules
       'no-console': 'warn',
+      // Theme guardrail: prevent hardcoded colors
+      'theme-colors/no-hardcoded-colors': 'warn',
     },
   },
   {

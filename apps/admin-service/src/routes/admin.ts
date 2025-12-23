@@ -14,6 +14,8 @@ import {
   deleteUser,
 } from '../controllers/admin.controller';
 import { getSystemHealth } from '../controllers/system-health.controller';
+import { listAuditLogs } from '../controllers/audit-logs.controller';
+import { getAvailableActions } from '../services/audit-logs.service';
 
 const router = express.Router();
 
@@ -24,20 +26,18 @@ router.use(requireAdmin);
 // System health route
 router.get('/health', getSystemHealth);
 
-// Audit logs route (stub - returns empty for now)
-router.get('/audit-logs', (_req, res) => {
-  res.json({
-    success: true,
-    data: {
-      data: [], // Array of audit logs
-      pagination: {
-        page: 1,
-        limit: 10,
-        total: 0,
-        totalPages: 0,
-      },
-    },
-  });
+// Audit logs routes
+router.get('/audit-logs', listAuditLogs);
+router.get('/audit-logs/actions', async (_req, res) => {
+  try {
+    const actions = await getAvailableActions();
+    res.json({ success: true, data: actions });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: 'Failed to retrieve available actions',
+    });
+  }
 });
 
 // User management routes

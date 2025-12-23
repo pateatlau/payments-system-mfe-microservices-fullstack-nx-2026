@@ -26,7 +26,9 @@ export function Layout({ children }: LayoutProps) {
   return (
     <div className="h-screen flex flex-col overflow-hidden">
       <Header onLogout={handleLogout} />
-      <main className="flex-1 min-h-0 overflow-y-auto p-8 bg-slate-50">{children}</main>
+      <main className="flex-1 min-h-0 overflow-y-auto p-8 bg-muted">
+        {children}
+      </main>
     </div>
   );
 }

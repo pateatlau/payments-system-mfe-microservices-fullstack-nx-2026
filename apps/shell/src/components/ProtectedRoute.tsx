@@ -45,7 +45,7 @@ export interface ProtectedRouteProps {
  */
 function DefaultLoadingComponent() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50">
+    <div className="min-h-screen flex items-center justify-center bg-muted">
       <Loading size="lg" label="Checking authentication..." />
     </div>
   );
