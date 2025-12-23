@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuthStore } from 'shared-auth-store';
 import { UserRole } from 'shared-types';
@@ -32,6 +33,7 @@ export function Header({
 }: HeaderProps) {
   const { user, isAuthenticated, logout, hasRole } = useAuthStore();
   const location = useLocation();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleLogout = () => {
     if (onLogout) {
@@ -39,6 +41,14 @@ export function Header({
     } else {
       logout();
     }
+  };
+
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
+  const closeMobileMenu = () => {
+    setIsMobileMenuOpen(false);
   };
 
   // Helper function to check if a path is active
@@ -53,6 +63,17 @@ export function Header({
     const active = isActive(path);
     return cn(
       'px-3 py-2 text-sm font-medium transition-colors rounded-md',
+      active
+        ? 'text-primary-foreground bg-primary-foreground/20 font-semibold'
+        : 'text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10'
+    );
+  };
+
+  // Helper function to get mobile nav link classes
+  const getMobileNavLinkClasses = (path: string) => {
+    const active = isActive(path);
+    return cn(
+      'block px-4 py-3 text-base font-medium transition-colors rounded-md',
       active
         ? 'text-primary-foreground bg-primary-foreground/20 font-semibold'
         : 'text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10'
@@ -95,7 +116,7 @@ export function Header({
 
             {/* Theme toggle + User Info and Logout */}
             {isAuthenticated && user ? (
-              <div className="flex items-center gap-4">
+              <div className="items-center hidden gap-4 md:flex">
                 <ThemeToggle
                   className="text-primary-foreground hover:bg-primary-foreground/10 focus-visible:ring-primary-foreground focus-visible:ring-offset-0 dark:text-primary-foreground"
                   aria-label="Toggle theme"
@@ -120,7 +141,7 @@ export function Header({
                 </Button>
               </div>
             ) : (
-              <div className="flex items-center gap-2">
+              <div className="items-center hidden gap-2 md:flex">
                 <ThemeToggle
                   className="text-primary-foreground hover:bg-primary-foreground/10 focus-visible:ring-primary-foreground focus-visible:ring-offset-0 dark:text-primary-foreground"
                   aria-label="Toggle theme"
@@ -140,28 +161,157 @@ export function Header({
               </div>
             )}
 
-            {/* Mobile Menu Button - For future mobile menu implementation */}
+            {/* Mobile Menu Button */}
             <button
+              onClick={toggleMobileMenu}
               className="p-2 md:hidden text-primary-foreground/70 hover:text-primary-foreground"
               aria-label="Menu"
-              aria-expanded="false"
+              aria-expanded={isMobileMenuOpen}
             >
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
-              </svg>
+              {isMobileMenuOpen ? (
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              ) : (
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 6h16M4 12h16M4 18h16"
+                  />
+                </svg>
+              )}
             </button>
           </nav>
         </div>
+
+        {/* Mobile Menu Dropdown */}
+        {isMobileMenuOpen && (
+          <div className="mt-4 md:hidden">
+            <div className="px-2 pt-2 pb-3 space-y-1">
+              {isAuthenticated ? (
+                <>
+                  <Link
+                    to="/payments"
+                    className={getMobileNavLinkClasses('/payments')}
+                    onClick={closeMobileMenu}
+                  >
+                    Payments
+                  </Link>
+                  <Link
+                    to="/profile"
+                    className={getMobileNavLinkClasses('/profile')}
+                    onClick={closeMobileMenu}
+                  >
+                    Profile
+                  </Link>
+                  {hasRole(UserRole.VENDOR) && (
+                    <Link
+                      to="/reports"
+                      className={getMobileNavLinkClasses('/reports')}
+                      onClick={closeMobileMenu}
+                    >
+                      Reports
+                    </Link>
+                  )}
+                  {hasRole(UserRole.ADMIN) && (
+                    <Link
+                      to="/admin"
+                      className={getMobileNavLinkClasses('/admin')}
+                      onClick={closeMobileMenu}
+                    >
+                      Admin
+                    </Link>
+                  )}
+
+                  {/* Mobile User Info and Logout */}
+                  <div className="pt-4 mt-4 border-t border-primary-foreground/20">
+                    {user && (
+                      <div className="px-4 py-2 mb-2">
+                        <p className="text-sm font-medium text-primary-foreground">
+                          {user.name}
+                        </p>
+                        <p className="text-xs capitalize text-primary-foreground/80">
+                          {user.role.toLowerCase()}
+                        </p>
+                      </div>
+                    )}
+                    
+                    {/* Theme Toggle */}
+                    <div className="flex items-center justify-between px-4 py-2 mb-2">
+                      <span className="text-sm font-medium text-primary-foreground">
+                        Theme
+                      </span>
+                      <ThemeToggle
+                        className="text-primary-foreground hover:bg-primary-foreground/10 focus-visible:ring-primary-foreground focus-visible:ring-offset-0"
+                        aria-label="Toggle theme"
+                      />
+                    </div>
+
+                    <button
+                      onClick={() => {
+                        handleLogout();
+                        closeMobileMenu();
+                      }}
+                      className="w-full px-4 py-3 text-base font-medium text-left transition-colors rounded-md text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10"
+                    >
+                      Logout
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <Link
+                    to="/signin"
+                    className={getMobileNavLinkClasses('/signin')}
+                    onClick={closeMobileMenu}
+                  >
+                    Sign In
+                  </Link>
+                  <Link
+                    to="/signup"
+                    className={cn(
+                      getMobileNavLinkClasses('/signup'),
+                      'bg-background text-foreground hover:bg-muted'
+                    )}
+                    onClick={closeMobileMenu}
+                  >
+                    Sign Up
+                  </Link>
+
+                  {/* Theme Toggle for unauthenticated */}
+                  <div className="pt-4 mt-4 border-t border-primary-foreground/20">
+                    <div className="flex items-center justify-between px-4 py-2">
+                      <span className="text-sm font-medium text-primary-foreground">
+                        Theme
+                      </span>
+                      <ThemeToggle
+                        className="text-primary-foreground hover:bg-primary-foreground/10 focus-visible:ring-primary-foreground focus-visible:ring-offset-0"
+                        aria-label="Toggle theme"
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </header>
   );
