@@ -7,31 +7,37 @@ All 27 projects build successfully. Theme infrastructure ready for Step B.
 ## What Was Completed
 
 ### 1. Tailwind Configuration
+
 - ✅ Added `darkMode: 'class'` to all 5 MFE configs
 - ✅ Expanded content globs to include `'../../libs/**/*.{js,jsx,ts,tsx}'` in all configs
 - ✅ Mapped semantic tokens to Tailwind colors using `rgb(var(--token) / <alpha-value>)` format
 
 ### 2. CSS Variables
+
 - ✅ Defined light theme tokens in `:root` across all 5 apps
 - ✅ Defined dark theme tokens in `.dark` selector across all 5 apps
 - ✅ Tokens: background, foreground, muted, card, border, input, ring, primary, secondary, destructive, accent, popover (with foreground variants)
 
 ### 3. Base Resets
+
 - ✅ Applied `@layer base` with universal border and body background/text defaults
 - ✅ All apps: `* { border-color: rgb(var(--border)); }` and `body { background-color: rgb(var(--background)); color: rgb(var(--foreground)); }`
 
 ## Key Fixes Applied
 
 ### Module Resolution
+
 - Changed `@mfe/shared-session-sync` → `shared-session-sync` to match tsconfig.base.json
 - Updated in: `libs/shared-theme-store/src/lib/theme-store.ts`
 
 ### Rspack Configuration
+
 - Added `shared-session-sync` to shared dependencies (all 5 MFEs)
 - Added `shared-session-sync` to resolve.alias (all 5 MFEs)
 - Ensures Module Federation can resolve the dependency
 
 ### TypeScript Errors
+
 - Removed unused `ApiResponse` import
 - Fixed payload type casting: `(data: unknown) => { const payload = data as ThemeChangePayload; }`
 - Added type assertion in colors.ts: `as string`
@@ -42,6 +48,7 @@ All 27 projects build successfully. Theme infrastructure ready for Step B.
 ## Files Modified (18 total)
 
 ### Tailwind Configs (5)
+
 - apps/shell/tailwind.config.js
 - apps/auth-mfe/tailwind.config.js
 - apps/payments-mfe/tailwind.config.js
@@ -49,6 +56,7 @@ All 27 projects build successfully. Theme infrastructure ready for Step B.
 - apps/profile-mfe/tailwind.config.js
 
 ### Global CSS (5)
+
 - apps/shell/src/styles.css
 - apps/auth-mfe/src/styles.css
 - apps/payments-mfe/src/styles.css
@@ -56,6 +64,7 @@ All 27 projects build successfully. Theme infrastructure ready for Step B.
 - apps/profile-mfe/src/styles.css
 
 ### Rspack Configs (5)
+
 - apps/shell/rspack.config.js
 - apps/auth-mfe/rspack.config.js
 - apps/payments-mfe/rspack.config.js
@@ -63,6 +72,7 @@ All 27 projects build successfully. Theme infrastructure ready for Step B.
 - apps/profile-mfe/rspack.config.js
 
 ### Shared Libraries (3)
+
 - libs/shared-theme-store/src/lib/theme-store.ts
 - libs/shared-design-system/src/lib/tokens/colors.ts
 - libs/shared-session-sync/src/hooks/useSessionSync.ts
@@ -73,12 +83,14 @@ All 27 projects build successfully. Theme infrastructure ready for Step B.
 ## Token Format (Tailwind v4)
 
 CSS Variables (RGB space-separated):
+
 ```css
 --background: 255 255 255;
 --foreground: 17 24 39;
 ```
 
 Tailwind Mapping:
+
 ```js
 colors: {
   background: 'rgb(var(--background) / <alpha-value>)',
@@ -94,6 +106,7 @@ pnpm nx run-many --target=build --all --parallel=3
 ```
 
 **Result:** ✅ All 27 projects built successfully
+
 - No TypeScript errors
 - No Rspack module resolution errors
 - No missing dependencies
@@ -101,5 +114,6 @@ pnpm nx run-many --target=build --all --parallel=3
 ## Next: Step B
 
 Foundation is stable. Ready to proceed with:
+
 - Refactoring shared design system components (Alert, Badge, Button, Card, Input, Toast, StatusBadge, ThemeToggle)
 - Replacing hardcoded utilities with semantic tokens

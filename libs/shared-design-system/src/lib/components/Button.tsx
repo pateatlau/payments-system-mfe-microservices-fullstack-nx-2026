@@ -15,15 +15,15 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          'bg-[rgb(var(--primary))] text-[rgb(var(--primary-foreground))] hover:bg-[rgb(var(--primary))]/90 dark:bg-[rgb(var(--primary))] dark:text-[rgb(var(--primary-foreground))] dark:hover:bg-[rgb(var(--primary))]/90',
+          'bg-[rgb(var(--primary))] text-[rgb(var(--primary-foreground))] hover:bg-[rgb(var(--primary))]/90',
         destructive:
-          'bg-[rgb(var(--destructive))] text-[rgb(var(--destructive-foreground))] hover:bg-[rgb(var(--destructive))]/90 dark:bg-[rgb(var(--destructive))] dark:text-[rgb(var(--destructive-foreground))] dark:hover:bg-[rgb(var(--destructive))]/90',
+          'bg-[rgb(var(--destructive))] text-[rgb(var(--destructive-foreground))] hover:bg-[rgb(var(--destructive))]/90',
         outline:
-          'border border-[rgb(var(--border))] bg-[rgb(var(--background))] hover:bg-[rgb(var(--muted))] dark:border-[rgb(var(--border))] dark:bg-[rgb(var(--background))] dark:hover:bg-[rgb(var(--muted))]',
+          'border border-[rgb(var(--border))] bg-[rgb(var(--background))] hover:bg-[rgb(var(--muted))]',
         secondary:
-          'bg-[rgb(var(--muted))] text-[rgb(var(--muted-foreground))] hover:bg-[rgb(var(--muted))]/80 dark:bg-[rgb(var(--muted))] dark:text-[rgb(var(--muted-foreground))] dark:hover:bg-[rgb(var(--muted))]/80',
-        ghost: 'hover:bg-[rgb(var(--muted))] dark:hover:bg-[rgb(var(--muted))]',
-        link: 'text-[rgb(var(--primary))] underline-offset-4 hover:underline dark:text-[rgb(var(--primary))]',
+          'bg-[rgb(var(--muted))] text-[rgb(var(--muted-foreground))] hover:bg-[rgb(var(--muted))]/80',
+        ghost: 'hover:bg-[rgb(var(--muted))]',
+        link: 'text-[rgb(var(--primary))] underline-offset-4 hover:underline',
       },
       size: {
         default: 'h-10 px-4 py-2',

@@ -98,76 +98,28 @@ This plan makes dark mode complete, consistent, and accessible across the shell 
 - No Rspack module resolution errors
 - Theme infrastructure ready for Step B (component refactoring)
 
-### B) Shared Design System Refactor (libs/shared-design-system)
+### B) Shared Design System Refactor (libs/shared-design-system) ✅
 
-- [ ] Replace hardcoded grays/whites with semantic utilities in:
-  - [ ] apps/admin-mfe/tailwind.config.js
-  - [ ] apps/auth-mfe/tailwind.config.js
-  - [ ] apps/payments-mfe/tailwind.config.js
-  - [ ] apps/profile-mfe/tailwind.config.js
-  - [ ] apps/shell/tailwind.config.js
-- [ ] Expand `content` globs so dark variants are emitted for shared libs
-  - Include: `libs/**/*.{ts,tsx}`, shared design-system/header-ui/session-sync, etc.
-- [ ] Define semantic CSS variables in each app’s global stylesheet
-  - [ ] apps/admin-mfe/src/styles.css
-  - [ ] apps/auth-mfe/src/styles.css
-  - [ ] apps/payments-mfe/src/styles.css
-  - [ ] apps/profile-mfe/src/styles.css
-  - [ ] apps/shell/src/styles.css
-  - Tokens (light `:root`):
-    - `--background`, `--foreground`
-    - `--muted`, `--muted-foreground`
-    - `--card`, `--card-foreground`
-    - `--border`, `--input`, `--ring`
-    - `--primary`, `--primary-foreground`
-    - `--secondary`, `--secondary-foreground`
-    - `--destructive`, `--destructive-foreground`
-    - `--accent`, `--accent-foreground`
-    - `--popover`, `--popover-foreground`
-  - Tokens (dark `.dark`): define darker hues with strong contrast vs foregrounds
-- [ ] Map Tailwind theme colors to tokens in each Tailwind config (example):
-  ```js
-  extend: {
-    colors: {
-      background: 'hsl(var(--background))',
-      foreground: 'hsl(var(--foreground))',
-      muted: 'hsl(var(--muted))',
-      'muted-foreground': 'hsl(var(--muted-foreground))',
-      card: 'hsl(var(--card))',
-      'card-foreground': 'hsl(var(--card-foreground))',
-      border: 'hsl(var(--border))',
-      input: 'hsl(var(--input))',
-      ring: 'hsl(var(--ring))',
-      primary: 'hsl(var(--primary))',
-      'primary-foreground': 'hsl(var(--primary-foreground))',
-      secondary: 'hsl(var(--secondary))',
-      'secondary-foreground': 'hsl(var(--secondary-foreground))',
-      destructive: 'hsl(var(--destructive))',
-      'destructive-foreground': 'hsl(var(--destructive-foreground))',
-      accent: 'hsl(var(--accent))',
-      'accent-foreground': 'hsl(var(--accent-foreground))',
-      popover: 'hsl(var(--popover))',
-      'popover-foreground': 'hsl(var(--popover-foreground))',
-    },
-  }
-  ```
-- [ ] Base reset in each app’s global CSS
-  - `* { @apply border-border; }`
-  - `body { @apply bg-background text-foreground; }`
+- [x] Replace hardcoded grays/whites with semantic utilities in:
+  - [x] Alert.tsx
+  - [x] Badge.tsx
+  - [x] Button.tsx (+ Button.test.tsx visual snapshots as needed)
+  - [x] Card.tsx
+  - [x] Input.tsx
+  - [x] Toast.tsx
+  - [x] StatusBadge.tsx (+ .test.tsx)
+  - [x] ThemeToggle.tsx
+- [x] Ensure exports aligned in `src/index.ts`
+- [x] Align with palette in `src/lib/tokens/colors.ts` (if used by design system)
 
-### B) Shared Design System Refactor (libs/shared-design-system)
+**Step B Completion Notes:**
 
-- [ ] Replace hardcoded grays/whites with semantic utilities in:
-  - [ ] Alert.tsx
-  - [ ] Badge.tsx
-  - [ ] Button.tsx (+ Button.test.tsx visual snapshots as needed)
-  - [ ] Card.tsx
-  - [ ] Input.tsx
-  - [ ] Toast.tsx
-  - [ ] StatusBadge.tsx (+ .test.tsx)
-  - [ ] ThemeToggle.tsx
-- [ ] Ensure exports aligned in `src/index.ts`
-- [ ] Align with palette in `src/lib/tokens/colors.ts` (if used by design system)
+- Removed all redundant `dark:` classes from components since CSS variables automatically adapt to dark mode
+- Replaced hardcoded colors in Toast.tsx with semantic tokens (card, border, destructive)
+- Badge success/warning variants still use hardcoded green/amber but removed dark: duplicates
+- Fixed Tailwind CSS deprecation: `flex-shrink-0` → `shrink-0`
+- All 27 projects build successfully with no TypeScript errors
+- All component exports verified in src/index.ts
 
 ### C) Shell (host) Wiring
 

@@ -157,7 +157,6 @@ export const ThemeToggle = React.forwardRef<
         'hover:bg-[rgb(var(--muted))]',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgb(var(--primary))] focus-visible:ring-offset-2',
         'disabled:pointer-events-none disabled:opacity-50',
-        'dark:hover:bg-[rgb(var(--muted))]',
         className
       )}
       aria-label={display.ariaLabel}
