@@ -41,6 +41,7 @@ A production-ready, full-stack microfrontend platform demonstrating enterprise-g
 - **pnpm:** 9.x
 - **Docker & Docker Compose:** Latest
 - **Git:** Latest
+- **Docker resources:** Allocate at least 4 GB RAM
 
 ### 1. Clone Repository
 
@@ -55,34 +56,62 @@ cd payments-system-mfe-microservices-fullstack-nx-2026
 pnpm install
 ```
 
-### 3. Generate SSL Certificates
+### 3. Set Up Environment Files
+
+```bash
+cp .env.example .env
+# If present, also copy: cp .env.required .env.required.local
+```
+
+Fill in (or keep defaults):
+- Database URLs for auth/payments/admin/profile services
+- RabbitMQ credentials and host
+- nginx host/ports
+- Sentry DSN (or leave blank for local)
+
+### 4. Prepare Databases
+
+```bash
+pnpm backend:setup
+# (Runs Prisma generate + migrations for all services)
+```
+
+### 5. Generate SSL Certificates
 
 ```bash
 pnpm ssl:generate
 ```
 
-### 4. Start Infrastructure
+To trust the self-signed cert:
+- macOS: open `nginx/ssl/self-signed.crt` in Keychain Access → set to Always Trust
+- Windows: import into Trusted Root Certification Authorities
+- If you prefer HTTP-only dev, you can later start the frontend via `pnpm dev:mf` (HTTP mode).
+
+### 6. Start Infrastructure
 
 ```bash
 # Start nginx, PostgreSQL databases, RabbitMQ, Redis, Prometheus, Grafana, Jaeger
 pnpm infra:start
 ```
 
-### 5. Start Backend Services
+### 7. Start Backend Services
 
 ```bash
 # Starts API Gateway, Auth, Payments, Admin, Profile services
 pnpm dev:backend
 ```
 
-### 6. Start Frontend
+### 8. Start Frontend
 
 ```bash
 # Starts Shell app and all MFEs (Auth, Payments, Admin, Profile)
 pnpm dev:all
+
+# If HTTPS causes issues, use HTTP mode (no cert trust needed):
+pnpm dev:mf
 ```
 
-### 7. Access Application
+### 9. Access Application
 
 Open your browser and navigate to:
 
@@ -96,7 +125,7 @@ Open your browser and navigate to:
 
 **Note:** Accept the self-signed certificate warning in your browser.
 
-### 8. Run Tests
+### 10. Run Tests
 
 ```bash
 # Run all tests
@@ -108,6 +137,12 @@ pnpm test:backend
 # Run E2E tests (requires services running)
 pnpm test:e2e
 ```
+
+### Quick Troubleshooting
+
+- If services fail to start: ensure Docker is running, then rerun `pnpm backend:setup` and `pnpm infra:start`.
+- If HTTPS shows cert errors: trust the generated cert (above) or use HTTP mode via `pnpm dev:mf`.
+- If ports are occupied: check 3000–3004, 4200–4204, 443/80, 9090, 3010, 16686, 5672/15672, 6379.
 
 ---
 
@@ -311,7 +346,6 @@ For detailed setup instructions, troubleshooting, and development workflows, ref
 
 ---
 
-**Last Updated:** December 12, 2025  
+**Last Updated:** December 23, 2025  
 **Status:** Production-Ready Architecture + UI/UX Polished (Dark Mode, Mobile, Navigation)  
 **Next Phase:** CI/CD Pipeline + Cloud Deployment
-
