@@ -64,6 +64,7 @@ cp .env.example .env
 ```
 
 Fill in (or keep defaults):
+
 - Database URLs for auth/payments/admin/profile services
 - RabbitMQ credentials and host
 - nginx host/ports
@@ -83,6 +84,7 @@ pnpm ssl:generate
 ```
 
 To trust the self-signed cert:
+
 - macOS: open `nginx/ssl/self-signed.crt` in Keychain Access → set to Always Trust
 - Windows: import into Trusted Root Certification Authorities
 - If you prefer HTTP-only dev, you can later start the frontend via `pnpm dev:mf` (HTTP mode).
