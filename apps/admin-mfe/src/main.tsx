@@ -17,12 +17,17 @@ import {
   SentryErrorBoundary,
   setUser,
   clearUser,
+  setTag,
 } from '@mfe-poc/shared-observability';
 
 // Initialize Sentry (must be done before rendering)
 initSentry({
   appName: 'admin-mfe',
 });
+
+// Set app-level tags for filtering in Sentry dashboard
+setTag('app', 'admin-mfe');
+setTag('version', process.env['NX_APP_VERSION'] || '0.0.1');
 
 // Create QueryClient for TanStack Query
 const queryClient = new QueryClient({

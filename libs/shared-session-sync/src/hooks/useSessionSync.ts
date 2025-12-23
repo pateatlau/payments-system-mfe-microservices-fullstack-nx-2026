@@ -8,7 +8,6 @@
 import { useEffect, useCallback } from 'react';
 import { sessionSync } from '../lib/session-sync';
 import { useAuthStore } from 'shared-auth-store';
-import type { User } from 'shared-types';
 import type { AuthStateChangePayload, TokenRefreshPayload } from '../lib/types';
 
 /**
@@ -24,9 +23,7 @@ import type { AuthStateChangePayload, TokenRefreshPayload } from '../lib/types';
 export function useSessionSync() {
   const logout = useAuthStore(state => state.logout);
   const setAccessToken = useAuthStore(state => state.setAccessToken);
-  const refreshToken = useAuthStore(state => state.refreshToken);
   const user = useAuthStore(state => state.user);
-  const accessToken = useAuthStore(state => state.accessToken);
   const isAuthenticated = useAuthStore(state => state.isAuthenticated);
 
   useEffect(() => {
@@ -43,7 +40,6 @@ export function useSessionSync() {
         // Note: The auth store persists state, so we mainly need to trigger a re-render
         // The actual state will be synced via localStorage persistence
         // For now, we'll just ensure the store is aware of the change
-        const userData = payload.user as User;
         // Since we can't directly set user, we rely on localStorage sync
         // The persist middleware will handle the sync
       } else {

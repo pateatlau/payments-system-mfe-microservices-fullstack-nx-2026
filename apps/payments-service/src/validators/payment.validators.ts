@@ -26,7 +26,7 @@ export const createPaymentSchema = z
   .object({
     type: z.enum(['instant', 'scheduled', 'recurring']),
     amount: z.number().positive(),
-    currency: z.string().length(3).default('USD'),
+    currency: z.string().length(3).default('INR'),
     description: z.string().min(1).max(500),
     recipientId: z.string().uuid().optional(),
     recipientEmail: z.string().email().optional(),

@@ -59,7 +59,7 @@ model Payment {
   recipientId       String?       @map("recipient_id")
   recipient         User?         @relation("ReceivedPayments", fields: [recipientId], references: [id])
   amount            Decimal       @db.Decimal(10, 2)
-  currency          String        @default("USD")
+  currency          String        @default("INR")
   status            PaymentStatus
   type              PaymentType
   description       String?

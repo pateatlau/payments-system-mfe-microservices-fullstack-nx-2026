@@ -42,19 +42,19 @@ export function DeleteConfirmDialog({
 }: DeleteConfirmDialogProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
+      <div className="bg-background rounded-lg shadow-xl w-full max-w-md mx-4">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-slate-200">
+        <div className="px-6 py-4 border-b border-border">
           <h3 className="text-lg font-semibold text-red-600">{title}</h3>
         </div>
 
         {/* Content */}
         <div className="px-6 py-4">
-          <p className="text-slate-700">{message}</p>
+          <p className="text-foreground">{message}</p>
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-slate-200 flex justify-end space-x-3">
+        <div className="px-6 py-4 border-t border-border flex justify-end space-x-3">
           <Button type="button" variant="outline" onClick={onCancel}>
             Cancel
           </Button>

@@ -13,7 +13,7 @@ const alertVariants = cva('relative w-full rounded-lg border p-4', {
   variants: {
     variant: {
       default:
-        'bg-[rgb(var(--background))] border-[rgb(var(--border))] text-[rgb(var(--foreground))] dark:bg-[rgb(var(--background))] dark:border-[rgb(var(--border))] dark:text-[rgb(var(--foreground))]',
+        'bg-(--background) bg-[rgb(var(--background))] border-(--border) border-[rgb(var(--border))] text-(--foreground) text-[rgb(var(--foreground))]',
       destructive:
         'bg-red-50 border-red-200 text-red-900 dark:bg-red-950 dark:border-red-900 dark:text-red-100',
       success:

@@ -10,6 +10,7 @@ import {
   SentryErrorBoundary,
   setUser,
   clearUser,
+  setTag,
 } from '@mfe-poc/shared-observability';
 import {
   GraphQLProvider,
@@ -20,6 +21,10 @@ import {
 initSentry({
   appName: 'payments-mfe',
 });
+
+// Set app-level tags for filtering in Sentry dashboard
+setTag('app', 'payments-mfe');
+setTag('version', process.env['NX_APP_VERSION'] || '0.0.1');
 
 /**
  * AppWrapper - provides WebSocket and GraphQL context for standalone mode

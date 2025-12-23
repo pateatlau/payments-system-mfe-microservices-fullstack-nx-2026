@@ -64,6 +64,11 @@ const sharedDependencies = {
     requiredVersion: false,
     eager: true, // Must be eager for standalone app
   },
+  'shared-session-sync': {
+    singleton: true,
+    requiredVersion: false,
+    eager: true, // Must be eager for standalone app
+  },
   'shared-websocket': {
     singleton: true,
     requiredVersion: false,
@@ -129,6 +134,10 @@ module.exports = {
         '../../libs/shared-theme-store/src/index.ts'
       ),
       '@mfe/shared-session-sync': path.resolve(
+        __dirname,
+        '../../libs/shared-session-sync/src/index.ts'
+      ),
+      'shared-session-sync': path.resolve(
         __dirname,
         '../../libs/shared-session-sync/src/index.ts'
       ),
@@ -203,6 +212,10 @@ module.exports = {
         // Development & Production: Through nginx proxy (https://localhost/api)
         // Direct API Gateway access (http://localhost:3000/api) available via env var
         NX_API_BASE_URL: process.env.NX_API_BASE_URL || 'https://localhost/api',
+        // Sentry (Frontend)
+        NX_SENTRY_DSN: process.env.NX_SENTRY_DSN || '',
+        NX_SENTRY_RELEASE: process.env.NX_SENTRY_RELEASE || '',
+        NX_APP_VERSION: process.env.NX_APP_VERSION || '0.0.1',
         NODE_ENV: isProduction ? 'production' : 'development',
       }),
     }),

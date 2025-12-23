@@ -223,7 +223,7 @@ export function getThemeColor(
   // Check if category has light/dark variants
   if ('light' in colorCategory && 'dark' in colorCategory) {
     const themeColors = colorCategory[theme] as Record<string, string>;
-    return themeColors[variant || 'DEFAULT'] || themeColors.DEFAULT;
+    return (themeColors[variant || 'DEFAULT'] || themeColors.DEFAULT) as string;
   }
 
   // Fallback to direct access for legacy tokens

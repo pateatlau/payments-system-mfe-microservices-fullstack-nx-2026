@@ -39,7 +39,7 @@ function DefaultErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4 py-12">
+    <div className="min-h-screen flex items-center justify-center bg-muted px-4 py-12">
       <Card className="max-w-md mx-auto text-center">
         <CardHeader>
           <div className="mb-4 flex justify-center">
@@ -61,7 +61,7 @@ function DefaultErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
           <CardTitle>Failed to Load Component</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <p className="text-slate-600">
+          <p className="text-muted-foreground">
             We couldn't load the component from the remote. This might be a
             temporary issue.
           </p>

@@ -13,6 +13,7 @@ import {
   SentryErrorBoundary,
   setUser,
   clearUser,
+  setTag,
 } from '@mfe-poc/shared-observability';
 
 // Import remote components
@@ -30,6 +31,10 @@ import {
 initSentry({
   appName: 'shell',
 });
+
+// Set app-level tags for filtering in Sentry dashboard
+setTag('app', 'shell');
+setTag('version', process.env['NX_APP_VERSION'] || '0.0.1');
 
 // Create a QueryClient for TanStack Query
 // This is needed for remote components that use TanStack Query (like PaymentsPage)
@@ -97,7 +102,10 @@ async function bootstrap() {
   try {
     await useThemeStore.getState().initializeTheme();
   } catch (error) {
-    console.warn('Theme initialization failed, continuing with defaults.', error);
+    console.warn(
+      'Theme initialization failed, continuing with defaults.',
+      error
+    );
   }
 
   const root = ReactDOM.createRoot(
@@ -132,7 +140,7 @@ async function bootstrap() {
               }}
               style={{
                 padding: '0.5rem 1rem',
-                backgroundColor: '#3b82f6',
+                backgroundColor: '#084683',
                 color: 'white',
                 border: 'none',
                 borderRadius: '0.375rem',

@@ -189,9 +189,10 @@ services:
     ports:
       - '5672:5672' # AMQP
       - '15672:15672' # Management UI
-    command: >-
-      sh -c "mkdir -p /var/lib/rabbitmq && echo SWQOKODSQALRPCLNMEQGSWQOKODS > /var/lib/rabbitmq/.erlang.cookie && chmod 400 /var/lib/rabbitmq/.erlang.cookie && rabbitmq-server"
-    # Using container filesystem to avoid host volume cookie corruption during startup.
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    # RabbitMQ uses RABBITMQ_ERLANG_COOKIE env var for cluster auth and persistence
+    # Do NOT regenerate .erlang.cookie on startup; let RabbitMQ manage it
     healthcheck:
       test: ['CMD', 'rabbitmq-diagnostics', '-q', 'ping']
       interval: 10s

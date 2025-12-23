@@ -1,18 +1,19 @@
 # POC-3 Implementation Plan
 
-**Status:** ✅ COMPLETE (All 8 Phases Complete)  
+**Status:** ✅ COMPLETE (All 9 Phases Complete)  
 **Version:** 1.5  
-**Date:** 2025-12-12  
+**Date:** 2025-12-23  
 **Phase:** POC-3 - Production-Ready Infrastructure
 
-> ** Progress Tracking:** See [`task-list.md`](./task-list.md) to track completion status and overall progress.
+> **Progress Tracking:** See [`task-list.md`](./task-list.md) to track completion status and overall progress.
 
-**Latest Updates (2025-12-12):**
+**Latest Updates (2025-12-23):**
 
-- HTTPS/TLS: SSL certificates working, nginx reverse proxy configured
-- CORS: Fixed for all 5 backend services (added `https://localhost`)
-- HMR: Configured via nginx proxy for HTTPS mode (known limitation: full page reload)
-- RabbitMQ: Fixed user authentication (added users to definitions.json)
+- Phase 9 Complete: UI/UX enhancements implemented (dark mode, color consistency, navigation, mobile)
+- Dark Mode: Comprehensive 9-step implementation (Steps A-I) with WCAG AA compliance
+- Design System: Unified all blue colors to primary brand (#084683)
+- Navigation: Added active state highlighting for better wayfinding
+- Mobile: Functional hamburger menu with dropdown navigation
 
 ---
 
@@ -30,6 +31,7 @@ This document provides a detailed, step-by-step implementation plan for POC-3, e
 - **Session management** (cross-tab sync, cross-device sync)
 - **Performance optimizations** (code splitting, lazy loading, bundle optimization)
 - **Optional GraphQL API** (alongside REST)
+- **UI/UX Enhancements** (dark mode, design consistency, mobile responsiveness)
 
 Each task is designed to be:
 
@@ -38,10 +40,10 @@ Each task is designed to be:
 - **Production-ready** - No throw-away code
 - **Incremental** - Builds on previous steps
 
-**Timeline:** 8-10 weeks  
-**Goal:** Production-ready infrastructure with separate databases, RabbitMQ, nginx, WebSocket, and enhanced observability
+**Timeline:** 10-12 weeks  
+**Goal:** Production-ready infrastructure with separate databases, RabbitMQ, nginx, WebSocket, enhanced observability, and polished UI/UX
 
-**Overall Progress:** 100% (All 8 phases complete - 52 sub-tasks + 1 optional)
+**Overall Progress:** 100% (All 9 phases complete - 64 sub-tasks + 1 optional)
 
 - Phase 1: Planning & Architecture Review (100% - 12/12 sub-tasks complete)
 - Phase 2: Infrastructure Setup (100% - 9/9 sub-tasks complete)
@@ -51,6 +53,7 @@ Each task is designed to be:
 - Phase 6: Observability & Monitoring (100% - 5/5 sub-tasks complete)
 - Phase 7: Session Management (100% - 3/3 sub-tasks complete)
 - Phase 8: Integration, Testing & Documentation (100% - 5/5 sub-tasks complete)
+- Phase 9: UI/UX Enhancements & Design System (100% - 12/12 sub-tasks complete)
 
 ---
 
@@ -7243,6 +7246,391 @@ See `docs/POC-3-Implementation/ssl-tls-setup-guide.md` for complete list of file
 
 ---
 
-**Last Updated:** 2025-12-12  
-**Status:** ✅ COMPLETE (All 8 Phases Complete - 100% overall progress)  
-**Next Steps:** POC-3 is complete. Ready for MVP/Production phase. All infrastructure, migrations, WebSocket, caching, observability, session management, testing, and documentation complete. GraphQL API implemented alongside REST API. HTTPS/TLS working with nginx reverse proxy. Swagger UI and Observability stack (Prometheus, Grafana, Jaeger) fully configured.
+## Phase 9: UI/UX Enhancements & Design System (Post-Infrastructure)
+
+**Duration:** December 12-23, 2025  
+**Status:** ✅ COMPLETE (4/4 sub-phases complete)  
+**Objective:** Implement comprehensive dark mode support, unify design system colors, enhance navigation UX, and improve mobile responsiveness across all MFEs.
+
+### Overview
+
+After completing all infrastructure phases (Phases 1-8), Phase 9 focused on enhancing the user experience across the entire application. This included implementing a production-ready dark mode system, ensuring color consistency with brand standards, improving navigation clarity, and optimizing the mobile experience.
+
+---
+
+### 9.1: Dark Mode Implementation (Steps A-I)
+
+**Status:** ✅ COMPLETE  
+**Duration:** December 12-20, 2025
+
+Implemented comprehensive dark mode support following a systematic 9-step approach. This work is documented in detail in [DARK-MODE-FULL-IMPLEMENTATION-PLAN.md](./DARK-MODE-FULL-IMPLEMENTATION-PLAN.md).
+
+**Approach:**
+
+- Semantic color tokens using CSS variables (RGB space-separated format for Tailwind v4)
+- `.dark` class-based theme switching
+- Centralized theme store with cross-tab synchronization
+- WCAG AA contrast compliance for accessibility
+
+**Steps Completed:**
+
+1. **Step A - Foundation Implementation:** Set up Tailwind dark mode, CSS variables, and theme tokens across all MFEs (shell, auth-mfe, payments-mfe, admin-mfe, profile-mfe)
+2. **Step B - Shared Design System Refactor:** Migrated all 15+ shared components to use semantic tokens instead of hardcoded colors
+3. **Step C - Shell Wiring:** Integrated theme store, theme toggle, and persisted theme preference
+4. **Step D - MFE Integration:** Rolled out dark mode to all remote MFEs with theme propagation
+5. **Step E - Focus Ring Migration:** Migrated all focus indicators to semantic `ring` token for consistency
+6. **Step F - Animation & Polish:** Added smooth theme transitions and refined dark mode aesthetics
+7. **Step G - WCAG AA Contrast Audit:** Verified and fixed all contrast ratios to meet WCAG AA standards (4.5:1 for normal text, 3:1 for large text/UI components)
+8. **Step H - Theme Propagation & Guardrails:** Added ESLint rule, pre-commit hook, and documentation to prevent hardcoded colors
+9. **Step I - Validation & E2E Tests:** Created comprehensive test suite (27 E2E tests) and manual testing checklist (~150 checks)
+
+**Key Files Created:**
+
+- `libs/shared-theme-store/` - Centralized theme management with Zustand
+- `libs/shared-design-system/src/lib/tokens/colors.ts` - Semantic color token mapping
+- `apps/shell-e2e/src/dark-mode.spec.ts` - 27 comprehensive E2E tests
+- `docs/DARK-MODE-MANUAL-TESTS.md` - Manual testing checklist
+- `docs/POC-3-Implementation/THEME-GUARDRAILS.md` - ESLint rules and guidelines
+- `docs/POC-3-Implementation/DARK-MODE-FULL-IMPLEMENTATION-PLAN.md` - Full implementation details
+
+**Files Modified:**
+
+- All MFE Tailwind configs (5 files) - Added dark mode support and semantic token mapping
+- All MFE global CSS files (5 files) - Defined light/dark theme CSS variables
+- All MFE rspack configs (5 files) - Added theme store to Module Federation
+- Shared design system components (15+ files) - Migrated to semantic tokens
+- All component styles across MFEs (50+ files) - Replaced hardcoded colors
+
+**Acceptance Criteria:**
+
+- [x] Dark mode toggle works in header
+- [x] Theme preference persists across sessions
+- [x] Theme syncs across tabs (using `shared-session-sync`)
+- [x] All MFEs respect shell's theme
+- [x] All text meets WCAG AA contrast ratios
+- [x] Smooth theme transitions (no flash)
+- [x] ESLint rules prevent hardcoded colors
+- [x] 27 E2E tests passing
+- [x] Manual test checklist completed (~150 checks)
+
+**Git Commits:**
+
+```bash
+496137f feat(dark-mode): complete Step A - foundation implementation
+0a72b92 feat(dark-mode): complete Step B - shared design system refactor
+7b1fa2e feat(dark-mode): complete Step C - shell wiring
+0ca0195 dark-mode: Step D complete
+b46426b dark-mode: Step E (partial) - migrate focus rings to semantic token
+c1d315e dark-mode: Step E complete
+2406ecf dark-mode: Step F complete
+7a694b3 dark-mode: Step G complete
+9cf4681 dark-mode: Step H complete
+a8173b5 dark-mode: Step I complete - Validation & E2E Tests
+```
+
+---
+
+### 9.2: Color Consistency & Branding
+
+**Status:** ✅ COMPLETE  
+**Duration:** December 21, 2025
+
+**Objective:** Unify all blue colors across the application to use the primary brand color (#084683) for visual consistency.
+
+**Problem:**
+
+- Multiple hardcoded blue variants (e.g., `#3b82f6`, `blue-500`, `blue-600`) were used inconsistently across components
+- Primary brand color (#084683) was not applied uniformly
+
+**Solution:**
+
+Replaced all hardcoded blue colors with semantic `primary` token that maps to #084683 (RGB: 8, 70, 131).
+
+**Files Modified (11 total):**
+
+1. `apps/shell/src/bootstrap.tsx` - Header gradient (#3b82f6 → #084683)
+2. `apps/payments-mfe/src/components/PaymentTabs.tsx` - Active tab indicator
+3. `apps/payments-mfe/src/components/shared/LoadingSpinner.tsx` - Spinner color
+4. `apps/payments-mfe/src/components/DualHandleSlider.tsx` - Range slider track
+5. `apps/payments-mfe/src/components/StatusBadge.tsx` - Status badges
+6. `apps/admin-mfe/src/components/shared/LoadingIndicator.tsx` - Loading indicator
+7. `apps/admin-mfe/src/components/shared/Tabs.tsx` - Tab styling
+8. `apps/auth-mfe/src/components/shared/LoadingSpinner.tsx` - Auth spinner
+9. `apps/profile-mfe/src/components/shared/LoadingSpinner.tsx` - Profile spinner
+10. `libs/shared-design-system/src/lib/components/Badge.tsx` - Badge variants
+11. Test files - Updated color assertions to match primary token
+
+**Changes Made:**
+
+- Replaced direct hex values with `bg-primary`, `text-primary`, `border-primary`
+- Updated gradient definitions to use primary color
+- Changed Tailwind blue utilities (`blue-500`, `blue-600`) to `primary`
+- Updated test expectations to reflect new color values
+
+**Verification:**
+
+- [x] All builds successful (27 projects)
+- [x] Visual inspection confirms consistent blue across all pages
+- [x] Primary brand color (#084683) used uniformly
+- [x] Dark mode still works with new colors
+
+**Git Commit:**
+
+```bash
+e432293 refactor: Unify blue colors to primary brand color (#084683)
+```
+
+---
+
+### 9.3: Navigation UX Enhancements
+
+**Status:** ✅ COMPLETE  
+**Duration:** December 22, 2025
+
+**Objective:** Add active state highlighting to navigation menu items to improve wayfinding.
+
+**Problem:**
+
+- Navigation menu items looked identical regardless of which page was active
+- Users had no visual indicator of their current location in the app
+- Poor UX for navigation clarity
+
+**Solution:**
+
+Implemented active state detection using React Router's `useLocation` hook with conditional styling.
+
+**Implementation:**
+
+1. **Active State Detection:**
+
+- Added `useLocation()` hook to `shared-header-ui` component
+- Created `isActive()` helper function to match current pathname
+- Applied to both desktop and mobile navigation
+
+2. **Visual Styling:**
+
+- Active nav items: `bg-primary-foreground/20` background + `font-semibold` weight
+- Inactive nav items: Default styling with hover states
+- Consistent across light and dark modes
+
+**Files Modified:**
+
+- `libs/shared-header-ui/src/lib/shared-header-ui.tsx` - Added active state logic and styling
+
+**Code Example:**
+
+```tsx
+const location = useLocation();
+const isActive = (path: string) => location.pathname === path;
+
+<Link
+  to="/payments"
+  className={`px-4 py-2 rounded-md transition-colors ${
+    isActive('/payments')
+      ? 'bg-primary-foreground/20 font-semibold'
+      : 'hover:bg-primary-foreground/10'
+  }`}
+>
+  Payments
+</Link>;
+```
+
+**Verification:**
+
+- [x] Active nav item visually distinct on all pages
+- [x] Works in both desktop and mobile views
+- [x] Consistent styling across light/dark modes
+- [x] Smooth transitions between active states
+
+**Git Commit:**
+
+```bash
+9a74932 feat: Add active state highlighting to navigation menu items
+```
+
+---
+
+### 9.4: Mobile Responsiveness
+
+**Status:** ✅ COMPLETE  
+**Duration:** December 23, 2025
+
+**Objective:** Implement functional mobile hamburger menu with dropdown navigation.
+
+**Problem:**
+
+- Mobile hamburger button (☰) was visible but non-functional
+- No click handler or state management for mobile menu
+- Poor mobile UX - users couldn't navigate on small screens
+
+**Solution:**
+
+Implemented full mobile menu with React state management and responsive dropdown.
+
+**Implementation:**
+
+1. **State Management:**
+
+- Added `useState` hook for menu toggle state: `const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)`
+- Toggle function: `const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen)`
+
+2. **UI Components:**
+
+- Hamburger button (☰) in mobile view (`md:hidden`)
+- Close button (×) when menu is open
+- Dropdown overlay with all navigation links
+- Theme toggle button in mobile menu
+- User info section in mobile menu
+
+3. **Interactions:**
+
+- Click hamburger to open menu
+- Click any link to navigate and auto-close menu
+- Click close button (×) to dismiss menu
+- Responsive breakpoints: `md:hidden` for mobile, `hidden md:flex` for desktop
+
+**Files Modified:**
+
+- `libs/shared-header-ui/src/lib/shared-header-ui.tsx` - Added mobile menu state, toggle button, and dropdown
+
+**Code Structure:**
+
+```tsx
+// State
+const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+// Mobile hamburger button
+<button onClick={toggleMobileMenu} className="md:hidden">
+  {isMobileMenuOpen ? '×' : '☰'}
+</button>;
+
+// Mobile menu dropdown (shown when isMobileMenuOpen is true)
+{
+  isMobileMenuOpen && (
+    <div className="md:hidden absolute top-full left-0 right-0 bg-background">
+      {/* All nav links */}
+      <Link onClick={() => setIsMobileMenuOpen(false)}>...</Link>
+      {/* Theme toggle */}
+      {/* User info */}
+    </div>
+  );
+}
+```
+
+**Features:**
+
+- Full navigation menu in mobile view
+- Theme toggle accessible on mobile
+- User name and role displayed
+- Auto-close on link click for better UX
+- Smooth transitions and proper z-indexing
+
+**Verification:**
+
+- [x] Hamburger button clickable and functional
+- [x] Menu opens/closes smoothly
+- [x] All navigation links work
+- [x] Theme toggle works in mobile menu
+- [x] Menu auto-closes after navigation
+- [x] Responsive breakpoints correct (mobile vs desktop)
+- [x] No layout shifts or overflow issues
+
+**Git Commits:**
+
+```bash
+b8d4e92 feat: Implement functional mobile hamburger menu
+7928979 Mobile responsive menu implemented
+```
+
+---
+
+### Phase 9 Summary
+
+**Overall Status:** ✅ COMPLETE (100% of sub-phases)
+
+**Key Achievements:**
+
+1. **Dark Mode System:**
+
+- Comprehensive 9-step implementation (Steps A-I)
+- WCAG AA compliant with contrast audits
+- 27 E2E tests + ~150 manual checks
+- ESLint guardrails to prevent regressions
+- Cross-tab theme synchronization
+
+2. **Visual Consistency:**
+
+- Unified all blue colors to primary brand (#084683)
+- 11 files updated for color consistency
+- Consistent design language across all MFEs
+
+3. **Navigation UX:**
+
+- Active state highlighting on nav items
+- Clear visual indicators for current page
+- Improved wayfinding and user orientation
+
+4. **Mobile Experience:**
+
+- Fully functional hamburger menu
+- Dropdown navigation with all features
+- Theme toggle accessible on mobile
+- Responsive design optimized
+
+**Files Created (9):**
+
+- `libs/shared-theme-store/` (entire library)
+- `libs/shared-design-system/src/lib/tokens/colors.ts`
+- `apps/shell-e2e/src/dark-mode.spec.ts`
+- `docs/DARK-MODE-MANUAL-TESTS.md`
+- `docs/POC-3-Implementation/THEME-GUARDRAILS.md`
+- `docs/POC-3-Implementation/DARK-MODE-FULL-IMPLEMENTATION-PLAN.md`
+- `.husky/pre-commit` (enhanced with theme linting)
+- `eslint.config.mjs` (enhanced with dark mode rules)
+
+**Files Modified (80+):**
+
+- 5 MFE Tailwind configs
+- 5 MFE global CSS files
+- 5 MFE rspack configs
+- 15+ shared design system components
+- 50+ component files across MFEs (theme migration)
+- 11 files for color consistency
+- 1 file for navigation enhancements
+- 1 file for mobile menu
+
+**Testing:**
+
+- [x] All 27 dark mode E2E tests passing
+- [x] Manual test checklist completed (~150 checks)
+- [x] All builds successful after each change
+- [x] Visual regression testing complete
+- [x] Accessibility testing (WCAG AA) complete
+- [x] Cross-browser testing (Chrome, Firefox, Safari)
+- [x] Mobile testing (iOS, Android)
+
+**Documentation:**
+
+- [x] DARK-MODE-FULL-IMPLEMENTATION-PLAN.md (detailed 9-step plan)
+- [x] DARK-MODE-MANUAL-TESTS.md (testing checklist)
+- [x] THEME-GUARDRAILS.md (ESLint rules and guidelines)
+- [x] Implementation plan updated (this document)
+- [x] Task list updated (task-list.md)
+
+**Next Steps:**
+
+Phase 9 represents the completion of POC-3's UI/UX layer. The application now has:
+
+- Production-ready infrastructure (Phases 1-8)
+- Polished, accessible UI with dark mode support
+- Consistent design system and branding
+- Excellent mobile experience
+- Comprehensive testing and documentation
+
+POC-3 is **fully complete** and ready for MVP/Production deployment.
+
+---
+
+**Last Updated:** 2025-12-23  
+**Status:** ✅ COMPLETE (All 9 Phases Complete - 100% overall progress)  
+**Next Steps:** POC-3 is complete. Ready for MVP/Production phase. All infrastructure (Phases 1-8) and UI/UX enhancements (Phase 9) complete. Full dark mode support, unified design system, enhanced navigation, and mobile responsiveness implemented. GraphQL API implemented alongside REST API. HTTPS/TLS working with nginx reverse proxy. Swagger UI and Observability stack (Prometheus, Grafana, Jaeger) fully configured.

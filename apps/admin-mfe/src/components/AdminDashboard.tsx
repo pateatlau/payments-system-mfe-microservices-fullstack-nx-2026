@@ -191,14 +191,16 @@ export function AdminDashboard() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-slate-900">Admin Dashboard</h1>
-          <p className="mt-2 text-slate-600">
+          <h1 className="text-3xl font-bold text-foreground">
+            Admin Dashboard
+          </h1>
+          <p className="mt-2 text-muted-foreground">
             Welcome back, {user?.name || 'Admin'} · Role: {user?.role || 'N/A'}
           </p>
         </div>
 
         {/* Navigation Tabs */}
-        <div className="mb-8 bg-white rounded-lg shadow-sm">
+        <div className="mb-8 bg-card rounded-lg shadow-sm">
           <div className="px-4">
             <DashboardTabs activeTab={activeTab} onTabChange={setActiveTab} />
           </div>
@@ -230,7 +232,7 @@ export function AdminDashboard() {
 
             {/* Quick Actions */}
             <div>
-              <h2 className="text-lg font-semibold text-slate-900 mb-4">
+              <h2 className="text-lg font-semibold text-foreground mb-4">
                 Quick Actions
               </h2>
               <QuickActions actions={quickActions} />
