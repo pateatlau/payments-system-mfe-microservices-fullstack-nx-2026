@@ -179,14 +179,14 @@ export function UserFormDialog({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justifycenter bg-black bg-opacity-50">
-      <div className="bg-background rounded-lg shadow-xl w-full max-w-md mx-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+      <div className="w-full max-w-md mx-4 rounded-lg shadow-xl bg-background">
         {/* Header */}
         <div className="px-6 py-4 border-b border-border">
           <h3 className="text-lg font-semibold text-foreground">
             {isEditMode ? 'Edit User' : 'Create New User'}
           </h3>
-          <p className="text-sm text-muted-foreground mt-1">
+          <p className="mt-1 text-sm text-muted-foreground">
             {isEditMode
               ? 'Update user information'
               : 'Add a new user to the system'}
@@ -271,7 +271,7 @@ export function UserFormDialog({
                 </Label>
                 <select
                   id="role"
-                  className="w-full px-3 py-2 border border-border bg-background rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                  className="w-full px-3 py-2 border rounded-md border-border bg-background focus:outline-none focus:ring-2 focus:ring-ring"
                   value={formData.role}
                   onChange={e =>
                     handleInputChange('role', e.target.value as UserRole)
@@ -290,7 +290,7 @@ export function UserFormDialog({
         </form>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-border flex justify-end space-x-3">
+        <div className="flex justify-end px-6 py-4 space-x-3 border-t border-border">
           <Button
             type="button"
             variant="outline"

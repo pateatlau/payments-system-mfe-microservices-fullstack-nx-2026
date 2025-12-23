@@ -34,7 +34,7 @@ describe('Toast', () => {
       <Toast variant="error" message="Error!" onDismiss={jest.fn()} />
     );
     const toast = container.firstChild as HTMLElement;
-    expect(toast).toHaveClass('bg-red-50');
+    expect(toast).toHaveClass('bg-(--destructive)');
   });
 
   it('renders warning variant', () => {

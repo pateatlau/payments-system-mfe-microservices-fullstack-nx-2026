@@ -22,10 +22,10 @@ const toastVariants = cva(
     variants: {
       variant: {
         default:
-          'bg-[rgb(var(--card))] border-[rgb(var(--border))] text-[rgb(var(--card-foreground))]',
+          'bg-[rgb:var(--card)] border-[rgb:var(--border)] text-[rgb:var(--card-foreground)]',
         success: 'bg-green-50 border-green-500 text-green-900',
         error:
-          'bg-[rgb(var(--destructive))] border-[rgb(var(--destructive))] text-[rgb(var(--destructive-foreground))]',
+          'bg-(--destructive) border-(--destructive) text-(--destructive-foreground)',
         warning: 'bg-amber-50 border-amber-500 text-amber-900',
         info: 'bg-blue-50 border-blue-500 text-blue-900',
       },
@@ -125,7 +125,7 @@ const Toast = React.forwardRef<HTMLDivElement, ToastProps>(
           <button
             type="button"
             onClick={handleDismiss}
-            className="shrink-0 rounded-md p-1 hover:bg-[rgb(var(--muted))] transition-colors"
+            className="shrink-0 rounded-md p-1 hover:bg-(--muted) transition-colors"
             aria-label="Dismiss notification"
           >
             <svg

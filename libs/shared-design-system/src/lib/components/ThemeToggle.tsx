@@ -154,8 +154,8 @@ export const ThemeToggle = React.forwardRef<
         'rounded-md p-2',
         'text-sm font-medium',
         'transition-colors',
-        'hover:bg-[rgb(var(--muted))]',
-        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgb(var(--primary))] focus-visible:ring-offset-2',
+        'hover:bg-(--muted)',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--primary) focus-visible:ring-offset-2',
         'disabled:pointer-events-none disabled:opacity-50',
         className
       )}

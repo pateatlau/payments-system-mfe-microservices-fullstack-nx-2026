@@ -191,9 +191,8 @@ services:
       - '15672:15672' # Management UI
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
-    command: >-
-      sh -c "mkdir -p /var/lib/rabbitmq && echo SWQOKODSQALRPCLNMEQGSWQOKODS > /var/lib/rabbitmq/.erlang.cookie && chmod 400 /var/lib/rabbitmq/.erlang.cookie && rabbitmq-server"
-    # Persistent volume for queue/message durability with fresh cookie on each startup to prevent corruption.
+    # RabbitMQ uses RABBITMQ_ERLANG_COOKIE env var for cluster auth and persistence
+    # Do NOT regenerate .erlang.cookie on startup; let RabbitMQ manage it
     healthcheck:
       test: ['CMD', 'rabbitmq-diagnostics', '-q', 'ping']
       interval: 10s

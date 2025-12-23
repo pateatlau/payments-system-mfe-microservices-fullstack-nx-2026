@@ -81,7 +81,7 @@ export function Header({
   };
 
   return (
-    <header className="sticky top-0 z-50 text-primary-foreground shadow-lg bg-primary">
+    <header className="sticky top-0 z-50 shadow-lg text-primary-foreground bg-primary">
       <div className="container px-4 py-4 mx-auto">
         <div className="flex items-center justify-between">
           {/* Branding/Logo */}

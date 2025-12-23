@@ -15,16 +15,17 @@ const badgeVariants = cva(
     variants: {
       variant: {
         default:
-          'border-transparent bg-[rgb(var(--primary))] text-[rgb(var(--primary-foreground))] hover:bg-[rgb(var(--primary))]/80',
+          'border-transparent bg-(--primary) bg-[rgb(var(--primary))] text-(--primary-foreground) text-[rgb(var(--primary-foreground))] hover:bg-(--primary)/80 hover:bg-[rgb(var(--primary))]/80',
         secondary:
-          'border-transparent bg-[rgb(var(--muted))] text-[rgb(var(--muted-foreground))] hover:bg-[rgb(var(--muted))]/80',
+          'border-2 border-(--border) border-[rgb(var(--border))] bg-(--secondary) bg-[rgb(var(--secondary))] text-(--secondary-foreground) text-[rgb(var(--secondary-foreground))] hover:bg-(--secondary) hover:bg-[rgb(var(--secondary))] hover:opacity-80 shadow-sm',
         destructive:
-          'border-transparent bg-[rgb(var(--destructive))] text-[rgb(var(--destructive-foreground))] hover:bg-[rgb(var(--destructive))]/80',
+          'border-transparent bg-(--destructive) bg-[rgb(var(--destructive))] text-(--destructive-foreground) text-[rgb(var(--destructive-foreground))] hover:bg-(--destructive)/80 hover:bg-[rgb(var(--destructive))]/80',
         success:
           'border-transparent bg-green-600 text-white hover:bg-green-700',
         warning:
           'border-transparent bg-amber-600 text-white hover:bg-amber-700',
-        outline: 'text-[rgb(var(--foreground))] border-[rgb(var(--border))]',
+        outline:
+          'text-(--foreground) text-[rgb(var(--foreground))] border-(--border) border-[rgb(var(--border))]',
       },
     },
     defaultVariants: {
