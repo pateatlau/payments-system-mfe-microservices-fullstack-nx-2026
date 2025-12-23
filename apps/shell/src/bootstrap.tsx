@@ -13,6 +13,7 @@ import {
   SentryErrorBoundary,
   setUser,
   clearUser,
+  setTag,
 } from '@mfe-poc/shared-observability';
 
 // Import remote components
@@ -30,6 +31,10 @@ import {
 initSentry({
   appName: 'shell',
 });
+
+// Set app-level tags for filtering in Sentry dashboard
+setTag('app', 'shell');
+setTag('version', process.env['NX_APP_VERSION'] || '0.0.1');
 
 // Create a QueryClient for TanStack Query
 // This is needed for remote components that use TanStack Query (like PaymentsPage)

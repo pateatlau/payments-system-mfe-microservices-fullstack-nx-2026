@@ -93,6 +93,8 @@ Optionally, add `SENTRY_ENVIRONMENT` and `SENTRY_RELEASE` (release defaults alre
 
 **⚠️ Note:** Project uses **React Router v7** (not v6). Sentry's `reactRouterV6Instrumentation` may not be compatible. Need to investigate v7 support or create custom navigation spans.
 
+**🔴 DEFERRED:** Pending Sentry quota reset and Phase A/B/E/F verification. Router v7 requires investigation and browser testing; too risky to implement without verification capability.
+
 **Implement:** Enhance router tracing in [libs/shared-observability/src/lib/sentry.ts].
 
 - [ ] **Investigate:** Check if Sentry has React Router v7 instrumentation support or if `reactRouterV6Instrumentation` works with v7.
@@ -113,6 +115,8 @@ Optionally, add `SENTRY_ENVIRONMENT` and `SENTRY_RELEASE` (release defaults alre
 
 ### D) Network Error Capture — GraphQL & WebSocket
 
+**🟡 DEFERRED (OPTIONAL):** Can implement now (low-risk code), but cannot verify without browser testing until Sentry quota resets. Consider deferring until after Phase A/B/E/F verification.
+
 **Implement:**
 
 - [ ] Payments MFE GraphQL: Update `onError` in [apps/payments-mfe/src/bootstrap.tsx] to call `captureException(error, { operationName, variables })` and add breadcrumb with `type: 'http'`, `category: 'graphql'`.
@@ -131,13 +135,14 @@ Optionally, add `SENTRY_ENVIRONMENT` and `SENTRY_RELEASE` (release defaults alre
 
 **Implement:**
 
-- [ ] Frontend `initSentry`: call `setTag('app', appName)` and `setTag('version', release)` after init.
-- [ ] Confirm existing `setUser()`/`clearUser()` wiring in MFEs and shell remains active.
-- [ ] Tune `tracesSampleRate` and profiling; dev: 1.0, prod: 0.1 (already present).
+- [x] Frontend `initSentry`: call `setTag('app', appName)` and `setTag('version', release)` after init.
+- [x] Confirm existing `setUser()`/`clearUser()` wiring in MFEs and shell remains active.
+- [x] Tune `tracesSampleRate` and profiling; dev: 1.0, prod: 0.1 (already present).
 
 **Verify:**
 
 - Check new events for `app` and `version` tags; ensure user context is set after login.
+- TODO (pending quota reset): confirm tags appear in Sentry events after smoke testing.
 
 **Rollback:** Remove extra tags if needed; restore sampling defaults.
 
@@ -161,6 +166,8 @@ Optionally, add `SENTRY_ENVIRONMENT` and `SENTRY_RELEASE` (release defaults alre
 ---
 
 ### G) CI/CD — Releases & Source Map Upload
+
+**🔴 DEFERRED:** CI/CD pipelines not yet configured for this monorepo. Defer until CI infrastructure is in place.
 
 **Implement:** Configure CI for each frontend app to upload source maps using Sentry CLI.
 
@@ -189,18 +196,23 @@ sentry-cli releases finalize "$RELEASE"
 
 **Implement:**
 
-- [ ] Add a short setup guide under `docs/` (env keys, CI usage, verification commands).
-- [ ] Leverage existing [scripts/test-sentry-error-capture.ts] to validate backend capture; add a tiny frontend smoke snippet to docs.
+- [x] Add a short setup guide under `docs/` (env keys, CI usage, verification commands).
+- [x] Leverage existing [scripts/test-sentry-error-capture.ts] to validate backend capture; add a tiny frontend smoke snippet to docs.
 
 **Verify:**
 
 - Run the test script locally and confirm events in Sentry.
+- ✅ Backend integration tests passing (test-sentry-integration.ts, test-sentry-error-capture.ts, test-sentry-comprehensive.ts)
 
 **Rollback:** N/A (documentation only).
+
+**Deliverable:** [docs/POC-3-Implementation/SENTRY-SETUP-GUIDE.md](./SENTRY-SETUP-GUIDE.md)
 
 ---
 
 ### I) Alerting & Dashboards
+
+**🔴 DEFERRED:** Requires live Sentry events to configure meaningful alert thresholds and dashboards. Defer until after Phase A/B/E/F verification and production rollout.
 
 **Implement:**
 
@@ -216,6 +228,8 @@ sentry-cli releases finalize "$RELEASE"
 ---
 
 ### J) Rollout Plan & Environments
+
+**🟡 IN PROGRESS:** Dev rollout of Phases A, B, E, F complete. Awaiting Sentry quota reset for frontend verification before proceeding to staging/production.
 
 **Order:** Backend DSNs → Frontend env injection → Router instrumentation → Network capture → CI releases/maps → Alerting.
 
