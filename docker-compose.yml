@@ -189,9 +189,11 @@ services:
     ports:
       - '5672:5672' # AMQP
       - '15672:15672' # Management UI
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
     command: >-
       sh -c "mkdir -p /var/lib/rabbitmq && echo SWQOKODSQALRPCLNMEQGSWQOKODS > /var/lib/rabbitmq/.erlang.cookie && chmod 400 /var/lib/rabbitmq/.erlang.cookie && rabbitmq-server"
-    # Using container filesystem to avoid host volume cookie corruption during startup.
+    # Persistent volume for queue/message durability with fresh cookie on each startup to prevent corruption.
     healthcheck:
       test: ['CMD', 'rabbitmq-diagnostics', '-q', 'ping']
       interval: 10s
