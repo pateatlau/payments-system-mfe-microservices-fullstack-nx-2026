@@ -5,7 +5,6 @@
  * logs out the user if their current device is logged out remotely.
  */
 
-import { useEffect } from 'react';
 import { useWebSocketSubscription } from 'shared-websocket';
 import { useAuthStore } from 'shared-auth-store';
 import { getDeviceId } from '../lib/device-id';

@@ -13,6 +13,7 @@ import {
   CardTitle,
   Input,
   Label,
+  Select,
   cn,
 } from '@mfe/shared-design-system';
 
@@ -206,32 +207,24 @@ export function PaymentFilters({
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             <div className="space-y-2">
               <Label htmlFor="status">Status</Label>
-              <select
-                id="status"
-                {...register('status')}
-                className="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-              >
+              <Select id="status" {...register('status')}>
                 <option value="all">All statuses</option>
                 <option value={PaymentStatus.PENDING}>Pending</option>
                 <option value={PaymentStatus.PROCESSING}>Processing</option>
                 <option value={PaymentStatus.COMPLETED}>Completed</option>
                 <option value={PaymentStatus.FAILED}>Failed</option>
                 <option value={PaymentStatus.CANCELLED}>Cancelled</option>
-              </select>
+              </Select>
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="type">Type</Label>
-              <select
-                id="type"
-                {...register('type')}
-                className="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-              >
+              <Select id="type" {...register('type')}>
                 <option value="all">All types</option>
                 <option value={PaymentType.INSTANT}>Instant</option>
                 <option value={PaymentType.SCHEDULED}>Scheduled</option>
                 <option value={PaymentType.RECURRING}>Recurring</option>
-              </select>
+              </Select>
             </div>
 
             <div className="space-y-2">
@@ -261,14 +254,14 @@ export function PaymentFilters({
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <Label>Amount range</Label>
-              <span className="text-xs text-slate-500">
+              <span className="text-xs text-muted-foreground">
                 {MIN_AMOUNT.toLocaleString()} - {MAX_AMOUNT.toLocaleString()}
               </span>
             </div>
 
             <div className="space-y-4">
               {/* Display min and max values */}
-              <div className="flex items-center justify-between text-sm text-slate-600 font-semibold">
+              <div className="flex items-center justify-between text-sm text-muted-foreground font-semibold">
                 <span aria-live="polite">
                   Minimum: $
                   {watchedValues.minAmount?.toLocaleString?.() ?? MIN_AMOUNT}
@@ -305,7 +298,7 @@ export function PaymentFilters({
                                   minField.onChange(val);
                                 }
                               }}
-                              className="absolute top-1/2 w-full h-6 -translate-y-1/2 cursor-pointer appearance-none bg-transparent pointer-events-none [&::-webkit-slider-runnable-track]:h-2 [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-runnable-track]:bg-transparent [&::-webkit-slider-runnable-track]:border-0 [&::-moz-range-track]:h-2 [&::-moz-range-track]:rounded-full [&::-moz-range-track]:bg-transparent [&::-moz-range-track]:border-0 [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-blue-500 [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:mt-[-6px] [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-blue-500 [&::-moz-range-thumb]:cursor-pointer [&::-moz-range-thumb]:shadow-md [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:mt-[-6px]"
+                              className="absolute top-1/2 w-full h-6 -translate-y-1/2 cursor-pointer appearance-none bg-transparent pointer-events-none [&::-webkit-slider-runnable-track]:h-2 [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-runnable-track]:bg-transparent [&::-webkit-slider-runnable-track]:border-0 [&::-moz-range-track]:h-2 [&::-moz-range-track]:rounded-full [&::-moz-range-track]:bg-transparent [&::-moz-range-track]:border-0 [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:mt-[-6px] [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-primary [&::-moz-range-thumb]:cursor-pointer [&::-moz-range-thumb]:shadow-md [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:mt-[-6px]"
                               style={{
                                 zIndex:
                                   (minField.value ?? MIN_AMOUNT) >
@@ -330,7 +323,7 @@ export function PaymentFilters({
                                   maxField.onChange(val);
                                 }
                               }}
-                              className="absolute top-1/2 w-full h-6 -translate-y-1/2 cursor-pointer appearance-none bg-transparent pointer-events-none [&::-webkit-slider-runnable-track]:h-2 [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-runnable-track]:bg-transparent [&::-webkit-slider-runnable-track]:border-0 [&::-moz-range-track]:h-2 [&::-moz-range-track]:rounded-full [&::-moz-range-track]:bg-transparent [&::-moz-range-track]:border-0 [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-blue-500 [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:mt-[-6px] [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-blue-500 [&::-moz-range-thumb]:cursor-pointer [&::-moz-range-thumb]:shadow-md [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:mt-[-6px]"
+                              className="absolute top-1/2 w-full h-6 -translate-y-1/2 cursor-pointer appearance-none bg-transparent pointer-events-none [&::-webkit-slider-runnable-track]:h-2 [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-runnable-track]:bg-transparent [&::-webkit-slider-runnable-track]:border-0 [&::-moz-range-track]:h-2 [&::-moz-range-track]:rounded-full [&::-moz-range-track]:bg-transparent [&::-moz-range-track]:border-0 [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:mt-[-6px] [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-primary [&::-moz-range-thumb]:cursor-pointer [&::-moz-range-thumb]:shadow-md [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:mt-[-6px]"
                               style={{
                                 zIndex:
                                   (maxField.value ?? MAX_AMOUNT) <
@@ -342,10 +335,10 @@ export function PaymentFilters({
                             />
 
                             {/* Track background */}
-                            <div className="pointer-events-none absolute top-1/2 h-2 w-full -translate-y-1/2 rounded-full border border-gray-300 bg-gray-200" />
+                            <div className="pointer-events-none absolute top-1/2 h-2 w-full -translate-y-1/2 rounded-full border border-border bg-muted" />
                             {/* Filled track */}
                             <div
-                              className="pointer-events-none absolute top-1/2 h-2 -translate-y-1/2 rounded-full bg-blue-500"
+                              className="pointer-events-none absolute top-1/2 h-2 -translate-y-1/2 rounded-full bg-primary"
                               style={{
                                 left: `${(((minField.value ?? MIN_AMOUNT) - MIN_AMOUNT) / (MAX_AMOUNT - MIN_AMOUNT)) * 100}%`,
                                 right: `${100 - (((maxField.value ?? MAX_AMOUNT) - MIN_AMOUNT) / (MAX_AMOUNT - MIN_AMOUNT)) * 100}%`,
@@ -438,7 +431,7 @@ export function PaymentFilters({
           </div>
 
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="text-sm text-slate-600">
+            <div className="text-sm text-muted-foreground">
               {activeFilters} active filter{activeFilters === 1 ? '' : 's'}
             </div>
             <div className="flex gap-2">

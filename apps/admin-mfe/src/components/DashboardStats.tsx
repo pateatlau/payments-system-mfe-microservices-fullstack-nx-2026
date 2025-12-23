@@ -39,10 +39,10 @@ export function DashboardStats({
         {[...Array(4)].map((_, i) => (
           <Card key={i}>
             <CardHeader className="pb-2">
-              <div className="h-4 w-24 bg-slate-200 rounded animate-pulse" />
+              <div className="h-4 w-24 bg-muted rounded animate-pulse" />
             </CardHeader>
             <CardContent>
-              <div className="h-8 w-16 bg-slate-200 rounded animate-pulse" />
+              <div className="h-8 w-16 bg-muted rounded animate-pulse" />
             </CardContent>
           </Card>
         ))}
@@ -55,16 +55,18 @@ export function DashboardStats({
       {stats.map((stat, index) => (
         <Card key={index}>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-slate-600">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
               {stat.label}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between">
-              <div className="text-2xl font-bold text-slate-900">
+              <div className="text-2xl font-bold text-foreground">
                 {stat.value}
               </div>
-              {stat.icon && <div className="text-slate-400">{stat.icon}</div>}
+              {stat.icon && (
+                <div className="text-muted-foreground">{stat.icon}</div>
+              )}
             </div>
             {stat.trend && (
               <div
@@ -73,7 +75,10 @@ export function DashboardStats({
                 }`}
               >
                 {stat.trend.isPositive ? '↑' : '↓'} {Math.abs(stat.trend.value)}
-                %<span className="text-slate-500 ml-1">vs last month</span>
+                %
+                <span className="text-muted-foreground ml-1">
+                  vs last month
+                </span>
               </div>
             )}
           </CardContent>

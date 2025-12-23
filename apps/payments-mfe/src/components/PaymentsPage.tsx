@@ -18,6 +18,7 @@ import {
   AlertDescription,
   Badge,
   Loading,
+  Select,
 } from '@mfe/shared-design-system';
 import {
   usePayments,
@@ -369,7 +370,7 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
   // Loading state
   if (isLoadingPayments) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-slate-50">
+      <div className="flex items-center justify-center min-h-screen bg-muted">
         <Loading size="lg" label="Loading payments..." />
       </div>
     );
@@ -378,7 +379,7 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
   // Error state
   if (paymentsError) {
     return (
-      <div className="flex items-center justify-center min-h-screen px-4 bg-slate-50">
+      <div className="flex items-center justify-center min-h-screen px-4 bg-muted">
         <Alert variant="destructive" className="w-full max-w-md">
           <AlertTitle>Error Loading Payments</AlertTitle>
           <AlertDescription>
@@ -394,7 +395,7 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
   // Not authenticated
   if (!user) {
     return (
-      <div className="flex items-center justify-center min-h-screen px-4 bg-slate-50">
+      <div className="flex items-center justify-center min-h-screen px-4 bg-muted">
         <Alert variant="warning" className="w-full max-w-md">
           <AlertTitle>Authentication Required</AlertTitle>
           <AlertDescription>
@@ -410,8 +411,8 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
       <div className="mx-auto max-w-7xl">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="mb-2 text-3xl font-bold text-slate-900">Payments</h1>
-          <p className="text-slate-600">
+          <h1 className="mb-2 text-3xl font-bold text-foreground">Payments</h1>
+          <p className="text-muted-foreground">
             {isVendor
               ? 'Manage payments and view reports'
               : 'View your payment history'}
@@ -420,13 +421,13 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
 
         {/* Tab Navigation (Vendors/Admins only) */}
         {isVendor && (
-          <div className="flex gap-2 mb-6 border-b border-slate-200">
+          <div className="flex gap-2 mb-6 border-b border-border">
             <button
               onClick={() => setActiveTab('payments')}
               className={`px-4 py-2 font-medium transition-colors ${
                 activeTab === 'payments'
-                  ? 'border-b-2 border-blue-600 text-blue-600'
-                  : 'text-slate-600 hover:text-slate-900'
+                  ? 'border-b-2 border-primary text-primary'
+                  : 'text-muted-foreground hover:text-foreground'
               }`}
             >
               Payments
@@ -435,8 +436,8 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
               onClick={() => setActiveTab('reports')}
               className={`px-4 py-2 font-medium transition-colors ${
                 activeTab === 'reports'
-                  ? 'border-b-2 border-blue-600 text-blue-600'
-                  : 'text-slate-600 hover:text-slate-900'
+                  ? 'border-b-2 border-primary text-primary'
+                  : 'text-muted-foreground hover:text-foreground'
               }`}
             >
               Reports
@@ -502,15 +503,14 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
 
                           <div>
                             <Label htmlFor="currency">Currency *</Label>
-                            <select
+                            <Select
                               id="currency"
                               {...registerCreate('currency')}
-                              className="flex w-full h-10 px-3 py-2 mt-2 text-sm bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                             >
                               <option value="USD">USD</option>
                               <option value="EUR">EUR</option>
                               <option value="GBP">GBP</option>
-                            </select>
+                            </Select>
                             {createErrors.currency && (
                               <p
                                 className="mt-1 text-sm text-red-600"
@@ -524,11 +524,7 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
 
                         <div>
                           <Label htmlFor="type">Payment Type *</Label>
-                          <select
-                            id="type"
-                            {...registerCreate('type')}
-                            className="flex w-full h-10 px-3 py-2 mt-2 text-sm bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                          >
+                          <Select id="type" {...registerCreate('type')}>
                             <option value={PaymentType.INSTANT}>Instant</option>
                             <option value={PaymentType.SCHEDULED}>
                               Scheduled
@@ -536,7 +532,7 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
                             <option value={PaymentType.RECURRING}>
                               Recurring
                             </option>
-                          </select>
+                          </Select>
                           {createErrors.type && (
                             <p
                               className="mt-1 text-sm text-red-600"
@@ -629,55 +625,52 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
             <Card className="overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full">
-                  <thead className="bg-slate-50">
+                  <thead className="bg-muted">
                     <tr>
-                      <th className="px-6 py-3 text-xs font-medium tracking-wider text-left uppercase text-slate-500">
+                      <th className="px-6 py-3 text-xs font-medium tracking-wider text-left uppercase text-muted-foreground">
                         ID
                       </th>
-                      <th className="px-6 py-3 text-xs font-medium tracking-wider text-left uppercase text-slate-500">
+                      <th className="px-6 py-3 text-xs font-medium tracking-wider text-left uppercase text-muted-foreground">
                         Amount
                       </th>
-                      <th className="px-6 py-3 text-xs font-medium tracking-wider text-left uppercase text-slate-500">
+                      <th className="px-6 py-3 text-xs font-medium tracking-wider text-left uppercase text-muted-foreground">
                         Type
                       </th>
-                      <th className="px-6 py-3 text-xs font-medium tracking-wider text-left uppercase text-slate-500">
+                      <th className="px-6 py-3 text-xs font-medium tracking-wider text-left uppercase text-muted-foreground">
                         Status
                       </th>
-                      <th className="px-6 py-3 text-xs font-medium tracking-wider text-left uppercase text-slate-500">
+                      <th className="px-6 py-3 text-xs font-medium tracking-wider text-left uppercase text-muted-foreground">
                         Description
                       </th>
-                      <th className="px-6 py-3 text-xs font-medium tracking-wider text-left uppercase text-slate-500">
+                      <th className="px-6 py-3 text-xs font-medium tracking-wider text-left uppercase text-muted-foreground">
                         Created
                       </th>
-                      <th className="px-6 py-3 text-xs font-medium tracking-wider text-left uppercase text-slate-500">
+                      <th className="px-6 py-3 text-xs font-medium tracking-wider text-left uppercase text-muted-foreground">
                         Actions
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-slate-200">
+                  <tbody className="bg-card divide-y divide-border">
                     {payments && payments.length > 0 ? (
                       payments.map(payment => (
-                        <tr key={payment.id} className="hover:bg-slate-50">
+                        <tr key={payment.id} className="hover:bg-muted/50">
                           {editingPayment?.id === payment.id ? (
                             // Edit mode - single form for all fields
                             <>
-                              <td className="px-6 py-4 text-sm whitespace-nowrap text-slate-900">
+                              <td className="px-6 py-4 text-sm whitespace-nowrap text-foreground">
                                 {payment.id}
                               </td>
-                              <td className="px-6 py-4 font-mono text-sm whitespace-nowrap text-slate-900">
+                              <td className="px-6 py-4 font-mono text-sm whitespace-nowrap text-foreground">
                                 {formatCurrency(
                                   payment.amount,
                                   payment.currency
                                 )}
                               </td>
-                              <td className="px-6 py-4 text-sm whitespace-nowrap text-slate-500">
+                              <td className="px-6 py-4 text-sm whitespace-nowrap text-muted-foreground">
                                 <Badge variant="outline">{payment.type}</Badge>
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap">
-                                <select
-                                  {...registerUpdate('status')}
-                                  className="flex px-2 py-1 text-sm bg-white border border-gray-300 rounded-md h-9 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                                >
+                                <Select {...registerUpdate('status')}>
                                   <option value={PaymentStatus.PENDING}>
                                     Pending
                                   </option>
@@ -693,7 +686,7 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
                                   <option value={PaymentStatus.CANCELLED}>
                                     Cancelled
                                   </option>
-                                </select>
+                                </Select>
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap">
                                 <Input
@@ -703,7 +696,7 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
                                   className="w-full"
                                 />
                               </td>
-                              <td className="px-6 py-4 text-sm whitespace-nowrap text-slate-500">
+                              <td className="px-6 py-4 text-sm whitespace-nowrap text-muted-foreground">
                                 {formatDate(payment.createdAt)}
                               </td>
                               <td className="px-6 py-4 text-sm font-medium whitespace-nowrap">
@@ -735,16 +728,16 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
                           ) : (
                             // View mode
                             <>
-                              <td className="px-6 py-4 font-mono text-sm whitespace-nowrap text-slate-900">
+                              <td className="px-6 py-4 font-mono text-sm whitespace-nowrap text-foreground">
                                 {payment.id}
                               </td>
-                              <td className="px-6 py-4 text-sm font-medium whitespace-nowrap text-slate-900">
+                              <td className="px-6 py-4 text-sm font-medium whitespace-nowrap text-foreground">
                                 {formatCurrency(
                                   payment.amount,
                                   payment.currency
                                 )}
                               </td>
-                              <td className="px-6 py-4 text-sm whitespace-nowrap text-slate-500">
+                              <td className="px-6 py-4 text-sm whitespace-nowrap text-muted-foreground">
                                 <Badge variant="outline">{payment.type}</Badge>
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap">
@@ -761,10 +754,10 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
                                   );
                                 })()}
                               </td>
-                              <td className="px-6 py-4 text-sm text-slate-500">
+                              <td className="px-6 py-4 text-sm text-muted-foreground">
                                 {payment.description || '-'}
                               </td>
-                              <td className="px-6 py-4 text-sm whitespace-nowrap text-slate-500">
+                              <td className="px-6 py-4 text-sm whitespace-nowrap text-muted-foreground">
                                 {formatDate(payment.createdAt)}
                               </td>
                               <td className="px-6 py-4 text-sm font-medium whitespace-nowrap">
@@ -833,7 +826,7 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
                     ) : (
                       <tr>
                         <td colSpan={isVendor ? 7 : 6} className="px-6 py-10">
-                          <div className="flex flex-col items-center justify-center gap-3 text-center text-slate-600">
+                          <div className="flex flex-col items-center justify-center gap-3 text-center text-muted-foreground">
                             <p className="text-lg font-semibold">
                               {hasActiveFilters
                                 ? 'No payments match your filters'
@@ -841,7 +834,7 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
                                   ? 'No payments yet. Create the first payment.'
                                   : 'No payments found for your account.'}
                             </p>
-                            <p className="text-sm text-slate-500">
+                            <p className="text-sm text-muted-foreground">
                               {hasActiveFilters
                                 ? 'Try adjusting or clearing the filters to see more results.'
                                 : isVendor
@@ -895,7 +888,7 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
         >
           <div
             ref={dialogRef}
-            className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-white rounded-lg shadow-xl"
+            className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-background rounded-lg shadow-xl"
             onClick={e => e.stopPropagation()}
             role="dialog"
             aria-modal="true"
@@ -903,7 +896,7 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
             aria-describedby="payment-details-content"
             tabIndex={-1}
           >
-            <div className="sticky top-0 z-10 flex items-center justify-between p-4 bg-white border-b">
+            <div className="sticky top-0 z-10 flex items-center justify-between p-4 bg-background border-b border-border">
               <h2 id="payment-details-title" className="text-xl font-semibold">
                 Payment Details
               </h2>

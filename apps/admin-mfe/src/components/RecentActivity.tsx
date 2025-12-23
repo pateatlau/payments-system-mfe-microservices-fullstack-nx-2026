@@ -83,10 +83,10 @@ export function RecentActivity({
           <div className="space-y-4">
             {[...Array(5)].map((_, i) => (
               <div key={i} className="flex items-start gap-3">
-                <div className="h-8 w-8 bg-slate-200 rounded-full animate-pulse" />
+                <div className="h-8 w-8 bg-muted rounded-full animate-pulse" />
                 <div className="flex-1 space-y-2">
-                  <div className="h-4 w-3/4 bg-slate-200 rounded animate-pulse" />
-                  <div className="h-3 w-1/2 bg-slate-200 rounded animate-pulse" />
+                  <div className="h-4 w-3/4 bg-muted rounded animate-pulse" />
+                  <div className="h-3 w-1/2 bg-muted rounded animate-pulse" />
                 </div>
               </div>
             ))}
@@ -103,7 +103,7 @@ export function RecentActivity({
           <CardTitle>Recent Activity</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-center py-8 text-slate-500">
+          <div className="text-center py-8 text-muted-foreground">
             No recent activity to display
           </div>
         </CardContent>
@@ -123,14 +123,14 @@ export function RecentActivity({
               key={activity.id}
               className="flex items-start gap-3 pb-4 last:pb-0 border-b last:border-0"
             >
-              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 text-sm font-medium">
+              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-muted flex items-center justify-center text-muted-foreground text-sm font-medium">
                 {activity.type === 'user' && '👤'}
                 {activity.type === 'payment' && '💳'}
                 {activity.type === 'system' && '⚙️'}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <p className="text-sm text-slate-900">{activity.action}</p>
+                  <p className="text-sm text-foreground">{activity.action}</p>
                   <Badge variant={getActivityBadgeVariant(activity.type)}>
                     {activity.type}
                   </Badge>
@@ -149,11 +149,11 @@ export function RecentActivity({
                   )}
                 </div>
                 {activity.user && (
-                  <p className="text-xs text-slate-500 mt-1">
+                  <p className="text-xs text-muted-foreground mt-1">
                     by {activity.user}
                   </p>
                 )}
-                <p className="text-xs text-slate-400 mt-1">
+                <p className="text-xs text-muted-foreground mt-1">
                   {formatRelativeTime(activity.timestamp)}
                 </p>
               </div>

@@ -154,8 +154,8 @@ export function ProfileForm({ onSuccess }: ProfileFormProps) {
       </ToastContainer>
 
       <div className="space-y-1">
-        <h2 className="text-lg font-semibold text-slate-900">Profile</h2>
-        <p className="text-sm text-slate-600">
+        <h2 className="text-lg font-semibold text-foreground">Profile</h2>
+        <p className="text-sm text-muted-foreground">
           Update your contact information and profile details.
         </p>
       </div>
@@ -251,10 +251,10 @@ export function ProfileForm({ onSuccess }: ProfileFormProps) {
               />
             </div>
             <div className="space-y-1">
-              <p className="text-sm font-medium text-slate-700">
+              <p className="text-sm font-medium text-foreground">
                 Profile Photo
               </p>
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-muted-foreground">
                 Recommended size: 200x200px. Max 2MB.
               </p>
             </div>

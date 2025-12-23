@@ -71,14 +71,14 @@ export function ProfilePage() {
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-slate-900">Profile</h1>
-          <p className="mt-2 text-slate-600">
+          <h1 className="text-3xl font-bold text-foreground">Profile</h1>
+          <p className="mt-2 text-muted-foreground">
             Manage your personal information, preferences, and account details.
           </p>
         </div>
 
         {/* Tabs */}
-        <div className="mb-6 border-b border-slate-200">
+        <div className="mb-6 border-b border-border">
           <nav className="-mb-px flex space-x-6" aria-label="Profile tabs">
             {PROFILE_TABS.map(tab => (
               <button
@@ -89,7 +89,7 @@ export function ProfilePage() {
                   'whitespace-nowrap border-b-2 px-1 pb-2 text-sm font-medium transition-colors ' +
                   (activeTab === tab.key
                     ? 'border-primary-600 text-primary-700'
-                    : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300')
+                    : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border')
                 }
               >
                 {tab.label}
@@ -111,7 +111,7 @@ export function ProfilePage() {
         {/* Loading state */}
         {isLoading && !profile && (
           <Card className="p-6">
-            <p className="text-slate-600">Loading your profile...</p>
+            <p className="text-muted-foreground">Loading your profile...</p>
           </Card>
         )}
 

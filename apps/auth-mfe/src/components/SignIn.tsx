@@ -167,7 +167,7 @@ export function SignIn({ onSuccess, onNavigateToSignUp }: SignInProps = {}) {
             {/* Sign-up link */}
             {onNavigateToSignUp && (
               <div className="mt-6 text-center">
-                <p className="text-sm text-slate-600">
+                <p className="text-sm text-muted-foreground">
                   Don't have an account?{' '}
                   <Button
                     type="button"

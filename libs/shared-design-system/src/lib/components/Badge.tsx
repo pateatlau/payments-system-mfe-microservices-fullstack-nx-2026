@@ -15,17 +15,16 @@ const badgeVariants = cva(
     variants: {
       variant: {
         default:
-          'border-transparent bg-[rgb(var(--primary))] text-[rgb(var(--primary-foreground))] hover:bg-[rgb(var(--primary))]/80 dark:bg-[rgb(var(--primary))] dark:text-[rgb(var(--primary-foreground))] dark:hover:bg-[rgb(var(--primary))]/80',
+          'border-transparent bg-[rgb(var(--primary))] text-[rgb(var(--primary-foreground))] hover:bg-[rgb(var(--primary))]/80',
         secondary:
-          'border-transparent bg-[rgb(var(--muted))] text-[rgb(var(--muted-foreground))] hover:bg-[rgb(var(--muted))]/80 dark:bg-[rgb(var(--muted))] dark:text-[rgb(var(--muted-foreground))] dark:hover:bg-[rgb(var(--muted))]/80',
+          'border-2 border-[rgb(var(--border))] bg-[rgb(var(--secondary))] text-[rgb(var(--secondary-foreground))] hover:bg-[rgb(var(--secondary))] hover:opacity-80 shadow-sm',
         destructive:
-          'border-transparent bg-[rgb(var(--destructive))] text-[rgb(var(--destructive-foreground))] hover:bg-[rgb(var(--destructive))]/80 dark:bg-[rgb(var(--destructive))] dark:text-[rgb(var(--destructive-foreground))] dark:hover:bg-[rgb(var(--destructive))]/80',
+          'border-transparent bg-[rgb(var(--destructive))] text-[rgb(var(--destructive-foreground))] hover:bg-[rgb(var(--destructive))]/80',
         success:
-          'border-transparent bg-green-600 text-white hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-800',
+          'border-transparent bg-green-600 text-white hover:bg-green-700',
         warning:
-          'border-transparent bg-amber-600 text-white hover:bg-amber-700 dark:bg-amber-700 dark:hover:bg-amber-800',
-        outline:
-          'text-[rgb(var(--foreground))] border-[rgb(var(--border))] dark:text-[rgb(var(--foreground))] dark:border-[rgb(var(--border))]',
+          'border-transparent bg-amber-600 text-white hover:bg-amber-700',
+        outline: 'text-[rgb(var(--foreground))] border-[rgb(var(--border))]',
       },
     },
     defaultVariants: {

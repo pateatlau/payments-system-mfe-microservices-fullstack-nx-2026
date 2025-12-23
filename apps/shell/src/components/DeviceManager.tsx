@@ -27,7 +27,7 @@ export function DeviceManager(): JSX.Element {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
-        <Loading size="md" label="Loading devices..." />
+        <Loading size="lg" label="Loading devices..." />
       </div>
     );
   }
@@ -44,8 +44,8 @@ export function DeviceManager(): JSX.Element {
 
   if (!devices || devices.length === 0) {
     return (
-      <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
-        <p className="text-gray-600">No active devices found.</p>
+      <div className="p-4 bg-muted border border-border rounded-lg">
+        <p className="text-muted-foreground">No active devices found.</p>
       </div>
     );
   }
@@ -57,12 +57,14 @@ export function DeviceManager(): JSX.Element {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-gray-900">Active Devices</h2>
+        <h2 className="text-lg font-semibold text-foreground">
+          Active Devices
+        </h2>
         {otherDevices.length > 0 && (
           <button
             onClick={() => logoutOthers.mutate()}
             disabled={logoutOthers.isPending}
-            className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {logoutOthers.isPending
               ? 'Logging out...'
@@ -81,31 +83,31 @@ export function DeviceManager(): JSX.Element {
           return (
             <li
               key={device.id}
-              className="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-lg shadow-sm"
+              className="flex items-center justify-between p-4 bg-card border border-border rounded-lg shadow-sm"
             >
               <div className="flex-1">
                 <div className="flex items-center gap-2">
-                  <p className="font-medium text-gray-900">
+                  <p className="font-medium text-foreground">
                     {device.deviceName || 'Unknown Device'}
                   </p>
                   {isCurrentDevice && (
-                    <span className="px-2 py-1 text-xs font-medium text-blue-700 bg-blue-100 rounded-full">
+                    <span className="px-2 py-1 text-xs font-medium text-primary-foreground bg-primary rounded-full">
                       This Device
                     </span>
                   )}
                 </div>
                 <div className="mt-1 space-y-1">
                   {device.deviceType && (
-                    <p className="text-sm text-gray-500 capitalize">
+                    <p className="text-sm text-muted-foreground capitalize">
                       {device.deviceType}
                     </p>
                   )}
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-muted-foreground">
                     Last active:{' '}
                     {new Date(device.lastActiveAt).toLocaleString()}
                   </p>
                   {device.userAgent && (
-                    <p className="text-xs text-gray-400 truncate max-w-md">
+                    <p className="text-xs text-muted-foreground truncate max-w-md">
                       {device.userAgent}
                     </p>
                   )}
@@ -115,7 +117,7 @@ export function DeviceManager(): JSX.Element {
                 <button
                   onClick={() => logoutDevice.mutate(device.deviceId)}
                   disabled={isLoggingOut || logoutDevice.isPending}
-                  className="ml-4 px-3 py-2 text-sm font-medium text-red-600 bg-red-50 rounded-md hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="ml-4 px-3 py-2 text-sm font-medium text-red-600 bg-red-50 rounded-md hover:bg-red-100 ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isLoggingOut ? 'Logging out...' : 'Logout'}
                 </button>
@@ -126,7 +128,7 @@ export function DeviceManager(): JSX.Element {
       </ul>
 
       {devices.length === 1 && (
-        <p className="text-sm text-gray-500 text-center">
+        <p className="text-sm text-muted-foreground text-center">
           This is your only active device.
         </p>
       )}

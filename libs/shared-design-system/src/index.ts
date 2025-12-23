@@ -25,6 +25,9 @@ export type { ButtonProps } from './lib/components/Button';
 export { Input } from './lib/components/Input';
 export type { InputProps } from './lib/components/Input';
 
+export { Select } from './lib/components/Select';
+export type { SelectProps } from './lib/components/Select';
+
 export {
   Card,
   CardHeader,

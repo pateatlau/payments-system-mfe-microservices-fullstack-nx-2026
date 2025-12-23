@@ -20,6 +20,7 @@ import {
   Alert,
   AlertDescription,
   Loading,
+  Select,
 } from '@mfe/shared-design-system';
 import type { AuditLog, AuditLogFilters } from '../api/audit-logs';
 import { getAvailableActions } from '../api/audit-logs';
@@ -222,8 +223,8 @@ export function AuditLogs() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h2 className="text-2xl font-bold text-slate-900">Audit Logs</h2>
-        <p className="text-sm text-slate-600 mt-1">
+        <h2 className="text-2xl font-bold text-foreground">Audit Logs</h2>
+        <p className="text-sm text-muted-foreground mt-1">
           Track system activity and user actions
         </p>
       </div>
@@ -247,9 +248,8 @@ export function AuditLogs() {
         <CardContent>
           <div className="space-y-2">
             <Label htmlFor="action-filter">Filter by Action</Label>
-            <select
+            <Select
               id="action-filter"
-              className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={filters.action || 'ALL'}
               onChange={e => handleActionFilterChange(e.target.value)}
             >
@@ -259,7 +259,7 @@ export function AuditLogs() {
                   {action.replace(/_/g, ' ')}
                 </option>
               ))}
-            </select>
+            </Select>
           </div>
         </CardContent>
       </Card>
@@ -279,46 +279,46 @@ export function AuditLogs() {
             </div>
           ) : logs.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-slate-500">No audit logs found</p>
+              <p className="text-muted-foreground">No audit logs found</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-slate-50 border-b border-slate-200">
+                <thead className="bg-muted border-b border-border">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-slate-700 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                       Timestamp
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-slate-700 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                       User
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-slate-700 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                       Action
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-slate-700 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                       Resource
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-slate-700 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                       IP Address
                     </th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-slate-700 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">
                       Actions
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-slate-200">
+                <tbody className="bg-card divide-y divide-border">
                   {logs.map(log => (
-                    <tr key={log.id} className="hover:bg-slate-50">
+                    <tr key={log.id} className="hover:bg-muted/50">
                       <td className="px-4 py-4 whitespace-nowrap">
-                        <div className="text-sm text-slate-900">
+                        <div className="text-sm text-foreground">
                           {formatTimestamp(log.timestamp)}
                         </div>
                       </td>
                       <td className="px-4 py-4">
-                        <div className="text-sm font-medium text-slate-900">
+                        <div className="text-sm font-medium text-foreground">
                           {log.userName || 'Unknown'}
                         </div>
-                        <div className="text-xs text-slate-500">
+                        <div className="text-xs text-muted-foreground">
                           {log.userEmail}
                         </div>
                       </td>
@@ -328,15 +328,15 @@ export function AuditLogs() {
                         </Badge>
                       </td>
                       <td className="px-4 py-4">
-                        <div className="text-sm text-slate-900">
+                        <div className="text-sm text-foreground">
                           {log.resourceType}
                         </div>
-                        <div className="text-xs text-slate-500 truncate max-w-[150px]">
+                        <div className="text-xs text-muted-foreground truncate max-w-[150px]">
                           {log.resourceId}
                         </div>
                       </td>
                       <td className="px-4 py-4 whitespace-nowrap">
-                        <div className="text-sm text-slate-600">
+                        <div className="text-sm text-muted-foreground">
                           {log.ipAddress || 'N/A'}
                         </div>
                       </td>
@@ -361,10 +361,10 @@ export function AuditLogs() {
       {/* Details Modal */}
       {selectedLog && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl mx-4">
+          <div className="bg-background rounded-lg shadow-xl w-full max-w-2xl mx-4">
             {/* Header */}
-            <div className="px-6 py-4 border-b border-slate-200">
-              <h3 className="text-lg font-semibold text-slate-900">
+            <div className="px-6 py-4 border-b border-border">
+              <h3 className="text-lg font-semibold text-foreground">
                 Audit Log Details
               </h3>
             </div>
@@ -383,34 +383,34 @@ export function AuditLogs() {
                 </div>
                 <div>
                   <Label>Timestamp</Label>
-                  <p className="text-sm text-slate-900 mt-1">
+                  <p className="text-sm text-foreground mt-1">
                     {new Date(selectedLog.timestamp).toLocaleString()}
                   </p>
                 </div>
                 <div>
                   <Label>User</Label>
-                  <p className="text-sm text-slate-900 mt-1">
+                  <p className="text-sm text-foreground mt-1">
                     {selectedLog.userName || 'Unknown'}
                   </p>
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-muted-foreground">
                     {selectedLog.userEmail}
                   </p>
                 </div>
                 <div>
                   <Label>IP Address</Label>
-                  <p className="text-sm text-slate-900 mt-1">
+                  <p className="text-sm text-foreground mt-1">
                     {selectedLog.ipAddress || 'N/A'}
                   </p>
                 </div>
                 <div>
                   <Label>Resource Type</Label>
-                  <p className="text-sm text-slate-900 mt-1">
+                  <p className="text-sm text-foreground mt-1">
                     {selectedLog.resourceType}
                   </p>
                 </div>
                 <div>
                   <Label>Resource ID</Label>
-                  <p className="text-sm text-slate-900 mt-1 break-all">
+                  <p className="text-sm text-foreground mt-1 break-all">
                     {selectedLog.resourceId}
                   </p>
                 </div>
@@ -419,7 +419,7 @@ export function AuditLogs() {
               {selectedLog.details && (
                 <div>
                   <Label>Details</Label>
-                  <pre className="mt-1 p-3 bg-slate-50 border border-slate-200 rounded text-xs overflow-auto">
+                  <pre className="mt-1 p-3 bg-muted border border-border rounded text-xs overflow-auto">
                     {JSON.stringify(selectedLog.details, null, 2)}
                   </pre>
                 </div>
@@ -428,7 +428,7 @@ export function AuditLogs() {
               {selectedLog.userAgent && (
                 <div>
                   <Label>User Agent</Label>
-                  <p className="text-xs text-slate-600 mt-1 break-all">
+                  <p className="text-xs text-muted-foreground mt-1 break-all">
                     {selectedLog.userAgent}
                   </p>
                 </div>
@@ -436,7 +436,7 @@ export function AuditLogs() {
             </div>
 
             {/* Footer */}
-            <div className="px-6 py-4 border-t border-slate-200 flex justify-end">
+            <div className="px-6 py-4 border-t border-border flex justify-end">
               <Button onClick={() => setSelectedLog(null)}>Close</Button>
             </div>
           </div>
