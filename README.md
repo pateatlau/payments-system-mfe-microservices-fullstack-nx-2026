@@ -1,7 +1,7 @@
 # MFE Payments System - Production-Ready Microfrontend Platform
 
 **Version:** 0.3.0  
-**Status:** POC-3 Complete - Production-Ready Infrastructure  
+**Status:** POC-3 Complete – Production-Ready Infrastructure + UI/UX Enhancements  
 **Tech Stack:** React 19 + Nx + Rspack + Module Federation v2 + Node.js + PostgreSQL + RabbitMQ + nginx
 
 ---
@@ -267,26 +267,25 @@ pnpm test:e2e                 # End-to-end tests
 
 ## Documentation
 
-### Essential Documentation
+### Key Resources (Start Here)
 
-| Document                                                                            | Description                                         |
-| ----------------------------------------------------------------------------------- | --------------------------------------------------- |
-| [Executive Summary](docs/EXECUTIVE_SUMMARY.md)                                      | High-level architecture overview for stakeholders   |
-| [Implementation Journey](docs/IMPLEMENTATION-JOURNEY.md)                            | Complete evolution from POC-0 to POC-3              |
-| [SSL/TLS Setup Guide](docs/POC-3-Implementation/ssl-tls-setup-guide.md)             | HTTPS configuration and troubleshooting             |
-| [Observability Live Setup](docs/POC-3-Implementation/OBSERVABILITY_LIVE_SETUP.md)   | Prometheus, Grafana, Jaeger integration             |
-| [Testing Guide](docs/POC-3-Implementation/testing-guide.md)                         | Comprehensive testing instructions                  |
-| [Implementation Plan](docs/POC-3-Implementation/implementation-plan.md)             | Detailed implementation phases and progress         |
-| [CI/CD Planning](docs/POC-3-Implementation/CI-CD-PLANNING.md)                       | CI/CD pipeline planning and deployment strategy     |
-| [Storybook Implementation](docs/POC-3-Implementation/STORYBOOK-IMPLEMENTATION.md)   | Design system documentation with Storybook          |
-| [Payments MFE – Main Flow](docs/POC-3-Implementation/PAYMENTS-MFE-DOCUMENTATION.md) | Features, usage, and testing for payments main flow |
+- [Executive Summary](docs/EXECUTIVE_SUMMARY.md) – High-level overview for stakeholders
+- [Implementation Journey](docs/IMPLEMENTATION-JOURNEY.md) – Evolution from POC-0 → POC-3
+- [POC-3 Implementation Plan](docs/POC-3-Implementation/implementation-plan.md) – Phases 1–9, current status
+- [POC-3 Task List](docs/POC-3-Implementation/task-list.md) – Progress tracking checklist
+- [Dark Mode – Full Plan](docs/POC-3-Implementation/DARK-MODE-FULL-IMPLEMENTATION-PLAN.md) – Steps A–I, tests, guardrails
+- [Theme Guardrails](docs/POC-3-Implementation/THEME-GUARDRAILS.md) – ESLint rules and patterns
+- [SSL/TLS Setup Guide](docs/POC-3-Implementation/ssl-tls-setup-guide.md) – HTTPS config + troubleshooting
+- [Observability Setup](docs/POC-3-Implementation/OBSERVABILITY_LIVE_SETUP.md) – Prometheus/Grafana/Jaeger
+- [Swagger API Docs](docs/POC-3-Implementation/SWAGGER_API_DOCUMENTATION.md) – REST endpoints and auth
 
-### Additional Documentation
+### Reference (As Needed)
 
-- **API Documentation:** [Swagger API Docs](docs/POC-3-Implementation/SWAGGER_API_DOCUMENTATION.md)
-- **Event System:** [RabbitMQ Implementation](docs/POC-3-Implementation/RABBITMQ_IMPLEMENTATION.md)
-- **Security:** See implementation plan for JWT, RBAC, and security headers
-- **Architecture:** See executive summary for complete architecture diagrams
+- [ADR Index](docs/adr/) – Architecture decisions across POC-3
+- [Developer Workflow](docs/Developer-Workflow/) – Local dev and conventions
+- [Rspack Migration Notes](docs/Rspack-Migration/) – Rspack + Module Federation details
+- [Payments MFE Notes](docs/POC-3-Implementation/PAYMENT-DETAILS-INTEGRATION.md) – Key implementation details
+- For everything else, see [docs/](docs/) — many files are historical/temporary. The links above are the authoritative references.
 
 ### Payments MFE – Main Flow Highlights
 
@@ -313,5 +312,6 @@ For detailed setup instructions, troubleshooting, and development workflows, ref
 ---
 
 **Last Updated:** December 12, 2025  
-**Status:** Production-Ready Architecture - Deployment Infrastructure Pending  
+**Status:** Production-Ready Architecture + UI/UX Polished (Dark Mode, Mobile, Navigation)  
 **Next Phase:** CI/CD Pipeline + Cloud Deployment
+
