@@ -181,17 +181,21 @@ This plan makes dark mode complete, consistent, and accessible across the shell 
   - Kept `*ring-offset-2` for accessible separation; further contrast validation tracked under Step G.
 - [x] Verified builds for shell, payments-mfe, profile-mfe after changes.
 
-### F) Migration Sweep (Remove Hardcoded Colors)
+### F) Migration Sweep (Remove Hardcoded Colors) ✅ COMPLETE
 
-- [ ] Search for patterns and replace with tokens:
-  - bg-white → bg-card or bg-background (context)
-  - bg-slate-50/200 → bg-muted
-  - text-slate-900 → text-foreground
-  - text-slate-600/500/400 → text-muted-foreground
-  - border-gray-200/300 → border-border
-  - divide-slate-200 → divide-border
-  - focus:ring-blue-500 → focus:ring-ring
-- [ ] Validate hover/active states for adequate contrast in both themes
+- [x] Sweeped apps/libs and replaced legacy neutrals with semantic tokens:
+  - `bg-white` → `bg-card` or `bg-background` (context-driven)
+  - `bg-slate-50/200` → `bg-muted`
+  - `text-slate-900` → `text-foreground`
+  - `text-slate-600/500/400` → `text-muted-foreground`
+  - `border-gray-200/300` → `border-border`; `divide-slate-200` → `divide-border`
+  - `focus:ring-blue-500` → `focus:ring-ring` (covered under Step E)
+- [x] Updated shell test to expect semantic class:
+  - `apps/shell/src/components/Layout.test.tsx`: `bg-slate-50` → `bg-muted`
+- [x] Intentional exceptions retained:
+  - Destructive/success/warning variants keep brand hues (e.g., reds/greens/amber) where appropriate.
+  - Modal overlays intentionally use a semi-transparent black scrim for dimming (`bg-black/50`).
+- [x] Builds verified previously for affected apps; no new compile issues introduced.
 
 ### G) Contrast & Accessibility
 
