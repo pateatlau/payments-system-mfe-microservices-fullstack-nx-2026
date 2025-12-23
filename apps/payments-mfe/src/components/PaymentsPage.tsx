@@ -45,7 +45,7 @@ const createPaymentSchema = z.object({
     .number({ required_error: 'Amount is required' })
     .positive('Amount must be positive')
     .min(0.01, 'Amount must be at least 0.01'),
-  currency: z.string().min(1, 'Currency is required').default('USD'),
+  currency: z.string().min(1, 'Currency is required').default('INR'),
   type: z.enum([
     PaymentType.INSTANT,
     PaymentType.SCHEDULED,
@@ -173,7 +173,7 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
     resolver: zodResolver(createPaymentSchema),
     defaultValues: {
       amount: 0,
-      currency: 'USD',
+      currency: 'INR',
       // Default type: customers create instant payments; vendors default to instant as well
       type: PaymentType.INSTANT,
       description: '',
@@ -507,6 +507,7 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
                               id="currency"
                               {...registerCreate('currency')}
                             >
+                              <option value="INR">INR</option>
                               <option value="USD">USD</option>
                               <option value="EUR">EUR</option>
                               <option value="GBP">GBP</option>

@@ -263,11 +263,11 @@ export function PaymentFilters({
               {/* Display min and max values */}
               <div className="flex items-center justify-between text-sm text-muted-foreground font-semibold">
                 <span aria-live="polite">
-                  Minimum: $
+                  Minimum:{' '}
                   {watchedValues.minAmount?.toLocaleString?.() ?? MIN_AMOUNT}
                 </span>
                 <span aria-live="polite">
-                  Maximum: $
+                  Maximum:{' '}
                   {watchedValues.maxAmount?.toLocaleString?.() ?? MAX_AMOUNT}
                 </span>
               </div>
