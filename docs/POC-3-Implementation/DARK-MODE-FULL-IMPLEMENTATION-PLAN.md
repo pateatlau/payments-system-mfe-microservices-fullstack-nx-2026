@@ -173,10 +173,11 @@ This plan makes dark mode complete, consistent, and accessible across the shell 
 - Design system polish: `Skeleton` uses `bg-muted`; `Loading` uses `text-muted-foreground`.
 - Builds: Verified successful builds for payments-mfe, admin-mfe, profile-mfe, auth-mfe, and shell after refactors.
 
-### E) Interaction & Focus States
+### E) Interaction & Focus States ✅ PARTIAL
 
-- [ ] Replace `focus:ring-*` with semantic `focus:ring-ring` and ensure `--ring` works in both themes
-- [ ] Normalise `focus:ring-offset-*` against token background
+- [x] Replace `focus:ring-*` with semantic `focus:ring-ring` and ensure `--ring` works in both themes
+  - Updated in: shell (DeviceManager), profile (PreferencesForm), header unauthenticated/authenticated ThemeToggle already tokenized
+- [ ] Normalise `focus:ring-offset-*` against token background (keep `focus:ring-offset-2` for now; review contrast in Step G)
 
 ### F) Migration Sweep (Remove Hardcoded Colors)
 
