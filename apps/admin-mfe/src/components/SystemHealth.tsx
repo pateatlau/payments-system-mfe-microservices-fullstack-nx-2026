@@ -143,19 +143,19 @@ export function SystemHealth() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-slate-900">System Health</h2>
-          <p className="text-sm text-slate-600 mt-1">
+          <h2 className="text-2xl font-bold text-foreground">System Health</h2>
+          <p className="text-sm text-muted-foreground mt-1">
             Real-time monitoring of system services
           </p>
         </div>
         <div className="flex items-center gap-3">
           {/* Auto-refresh toggle */}
-          <label className="flex items-center gap-2 text-sm text-slate-700">
+          <label className="flex items-center gap-2 text-sm text-foreground">
             <input
               type="checkbox"
               checked={autoRefresh}
               onChange={e => setAutoRefresh(e.target.checked)}
-              className="rounded border-slate-300"
+              className="rounded border-border"
             />
             Auto-refresh ({refreshInterval}s)
           </label>
@@ -200,23 +200,23 @@ export function SystemHealth() {
               </div>
 
               {/* System Info */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t border-slate-200">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t border-border">
                 <div className="text-center">
-                  <div className="text-sm text-slate-600">Version</div>
-                  <div className="text-lg font-semibold text-slate-900">
+                  <div className="text-sm text-muted-foreground">Version</div>
+                  <div className="text-lg font-semibold text-foreground">
                     {healthData.version}
                   </div>
                 </div>
                 <div className="text-center">
-                  <div className="text-sm text-slate-600">Timestamp</div>
-                  <div className="text-lg font-semibold text-slate-900">
+                  <div className="text-sm text-muted-foreground">Timestamp</div>
+                  <div className="text-lg font-semibold text-foreground">
                     {new Date(healthData.timestamp).toLocaleTimeString()}
                   </div>
                 </div>
                 {healthData.uptime && (
                   <div className="text-center">
-                    <div className="text-sm text-slate-600">Uptime</div>
-                    <div className="text-lg font-semibold text-slate-900">
+                    <div className="text-sm text-muted-foreground">Uptime</div>
+                    <div className="text-lg font-semibold text-foreground">
                       {formatUptime(healthData.uptime)}
                     </div>
                   </div>
@@ -245,17 +245,17 @@ export function SystemHealth() {
               {getServiceEntries().map(service => (
                 <div
                   key={service.key}
-                  className="flex items-center justify-between p-4 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
+                  className="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors"
                 >
                   <div className="flex items-center gap-3">
                     <span className="text-2xl">
                       {getStatusIcon(service.status)}
                     </span>
                     <div>
-                      <div className="font-medium text-slate-900">
+                      <div className="font-medium text-foreground">
                         {service.name}
                       </div>
-                      <div className="text-xs text-slate-500">
+                      <div className="text-xs text-muted-foreground">
                         {service.key}
                       </div>
                     </div>
@@ -280,13 +280,13 @@ export function SystemHealth() {
         </CardHeader>
         <CardContent>
           <div className="flex items-center gap-4">
-            <label className="text-sm font-medium text-slate-700">
+            <label className="text-sm font-medium text-foreground">
               Refresh Interval:
             </label>
             <select
               value={refreshInterval}
               onChange={e => setRefreshInterval(Number(e.target.value))}
-              className="px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-3 py-2 border border-border bg-background rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
               disabled={!autoRefresh}
             >
               <option value={10}>10 seconds</option>
@@ -294,7 +294,7 @@ export function SystemHealth() {
               <option value={60}>1 minute</option>
               <option value={300}>5 minutes</option>
             </select>
-            <span className="text-sm text-slate-500">
+            <span className="text-sm text-muted-foreground">
               {autoRefresh ? 'Active' : 'Paused'}
             </span>
           </div>

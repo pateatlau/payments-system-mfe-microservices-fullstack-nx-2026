@@ -42,7 +42,7 @@ function Loading({ className, size, label, ...props }: LoadingProps) {
       >
         <span className="sr-only">{label || 'Loading...'}</span>
       </div>
-      {label && <p className="text-sm text-gray-500">{label}</p>}
+      {label && <p className="text-sm text-muted-foreground">{label}</p>}
     </div>
   );
 }

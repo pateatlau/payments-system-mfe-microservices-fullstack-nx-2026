@@ -142,23 +142,36 @@ This plan makes dark mode complete, consistent, and accessible across the shell 
   - Each remote has CSS variables defined in Step A, activated by shell's `.dark` class
 - Build status: ✅ Shell and all dependencies compile successfully
 
-### D) MFEs: Payments / Admin / Profile / Auth
+### D) MFEs: Payments / Admin / Profile / Auth ✅ COMPLETE
 
 - Payments MFE
-  - [ ] Replace hardcoded utilities in high-traffic views:
-    - [ ] src/components/PaymentsPage.tsx (tables, cards, filters, dialogs)
-    - [ ] src/components/PaymentReports.tsx
-    - [ ] src/components/PaymentFilters.tsx
-    - [ ] src/components/PaymentDetails.tsx
+  - [x] Replace hardcoded utilities in high-traffic views:
+    - [x] src/components/PaymentsPage.tsx (tables, cards, filters, dialogs)
+    - [x] src/components/PaymentReports.tsx
+    - [x] src/components/PaymentFilters.tsx
+    - [x] src/components/PaymentDetails.tsx
 - Admin MFE
-  - [ ] Update pages/dialogs/tables:
-    - [ ] AdminDashboard.tsx, AuditLogs.tsx, UserManagement.tsx
-    - [ ] Dialogs (DeleteConfirmDialog.tsx, UserFormDialog.tsx)
+  - [x] Update pages/dialogs/tables:
+    - [x] AdminDashboard.tsx, AuditLogs.tsx, UserManagement.tsx
+    - [x] Dialogs (DeleteConfirmDialog.tsx)
 - Profile MFE
-  - [ ] Update pages/forms/avatars:
-    - [ ] ProfilePage.tsx, ProfileForm.tsx, AvatarUpload.tsx, AccountInfo.tsx
+  - [x] Update pages/forms/avatars:
+    - [x] ProfilePage.tsx, ProfileForm.tsx, AvatarUpload.tsx, AccountInfo.tsx, PreferencesForm.tsx
 - Auth MFE
-  - [ ] Update screens/forms to token utilities
+  - [x] Update screens/forms to token utilities
+
+**Step D Completion Notes:**
+
+- Replaced slate/gray/white hardcoded utilities with semantic tokens across all 4 MFEs (bg/text/border/divide/ring) per mapping cheat sheet.
+- Payments: normalized filter controls, dialogs, progress bars and cards to `bg-background|bg-card`, `border-border`, `text-foreground|text-muted-foreground`, and `focus:ring-ring`.
+- Admin: tables, tabs, dialogs and empty states refactored; hover states standardized (`hover:bg-muted/50`).
+- Profile: headings/labels/values aligned to `text-foreground` with helper copy on `text-muted-foreground`; inputs/selects use `bg-background` + `border-border` + `focus:ring-primary-500` where brand-intended.
+- Auth: app shell/screens updated to use semantic surfaces and copy.
+- Shell Header (shared): moved from `text-white` to `text-primary-foreground` on `bg-primary` and updated nav/link hover styles to token-based.
+- Theme toggle: now visible and functional in unauthenticated header state as well as authenticated.
+- Sign Up button: removed hardcoded `bg-primary-600/700`; now fully semantic via design system `buttonVariants('default')`.
+- Design system polish: `Skeleton` uses `bg-muted`; `Loading` uses `text-muted-foreground`.
+- Builds: Verified successful builds for payments-mfe, admin-mfe, profile-mfe, auth-mfe, and shell after refactors.
 
 ### E) Interaction & Focus States
 

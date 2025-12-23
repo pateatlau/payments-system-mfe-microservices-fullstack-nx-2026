@@ -150,8 +150,8 @@ export function PreferencesForm({ onSuccess }: PreferencesFormProps) {
       </ToastContainer>
 
       <div className="space-y-1">
-        <h2 className="text-lg font-semibold text-slate-900">Preferences</h2>
-        <p className="text-sm text-slate-600">
+        <h2 className="text-lg font-semibold text-foreground">Preferences</h2>
+        <p className="text-sm text-muted-foreground">
           Customize your application preferences and notification settings.
         </p>
       </div>
@@ -179,7 +179,7 @@ export function PreferencesForm({ onSuccess }: PreferencesFormProps) {
           <Label htmlFor="theme">Theme</Label>
           <select
             id="theme"
-            className="flex h-10 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
             disabled={isPreferencesLoading || isSubmitting}
             {...register('theme')}
           >
@@ -257,14 +257,14 @@ export function PreferencesForm({ onSuccess }: PreferencesFormProps) {
                 >
                   Email Notifications
                 </Label>
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-muted-foreground">
                   Receive notifications via email
                 </p>
               </div>
               <input
                 type="checkbox"
                 id="notifications-email"
-                className="h-4 w-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500"
+                className="h-4 w-4 rounded border-border text-primary-600 focus:ring-primary-500"
                 disabled={isSubmitting}
                 {...register('notifications.email')}
               />
@@ -278,14 +278,14 @@ export function PreferencesForm({ onSuccess }: PreferencesFormProps) {
                 >
                   Push Notifications
                 </Label>
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-muted-foreground">
                   Receive browser notifications
                 </p>
               </div>
               <input
                 type="checkbox"
                 id="notifications-push"
-                className="h-4 w-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500"
+                className="h-4 w-4 rounded border-border text-primary-600 focus:ring-primary-500"
                 disabled={isSubmitting}
                 {...register('notifications.push')}
               />
@@ -299,14 +299,14 @@ export function PreferencesForm({ onSuccess }: PreferencesFormProps) {
                 >
                   SMS Notifications
                 </Label>
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-muted-foreground">
                   Receive text message notifications
                 </p>
               </div>
               <input
                 type="checkbox"
                 id="notifications-sms"
-                className="h-4 w-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500"
+                className="h-4 w-4 rounded border-border text-primary-600 focus:ring-primary-500"
                 disabled={isSubmitting}
                 {...register('notifications.sms')}
               />

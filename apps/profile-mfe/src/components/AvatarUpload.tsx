@@ -101,7 +101,7 @@ export function AvatarUpload({ initialUrl, onFileChange }: AvatarUploadProps) {
       />
 
       <div className="flex items-center space-x-4">
-        <div className="w-16 h-16 rounded-full overflow-hidden bg-slate-200 flex items-center justify-center">
+        <div className="w-16 h-16 rounded-full overflow-hidden bg-muted flex items-center justify-center">
           {previewUrl ? (
             <img
               src={previewUrl}
@@ -109,7 +109,7 @@ export function AvatarUpload({ initialUrl, onFileChange }: AvatarUploadProps) {
               className="w-full h-full object-cover"
             />
           ) : (
-            <span className="text-xs text-slate-500">No avatar</span>
+            <span className="text-xs text-muted-foreground">No avatar</span>
           )}
         </div>
 
@@ -129,7 +129,9 @@ export function AvatarUpload({ initialUrl, onFileChange }: AvatarUploadProps) {
               </Button>
             )}
           </div>
-          <p className="text-xs text-slate-500">PNG, JPG, or WEBP up to 5MB.</p>
+          <p className="text-xs text-muted-foreground">
+            PNG, JPG, or WEBP up to 5MB.
+          </p>
         </div>
       </div>
 

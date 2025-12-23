@@ -52,16 +52,16 @@ export function PaymentReports() {
   const StatusBars = useMemo(() => {
     const entries = Object.entries(byStatus);
     if (entries.length === 0)
-      return <p className="text-sm text-slate-500">No status data</p>;
+      return <p className="text-sm text-muted-foreground">No status data</p>;
     return (
       <div className="space-y-2" role="list" aria-label="Payments by status">
         {entries.map(([status, count]) => (
           <div key={status} role="listitem" className="space-y-1">
             <div className="flex items-center justify-between text-sm">
               <span className="capitalize">{status}</span>
-              <span className="text-slate-600">{count}</span>
+              <span className="text-muted-foreground">{count}</span>
             </div>
-            <div className="h-2 w-full bg-slate-200 rounded">
+            <div className="h-2 w-full bg-muted rounded">
               <div
                 className="h-2 bg-blue-600 rounded"
                 style={{ width: `${percent(count, totalPayments)}%` }}
@@ -77,16 +77,16 @@ export function PaymentReports() {
   const TypeBars = useMemo(() => {
     const entries = Object.entries(byType);
     if (entries.length === 0)
-      return <p className="text-sm text-slate-500">No type data</p>;
+      return <p className="text-sm text-muted-foreground">No type data</p>;
     return (
       <div className="space-y-2" role="list" aria-label="Payments by type">
         {entries.map(([type, count]) => (
           <div key={type} role="listitem" className="space-y-1">
             <div className="flex items-center justify-between text-sm">
               <span className="capitalize">{type}</span>
-              <span className="text-slate-600">{count}</span>
+              <span className="text-muted-foreground">{count}</span>
             </div>
-            <div className="h-2 w-full bg-slate-200 rounded">
+            <div className="h-2 w-full bg-muted rounded">
               <div
                 className="h-2 bg-green-600 rounded"
                 style={{ width: `${percent(count, totalPayments)}%` }}
@@ -144,7 +144,7 @@ export function PaymentReports() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
-          <p className="text-sm text-slate-600">
+          <p className="text-sm text-muted-foreground">
             Create or receive payments, then refresh to see metrics.
           </p>
           <Button onClick={() => refetch()} variant="outline">
@@ -172,7 +172,7 @@ export function PaymentReports() {
               <input
                 id="startDate"
                 type="date"
-                className="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                className="flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
                 value={startDate}
                 onChange={e => setStartDate(e.target.value)}
                 aria-label="Start date"
@@ -183,7 +183,7 @@ export function PaymentReports() {
               <input
                 id="endDate"
                 type="date"
-                className="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                className="flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
                 value={endDate}
                 onChange={e => setEndDate(e.target.value)}
                 aria-label="End date"

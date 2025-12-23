@@ -179,14 +179,14 @@ export function UserFormDialog({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
+    <div className="fixed inset-0 z-50 flex items-center justifycenter bg-black bg-opacity-50">
+      <div className="bg-background rounded-lg shadow-xl w-full max-w-md mx-4">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-slate-200">
-          <h3 className="text-lg font-semibold text-slate-900">
+        <div className="px-6 py-4 border-b border-border">
+          <h3 className="text-lg font-semibold text-foreground">
             {isEditMode ? 'Edit User' : 'Create New User'}
           </h3>
-          <p className="text-sm text-slate-600 mt-1">
+          <p className="text-sm text-muted-foreground mt-1">
             {isEditMode
               ? 'Update user information'
               : 'Add a new user to the system'}
@@ -256,7 +256,7 @@ export function UserFormDialog({
                 {errors.password && (
                   <p className="text-sm text-red-500">{errors.password}</p>
                 )}
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-muted-foreground">
                   Must be 12+ characters with uppercase, lowercase, numbers, and
                   symbols
                 </p>
@@ -271,7 +271,7 @@ export function UserFormDialog({
                 </Label>
                 <select
                   id="role"
-                  className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-border bg-background rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
                   value={formData.role}
                   onChange={e =>
                     handleInputChange('role', e.target.value as UserRole)
@@ -281,7 +281,7 @@ export function UserFormDialog({
                   <option value={UserRole.VENDOR}>Vendor</option>
                   <option value={UserRole.ADMIN}>Admin</option>
                 </select>
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-muted-foreground">
                   Role can be changed later from the user list
                 </p>
               </div>
@@ -290,7 +290,7 @@ export function UserFormDialog({
         </form>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-slate-200 flex justify-end space-x-3">
+        <div className="px-6 py-4 border-t border-border flex justify-end space-x-3">
           <Button
             type="button"
             variant="outline"

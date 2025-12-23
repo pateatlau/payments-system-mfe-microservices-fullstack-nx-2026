@@ -41,7 +41,7 @@ export function Header({
   };
 
   return (
-    <header className="sticky top-0 z-50 text-white shadow-lg bg-primary">
+    <header className="sticky top-0 z-50 text-primary-foreground shadow-lg bg-primary">
       <div className="container px-4 py-4 mx-auto">
         <div className="flex items-center justify-between">
           {/* Branding/Logo */}
@@ -56,21 +56,21 @@ export function Header({
               <div className="items-center hidden gap-4 md:flex">
                 <Link
                   to="/payments"
-                  className="px-3 py-2 text-sm font-medium transition-colors rounded-md text-slate-300 hover:text-white"
+                  className="px-3 py-2 text-sm font-medium transition-colors rounded-md text-primary-foreground/70 hover:text-primary-foreground"
                 >
                   Payments
                 </Link>
                 {/* Profile Link - Visible to all authenticated users */}
                 <Link
                   to="/profile"
-                  className="px-3 py-2 text-sm font-medium transition-colors rounded-md text-slate-300 hover:text-white"
+                  className="px-3 py-2 text-sm font-medium transition-colors rounded-md text-primary-foreground/70 hover:text-primary-foreground"
                 >
                   Profile
                 </Link>
                 {hasRole(UserRole.VENDOR) && (
                   <Link
                     to="/reports"
-                    className="px-3 py-2 text-sm font-medium transition-colors rounded-md text-slate-300 hover:text-white"
+                    className="px-3 py-2 text-sm font-medium transition-colors rounded-md text-primary-foreground/70 hover:text-primary-foreground"
                   >
                     Reports
                   </Link>
@@ -78,7 +78,7 @@ export function Header({
                 {hasRole(UserRole.ADMIN) && (
                   <Link
                     to="/admin"
-                    className="px-3 py-2 text-sm font-medium transition-colors rounded-md text-slate-300 hover:text-white"
+                    className="px-3 py-2 text-sm font-medium transition-colors rounded-md text-primary-foreground/70 hover:text-primary-foreground"
                   >
                     Admin
                   </Link>
@@ -90,14 +90,14 @@ export function Header({
             {isAuthenticated && user ? (
               <div className="flex items-center gap-4">
                 <ThemeToggle
-                  className="text-white hover:bg-white/10 focus-visible:ring-white focus-visible:ring-offset-0 dark:text-white"
+                  className="text-primary-foreground hover:bg-primary-foreground/10 focus-visible:ring-primary-foreground focus-visible:ring-offset-0 dark:text-primary-foreground"
                   aria-label="Toggle theme"
                 />
 
                 {/* User Info */}
                 <div className="flex-col items-end hidden sm:flex">
                   <span className="text-sm font-medium">{user.name}</span>
-                  <span className="text-xs capitalize text-slate-200/80">
+                  <span className="text-xs capitalize text-primary-foreground/80">
                     {user.role.toLowerCase()}
                   </span>
                 </div>
@@ -106,7 +106,7 @@ export function Header({
                 <Button
                   onClick={handleLogout}
                   variant="ghost"
-                  className="text-white hover:bg-white/10 bg-white/15"
+                  className="text-primary-foreground hover:bg-primary-foreground/10 bg-primary-foreground/15"
                   aria-label="Logout"
                 >
                   Logout
@@ -114,18 +114,19 @@ export function Header({
               </div>
             ) : (
               <div className="flex items-center gap-2">
+                <ThemeToggle
+                  className="text-primary-foreground hover:bg-primary-foreground/10 focus-visible:ring-primary-foreground focus-visible:ring-offset-0 dark:text-primary-foreground"
+                  aria-label="Toggle theme"
+                />
                 <Link
                   to="/signin"
-                  className="px-3 py-2 text-sm font-medium transition-colors rounded-md text-slate-300 hover:text-white"
+                  className="px-3 py-2 text-sm font-medium transition-colors rounded-md text-primary-foreground/70 hover:text-primary-foreground"
                 >
                   Sign In
                 </Link>
                 <Link
                   to="/signup"
-                  className={cn(
-                    buttonVariants({ variant: 'default' }),
-                    'bg-primary-600 hover:bg-primary-700'
-                  )}
+                  className={cn(buttonVariants({ variant: 'default' }))}
                 >
                   Sign Up
                 </Link>
@@ -134,7 +135,7 @@ export function Header({
 
             {/* Mobile Menu Button - For future mobile menu implementation */}
             <button
-              className="p-2 md:hidden text-slate-300 hover:text-white"
+              className="p-2 md:hidden text-primary-foreground/70 hover:text-primary-foreground"
               aria-label="Menu"
               aria-expanded="false"
             >

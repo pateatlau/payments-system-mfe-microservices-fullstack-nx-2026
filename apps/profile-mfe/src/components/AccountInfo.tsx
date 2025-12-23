@@ -45,7 +45,7 @@ export function AccountInfo() {
   if (!account) {
     return (
       <Card className="p-6">
-        <p className="text-sm text-slate-600">
+        <p className="text-sm text-muted-foreground">
           Account information is available after you sign in.
         </p>
       </Card>
@@ -56,8 +56,8 @@ export function AccountInfo() {
     <Card className="p-6 space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-semibold text-slate-900">Account</h2>
-          <p className="text-sm text-slate-600">
+          <h2 className="text-lg font-semibold text-foreground">Account</h2>
+          <p className="text-sm text-muted-foreground">
             Read-only overview of your account details.
           </p>
         </div>
@@ -68,33 +68,33 @@ export function AccountInfo() {
 
       <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3 text-sm">
         <div>
-          <dt className="font-medium text-slate-700">User ID</dt>
-          <dd className="text-slate-900 break-all">{account.id}</dd>
+          <dt className="font-medium text-foreground">User ID</dt>
+          <dd className="text-foreground break-all">{account.id}</dd>
         </div>
 
         <div>
-          <dt className="font-medium text-slate-700">Email</dt>
-          <dd className="text-slate-900">{account.email}</dd>
+          <dt className="font-medium text-foreground">Email</dt>
+          <dd className="text-foreground">{account.email}</dd>
         </div>
 
         <div>
-          <dt className="font-medium text-slate-700">Name</dt>
-          <dd className="text-slate-900">{account.name}</dd>
+          <dt className="font-medium text-foreground">Name</dt>
+          <dd className="text-foreground">{account.name}</dd>
         </div>
 
         <div>
-          <dt className="font-medium text-slate-700">Role</dt>
-          <dd className="text-slate-900">{account.role}</dd>
+          <dt className="font-medium text-foreground">Role</dt>
+          <dd className="text-foreground">{account.role}</dd>
         </div>
 
         <div>
-          <dt className="font-medium text-slate-700">Account created</dt>
-          <dd className="text-slate-900">{formatDate(account.createdAt)}</dd>
+          <dt className="font-medium text-foreground">Account created</dt>
+          <dd className="text-foreground">{formatDate(account.createdAt)}</dd>
         </div>
 
         <div>
-          <dt className="font-medium text-slate-700">Last updated</dt>
-          <dd className="text-slate-900">{formatDate(account.updatedAt)}</dd>
+          <dt className="font-medium text-muted-foreground">Last updated</dt>
+          <dd className="text-foreground">{formatDate(account.updatedAt)}</dd>
         </div>
       </dl>
     </Card>

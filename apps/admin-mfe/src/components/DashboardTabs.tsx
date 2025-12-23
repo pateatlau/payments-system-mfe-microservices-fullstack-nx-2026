@@ -6,7 +6,12 @@
 import { useState } from 'react';
 import { cn } from '@mfe/shared-design-system';
 
-export type DashboardTab = 'overview' | 'users' | 'payments' | 'audit' | 'system';
+export type DashboardTab =
+  | 'overview'
+  | 'users'
+  | 'payments'
+  | 'audit'
+  | 'system';
 
 export interface DashboardTabsProps {
   activeTab: DashboardTab;
@@ -33,7 +38,7 @@ const tabs: TabConfig[] = [
  */
 export function DashboardTabs({ activeTab, onTabChange }: DashboardTabsProps) {
   return (
-    <div className="border-b border-slate-200">
+    <div className="border-b border-border">
       <nav className="-mb-px flex space-x-8 overflow-x-auto" aria-label="Tabs">
         {tabs.map(tab => {
           const isActive = activeTab === tab.id;
@@ -44,7 +49,7 @@ export function DashboardTabs({ activeTab, onTabChange }: DashboardTabsProps) {
               className={cn(
                 isActive
                   ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300',
+                  : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border',
                 'whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium transition-colors flex items-center gap-2'
               )}
               aria-current={isActive ? 'page' : undefined}

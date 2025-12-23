@@ -209,7 +209,7 @@ export function PaymentFilters({
               <select
                 id="status"
                 {...register('status')}
-                className="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                className="flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
               >
                 <option value="all">All statuses</option>
                 <option value={PaymentStatus.PENDING}>Pending</option>
@@ -225,7 +225,7 @@ export function PaymentFilters({
               <select
                 id="type"
                 {...register('type')}
-                className="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                className="flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
               >
                 <option value="all">All types</option>
                 <option value={PaymentType.INSTANT}>Instant</option>
@@ -261,14 +261,14 @@ export function PaymentFilters({
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <Label>Amount range</Label>
-              <span className="text-xs text-slate-500">
+              <span className="text-xs text-muted-foreground">
                 {MIN_AMOUNT.toLocaleString()} - {MAX_AMOUNT.toLocaleString()}
               </span>
             </div>
 
             <div className="space-y-4">
               {/* Display min and max values */}
-              <div className="flex items-center justify-between text-sm text-slate-600 font-semibold">
+              <div className="flex items-center justify-between text-sm text-muted-foreground font-semibold">
                 <span aria-live="polite">
                   Minimum: $
                   {watchedValues.minAmount?.toLocaleString?.() ?? MIN_AMOUNT}
@@ -342,7 +342,7 @@ export function PaymentFilters({
                             />
 
                             {/* Track background */}
-                            <div className="pointer-events-none absolute top-1/2 h-2 w-full -translate-y-1/2 rounded-full border border-gray-300 bg-gray-200" />
+                            <div className="pointer-events-none absolute top-1/2 h-2 w-full -translate-y-1/2 rounded-full border border-border bg-muted" />
                             {/* Filled track */}
                             <div
                               className="pointer-events-none absolute top-1/2 h-2 -translate-y-1/2 rounded-full bg-blue-500"
@@ -438,7 +438,7 @@ export function PaymentFilters({
           </div>
 
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="text-sm text-slate-600">
+            <div className="text-sm text-muted-foreground">
               {activeFilters} active filter{activeFilters === 1 ? '' : 's'}
             </div>
             <div className="flex gap-2">

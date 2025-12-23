@@ -183,7 +183,7 @@ export function PaymentDetails({
             {onClose && (
               <button
                 onClick={onClose}
-                className="text-gray-400 hover:text-gray-600"
+                className="text-muted-foreground hover:text-foreground"
                 aria-label="Close"
               >
                 ✕
@@ -202,7 +202,7 @@ export function PaymentDetails({
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
             {/* Amount */}
             <div>
-              <label className="text-sm font-medium text-gray-600">
+              <label className="text-sm font-medium text-muted-foreground">
                 Amount
               </label>
               <p className="text-xl font-bold">
@@ -212,7 +212,7 @@ export function PaymentDetails({
 
             {/* Currency */}
             <div>
-              <label className="text-sm font-medium text-gray-600">
+              <label className="text-sm font-medium text-muted-foreground">
                 Currency
               </label>
               <p className="text-lg font-semibold">{payment.currency}</p>
@@ -220,13 +220,15 @@ export function PaymentDetails({
 
             {/* Type */}
             <div>
-              <label className="text-sm font-medium text-gray-600">Type</label>
+              <label className="text-sm font-medium text-muted-foreground">
+                Type
+              </label>
               <p className="text-lg font-semibold capitalize">{payment.type}</p>
             </div>
 
             {/* Status */}
             <div>
-              <label className="text-sm font-medium text-gray-600">
+              <label className="text-sm font-medium text-muted-foreground">
                 Status
               </label>
               {(() => {
@@ -245,7 +247,7 @@ export function PaymentDetails({
 
             {/* Created Date */}
             <div>
-              <label className="text-sm font-medium text-gray-600">
+              <label className="text-sm font-medium text-muted-foreground">
                 Created
               </label>
               <p className="text-sm">{formatDate(payment.createdAt)}</p>
@@ -254,7 +256,7 @@ export function PaymentDetails({
             {/* Completed Date */}
             {payment.completedAt && (
               <div>
-                <label className="text-sm font-medium text-gray-600">
+                <label className="text-sm font-medium text-muted-foreground">
                   Completed
                 </label>
                 <p className="text-sm">{formatDate(payment.completedAt)}</p>
@@ -264,11 +266,11 @@ export function PaymentDetails({
 
           {/* Description */}
           {payment.description && (
-            <div className="pt-4 border-t">
-              <label className="text-sm font-medium text-gray-600">
+            <div className="pt-4 border-t border-border">
+              <label className="text-sm font-medium text-muted-foreground">
                 Description
               </label>
-              <p className="mt-1 text-sm text-gray-800">
+              <p className="mt-1 text-sm text-foreground">
                 {payment.description}
               </p>
             </div>
@@ -284,8 +286,8 @@ export function PaymentDetails({
         <CardContent className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">
             {/* Sender */}
-            <div className="p-4 rounded-lg bg-gray-50">
-              <label className="text-sm font-medium text-gray-600">
+            <div className="p-4 rounded-lg bg-muted">
+              <label className="text-sm font-medium text-muted-foreground">
                 From (Sender)
               </label>
               <div className="mt-2 space-y-1">
@@ -293,17 +295,21 @@ export function PaymentDetails({
                   <p className="font-semibold">{payment.sender.email}</p>
                 )}
                 {payment.senderId && (
-                  <p className="text-xs text-gray-500">{payment.senderId}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {payment.senderId}
+                  </p>
                 )}
                 {payment.userId && !payment.senderId && (
-                  <p className="text-xs text-gray-500">{payment.userId}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {payment.userId}
+                  </p>
                 )}
               </div>
             </div>
 
             {/* Recipient */}
-            <div className="p-4 rounded-lg bg-gray-50">
-              <label className="text-sm font-medium text-gray-600">
+            <div className="p-4 rounded-lg bg-muted">
+              <label className="text-sm font-medium text-muted-foreground">
                 To (Recipient)
               </label>
               <div className="mt-2 space-y-1">
@@ -311,7 +317,9 @@ export function PaymentDetails({
                   <p className="font-semibold">{payment.recipient.email}</p>
                 )}
                 {payment.recipientId && (
-                  <p className="text-xs text-gray-500">{payment.recipientId}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {payment.recipientId}
+                  </p>
                 )}
               </div>
             </div>
@@ -329,8 +337,10 @@ export function PaymentDetails({
             <div className="space-y-2">
               {Object.entries(payment.metadata).map(([key, value]) => (
                 <div key={key} className="flex justify-between text-sm">
-                  <span className="font-medium text-gray-600">{key}:</span>
-                  <span className="text-gray-800">
+                  <span className="font-medium text-muted-foreground">
+                    {key}:
+                  </span>
+                  <span className="text-foreground">
                     {typeof value === 'object'
                       ? JSON.stringify(value)
                       : String(value)}
@@ -357,7 +367,7 @@ export function PaymentDetails({
                 (transaction: TransactionRecord, index: number) => (
                   <div
                     key={transaction.id || index}
-                    className="flex gap-4 pb-3 pl-4 border-l-2 border-gray-300 last:border-0"
+                    className="flex gap-4 pb-3 pl-4 border-l-2 border-border last:border-0"
                   >
                     <div className="pt-1">
                       <div className="w-2 h-2 bg-blue-600 rounded-full" />
@@ -367,15 +377,15 @@ export function PaymentDetails({
                         <p className="font-medium capitalize">
                           {transaction.status}
                         </p>
-                        <p className="text-xs text-gray-500">
+                        <p className="text-xs text-muted-foreground">
                           {formatDate(new Date(transaction.createdAt))}
                         </p>
                       </div>
-                      <p className="mt-1 text-sm text-gray-700">
+                      <p className="mt-1 text-sm text-foreground">
                         {transaction.statusMessage}
                       </p>
                       {transaction.pspTransactionId && (
-                        <p className="mt-1 text-xs text-gray-500">
+                        <p className="mt-1 text-xs text-muted-foreground">
                           PSP ID: {transaction.pspTransactionId}
                         </p>
                       )}
@@ -385,7 +395,9 @@ export function PaymentDetails({
               )}
             </div>
           ) : (
-            <p className="text-sm text-gray-500">No transaction history</p>
+            <p className="text-sm text-muted-foreground">
+              No transaction history
+            </p>
           )}
         </CardContent>
       </Card>
