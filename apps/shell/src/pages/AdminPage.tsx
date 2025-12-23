@@ -26,7 +26,7 @@ function AdminLoadingFallback() {
   return (
     <div className="h-full min-h-0 flex items-center justify-center">
       <div className="text-center">
-        <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
+        <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4"></div>
         <p className="text-muted-foreground">Loading admin dashboard...</p>
       </div>
     </div>

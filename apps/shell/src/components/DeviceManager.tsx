@@ -91,7 +91,7 @@ export function DeviceManager(): JSX.Element {
                     {device.deviceName || 'Unknown Device'}
                   </p>
                   {isCurrentDevice && (
-                    <span className="px-2 py-1 text-xs font-medium text-blue-700 bg-blue-100 rounded-full">
+                    <span className="px-2 py-1 text-xs font-medium text-primary-foreground bg-primary rounded-full">
                       This Device
                     </span>
                   )}

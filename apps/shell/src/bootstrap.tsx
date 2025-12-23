@@ -97,7 +97,10 @@ async function bootstrap() {
   try {
     await useThemeStore.getState().initializeTheme();
   } catch (error) {
-    console.warn('Theme initialization failed, continuing with defaults.', error);
+    console.warn(
+      'Theme initialization failed, continuing with defaults.',
+      error
+    );
   }
 
   const root = ReactDOM.createRoot(
@@ -132,7 +135,7 @@ async function bootstrap() {
               }}
               style={{
                 padding: '0.5rem 1rem',
-                backgroundColor: '#3b82f6',
+                backgroundColor: '#084683',
                 color: 'white',
                 border: 'none',
                 borderRadius: '0.375rem',

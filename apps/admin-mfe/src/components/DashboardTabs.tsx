@@ -48,7 +48,7 @@ export function DashboardTabs({ activeTab, onTabChange }: DashboardTabsProps) {
               onClick={() => onTabChange(tab.id)}
               className={cn(
                 isActive
-                  ? 'border-blue-500 text-blue-600'
+                  ? 'border-primary text-primary'
                   : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border',
                 'whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium transition-colors flex items-center gap-2'
               )}

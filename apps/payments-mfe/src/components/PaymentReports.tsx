@@ -63,7 +63,7 @@ export function PaymentReports() {
             </div>
             <div className="h-2 w-full bg-muted rounded">
               <div
-                className="h-2 bg-blue-600 rounded"
+                className="h-2 bg-primary rounded"
                 style={{ width: `${percent(count, totalPayments)}%` }}
                 aria-label={`${titleCase(status)} ${percent(count, totalPayments)}%`}
               />

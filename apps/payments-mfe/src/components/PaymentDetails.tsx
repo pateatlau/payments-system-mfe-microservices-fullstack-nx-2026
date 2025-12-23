@@ -370,7 +370,7 @@ export function PaymentDetails({
                     className="flex gap-4 pb-3 pl-4 border-l-2 border-border last:border-0"
                   >
                     <div className="pt-1">
-                      <div className="w-2 h-2 bg-blue-600 rounded-full" />
+                      <div className="w-2 h-2 bg-primary rounded-full" />
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center justify-between">

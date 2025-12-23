@@ -24,7 +24,7 @@ describe('DashboardTabs', () => {
     render(<DashboardTabs activeTab="users" onTabChange={mockOnTabChange} />);
 
     const usersTab = screen.getByText('User Management').closest('button');
-    expect(usersTab).toHaveClass('border-blue-500', 'text-blue-600');
+    expect(usersTab).toHaveClass('border-primary', 'text-primary');
   });
 
   it('calls onTabChange when a tab is clicked', () => {
