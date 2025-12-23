@@ -16,15 +16,15 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
       <select
         className={cn(
           'flex h-10 w-full items-center justify-between rounded-md border px-3 py-2 text-sm',
-          'border-(--input) border-[rgb(var(--input))]',
-          'bg-(--background) bg-[rgb(var(--background))]',
-          'text-(--foreground) text-[rgb(var(--foreground))]',
-          'ring-offset-(--background) ring-offset-[rgb(var(--background))]',
-          'placeholder:text-(--muted-foreground) placeholder:text-[rgb(var(--muted-foreground))]',
-          'focus:outline-none focus:ring-2 focus:ring-(--ring) focus:ring-[rgb(var(--ring))] focus:ring-offset-2',
+          'border-[rgb(var(--input))]',
+          'bg-[rgb(var(--background))]',
+          'text-[rgb(var(--foreground))]',
+          'ring-offset-[rgb(var(--background))]',
+          'placeholder:text-[rgb(var(--muted-foreground))]',
+          'focus:outline-none focus:ring-2 focus:ring-[rgb(var(--ring))] focus:ring-offset-2',
           'disabled:cursor-not-allowed disabled:opacity-50',
-          '[&>option]:bg-(--background) [&>option]:bg-[rgb(var(--background))]',
-          '[&>option]:text-(--foreground) [&>option]:text-[rgb(var(--foreground))]',
+          '[&>option]:bg-[rgb(var(--background))]',
+          '[&>option]:text-[rgb(var(--foreground))]',
           // Custom arrow styling
           'appearance-none bg-no-repeat',
           'bg-[length:16px_16px] bg-[right_0.75rem_center]',

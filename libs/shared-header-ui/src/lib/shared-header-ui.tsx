@@ -52,9 +52,12 @@ export function Header({
   };
 
   // Helper function to check if a path is active
+  // Matches exact path or path as a full segment (e.g., /admin matches /admin and /admin/users, but not /admin-panel)
   const isActive = (path: string) => {
+    const pathname = location.pathname;
     return (
-      location.pathname === path || location.pathname.startsWith(path + '/')
+      pathname === path ||
+      (pathname.startsWith(path + '/') && pathname[path.length] === '/')
     );
   };
 
@@ -287,8 +290,8 @@ export function Header({
                   <Link
                     to="/signup"
                     className={cn(
-                      getMobileNavLinkClasses('/signup'),
-                      'bg-background text-foreground hover:bg-muted'
+                      'w-full px-4 py-2 text-center text-sm font-semibold rounded-md transition-colors',
+                      'bg-primary text-primary-foreground hover:bg-primary/90'
                     )}
                     onClick={closeMobileMenu}
                   >
