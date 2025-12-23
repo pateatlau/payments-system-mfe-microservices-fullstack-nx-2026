@@ -2,6 +2,44 @@
 
 This document tracks known issues we’re deferring for now. Each entry includes symptoms, impact, quick workarounds, and a proposed fix for when we prioritize the item.
 
+## HIGH PRIORITY: Observability — Sentry & Error Boundaries
+
+- Symptoms: Runtime exceptions silently crash parts of the UI; unclear user context in error reports; inconsistent error surface visibility across MFEs.
+- Likely causes:
+  - No unified Sentry init across shell + MFEs.
+  - Missing ErrorBoundary wrappers around app root and critical routes.
+  - No user/context wiring to enrich events.
+- References:
+  - Planned lib: `libs/shared-observability/src/lib/sentry.ts`
+  - Bootstraps: `apps/shell/src/bootstrap.tsx`, `apps/admin-mfe/src/main.tsx`, `apps/payments-mfe/src/bootstrap.tsx`, `apps/profile-mfe/src/main.tsx`
+- Quick workarounds:
+  - Manually wrap critical components with a simple ErrorBoundary locally.
+  - Enable verbose client-side logging during debugging.
+- Proposed fix when prioritized:
+  - Add `libs/shared-observability` with `initSentry`, `SentryErrorBoundary`, `setUser`, `clearUser`.
+  - Initialize `initSentry(...)` in each app bootstrap/main.
+  - Wrap root with `SentryErrorBoundary` and instrument auth store to call `setUser`/`clearUser`.
+  - Configure DSNs via NX/VITE env vars and strip PII in before-send hooks.
+
+## HIGH PRIORITY: Backend hardening — health checks, retries & circuit breakers
+
+- Symptoms: Intermittent API failures cascade to UI errors; long stalls on failed network calls; poor visibility into downstream service failures.
+- Likely causes:
+  - Missing health/readiness endpoints and lack of alerting.
+  - No retry/backoff or circuit-breaker semantics in client calls.
+  - Unobserved timeouts and lack of graceful degradation UI.
+- References:
+  - Frontend client wrapper: `libs/shared-api-client/*` (or frontend axios/fetch wrappers)
+  - Backend services: add `/health` and `/ready` endpoints and probe configs
+- Quick workarounds:
+  - Retry manually on UI errors; enable network throttling to reproduce.
+  - Shorten frontend request timeouts to fail fast.
+- Proposed fix when prioritized:
+  - Add health/readiness endpoints and prometheus metrics on services.
+  - Implement retry + exponential backoff + circuit breaker in `libs/shared-api-client`.
+  - Surface graceful fallback UIs and retry buttons; add short e2e for retry behavior.
+  - Wire health into CI/CD checks and alerting.
+
 ## 1) Brave Browser: App fails to run
 
 - Symptoms: Blank screen or blocked network requests; console shows “Mixed Content”, CSP, or tracker/cookie blocks.
