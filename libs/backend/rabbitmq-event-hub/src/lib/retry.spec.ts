@@ -13,9 +13,18 @@ import {
 describe('Retry Utility', () => {
   describe('calculateRetryDelay', () => {
     it('should calculate exponential backoff correctly', () => {
-      const delay0 = calculateRetryDelay(0, { ...defaultRetryStrategy, jitter: false });
-      const delay1 = calculateRetryDelay(1, { ...defaultRetryStrategy, jitter: false });
-      const delay2 = calculateRetryDelay(2, { ...defaultRetryStrategy, jitter: false });
+      const delay0 = calculateRetryDelay(0, {
+        ...defaultRetryStrategy,
+        jitter: false,
+      });
+      const delay1 = calculateRetryDelay(1, {
+        ...defaultRetryStrategy,
+        jitter: false,
+      });
+      const delay2 = calculateRetryDelay(2, {
+        ...defaultRetryStrategy,
+        jitter: false,
+      });
 
       expect(delay0).toBe(1000); // 1000 * 2^0 = 1000
       expect(delay1).toBe(2000); // 1000 * 2^1 = 2000
@@ -23,13 +32,22 @@ describe('Retry Utility', () => {
     });
 
     it('should cap at max delay', () => {
-      const delay = calculateRetryDelay(10, { ...defaultRetryStrategy, jitter: false });
+      const delay = calculateRetryDelay(10, {
+        ...defaultRetryStrategy,
+        jitter: false,
+      });
       expect(delay).toBe(30000); // Max delay
     });
 
     it('should add jitter when enabled', () => {
-      const delay1 = calculateRetryDelay(0, { ...defaultRetryStrategy, jitter: true });
-      const delay2 = calculateRetryDelay(0, { ...defaultRetryStrategy, jitter: true });
+      const delay1 = calculateRetryDelay(0, {
+        ...defaultRetryStrategy,
+        jitter: true,
+      });
+      const delay2 = calculateRetryDelay(0, {
+        ...defaultRetryStrategy,
+        jitter: true,
+      });
 
       // Jitter adds ±25% randomness, so values should be different
       expect(delay1).toBeGreaterThan(700);
@@ -53,7 +71,10 @@ describe('Retry Utility', () => {
   describe('withRetry', () => {
     it('should return result on first success', async () => {
       const fn = jest.fn().mockResolvedValue('success');
-      const result = await withRetry(fn, { ...defaultRetryStrategy, maxRetries: 3 });
+      const result = await withRetry(fn, {
+        ...defaultRetryStrategy,
+        maxRetries: 3,
+      });
 
       expect(result).toBe('success');
       expect(fn).toHaveBeenCalledTimes(1);
@@ -66,10 +87,13 @@ describe('Retry Utility', () => {
         .mockRejectedValueOnce(new Error('fail 2'))
         .mockResolvedValue('success');
 
-      const result = await withRetry(
-        fn,
-        { maxRetries: 3, initialDelay: 10, maxDelay: 100, multiplier: 2, jitter: false }
-      );
+      const result = await withRetry(fn, {
+        maxRetries: 3,
+        initialDelay: 10,
+        maxDelay: 100,
+        multiplier: 2,
+        jitter: false,
+      });
 
       expect(result).toBe('success');
       expect(fn).toHaveBeenCalledTimes(3);
@@ -79,7 +103,12 @@ describe('Retry Utility', () => {
       const fn = jest.fn().mockRejectedValue(new Error('persistent failure'));
 
       await expect(
-        withRetry(fn, { maxRetries: 2, initialDelay: 10, maxDelay: 100, multiplier: 2 })
+        withRetry(fn, {
+          maxRetries: 2,
+          initialDelay: 10,
+          maxDelay: 100,
+          multiplier: 2,
+        })
       ).rejects.toThrow('Operation failed after 2 retries');
 
       expect(fn).toHaveBeenCalledTimes(3); // Initial + 2 retries
@@ -95,7 +124,13 @@ describe('Retry Utility', () => {
 
       await withRetry(
         fn,
-        { maxRetries: 3, initialDelay: 10, maxDelay: 100, multiplier: 2, jitter: false },
+        {
+          maxRetries: 3,
+          initialDelay: 10,
+          maxDelay: 100,
+          multiplier: 2,
+          jitter: false,
+        },
         onRetry
       );
 

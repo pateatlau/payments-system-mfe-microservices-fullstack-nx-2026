@@ -58,7 +58,8 @@ Obtain a token via \`POST /api/auth/login\`.
       },
       {
         url: 'http://localhost:3000',
-        description: 'Development server (HTTP direct - use for local testing only)',
+        description:
+          'Development server (HTTP direct - use for local testing only)',
       },
     ],
     tags: [
@@ -97,8 +98,16 @@ Obtain a token via \`POST /api/auth/login\`.
         User: {
           type: 'object',
           properties: {
-            id: { type: 'string', format: 'uuid', example: '550e8400-e29b-41d4-a716-446655440000' },
-            email: { type: 'string', format: 'email', example: 'user@example.com' },
+            id: {
+              type: 'string',
+              format: 'uuid',
+              example: '550e8400-e29b-41d4-a716-446655440000',
+            },
+            email: {
+              type: 'string',
+              format: 'email',
+              example: 'user@example.com',
+            },
             name: { type: 'string', example: 'John Doe' },
             role: { $ref: '#/components/schemas/UserRole' },
             emailVerified: { type: 'boolean', example: true },
@@ -117,8 +126,16 @@ Obtain a token via \`POST /api/auth/login\`.
           type: 'object',
           required: ['email', 'password', 'name'],
           properties: {
-            email: { type: 'string', format: 'email', example: 'newuser@example.com' },
-            password: { type: 'string', minLength: 12, example: 'SecurePassword123!' },
+            email: {
+              type: 'string',
+              format: 'email',
+              example: 'newuser@example.com',
+            },
+            password: {
+              type: 'string',
+              minLength: 12,
+              example: 'SecurePassword123!',
+            },
             name: { type: 'string', example: 'John Doe' },
             role: { $ref: '#/components/schemas/UserRole' },
           },
@@ -127,7 +144,11 @@ Obtain a token via \`POST /api/auth/login\`.
           type: 'object',
           required: ['email', 'password'],
           properties: {
-            email: { type: 'string', format: 'email', example: 'admin@example.com' },
+            email: {
+              type: 'string',
+              format: 'email',
+              example: 'admin@example.com',
+            },
             password: { type: 'string', example: 'Admin123!@#' },
           },
         },
@@ -135,7 +156,10 @@ Obtain a token via \`POST /api/auth/login\`.
           type: 'object',
           required: ['refreshToken'],
           properties: {
-            refreshToken: { type: 'string', example: 'dGhpcyBpcyBhIHJlZnJlc2ggdG9rZW4...' },
+            refreshToken: {
+              type: 'string',
+              example: 'dGhpcyBpcyBhIHJlZnJlc2ggdG9rZW4...',
+            },
           },
         },
         PasswordChangeRequest: {
@@ -143,7 +167,11 @@ Obtain a token via \`POST /api/auth/login\`.
           required: ['currentPassword', 'newPassword'],
           properties: {
             currentPassword: { type: 'string', example: 'OldPassword123!' },
-            newPassword: { type: 'string', minLength: 12, example: 'NewSecurePassword456!' },
+            newPassword: {
+              type: 'string',
+              minLength: 12,
+              example: 'NewSecurePassword456!',
+            },
           },
         },
         AuthResponse: {
@@ -154,8 +182,14 @@ Obtain a token via \`POST /api/auth/login\`.
               type: 'object',
               properties: {
                 user: { $ref: '#/components/schemas/User' },
-                accessToken: { type: 'string', example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' },
-                refreshToken: { type: 'string', example: 'dGhpcyBpcyBhIHJlZnJlc2ggdG9rZW4...' },
+                accessToken: {
+                  type: 'string',
+                  example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+                },
+                refreshToken: {
+                  type: 'string',
+                  example: 'dGhpcyBpcyBhIHJlZnJlc2ggdG9rZW4...',
+                },
               },
             },
             message: { type: 'string', example: 'Login successful' },
@@ -165,7 +199,14 @@ Obtain a token via \`POST /api/auth/login\`.
         // Payment schemas
         PaymentStatus: {
           type: 'string',
-          enum: ['pending', 'initiated', 'processing', 'completed', 'failed', 'cancelled'],
+          enum: [
+            'pending',
+            'initiated',
+            'processing',
+            'completed',
+            'failed',
+            'cancelled',
+          ],
           example: 'pending',
         },
         PaymentType: {
@@ -631,7 +672,10 @@ Obtain a token via \`POST /api/auth/login\`.
                           accessToken: { type: 'string' },
                         },
                       },
-                      message: { type: 'string', example: 'Token refreshed successfully' },
+                      message: {
+                        type: 'string',
+                        example: 'Token refreshed successfully',
+                      },
                     },
                   },
                 },
@@ -702,7 +746,8 @@ Obtain a token via \`POST /api/auth/login\`.
         get: {
           tags: ['Payments'],
           summary: 'List payments',
-          description: 'Get a paginated list of payments. CUSTOMER sees own payments, VENDOR sees payments they initiated, ADMIN sees all.',
+          description:
+            'Get a paginated list of payments. CUSTOMER sees own payments, VENDOR sees payments they initiated, ADMIN sees all.',
           operationId: 'getPayments',
           security: [{ bearerAuth: [] }],
           parameters: [
@@ -736,7 +781,9 @@ Obtain a token via \`POST /api/auth/login\`.
                         type: 'array',
                         items: { $ref: '#/components/schemas/Payment' },
                       },
-                      pagination: { $ref: '#/components/schemas/PaginationMeta' },
+                      pagination: {
+                        $ref: '#/components/schemas/PaginationMeta',
+                      },
                     },
                   },
                 },
@@ -748,7 +795,8 @@ Obtain a token via \`POST /api/auth/login\`.
         post: {
           tags: ['Payments'],
           summary: 'Create payment',
-          description: 'Create a new payment. Note: All payment processing is stubbed - no real PSP integration.',
+          description:
+            'Create a new payment. Note: All payment processing is stubbed - no real PSP integration.',
           operationId: 'createPayment',
           security: [{ bearerAuth: [] }],
           requestBody: {
@@ -769,7 +817,10 @@ Obtain a token via \`POST /api/auth/login\`.
                     properties: {
                       success: { type: 'boolean', example: true },
                       data: { $ref: '#/components/schemas/Payment' },
-                      message: { type: 'string', example: 'Payment created successfully' },
+                      message: {
+                        type: 'string',
+                        example: 'Payment created successfully',
+                      },
                     },
                   },
                 },
@@ -855,7 +906,10 @@ Obtain a token via \`POST /api/auth/login\`.
                     properties: {
                       success: { type: 'boolean', example: true },
                       data: { $ref: '#/components/schemas/Payment' },
-                      message: { type: 'string', example: 'Payment updated successfully' },
+                      message: {
+                        type: 'string',
+                        example: 'Payment updated successfully',
+                      },
                     },
                   },
                 },
@@ -901,7 +955,8 @@ Obtain a token via \`POST /api/auth/login\`.
         post: {
           tags: ['Payments'],
           summary: 'Update payment status',
-          description: 'Update the status of a payment (VENDOR, ADMIN only). Valid transitions: pending→initiated/cancelled, initiated→processing/cancelled, processing→completed/failed.',
+          description:
+            'Update the status of a payment (VENDOR, ADMIN only). Valid transitions: pending→initiated/cancelled, initiated→processing/cancelled, processing→completed/failed.',
           operationId: 'updatePaymentStatus',
           security: [{ bearerAuth: [] }],
           parameters: [
@@ -917,7 +972,9 @@ Obtain a token via \`POST /api/auth/login\`.
             required: true,
             content: {
               'application/json': {
-                schema: { $ref: '#/components/schemas/UpdatePaymentStatusRequest' },
+                schema: {
+                  $ref: '#/components/schemas/UpdatePaymentStatusRequest',
+                },
               },
             },
           },
@@ -989,7 +1046,9 @@ Obtain a token via \`POST /api/auth/login\`.
                         type: 'array',
                         items: { $ref: '#/components/schemas/User' },
                       },
-                      pagination: { $ref: '#/components/schemas/PaginationMeta' },
+                      pagination: {
+                        $ref: '#/components/schemas/PaginationMeta',
+                      },
                     },
                   },
                 },
@@ -1023,7 +1082,10 @@ Obtain a token via \`POST /api/auth/login\`.
                     properties: {
                       success: { type: 'boolean', example: true },
                       data: { $ref: '#/components/schemas/User' },
-                      message: { type: 'string', example: 'User created successfully' },
+                      message: {
+                        type: 'string',
+                        example: 'User created successfully',
+                      },
                     },
                   },
                 },
@@ -1110,7 +1172,10 @@ Obtain a token via \`POST /api/auth/login\`.
                     properties: {
                       success: { type: 'boolean', example: true },
                       data: { $ref: '#/components/schemas/User' },
-                      message: { type: 'string', example: 'User updated successfully' },
+                      message: {
+                        type: 'string',
+                        example: 'User updated successfully',
+                      },
                     },
                   },
                 },
@@ -1289,7 +1354,10 @@ Obtain a token via \`POST /api/auth/login\`.
                     properties: {
                       success: { type: 'boolean', example: true },
                       data: { $ref: '#/components/schemas/Profile' },
-                      message: { type: 'string', example: 'Profile updated successfully' },
+                      message: {
+                        type: 'string',
+                        example: 'Profile updated successfully',
+                      },
                     },
                   },
                 },
@@ -1335,7 +1403,9 @@ Obtain a token via \`POST /api/auth/login\`.
             required: true,
             content: {
               'application/json': {
-                schema: { $ref: '#/components/schemas/UpdatePreferencesRequest' },
+                schema: {
+                  $ref: '#/components/schemas/UpdatePreferencesRequest',
+                },
               },
             },
           },
@@ -1349,7 +1419,10 @@ Obtain a token via \`POST /api/auth/login\`.
                     properties: {
                       success: { type: 'boolean', example: true },
                       data: { $ref: '#/components/schemas/Preferences' },
-                      message: { type: 'string', example: 'Preferences updated successfully' },
+                      message: {
+                        type: 'string',
+                        example: 'Preferences updated successfully',
+                      },
                     },
                   },
                 },
@@ -1364,4 +1437,3 @@ Obtain a token via \`POST /api/auth/login\`.
   },
   apis: [], // We define paths inline in the definition
 };
-

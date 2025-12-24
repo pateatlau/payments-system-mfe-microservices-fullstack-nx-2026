@@ -14,7 +14,12 @@ export default {
   },
   moduleFileExtensions: ['ts', 'js', 'html'],
   coverageDirectory: '../../../coverage/libs/backend/cache',
-  coveragePathIgnorePatterns: ['/node_modules/', '/dist/', '/.nx/', '/__mocks__/'],
+  coveragePathIgnorePatterns: [
+    '/node_modules/',
+    '/dist/',
+    '/.nx/',
+    '/__mocks__/',
+  ],
   collectCoverageFrom: [
     'src/**/*.ts',
     '!src/**/*.test.ts',

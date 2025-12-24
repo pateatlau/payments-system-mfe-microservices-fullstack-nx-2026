@@ -108,15 +108,15 @@ export async function applyGraphQLMiddleware(
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer <token> (for authenticated queries)',
+        Authorization: 'Bearer <token> (for authenticated queries)',
       },
       exampleQuery: {
         query: '{ health { status timestamp service } }',
       },
       tools: {
         'Apollo Studio': 'https://studio.apollographql.com/sandbox/explorer',
-        'Postman': 'Import from /api-docs.json',
-        'curl': 'curl -X POST https://localhost/graphql -H "Content-Type: application/json" -d \'{"query":"{ health { status } }"}\'',
+        Postman: 'Import from /api-docs.json',
+        curl: 'curl -X POST https://localhost/graphql -H "Content-Type: application/json" -d \'{"query":"{ health { status } }"}\'',
       },
     });
   });

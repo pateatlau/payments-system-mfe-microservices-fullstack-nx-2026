@@ -31,9 +31,9 @@ export function usePaymentsGraphQL() {
 
   return {
     payments:
-      (data as { payments?: { edges?: Array<{ node: Payment }> } })?.payments?.edges?.map(
-        (edge: { node: Payment }) => edge.node
-      ) || [],
+      (
+        data as { payments?: { edges?: Array<{ node: Payment }> } }
+      )?.payments?.edges?.map((edge: { node: Payment }) => edge.node) || [],
     loading,
     error,
     refetch,
@@ -127,7 +127,9 @@ export function useDeletePaymentGraphQL() {
   return {
     deletePayment: async (id: string) => {
       const result = await deletePayment({ variables: { id } });
-      return (result.data as { deletePayment?: boolean })?.deletePayment || false;
+      return (
+        (result.data as { deletePayment?: boolean })?.deletePayment || false
+      );
     },
     loading,
     error,

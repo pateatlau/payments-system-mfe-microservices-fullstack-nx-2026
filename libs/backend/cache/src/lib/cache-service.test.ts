@@ -19,10 +19,10 @@ describe('CacheService', () => {
       enableStats: true,
     };
     cacheService = new CacheService(config);
-    
+
     // Wait for connection to fully establish
     await new Promise(resolve => setTimeout(resolve, 1000));
-    
+
     // Verify connection
     const isHealthy = await cacheService.isHealthy();
     if (!isHealthy) {
@@ -48,7 +48,7 @@ describe('CacheService', () => {
   beforeEach(async () => {
     // Reset stats before each test
     cacheService.resetStats();
-    
+
     // Clear test keys
     try {
       await cacheService.flush();
@@ -63,7 +63,9 @@ describe('CacheService', () => {
       const testData = { id: '1', name: 'Test User' };
 
       await cacheService.set('user:1', testData);
-      const result = await cacheService.get<{ id: string; name: string }>('user:1');
+      const result = await cacheService.get<{ id: string; name: string }>(
+        'user:1'
+      );
 
       expect(result).toEqual(testData);
     });
@@ -76,7 +78,7 @@ describe('CacheService', () => {
     it('should delete a key', async () => {
       await cacheService.set('user:1', { id: '1' });
       await cacheService.delete('user:1');
-      
+
       const result = await cacheService.get('user:1');
       expect(result).toBeNull();
     });
@@ -118,7 +120,7 @@ describe('CacheService', () => {
       await cacheService.set('temp:key', 'value', { ttl: 10 });
 
       const ttl = await cacheService.getTtl('temp:key');
-      
+
       // TTL should be between 9-10 seconds
       expect(ttl).toBeGreaterThan(8);
       expect(ttl).toBeLessThanOrEqual(10);
@@ -143,7 +145,11 @@ describe('CacheService', () => {
     });
 
     it('should invalidate multiple tags', async () => {
-      await cacheService.set('user:1', { id: '1' }, { tags: ['users', 'active'] });
+      await cacheService.set(
+        'user:1',
+        { id: '1' },
+        { tags: ['users', 'active'] }
+      );
       await cacheService.set('user:2', { id: '2' }, { tags: ['users'] });
       await cacheService.set('payment:1', { id: '1' }, { tags: ['payments'] });
 
@@ -159,14 +165,14 @@ describe('CacheService', () => {
     it('should track hits and misses', async () => {
       // Reset stats at the start
       cacheService.resetStats();
-      
+
       await cacheService.set('key1', 'value1');
       // Small delay for Redis
       await new Promise(resolve => setTimeout(resolve, 10));
 
       // Hit
       await cacheService.get('key1');
-      
+
       // Miss
       await cacheService.get('key2');
 
@@ -195,7 +201,7 @@ describe('CacheService', () => {
     it('should reset statistics', async () => {
       await cacheService.set('key', 'value');
       await cacheService.get('key');
-      
+
       cacheService.resetStats();
       const stats = cacheService.getStats();
 
@@ -211,13 +217,13 @@ describe('CacheService', () => {
       await cacheService.set('key', 'value');
       // Small delay for Redis
       await new Promise(resolve => setTimeout(resolve, 10));
-      
+
       const exists = await cacheService.exists('key');
       expect(exists).toBe(true);
 
       await cacheService.delete('key');
       await new Promise(resolve => setTimeout(resolve, 10));
-      
+
       const exists2 = await cacheService.exists('key');
       expect(exists2).toBe(false);
     });
@@ -225,7 +231,7 @@ describe('CacheService', () => {
     it('should check Redis health', async () => {
       // Small delay to ensure connection is established
       await new Promise(resolve => setTimeout(resolve, 100));
-      
+
       const isHealthy = await cacheService.isHealthy();
       expect(isHealthy).toBe(true);
     });

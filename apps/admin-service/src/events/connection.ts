@@ -29,7 +29,7 @@ export function getConnectionManager(): RabbitMQConnectionManager {
     });
 
     // Connect on first access
-    connectionManager.connect().catch((error) => {
+    connectionManager.connect().catch(error => {
       console.error('[Admin Service] Failed to connect to RabbitMQ:', error);
     });
   }

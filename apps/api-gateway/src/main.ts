@@ -173,13 +173,13 @@ const wsServer = createWebSocketServer(httpServer);
   try {
     // Initialize GraphQL server
     apolloServer = createApolloServer();
-    
+
     // GraphQL needs body parsing (JSON) - apply it only for /graphql route
     app.use('/graphql', express.json());
-    
+
     // Apply optional auth to extract user from token if present
     app.use('/graphql', optionalAuth);
-    
+
     // Apply GraphQL middleware BEFORE error handlers
     await applyGraphQLMiddleware(app, apolloServer);
 

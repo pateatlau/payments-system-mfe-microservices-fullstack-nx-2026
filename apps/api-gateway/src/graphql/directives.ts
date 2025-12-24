@@ -14,10 +14,19 @@ import type { GraphQLContext } from './context';
 export function authDirectiveTransformer(schema: GraphQLSchema): GraphQLSchema {
   return mapSchema(schema, {
     [MapperKind.OBJECT_FIELD]: (fieldConfig, _fieldName, _typeName) => {
-      const authDirective = (getDirective as any)(schema, fieldConfig, 'auth')?.[0];
+      const authDirective = (getDirective as any)(
+        schema,
+        fieldConfig,
+        'auth'
+      )?.[0];
       if (authDirective) {
         const { resolve = defaultFieldResolver } = fieldConfig;
-        fieldConfig.resolve = async (source, args, context: GraphQLContext, info) => {
+        fieldConfig.resolve = async (
+          source,
+          args,
+          context: GraphQLContext,
+          info
+        ) => {
           if (!context.user) {
             throw new GraphQLError('Authentication required', {
               extensions: { code: 'UNAUTHENTICATED', status: 401 },
@@ -39,10 +48,19 @@ export function adminDirectiveTransformer(
 ): GraphQLSchema {
   return mapSchema(schema, {
     [MapperKind.OBJECT_FIELD]: (fieldConfig, _fieldName, _typeName) => {
-      const adminDirective = (getDirective as any)(schema, fieldConfig, 'admin')?.[0];
+      const adminDirective = (getDirective as any)(
+        schema,
+        fieldConfig,
+        'admin'
+      )?.[0];
       if (adminDirective) {
         const { resolve = defaultFieldResolver } = fieldConfig;
-        fieldConfig.resolve = async (source, args, context: GraphQLContext, info) => {
+        fieldConfig.resolve = async (
+          source,
+          args,
+          context: GraphQLContext,
+          info
+        ) => {
           if (!context.user) {
             throw new GraphQLError('Authentication required', {
               extensions: { code: 'UNAUTHENTICATED', status: 401 },

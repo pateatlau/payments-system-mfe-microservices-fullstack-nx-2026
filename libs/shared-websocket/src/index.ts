@@ -25,7 +25,10 @@ export type {
 } from './lib/types';
 
 // Context
-export { WebSocketProvider, useWebSocketContext } from './context/WebSocketProvider';
+export {
+  WebSocketProvider,
+  useWebSocketContext,
+} from './context/WebSocketProvider';
 export type { WebSocketProviderProps } from './context/WebSocketProvider';
 
 // Hooks

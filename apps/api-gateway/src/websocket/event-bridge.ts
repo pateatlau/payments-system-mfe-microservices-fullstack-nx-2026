@@ -68,7 +68,7 @@ export class WebSocketEventBridge {
         this.config.rabbitmqUrl ||
         process.env['RABBITMQ_URL'] ||
         'amqp://admin:admin@localhost:5672';
-      
+
       // Fix common credential issues:
       // 1. If URL has guest:guest (wrong credentials), replace with admin:admin
       // 2. If URL doesn't have credentials, add admin:admin
@@ -76,11 +76,17 @@ export class WebSocketEventBridge {
       if (rabbitmqUrl.includes('guest:guest')) {
         // Replace guest:guest with admin:admin
         finalUrl = rabbitmqUrl.replace('guest:guest', 'admin:admin');
-        logger.warn('RabbitMQ URL had guest:guest credentials, replaced with admin:admin', {
-          original: rabbitmqUrl,
-          fixed: finalUrl,
-        });
-      } else if (rabbitmqUrl.startsWith('amqp://localhost') || rabbitmqUrl.startsWith('amqp://127.0.0.1')) {
+        logger.warn(
+          'RabbitMQ URL had guest:guest credentials, replaced with admin:admin',
+          {
+            original: rabbitmqUrl,
+            fixed: finalUrl,
+          }
+        );
+      } else if (
+        rabbitmqUrl.startsWith('amqp://localhost') ||
+        rabbitmqUrl.startsWith('amqp://127.0.0.1')
+      ) {
         // URL doesn't have credentials, add admin:admin
         finalUrl = rabbitmqUrl.replace('amqp://', 'amqp://admin:admin@');
         logger.warn('RabbitMQ URL missing credentials, added admin:admin', {
@@ -88,7 +94,7 @@ export class WebSocketEventBridge {
           fixed: finalUrl,
         });
       }
-      
+
       this.connectionManager = new RabbitMQConnectionManager({
         url: finalUrl,
       });
@@ -165,62 +171,66 @@ export class WebSocketEventBridge {
       queue: `api-gateway-websocket-payments-${this.config.consumerTag || 'default'}`,
     });
 
-    await this.paymentSubscriber.subscribe(async (event: BaseEvent, context: EventContext) => {
-      this.eventsReceived++;
-      this.incrementEventType(event.type);
+    await this.paymentSubscriber.subscribe(
+      async (event: BaseEvent, context: EventContext) => {
+        this.eventsReceived++;
+        this.incrementEventType(event.type);
 
-      try {
-        // Extract user ID (support both senderId and userId)
-        const eventData = event.data as { senderId?: string; userId?: string } | undefined;
-        const userId = eventData?.senderId || eventData?.userId;
+        try {
+          // Extract user ID (support both senderId and userId)
+          const eventData = event.data as
+            | { senderId?: string; userId?: string }
+            | undefined;
+          const userId = eventData?.senderId || eventData?.userId;
 
-        // Extract event subtype (e.g., payments.payment.created → created)
-        const eventSubtype = event.type.split('.').pop() || 'unknown';
+          // Extract event subtype (e.g., payments.payment.created → created)
+          const eventSubtype = event.type.split('.').pop() || 'unknown';
 
-        // Create WebSocket message
-        const wsMessage: WebSocketMessage = {
-          type: 'event',
-          payload: {
-            eventType: `payment:${eventSubtype}`,
-            data: event.data,
-          },
-          timestamp: event.timestamp,
-        };
+          // Create WebSocket message
+          const wsMessage: WebSocketMessage = {
+            type: 'event',
+            payload: {
+              eventType: `payment:${eventSubtype}`,
+              data: event.data,
+            },
+            timestamp: event.timestamp,
+          };
 
-        const messageStr = JSON.stringify(wsMessage);
+          const messageStr = JSON.stringify(wsMessage);
 
-        // Forward to user-specific room
-        if (userId) {
-          this.roomManager.broadcast(`user:${userId}`, messageStr);
+          // Forward to user-specific room
+          if (userId) {
+            this.roomManager.broadcast(`user:${userId}`, messageStr);
+            this.eventsForwarded++;
+
+            logger.debug('Payment event forwarded to user room', {
+              eventType: event.type,
+              userId,
+              roomSize: this.roomManager.getRoomSize(`user:${userId}`),
+            });
+          }
+
+          // Always forward to admin room
+          this.roomManager.broadcast('role:admin', messageStr);
           this.eventsForwarded++;
 
-          logger.debug('Payment event forwarded to user room', {
+          logger.debug('Payment event forwarded to admin room', {
             eventType: event.type,
-            userId,
-            roomSize: this.roomManager.getRoomSize(`user:${userId}`),
+            roomSize: this.roomManager.getRoomSize('role:admin'),
           });
+
+          // Acknowledge the message
+          context.ack();
+        } catch (error) {
+          logger.error('Failed to forward payment event', {
+            error,
+            eventType: event.type,
+          });
+          // Reject the message (will go to DLQ if configured)
+          context.nack();
         }
-
-        // Always forward to admin room
-        this.roomManager.broadcast('role:admin', messageStr);
-        this.eventsForwarded++;
-
-        logger.debug('Payment event forwarded to admin room', {
-          eventType: event.type,
-          roomSize: this.roomManager.getRoomSize('role:admin'),
-        });
-
-        // Acknowledge the message
-        context.ack();
-      } catch (error) {
-        logger.error('Failed to forward payment event', {
-          error,
-          eventType: event.type,
-        });
-        // Reject the message (will go to DLQ if configured)
-        context.nack();
       }
-    });
+    );
 
     logger.info('Subscribed to payment events (payments.#)');
   }
@@ -238,55 +248,57 @@ export class WebSocketEventBridge {
       queue: `api-gateway-websocket-auth-${this.config.consumerTag || 'default'}`,
     });
 
-    await this.authSubscriber.subscribe(async (event: BaseEvent, context: EventContext) => {
-      this.eventsReceived++;
-      this.incrementEventType(event.type);
+    await this.authSubscriber.subscribe(
+      async (event: BaseEvent, context: EventContext) => {
+        this.eventsReceived++;
+        this.incrementEventType(event.type);
 
-      try {
-        const eventData = event.data as { userId?: string } | undefined;
-        const userId = eventData?.userId;
+        try {
+          const eventData = event.data as { userId?: string } | undefined;
+          const userId = eventData?.userId;
 
-        if (!userId) {
-          logger.warn('Auth event missing userId', { eventType: event.type });
-          return;
+          if (!userId) {
+            logger.warn('Auth event missing userId', { eventType: event.type });
+            return;
+          }
+
+          // Extract event subtype (e.g., auth.user.login → login)
+          const eventSubtype = event.type.split('.').pop() || 'unknown';
+
+          // Create WebSocket message
+          const wsMessage: WebSocketMessage = {
+            type: 'event',
+            payload: {
+              eventType: `session:${eventSubtype}`,
+              data: event.data,
+            },
+            timestamp: event.timestamp,
+          };
+
+          const messageStr = JSON.stringify(wsMessage);
+
+          // Forward to user-specific room (for cross-tab/device sync)
+          this.roomManager.broadcast(`user:${userId}`, messageStr);
+          this.eventsForwarded++;
+
+          logger.debug('Auth event forwarded to user room', {
+            eventType: event.type,
+            userId,
+            roomSize: this.roomManager.getRoomSize(`user:${userId}`),
+          });
+
+          // Acknowledge the message
+          context.ack();
+        } catch (error) {
+          logger.error('Failed to forward auth event', {
+            error,
+            eventType: event.type,
+          });
+          // Reject the message
+          context.nack();
         }
-
-        // Extract event subtype (e.g., auth.user.login → login)
-        const eventSubtype = event.type.split('.').pop() || 'unknown';
-
-        // Create WebSocket message
-        const wsMessage: WebSocketMessage = {
-          type: 'event',
-          payload: {
-            eventType: `session:${eventSubtype}`,
-            data: event.data,
-          },
-          timestamp: event.timestamp,
-        };
-
-        const messageStr = JSON.stringify(wsMessage);
-
-        // Forward to user-specific room (for cross-tab/device sync)
-        this.roomManager.broadcast(`user:${userId}`, messageStr);
-        this.eventsForwarded++;
-
-        logger.debug('Auth event forwarded to user room', {
-          eventType: event.type,
-          userId,
-          roomSize: this.roomManager.getRoomSize(`user:${userId}`),
-        });
-
-        // Acknowledge the message
-        context.ack();
-      } catch (error) {
-        logger.error('Failed to forward auth event', {
-          error,
-          eventType: event.type,
-        });
-        // Reject the message
-        context.nack();
       }
-    });
+    );
 
     logger.info('Subscribed to auth events (auth.#)');
   }
@@ -304,47 +316,49 @@ export class WebSocketEventBridge {
       queue: `api-gateway-websocket-admin-${this.config.consumerTag || 'default'}`,
     });
 
-    await this.adminSubscriber.subscribe(async (event: BaseEvent, context: EventContext) => {
-      this.eventsReceived++;
-      this.incrementEventType(event.type);
+    await this.adminSubscriber.subscribe(
+      async (event: BaseEvent, context: EventContext) => {
+        this.eventsReceived++;
+        this.incrementEventType(event.type);
 
-      try {
-        // Extract event subtype (e.g., admin.audit.created → audit-created)
-        const eventParts = event.type.split('.');
-        const eventSubtype = eventParts.slice(1).join('-');
+        try {
+          // Extract event subtype (e.g., admin.audit.created → audit-created)
+          const eventParts = event.type.split('.');
+          const eventSubtype = eventParts.slice(1).join('-');
 
-        // Create WebSocket message
-        const wsMessage: WebSocketMessage = {
-          type: 'event',
-          payload: {
-            eventType: `admin:${eventSubtype}`,
-            data: event.data,
-          },
-          timestamp: event.timestamp,
-        };
+          // Create WebSocket message
+          const wsMessage: WebSocketMessage = {
+            type: 'event',
+            payload: {
+              eventType: `admin:${eventSubtype}`,
+              data: event.data,
+            },
+            timestamp: event.timestamp,
+          };
 
-        const messageStr = JSON.stringify(wsMessage);
+          const messageStr = JSON.stringify(wsMessage);
 
-        // Forward to admin room only
-        this.roomManager.broadcast('role:admin', messageStr);
-        this.eventsForwarded++;
+          // Forward to admin room only
+          this.roomManager.broadcast('role:admin', messageStr);
+          this.eventsForwarded++;
 
-        logger.debug('Admin event forwarded to admin room', {
-          eventType: event.type,
-          roomSize: this.roomManager.getRoomSize('role:admin'),
-        });
+          logger.debug('Admin event forwarded to admin room', {
+            eventType: event.type,
+            roomSize: this.roomManager.getRoomSize('role:admin'),
+          });
 
-        // Acknowledge the message
-        context.ack();
-      } catch (error) {
-        logger.error('Failed to forward admin event', {
-          error,
-          eventType: event.type,
-        });
-        // Reject the message
-        context.nack();
+          // Acknowledge the message
+          context.ack();
+        } catch (error) {
+          logger.error('Failed to forward admin event', {
+            error,
+            eventType: event.type,
+          });
+          // Reject the message
+          context.nack();
+        }
       }
-    });
+    );
 
     logger.info('Subscribed to admin events (admin.#)');
   }
@@ -362,55 +376,57 @@ export class WebSocketEventBridge {
       queue: `api-gateway-websocket-user-${this.config.consumerTag || 'default'}`,
     });
 
-    await this.userSubscriber.subscribe(async (event: BaseEvent, context: EventContext) => {
-      this.eventsReceived++;
-      this.incrementEventType(event.type);
+    await this.userSubscriber.subscribe(
+      async (event: BaseEvent, context: EventContext) => {
+        this.eventsReceived++;
+        this.incrementEventType(event.type);
 
-      try {
-        const eventData = event.data as { userId?: string } | undefined;
-        const userId = eventData?.userId;
+        try {
+          const eventData = event.data as { userId?: string } | undefined;
+          const userId = eventData?.userId;
 
-        if (!userId) {
-          logger.warn('User event missing userId', { eventType: event.type });
-          return;
+          if (!userId) {
+            logger.warn('User event missing userId', { eventType: event.type });
+            return;
+          }
+
+          // Extract event subtype
+          const eventSubtype = event.type.split('.').pop() || 'unknown';
+
+          // Create WebSocket message
+          const wsMessage: WebSocketMessage = {
+            type: 'event',
+            payload: {
+              eventType: `user:${eventSubtype}`,
+              data: event.data,
+            },
+            timestamp: event.timestamp,
+          };
+
+          const messageStr = JSON.stringify(wsMessage);
+
+          // Forward to user-specific room
+          this.roomManager.broadcast(`user:${userId}`, messageStr);
+          this.eventsForwarded++;
+
+          logger.debug('User event forwarded to user room', {
+            eventType: event.type,
+            userId,
+            roomSize: this.roomManager.getRoomSize(`user:${userId}`),
+          });
+
+          // Acknowledge the message
+          context.ack();
+        } catch (error) {
+          logger.error('Failed to forward user event', {
+            error,
+            eventType: event.type,
+          });
+          // Reject the message
+          context.nack();
         }
-
-        // Extract event subtype
-        const eventSubtype = event.type.split('.').pop() || 'unknown';
-
-        // Create WebSocket message
-        const wsMessage: WebSocketMessage = {
-          type: 'event',
-          payload: {
-            eventType: `user:${eventSubtype}`,
-            data: event.data,
-          },
-          timestamp: event.timestamp,
-        };
-
-        const messageStr = JSON.stringify(wsMessage);
-
-        // Forward to user-specific room
-        this.roomManager.broadcast(`user:${userId}`, messageStr);
-        this.eventsForwarded++;
-
-        logger.debug('User event forwarded to user room', {
-          eventType: event.type,
-          userId,
-          roomSize: this.roomManager.getRoomSize(`user:${userId}`),
-        });
-
-        // Acknowledge the message
-        context.ack();
-      } catch (error) {
-        logger.error('Failed to forward user event', {
-          error,
-          eventType: event.type,
-        });
-        // Reject the message
-        context.nack();
       }
-    });
+    );
 
     logger.info('Subscribed to user events (user.#)');
   }

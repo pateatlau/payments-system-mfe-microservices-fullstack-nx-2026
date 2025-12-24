@@ -22,9 +22,7 @@ export interface GraphQLClientConfig {
 /**
  * Create Apollo Client instance
  */
-export function createGraphQLClient(
-  config: GraphQLClientConfig
-): ApolloClient {
+export function createGraphQLClient(config: GraphQLClientConfig): ApolloClient {
   const { uri, getAccessToken, onError: onErrorCallback } = config;
 
   // HTTP link
