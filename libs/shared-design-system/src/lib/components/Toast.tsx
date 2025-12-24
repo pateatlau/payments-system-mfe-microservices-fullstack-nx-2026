@@ -22,12 +22,14 @@ const toastVariants = cva(
     variants: {
       variant: {
         default:
-          'bg-[rgb:var(--card)] border-[rgb:var(--border)] text-[rgb:var(--card-foreground)]',
-        success: 'bg-green-50 border-green-500 text-green-900',
+          'bg-card border-border text-card-foreground shadow-md backdrop-blur-sm',
+        success:
+          'bg-green-50 border-green-500 text-green-900 dark:bg-green-950 dark:text-green-50',
         error:
-          'bg-(--destructive) border-(--destructive) text-(--destructive-foreground)',
-        warning: 'bg-amber-50 border-amber-500 text-amber-900',
-        info: 'bg-blue-50 border-blue-500 text-blue-900',
+          'bg-destructive border-destructive text-destructive-foreground shadow-md',
+        warning:
+          'bg-amber-50 border-amber-500 text-amber-900 dark:bg-amber-950 dark:text-amber-50',
+        info: 'bg-blue-50 border-blue-500 text-blue-900 dark:bg-blue-950 dark:text-blue-50',
       },
     },
     defaultVariants: {

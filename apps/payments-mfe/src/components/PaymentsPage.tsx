@@ -210,6 +210,7 @@ function PaymentsPageInner({ onPaymentSuccess }: PaymentsPageProps = {}) {
   // Role flags
   const isVendor = hasRole(UserRole.VENDOR);
   const isCustomer = hasRole(UserRole.CUSTOMER);
+  const isAdmin = hasRole(UserRole.ADMIN);
 
   // Create payment form
   const {
@@ -554,6 +555,7 @@ function PaymentsPageInner({ onPaymentSuccess }: PaymentsPageProps = {}) {
                             <Select
                               id="currency"
                               {...registerCreate('currency')}
+                              className="mt-2"
                             >
                               <option value="INR">INR</option>
                               <option value="USD">USD</option>
@@ -573,7 +575,11 @@ function PaymentsPageInner({ onPaymentSuccess }: PaymentsPageProps = {}) {
 
                         <div>
                           <Label htmlFor="type">Payment Type *</Label>
-                          <Select id="type" {...registerCreate('type')}>
+                          <Select
+                            id="type"
+                            {...registerCreate('type')}
+                            className="mt-2"
+                          >
                             <option value={PaymentType.INSTANT}>Instant</option>
                             <option value={PaymentType.SCHEDULED}>
                               Scheduled
@@ -820,7 +826,7 @@ function PaymentsPageInner({ onPaymentSuccess }: PaymentsPageProps = {}) {
                                   >
                                     View Details
                                   </Button>
-                                  {isVendor && (
+                                  {(isVendor || isAdmin) && (
                                     <>
                                       <Button
                                         variant="ghost"

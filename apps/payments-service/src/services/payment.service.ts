@@ -76,8 +76,8 @@ export const paymentService = {
       // Customers see only their own payments (as sender or recipient)
       where.OR = [{ senderId: userId }, { recipientId: userId }];
     } else if (userRole === 'VENDOR') {
-      // Vendors see payments they initiated
-      where.senderId = userId;
+      // Vendors see payments they sent AND payments received
+      where.OR = [{ senderId: userId }, { recipientId: userId }];
     }
     // ADMIN sees all payments (no filter)
 
@@ -231,27 +231,36 @@ export const paymentService = {
    * Create new payment (stubbed processing)
    */
   async createPayment(userId: string, data: CreatePaymentRequest) {
+    // Ensure sender exists in local User table (upsert for safety)
+    // This handles the case where RabbitMQ event synchronization isn't set up yet
+    await db.user.upsert({
+      where: { id: userId },
+      update: {},
+      create: { id: userId, email: `user-${userId}@temp.local` },
+    });
+
     // Find recipient
     let recipientId: string;
 
     if (data.recipientId) {
       recipientId = data.recipientId;
+      // Ensure recipient exists in local User table
+      await db.user.upsert({
+        where: { id: recipientId },
+        update: {},
+        create: { id: recipientId, email: `user-${recipientId}@temp.local` },
+      });
     } else if (data.recipientEmail) {
       // ZERO COUPLING: Lookup recipient in local denormalized User table
       // This table is synchronized via RabbitMQ events from Auth Service (Phase 4)
-      // No API calls to Auth Service - maintains zero coupling
-      const recipient = await db.user.findUnique({
+      // FALLBACK: If user not synced yet, create placeholder (upsert)
+      // This is a temporary workaround until RabbitMQ subscriber is fully operational
+      const recipient = await db.user.upsert({
         where: { email: data.recipientEmail },
+        update: { email: data.recipientEmail },
+        create: { email: data.recipientEmail },
         select: { id: true },
       });
-
-      if (!recipient) {
-        throw new ApiError(
-          404,
-          'RECIPIENT_NOT_FOUND',
-          'Recipient user not found'
-        );
-      }
 
       recipientId = recipient.id;
     } else {
