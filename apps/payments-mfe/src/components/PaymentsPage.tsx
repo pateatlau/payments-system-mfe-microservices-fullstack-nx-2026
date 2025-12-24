@@ -116,9 +116,9 @@ function formatDate(dateString: string): string {
 }
 
 /**
- * PaymentsPage component with role-based access and payment operations
+ * Inner PaymentsPage component - assumes Router context is available
  */
-export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
+function PaymentsPageInner({ onPaymentSuccess }: PaymentsPageProps = {}) {
   const { user, hasRole } = useAuthStore();
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingPayment, setEditingPayment] = useState<Payment | null>(null);
@@ -128,9 +128,18 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
   );
   const dialogRef = useRef<HTMLDivElement | null>(null);
   const previouslyFocusedRef = useRef<HTMLElement | null>(null);
+
+  // Get tab from URL search params using browser native API
+  const getTabFromUrl = (): 'payments' | 'reports' => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const tab = urlParams.get('tab');
+    return tab === 'reports' ? 'reports' : 'payments';
+  };
+
   const [activeTab, setActiveTab] = useState<'payments' | 'reports'>(
-    'payments'
+    getTabFromUrl()
   );
+
   const [filters, setFilters] = useState<UsePaymentsFilters>({
     status: 'all',
     type: 'all',
@@ -146,6 +155,45 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
 
   // Real-time payment updates via WebSocket
   usePaymentUpdates();
+
+  // Listen for URL changes - update activeTab when URL changes
+  // This handles both popstate (back/forward) and React Router navigation
+  useEffect(() => {
+    const handleLocationChange = () => {
+      const tabFromUrl = getTabFromUrl();
+      setActiveTab(tabFromUrl);
+    };
+
+    // popstate handles back/forward button
+    window.addEventListener('popstate', handleLocationChange);
+
+    // For React Router navigation, we check URL periodically
+    // This is a pragmatic solution since there's no native event for pushState
+    const checkInterval = setInterval(() => {
+      const tabFromUrl = getTabFromUrl();
+      setActiveTab(prev => {
+        // Only update if different to avoid unnecessary re-renders
+        if (prev !== tabFromUrl) {
+          return tabFromUrl;
+        }
+        return prev;
+      });
+    }, 50);
+
+    return () => {
+      window.removeEventListener('popstate', handleLocationChange);
+      clearInterval(checkInterval);
+    };
+  }, []);
+
+  // Sync URL when tab changes via tab click
+  useEffect(() => {
+    if (activeTab === 'reports') {
+      window.history.replaceState(null, '', '/payments?tab=reports');
+    } else {
+      window.history.replaceState(null, '', '/payments');
+    }
+  }, [activeTab]);
 
   // Fetch payments
   const {
@@ -937,6 +985,14 @@ export function PaymentsPage({ onPaymentSuccess }: PaymentsPageProps = {}) {
       </ToastContainer>
     </div>
   );
+}
+
+/**
+ * PaymentsPage - Public export
+ * The shell provides Router context via BrowserRouter in bootstrap.tsx
+ */
+export function PaymentsPage(props: PaymentsPageProps = {}) {
+  return <PaymentsPageInner {...props} />;
 }
 
 export default PaymentsPage;
