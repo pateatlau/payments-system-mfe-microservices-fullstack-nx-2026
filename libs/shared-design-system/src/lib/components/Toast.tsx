@@ -24,12 +24,12 @@ const toastVariants = cva(
         default:
           'bg-card border-border text-card-foreground shadow-md backdrop-blur-sm',
         success:
-          'bg-green-50 border-green-500 text-green-900 dark:bg-green-950 dark:text-green-50',
+          'bg-emerald-50/80 border-emerald-500/100 text-foreground dark:bg-emerald-950/80 dark:text-foreground',
         error:
           'bg-destructive border-destructive text-destructive-foreground shadow-md',
         warning:
-          'bg-amber-50 border-amber-500 text-amber-900 dark:bg-amber-950 dark:text-amber-50',
-        info: 'bg-blue-50 border-blue-500 text-blue-900 dark:bg-blue-950 dark:text-blue-50',
+          'bg-amber-50/80 border-amber-500/100 text-foreground dark:bg-amber-950/80 dark:text-foreground',
+        info: 'bg-blue-50/80 border-blue-500/100 text-foreground dark:bg-blue-950/80 dark:text-foreground',
       },
     },
     defaultVariants: {
@@ -119,7 +119,7 @@ const Toast = React.forwardRef<HTMLDivElement, ToastProps>(
       >
         <div className="flex-1 space-y-1">
           {title && (
-            <div className="font-semibold text-sm leading-none">{title}</div>
+            <div className="text-sm font-semibold leading-none">{title}</div>
           )}
           <div className="text-sm leading-relaxed">{message}</div>
         </div>

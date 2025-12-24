@@ -89,7 +89,7 @@ export function ProfileForm({ onSuccess }: ProfileFormProps) {
       await updateProfileMutation.mutateAsync(data);
       showSuccess('Profile updated successfully!', 'Success');
       onSuccess?.();
-    } catch (error) {
+    } catch {
       showError('Failed to update profile. Please try again.', 'Update Failed');
     } finally {
       setIsSubmitting(false);
@@ -115,24 +115,24 @@ export function ProfileForm({ onSuccess }: ProfileFormProps) {
     return (
       <Card className="p-6 space-y-6">
         <div className="space-y-2">
-          <Skeleton className="h-8 w-48" />
-          <Skeleton className="h-4 w-64" />
+          <Skeleton className="w-48 h-8" />
+          <Skeleton className="w-64 h-4" />
         </div>
         <div className="space-y-6">
           <div className="flex items-center space-x-6">
-            <Skeleton className="h-24 w-24 rounded-full" />
+            <Skeleton className="w-24 h-24 rounded-full" />
             <div className="space-y-2">
-              <Skeleton className="h-4 w-32" />
-              <Skeleton className="h-4 w-48" />
+              <Skeleton className="w-32 h-4" />
+              <Skeleton className="w-48 h-4" />
             </div>
           </div>
           {[1, 2, 3, 4].map(i => (
             <div key={i} className="space-y-1">
-              <Skeleton className="h-4 w-24" />
-              <Skeleton className="h-10 w-full" />
+              <Skeleton className="w-24 h-4" />
+              <Skeleton className="w-full h-10" />
             </div>
           ))}
-          <Skeleton className="h-10 w-24 ml-auto" />
+          <Skeleton className="w-24 h-10 ml-auto" />
         </div>
       </Card>
     );
@@ -190,7 +190,7 @@ export function ProfileForm({ onSuccess }: ProfileFormProps) {
             {...register('phoneNumber')}
           />
           {errors.phoneNumber && (
-            <p className="text-xs text-red-600">
+            <p className="text-xs text-destructive">
               {errors.phoneNumber.message as string}
             </p>
           )}
@@ -206,7 +206,7 @@ export function ProfileForm({ onSuccess }: ProfileFormProps) {
             {...register('address')}
           />
           {errors.address && (
-            <p className="text-xs text-red-600">
+            <p className="text-xs text-destructive">
               {errors.address.message as string}
             </p>
           )}
@@ -218,13 +218,13 @@ export function ProfileForm({ onSuccess }: ProfileFormProps) {
           <textarea
             id="bio"
             rows={4}
-            className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex w-full px-3 py-2 text-sm border rounded-md border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
             placeholder="Tell us about yourself..."
             disabled={isSubmitting}
             {...register('bio')}
           />
           {errors.bio && (
-            <p className="text-xs text-red-600">
+            <p className="text-xs text-destructive">
               {errors.bio.message as string}
             </p>
           )}
@@ -232,7 +232,7 @@ export function ProfileForm({ onSuccess }: ProfileFormProps) {
 
         {/* Avatar */}
         <div className="space-y-4">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+          <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
             <div className="shrink-0">
               <AvatarUpload
                 initialUrl={watch('avatarUrl') || undefined}

@@ -139,6 +139,7 @@ export const ThemeToggle = React.forwardRef<
   if (variant === 'dropdown') {
     // Future enhancement: dropdown menu with all three options
     // For now, fall back to button variant
+    // eslint-disable-next-line no-console
     console.warn(
       'ThemeToggle: dropdown variant not yet implemented, using button'
     );

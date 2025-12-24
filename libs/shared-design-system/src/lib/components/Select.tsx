@@ -8,7 +8,7 @@
 import * as React from 'react';
 import { cn } from '../utils/cn';
 
-export interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {}
+export type SelectProps = React.SelectHTMLAttributes<HTMLSelectElement>;
 
 const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
   ({ className, children, ...props }, ref) => {
@@ -33,7 +33,7 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
         {/* Chevron down icon */}
         <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-(--foreground)">
           <svg
-            className="h-5 w-5"
+            className="w-5 h-5"
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 20 20"
             fill="currentColor"
