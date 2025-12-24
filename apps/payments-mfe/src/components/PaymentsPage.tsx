@@ -200,6 +200,7 @@ function PaymentsPageInner({ onPaymentSuccess }: PaymentsPageProps = {}) {
     data: payments,
     isLoading: isLoadingPayments,
     error: paymentsError,
+    refetch: refetchPayments,
   } = usePayments(filters);
 
   // Mutations
@@ -284,6 +285,10 @@ function PaymentsPageInner({ onPaymentSuccess }: PaymentsPageProps = {}) {
           reason: data.reason,
         },
       });
+
+      // Force refetch to ensure UI shows updated data
+      await refetchPayments();
+
       resetUpdateForm();
       setEditingPayment(null);
       onPaymentSuccess?.();

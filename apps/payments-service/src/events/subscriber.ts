@@ -50,11 +50,47 @@ interface UserDeletedPayload {
  *
  * Upserts user to local denormalized User table.
  * Uses email-first upsert to handle placeholder users created by payment creation.
+ * If a placeholder exists, updates it with the real ID and migrates any payments.
  */
 async function handleUserCreated(payload: UserCreatedPayload): Promise<void> {
   try {
-    // Email-first upsert: if a placeholder exists with this email, update it with the real ID
-    // Otherwise create a new user
+    // Check if a placeholder user exists with this email
+    const existingUser = await prisma.user.findUnique({
+      where: { email: payload.email },
+    });
+
+    if (existingUser && existingUser.id !== payload.userId) {
+      // Placeholder exists with different ID - need to migrate payments
+      const placeholderId = existingUser.id;
+
+      // Update payments where placeholder was sender
+      await prisma.payment.updateMany({
+        where: { senderId: placeholderId },
+        data: { senderId: payload.userId },
+      });
+
+      // Update payments where placeholder was recipient
+      await prisma.payment.updateMany({
+        where: { recipientId: placeholderId },
+        data: { recipientId: payload.userId },
+      });
+
+      // Delete the placeholder user
+      await prisma.user.delete({
+        where: { id: placeholderId },
+      });
+
+      logger.info(
+        '[Payments Service] Migrated payments from placeholder to real user',
+        {
+          placeholderId,
+          realUserId: payload.userId,
+          email: payload.email,
+        }
+      );
+    }
+
+    // Upsert the real user (will create if not exists, or update if placeholder was deleted)
     const user = await prisma.user.upsert({
       where: { email: payload.email },
       update: { id: payload.userId, email: payload.email },
