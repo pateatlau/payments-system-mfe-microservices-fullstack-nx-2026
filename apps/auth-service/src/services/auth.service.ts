@@ -2,7 +2,7 @@
  * Auth Service
  *
  * Business logic for authentication operations
- * 
+ *
  * POC-3 Phase 5.2: Redis Caching Integration
  * - Cache user lookups (by ID and email)
  * - Invalidate cache on user updates
@@ -21,6 +21,7 @@ import { ApiError } from '../middleware/errorHandler';
 import { RegisterInput, LoginInput } from '../validators/auth.validators';
 import { UserRole } from 'shared-types';
 import { cache, CacheKeys, CacheTags, AuthCacheTTL } from '../lib/cache';
+import { publishUserCreated } from '../events/publisher';
 
 /**
  * User response (without password)
@@ -128,6 +129,22 @@ export const register = async (data: RegisterInput): Promise<AuthResponse> => {
       tags: [CacheTags.users, CacheTags.user(user.id)],
     }),
   ]);
+
+  // Publish user.created event for other services (Profile, Payments, Admin)
+  try {
+    await publishUserCreated({
+      userId: user.id,
+      email: user.email,
+      name: user.name,
+      role: user.role as string,
+      emailVerified: false,
+      createdAt: user.createdAt.toISOString(),
+    });
+  } catch (error) {
+    // Log error but don't fail registration - event publishing is non-critical
+    // eslint-disable-next-line no-console
+    console.error('Failed to publish user.created event:', error);
+  }
 
   return {
     user: userResponse,
