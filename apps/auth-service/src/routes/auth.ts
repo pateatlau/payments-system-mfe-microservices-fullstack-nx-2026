@@ -36,4 +36,14 @@ router.post('/auth/logout', authenticate, authController.logout);
 // POST /auth/password - Change password
 router.post('/auth/password', authenticate, authController.changePassword);
 
+/**
+ * Internal user lookup routes (for service-to-service validation)
+ * Note: In production, protect with network policies or service tokens.
+ */
+router.get(
+  '/auth/internal/users/by-email',
+  authController.getUserByEmailInternal
+);
+router.get('/auth/internal/users/:id', authController.getUserByIdInternal);
+
 export default router;

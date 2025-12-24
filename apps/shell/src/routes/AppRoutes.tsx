@@ -66,16 +66,20 @@ export function AppRoutes({
   AdminDashboardComponent,
   ProfilePageComponent,
 }: AppRoutesProps) {
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, hasRole } = useAuthStore();
 
   return (
     <Routes>
-      {/* Root route - redirect based on auth state */}
+      {/* Root route - redirect based on auth state and role */}
       <Route
         path="/"
         element={
           isAuthenticated ? (
-            <Navigate to="/payments" replace />
+            hasRole(UserRole.ADMIN) ? (
+              <Navigate to="/admin" replace />
+            ) : (
+              <Navigate to="/payments" replace />
+            )
           ) : (
             <Navigate to="/signin" replace />
           )

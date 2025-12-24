@@ -9,8 +9,12 @@
  * - 1 minute TTL for payment data (frequently changing)
  */
 
-import { randomUUID } from 'crypto';
 import { prisma as db } from '../lib/prisma';
+import {
+  getUserByEmail,
+  getUserById,
+  type MinimalUser,
+} from '../lib/authClient';
 import type { PaymentStatus, PaymentType, UserRole } from 'shared-types';
 import { ApiError } from '../middleware/errorHandler';
 import type {
@@ -232,38 +236,16 @@ export const paymentService = {
    * Create new payment (stubbed processing)
    */
   async createPayment(userId: string, data: CreatePaymentRequest) {
-    // Ensure sender exists in local User table (upsert for safety)
-    // This handles the case where RabbitMQ event synchronization isn't set up yet
-    await db.user.upsert({
-      where: { id: userId },
-      update: {},
-      create: { id: userId, email: `user-${userId}@temp.local` },
-    });
+    // 1) Validate sender synchronously via Auth and ensure local read-model
+    const senderIdentity = await getUserById(userId);
+    await ensureUserReadModel(senderIdentity);
 
-    // Find recipient
-    let recipientId: string;
-
+    // 2) Validate recipient via Auth and ensure local read-model
+    let recipientIdentity: MinimalUser | null = null;
     if (data.recipientId) {
-      recipientId = data.recipientId;
-      // Ensure recipient exists in local User table
-      await db.user.upsert({
-        where: { id: recipientId },
-        update: {},
-        create: { id: recipientId, email: `user-${recipientId}@temp.local` },
-      });
+      recipientIdentity = await getUserById(data.recipientId);
     } else if (data.recipientEmail) {
-      // ZERO COUPLING: Lookup recipient in local denormalized User table
-      // This table is synchronized via RabbitMQ events from Auth Service (Phase 4)
-      // FALLBACK: If user not synced yet, create placeholder (upsert)
-      // This is a temporary workaround until RabbitMQ subscriber is fully operational
-      const recipient = await db.user.upsert({
-        where: { email: data.recipientEmail },
-        update: { email: data.recipientEmail },
-        create: { id: randomUUID(), email: data.recipientEmail },
-        select: { id: true },
-      });
-
-      recipientId = recipient.id;
+      recipientIdentity = await getUserByEmail(data.recipientEmail);
     } else {
       throw new ApiError(
         400,
@@ -271,6 +253,9 @@ export const paymentService = {
         'Either recipientId or recipientEmail must be provided'
       );
     }
+
+    await ensureUserReadModel(recipientIdentity);
+    const recipientId = recipientIdentity.id;
 
     // Create payment
     const paymentData: {
@@ -283,7 +268,7 @@ export const paymentService = {
       status: string;
       metadata?: Record<string, unknown>;
     } = {
-      senderId: userId,
+      senderId: senderIdentity.id,
       recipientId,
       type: data.type,
       amount: data.amount,
@@ -330,6 +315,8 @@ export const paymentService = {
       cache.invalidateByTag(CacheTags.user(userId)),
       cache.invalidateByTag(CacheTags.user(recipientId)),
     ]);
+    // Also invalidate global payments caches (e.g., admin lists)
+    await cache.invalidateByTag(CacheTags.payments);
 
     // TODO: Publish event: payment:created
 
@@ -446,6 +433,8 @@ export const paymentService = {
         CacheTags.user(nextRecipientId ?? payment.recipientId)
       ),
     ]);
+    // Also invalidate global payments caches (e.g., admin lists)
+    await cache.invalidateByTag(CacheTags.payments);
 
     return updatedPayment;
   },
@@ -516,6 +505,8 @@ export const paymentService = {
       cache.invalidateByTag(CacheTags.user(payment.senderId)),
       cache.invalidateByTag(CacheTags.user(payment.recipientId)),
     ]);
+    // Also invalidate global payments caches (e.g., admin lists)
+    await cache.invalidateByTag(CacheTags.payments);
 
     // TODO: Publish event: payment:status:updated
 
@@ -609,3 +600,34 @@ export const paymentService = {
     return result;
   },
 };
+
+/**
+ * Ensure payments_db.users has the canonical (id,email).
+ * If a different ID exists for same email, migrate payments and replace user.
+ */
+async function ensureUserReadModel(user: MinimalUser) {
+  // Find any existing user by email
+  const existingByEmail = await db.user.findUnique({
+    where: { email: user.email },
+  });
+  if (existingByEmail && existingByEmail.id !== user.id) {
+    // Migrate payments from old id to canonical id
+    await db.payment.updateMany({
+      where: { senderId: existingByEmail.id },
+      data: { senderId: user.id },
+    });
+    await db.payment.updateMany({
+      where: { recipientId: existingByEmail.id },
+      data: { recipientId: user.id },
+    });
+    // Delete old user
+    await db.user.delete({ where: { id: existingByEmail.id } });
+  }
+
+  // Upsert canonical user
+  await db.user.upsert({
+    where: { id: user.id },
+    update: { email: user.email },
+    create: { id: user.id, email: user.email },
+  });
+}

@@ -79,6 +79,17 @@ const updatePaymentSchema = z.object({
 
 type UpdatePaymentFormData = z.infer<typeof updatePaymentSchema>;
 
+type PartyInfo = {
+  id: string;
+  email: string;
+  name?: string | null;
+};
+
+type PaymentWithParties = Payment & {
+  sender?: PartyInfo | null;
+  recipient?: PartyInfo | null;
+};
+
 const FOCUSABLE_SELECTOR =
   'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])';
 
@@ -104,15 +115,39 @@ function formatCurrency(amount: number, currency: string): string {
 
 /**
  * Format date for display
+ * Format: DD MMM, YYYY, HH:MM AM/PM (e.g., 24 Dec, 2025, 05:31 PM)
  */
 function formatDate(dateString: string): string {
-  return new Date(dateString).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
+  const date = new Date(dateString);
+  const day = date.getDate().toString().padStart(2, '0');
+  const month = date.toLocaleDateString('en-US', { month: 'short' });
+  const year = date.getFullYear();
+  const time = date.toLocaleTimeString('en-US', {
     hour: '2-digit',
     minute: '2-digit',
+    hour12: true,
   });
+  return `${day} ${month}, ${year}, ${time}`;
+}
+
+function deriveNameFromEmail(email: string): string {
+  const localPart = email.split('@')[0] ?? '';
+  if (!localPart) return email;
+
+  return localPart
+    .split(/[-_.\s]+/)
+    .filter(Boolean)
+    .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ');
+}
+
+function getPartyDisplay(party?: PartyInfo | null): {
+  name: string;
+  email: string;
+} {
+  if (!party?.email) return { name: '-', email: '' };
+  const name = party.name?.trim() || deriveNameFromEmail(party.email);
+  return { name, email: party.email };
 }
 
 /**
@@ -202,6 +237,11 @@ function PaymentsPageInner({ onPaymentSuccess }: PaymentsPageProps = {}) {
     error: paymentsError,
     refetch: refetchPayments,
   } = usePayments(filters);
+
+  const paymentsWithParties: PaymentWithParties[] = (payments ?? []).map(
+    payment => payment as PaymentWithParties
+  );
+  const hasPayments = paymentsWithParties.length > 0;
 
   // Mutations
   const createPaymentMutation = useCreatePayment();
@@ -461,7 +501,7 @@ function PaymentsPageInner({ onPaymentSuccess }: PaymentsPageProps = {}) {
   }
 
   return (
-    <div className="w-full h-full">
+    <div className="w-full h-full pb-12">
       <div className="mx-auto max-w-7xl">
         {/* Header */}
         <div className="mb-8">
@@ -547,7 +587,7 @@ function PaymentsPageInner({ onPaymentSuccess }: PaymentsPageProps = {}) {
                             />
                             {createErrors.amount && (
                               <p
-                                className="mt-1 text-sm text-red-600"
+                                className="mt-1 text-sm text-destructive"
                                 role="alert"
                               >
                                 {createErrors.amount.message}
@@ -569,7 +609,7 @@ function PaymentsPageInner({ onPaymentSuccess }: PaymentsPageProps = {}) {
                             </Select>
                             {createErrors.currency && (
                               <p
-                                className="mt-1 text-sm text-red-600"
+                                className="mt-1 text-sm text-destructive"
                                 role="alert"
                               >
                                 {createErrors.currency.message}
@@ -595,7 +635,7 @@ function PaymentsPageInner({ onPaymentSuccess }: PaymentsPageProps = {}) {
                           </Select>
                           {createErrors.type && (
                             <p
-                              className="mt-1 text-sm text-red-600"
+                              className="mt-1 text-sm text-destructive"
                               role="alert"
                             >
                               {createErrors.type.message}
@@ -614,7 +654,7 @@ function PaymentsPageInner({ onPaymentSuccess }: PaymentsPageProps = {}) {
                           />
                           {createErrors.description && (
                             <p
-                              className="mt-1 text-sm text-red-600"
+                              className="mt-1 text-sm text-destructive"
                               role="alert"
                             >
                               {createErrors.description.message}
@@ -635,7 +675,7 @@ function PaymentsPageInner({ onPaymentSuccess }: PaymentsPageProps = {}) {
                           />
                           {createErrors.recipientEmail && (
                             <p
-                              className="mt-1 text-sm text-red-600"
+                              className="mt-1 text-sm text-destructive"
                               role="alert"
                             >
                               {createErrors.recipientEmail.message}
@@ -682,54 +722,97 @@ function PaymentsPageInner({ onPaymentSuccess }: PaymentsPageProps = {}) {
             )}
 
             {/* Payments List */}
-            <Card className="overflow-hidden">
+            <Card className="overflow-hidden mb-12">
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead className="bg-muted">
                     <tr>
-                      <th className="px-6 py-3 text-xs font-medium tracking-wider text-left uppercase text-muted-foreground">
-                        ID
+                      <th className="px-3 py-2 text-[10px] font-medium tracking-wider text-left uppercase text-muted-foreground">
+                        From
                       </th>
-                      <th className="px-6 py-3 text-xs font-medium tracking-wider text-left uppercase text-muted-foreground">
+                      <th className="px-3 py-2 text-[10px] font-medium tracking-wider text-left uppercase text-muted-foreground">
+                        To
+                      </th>
+                      <th className="px-3 py-2 text-[10px] font-medium tracking-wider text-left uppercase text-muted-foreground">
                         Amount
                       </th>
-                      <th className="px-6 py-3 text-xs font-medium tracking-wider text-left uppercase text-muted-foreground">
+                      <th className="px-3 py-2 text-[10px] font-medium tracking-wider text-left uppercase text-muted-foreground">
                         Type
                       </th>
-                      <th className="px-6 py-3 text-xs font-medium tracking-wider text-left uppercase text-muted-foreground">
+                      <th className="px-3 py-2 text-[10px] font-medium tracking-wider text-left uppercase text-muted-foreground">
                         Status
                       </th>
-                      <th className="px-6 py-3 text-xs font-medium tracking-wider text-left uppercase text-muted-foreground">
+                      <th className="px-3 py-2 text-[10px] font-medium tracking-wider text-left uppercase text-muted-foreground">
                         Description
                       </th>
-                      <th className="px-6 py-3 text-xs font-medium tracking-wider text-left uppercase text-muted-foreground">
+                      <th className="px-3 py-2 text-[10px] font-medium tracking-wider text-left uppercase text-muted-foreground">
                         Created
                       </th>
-                      <th className="px-6 py-3 text-xs font-medium tracking-wider text-left uppercase text-muted-foreground">
+                      <th className="px-3 py-2 text-[10px] font-medium tracking-wider text-left uppercase text-muted-foreground">
                         Actions
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="bg-card divide-y divide-border">
-                    {payments && payments.length > 0 ? (
-                      payments.map(payment => (
+                  <tbody className="divide-y bg-card divide-border">
+                    {hasPayments ? (
+                      paymentsWithParties.map(payment => (
                         <tr key={payment.id} className="hover:bg-muted/50">
                           {editingPayment?.id === payment.id ? (
                             // Edit mode - single form for all fields
                             <>
-                              <td className="px-6 py-4 text-sm whitespace-nowrap text-foreground">
-                                {payment.id}
+                              <td className="px-3 py-2 text-sm whitespace-nowrap text-foreground">
+                                {(() => {
+                                  const sender = getPartyDisplay(
+                                    payment.sender
+                                  );
+                                  return (
+                                    <div className="flex flex-col leading-tight">
+                                      <span className="text-xs font-medium text-foreground">
+                                        {sender.name}
+                                      </span>
+                                      {sender.email && (
+                                        <span className="text-[10px] italic text-muted-foreground">
+                                          {sender.email}
+                                        </span>
+                                      )}
+                                    </div>
+                                  );
+                                })()}
                               </td>
-                              <td className="px-6 py-4 font-mono text-sm whitespace-nowrap text-foreground">
+                              <td className="px-3 py-2 text-sm whitespace-nowrap text-foreground">
+                                {(() => {
+                                  const recipient = getPartyDisplay(
+                                    payment.recipient
+                                  );
+                                  return (
+                                    <div className="flex flex-col leading-tight">
+                                      <span className="text-xs font-medium text-foreground">
+                                        {recipient.name}
+                                      </span>
+                                      {recipient.email && (
+                                        <span className="text-[10px] italic text-muted-foreground">
+                                          {recipient.email}
+                                        </span>
+                                      )}
+                                    </div>
+                                  );
+                                })()}
+                              </td>
+                              <td className="px-3 py-2 font-mono text-xs whitespace-nowrap text-foreground">
                                 {formatCurrency(
                                   payment.amount,
                                   payment.currency
                                 )}
                               </td>
-                              <td className="px-6 py-4 text-sm whitespace-nowrap text-muted-foreground">
-                                <Badge variant="outline">{payment.type}</Badge>
+                              <td className="px-3 py-2 text-xs whitespace-nowrap text-muted-foreground">
+                                <Badge
+                                  variant="outline"
+                                  className="text-[10px] px-1.5 py-0.5"
+                                >
+                                  {payment.type}
+                                </Badge>
                               </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
+                              <td className="px-3 py-2 whitespace-nowrap">
                                 <Select {...registerUpdate('status')}>
                                   <option value={PaymentStatus.PENDING}>
                                     Pending
@@ -748,38 +831,68 @@ function PaymentsPageInner({ onPaymentSuccess }: PaymentsPageProps = {}) {
                                   </option>
                                 </Select>
                               </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
+                              <td className="px-3 py-2 whitespace-nowrap">
                                 <Input
                                   type="text"
                                   {...registerUpdate('reason')}
-                                  placeholder="Reason (optional)"
-                                  className="w-full"
+                                  placeholder="Reason"
+                                  className="w-full text-xs"
                                 />
                               </td>
-                              <td className="px-6 py-4 text-sm whitespace-nowrap text-muted-foreground">
+                              <td className="px-3 py-2 text-xs whitespace-nowrap text-muted-foreground">
                                 {formatDate(payment.createdAt)}
                               </td>
-                              <td className="px-6 py-4 text-sm font-medium whitespace-nowrap">
+                              <td className="px-3 py-2 text-xs font-medium whitespace-nowrap">
                                 <form
                                   onSubmit={handleSubmitUpdate(onSubmitUpdate)}
                                   className="inline"
                                 >
-                                  <div className="flex gap-2">
+                                  <div className="flex gap-1">
                                     <Button
                                       type="submit"
                                       variant="ghost"
-                                      size="sm"
+                                      size="icon"
+                                      className="text-emerald-600 hover:text-emerald-700 hover:bg-emerald-100/70 focus-visible:ring-2 focus-visible:ring-emerald-500/40 focus-visible:ring-offset-2"
                                       disabled={isUpdating}
+                                      title="Save"
+                                      aria-label="Save"
                                     >
-                                      Save
+                                      {/* Check icon */}
+                                      <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        viewBox="0 0 20 20"
+                                        fill="currentColor"
+                                        className="w-5 h-5"
+                                      >
+                                        <path
+                                          fillRule="evenodd"
+                                          d="M16.704 5.291a1 1 0 0 1 .005 1.414l-7.5 7.5a1 1 0 0 1-1.414 0l-3.5-3.5a1 1 0 1 1 1.414-1.414l2.793 2.793 6.793-6.793a1 1 0 0 1 1.409 0Z"
+                                          clipRule="evenodd"
+                                        />
+                                      </svg>
                                     </Button>
                                     <Button
                                       type="button"
                                       variant="ghost"
                                       size="sm"
+                                      className="text-muted-foreground hover:text-foreground hover:bg-primary/10 focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:ring-offset-2"
                                       onClick={cancelEdit}
+                                      title="Cancel"
+                                      aria-label="Cancel"
                                     >
-                                      Cancel
+                                      {/* X icon */}
+                                      <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        viewBox="0 0 20 20"
+                                        fill="currentColor"
+                                        className="w-5 h-5"
+                                      >
+                                        <path
+                                          fillRule="evenodd"
+                                          d="M5.293 5.293a1 1 0 0 1 1.414 0L10 8.586l3.293-3.293a1 1 0 1 1 1.414 1.414L11.414 10l3.293 3.293a1 1 0 0 1-1.414 1.414L10 11.414l-3.293 3.293a1 1 0 0 1-1.414-1.414L8.586 10 5.293 6.707a1 1 0 0 1 0-1.414Z"
+                                          clipRule="evenodd"
+                                        />
+                                      </svg>
                                     </Button>
                                   </div>
                                 </form>
@@ -788,19 +901,59 @@ function PaymentsPageInner({ onPaymentSuccess }: PaymentsPageProps = {}) {
                           ) : (
                             // View mode
                             <>
-                              <td className="px-6 py-4 font-mono text-sm whitespace-nowrap text-foreground">
-                                {payment.id}
+                              <td className="px-3 py-2 text-sm whitespace-nowrap text-foreground">
+                                {(() => {
+                                  const sender = getPartyDisplay(
+                                    payment.sender
+                                  );
+                                  return (
+                                    <div className="flex flex-col leading-tight">
+                                      <span className="text-xs font-medium text-foreground">
+                                        {sender.name}
+                                      </span>
+                                      {sender.email && (
+                                        <span className="text-[10px] italic text-muted-foreground">
+                                          {sender.email}
+                                        </span>
+                                      )}
+                                    </div>
+                                  );
+                                })()}
                               </td>
-                              <td className="px-6 py-4 text-sm font-medium whitespace-nowrap text-foreground">
+                              <td className="px-3 py-2 text-sm whitespace-nowrap text-foreground">
+                                {(() => {
+                                  const recipient = getPartyDisplay(
+                                    payment.recipient
+                                  );
+                                  return (
+                                    <div className="flex flex-col leading-tight">
+                                      <span className="text-xs font-medium text-foreground">
+                                        {recipient.name}
+                                      </span>
+                                      {recipient.email && (
+                                        <span className="text-[10px] italic text-muted-foreground">
+                                          {recipient.email}
+                                        </span>
+                                      )}
+                                    </div>
+                                  );
+                                })()}
+                              </td>
+                              <td className="px-3 py-2 font-mono text-xs whitespace-nowrap text-foreground">
                                 {formatCurrency(
                                   payment.amount,
                                   payment.currency
                                 )}
                               </td>
-                              <td className="px-6 py-4 text-sm whitespace-nowrap text-muted-foreground">
-                                <Badge variant="outline">{payment.type}</Badge>
+                              <td className="px-3 py-2 text-xs whitespace-nowrap text-muted-foreground">
+                                <Badge
+                                  variant="outline"
+                                  className="text-[10px] px-1.5 py-0.5"
+                                >
+                                  {payment.type}
+                                </Badge>
                               </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
+                              <td className="px-3 py-2 whitespace-nowrap">
                                 {(() => {
                                   const info = getStatusInfo(payment.status);
                                   return (
@@ -814,65 +967,129 @@ function PaymentsPageInner({ onPaymentSuccess }: PaymentsPageProps = {}) {
                                   );
                                 })()}
                               </td>
-                              <td className="px-6 py-4 text-sm text-muted-foreground">
+                              <td className="px-3 py-2 text-xs text-muted-foreground max-w-[120px] truncate">
                                 {payment.description || '-'}
                               </td>
-                              <td className="px-6 py-4 text-sm whitespace-nowrap text-muted-foreground">
+                              <td className="px-3 py-2 text-xs whitespace-nowrap text-muted-foreground">
                                 {formatDate(payment.createdAt)}
                               </td>
-                              <td className="px-6 py-4 text-sm font-medium whitespace-nowrap">
+                              <td className="px-3 py-2 text-xs font-medium whitespace-nowrap">
                                 <div className="flex gap-2">
                                   <Button
                                     variant="ghost"
                                     size="sm"
+                                    className="p-0 text-primary hover:text-primary hover:bg-primary/10 focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 h-7 w-7"
                                     onClick={() =>
                                       setSelectedPaymentId(payment.id)
                                     }
+                                    title="View Details"
+                                    aria-label="View Details"
                                   >
-                                    View Details
+                                    {/* Eye icon */}
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      viewBox="0 0 20 20"
+                                      fill="currentColor"
+                                      className="w-4 h-4"
+                                    >
+                                      <path d="M10 3.5c4.5 0 8 4.5 8 6.5s-3.5 6.5-8 6.5-8-4.5-8-6.5 3.5-6.5 8-6.5Zm0 3a4.5 4.5 0 1 0 0 9 4.5 4.5 0 0 0 0-9Z" />
+                                    </svg>
                                   </Button>
                                   {(isVendor || isAdmin) && (
                                     <>
                                       <Button
                                         variant="ghost"
                                         size="sm"
+                                        className="p-0 text-primary hover:text-primary hover:bg-primary/10 focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 h-7 w-7"
                                         onClick={() => startEdit(payment)}
+                                        title="Edit"
+                                        aria-label="Edit"
                                       >
-                                        Edit
+                                        {/* Pencil icon */}
+                                        <svg
+                                          xmlns="http://www.w3.org/2000/svg"
+                                          viewBox="0 0 20 20"
+                                          fill="currentColor"
+                                          className="w-4 h-4"
+                                        >
+                                          <path d="M13.586 3.586a2 2 0 0 1 2.828 2.828l-8.5 8.5a2 2 0 0 1-1.061.561l-3.15.525a.75.75 0 0 1-.87-.87l.525-3.15a2 2 0 0 1 .561-1.061l8.5-8.5Z" />
+                                          <path d="M12 5l3 3" />
+                                        </svg>
                                       </Button>
                                       {deleteConfirmId === payment.id ? (
                                         <div className="flex gap-2">
                                           <Button
                                             variant="destructive"
                                             size="sm"
+                                            className="p-0 hover:bg-destructive/80 h-7 w-7"
                                             onClick={() =>
                                               handleDelete(payment.id)
                                             }
                                             disabled={
                                               deletePaymentMutation.isPending
                                             }
+                                            title="Confirm Delete"
+                                            aria-label="Confirm Delete"
                                           >
-                                            Confirm
+                                            {/* Check icon */}
+                                            <svg
+                                              xmlns="http://www.w3.org/2000/svg"
+                                              viewBox="0 0 20 20"
+                                              fill="currentColor"
+                                              className="w-4 h-4"
+                                            >
+                                              <path
+                                                fillRule="evenodd"
+                                                d="M16.704 5.291a1 1 0 0 1 .005 1.414l-7.5 7.5a1 1 0 0 1-1.414 0l-3.5-3.5a1 1 0 1 1 1.414-1.414l2.793 2.793 6.793-6.793a1 1 0 0 1 1.409 0Z"
+                                                clipRule="evenodd"
+                                              />
+                                            </svg>
                                           </Button>
                                           <Button
                                             variant="ghost"
                                             size="sm"
+                                            className="p-0 text-muted-foreground hover:text-foreground hover:bg-accent h-7 w-7"
                                             onClick={() =>
                                               setDeleteConfirmId(null)
                                             }
+                                            title="Cancel"
+                                            aria-label="Cancel"
                                           >
-                                            Cancel
+                                            {/* X icon */}
+                                            <svg
+                                              xmlns="http://www.w3.org/2000/svg"
+                                              viewBox="0 0 20 20"
+                                              fill="currentColor"
+                                              className="w-4 h-4"
+                                            >
+                                              <path
+                                                fillRule="evenodd"
+                                                d="M5.293 5.293a1 1 0 0 1 1.414 0L10 8.586l3.293-3.293a1 1 0 1 1 1.414 1.414L11.414 10l3.293 3.293a1 1 0 0 1-1.414 1.414L10 11.414l-3.293 3.293a1 1 0 0 1-1.414-1.414L8.586 10 5.293 6.707a1 1 0 0 1 0-1.414Z"
+                                                clipRule="evenodd"
+                                              />
+                                            </svg>
                                           </Button>
                                         </div>
                                       ) : (
                                         <Button
                                           variant="destructive"
                                           size="sm"
+                                          className="p-0 hover:bg-destructive/80 h-7 w-7"
                                           onClick={() =>
                                             setDeleteConfirmId(payment.id)
                                           }
+                                          title="Delete"
+                                          aria-label="Delete"
                                         >
-                                          Delete
+                                          {/* Trash icon */}
+                                          <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            viewBox="0 0 20 20"
+                                            fill="currentColor"
+                                            className="w-4 h-4"
+                                          >
+                                            <path d="M8 2a2 2 0 0 1 2-2h0a2 2 0 0 1 2 2h4a1 1 0 1 1 0 2h-1v11a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3V4H4a1 1 0 1 1 0-2h4Zm-1 4a1 1 0 1 0-2 0v9a1 1 0 1 0 2 0V6Zm3 0a1 1 0 1 0-2 0v9a1 1 0 1 0 2 0V6Zm3 0a1 1 0 1 0-2 0v9a1 1 0 1 0 2 0V6Z" />
+                                          </svg>
                                         </Button>
                                       )}
                                     </>
@@ -885,7 +1102,7 @@ function PaymentsPageInner({ onPaymentSuccess }: PaymentsPageProps = {}) {
                       ))
                     ) : (
                       <tr>
-                        <td colSpan={isVendor ? 7 : 6} className="px-6 py-10">
+                        <td colSpan={8} className="px-6 py-10">
                           <div className="flex flex-col items-center justify-center gap-3 text-center text-muted-foreground">
                             <p className="text-lg font-semibold">
                               {hasActiveFilters
@@ -956,7 +1173,7 @@ function PaymentsPageInner({ onPaymentSuccess }: PaymentsPageProps = {}) {
             aria-describedby="payment-details-content"
             tabIndex={-1}
           >
-            <div className="sticky top-0 z-10 flex items-center justify-between p-4 bg-background border-b border-border">
+            <div className="sticky top-0 z-10 flex items-center justify-between p-4 border-b bg-background border-border">
               <h2 id="payment-details-title" className="text-xl font-semibold">
                 Payment Details
               </h2>
@@ -972,7 +1189,8 @@ function PaymentsPageInner({ onPaymentSuccess }: PaymentsPageProps = {}) {
             <div id="payment-details-content" className="p-6">
               <PaymentDetails
                 payment={
-                  payments?.find(p => p.id === selectedPaymentId) || null
+                  paymentsWithParties.find(p => p.id === selectedPaymentId) ||
+                  null
                 }
                 isLoading={false}
                 isError={false}

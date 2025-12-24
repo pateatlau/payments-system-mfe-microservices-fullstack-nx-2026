@@ -21,7 +21,19 @@ export function useToasts() {
     (toast: Omit<ToastItem, 'id'> & { id?: string }) => {
       const id =
         toast.id ?? crypto.randomUUID?.() ?? `${Date.now()}-${Math.random()}`;
-      setToasts(prev => [...prev, { ...toast, id }]);
+      const duration = toast.duration ?? 5000; // default auto-close after 5s
+      // Add toast with ensured duration
+      setToasts(prev => [...prev, { ...toast, id, duration }]);
+
+      // Auto-dismiss after duration
+      try {
+        setTimeout(() => {
+          removeToast(id);
+        }, duration);
+      } catch {
+        // no-op: timer setup should not block toast creation
+      }
+
       return id;
     },
     []
