@@ -118,17 +118,8 @@ export const register = async (data: RegisterInput): Promise<AuthResponse> => {
     updatedAt: user.updatedAt,
   };
 
-  // Cache the newly created user (by ID and email)
-  await Promise.all([
-    cache.set(CacheKeys.user(user.id), userResponse, {
-      ttl: AuthCacheTTL.USER_BY_ID,
-      tags: [CacheTags.users, CacheTags.user(user.id)],
-    }),
-    cache.set(CacheKeys.userByEmail(user.email), userResponse, {
-      ttl: AuthCacheTTL.USER_BY_EMAIL,
-      tags: [CacheTags.users, CacheTags.user(user.id)],
-    }),
-  ]);
+  // Don't cache after registration - userResponse lacks passwordHash
+  // Login will fetch from DB and cache properly with passwordHash included
 
   // Publish user.created event for other services (Profile, Payments, Admin)
   try {

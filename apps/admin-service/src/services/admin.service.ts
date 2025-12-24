@@ -2,7 +2,6 @@
  * Admin Service - Business Logic
  */
 
-import crypto from 'crypto';
 import { prisma as db } from '../lib/prisma';
 
 /**
@@ -36,7 +35,6 @@ import type {
   UpdateUserStatusRequest,
   CreateUserRequest,
 } from '../validators/admin.validators';
-import bcrypt from 'bcrypt';
 
 export const adminService = {
   /**
@@ -235,14 +233,15 @@ export const adminService = {
 
   /**
    * Create new user
-   * 
+   *
    * Proxies to Auth Service to create user in auth_db (where login happens)
    * The created user will be synced back to admin_db via RabbitMQ user.created event
    */
   async createUser(data: CreateUserRequest) {
     // Call Auth Service API to create user in auth_db
-    const authServiceUrl = process.env['AUTH_SERVICE_URL'] || 'http://localhost:3001';
-    
+    const authServiceUrl =
+      process.env['AUTH_SERVICE_URL'] || 'http://localhost:3001';
+
     try {
       const response = await fetch(`${authServiceUrl}/auth/register`, {
         method: 'POST',
@@ -267,7 +266,7 @@ export const adminService = {
       }
 
       const result = await response.json();
-      
+
       // Return user details (without tokens)
       return {
         id: result.data.user.id,
