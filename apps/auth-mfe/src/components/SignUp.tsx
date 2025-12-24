@@ -20,9 +20,8 @@ import {
  * Password strength validation helper
  * Banking-grade requirements: minimum 12 characters, uppercase, lowercase, numbers, symbols
  */
-// eslint-disable-next-line no-useless-escape
 const passwordStrengthRegex =
-  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#^()_+\-=[\]{};':"\\|,.<>\/])[A-Za-z\d@$!%*?&#^()_+\-=[\]{};':"\\|,.<>\/]{12,}$/;
+  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#^()_+\-=[\]{};':"\\|,.<>/])[A-Za-z\d@$!%*?&#^()_+\-=[\]{};':"\\|,.<>/]{12,}$/;
 
 /**
  * Sign-up form schema using Zod
@@ -143,8 +142,7 @@ export function SignUp({ onSuccess, onNavigateToSignIn }: SignUpProps = {}) {
     const hasLower = /[a-z]/.test(pwd);
     const hasUpper = /[A-Z]/.test(pwd);
     const hasNumber = /\d/.test(pwd);
-    // eslint-disable-next-line no-useless-escape
-    const hasSymbol = /[@$!%*?&#^()_+\-=[\]{};':"\\|,.<>\/]/.test(pwd);
+    const hasSymbol = /[@$!%*?&#^()_+\-=[\]{};':"\\|,.<>/]/.test(pwd);
 
     const requirementsMet = [hasLower, hasUpper, hasNumber, hasSymbol].filter(
       Boolean
@@ -162,7 +160,7 @@ export function SignUp({ onSuccess, onNavigateToSignIn }: SignUpProps = {}) {
   const passwordStrength = getPasswordStrength(password);
 
   return (
-    <div className="w-full flex items-center justify-center">
+    <div className="flex items-center justify-center w-full">
       <div className="w-full max-w-md">
         <Card>
           <CardHeader>
@@ -192,7 +190,7 @@ export function SignUp({ onSuccess, onNavigateToSignIn }: SignUpProps = {}) {
                   autoComplete="name"
                 />
                 {errors.name && (
-                  <p className="text-sm text-red-600" role="alert">
+                  <p className="text-sm text-destructive" role="alert">
                     {errors.name.message}
                   </p>
                 )}
@@ -210,7 +208,7 @@ export function SignUp({ onSuccess, onNavigateToSignIn }: SignUpProps = {}) {
                   autoComplete="email"
                 />
                 {errors.email && (
-                  <p className="text-sm text-red-600" role="alert">
+                  <p className="text-sm text-destructive" role="alert">
                     {errors.email.message}
                   </p>
                 )}
@@ -233,7 +231,7 @@ export function SignUp({ onSuccess, onNavigateToSignIn }: SignUpProps = {}) {
                   </p>
                 )}
                 {errors.password && (
-                  <p className="text-sm text-red-600" role="alert">
+                  <p className="text-sm text-destructive" role="alert">
                     {errors.password.message}
                   </p>
                 )}
@@ -255,7 +253,7 @@ export function SignUp({ onSuccess, onNavigateToSignIn }: SignUpProps = {}) {
                   autoComplete="new-password"
                 />
                 {errors.confirmPassword && (
-                  <p className="text-sm text-red-600" role="alert">
+                  <p className="text-sm text-destructive" role="alert">
                     {errors.confirmPassword.message}
                   </p>
                 )}

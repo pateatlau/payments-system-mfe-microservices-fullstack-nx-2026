@@ -1,6 +1,7 @@
 // @ts-check
 import eslint from '@eslint/js';
 import tseslint from 'typescript-eslint';
+import reactHooks from 'eslint-plugin-react-hooks';
 import noHardcodedColors from './scripts/eslint-rules/no-hardcoded-colors.js';
 
 export default tseslint.config(
@@ -11,6 +12,7 @@ export default tseslint.config(
     ignores: ['docs/**'],
     plugins: {
       'theme-colors': { rules: { 'no-hardcoded-colors': noHardcodedColors } },
+      'react-hooks': reactHooks,
     },
     rules: {
       // TypeScript-specific rules
@@ -26,6 +28,9 @@ export default tseslint.config(
       'no-console': 'warn',
       // Theme guardrail: prevent hardcoded colors
       'theme-colors/no-hardcoded-colors': 'warn',
+      // React Hooks rules
+      'react-hooks/rules-of-hooks': 'error',
+      'react-hooks/exhaustive-deps': 'warn',
     },
   },
   {
