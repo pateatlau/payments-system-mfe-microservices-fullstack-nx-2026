@@ -11,7 +11,7 @@
  * - Handles placeholder users created by payment creation upsert (email-first upsert)
  */
 
-import { RabbitMQSubscriber, EventContext, BaseEvent } from '@payments-system/rabbitmq-event-hub';
+import { RabbitMQSubscriber } from '@payments-system/rabbitmq-event-hub';
 import { getConnectionManager } from './connection';
 import { config } from '../config';
 import { prisma } from '../lib/prisma';
@@ -51,9 +51,7 @@ interface UserDeletedPayload {
  * Upserts user to local denormalized User table.
  * Uses email-first upsert to handle placeholder users created by payment creation.
  */
-async function handleUserCreated(
-  payload: UserCreatedPayload
-): Promise<void> {
+async function handleUserCreated(payload: UserCreatedPayload): Promise<void> {
   try {
     // Email-first upsert: if a placeholder exists with this email, update it with the real ID
     // Otherwise create a new user
@@ -83,9 +81,7 @@ async function handleUserCreated(
  * Updates user in local denormalized User table.
  * Only email field is updated (other fields not needed for payment validation).
  */
-async function handleUserUpdated(
-  payload: UserUpdatedPayload
-): Promise<void> {
+async function handleUserUpdated(payload: UserUpdatedPayload): Promise<void> {
   try {
     // Update user by ID, with email-safe fallback if user doesn't exist by ID
     const user = await prisma.user.update({
@@ -102,10 +98,13 @@ async function handleUserUpdated(
   } catch (error) {
     // If user not found by ID, might be a new user that hasn't synced yet
     // This is non-critical - next creation will sync it
-    logger.warn('[Payments Service] Could not update user (may not exist yet)', {
-      userId: payload.userId,
-      error,
-    });
+    logger.warn(
+      '[Payments Service] Could not update user (may not exist yet)',
+      {
+        userId: payload.userId,
+        error,
+      }
+    );
     // Don't throw - this is a non-blocking event
   }
 }
@@ -116,17 +115,18 @@ async function handleUserUpdated(
  * Deletes user from local denormalized User table.
  * This prevents the user from being used in new payments.
  */
-async function handleUserDeleted(
-  payload: UserDeletedPayload
-): Promise<void> {
+async function handleUserDeleted(payload: UserDeletedPayload): Promise<void> {
   try {
     await prisma.user.delete({
       where: { id: payload.userId },
     });
 
-    logger.info('[Payments Service] Synced user deletion from auth.user.deleted event', {
-      userId: payload.userId,
-    });
+    logger.info(
+      '[Payments Service] Synced user deletion from auth.user.deleted event',
+      {
+        userId: payload.userId,
+      }
+    );
   } catch (error) {
     // If user not found, it was already deleted or never synced
     // This is non-critical
@@ -215,7 +215,9 @@ export async function startUserEventSubscriber(): Promise<void> {
       }
     });
 
-    logger.info('[Payments Service] User event subscriber started successfully');
+    logger.info(
+      '[Payments Service] User event subscriber started successfully'
+    );
   } catch (error) {
     logger.error('[Payments Service] Failed to start user event subscriber', {
       error,

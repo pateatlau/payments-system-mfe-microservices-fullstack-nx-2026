@@ -9,6 +9,7 @@
  * - 1 minute TTL for payment data (frequently changing)
  */
 
+import { randomUUID } from 'crypto';
 import { prisma as db } from '../lib/prisma';
 import type { PaymentStatus, PaymentType, UserRole } from 'shared-types';
 import { ApiError } from '../middleware/errorHandler';
@@ -258,7 +259,7 @@ export const paymentService = {
       const recipient = await db.user.upsert({
         where: { email: data.recipientEmail },
         update: { email: data.recipientEmail },
-        create: { email: data.recipientEmail },
+        create: { id: randomUUID(), email: data.recipientEmail },
         select: { id: true },
       });
 

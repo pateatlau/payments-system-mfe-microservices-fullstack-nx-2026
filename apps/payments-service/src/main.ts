@@ -129,7 +129,7 @@ const server = app.listen(port, () => {
  * Initialize RabbitMQ Event Subscriber (async, non-blocking)
  * This enables automatic user synchronization from Auth Service
  */
-startUserEventSubscriber().catch((error) => {
+startUserEventSubscriber().catch(error => {
   logger.error('Failed to start RabbitMQ subscriber', { error });
   // Non-fatal: service can still operate with manual upserts
   // but user sync from auth service won't work
