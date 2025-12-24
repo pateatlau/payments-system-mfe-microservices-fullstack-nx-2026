@@ -235,48 +235,58 @@ export const adminService = {
 
   /**
    * Create new user
+   * 
+   * Proxies to Auth Service to create user in auth_db (where login happens)
+   * The created user will be synced back to admin_db via RabbitMQ user.created event
    */
   async createUser(data: CreateUserRequest) {
-    // Check if email already exists
-    const existingUser = await db.user.findUnique({
-      where: { email: data.email },
-    });
+    // Call Auth Service API to create user in auth_db
+    const authServiceUrl = process.env['AUTH_SERVICE_URL'] || 'http://localhost:3001';
+    
+    try {
+      const response = await fetch(`${authServiceUrl}/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: data.email,
+          password: data.password,
+          name: data.name,
+          role: data.role,
+        }),
+      });
 
-    if (existingUser) {
+      if (!response.ok) {
+        const error = await response.json();
+        throw new ApiError(
+          response.status,
+          error.error?.code || 'USER_CREATION_FAILED',
+          error.error?.message || 'Failed to create user in auth service'
+        );
+      }
+
+      const result = await response.json();
+      
+      // Return user details (without tokens)
+      return {
+        id: result.data.user.id,
+        email: result.data.user.email,
+        name: result.data.user.name,
+        role: result.data.user.role,
+        createdAt: result.data.user.createdAt,
+        updatedAt: result.data.user.updatedAt,
+      };
+    } catch (error) {
+      if (error instanceof ApiError) {
+        throw error;
+      }
       throw new ApiError(
-        409,
-        'EMAIL_ALREADY_EXISTS',
-        'Email is already in use'
+        500,
+        'USER_CREATION_FAILED',
+        `Failed to create user: ${(error as Error).message}`
       );
     }
-
-    // Hash password
-    const passwordHash = await bcrypt.hash(data.password, 10);
-
-    // Create user with explicit id and timestamps
-    const now = new Date();
-    const user = await db.user.create({
-      data: {
-        id: crypto.randomUUID(),
-        email: data.email,
-        passwordHash,
-        name: data.name,
-        role: data.role,
-        emailVerified: false,
-        createdAt: now,
-        updatedAt: now,
-      },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        role: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    });
-
-    return user;
   },
 
   /**
