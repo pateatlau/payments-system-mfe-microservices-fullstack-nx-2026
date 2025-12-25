@@ -211,7 +211,7 @@ export function PaymentFilters({
               ▶
             </span>
             <div>
-              <CardTitle className="group-hover:text-primary transition-colors">
+              <CardTitle className="transition-colors group-hover:text-primary">
                 Filters
               </CardTitle>
               {!isExpanded && (
@@ -299,7 +299,7 @@ export function PaymentFilters({
 
               <div className="space-y-4">
                 {/* Display min and max values */}
-                <div className="flex items-center justify-between text-sm text-muted-foreground font-semibold">
+                <div className="flex items-center justify-between text-sm font-semibold text-muted-foreground">
                   <span aria-live="polite">
                     Minimum:{' '}
                     {watchedValues.minAmount?.toLocaleString?.() ?? MIN_AMOUNT}
@@ -373,10 +373,10 @@ export function PaymentFilters({
                               />
 
                               {/* Track background */}
-                              <div className="pointer-events-none absolute top-1/2 h-2 w-full -translate-y-1/2 rounded-full border border-border bg-muted" />
+                              <div className="absolute w-full h-2 -translate-y-1/2 border rounded-full pointer-events-none top-1/2 border-border bg-muted" />
                               {/* Filled track */}
                               <div
-                                className="pointer-events-none absolute top-1/2 h-2 -translate-y-1/2 rounded-full bg-primary"
+                                className="absolute h-2 -translate-y-1/2 rounded-full pointer-events-none top-1/2 bg-primary"
                                 style={{
                                   left: `${(((minField.value ?? MIN_AMOUNT) - MIN_AMOUNT) / (MAX_AMOUNT - MIN_AMOUNT)) * 100}%`,
                                   right: `${100 - (((maxField.value ?? MAX_AMOUNT) - MIN_AMOUNT) / (MAX_AMOUNT - MIN_AMOUNT)) * 100}%`,

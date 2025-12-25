@@ -1,8 +1,8 @@
 # MFE Payments System - Executive Summary
 
-**Document Version:** 1.0  
-**Date:** December 12, 2025  
-**Status:** POC-3 Complete - Production-Ready Infrastructure  
+**Document Version:** 1.1  
+**Date:** December 25, 2025  
+**Status:** POC-3 Complete - MVP feature-complete; CI/CD pending  
 **Prepared For:** Senior Architecture Review  
 **Repository:** [GitHub](https://github.com/pateatlau/payments-system-mfe-microservices-fullstack-nx-2026)
 
@@ -31,12 +31,12 @@ The MFE Payments System is a production-ready, full-stack microfrontend platform
 
 ### Key Achievements
 
-| Milestone | Status   | Description                                              |
-| --------- | -------- | -------------------------------------------------------- |
-| POC-0     | Complete | Foundation architecture and project structure            |
-| POC-1     | Complete | Rspack migration, Module Federation v2, HMR optimization |
-| POC-2     | Complete | Backend integration, JWT authentication, design system   |
-| POC-3     | Complete | Production-ready infrastructure, observability, GraphQL  |
+| Milestone | Status   | Description                                                                       |
+| --------- | -------- | --------------------------------------------------------------------------------- |
+| POC-0     | Complete | Foundation architecture and project structure                                     |
+| POC-1     | Complete | Rspack migration, Module Federation v2, HMR optimization                          |
+| POC-2     | Complete | Backend integration, JWT authentication, design system                            |
+| POC-3     | Complete | Production-ready infrastructure, observability, GraphQL; theme system implemented |
 
 ### Business Value
 
@@ -107,26 +107,26 @@ The MFE Payments System is a production-ready, full-stack microfrontend platform
 
 | Category      | Technology            | Version         | Purpose                                      |
 | ------------- | --------------------- | --------------- | -------------------------------------------- |
-| Framework     | React                 | 19.2.0          | UI components and state management           |
+| Framework     | React                 | 18.3.1          | UI components and state management           |
 | Build Tool    | Rspack                | 1.6.x           | Fast bundling with Module Federation         |
-| Monorepo      | Nx                    | 21.x            | Workspace management and build orchestration |
-| Styling       | Tailwind CSS          | 4.0+            | Utility-first CSS framework                  |
+| Monorepo      | Nx                    | 22.1.x          | Workspace management and build orchestration |
+| Styling       | Tailwind CSS          | 4.0.0           | Utility-first CSS framework                  |
 | State         | Zustand               | 4.5.x           | Client-side state management                 |
 | Server State  | TanStack Query        | 5.x             | Server state and caching                     |
-| Forms         | React Hook Form + Zod | 7.52.x / 3.23.x | Form handling and validation                 |
+| Forms         | React Hook Form + Zod | 7.52.x / 3.25.x | Form handling and validation                 |
 | Design System | shadcn/ui             | Latest          | Accessible component library                 |
 
 ### Backend Technologies
 
-| Category       | Technology     | Version     | Purpose                     |
-| -------------- | -------------- | ----------- | --------------------------- |
-| Runtime        | Node.js        | 24.11.x LTS | Server-side JavaScript      |
-| Framework      | Express        | 5.x         | HTTP server framework       |
-| Database       | PostgreSQL     | 16          | Relational data storage     |
-| ORM            | Prisma         | 6.x         | Type-safe database access   |
-| Cache          | Redis          | 7.x         | Caching and session storage |
-| Message Broker | RabbitMQ       | 3.x         | Event-driven messaging      |
-| API            | REST + GraphQL | -           | Dual API support            |
+| Category       | Technology     | Version | Purpose                     |
+| -------------- | -------------- | ------- | --------------------------- |
+| Runtime        | Node.js        | 20.x    | Server-side JavaScript      |
+| Framework      | Express        | 5.x     | HTTP server framework       |
+| Database       | PostgreSQL     | 16      | Relational data storage     |
+| ORM            | Prisma         | 5.x     | Type-safe database access   |
+| Cache          | Redis          | 7.x     | Caching and session storage |
+| Message Broker | RabbitMQ       | 3.x     | Event-driven messaging      |
+| API            | REST + GraphQL | -       | Dual API support            |
 
 ### Infrastructure Technologies
 
@@ -210,6 +210,7 @@ The application supports system-aware theme switching with user preference persi
 - Profile MFE integration (planned) for user preference management
 
 **Status:** Planned - Implementation in progress
+**Update (Dec 2025):** Implemented across Shell and MFEs; user preference persistence, system detection, and cross-tab sync verified. Profile MFE preference storage remains in progress.
 
 ---
 
@@ -577,7 +578,8 @@ payments-system-mfe/
 
 **User Experience Enhancements**
 
-- Dark mode theme system (implementation in progress)
+| Dark mode theme system (implemented)
+
 - Theme preference management in Profile MFE
 - Enhanced accessibility features
 

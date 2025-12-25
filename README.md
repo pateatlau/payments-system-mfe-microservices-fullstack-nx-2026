@@ -2,7 +2,7 @@
 
 **Version:** 0.3.0  
 **Status:** POC-3 Complete – Production-Ready Infrastructure + UI/UX Enhancements  
-**Tech Stack:** React 19 + Nx + Rspack + Module Federation v2 + Node.js + PostgreSQL + RabbitMQ + nginx
+**Tech Stack:** React + Nx + Rspack + Module Federation v2 + Node.js + PostgreSQL + RabbitMQ + nginx
 
 ---
 
@@ -188,9 +188,9 @@ payments-system-mfe/
 
 ### Frontend
 
-- React 19.2.0 with TypeScript 5.9.x
-- Rspack 1.6.x with Module Federation v2
-- Nx 21.x monorepo
+- React with TypeScript
+- Rspack with Module Federation v2
+- Nx monorepo
 - Tailwind CSS 4.0+ and shadcn/ui
 - Zustand + TanStack Query for state management
 - React Hook Form + Zod for forms
@@ -198,9 +198,9 @@ payments-system-mfe/
 ### Backend
 
 - Node.js 24.11.x LTS with Express 5.x
-- PostgreSQL 16 with Prisma ORM
-- RabbitMQ 3.x for event-driven messaging
-- Redis 7.x for caching
+- PostgreSQL with Prisma ORM
+- RabbitMQ for event-driven messaging
+- Redis for caching
 - REST + GraphQL APIs
 
 ### Infrastructure
@@ -226,7 +226,7 @@ pnpm test:backend             # Run backend tests
 pnpm backend:setup            # Setup databases with Prisma
 
 # Frontend
-pnpm dev:all                  # Start all frontend MFEs
+pnpm dev:mf:https             # Start frontend (HTTPS mode)
 pnpm dev:mf                   # Start frontend (HTTP mode)
 pnpm test                     # Run all frontend tests
 pnpm test:coverage            # Run tests with coverage
