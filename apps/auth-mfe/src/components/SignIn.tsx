@@ -97,7 +97,7 @@ export function SignIn({ onSuccess, onNavigateToSignUp }: SignInProps = {}) {
   const isFormLoading = isLoading || isSubmitting;
 
   return (
-    <div className="w-full flex items-center justify-center">
+    <div className="flex items-center justify-center w-full">
       <div className="w-full max-w-md">
         <Card>
           <CardHeader>
@@ -127,7 +127,7 @@ export function SignIn({ onSuccess, onNavigateToSignUp }: SignInProps = {}) {
                   autoComplete="email"
                 />
                 {errors.email && (
-                  <p className="text-sm text-red-600" role="alert">
+                  <p className="text-sm text-destructive" role="alert">
                     {errors.email.message}
                   </p>
                 )}
@@ -145,7 +145,7 @@ export function SignIn({ onSuccess, onNavigateToSignUp }: SignInProps = {}) {
                   autoComplete="current-password"
                 />
                 {errors.password && (
-                  <p className="text-sm text-red-600" role="alert">
+                  <p className="text-sm text-destructive" role="alert">
                     {errors.password.message}
                   </p>
                 )}

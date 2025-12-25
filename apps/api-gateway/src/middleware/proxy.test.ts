@@ -13,7 +13,7 @@ describe('Streaming HTTP Proxy Middleware', () => {
   let mockBackendServer: ReturnType<typeof createServer>;
   let mockBackendPort: number;
 
-  beforeAll((done) => {
+  beforeAll(done => {
     // Create a mock backend server for testing
     mockBackendServer = createServer(
       (req: IncomingMessage, res: ServerResponse) => {
@@ -22,7 +22,7 @@ describe('Streaming HTTP Proxy Middleware', () => {
         if (url === '/echo') {
           // Echo endpoint: return request details
           let body = '';
-          req.on('data', (chunk) => {
+          req.on('data', chunk => {
             body += chunk.toString();
           });
           req.on('end', () => {
@@ -63,7 +63,7 @@ describe('Streaming HTTP Proxy Middleware', () => {
   });
 
   afterAll(async () => {
-    return new Promise<void>((resolve) => {
+    return new Promise<void>(resolve => {
       mockBackendServer.close(() => {
         resolve();
       });
@@ -233,7 +233,7 @@ describe('Streaming HTTP Proxy Middleware', () => {
       proxy(mockReq, mockRes, mockNext);
 
       // Wait a bit for the error to occur
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await new Promise(resolve => setTimeout(resolve, 100));
 
       // In a real scenario, this would trigger a 502 error
       // This test verifies the proxy middleware was created

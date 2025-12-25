@@ -47,14 +47,14 @@ export function SignInPage({ SignInComponent }: SignInPageProps) {
   // Check if already authenticated (for initial page load / direct navigation)
   const isAuthenticated = useAuthStore(state => state.isAuthenticated);
 
-  // Redirect to payments if already authenticated
+  // Redirect to root if already authenticated (role-based routing will determine destination)
   if (isAuthenticated) {
-    return <Navigate to="/payments" replace />;
+    return <Navigate to="/" replace />;
   }
 
-  // Handle successful login - navigate to payments page
+  // Handle successful login - navigate to root (role-based routing will determine destination)
   const handleSuccess = () => {
-    navigate('/payments', { replace: true });
+    navigate('/', { replace: true });
   };
 
   // Handle navigation to sign-up page

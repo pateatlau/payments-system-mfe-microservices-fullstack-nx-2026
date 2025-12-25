@@ -90,7 +90,7 @@ function convertToYaml(obj: unknown, indent = 0): string {
     // Handle multiline strings
     if (obj.includes('\n')) {
       const lines = obj.split('\n');
-      return `|\n${lines.map((line) => spaces + '  ' + line).join('\n')}`;
+      return `|\n${lines.map(line => spaces + '  ' + line).join('\n')}`;
     }
     // Quote strings that might be interpreted as other types
     if (
@@ -114,10 +114,13 @@ function convertToYaml(obj: unknown, indent = 0): string {
       return '[]';
     }
     return obj
-      .map((item) => {
+      .map(item => {
         const value = convertToYaml(item, indent + 1);
         if (typeof item === 'object' && item !== null) {
-          return `${spaces}- ${value.trim().replace(/^\s+/gm, (match) => spaces + '  ' + match.trim() + '\n').trim()}`;
+          return `${spaces}- ${value
+            .trim()
+            .replace(/^\s+/gm, match => spaces + '  ' + match.trim() + '\n')
+            .trim()}`;
         }
         return `${spaces}- ${value}`;
       })
@@ -151,4 +154,3 @@ function convertToYaml(obj: unknown, indent = 0): string {
 }
 
 export { swaggerSpec as openApiSpec };
-

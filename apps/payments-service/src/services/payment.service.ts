@@ -10,6 +10,11 @@
  */
 
 import { prisma as db } from '../lib/prisma';
+import {
+  getUserByEmail,
+  getUserById,
+  type MinimalUser,
+} from '../lib/authClient';
 import type { PaymentStatus, PaymentType, UserRole } from 'shared-types';
 import { ApiError } from '../middleware/errorHandler';
 import type {
@@ -76,8 +81,8 @@ export const paymentService = {
       // Customers see only their own payments (as sender or recipient)
       where.OR = [{ senderId: userId }, { recipientId: userId }];
     } else if (userRole === 'VENDOR') {
-      // Vendors see payments they initiated
-      where.senderId = userId;
+      // Vendors see payments they sent AND payments received
+      where.OR = [{ senderId: userId }, { recipientId: userId }];
     }
     // ADMIN sees all payments (no filter)
 
@@ -231,29 +236,16 @@ export const paymentService = {
    * Create new payment (stubbed processing)
    */
   async createPayment(userId: string, data: CreatePaymentRequest) {
-    // Find recipient
-    let recipientId: string;
+    // 1) Validate sender synchronously via Auth and ensure local read-model
+    const senderIdentity = await getUserById(userId);
+    await ensureUserReadModel(senderIdentity);
 
+    // 2) Validate recipient via Auth and ensure local read-model
+    let recipientIdentity: MinimalUser | null = null;
     if (data.recipientId) {
-      recipientId = data.recipientId;
+      recipientIdentity = await getUserById(data.recipientId);
     } else if (data.recipientEmail) {
-      // ZERO COUPLING: Lookup recipient in local denormalized User table
-      // This table is synchronized via RabbitMQ events from Auth Service (Phase 4)
-      // No API calls to Auth Service - maintains zero coupling
-      const recipient = await db.user.findUnique({
-        where: { email: data.recipientEmail },
-        select: { id: true },
-      });
-
-      if (!recipient) {
-        throw new ApiError(
-          404,
-          'RECIPIENT_NOT_FOUND',
-          'Recipient user not found'
-        );
-      }
-
-      recipientId = recipient.id;
+      recipientIdentity = await getUserByEmail(data.recipientEmail);
     } else {
       throw new ApiError(
         400,
@@ -261,6 +253,9 @@ export const paymentService = {
         'Either recipientId or recipientEmail must be provided'
       );
     }
+
+    await ensureUserReadModel(recipientIdentity);
+    const recipientId = recipientIdentity.id;
 
     // Create payment
     const paymentData: {
@@ -273,7 +268,7 @@ export const paymentService = {
       status: string;
       metadata?: Record<string, unknown>;
     } = {
-      senderId: userId,
+      senderId: senderIdentity.id,
       recipientId,
       type: data.type,
       amount: data.amount,
@@ -320,6 +315,8 @@ export const paymentService = {
       cache.invalidateByTag(CacheTags.user(userId)),
       cache.invalidateByTag(CacheTags.user(recipientId)),
     ]);
+    // Also invalidate global payments caches (e.g., admin lists)
+    await cache.invalidateByTag(CacheTags.payments);
 
     // TODO: Publish event: payment:created
 
@@ -436,6 +433,8 @@ export const paymentService = {
         CacheTags.user(nextRecipientId ?? payment.recipientId)
       ),
     ]);
+    // Also invalidate global payments caches (e.g., admin lists)
+    await cache.invalidateByTag(CacheTags.payments);
 
     return updatedPayment;
   },
@@ -506,6 +505,8 @@ export const paymentService = {
       cache.invalidateByTag(CacheTags.user(payment.senderId)),
       cache.invalidateByTag(CacheTags.user(payment.recipientId)),
     ]);
+    // Also invalidate global payments caches (e.g., admin lists)
+    await cache.invalidateByTag(CacheTags.payments);
 
     // TODO: Publish event: payment:status:updated
 
@@ -599,3 +600,34 @@ export const paymentService = {
     return result;
   },
 };
+
+/**
+ * Ensure payments_db.users has the canonical (id,email).
+ * If a different ID exists for same email, migrate payments and replace user.
+ */
+async function ensureUserReadModel(user: MinimalUser) {
+  // Find any existing user by email
+  const existingByEmail = await db.user.findUnique({
+    where: { email: user.email },
+  });
+  if (existingByEmail && existingByEmail.id !== user.id) {
+    // Migrate payments from old id to canonical id
+    await db.payment.updateMany({
+      where: { senderId: existingByEmail.id },
+      data: { senderId: user.id },
+    });
+    await db.payment.updateMany({
+      where: { recipientId: existingByEmail.id },
+      data: { recipientId: user.id },
+    });
+    // Delete old user
+    await db.user.delete({ where: { id: existingByEmail.id } });
+  }
+
+  // Upsert canonical user
+  await db.user.upsert({
+    where: { id: user.id },
+    update: { email: user.email },
+    create: { id: user.id, email: user.email },
+  });
+}

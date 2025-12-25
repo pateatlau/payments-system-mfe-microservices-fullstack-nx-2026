@@ -13,17 +13,10 @@
                 "cwd": "libs/backend/event-hub",
                 "command": "eslint ."
               },
-              "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json"
-              ],
-              "outputs": [
-                "{options.outputFile}"
-              ],
+              "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
+              "outputs": ["{options.outputFile}"],
               "metadata": {
-                "technologies": [
-                  "eslint"
-                ],
+                "technologies": ["eslint"],
                 "description": "Runs ESLint on project",
                 "help": {
                   "command": "pnpm exec eslint --help",
@@ -40,33 +33,22 @@
             },
             "build": {
               "executor": "@nx/js:tsc",
-              "outputs": [
-                "{options.outputPath}"
-              ],
+              "outputs": ["{options.outputPath}"],
               "options": {
                 "outputPath": "dist/libs/backend/event-hub",
                 "main": "libs/backend/event-hub/src/index.ts",
                 "tsConfig": "libs/backend/event-hub/tsconfig.lib.json",
-                "assets": [
-                  "libs/backend/event-hub/*.md"
-                ]
+                "assets": ["libs/backend/event-hub/*.md"]
               },
               "configurations": {},
               "parallelism": true,
               "cache": true,
-              "dependsOn": [
-                "^build"
-              ],
-              "inputs": [
-                "production",
-                "^production"
-              ]
+              "dependsOn": ["^build"],
+              "inputs": ["production", "^production"]
             },
             "test": {
               "executor": "@nx/jest:jest",
-              "outputs": [
-                "{workspaceRoot}/coverage/{projectRoot}"
-              ],
+              "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
               "options": {
                 "jestConfig": "libs/backend/event-hub/jest.config.cts"
               },
@@ -81,11 +63,7 @@
             }
           },
           "name": "event-hub",
-          "tags": [
-            "npm:private",
-            "backend",
-            "shared"
-          ],
+          "tags": ["npm:private", "backend", "shared"],
           "metadata": {
             "targetGroups": {},
             "js": {
@@ -118,35 +96,24 @@
           "targets": {
             "build": {
               "executor": "@nx/js:tsc",
-              "outputs": [
-                "{options.outputPath}"
-              ],
+              "outputs": ["{options.outputPath}"],
               "options": {
                 "outputPath": "dist/libs/shared-auth-store",
                 "main": "libs/shared-auth-store/src/index.ts",
                 "tsConfig": "libs/shared-auth-store/tsconfig.lib.json",
-                "assets": [
-                  "libs/shared-auth-store/*.md"
-                ]
+                "assets": ["libs/shared-auth-store/*.md"]
               },
               "configurations": {},
               "parallelism": true,
               "cache": true,
-              "dependsOn": [
-                "^build"
-              ],
-              "inputs": [
-                "production",
-                "^production"
-              ]
+              "dependsOn": ["^build"],
+              "inputs": ["production", "^production"]
             },
             "serve": {
               "continuous": true,
               "options": {
                 "cwd": "libs/shared-auth-store",
-                "args": [
-                  "--node-env=development"
-                ],
+                "args": ["--node-env=development"],
                 "env": {},
                 "command": "rspack serve"
               },
@@ -158,9 +125,7 @@
               "continuous": true,
               "options": {
                 "cwd": "libs/shared-auth-store",
-                "args": [
-                  "--node-env=production"
-                ],
+                "args": ["--node-env=production"],
                 "env": {},
                 "command": "rspack serve"
               },
@@ -169,9 +134,7 @@
               "parallelism": true
             },
             "serve-static": {
-              "dependsOn": [
-                "build"
-              ],
+              "dependsOn": ["build"],
               "continuous": true,
               "executor": "@nx/web:file-server",
               "options": {
@@ -182,9 +145,7 @@
               "parallelism": true
             },
             "build-deps": {
-              "dependsOn": [
-                "^build"
-              ],
+              "dependsOn": ["^build"],
               "configurations": {},
               "options": {},
               "parallelism": true,
@@ -192,9 +153,7 @@
             },
             "watch-deps": {
               "continuous": true,
-              "dependsOn": [
-                "build-deps"
-              ],
+              "dependsOn": ["build-deps"],
               "executor": "nx:run-commands",
               "options": {
                 "command": "pnpm exec nx watch --projects shared-auth-store --includeDependentProjects -- pnpm exec nx build-deps shared-auth-store"
@@ -208,17 +167,10 @@
                 "cwd": "libs/shared-auth-store",
                 "command": "eslint ."
               },
-              "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json"
-              ],
-              "outputs": [
-                "{options.outputFile}"
-              ],
+              "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
+              "outputs": ["{options.outputFile}"],
               "metadata": {
-                "technologies": [
-                  "eslint"
-                ],
+                "technologies": ["eslint"],
                 "description": "Runs ESLint on project",
                 "help": {
                   "command": "pnpm exec eslint --help",
@@ -235,9 +187,7 @@
             },
             "test": {
               "executor": "@nx/jest:jest",
-              "outputs": [
-                "{workspaceRoot}/coverage/{projectRoot}"
-              ],
+              "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
               "options": {
                 "jestConfig": "libs/shared-auth-store/jest.config.js",
                 "passWithNoTests": true
@@ -253,9 +203,7 @@
             }
           },
           "name": "shared-auth-store",
-          "tags": [
-            "npm:private"
-          ],
+          "tags": ["npm:private"],
           "$schema": "../../node_modules/nx/schemas/project-schema.json",
           "sourceRoot": "libs/shared-auth-store/src",
           "projectType": "library",
@@ -274,17 +222,10 @@
                 "cwd": "apps/payments-service",
                 "command": "eslint ."
               },
-              "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json"
-              ],
-              "outputs": [
-                "{options.outputFile}"
-              ],
+              "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
+              "outputs": ["{options.outputFile}"],
               "metadata": {
-                "technologies": [
-                  "eslint"
-                ],
+                "technologies": ["eslint"],
                 "description": "Runs ESLint on project",
                 "help": {
                   "command": "pnpm exec eslint --help",
@@ -301,22 +242,16 @@
             },
             "build": {
               "executor": "@nx/esbuild:esbuild",
-              "outputs": [
-                "{options.outputPath}"
-              ],
+              "outputs": ["{options.outputPath}"],
               "defaultConfiguration": "production",
               "options": {
                 "platform": "node",
                 "outputPath": "dist/apps/payments-service",
-                "format": [
-                  "cjs"
-                ],
+                "format": ["cjs"],
                 "bundle": false,
                 "main": "apps/payments-service/src/main.ts",
                 "tsConfig": "apps/payments-service/tsconfig.app.json",
-                "assets": [
-                  "apps/payments-service/src/assets"
-                ],
+                "assets": ["apps/payments-service/src/assets"],
                 "generatePackageJson": true,
                 "esbuildOptions": {
                   "sourcemap": true,
@@ -338,18 +273,11 @@
               },
               "parallelism": true,
               "cache": true,
-              "dependsOn": [
-                "^build"
-              ],
-              "inputs": [
-                "production",
-                "^production"
-              ]
+              "dependsOn": ["^build"],
+              "inputs": ["production", "^production"]
             },
             "prune-lockfile": {
-              "dependsOn": [
-                "build"
-              ],
+              "dependsOn": ["build"],
               "cache": true,
               "executor": "@nx/js:prune-lockfile",
               "outputs": [
@@ -363,9 +291,7 @@
               "parallelism": true
             },
             "copy-workspace-modules": {
-              "dependsOn": [
-                "build"
-              ],
+              "dependsOn": ["build"],
               "cache": true,
               "outputs": [
                 "{workspaceRoot}/dist/apps/payments-service/workspace_modules"
@@ -378,10 +304,7 @@
               "parallelism": true
             },
             "prune": {
-              "dependsOn": [
-                "prune-lockfile",
-                "copy-workspace-modules"
-              ],
+              "dependsOn": ["prune-lockfile", "copy-workspace-modules"],
               "executor": "nx:noop",
               "configurations": {},
               "options": {},
@@ -391,9 +314,7 @@
               "continuous": true,
               "executor": "@nx/js:node",
               "defaultConfiguration": "development",
-              "dependsOn": [
-                "build"
-              ],
+              "dependsOn": ["build"],
               "options": {
                 "buildTarget": "payments-service:build",
                 "runBuildTargetDependencies": false
@@ -410,9 +331,7 @@
             },
             "test": {
               "executor": "@nx/jest:jest",
-              "outputs": [
-                "{workspaceRoot}/coverage/{projectRoot}"
-              ],
+              "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
               "options": {
                 "jestConfig": "apps/payments-service/jest.config.cts",
                 "passWithNoTests": true
@@ -431,10 +350,7 @@
           "$schema": "../../node_modules/nx/schemas/project-schema.json",
           "sourceRoot": "apps/payments-service/src",
           "projectType": "application",
-          "tags": [
-            "backend",
-            "payments-service"
-          ],
+          "tags": ["backend", "payments-service"],
           "implicitDependencies": []
         }
       },
@@ -461,35 +377,24 @@
           "targets": {
             "build": {
               "executor": "@nx/js:tsc",
-              "outputs": [
-                "{options.outputPath}"
-              ],
+              "outputs": ["{options.outputPath}"],
               "options": {
                 "outputPath": "dist/libs/shared-header-ui",
                 "main": "libs/shared-header-ui/src/index.ts",
                 "tsConfig": "libs/shared-header-ui/tsconfig.lib.json",
-                "assets": [
-                  "libs/shared-header-ui/*.md"
-                ]
+                "assets": ["libs/shared-header-ui/*.md"]
               },
               "configurations": {},
               "parallelism": true,
               "cache": true,
-              "dependsOn": [
-                "^build"
-              ],
-              "inputs": [
-                "production",
-                "^production"
-              ]
+              "dependsOn": ["^build"],
+              "inputs": ["production", "^production"]
             },
             "serve": {
               "continuous": true,
               "options": {
                 "cwd": "libs/shared-header-ui",
-                "args": [
-                  "--node-env=development"
-                ],
+                "args": ["--node-env=development"],
                 "env": {},
                 "command": "rspack serve"
               },
@@ -501,9 +406,7 @@
               "continuous": true,
               "options": {
                 "cwd": "libs/shared-header-ui",
-                "args": [
-                  "--node-env=production"
-                ],
+                "args": ["--node-env=production"],
                 "env": {},
                 "command": "rspack serve"
               },
@@ -512,9 +415,7 @@
               "parallelism": true
             },
             "serve-static": {
-              "dependsOn": [
-                "build"
-              ],
+              "dependsOn": ["build"],
               "continuous": true,
               "executor": "@nx/web:file-server",
               "options": {
@@ -525,9 +426,7 @@
               "parallelism": true
             },
             "build-deps": {
-              "dependsOn": [
-                "^build"
-              ],
+              "dependsOn": ["^build"],
               "configurations": {},
               "options": {},
               "parallelism": true,
@@ -535,9 +434,7 @@
             },
             "watch-deps": {
               "continuous": true,
-              "dependsOn": [
-                "build-deps"
-              ],
+              "dependsOn": ["build-deps"],
               "executor": "nx:run-commands",
               "options": {
                 "command": "pnpm exec nx watch --projects shared-header-ui --includeDependentProjects -- pnpm exec nx build-deps shared-header-ui"
@@ -551,17 +448,10 @@
                 "cwd": "libs/shared-header-ui",
                 "command": "eslint ."
               },
-              "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json"
-              ],
-              "outputs": [
-                "{options.outputFile}"
-              ],
+              "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
+              "outputs": ["{options.outputFile}"],
               "metadata": {
-                "technologies": [
-                  "eslint"
-                ],
+                "technologies": ["eslint"],
                 "description": "Runs ESLint on project",
                 "help": {
                   "command": "pnpm exec eslint --help",
@@ -578,18 +468,14 @@
             },
             "nx-release-publish": {
               "executor": "@nx/js:release-publish",
-              "dependsOn": [
-                "^nx-release-publish"
-              ],
+              "dependsOn": ["^nx-release-publish"],
               "options": {},
               "configurations": {},
               "parallelism": true
             },
             "test": {
               "executor": "@nx/jest:jest",
-              "outputs": [
-                "{workspaceRoot}/coverage/{projectRoot}"
-              ],
+              "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
               "options": {
                 "jestConfig": "libs/shared-header-ui/jest.config.js",
                 "passWithNoTests": true
@@ -605,9 +491,7 @@
             }
           },
           "name": "shared-header-ui",
-          "tags": [
-            "npm:public"
-          ],
+          "tags": ["npm:public"],
           "$schema": "../../node_modules/nx/schemas/project-schema.json",
           "sourceRoot": "libs/shared-header-ui/src",
           "projectType": "library",
@@ -626,17 +510,10 @@
                 "cwd": "apps/profile-service",
                 "command": "eslint ."
               },
-              "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json"
-              ],
-              "outputs": [
-                "{options.outputFile}"
-              ],
+              "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
+              "outputs": ["{options.outputFile}"],
               "metadata": {
-                "technologies": [
-                  "eslint"
-                ],
+                "technologies": ["eslint"],
                 "description": "Runs ESLint on project",
                 "help": {
                   "command": "pnpm exec eslint --help",
@@ -653,22 +530,16 @@
             },
             "build": {
               "executor": "@nx/esbuild:esbuild",
-              "outputs": [
-                "{options.outputPath}"
-              ],
+              "outputs": ["{options.outputPath}"],
               "defaultConfiguration": "production",
               "options": {
                 "platform": "node",
                 "outputPath": "dist/apps/profile-service",
-                "format": [
-                  "cjs"
-                ],
+                "format": ["cjs"],
                 "bundle": false,
                 "main": "apps/profile-service/src/main.ts",
                 "tsConfig": "apps/profile-service/tsconfig.app.json",
-                "assets": [
-                  "apps/profile-service/src/assets"
-                ],
+                "assets": ["apps/profile-service/src/assets"],
                 "generatePackageJson": true,
                 "esbuildOptions": {
                   "sourcemap": true,
@@ -690,18 +561,11 @@
               },
               "parallelism": true,
               "cache": true,
-              "dependsOn": [
-                "^build"
-              ],
-              "inputs": [
-                "production",
-                "^production"
-              ]
+              "dependsOn": ["^build"],
+              "inputs": ["production", "^production"]
             },
             "prune-lockfile": {
-              "dependsOn": [
-                "build"
-              ],
+              "dependsOn": ["build"],
               "cache": true,
               "executor": "@nx/js:prune-lockfile",
               "outputs": [
@@ -715,9 +579,7 @@
               "parallelism": true
             },
             "copy-workspace-modules": {
-              "dependsOn": [
-                "build"
-              ],
+              "dependsOn": ["build"],
               "cache": true,
               "outputs": [
                 "{workspaceRoot}/dist/apps/profile-service/workspace_modules"
@@ -730,10 +592,7 @@
               "parallelism": true
             },
             "prune": {
-              "dependsOn": [
-                "prune-lockfile",
-                "copy-workspace-modules"
-              ],
+              "dependsOn": ["prune-lockfile", "copy-workspace-modules"],
               "executor": "nx:noop",
               "configurations": {},
               "options": {},
@@ -743,9 +602,7 @@
               "continuous": true,
               "executor": "@nx/js:node",
               "defaultConfiguration": "development",
-              "dependsOn": [
-                "build"
-              ],
+              "dependsOn": ["build"],
               "options": {
                 "buildTarget": "profile-service:build",
                 "runBuildTargetDependencies": false
@@ -762,9 +619,7 @@
             },
             "test": {
               "executor": "@nx/jest:jest",
-              "outputs": [
-                "{workspaceRoot}/coverage/{projectRoot}"
-              ],
+              "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
               "options": {
                 "jestConfig": "apps/profile-service/jest.config.cts",
                 "passWithNoTests": true
@@ -783,10 +638,7 @@
           "$schema": "../../node_modules/nx/schemas/project-schema.json",
           "sourceRoot": "apps/profile-service/src",
           "projectType": "application",
-          "tags": [
-            "backend",
-            "profile-service"
-          ],
+          "tags": ["backend", "profile-service"],
           "implicitDependencies": []
         }
       },
@@ -802,17 +654,10 @@
                 "cwd": "apps/admin-service",
                 "command": "eslint ."
               },
-              "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json"
-              ],
-              "outputs": [
-                "{options.outputFile}"
-              ],
+              "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
+              "outputs": ["{options.outputFile}"],
               "metadata": {
-                "technologies": [
-                  "eslint"
-                ],
+                "technologies": ["eslint"],
                 "description": "Runs ESLint on project",
                 "help": {
                   "command": "pnpm exec eslint --help",
@@ -829,22 +674,16 @@
             },
             "build": {
               "executor": "@nx/esbuild:esbuild",
-              "outputs": [
-                "{options.outputPath}"
-              ],
+              "outputs": ["{options.outputPath}"],
               "defaultConfiguration": "production",
               "options": {
                 "platform": "node",
                 "outputPath": "dist/apps/admin-service",
-                "format": [
-                  "cjs"
-                ],
+                "format": ["cjs"],
                 "bundle": false,
                 "main": "apps/admin-service/src/main.ts",
                 "tsConfig": "apps/admin-service/tsconfig.app.json",
-                "assets": [
-                  "apps/admin-service/src/assets"
-                ],
+                "assets": ["apps/admin-service/src/assets"],
                 "generatePackageJson": true,
                 "esbuildOptions": {
                   "sourcemap": true,
@@ -866,18 +705,11 @@
               },
               "parallelism": true,
               "cache": true,
-              "dependsOn": [
-                "^build"
-              ],
-              "inputs": [
-                "production",
-                "^production"
-              ]
+              "dependsOn": ["^build"],
+              "inputs": ["production", "^production"]
             },
             "prune-lockfile": {
-              "dependsOn": [
-                "build"
-              ],
+              "dependsOn": ["build"],
               "cache": true,
               "executor": "@nx/js:prune-lockfile",
               "outputs": [
@@ -891,9 +723,7 @@
               "parallelism": true
             },
             "copy-workspace-modules": {
-              "dependsOn": [
-                "build"
-              ],
+              "dependsOn": ["build"],
               "cache": true,
               "outputs": [
                 "{workspaceRoot}/dist/apps/admin-service/workspace_modules"
@@ -906,10 +736,7 @@
               "parallelism": true
             },
             "prune": {
-              "dependsOn": [
-                "prune-lockfile",
-                "copy-workspace-modules"
-              ],
+              "dependsOn": ["prune-lockfile", "copy-workspace-modules"],
               "executor": "nx:noop",
               "configurations": {},
               "options": {},
@@ -919,9 +746,7 @@
               "continuous": true,
               "executor": "@nx/js:node",
               "defaultConfiguration": "development",
-              "dependsOn": [
-                "build"
-              ],
+              "dependsOn": ["build"],
               "options": {
                 "buildTarget": "admin-service:build",
                 "runBuildTargetDependencies": false
@@ -938,9 +763,7 @@
             },
             "test": {
               "executor": "@nx/jest:jest",
-              "outputs": [
-                "{workspaceRoot}/coverage/{projectRoot}"
-              ],
+              "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
               "options": {
                 "jestConfig": "apps/admin-service/jest.config.cts",
                 "passWithNoTests": true
@@ -959,10 +782,7 @@
           "$schema": "../../node_modules/nx/schemas/project-schema.json",
           "sourceRoot": "apps/admin-service/src",
           "projectType": "application",
-          "tags": [
-            "backend",
-            "admin-service"
-          ],
+          "tags": ["backend", "admin-service"],
           "implicitDependencies": []
         }
       },
@@ -978,17 +798,10 @@
                 "cwd": "libs/backend/types",
                 "command": "eslint ."
               },
-              "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json"
-              ],
-              "outputs": [
-                "{options.outputFile}"
-              ],
+              "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
+              "outputs": ["{options.outputFile}"],
               "metadata": {
-                "technologies": [
-                  "eslint"
-                ],
+                "technologies": ["eslint"],
                 "description": "Runs ESLint on project",
                 "help": {
                   "command": "pnpm exec eslint --help",
@@ -1005,33 +818,22 @@
             },
             "build": {
               "executor": "@nx/js:tsc",
-              "outputs": [
-                "{options.outputPath}"
-              ],
+              "outputs": ["{options.outputPath}"],
               "options": {
                 "outputPath": "dist/libs/backend/types",
                 "main": "libs/backend/types/src/index.ts",
                 "tsConfig": "libs/backend/types/tsconfig.lib.json",
-                "assets": [
-                  "libs/backend/types/*.md"
-                ]
+                "assets": ["libs/backend/types/*.md"]
               },
               "configurations": {},
               "parallelism": true,
               "cache": true,
-              "dependsOn": [
-                "^build"
-              ],
-              "inputs": [
-                "production",
-                "^production"
-              ]
+              "dependsOn": ["^build"],
+              "inputs": ["production", "^production"]
             },
             "test": {
               "executor": "@nx/jest:jest",
-              "outputs": [
-                "{workspaceRoot}/coverage/{projectRoot}"
-              ],
+              "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
               "options": {
                 "jestConfig": "libs/backend/types/jest.config.cts"
               },
@@ -1046,11 +848,7 @@
             }
           },
           "name": "types",
-          "tags": [
-            "npm:private",
-            "backend",
-            "shared"
-          ],
+          "tags": ["npm:private", "backend", "shared"],
           "metadata": {
             "targetGroups": {},
             "js": {
@@ -1078,17 +876,10 @@
                 "cwd": "libs/backend/utils",
                 "command": "eslint ."
               },
-              "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json"
-              ],
-              "outputs": [
-                "{options.outputFile}"
-              ],
+              "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
+              "outputs": ["{options.outputFile}"],
               "metadata": {
-                "technologies": [
-                  "eslint"
-                ],
+                "technologies": ["eslint"],
                 "description": "Runs ESLint on project",
                 "help": {
                   "command": "pnpm exec eslint --help",
@@ -1105,33 +896,22 @@
             },
             "build": {
               "executor": "@nx/js:tsc",
-              "outputs": [
-                "{options.outputPath}"
-              ],
+              "outputs": ["{options.outputPath}"],
               "options": {
                 "outputPath": "dist/libs/backend/utils",
                 "main": "libs/backend/utils/src/index.ts",
                 "tsConfig": "libs/backend/utils/tsconfig.lib.json",
-                "assets": [
-                  "libs/backend/utils/*.md"
-                ]
+                "assets": ["libs/backend/utils/*.md"]
               },
               "configurations": {},
               "parallelism": true,
               "cache": true,
-              "dependsOn": [
-                "^build"
-              ],
-              "inputs": [
-                "production",
-                "^production"
-              ]
+              "dependsOn": ["^build"],
+              "inputs": ["production", "^production"]
             },
             "test": {
               "executor": "@nx/jest:jest",
-              "outputs": [
-                "{workspaceRoot}/coverage/{projectRoot}"
-              ],
+              "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
               "options": {
                 "jestConfig": "libs/backend/utils/jest.config.cts"
               },
@@ -1146,11 +926,7 @@
             }
           },
           "name": "utils",
-          "tags": [
-            "npm:private",
-            "backend",
-            "shared"
-          ],
+          "tags": ["npm:private", "backend", "shared"],
           "metadata": {
             "targetGroups": {},
             "js": {
@@ -1178,17 +954,10 @@
                 "cwd": "apps/auth-service",
                 "command": "eslint ."
               },
-              "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json"
-              ],
-              "outputs": [
-                "{options.outputFile}"
-              ],
+              "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
+              "outputs": ["{options.outputFile}"],
               "metadata": {
-                "technologies": [
-                  "eslint"
-                ],
+                "technologies": ["eslint"],
                 "description": "Runs ESLint on project",
                 "help": {
                   "command": "pnpm exec eslint --help",
@@ -1205,22 +974,16 @@
             },
             "build": {
               "executor": "@nx/esbuild:esbuild",
-              "outputs": [
-                "{options.outputPath}"
-              ],
+              "outputs": ["{options.outputPath}"],
               "defaultConfiguration": "production",
               "options": {
                 "platform": "node",
                 "outputPath": "dist/apps/auth-service",
-                "format": [
-                  "cjs"
-                ],
+                "format": ["cjs"],
                 "bundle": false,
                 "main": "apps/auth-service/src/main.ts",
                 "tsConfig": "apps/auth-service/tsconfig.app.json",
-                "assets": [
-                  "apps/auth-service/src/assets"
-                ],
+                "assets": ["apps/auth-service/src/assets"],
                 "generatePackageJson": true,
                 "esbuildOptions": {
                   "sourcemap": true,
@@ -1242,18 +1005,11 @@
               },
               "parallelism": true,
               "cache": true,
-              "dependsOn": [
-                "^build"
-              ],
-              "inputs": [
-                "production",
-                "^production"
-              ]
+              "dependsOn": ["^build"],
+              "inputs": ["production", "^production"]
             },
             "prune-lockfile": {
-              "dependsOn": [
-                "build"
-              ],
+              "dependsOn": ["build"],
               "cache": true,
               "executor": "@nx/js:prune-lockfile",
               "outputs": [
@@ -1267,9 +1023,7 @@
               "parallelism": true
             },
             "copy-workspace-modules": {
-              "dependsOn": [
-                "build"
-              ],
+              "dependsOn": ["build"],
               "cache": true,
               "outputs": [
                 "{workspaceRoot}/dist/apps/auth-service/workspace_modules"
@@ -1282,10 +1036,7 @@
               "parallelism": true
             },
             "prune": {
-              "dependsOn": [
-                "prune-lockfile",
-                "copy-workspace-modules"
-              ],
+              "dependsOn": ["prune-lockfile", "copy-workspace-modules"],
               "executor": "nx:noop",
               "configurations": {},
               "options": {},
@@ -1295,9 +1046,7 @@
               "continuous": true,
               "executor": "@nx/js:node",
               "defaultConfiguration": "development",
-              "dependsOn": [
-                "build"
-              ],
+              "dependsOn": ["build"],
               "options": {
                 "buildTarget": "auth-service:build",
                 "runBuildTargetDependencies": false
@@ -1314,9 +1063,7 @@
             },
             "test": {
               "executor": "@nx/jest:jest",
-              "outputs": [
-                "{workspaceRoot}/coverage/{projectRoot}"
-              ],
+              "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
               "options": {
                 "jestConfig": "apps/auth-service/jest.config.cts",
                 "passWithNoTests": true
@@ -1335,10 +1082,7 @@
           "$schema": "../../node_modules/nx/schemas/project-schema.json",
           "sourceRoot": "apps/auth-service/src",
           "projectType": "application",
-          "tags": [
-            "backend",
-            "auth-service"
-          ],
+          "tags": ["backend", "auth-service"],
           "implicitDependencies": []
         }
       },
@@ -1351,9 +1095,7 @@
           "targets": {
             "build": {
               "executor": "@nx/rspack:rspack",
-              "outputs": [
-                "{options.outputPath}"
-              ],
+              "outputs": ["{options.outputPath}"],
               "defaultConfiguration": "production",
               "options": {
                 "target": "web",
@@ -1373,13 +1115,8 @@
                 }
               },
               "parallelism": true,
-              "dependsOn": [
-                "^build"
-              ],
-              "inputs": [
-                "production",
-                "^production"
-              ],
+              "dependsOn": ["^build"],
+              "inputs": ["production", "^production"],
               "cache": true
             },
             "serve": {
@@ -1404,9 +1141,7 @@
               "continuous": true,
               "options": {
                 "cwd": "apps/payments-mfe",
-                "args": [
-                  "--node-env=production"
-                ],
+                "args": ["--node-env=production"],
                 "env": {},
                 "command": "rspack serve"
               },
@@ -1415,9 +1150,7 @@
               "parallelism": true
             },
             "serve-static": {
-              "dependsOn": [
-                "build"
-              ],
+              "dependsOn": ["build"],
               "continuous": true,
               "executor": "@nx/web:file-server",
               "options": {
@@ -1429,9 +1162,7 @@
               "parallelism": true
             },
             "build-deps": {
-              "dependsOn": [
-                "^build"
-              ],
+              "dependsOn": ["^build"],
               "configurations": {},
               "options": {},
               "parallelism": true,
@@ -1439,9 +1170,7 @@
             },
             "watch-deps": {
               "continuous": true,
-              "dependsOn": [
-                "build-deps"
-              ],
+              "dependsOn": ["build-deps"],
               "executor": "nx:run-commands",
               "options": {
                 "command": "pnpm exec nx watch --projects payments-mfe --includeDependentProjects -- pnpm exec nx build-deps payments-mfe"
@@ -1455,17 +1184,10 @@
                 "cwd": "apps/payments-mfe",
                 "command": "eslint ."
               },
-              "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json"
-              ],
-              "outputs": [
-                "{options.outputFile}"
-              ],
+              "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
+              "outputs": ["{options.outputFile}"],
               "metadata": {
-                "technologies": [
-                  "eslint"
-                ],
+                "technologies": ["eslint"],
                 "description": "Runs ESLint on project",
                 "help": {
                   "command": "pnpm exec eslint --help",
@@ -1482,9 +1204,7 @@
             },
             "test": {
               "executor": "@nx/jest:jest",
-              "outputs": [
-                "{workspaceRoot}/coverage/{projectRoot}"
-              ],
+              "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
               "options": {
                 "jestConfig": "apps/payments-mfe/jest.config.js",
                 "passWithNoTests": true
@@ -1524,35 +1244,24 @@
           "targets": {
             "build": {
               "executor": "@nx/js:tsc",
-              "outputs": [
-                "{options.outputPath}"
-              ],
+              "outputs": ["{options.outputPath}"],
               "options": {
                 "outputPath": "dist/libs/shared-types",
                 "main": "libs/shared-types/src/index.ts",
                 "tsConfig": "libs/shared-types/tsconfig.lib.json",
-                "assets": [
-                  "libs/shared-types/*.md"
-                ]
+                "assets": ["libs/shared-types/*.md"]
               },
               "configurations": {},
               "parallelism": true,
               "cache": true,
-              "dependsOn": [
-                "^build"
-              ],
-              "inputs": [
-                "production",
-                "^production"
-              ]
+              "dependsOn": ["^build"],
+              "inputs": ["production", "^production"]
             },
             "serve": {
               "continuous": true,
               "options": {
                 "cwd": "libs/shared-types",
-                "args": [
-                  "--node-env=development"
-                ],
+                "args": ["--node-env=development"],
                 "env": {},
                 "command": "rspack serve"
               },
@@ -1564,9 +1273,7 @@
               "continuous": true,
               "options": {
                 "cwd": "libs/shared-types",
-                "args": [
-                  "--node-env=production"
-                ],
+                "args": ["--node-env=production"],
                 "env": {},
                 "command": "rspack serve"
               },
@@ -1575,9 +1282,7 @@
               "parallelism": true
             },
             "serve-static": {
-              "dependsOn": [
-                "build"
-              ],
+              "dependsOn": ["build"],
               "continuous": true,
               "executor": "@nx/web:file-server",
               "options": {
@@ -1588,9 +1293,7 @@
               "parallelism": true
             },
             "build-deps": {
-              "dependsOn": [
-                "^build"
-              ],
+              "dependsOn": ["^build"],
               "configurations": {},
               "options": {},
               "parallelism": true,
@@ -1598,9 +1301,7 @@
             },
             "watch-deps": {
               "continuous": true,
-              "dependsOn": [
-                "build-deps"
-              ],
+              "dependsOn": ["build-deps"],
               "executor": "nx:run-commands",
               "options": {
                 "command": "pnpm exec nx watch --projects shared-types --includeDependentProjects -- pnpm exec nx build-deps shared-types"
@@ -1614,17 +1315,10 @@
                 "cwd": "libs/shared-types",
                 "command": "eslint ."
               },
-              "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json"
-              ],
-              "outputs": [
-                "{options.outputFile}"
-              ],
+              "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
+              "outputs": ["{options.outputFile}"],
               "metadata": {
-                "technologies": [
-                  "eslint"
-                ],
+                "technologies": ["eslint"],
                 "description": "Runs ESLint on project",
                 "help": {
                   "command": "pnpm exec eslint --help",
@@ -1641,9 +1335,7 @@
             },
             "test": {
               "executor": "@nx/jest:jest",
-              "outputs": [
-                "{workspaceRoot}/coverage/{projectRoot}"
-              ],
+              "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
               "options": {
                 "jestConfig": "libs/shared-types/jest.config.js",
                 "passWithNoTests": true
@@ -1659,9 +1351,7 @@
             }
           },
           "name": "shared-types",
-          "tags": [
-            "npm:private"
-          ],
+          "tags": ["npm:private"],
           "$schema": "../node_modules/nx/schemas/project-schema.json",
           "sourceRoot": "libs/shared-types/src",
           "projectType": "library",
@@ -1685,35 +1375,24 @@
           "targets": {
             "build": {
               "executor": "@nx/js:tsc",
-              "outputs": [
-                "{options.outputPath}"
-              ],
+              "outputs": ["{options.outputPath}"],
               "options": {
                 "outputPath": "dist/libs/shared-utils",
                 "main": "libs/shared-utils/src/index.ts",
                 "tsConfig": "libs/shared-utils/tsconfig.lib.json",
-                "assets": [
-                  "libs/shared-utils/*.md"
-                ]
+                "assets": ["libs/shared-utils/*.md"]
               },
               "configurations": {},
               "parallelism": true,
               "cache": true,
-              "dependsOn": [
-                "^build"
-              ],
-              "inputs": [
-                "production",
-                "^production"
-              ]
+              "dependsOn": ["^build"],
+              "inputs": ["production", "^production"]
             },
             "serve": {
               "continuous": true,
               "options": {
                 "cwd": "libs/shared-utils",
-                "args": [
-                  "--node-env=development"
-                ],
+                "args": ["--node-env=development"],
                 "env": {},
                 "command": "rspack serve"
               },
@@ -1725,9 +1404,7 @@
               "continuous": true,
               "options": {
                 "cwd": "libs/shared-utils",
-                "args": [
-                  "--node-env=production"
-                ],
+                "args": ["--node-env=production"],
                 "env": {},
                 "command": "rspack serve"
               },
@@ -1736,9 +1413,7 @@
               "parallelism": true
             },
             "serve-static": {
-              "dependsOn": [
-                "build"
-              ],
+              "dependsOn": ["build"],
               "continuous": true,
               "executor": "@nx/web:file-server",
               "options": {
@@ -1749,9 +1424,7 @@
               "parallelism": true
             },
             "build-deps": {
-              "dependsOn": [
-                "^build"
-              ],
+              "dependsOn": ["^build"],
               "configurations": {},
               "options": {},
               "parallelism": true,
@@ -1759,9 +1432,7 @@
             },
             "watch-deps": {
               "continuous": true,
-              "dependsOn": [
-                "build-deps"
-              ],
+              "dependsOn": ["build-deps"],
               "executor": "nx:run-commands",
               "options": {
                 "command": "pnpm exec nx watch --projects shared-utils --includeDependentProjects -- pnpm exec nx build-deps shared-utils"
@@ -1775,17 +1446,10 @@
                 "cwd": "libs/shared-utils",
                 "command": "eslint ."
               },
-              "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json"
-              ],
-              "outputs": [
-                "{options.outputFile}"
-              ],
+              "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
+              "outputs": ["{options.outputFile}"],
               "metadata": {
-                "technologies": [
-                  "eslint"
-                ],
+                "technologies": ["eslint"],
                 "description": "Runs ESLint on project",
                 "help": {
                   "command": "pnpm exec eslint --help",
@@ -1802,9 +1466,7 @@
             },
             "test": {
               "executor": "@nx/jest:jest",
-              "outputs": [
-                "{workspaceRoot}/coverage/{projectRoot}"
-              ],
+              "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
               "options": {
                 "jestConfig": "libs/shared-utils/jest.config.js",
                 "passWithNoTests": true
@@ -1820,9 +1482,7 @@
             }
           },
           "name": "shared-utils",
-          "tags": [
-            "npm:private"
-          ],
+          "tags": ["npm:private"],
           "$schema": "../node_modules/nx/schemas/project-schema.json",
           "sourceRoot": "libs/shared-utils/src",
           "projectType": "library",
@@ -1841,17 +1501,10 @@
                 "cwd": "apps/api-gateway",
                 "command": "eslint ."
               },
-              "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json"
-              ],
-              "outputs": [
-                "{options.outputFile}"
-              ],
+              "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
+              "outputs": ["{options.outputFile}"],
               "metadata": {
-                "technologies": [
-                  "eslint"
-                ],
+                "technologies": ["eslint"],
                 "description": "Runs ESLint on project",
                 "help": {
                   "command": "pnpm exec eslint --help",
@@ -1868,22 +1521,16 @@
             },
             "build": {
               "executor": "@nx/esbuild:esbuild",
-              "outputs": [
-                "{options.outputPath}"
-              ],
+              "outputs": ["{options.outputPath}"],
               "defaultConfiguration": "production",
               "options": {
                 "platform": "node",
                 "outputPath": "dist/apps/api-gateway",
-                "format": [
-                  "cjs"
-                ],
+                "format": ["cjs"],
                 "bundle": false,
                 "main": "apps/api-gateway/src/main.ts",
                 "tsConfig": "apps/api-gateway/tsconfig.app.json",
-                "assets": [
-                  "apps/api-gateway/src/assets"
-                ],
+                "assets": ["apps/api-gateway/src/assets"],
                 "generatePackageJson": true,
                 "esbuildOptions": {
                   "sourcemap": true,
@@ -1905,18 +1552,11 @@
               },
               "parallelism": true,
               "cache": true,
-              "dependsOn": [
-                "^build"
-              ],
-              "inputs": [
-                "production",
-                "^production"
-              ]
+              "dependsOn": ["^build"],
+              "inputs": ["production", "^production"]
             },
             "prune-lockfile": {
-              "dependsOn": [
-                "build"
-              ],
+              "dependsOn": ["build"],
               "cache": true,
               "executor": "@nx/js:prune-lockfile",
               "outputs": [
@@ -1930,9 +1570,7 @@
               "parallelism": true
             },
             "copy-workspace-modules": {
-              "dependsOn": [
-                "build"
-              ],
+              "dependsOn": ["build"],
               "cache": true,
               "outputs": [
                 "{workspaceRoot}/dist/apps/api-gateway/workspace_modules"
@@ -1945,10 +1583,7 @@
               "parallelism": true
             },
             "prune": {
-              "dependsOn": [
-                "prune-lockfile",
-                "copy-workspace-modules"
-              ],
+              "dependsOn": ["prune-lockfile", "copy-workspace-modules"],
               "executor": "nx:noop",
               "configurations": {},
               "options": {},
@@ -1958,9 +1593,7 @@
               "continuous": true,
               "executor": "@nx/js:node",
               "defaultConfiguration": "development",
-              "dependsOn": [
-                "build"
-              ],
+              "dependsOn": ["build"],
               "options": {
                 "buildTarget": "api-gateway:build",
                 "runBuildTargetDependencies": false
@@ -1977,9 +1610,7 @@
             },
             "test": {
               "executor": "@nx/jest:jest",
-              "outputs": [
-                "{workspaceRoot}/coverage/{projectRoot}"
-              ],
+              "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
               "options": {
                 "jestConfig": "apps/api-gateway/jest.config.cts",
                 "passWithNoTests": true
@@ -1998,10 +1629,7 @@
           "$schema": "../../node_modules/nx/schemas/project-schema.json",
           "sourceRoot": "apps/api-gateway/src",
           "projectType": "application",
-          "tags": [
-            "backend",
-            "api-gateway"
-          ],
+          "tags": ["backend", "api-gateway"],
           "implicitDependencies": []
         }
       },
@@ -2017,17 +1645,10 @@
                 "cwd": "libs/backend/db",
                 "command": "eslint ."
               },
-              "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json"
-              ],
-              "outputs": [
-                "{options.outputFile}"
-              ],
+              "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
+              "outputs": ["{options.outputFile}"],
               "metadata": {
-                "technologies": [
-                  "eslint"
-                ],
+                "technologies": ["eslint"],
                 "description": "Runs ESLint on project",
                 "help": {
                   "command": "pnpm exec eslint --help",
@@ -2044,33 +1665,22 @@
             },
             "build": {
               "executor": "@nx/js:tsc",
-              "outputs": [
-                "{options.outputPath}"
-              ],
+              "outputs": ["{options.outputPath}"],
               "options": {
                 "outputPath": "dist/libs/backend/db",
                 "main": "libs/backend/db/src/index.ts",
                 "tsConfig": "libs/backend/db/tsconfig.lib.json",
-                "assets": [
-                  "libs/backend/db/*.md"
-                ]
+                "assets": ["libs/backend/db/*.md"]
               },
               "configurations": {},
               "parallelism": true,
               "cache": true,
-              "dependsOn": [
-                "^build"
-              ],
-              "inputs": [
-                "production",
-                "^production"
-              ]
+              "dependsOn": ["^build"],
+              "inputs": ["production", "^production"]
             },
             "test": {
               "executor": "@nx/jest:jest",
-              "outputs": [
-                "{workspaceRoot}/coverage/{projectRoot}"
-              ],
+              "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
               "options": {
                 "jestConfig": "libs/backend/db/jest.config.cts"
               },
@@ -2085,11 +1695,7 @@
             }
           },
           "name": "db",
-          "tags": [
-            "npm:private",
-            "backend",
-            "shared"
-          ],
+          "tags": ["npm:private", "backend", "shared"],
           "metadata": {
             "targetGroups": {},
             "js": {
@@ -2128,35 +1734,24 @@
           "targets": {
             "build": {
               "executor": "@nx/js:tsc",
-              "outputs": [
-                "{options.outputPath}"
-              ],
+              "outputs": ["{options.outputPath}"],
               "options": {
                 "outputPath": "dist/libs/shared-ui",
                 "main": "libs/shared-ui/src/index.ts",
                 "tsConfig": "libs/shared-ui/tsconfig.lib.json",
-                "assets": [
-                  "libs/shared-ui/*.md"
-                ]
+                "assets": ["libs/shared-ui/*.md"]
               },
               "configurations": {},
               "parallelism": true,
               "cache": true,
-              "dependsOn": [
-                "^build"
-              ],
-              "inputs": [
-                "production",
-                "^production"
-              ]
+              "dependsOn": ["^build"],
+              "inputs": ["production", "^production"]
             },
             "serve": {
               "continuous": true,
               "options": {
                 "cwd": "libs/shared-ui",
-                "args": [
-                  "--node-env=development"
-                ],
+                "args": ["--node-env=development"],
                 "env": {},
                 "command": "rspack serve"
               },
@@ -2168,9 +1763,7 @@
               "continuous": true,
               "options": {
                 "cwd": "libs/shared-ui",
-                "args": [
-                  "--node-env=production"
-                ],
+                "args": ["--node-env=production"],
                 "env": {},
                 "command": "rspack serve"
               },
@@ -2179,9 +1772,7 @@
               "parallelism": true
             },
             "serve-static": {
-              "dependsOn": [
-                "build"
-              ],
+              "dependsOn": ["build"],
               "continuous": true,
               "executor": "@nx/web:file-server",
               "options": {
@@ -2192,9 +1783,7 @@
               "parallelism": true
             },
             "build-deps": {
-              "dependsOn": [
-                "^build"
-              ],
+              "dependsOn": ["^build"],
               "configurations": {},
               "options": {},
               "parallelism": true,
@@ -2202,9 +1791,7 @@
             },
             "watch-deps": {
               "continuous": true,
-              "dependsOn": [
-                "build-deps"
-              ],
+              "dependsOn": ["build-deps"],
               "executor": "nx:run-commands",
               "options": {
                 "command": "pnpm exec nx watch --projects shared-ui --includeDependentProjects -- pnpm exec nx build-deps shared-ui"
@@ -2218,17 +1805,10 @@
                 "cwd": "libs/shared-ui",
                 "command": "eslint ."
               },
-              "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json"
-              ],
-              "outputs": [
-                "{options.outputFile}"
-              ],
+              "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
+              "outputs": ["{options.outputFile}"],
               "metadata": {
-                "technologies": [
-                  "eslint"
-                ],
+                "technologies": ["eslint"],
                 "description": "Runs ESLint on project",
                 "help": {
                   "command": "pnpm exec eslint --help",
@@ -2245,18 +1825,14 @@
             },
             "nx-release-publish": {
               "executor": "@nx/js:release-publish",
-              "dependsOn": [
-                "^nx-release-publish"
-              ],
+              "dependsOn": ["^nx-release-publish"],
               "options": {},
               "configurations": {},
               "parallelism": true
             },
             "test": {
               "executor": "@nx/jest:jest",
-              "outputs": [
-                "{workspaceRoot}/coverage/{projectRoot}"
-              ],
+              "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
               "options": {
                 "jestConfig": "libs/shared-ui/jest.config.js",
                 "passWithNoTests": true
@@ -2272,9 +1848,7 @@
             }
           },
           "name": "shared-ui",
-          "tags": [
-            "npm:public"
-          ],
+          "tags": ["npm:public"],
           "$schema": "../node_modules/nx/schemas/project-schema.json",
           "sourceRoot": "libs/shared-ui/src",
           "projectType": "library",
@@ -2305,9 +1879,7 @@
                 "command": "playwright test"
               },
               "metadata": {
-                "technologies": [
-                  "playwright"
-                ],
+                "technologies": ["playwright"],
                 "description": "Runs Playwright Tests",
                 "help": {
                   "command": "pnpm exec playwright test --help",
@@ -2324,9 +1896,7 @@
                 "default",
                 "^production",
                 {
-                  "externalDependencies": [
-                    "@playwright/test"
-                  ]
+                  "externalDependencies": ["@playwright/test"]
                 }
               ],
               "outputs": [
@@ -2348,9 +1918,7 @@
                 "command": "playwright test src/auth-flow.spec.ts --output=../../dist/.playwright/apps/shell-e2e/test-output/src-auth-flow-spec-ts"
               },
               "metadata": {
-                "technologies": [
-                  "playwright"
-                ],
+                "technologies": ["playwright"],
                 "description": "Runs Playwright Tests in src/auth-flow.spec.ts in CI",
                 "help": {
                   "command": "pnpm exec playwright test --help",
@@ -2367,9 +1935,7 @@
                 "default",
                 "^production",
                 {
-                  "externalDependencies": [
-                    "@playwright/test"
-                  ]
+                  "externalDependencies": ["@playwright/test"]
                 }
               ],
               "outputs": [
@@ -2391,9 +1957,7 @@
                 "command": "playwright test src/logout-flow.spec.ts --output=../../dist/.playwright/apps/shell-e2e/test-output/src-logout-flow-spec-ts"
               },
               "metadata": {
-                "technologies": [
-                  "playwright"
-                ],
+                "technologies": ["playwright"],
                 "description": "Runs Playwright Tests in src/logout-flow.spec.ts in CI",
                 "help": {
                   "command": "pnpm exec playwright test --help",
@@ -2410,9 +1974,7 @@
                 "default",
                 "^production",
                 {
-                  "externalDependencies": [
-                    "@playwright/test"
-                  ]
+                  "externalDependencies": ["@playwright/test"]
                 }
               ],
               "outputs": [
@@ -2434,9 +1996,7 @@
                 "command": "playwright test src/payments-flow.spec.ts --output=../../dist/.playwright/apps/shell-e2e/test-output/src-payments-flow-spec-ts"
               },
               "metadata": {
-                "technologies": [
-                  "playwright"
-                ],
+                "technologies": ["playwright"],
                 "description": "Runs Playwright Tests in src/payments-flow.spec.ts in CI",
                 "help": {
                   "command": "pnpm exec playwright test --help",
@@ -2453,9 +2013,7 @@
                 "default",
                 "^production",
                 {
-                  "externalDependencies": [
-                    "@playwright/test"
-                  ]
+                  "externalDependencies": ["@playwright/test"]
                 }
               ],
               "outputs": [
@@ -2477,9 +2035,7 @@
                 "command": "playwright test src/role-based-access.spec.ts --output=../../dist/.playwright/apps/shell-e2e/test-output/src-role-based-access-spec-ts"
               },
               "metadata": {
-                "technologies": [
-                  "playwright"
-                ],
+                "technologies": ["playwright"],
                 "description": "Runs Playwright Tests in src/role-based-access.spec.ts in CI",
                 "help": {
                   "command": "pnpm exec playwright test --help",
@@ -2496,9 +2052,7 @@
                 "default",
                 "^production",
                 {
-                  "externalDependencies": [
-                    "@playwright/test"
-                  ]
+                  "externalDependencies": ["@playwright/test"]
                 }
               ],
               "outputs": [
@@ -2516,9 +2070,7 @@
                 "default",
                 "^production",
                 {
-                  "externalDependencies": [
-                    "@playwright/test"
-                  ]
+                  "externalDependencies": ["@playwright/test"]
                 }
               ],
               "outputs": [
@@ -2553,9 +2105,7 @@
                 }
               ],
               "metadata": {
-                "technologies": [
-                  "playwright"
-                ],
+                "technologies": ["playwright"],
                 "description": "Runs Playwright Tests in CI",
                 "nonAtomizedTarget": "e2e",
                 "help": {
@@ -2578,9 +2128,7 @@
                 "default",
                 "^production",
                 {
-                  "externalDependencies": [
-                    "@playwright/test"
-                  ]
+                  "externalDependencies": ["@playwright/test"]
                 }
               ],
               "outputs": [
@@ -2591,9 +2139,7 @@
                 "expectedSuites": 4
               },
               "metadata": {
-                "technologies": [
-                  "playwright"
-                ],
+                "technologies": ["playwright"],
                 "description": "Merges Playwright blob reports from atomized tasks to produce unified reports for the configured reporters."
               },
               "configurations": {},
@@ -2605,17 +2151,10 @@
                 "cwd": "apps/shell-e2e",
                 "command": "eslint ."
               },
-              "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json"
-              ],
-              "outputs": [
-                "{options.outputFile}"
-              ],
+              "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
+              "outputs": ["{options.outputFile}"],
               "metadata": {
-                "technologies": [
-                  "eslint"
-                ],
+                "technologies": ["eslint"],
                 "description": "Runs ESLint on project",
                 "help": {
                   "command": "pnpm exec eslint --help",
@@ -2636,9 +2175,7 @@
           "projectType": "application",
           "sourceRoot": "shell-e2e/src",
           "tags": [],
-          "implicitDependencies": [
-            "shell"
-          ]
+          "implicitDependencies": ["shell"]
         }
       },
       "auth-mfe": {
@@ -2650,9 +2187,7 @@
           "targets": {
             "build": {
               "executor": "@nx/rspack:rspack",
-              "outputs": [
-                "{options.outputPath}"
-              ],
+              "outputs": ["{options.outputPath}"],
               "defaultConfiguration": "production",
               "options": {
                 "target": "web",
@@ -2672,13 +2207,8 @@
                 }
               },
               "parallelism": true,
-              "dependsOn": [
-                "^build"
-              ],
-              "inputs": [
-                "production",
-                "^production"
-              ],
+              "dependsOn": ["^build"],
+              "inputs": ["production", "^production"],
               "cache": true
             },
             "serve": {
@@ -2703,9 +2233,7 @@
               "continuous": true,
               "options": {
                 "cwd": "apps/auth-mfe",
-                "args": [
-                  "--node-env=production"
-                ],
+                "args": ["--node-env=production"],
                 "env": {},
                 "command": "rspack serve"
               },
@@ -2714,9 +2242,7 @@
               "parallelism": true
             },
             "serve-static": {
-              "dependsOn": [
-                "build"
-              ],
+              "dependsOn": ["build"],
               "continuous": true,
               "executor": "@nx/web:file-server",
               "options": {
@@ -2728,9 +2254,7 @@
               "parallelism": true
             },
             "build-deps": {
-              "dependsOn": [
-                "^build"
-              ],
+              "dependsOn": ["^build"],
               "configurations": {},
               "options": {},
               "parallelism": true,
@@ -2738,9 +2262,7 @@
             },
             "watch-deps": {
               "continuous": true,
-              "dependsOn": [
-                "build-deps"
-              ],
+              "dependsOn": ["build-deps"],
               "executor": "nx:run-commands",
               "options": {
                 "command": "pnpm exec nx watch --projects auth-mfe --includeDependentProjects -- pnpm exec nx build-deps auth-mfe"
@@ -2754,17 +2276,10 @@
                 "cwd": "apps/auth-mfe",
                 "command": "eslint ."
               },
-              "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json"
-              ],
-              "outputs": [
-                "{options.outputFile}"
-              ],
+              "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
+              "outputs": ["{options.outputFile}"],
               "metadata": {
-                "technologies": [
-                  "eslint"
-                ],
+                "technologies": ["eslint"],
                 "description": "Runs ESLint on project",
                 "help": {
                   "command": "pnpm exec eslint --help",
@@ -2781,9 +2296,7 @@
             },
             "test": {
               "executor": "@nx/jest:jest",
-              "outputs": [
-                "{workspaceRoot}/coverage/{projectRoot}"
-              ],
+              "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
               "options": {
                 "jestConfig": "apps/auth-mfe/jest.config.js",
                 "passWithNoTests": true
@@ -2815,9 +2328,7 @@
           "targets": {
             "build": {
               "executor": "@nx/rspack:rspack",
-              "outputs": [
-                "{options.outputPath}"
-              ],
+              "outputs": ["{options.outputPath}"],
               "defaultConfiguration": "production",
               "options": {
                 "target": "web",
@@ -2837,13 +2348,8 @@
                 }
               },
               "parallelism": true,
-              "dependsOn": [
-                "^build"
-              ],
-              "inputs": [
-                "production",
-                "^production"
-              ],
+              "dependsOn": ["^build"],
+              "inputs": ["production", "^production"],
               "cache": true
             },
             "serve": {
@@ -2868,9 +2374,7 @@
               "continuous": true,
               "options": {
                 "cwd": "apps/shell",
-                "args": [
-                  "--node-env=production"
-                ],
+                "args": ["--node-env=production"],
                 "env": {},
                 "command": "rspack serve"
               },
@@ -2879,9 +2383,7 @@
               "parallelism": true
             },
             "serve-static": {
-              "dependsOn": [
-                "build"
-              ],
+              "dependsOn": ["build"],
               "continuous": true,
               "executor": "@nx/web:file-server",
               "options": {
@@ -2892,9 +2394,7 @@
               "parallelism": true
             },
             "build-deps": {
-              "dependsOn": [
-                "^build"
-              ],
+              "dependsOn": ["^build"],
               "configurations": {},
               "options": {},
               "parallelism": true,
@@ -2902,9 +2402,7 @@
             },
             "watch-deps": {
               "continuous": true,
-              "dependsOn": [
-                "build-deps"
-              ],
+              "dependsOn": ["build-deps"],
               "executor": "nx:run-commands",
               "options": {
                 "command": "pnpm exec nx watch --projects shell --includeDependentProjects -- pnpm exec nx build-deps shell"
@@ -2918,17 +2416,10 @@
                 "cwd": "apps/shell",
                 "command": "eslint ."
               },
-              "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json"
-              ],
-              "outputs": [
-                "{options.outputFile}"
-              ],
+              "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
+              "outputs": ["{options.outputFile}"],
               "metadata": {
-                "technologies": [
-                  "eslint"
-                ],
+                "technologies": ["eslint"],
                 "description": "Runs ESLint on project",
                 "help": {
                   "command": "pnpm exec eslint --help",
@@ -2945,9 +2436,7 @@
             },
             "test": {
               "executor": "@nx/jest:jest",
-              "outputs": [
-                "{workspaceRoot}/coverage/{projectRoot}"
-              ],
+              "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
               "options": {
                 "jestConfig": "apps/shell/jest.config.js",
                 "passWithNoTests": true,

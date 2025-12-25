@@ -1,8 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import type { UpdatePaymentData } from '@mfe/shared-api-client';
-import { updatePaymentDetails as updatePaymentDetailsShared } from '@mfe/shared-api-client';
-import { updatePaymentDetails as updatePaymentDetailsMFE } from '../api/payments';
-import type { UpdatePaymentDetailsDto } from '../api/types';
+import { updatePaymentStatus } from '../api/payments';
+import type { UpdatePaymentDto } from '../api/types';
 import type { Payment } from 'shared-types';
 import { paymentKeys } from './usePayments';
 
@@ -19,10 +17,10 @@ interface UseUpdatePaymentOptions {
 }
 
 /**
- * Hook to update payment details via PUT /payments/:id
+ * Hook to update payment status via PATCH /payments/:id/status
  *
  * Uses TanStack Query mutation with:
- * - Automatic error handling and retry logic (via shared ApiClient)
+ * - Automatic error handling and retry logic
  * - Cache invalidation for specific payment and list
  * - Optional success/error callbacks
  *
@@ -39,7 +37,7 @@ interface UseUpdatePaymentOptions {
  * // In form submission:
  * await updateMutation.mutateAsync({
  *   id: 'pay_123',
- *   data: { description: 'New description' },
+ *   data: { status: 'completed', reason: 'Payment processed' },
  * });
  * ```
  */
@@ -52,16 +50,9 @@ export function useUpdatePayment(options?: UseUpdatePaymentOptions) {
       data,
     }: {
       id: string;
-      data: UpdatePaymentDetailsDto;
+      data: UpdatePaymentDto;
     }): Promise<Payment> => {
-      // Prefer shared API client if available; fall back to MFE local wrapper
-      // The shared client includes auth interceptors, error handling, and retry logic
-      try {
-        return await updatePaymentDetailsShared(id, data as UpdatePaymentData);
-      } catch {
-        // Fallback to MFE wrapper (for backward compatibility)
-        return await updatePaymentDetailsMFE(id, data);
-      }
+      return await updatePaymentStatus(id, data);
     },
 
     onSuccess: (payment: Payment) => {

@@ -15,12 +15,12 @@ const alertVariants = cva('relative w-full rounded-lg border p-4', {
       default:
         'bg-(--background) bg-[rgb(var(--background))] border-(--border) border-[rgb(var(--border))] text-(--foreground) text-[rgb(var(--foreground))]',
       destructive:
-        'bg-red-50 border-red-200 text-red-900 dark:bg-red-950 dark:border-red-900 dark:text-red-100',
+        'bg-destructive/10 border-destructive/30 text-destructive dark:bg-destructive/20 dark:border-destructive/50 dark:text-destructive',
       success:
-        'bg-green-50 border-green-200 text-green-900 dark:bg-green-950 dark:border-green-900 dark:text-green-100',
+        'bg-emerald-500/15 border-emerald-500/40 text-foreground dark:bg-emerald-500/20 dark:border-emerald-500/50 dark:text-foreground',
       warning:
-        'bg-amber-50 border-amber-200 text-amber-900 dark:bg-amber-950 dark:border-amber-900 dark:text-amber-100',
-      info: 'bg-blue-50 border-blue-200 text-blue-900 dark:bg-blue-950 dark:border-blue-900 dark:text-blue-100',
+        'bg-amber-500/15 border-amber-500/40 text-foreground dark:bg-amber-500/20 dark:border-amber-500/50 dark:text-foreground',
+      info: 'bg-blue-500/15 border-blue-500/40 text-foreground dark:bg-blue-500/20 dark:border-blue-500/50 dark:text-foreground',
     },
   },
   defaultVariants: {

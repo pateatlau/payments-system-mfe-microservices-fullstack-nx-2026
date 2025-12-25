@@ -66,10 +66,12 @@ export const CacheKeys = {
   user: (id: string) => `user:${id}`,
   userByEmail: (email: string) => `user:email:${email}`,
   payment: (id: string) => `payment:${id}`,
-  paymentList: (userId: string, page: number) => `payments:user:${userId}:page:${page}`,
+  paymentList: (userId: string, page: number) =>
+    `payments:user:${userId}:page:${page}`,
   profile: (userId: string) => `profile:${userId}`,
   profilePreferences: (userId: string) => `profile:${userId}:preferences`,
-  auditLogs: (page: number, limit: number) => `audit:logs:page:${page}:limit:${limit}`,
+  auditLogs: (page: number, limit: number) =>
+    `audit:logs:page:${page}:limit:${limit}`,
   systemConfig: (key: string) => `config:${key}`,
 } as const;
 

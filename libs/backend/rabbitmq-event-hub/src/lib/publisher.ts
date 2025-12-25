@@ -238,11 +238,14 @@ export class RabbitMQPublisher {
   private async waitForConfirm(channel: any): Promise<void> {
     // Use the promise-based API for waitForConfirms
     const timeout = this.options.timeout || 10000;
-    
+
     return Promise.race([
       channel.waitForConfirms(),
-      new Promise<never>((_, reject) => 
-        setTimeout(() => reject(new Error('Publisher confirmation timeout')), timeout)
+      new Promise<never>((_, reject) =>
+        setTimeout(
+          () => reject(new Error('Publisher confirmation timeout')),
+          timeout
+        )
       ),
     ]);
   }

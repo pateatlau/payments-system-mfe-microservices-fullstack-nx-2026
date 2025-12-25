@@ -1,10 +1,13 @@
 # CI/CD Planning Document - MFE Payments System
 
-**Document Version:** 1.0  
-**Date:** December 12, 2025  
-**Status:** Planning Phase  
+**Document Version:** 1.1  
+**Date Updated:** December 23, 2025  
+**Original Date:** December 12, 2025  
+**Status:** Planning Phase - Backend Hardening Required First  
 **Project:** MFE Payments System - Production Deployment  
 **Repository:** https://github.com/pateatlau/payments-system-mfe-microservices-fullstack-nx-2026
+
+> ⚠️ **CRITICAL UPDATE (Dec 23, 2025):** Backend security audit revealed critical vulnerabilities that MUST be addressed before production deployment. Rate limiting is disabled (100,000 req/15min instead of 100), JWT refresh tokens don't rotate, no account lockout protection, and input validation gaps exist in payments/admin services. See [Backend Hardening Plan](./BACKEND-HARDENING-PLAN.md) for details. **Recommendation: Complete Backend Hardening Phase 1-2 BEFORE starting CI/CD implementation.**
 
 ---
 
@@ -22,6 +25,7 @@
 10. [Success Criteria](#10-success-criteria)
 11. [Timeline & Phases](#11-timeline--phases)
 12. [Next Steps](#12-next-steps)
+13. [Integrated Implementation Roadmap](#13-integrated-implementation-roadmap)
 
 ---
 
@@ -46,6 +50,28 @@ Implement a production-ready CI/CD pipeline to enable automated testing, buildin
 - Independent service scaling
 - Production-ready infrastructure
 - Internet-accessible live demo
+
+### 🎯 Implementation Roadmap Recommendation
+
+**PRIORITY 1 (BLOCKING):** Backend Hardening Phase 1-2 (2-3 weeks)
+
+- **Week 1-2:** Critical security fixes (rate limiting, JWT rotation, account lockout, input validation)
+- **Week 3:** Security testing and validation
+- **Rationale:** Deploying vulnerable code to production introduces unacceptable security risks
+
+**PRIORITY 2 (FOUNDATION):** CI/CD Phase 1-3 (2-3 weeks)
+
+- **Week 4-5:** CI pipeline + Docker configuration + AWS infrastructure
+- **Rationale:** With security hardened, build automated deployment foundation
+
+**PRIORITY 3 (PARALLEL):** Security + Deployment (1-2 weeks)
+
+- **Week 6-7:** Backend hardening Phase 3-5 (parallel with CD pipeline Phase 4-6)
+- **Rationale:** Complete security hardening while automating deployments
+
+**Total Timeline:** 6-8 weeks (security-first approach)
+
+See [Section 13: Integrated Implementation Roadmap](#13-integrated-implementation-roadmap) for detailed breakdown.
 
 ---
 
@@ -1075,11 +1101,391 @@ After implementation, update:
 
 ---
 
+## 13. Integrated Implementation Roadmap
+
+### Overview: Security-First Deployment Strategy
+
+After reviewing both the CI/CD planning and backend hardening requirements, **we recommend a security-first approach** where critical backend security issues are resolved BEFORE setting up production deployment infrastructure. This prevents deploying vulnerable code to the internet.
+
+### Why Security Must Come First
+
+**Current Critical Vulnerabilities:**
+
+1. ❌ **Rate limiting disabled** - System vulnerable to brute force and DoS attacks
+2. ❌ **No JWT refresh rotation** - Stolen tokens valid for 7 days with no revocation
+3. ❌ **No account lockout** - Unlimited login attempts enable credential stuffing
+4. ❌ **Missing input validation** - Payments and Admin services lack Zod validators
+5. ❌ **Default secrets** - Production may use "your-secret-key-change-in-production"
+
+**Risk Assessment:**
+
+- Deploying with these vulnerabilities = **Immediate exploitation opportunity**
+- Rate limiting restoration alone = **70% risk reduction**
+- Completing Backend Hardening Phase 1-2 = **90% risk reduction**
+
+**Industry Best Practice:**
+
+> "Never deploy security vulnerabilities to production, even temporarily. Fix critical security issues before making services internet-accessible."
+
+---
+
+### Recommended Implementation Sequence
+
+#### 🔴 STAGE 1: Critical Security Hardening (2-3 weeks) - BLOCKING
+
+**Objective:** Fix critical vulnerabilities before production deployment
+
+**Backend Hardening Phase 1 (Week 1): Immediate Fixes**
+
+- Day 1-2: Restore rate limiting (100 general, 5 auth endpoints)
+- Day 3-4: Implement JWT refresh token rotation with Redis blacklist
+- Day 5-7: Add account lockout protection (5 attempts → 15min lockout)
+- **Effort:** 9 hours dev + 3 hours testing
+- **Impact:** 70% of critical vulnerabilities resolved
+- **Deliverable:** Rate limiting restored, token rotation working, account lockout active
+
+**Backend Hardening Phase 2 (Week 2): Input Validation**
+
+- Day 1-3: Create Payments service validators (payment.validators.ts)
+- Day 4-6: Create Admin service validators (admin.validators.ts)
+- Day 7: Integration testing
+- **Effort:** 12 hours dev + 4 hours testing
+- **Impact:** SQL injection, XSS, and command injection risks eliminated
+- **Deliverable:** All services have Zod validation
+
+**Security Testing (Week 3): Validation**
+
+- Penetration testing with OWASP ZAP
+- Rate limit testing (verify 429 responses)
+- Auth security testing (token rotation, account lockout)
+- Input validation testing (SQL injection, XSS attempts)
+- **Deliverable:** Security audit report, all tests passing
+
+**🔒 GATE 1: Security Sign-Off Required**
+
+- [ ] All critical vulnerabilities resolved
+- [ ] Rate limiting functional
+- [ ] Token rotation working
+- [ ] Input validation complete
+- [ ] Security tests passing
+
+---
+
+#### 🟡 STAGE 2: CI/CD Foundation (2-3 weeks) - CRITICAL PATH
+
+**Objective:** Build automated deployment infrastructure on hardened backend
+
+**CI/CD Phase 1 (Week 4): CI Pipeline Setup**
+
+- Create `.github/workflows/ci.yml`
+- Configure Nx affected builds
+- Set up parallel test execution
+- Configure linting, type checking
+- Set up artifact caching
+- **Deliverable:** CI runs on every push/PR, < 10min execution
+
+**CI/CD Phase 2 (Week 4-5): Docker Configuration**
+
+- Create Dockerfiles for all 10 services + nginx
+- Multi-stage builds for optimization
+- Test builds locally
+- Optimize image sizes (< 500MB target)
+- **Deliverable:** All Docker images build successfully
+
+**CI/CD Phase 3 (Week 5-6): AWS Infrastructure**
+
+- Set up AWS CDK project (TypeScript)
+- Create VPC with public/private subnets
+- Create ECR repositories (11 total)
+- Create ECS clusters (staging + production)
+- Set up RDS PostgreSQL (4 databases)
+- Configure ElastiCache Redis
+- Set up Application Load Balancer
+- Configure security groups and IAM roles
+- **Deliverable:** All AWS infrastructure provisioned
+
+**💡 GATE 2: Infrastructure Ready**
+
+- [ ] Docker images build successfully
+- [ ] AWS infrastructure provisioned
+- [ ] Security groups configured
+- [ ] Secrets in AWS Secrets Manager
+
+---
+
+#### 🟢 STAGE 3: Parallel Security + Deployment (2-3 weeks)
+
+**Objective:** Complete security hardening while automating deployments
+
+**PARALLEL TRACK A: CD Pipeline (Week 6-7)**
+
+- **Phase 4:** CD Pipeline for Staging
+  - Auto-deploy on `develop` branch
+  - Health checks and rollback
+- **Phase 5:** Production Deployment
+  - Manual approval gate
+  - Blue/green deployment
+- **Phase 6:** Database Migration Automation
+  - Pre-deployment backups
+  - Migration execution scripts
+  - Rollback on failure
+
+**PARALLEL TRACK B: Advanced Security (Week 6-7)**
+
+- **Backend Hardening Phase 3:** Secrets Management
+  - Migrate to AWS Secrets Manager
+  - Implement secrets rotation
+  - Remove default secrets
+  - Add secrets validation (fail on defaults)
+- **Backend Hardening Phase 4:** Database Security
+  - Connection pool limits
+  - Query timeouts
+  - Audit logging
+  - Disable query logging in production
+- **Backend Hardening Phase 5:** Service Resilience
+  - Circuit breakers
+  - Request timeouts
+  - Graceful degradation
+  - Health check endpoints
+
+**PARALLEL TRACK C: Monitoring (Week 7)**
+
+- **CI/CD Phase 7:** CloudWatch integration
+- **CI/CD Phase 8:** Security scanning in CI
+
+**🎉 GATE 3: Production Ready**
+
+- [ ] Staging deployment automated
+- [ ] Production deployment with approval
+- [ ] All security phases complete
+- [ ] Monitoring active
+- [ ] Health checks passing
+
+---
+
+### Implementation Gantt Chart
+
+```
+Week 1-2  │████████████│ Backend Hardening Phase 1-2 (CRITICAL)
+          │             │ ├─ Rate limiting
+          │             │ ├─ JWT rotation
+          │             │ ├─ Account lockout
+          │             │ └─ Input validation
+          │
+Week 3    │██████      │ Security Testing & Validation
+          │             │
+Week 4    │      ████████│ CI Pipeline + Docker
+          │             │
+Week 5-6  │        ██████████████│ AWS Infrastructure Setup
+          │                     │
+Week 6-7  │              ████████████│ CD Pipeline (TRACK A)
+          │              ████████████│ Advanced Security (TRACK B)
+          │              ████████████│ Monitoring (TRACK C)
+          │
+          └─────────────────────────────────────────────
+          BLOCKING → CRITICAL PATH → PARALLEL WORK
+```
+
+---
+
+### Parallel Work Opportunities
+
+**What CAN Be Done in Parallel:**
+
+1. **Week 1-2 (During Backend Hardening):**
+   - ✅ Document CI/CD requirements
+   - ✅ Set up AWS account
+   - ✅ Configure GitHub secrets
+   - ✅ Research AWS CDK patterns
+   - ✅ Create Dockerfile templates
+
+2. **Week 4-5 (During CI/CD Foundation):**
+   - ✅ Backend Hardening Phase 3 (secrets management) - Can start in Week 5
+   - ✅ Security scanning tool evaluation
+   - ✅ Monitoring strategy planning
+
+3. **Week 6-7 (Fully Parallel):**
+   - ✅ CD pipeline implementation (Track A)
+   - ✅ Backend Hardening Phase 3-5 (Track B)
+   - ✅ Monitoring setup (Track C)
+
+**What CANNOT Be Done in Parallel:**
+
+1. ❌ **CI/CD before Backend Hardening Phase 1-2**
+   - Reason: Would deploy vulnerable code to production
+   - Risk: Immediate exploitation, data breaches, reputation damage
+
+2. ❌ **Production deployment before security testing**
+   - Reason: Unvalidated security fixes may have gaps
+   - Risk: False sense of security
+
+3. ❌ **Monitoring before deployment**
+   - Reason: Nothing to monitor yet
+   - Better: Set up monitoring during/after deployment
+
+---
+
+### Resource Allocation
+
+**Single Developer (Full-Time):**
+
+- **Week 1-3:** Backend Hardening (100% focus)
+- **Week 4-6:** CI/CD Setup (100% focus)
+- **Week 7-8:** Parallel work (alternate daily between tracks)
+- **Total:** 7-8 weeks
+
+**Single Developer (Part-Time - 20 hrs/week):**
+
+- **Week 1-4:** Backend Hardening
+- **Week 5-10:** CI/CD Setup
+- **Week 11-14:** Parallel work
+- **Total:** 12-14 weeks
+
+**Team of 2 (Full-Time):**
+
+- **Week 1-2:** Backend Hardening (both)
+- **Week 3:** Security testing (Developer 1) + CI setup start (Developer 2)
+- **Week 4-5:** CI/CD (both)
+- **Week 6:** Parallel tracks (Developer 1: Security, Developer 2: Deployment)
+- **Total:** 5-6 weeks
+
+---
+
+### Decision Matrix: When to Start CI/CD
+
+| Scenario                         | Start CI/CD When...                    | Rationale                                                 |
+| -------------------------------- | -------------------------------------- | --------------------------------------------------------- |
+| **Production Deployment Target** | ✅ After Backend Hardening Phase 1-2   | Security-critical; deploying vulnerabilities unacceptable |
+| **Internal Demo Only**           | ⚠️ Can start CI/CD immediately         | Lower risk; still recommend fixing rate limiting first    |
+| **Development/Staging Only**     | ✅ Can start CI/CD immediately         | No public exposure; security can be hardened later        |
+| **Investor Demo**                | ✅ After Backend Hardening Phase 1     | Reputation risk; demonstrate security awareness           |
+| **Production Traffic**           | 🚫 MUST complete ALL Backend Hardening | Regulatory/compliance requirements                        |
+
+---
+
+### Cost Optimization Through Sequencing
+
+**Approach A: Security First (Recommended)**
+
+- Weeks 1-3: $0 (local development only)
+- Weeks 4-8: $421/month AWS costs
+- **Total Cost (2 months):** ~$842
+- **Benefits:** Secure from day 1, no vulnerability window
+
+**Approach B: Parallel (NOT Recommended)**
+
+- Weeks 1-8: $421/month AWS costs
+- **Total Cost (2 months):** ~$842
+- **Risks:** 3-4 weeks of vulnerable production system, potential breach costs ($$$$)
+
+**Approach C: CI/CD First (DANGEROUS)**
+
+- Weeks 1-8: $421/month AWS costs
+- Weeks 9-11: Backend hardening
+- **Total Cost (3 months):** ~$1,263
+- **Risks:** 8+ weeks of vulnerable production system, likely exploitation
+
+**Recommendation:** Approach A saves money AND reduces risk.
+
+---
+
+### Success Metrics by Stage
+
+**Stage 1 Success (Security Hardening):**
+
+- [ ] Rate limiting: 100 req/15min (general), 5 req/15min (auth)
+- [ ] JWT refresh rotation: New token on every refresh
+- [ ] Account lockout: Lock after 5 failed attempts for 15 minutes
+- [ ] Input validation: All services have Zod validators
+- [ ] Security scan: 0 critical vulnerabilities
+- [ ] Penetration test: No successful exploits
+
+**Stage 2 Success (CI/CD Foundation):**
+
+- [ ] CI pipeline: < 10min execution time
+- [ ] Docker images: All build successfully, < 500MB each
+- [ ] AWS infrastructure: All resources provisioned
+- [ ] ECR: All images pushed successfully
+- [ ] Health checks: All services respond correctly
+
+**Stage 3 Success (Production Ready):**
+
+- [ ] Staging deployment: Auto-deploy on `develop` push
+- [ ] Production deployment: Manual approval working
+- [ ] Zero-downtime: Blue/green deployment functional
+- [ ] Monitoring: CloudWatch logs + metrics active
+- [ ] Security: HTTPS enforced, secrets in Secrets Manager
+- [ ] Performance: All services respond < 500ms (p95)
+
+---
+
+### Risk Mitigation Strategy
+
+**Risk 1: Backend Hardening Takes Longer Than Expected**
+
+- **Mitigation:** Start with Phase 1 only (rate limiting, JWT rotation, account lockout)
+- **Fallback:** Deploy with Phase 1 complete, continue Phase 2+ in parallel with CI/CD
+- **Timeline Impact:** +1-2 weeks
+
+**Risk 2: AWS Costs Exceed Budget**
+
+- **Mitigation:** Start with staging only, add production after validation
+- **Fallback:** Use smaller instance sizes, scale up as needed
+- **Cost Impact:** -30% by using t3.micro everywhere
+
+**Risk 3: CI/CD Complexity Causes Delays**
+
+- **Mitigation:** Use AWS Copilot CLI instead of CDK for faster setup
+- **Fallback:** Manual deployment initially, automate incrementally
+- **Timeline Impact:** -1 week with Copilot CLI
+
+**Risk 4: Database Migration Issues**
+
+- **Mitigation:** Test all migrations on staging first
+- **Fallback:** Manual migration execution with backup/restore
+- **Timeline Impact:** +2-3 days for manual process
+
+---
+
+### Final Recommendation
+
+**For Production Deployment:**
+
+1. ✅ **Complete Backend Hardening Phase 1-2 FIRST** (2-3 weeks)
+   - This is NON-NEGOTIABLE for production deployment
+   - Fixes 90% of critical vulnerabilities
+   - Enables security-first CI/CD implementation
+
+2. ✅ **Then Build CI/CD Infrastructure** (2-3 weeks)
+   - With security hardened, focus on automation
+   - Use security-validated code as baseline
+   - Deploy with confidence
+
+3. ✅ **Parallel Advanced Security + Deployment** (1-2 weeks)
+   - Complete remaining security phases
+   - Finalize production deployment
+   - Set up comprehensive monitoring
+
+**Total Timeline:** 6-8 weeks (security-first approach)
+
+**For Development/Staging Only:**
+
+- Can start CI/CD immediately
+- Recommend fixing rate limiting first (1-2 days)
+- Complete security hardening in parallel
+
+**Key Insight:**
+
+> Security is not a feature to be added later—it's the foundation upon which production systems are built. The 2-3 week investment in backend hardening will save months of potential incident response, reputation damage, and regulatory complications.
+
+---
+
 ## Document History
 
-| Version | Date       | Author          | Changes                   |
-| ------- | ---------- | --------------- | ------------------------- |
-| 1.0     | 2025-12-12 | Laldingliana TV | Initial planning document |
+| Version | Date       | Author          | Changes                                                                                         |
+| ------- | ---------- | --------------- | ----------------------------------------------------------------------------------------------- |
+| 1.0     | 2025-12-12 | Laldingliana TV | Initial planning document                                                                       |
+| 1.1     | 2025-12-23 | GitHub Copilot  | Added integrated implementation roadmap, security-first approach, parallel work recommendations |
 
 ---
 

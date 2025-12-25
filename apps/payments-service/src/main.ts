@@ -9,6 +9,7 @@ import { logger } from './utils/logger';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 import healthRoutes from './routes/health';
 import { paymentRoutes, webhookRouter } from './routes/payment';
+import { startUserEventSubscriber, closeSubscriber } from './events/subscriber';
 import {
   initSentry,
   initSentryErrorHandler,
@@ -118,10 +119,49 @@ app.use(errorHandler);
 // Start Server
 const port = config.port;
 
-app.listen(port, () => {
+const server = app.listen(port, () => {
   logger.info(`Payments Service started on port ${port}`, {
     environment: config.nodeEnv,
   });
 });
+
+/**
+ * Initialize RabbitMQ Event Subscriber (async, non-blocking)
+ * This enables automatic user synchronization from Auth Service
+ */
+startUserEventSubscriber().catch(error => {
+  logger.error('Failed to start RabbitMQ subscriber', { error });
+  // Non-fatal: service can still operate with manual upserts
+  // but user sync from auth service won't work
+});
+
+/**
+ * Graceful Shutdown
+ */
+const shutdown = async (signal: string) => {
+  logger.info(`Received ${signal}, shutting down gracefully...`);
+
+  // Close RabbitMQ subscriber
+  try {
+    await closeSubscriber();
+  } catch (error) {
+    logger.error('Error closing RabbitMQ subscriber', { error });
+  }
+
+  // Close HTTP server
+  server.close(() => {
+    logger.info('HTTP server closed');
+    process.exit(0);
+  });
+
+  // Force exit after 30 seconds
+  setTimeout(() => {
+    logger.error('Forced shutdown after 30 seconds');
+    process.exit(1);
+  }, 30000);
+};
+
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+process.on('SIGINT', () => shutdown('SIGINT'));
 
 export default app;

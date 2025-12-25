@@ -68,7 +68,7 @@ export class HeartbeatManager {
     let terminatedCount = 0;
     let aliveCount = 0;
 
-    this.wss.clients.forEach((ws) => {
+    this.wss.clients.forEach(ws => {
       const authWs = ws as AuthenticatedWebSocket;
 
       // Check if client responded to last ping

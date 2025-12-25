@@ -235,7 +235,7 @@ export class RoomManager {
    */
   getAllRoomInfo(): RoomInfo[] {
     return this.getAllRoomNames()
-      .map((name) => this.getRoomInfo(name))
+      .map(name => this.getRoomInfo(name))
       .filter((info): info is RoomInfo => info !== null);
   }
 

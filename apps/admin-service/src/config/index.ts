@@ -11,9 +11,7 @@ const configSchema = z.object({
   database: z.object({
     url: z
       .string()
-      .default(
-        'postgresql://postgres:postgres@localhost:5434/admin_db'
-      ),
+      .default('postgresql://postgres:postgres@localhost:5434/admin_db'),
   }),
   // Auth Service (for user validation)
   authService: z.object({

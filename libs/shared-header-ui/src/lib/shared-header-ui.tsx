@@ -61,9 +61,23 @@ export function Header({
     );
   };
 
+  // Helper function to check if Reports tab is active
+  const isReportsActive = () => {
+    const pathname = location.pathname;
+    const search = location.search;
+    return pathname === '/payments' && search.includes('tab=reports');
+  };
+
+  // Helper function to check if Payments tab is active
+  const isPaymentsActive = () => {
+    const pathname = location.pathname;
+    const search = location.search;
+    return pathname === '/payments' && !search.includes('tab=reports');
+  };
+
   // Helper function to get nav link classes
-  const getNavLinkClasses = (path: string) => {
-    const active = isActive(path);
+  const getNavLinkClasses = (path: string, isActiveCheck?: boolean) => {
+    const active = isActiveCheck !== undefined ? isActiveCheck : isActive(path);
     return cn(
       'px-3 py-2 text-sm font-medium transition-colors rounded-md',
       active
@@ -73,8 +87,8 @@ export function Header({
   };
 
   // Helper function to get mobile nav link classes
-  const getMobileNavLinkClasses = (path: string) => {
-    const active = isActive(path);
+  const getMobileNavLinkClasses = (path: string, isActiveCheck?: boolean) => {
+    const active = isActiveCheck !== undefined ? isActiveCheck : isActive(path);
     return cn(
       'block px-4 py-3 text-base font-medium transition-colors rounded-md',
       active
@@ -97,18 +111,27 @@ export function Header({
             {/* Navigation Items - Only show when authenticated */}
             {isAuthenticated && (
               <div className="items-center hidden gap-4 md:flex">
-                <Link to="/payments" className={getNavLinkClasses('/payments')}>
+                <Link
+                  to="/payments"
+                  className={getNavLinkClasses('/payments', isPaymentsActive())}
+                >
                   Payments
                 </Link>
+                {hasRole(UserRole.VENDOR) && (
+                  <Link
+                    to="/payments?tab=reports"
+                    className={getNavLinkClasses(
+                      '/payments',
+                      isReportsActive()
+                    )}
+                  >
+                    Reports
+                  </Link>
+                )}
                 {/* Profile Link - Visible to all authenticated users */}
                 <Link to="/profile" className={getNavLinkClasses('/profile')}>
                   Profile
                 </Link>
-                {hasRole(UserRole.VENDOR) && (
-                  <Link to="/reports" className={getNavLinkClasses('/reports')}>
-                    Reports
-                  </Link>
-                )}
                 {hasRole(UserRole.ADMIN) && (
                   <Link to="/admin" className={getNavLinkClasses('/admin')}>
                     Admin
@@ -212,11 +235,26 @@ export function Header({
                 <>
                   <Link
                     to="/payments"
-                    className={getMobileNavLinkClasses('/payments')}
+                    className={getMobileNavLinkClasses(
+                      '/payments',
+                      isPaymentsActive()
+                    )}
                     onClick={closeMobileMenu}
                   >
                     Payments
                   </Link>
+                  {hasRole(UserRole.VENDOR) && (
+                    <Link
+                      to="/payments?tab=reports"
+                      className={getMobileNavLinkClasses(
+                        '/payments',
+                        isReportsActive()
+                      )}
+                      onClick={closeMobileMenu}
+                    >
+                      Reports
+                    </Link>
+                  )}
                   <Link
                     to="/profile"
                     className={getMobileNavLinkClasses('/profile')}
@@ -224,15 +262,6 @@ export function Header({
                   >
                     Profile
                   </Link>
-                  {hasRole(UserRole.VENDOR) && (
-                    <Link
-                      to="/reports"
-                      className={getMobileNavLinkClasses('/reports')}
-                      onClick={closeMobileMenu}
-                    >
-                      Reports
-                    </Link>
-                  )}
                   {hasRole(UserRole.ADMIN) && (
                     <Link
                       to="/admin"

@@ -13,8 +13,20 @@
         "defaults": {
           "color": { "mode": "thresholds" },
           "mappings": [
-            { "options": { "0": { "color": "red", "index": 0, "text": "DOWN" } }, "type": "value" },
-            { "options": { "from": 1, "result": { "color": "green", "index": 1, "text": "UP" }, "to": 999999 }, "type": "range" }
+            {
+              "options": {
+                "0": { "color": "red", "index": 0, "text": "DOWN" }
+              },
+              "type": "value"
+            },
+            {
+              "options": {
+                "from": 1,
+                "result": { "color": "green", "index": 1, "text": "UP" },
+                "to": 999999
+              },
+              "type": "range"
+            }
           ],
           "thresholds": {
             "mode": "absolute",
@@ -34,7 +46,11 @@
         "graphMode": "none",
         "justifyMode": "auto",
         "orientation": "auto",
-        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
         "textMode": "auto"
       },
       "pluginVersion": "10.0.0",
@@ -55,8 +71,20 @@
         "defaults": {
           "color": { "mode": "thresholds" },
           "mappings": [
-            { "options": { "0": { "color": "red", "index": 0, "text": "DOWN" } }, "type": "value" },
-            { "options": { "from": 1, "result": { "color": "green", "index": 1, "text": "UP" }, "to": 999999 }, "type": "range" }
+            {
+              "options": {
+                "0": { "color": "red", "index": 0, "text": "DOWN" }
+              },
+              "type": "value"
+            },
+            {
+              "options": {
+                "from": 1,
+                "result": { "color": "green", "index": 1, "text": "UP" },
+                "to": 999999
+              },
+              "type": "range"
+            }
           ],
           "thresholds": {
             "mode": "absolute",
@@ -76,7 +104,11 @@
         "graphMode": "none",
         "justifyMode": "auto",
         "orientation": "auto",
-        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
         "textMode": "auto"
       },
       "pluginVersion": "10.0.0",
@@ -97,8 +129,20 @@
         "defaults": {
           "color": { "mode": "thresholds" },
           "mappings": [
-            { "options": { "0": { "color": "red", "index": 0, "text": "DOWN" } }, "type": "value" },
-            { "options": { "from": 1, "result": { "color": "green", "index": 1, "text": "UP" }, "to": 999999 }, "type": "range" }
+            {
+              "options": {
+                "0": { "color": "red", "index": 0, "text": "DOWN" }
+              },
+              "type": "value"
+            },
+            {
+              "options": {
+                "from": 1,
+                "result": { "color": "green", "index": 1, "text": "UP" },
+                "to": 999999
+              },
+              "type": "range"
+            }
           ],
           "thresholds": {
             "mode": "absolute",
@@ -118,7 +162,11 @@
         "graphMode": "none",
         "justifyMode": "auto",
         "orientation": "auto",
-        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
         "textMode": "auto"
       },
       "pluginVersion": "10.0.0",
@@ -139,8 +187,20 @@
         "defaults": {
           "color": { "mode": "thresholds" },
           "mappings": [
-            { "options": { "0": { "color": "red", "index": 0, "text": "DOWN" } }, "type": "value" },
-            { "options": { "from": 1, "result": { "color": "green", "index": 1, "text": "UP" }, "to": 999999 }, "type": "range" }
+            {
+              "options": {
+                "0": { "color": "red", "index": 0, "text": "DOWN" }
+              },
+              "type": "value"
+            },
+            {
+              "options": {
+                "from": 1,
+                "result": { "color": "green", "index": 1, "text": "UP" },
+                "to": 999999
+              },
+              "type": "range"
+            }
           ],
           "thresholds": {
             "mode": "absolute",
@@ -160,7 +220,11 @@
         "graphMode": "none",
         "justifyMode": "auto",
         "orientation": "auto",
-        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
         "textMode": "auto"
       },
       "pluginVersion": "10.0.0",
@@ -181,8 +245,20 @@
         "defaults": {
           "color": { "mode": "thresholds" },
           "mappings": [
-            { "options": { "0": { "color": "red", "index": 0, "text": "DOWN" } }, "type": "value" },
-            { "options": { "from": 1, "result": { "color": "green", "index": 1, "text": "UP" }, "to": 999999 }, "type": "range" }
+            {
+              "options": {
+                "0": { "color": "red", "index": 0, "text": "DOWN" }
+              },
+              "type": "value"
+            },
+            {
+              "options": {
+                "from": 1,
+                "result": { "color": "green", "index": 1, "text": "UP" },
+                "to": 999999
+              },
+              "type": "range"
+            }
           ],
           "thresholds": {
             "mode": "absolute",
@@ -202,7 +278,11 @@
         "graphMode": "none",
         "justifyMode": "auto",
         "orientation": "auto",
-        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
         "textMode": "auto"
       },
       "pluginVersion": "10.0.0",
@@ -223,8 +303,20 @@
         "defaults": {
           "color": { "mode": "thresholds" },
           "mappings": [
-            { "options": { "0": { "color": "red", "index": 0, "text": "DOWN" } }, "type": "value" },
-            { "options": { "from": 1, "result": { "color": "green", "index": 1, "text": "UP" }, "to": 999999 }, "type": "range" }
+            {
+              "options": {
+                "0": { "color": "red", "index": 0, "text": "DOWN" }
+              },
+              "type": "value"
+            },
+            {
+              "options": {
+                "from": 1,
+                "result": { "color": "green", "index": 1, "text": "UP" },
+                "to": 999999
+              },
+              "type": "range"
+            }
           ],
           "thresholds": {
             "mode": "absolute",
@@ -244,7 +336,11 @@
         "graphMode": "none",
         "justifyMode": "auto",
         "orientation": "auto",
-        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
         "textMode": "auto"
       },
       "pluginVersion": "10.0.0",
@@ -284,7 +380,10 @@
             "thresholdsStyle": { "mode": "off" }
           },
           "mappings": [],
-          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [{ "color": "green", "value": null }]
+          },
           "unit": "reqps"
         },
         "overrides": []
@@ -292,7 +391,12 @@
       "gridPos": { "h": 8, "w": 24, "x": 0, "y": 4 },
       "id": 7,
       "options": {
-        "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "right", "showLegend": true },
+        "legend": {
+          "calcs": ["mean", "max"],
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true
+        },
         "tooltip": { "mode": "multi", "sort": "desc" }
       },
       "pluginVersion": "10.0.0",
@@ -356,7 +460,10 @@
             "thresholdsStyle": { "mode": "off" }
           },
           "mappings": [],
-          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [{ "color": "green", "value": null }]
+          },
           "unit": "s"
         },
         "overrides": []
@@ -364,7 +471,12 @@
       "gridPos": { "h": 8, "w": 24, "x": 0, "y": 12 },
       "id": 8,
       "options": {
-        "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "right", "showLegend": true },
+        "legend": {
+          "calcs": ["mean", "max"],
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true
+        },
         "tooltip": { "mode": "multi", "sort": "desc" }
       },
       "pluginVersion": "10.0.0",
@@ -417,4 +529,3 @@
   "version": 1,
   "weekStart": ""
 }
-

@@ -1,0 +1,1136 @@
+# Backend Hardening Plan - POC-3
+
+**Date:** December 23, 2025  
+**Status:** Planning Phase  
+**Priority:** High
+
+## Executive Summary
+
+This document outlines a comprehensive backend hardening strategy for the POC-3 payments system. After auditing the current implementation, we've identified several security gaps and areas for improvement across input validation, authentication, authorization, database security, error handling, service resilience, secrets management, and API security.
+
+---
+
+## Current State Assessment
+
+### ✅ What's Working Well
+
+#### 1. **Authentication & Authorization**
+
+- ✅ JWT-based authentication implemented across all services
+- ✅ Role-based access control (RBAC) middleware in API Gateway
+- ✅ Token expiration handling (15m access, 7d refresh)
+- ✅ Consistent auth middleware pattern across services
+- ✅ Password hashing with bcrypt (10 rounds)
+- ✅ Strong password requirements (12+ chars, uppercase, lowercase, number, symbol)
+
+#### 2. **Input Validation**
+
+- ✅ Zod schemas for request validation in auth and profile services
+- ✅ Email validation with proper regex
+- ✅ Password strength validation with banking-grade requirements
+- ✅ Zod error handling in error middleware
+
+#### 3. **Error Handling**
+
+- ✅ Centralized error handling middleware in all services
+- ✅ ApiError class for structured errors
+- ✅ Consistent error response format
+- ✅ Zod validation error handling
+- ✅ Proper error logging with Winston
+- ✅ Development vs production error detail differentiation
+
+#### 4. **Security Headers & CORS**
+
+- ✅ Helmet middleware for security headers (API Gateway)
+- ✅ CORS whitelist with specific origins
+- ✅ CSP, HSTS, X-Frame-Options, XSS Protection configured
+- ✅ nginx security headers (X-Content-Type-Options, Referrer-Policy)
+
+#### 5. **Observability**
+
+- ✅ Sentry integration (frontend & backend)
+- ✅ Structured logging with Winston
+- ✅ Prometheus metrics collection
+- ✅ Grafana dashboards
+- ✅ Request/response logging
+
+---
+
+## 🚨 Critical Gaps Identified
+
+### 1. **Rate Limiting (CRITICAL)**
+
+**Current State:**
+
+- Rate limits set to 100,000 requests per 15 minutes (intentionally disabled)
+- TODO comments indicate original limit was 100 requests
+- Auth endpoints should be 5 requests per 15 minutes (currently 100,000)
+
+**Risk:** **HIGH** - System vulnerable to:
+
+- Brute force attacks on login endpoints
+- DoS attacks
+- API abuse
+- Credential stuffing attacks
+
+**Files Affected:**
+
+- `apps/api-gateway/src/middleware/rateLimit.ts`
+- `apps/api-gateway/src/config/index.ts`
+- `apps/admin-service/src/main.ts` (100,000 limit)
+- `apps/profile-service/src/main.ts` (100,000 limit)
+
+### 2. **JWT Security Hardening**
+
+**Current State:**
+
+- No refresh token rotation
+- Access tokens valid for 15 minutes
+- Refresh tokens valid for 7 days with no rotation
+- Default JWT secret: "your-secret-key-change-in-production"
+- JWT secret stored as plain text in config
+
+**Risk:** **HIGH** - Vulnerabilities:
+
+- Stolen refresh tokens valid indefinitely until expiration
+- Weak default secrets in development can leak to production
+- No token revocation mechanism
+- No blacklist for compromised tokens
+
+### 3. **Input Validation Gaps**
+
+**Current State:**
+
+- Only auth and profile services have Zod validators
+- Payments service lacks input validation
+- Admin service lacks input validation
+- No sanitization for special characters/SQL injection attempts
+- No file upload validation (if applicable)
+
+**Risk:** **MEDIUM-HIGH**
+
+- SQL injection (mitigated by Prisma, but still a concern)
+- XSS through unvalidated inputs
+- NoSQL injection
+- Command injection
+
+**Files Affected:**
+
+- `apps/payments-service/src/controllers/*.ts` (no validators)
+- `apps/admin-service/src/controllers/*.ts` (no validators)
+
+### 4. **Secrets Management**
+
+**Current State:**
+
+- JWT secrets have insecure defaults
+- All secrets in plain text environment variables
+- No encryption at rest for secrets
+- No secrets rotation policy
+- Database URLs contain credentials in plain text
+
+**Risk:** **HIGH**
+
+- Secrets exposure through logs, error messages, or repository
+- No rotation means compromised secrets remain valid
+- Default secrets may be used in production
+
+**Files Affected:**
+
+- `.env.example` (contains default secrets)
+- All service `config/index.ts` files
+
+### 5. **Database Security**
+
+**Current State:**
+
+- Prisma prevents SQL injection through parameterized queries ✅
+- No connection pool limits enforced
+- No query timeout configuration
+- Query logging enabled in development (could leak sensitive data)
+- No encryption at rest mentioned
+
+**Risk:** **MEDIUM**
+
+- Connection pool exhaustion
+- Slow query DoS attacks
+- Sensitive data in logs
+
+### 6. **Service Resilience**
+
+**Current State:**
+
+- No circuit breakers implemented
+- No retry policies for inter-service communication
+- Basic timeout on health checks (5 seconds)
+- No graceful degradation patterns
+- No fallback mechanisms
+
+**Risk:** **MEDIUM**
+
+- Cascading failures
+- Service unavailability
+- Poor user experience during outages
+
+### 7. **API Response Security**
+
+**Current State:**
+
+- Helmet middleware only on API Gateway
+- Other services lack security headers middleware
+- No CSP on individual services
+- No response sanitization
+- Potential information disclosure in error messages
+
+**Risk:** **MEDIUM**
+
+- Information leakage
+- XSS vulnerabilities
+- Clickjacking
+
+### 8. **Authentication Edge Cases**
+
+**Current State:**
+
+- No account lockout after failed login attempts
+- No suspicious activity detection
+- No CAPTCHA for repeated failures
+- No IP-based restrictions
+- No multi-factor authentication (MFA)
+
+**Risk:** **HIGH**
+
+- Brute force attacks
+- Credential stuffing
+- Account takeover
+
+---
+
+## Hardening Roadmap
+
+### Phase 1: Critical Security Fixes (Week 1) 🔥
+
+#### Priority 1.1: Restore Rate Limiting
+
+**Effort:** 2 hours  
+**Impact:** HIGH
+
+**Tasks:**
+
+1. Restore original rate limits in API Gateway:
+   - General API: 100 requests per 15 minutes
+   - Auth endpoints: 5 requests per 15 minutes
+2. Restore rate limits in individual services:
+   - Admin Service: 100 requests per 15 minutes
+   - Profile Service: 100 requests per 15 minutes
+3. Add per-user rate limiting (not just per-IP)
+4. Implement rate limit headers (X-RateLimit-\*)
+5. Add Redis-based rate limiting for distributed systems
+
+**Files to Modify:**
+
+- `apps/api-gateway/src/middleware/rateLimit.ts`
+- `apps/api-gateway/src/config/index.ts`
+- `apps/admin-service/src/main.ts`
+- `apps/profile-service/src/main.ts`
+
+**Success Criteria:**
+
+- Rate limits enforced on all endpoints
+- Proper 429 responses with Retry-After header
+- Rate limit bypass for health checks
+
+---
+
+#### Priority 1.2: JWT Refresh Token Rotation
+
+**Effort:** 4 hours  
+**Impact:** HIGH
+
+**Tasks:**
+
+1. Implement refresh token rotation:
+   - Generate new refresh token on each refresh request
+   - Invalidate old refresh token
+   - Update database with new token
+2. Add token revocation mechanism:
+   - Create blacklist/revocation list in Redis
+   - Check revoked tokens on auth
+3. Add token fingerprinting (user agent + IP hash)
+4. Implement session management:
+   - Track active sessions per user
+   - Allow users to revoke sessions
+   - Auto-revoke on password change
+
+**Files to Modify:**
+
+- `apps/auth-service/src/controllers/auth.controller.ts`
+- `apps/auth-service/src/utils/token.ts`
+- `apps/api-gateway/src/middleware/auth.ts`
+
+**New Files:**
+
+- `libs/backend/redis-client/src/lib/token-blacklist.ts`
+- `apps/auth-service/src/services/session.service.ts`
+
+**Success Criteria:**
+
+- Refresh tokens rotate on use
+- Old refresh tokens invalid after rotation
+- Token revocation works across all services
+- Users can view/revoke active sessions
+
+---
+
+#### Priority 1.3: Account Lockout & Brute Force Protection
+
+**Effort:** 3 hours  
+**Impact:** HIGH
+
+**Tasks:**
+
+1. Implement failed login attempt tracking:
+   - Track failed attempts by email + IP in Redis
+   - Lockout after 5 failed attempts
+   - Auto-unlock after 15 minutes
+2. Add exponential backoff for repeated failures
+3. Add CAPTCHA integration (optional, for future)
+4. Add suspicious activity logging to Sentry
+5. Add email notifications for lockouts
+
+**Files to Modify:**
+
+- `apps/auth-service/src/controllers/auth.controller.ts`
+
+**New Files:**
+
+- `libs/backend/redis-client/src/lib/login-attempts.ts`
+- `apps/auth-service/src/middleware/brute-force-protection.ts`
+
+**Success Criteria:**
+
+- Accounts lock after 5 failed attempts
+- Lockout duration configurable
+- Admin can unlock accounts
+- Suspicious activity logged
+
+---
+
+### Phase 2: Input Validation & Sanitization (Week 2) 🛡️
+
+#### Priority 2.1: Add Validation to Payments Service
+
+**Effort:** 4 hours  
+**Impact:** MEDIUM-HIGH
+
+**Tasks:**
+
+1. Create Zod validators for all payment endpoints:
+   - Create payment request
+   - Update payment request
+   - Payment filters/query params
+2. Add validation middleware to routes
+3. Add sanitization for text fields
+4. Add amount validation (positive, max limits)
+5. Add currency validation (ISO 4217)
+
+**New Files:**
+
+- `apps/payments-service/src/validators/payment.validators.ts`
+- `apps/payments-service/src/middleware/validate.ts`
+
+**Success Criteria:**
+
+- All payment endpoints validated
+- Invalid requests return 400 with details
+- Sanitization prevents XSS
+
+---
+
+#### Priority 2.2: Add Validation to Admin Service
+
+**Effort:** 3 hours  
+**Impact:** MEDIUM
+
+**Tasks:**
+
+1. Create Zod validators for admin endpoints:
+   - Audit log queries
+   - User management
+   - System configuration
+2. Add validation middleware
+3. Add permission checks in validators
+
+**New Files:**
+
+- `apps/admin-service/src/validators/admin.validators.ts`
+
+**Success Criteria:**
+
+- All admin endpoints validated
+- Proper error responses
+- Permission checks integrated
+
+---
+
+#### Priority 2.3: Enhance Existing Validators
+
+**Effort:** 2 hours  
+**Impact:** MEDIUM
+
+**Tasks:**
+
+1. Add SQL injection pattern detection
+2. Add XSS pattern detection
+3. Add path traversal detection
+4. Add command injection detection
+5. Add Unicode normalization
+6. Add trim/normalize for all string fields
+
+**Files to Modify:**
+
+- `apps/auth-service/src/validators/auth.validators.ts`
+- `apps/profile-service/src/validators/profile.validators.ts`
+
+**New Files:**
+
+- `libs/backend/validation/src/lib/sanitizers.ts`
+- `libs/backend/validation/src/lib/patterns.ts`
+
+**Success Criteria:**
+
+- Malicious patterns detected and rejected
+- All string inputs normalized
+- Comprehensive validation test suite
+
+---
+
+### Phase 3: Secrets Management (Week 3) 🔐
+
+#### Priority 3.1: Secrets Rotation Policy
+
+**Effort:** 4 hours  
+**Impact:** HIGH
+
+**Tasks:**
+
+1. Implement JWT secret rotation:
+   - Support multiple active secrets (key versioning)
+   - Graceful secret rotation without downtime
+   - Admin endpoint to rotate secrets
+2. Add database credential rotation:
+   - Document rotation procedure
+   - Create rotation scripts
+3. Add secret expiry tracking
+4. Add alerts for expiring secrets
+
+**New Files:**
+
+- `libs/backend/secrets/src/lib/secret-manager.ts`
+- `libs/backend/secrets/src/lib/key-versioning.ts`
+- `scripts/rotate-secrets.ts`
+
+**Success Criteria:**
+
+- JWT secrets can rotate without downtime
+- Multiple versions supported
+- Automated rotation alerts
+
+---
+
+#### Priority 3.2: Environment Variable Validation
+
+**Effort:** 2 hours  
+**Impact:** MEDIUM
+
+**Tasks:**
+
+1. Add Zod validation for all config files:
+   - Required vs optional variables
+   - Format validation (URLs, ports, etc.)
+   - Min/max values
+2. Add startup validation check
+3. Fail fast on missing/invalid config
+4. Add config validation tests
+
+**Files to Modify:**
+
+- `apps/api-gateway/src/config/index.ts`
+- `apps/auth-service/src/config/index.ts`
+- `apps/payments-service/src/config/index.ts`
+- `apps/admin-service/src/config/index.ts`
+
+**Success Criteria:**
+
+- All services validate config on startup
+- Clear error messages for invalid config
+- No default insecure values in production
+
+---
+
+#### Priority 3.3: Secrets Encryption
+
+**Effort:** 6 hours  
+**Impact:** MEDIUM
+
+**Tasks:**
+
+1. Implement secrets encryption at rest:
+   - Use AWS KMS, Azure Key Vault, or HashiCorp Vault
+   - Encrypt sensitive config values
+2. Add decryption on service startup
+3. Add audit logging for secret access
+4. Document secrets management policy
+
+**New Files:**
+
+- `libs/backend/secrets/src/lib/encryption.ts`
+- `docs/POC-3-Implementation/SECRETS-MANAGEMENT.md`
+
+**Success Criteria:**
+
+- Secrets encrypted in .env files
+- Decryption transparent to application
+- Audit trail for secret access
+
+---
+
+### Phase 4: Database Security Hardening (Week 4) 🗄️
+
+#### Priority 4.1: Connection Pool Configuration
+
+**Effort:** 2 hours  
+**Impact:** MEDIUM
+
+**Tasks:**
+
+1. Configure Prisma connection pool limits:
+   - Min connections: 2
+   - Max connections: 10 (per service)
+   - Connection timeout: 30s
+   - Idle timeout: 600s
+2. Add pool monitoring metrics
+3. Add alerts for pool exhaustion
+
+**Files to Modify:**
+
+- All service `src/lib/prisma.ts` files
+
+**Success Criteria:**
+
+- Connection pools properly sized
+- Monitoring in Grafana
+- Alerts configured
+
+---
+
+#### Priority 4.2: Query Timeout & Performance
+
+**Effort:** 3 hours  
+**Impact:** MEDIUM
+
+**Tasks:**
+
+1. Add query timeout configuration (10s default)
+2. Add slow query logging (>1s)
+3. Add query performance monitoring
+4. Identify and index slow queries
+5. Add query complexity limits
+
+**Files to Modify:**
+
+- All service Prisma client configurations
+
+**New Files:**
+
+- `libs/backend/db/src/lib/query-monitor.ts`
+
+**Success Criteria:**
+
+- Queries timeout after 10s
+- Slow queries logged and monitored
+- Performance dashboard in Grafana
+
+---
+
+#### Priority 4.3: Data Encryption
+
+**Effort:** 8 hours  
+**Impact:** MEDIUM
+
+**Tasks:**
+
+1. Implement field-level encryption for sensitive data:
+   - User passwords (already hashed) ✅
+   - Payment details (card numbers, etc.)
+   - Personal information (SSN, etc.)
+2. Add encryption/decryption middleware
+3. Document encryption keys management
+4. Add key rotation support
+
+**New Files:**
+
+- `libs/backend/encryption/src/lib/field-encryption.ts`
+- `libs/backend/encryption/src/lib/encryption-middleware.ts`
+
+**Success Criteria:**
+
+- Sensitive fields encrypted in database
+- Transparent decryption on read
+- Key rotation support
+
+---
+
+#### Priority 4.4: Database Access Audit Logging
+
+**Effort:** 4 hours  
+**Impact:** LOW-MEDIUM
+
+**Tasks:**
+
+1. Add Prisma middleware for audit logging:
+   - Log all write operations (create, update, delete)
+   - Track user context
+   - Log to separate audit database
+2. Add query audit dashboard
+3. Add alerts for suspicious patterns
+
+**New Files:**
+
+- `libs/backend/db/src/lib/audit-middleware.ts`
+
+**Success Criteria:**
+
+- All write operations logged
+- Audit logs queryable
+- Dashboard in Grafana
+
+---
+
+### Phase 5: Service Resilience (Week 5) 💪
+
+#### Priority 5.1: Circuit Breaker Implementation
+
+**Effort:** 6 hours  
+**Impact:** MEDIUM
+
+**Tasks:**
+
+1. Implement circuit breaker for inter-service calls:
+   - Use `opossum` library
+   - Configure thresholds (error rate, timeout)
+   - Add fallback handlers
+2. Add circuit breaker for external dependencies:
+   - Database connections
+   - Redis connections
+   - RabbitMQ connections
+3. Add circuit state monitoring
+4. Add dashboard for circuit states
+
+**New Files:**
+
+- `libs/backend/resilience/src/lib/circuit-breaker.ts`
+- `libs/backend/resilience/src/lib/fallback-handlers.ts`
+
+**Success Criteria:**
+
+- Circuit breakers protect all external calls
+- Fallback responses configured
+- Circuit state visible in dashboard
+
+---
+
+#### Priority 5.2: Retry Policies
+
+**Effort:** 4 hours  
+**Impact:** MEDIUM
+
+**Tasks:**
+
+1. Implement exponential backoff retry:
+   - Max retries: 3
+   - Initial delay: 100ms
+   - Backoff factor: 2x
+   - Max delay: 5s
+2. Add retry for idempotent operations only
+3. Add retry budget (prevent retry storms)
+4. Add retry metrics
+
+**New Files:**
+
+- `libs/backend/resilience/src/lib/retry-policy.ts`
+
+**Success Criteria:**
+
+- Transient failures auto-retry
+- Retry budget prevents storms
+- Metrics track retry success/failure
+
+---
+
+#### Priority 5.3: Graceful Degradation
+
+**Effort:** 5 hours  
+**Impact:** MEDIUM
+
+**Tasks:**
+
+1. Implement feature flags for degraded mode:
+   - Disable non-critical features under load
+   - Use cached data when services unavailable
+2. Add health check levels (live, ready, degraded)
+3. Add auto-recovery monitoring
+4. Document degraded mode behavior
+
+**New Files:**
+
+- `libs/backend/resilience/src/lib/feature-flags.ts`
+- `libs/backend/resilience/src/lib/degraded-mode.ts`
+
+**Success Criteria:**
+
+- System remains operational in degraded mode
+- Feature flags configurable at runtime
+- Recovery automatic when possible
+
+---
+
+### Phase 6: Enhanced API Security (Week 6) 🔒
+
+#### Priority 6.1: Security Headers on All Services
+
+**Effort:** 2 hours  
+**Impact:** MEDIUM
+
+**Tasks:**
+
+1. Add Helmet middleware to all services:
+   - Auth Service
+   - Payments Service
+   - Profile Service (already has it)
+   - Admin Service (already has it)
+2. Configure CSP for each service
+3. Add security header tests
+
+**Files to Modify:**
+
+- `apps/auth-service/src/main.ts`
+- `apps/payments-service/src/main.ts`
+
+**Success Criteria:**
+
+- All services have security headers
+- CSP properly configured
+- Security headers tested
+
+---
+
+#### Priority 6.2: Response Sanitization
+
+**Effort:** 3 hours  
+**Impact:** MEDIUM
+
+**Tasks:**
+
+1. Implement response sanitization middleware:
+   - Remove stack traces in production
+   - Sanitize error messages
+   - Remove internal IDs/paths
+2. Add PII detection and redaction
+3. Add test suite
+
+**New Files:**
+
+- `libs/backend/middleware/src/lib/response-sanitizer.ts`
+
+**Success Criteria:**
+
+- Responses sanitized in production
+- No PII leaked in errors
+- Stack traces only in development
+
+---
+
+#### Priority 6.3: Request Size Limits
+
+**Effort:** 2 hours  
+**Impact:** LOW-MEDIUM
+
+**Tasks:**
+
+1. Add request body size limits:
+   - JSON: 10MB max
+   - URL-encoded: 10MB max
+   - File uploads: 50MB max
+2. Add URL length limits
+3. Add header size limits
+4. Add proper error messages
+
+**Files to Modify:**
+
+- All service `main.ts` files
+
+**Success Criteria:**
+
+- Large requests rejected
+- Proper error messages
+- Limits configurable per endpoint
+
+---
+
+#### Priority 6.4: API Versioning
+
+**Effort:** 4 hours  
+**Impact:** LOW
+
+**Tasks:**
+
+1. Implement API versioning strategy:
+   - URL-based versioning (/api/v1/...)
+   - Header-based versioning (Accept: application/vnd.api+json; version=1)
+2. Add version deprecation warnings
+3. Document versioning policy
+
+**Files to Modify:**
+
+- `apps/api-gateway/src/routes/proxy-routes.ts`
+- All service route files
+
+**Success Criteria:**
+
+- Multiple API versions supported
+- Deprecation warnings in responses
+- Clear migration path
+
+---
+
+### Phase 7: Advanced Security Features (Week 7+) 🚀
+
+#### Priority 7.1: Multi-Factor Authentication (MFA)
+
+**Effort:** 12 hours  
+**Impact:** HIGH
+
+**Tasks:**
+
+1. Implement TOTP-based MFA:
+   - Use `speakeasy` library
+   - Generate QR codes for setup
+   - Verify TOTP codes
+2. Add SMS-based MFA (optional)
+3. Add backup codes
+4. Add MFA recovery flow
+5. Add MFA enforcement policies
+
+**New Files:**
+
+- `apps/auth-service/src/services/mfa.service.ts`
+- `apps/auth-service/src/controllers/mfa.controller.ts`
+
+**Success Criteria:**
+
+- Users can enable MFA
+- TOTP verification works
+- Backup codes available
+- Recovery flow tested
+
+---
+
+#### Priority 7.2: Anomaly Detection
+
+**Effort:** 16 hours  
+**Impact:** MEDIUM
+
+**Tasks:**
+
+1. Implement basic anomaly detection:
+   - Unusual login locations (GeoIP)
+   - Login time patterns
+   - Transaction amount anomalies
+2. Add ML-based detection (future)
+3. Add alerting for anomalies
+4. Add user notifications
+
+**New Files:**
+
+- `libs/backend/security/src/lib/anomaly-detection.ts`
+- `libs/backend/security/src/lib/geoip.ts`
+
+**Success Criteria:**
+
+- Suspicious activity detected
+- Alerts sent to admins
+- Users notified of unusual activity
+
+---
+
+#### Priority 7.3: Security Audit Logging Enhancement
+
+**Effort:** 6 hours  
+**Impact:** MEDIUM
+
+**Tasks:**
+
+1. Enhanced audit logging:
+   - All authentication events
+   - All authorization failures
+   - All sensitive data access
+   - All configuration changes
+2. Add tamper-proof audit logs
+3. Add audit log retention policy
+4. Add compliance reporting
+
+**Files to Modify:**
+
+- All controllers with sensitive operations
+
+**New Files:**
+
+- `libs/backend/audit/src/lib/enhanced-audit.ts`
+
+**Success Criteria:**
+
+- Comprehensive audit trail
+- Logs immutable
+- Compliance reports available
+
+---
+
+## Implementation Guidelines
+
+### Development Workflow
+
+1. **Create Feature Branch:** `feat/hardening-{phase}-{priority}`
+2. **Implement Changes:** Follow existing patterns, add tests
+3. **Update Documentation:** Document new security features
+4. **Security Review:** Peer review focusing on security implications
+5. **Test Coverage:** Aim for 80%+ coverage on security features
+6. **Merge to Main:** After review + CI/CD passes
+
+### Testing Requirements
+
+Each hardening task must include:
+
+1. **Unit Tests:** Test individual functions/components
+2. **Integration Tests:** Test service interactions
+3. **Security Tests:** Test attack vectors
+4. **Performance Tests:** Ensure no performance regression
+
+### Rollback Plan
+
+Each phase should be independently deployable and reversible:
+
+1. Feature flags for new security features
+2. Database migrations reversible
+3. Configuration changes backward compatible
+4. Clear rollback documentation
+
+---
+
+## Monitoring & Validation
+
+### Security Metrics Dashboard
+
+Create Grafana dashboard tracking:
+
+1. **Rate Limiting:** Requests blocked, rate limit hits
+2. **Authentication:** Failed logins, locked accounts, MFA usage
+3. **Authorization:** RBAC denials, permission checks
+4. **Validation:** Validation errors, sanitization hits
+5. **Database:** Connection pool usage, slow queries
+6. **Resilience:** Circuit breaker state, retry counts
+7. **API Security:** Security header violations, large requests
+
+### Security Alerts
+
+Configure alerts for:
+
+1. High rate of failed logins (>10 in 5 minutes)
+2. Account lockouts
+3. Rate limit exceeded (per user)
+4. Circuit breaker open state
+5. Database connection pool exhaustion
+6. Slow queries (>5s)
+7. Anomaly detection triggers
+
+---
+
+## Dependencies & Tools
+
+### New Libraries Required
+
+```json
+{
+  "opossum": "^8.1.0", // Circuit breaker
+  "ioredis": "^5.3.0", // Redis client (for rate limiting, sessions)
+  "speakeasy": "^2.0.0", // TOTP for MFA
+  "qrcode": "^1.5.0", // QR code generation
+  "geoip-lite": "^1.4.0", // GeoIP for anomaly detection
+  "uuid": "^9.0.0", // Token fingerprinting
+  "crypto": "builtin" // Encryption
+}
+```
+
+### Infrastructure Changes
+
+1. **Redis:** Required for rate limiting, session management, token blacklist
+2. **Separate Audit Database:** For tamper-proof audit logs
+3. **Secrets Manager:** AWS KMS, Azure Key Vault, or HashiCorp Vault
+
+---
+
+## Success Metrics
+
+### Phase 1 Success
+
+- ✅ Rate limits enforced on all endpoints
+- ✅ Refresh tokens rotate on use
+- ✅ Accounts lock after failed attempts
+- ✅ Zero brute force attacks succeed
+
+### Phase 2 Success
+
+- ✅ All services have Zod validation
+- ✅ No validation errors in production
+- ✅ XSS/SQL injection attempts blocked
+- ✅ 100% validation coverage
+
+### Phase 3 Success
+
+- ✅ Secrets rotate without downtime
+- ✅ No hardcoded secrets in code
+- ✅ Config validation on startup
+- ✅ Secrets encrypted at rest
+
+### Phase 4 Success
+
+- ✅ Connection pools properly sized
+- ✅ No slow queries (all <1s)
+- ✅ Sensitive data encrypted
+- ✅ All writes audited
+
+### Phase 5 Success
+
+- ✅ Circuit breakers protect external calls
+- ✅ Transient failures auto-retry
+- ✅ System operates in degraded mode
+- ✅ Zero cascading failures
+
+### Phase 6 Success
+
+- ✅ All services have security headers
+- ✅ No PII leaked in responses
+- ✅ Large requests rejected
+- ✅ API versioning implemented
+
+### Phase 7 Success
+
+- ✅ MFA available to all users
+- ✅ Anomalies detected and alerted
+- ✅ Comprehensive audit trail
+- ✅ Compliance-ready logging
+
+---
+
+## Risk Assessment
+
+### High Risk (Address Immediately)
+
+1. ❗ **Rate Limiting Disabled** - Active vulnerability
+2. ❗ **No JWT Refresh Rotation** - Token theft impact
+3. ❗ **No Account Lockout** - Brute force attacks
+4. ❗ **Weak Default Secrets** - Production compromise risk
+
+### Medium Risk (Address in Phases 2-4)
+
+1. ⚠️ **Missing Input Validation** - Data integrity issues
+2. ⚠️ **No Circuit Breakers** - Cascading failures
+3. ⚠️ **Plain Text Secrets** - Credential exposure
+4. ⚠️ **No Connection Limits** - Resource exhaustion
+
+### Low Risk (Address in Phases 5-7)
+
+1. ℹ️ **No MFA** - Enhanced security desired
+2. ℹ️ **No Anomaly Detection** - Proactive security
+3. ℹ️ **No API Versioning** - Breaking changes impact
+
+---
+
+## Cost-Benefit Analysis
+
+### Phase 1 (Critical): $0 cost, HIGH impact
+
+- **Time:** 9 hours development + 3 hours testing
+- **Risk Reduction:** 70% of critical vulnerabilities
+- **ROI:** Immediate security improvement
+
+### Phases 2-3 (High): $0 cost, MEDIUM-HIGH impact
+
+- **Time:** 25 hours development + 8 hours testing
+- **Risk Reduction:** 20% additional risk coverage
+- **ROI:** Strong data integrity, compliance
+
+### Phases 4-6 (Medium): $500-$1000 cost (infrastructure), MEDIUM impact
+
+- **Time:** 40 hours development + 15 hours testing
+- **Cost:** Redis hosting, secrets management service
+- **Risk Reduction:** 5% additional risk coverage
+- **ROI:** Operational stability, performance
+
+### Phase 7 (Low): $1000+ cost, LOW-MEDIUM impact
+
+- **Time:** 34+ hours development + 12 hours testing
+- **Cost:** SMS provider, ML services
+- **Risk Reduction:** 5% additional risk coverage
+- **ROI:** Competitive advantage, compliance
+
+---
+
+## Conclusion
+
+This hardening plan addresses critical security gaps in the POC-3 backend while maintaining pragmatic prioritization. **Phase 1 must be completed immediately** to restore production-ready security posture. Subsequent phases build defense-in-depth and prepare the system for enterprise deployment.
+
+**Recommended Timeline:**
+
+- **Week 1:** Phase 1 (Critical) - ALL hands on deck
+- **Week 2-3:** Phase 2-3 (High priority)
+- **Week 4-6:** Phase 4-6 (Medium priority)
+- **Week 7+:** Phase 7 (Advanced features)
+
+**Next Steps:**
+
+1. Review and approve this plan
+2. Create GitHub issues for each priority
+3. Assign owners to Phase 1 tasks
+4. Schedule daily stand-ups during Phase 1
+5. Begin implementation immediately
+
+---
+
+## Appendix
+
+### A. Related Documentation
+
+- `docs/POC-3-Implementation/SENTRY-FULL-IMPLEMENTATION-PLAN.md`
+- `docs/POC-3-Implementation/testing-guide.md`
+- `docs/References/backend-poc2-architecture.md`
+- `docs/References/backend-auth-service-implementation.md`
+
+### B. Reference Implementations
+
+- Auth Service: `apps/auth-service/src/validators/auth.validators.ts`
+- Profile Service: `apps/profile-service/src/validators/profile.validators.ts`
+- API Gateway RBAC: `apps/api-gateway/src/middleware/rbac.ts`
+
+### C. Security Best Practices
+
+- OWASP Top 10: https://owasp.org/www-project-top-ten/
+- OWASP API Security: https://owasp.org/www-project-api-security/
+- NIST Cybersecurity Framework: https://www.nist.gov/cyberframework
+
+---
+
+**Document Version:** 1.0  
+**Last Updated:** December 23, 2025  
+**Owner:** Backend Team  
+**Reviewers:** Security Team, DevOps Team, Architecture Team

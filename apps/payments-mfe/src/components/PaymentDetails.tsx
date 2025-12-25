@@ -16,12 +16,18 @@ import {
   Loading,
 } from '@mfe/shared-design-system';
 
+interface PartyInfo {
+  id: string;
+  email: string;
+  name?: string | null;
+}
+
 /**
  * Extended Payment type with optional fields for detailed view
  */
 interface ExtendedPayment extends Payment {
-  sender?: { id: string; email: string };
-  recipient?: { id: string; email: string };
+  sender?: PartyInfo | null;
+  recipient?: PartyInfo | null;
   senderId?: string;
   recipientId?: string;
   completedAt?: string;

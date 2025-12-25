@@ -8,7 +8,11 @@
  * - Connection cleanup
  */
 
-import type { AuthenticatedWebSocket, ConnectionStats, UserRole } from './types';
+import type {
+  AuthenticatedWebSocket,
+  ConnectionStats,
+  UserRole,
+} from './types';
 import { logger } from '../utils/logger';
 
 export class ConnectionManager {
@@ -21,7 +25,8 @@ export class ConnectionManager {
   /**
    * Map of WebSocket → userId for reverse lookup
    */
-  private connectionToUser: WeakMap<AuthenticatedWebSocket, string> = new WeakMap();
+  private connectionToUser: WeakMap<AuthenticatedWebSocket, string> =
+    new WeakMap();
 
   /**
    * Add a connection

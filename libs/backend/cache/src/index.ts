@@ -4,12 +4,5 @@
  */
 
 export { CacheService } from './lib/cache-service';
-export type {
-  CacheConfig,
-  CacheOptions,
-  CacheStats,
-} from './lib/types';
-export {
-  CacheKeys,
-  CacheTags,
-} from './lib/types';
+export type { CacheConfig, CacheOptions, CacheStats } from './lib/types';
+export { CacheKeys, CacheTags } from './lib/types';
