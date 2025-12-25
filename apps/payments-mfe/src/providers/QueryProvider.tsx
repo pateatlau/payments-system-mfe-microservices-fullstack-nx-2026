@@ -34,4 +34,3 @@ export function QueryProvider({ children }: QueryProviderProps) {
 }
 
 export default QueryProvider;
-

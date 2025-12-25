@@ -53,7 +53,7 @@ export function calculateRetryDelay(
  * @param ms - Duration in milliseconds
  */
 export function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 /**
@@ -108,10 +108,9 @@ export async function withRetry<T>(
  * @param strategy - Retry strategy configuration
  * @returns Wrapped function with retry logic
  */
-export function createRetryWrapper<T extends (...args: unknown[]) => Promise<unknown>>(
-  fn: T,
-  strategy: RetryStrategy = defaultRetryStrategy
-): T {
+export function createRetryWrapper<
+  T extends (...args: unknown[]) => Promise<unknown>,
+>(fn: T, strategy: RetryStrategy = defaultRetryStrategy): T {
   return (async (...args: unknown[]) => {
     return withRetry(() => fn(...args), strategy);
   }) as T;
@@ -134,9 +133,7 @@ export function isRetryableError(error: Error): boolean {
     'Connection closed',
   ];
 
-  return retryableMessages.some((msg) =>
-    error.message.includes(msg)
-  );
+  return retryableMessages.some(msg => error.message.includes(msg));
 }
 
 /**

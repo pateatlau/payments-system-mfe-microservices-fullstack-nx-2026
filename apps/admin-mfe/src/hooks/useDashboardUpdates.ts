@@ -26,7 +26,7 @@ export function useDashboardUpdates() {
   const handlePaymentCreated = useCallback((payload: unknown) => {
     console.log('[DashboardUpdates] Payment created:', payload);
 
-    setRecentActivity((prev) => [
+    setRecentActivity(prev => [
       {
         id: crypto.randomUUID(),
         type: 'payment:created',
@@ -41,7 +41,7 @@ export function useDashboardUpdates() {
   const handlePaymentUpdated = useCallback((payload: unknown) => {
     console.log('[DashboardUpdates] Payment updated:', payload);
 
-    setRecentActivity((prev) => [
+    setRecentActivity(prev => [
       {
         id: crypto.randomUUID(),
         type: 'payment:updated',
@@ -56,7 +56,7 @@ export function useDashboardUpdates() {
   const handlePaymentCompleted = useCallback((payload: unknown) => {
     console.log('[DashboardUpdates] Payment completed:', payload);
 
-    setRecentActivity((prev) => [
+    setRecentActivity(prev => [
       {
         id: crypto.randomUUID(),
         type: 'payment:completed',
@@ -71,7 +71,7 @@ export function useDashboardUpdates() {
   const handlePaymentFailed = useCallback((payload: unknown) => {
     console.log('[DashboardUpdates] Payment failed:', payload);
 
-    setRecentActivity((prev) => [
+    setRecentActivity(prev => [
       {
         id: crypto.randomUUID(),
         type: 'payment:failed',
@@ -86,7 +86,7 @@ export function useDashboardUpdates() {
   const handleAuditCreated = useCallback((payload: unknown) => {
     console.log('[DashboardUpdates] Audit created:', payload);
 
-    setRecentActivity((prev) => [
+    setRecentActivity(prev => [
       {
         id: crypto.randomUUID(),
         type: 'admin:audit-created',

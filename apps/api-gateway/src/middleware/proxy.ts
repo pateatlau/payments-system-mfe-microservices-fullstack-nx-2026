@@ -82,9 +82,7 @@ export function createStreamingProxy(
     // Rewrite path if needed
     let path = req.url || '/';
     if (config.pathRewrite) {
-      for (const [pattern, replacement] of Object.entries(
-        config.pathRewrite
-      )) {
+      for (const [pattern, replacement] of Object.entries(config.pathRewrite)) {
         const regex = new RegExp(pattern);
         path = path.replace(regex, replacement);
       }

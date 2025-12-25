@@ -335,7 +335,7 @@ export function createWebSocketServer(
 
     // Close WebSocket server
     return new Promise((resolve, reject) => {
-      wss.close((error) => {
+      wss.close(error => {
         if (error) {
           logger.error('Error closing WebSocket server', { error });
           reject(error);

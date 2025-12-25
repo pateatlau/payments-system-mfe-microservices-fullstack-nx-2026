@@ -1,6 +1,6 @@
 /**
  * Profile Service - Business Logic
- * 
+ *
  * POC-3 Phase 5.2: Redis Caching Integration
  * - Cache profile lookups
  * - Cache user preferences
@@ -123,9 +123,10 @@ export const profileService = {
     const profile = await this.getOrCreateProfile(userId);
 
     // Return preferences from JSON field
-    const preferences = profile && profile.preferences
-      ? (profile.preferences as Record<string, unknown>)
-      : {};
+    const preferences =
+      profile && profile.preferences
+        ? (profile.preferences as Record<string, unknown>)
+        : {};
 
     // Cache the preferences
     await cache.set(cacheKey, preferences, {

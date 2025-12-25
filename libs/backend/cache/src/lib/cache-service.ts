@@ -12,7 +12,7 @@ export class CacheService {
   private readonly keyPrefix: string;
   private readonly defaultTtl?: number;
   private readonly enableStats: boolean;
-  
+
   // Statistics
   private stats: CacheStats = {
     hits: 0,
@@ -24,9 +24,9 @@ export class CacheService {
 
   constructor(config: CacheConfig | string) {
     const cfg = typeof config === 'string' ? { redisUrl: config } : config;
-    
+
     this.redis = new Redis(cfg.redisUrl, {
-      retryStrategy: (times) => {
+      retryStrategy: times => {
         const delay = Math.min(times * 50, 2000);
         return delay;
       },
@@ -38,7 +38,8 @@ export class CacheService {
 
     this.keyPrefix = cfg.keyPrefix || '';
     this.defaultTtl = cfg.defaultTtl;
-    this.enableStats = cfg.enableStats ?? process.env.NODE_ENV === 'development';
+    this.enableStats =
+      cfg.enableStats ?? process.env.NODE_ENV === 'development';
 
     // Log connection status in development
     if (process.env.NODE_ENV === 'development') {
@@ -46,7 +47,7 @@ export class CacheService {
         console.log('[CacheService] Connected to Redis');
       });
 
-      this.redis.on('error', (err) => {
+      this.redis.on('error', err => {
         console.error('[CacheService] Redis error:', err.message);
       });
     }
@@ -59,7 +60,7 @@ export class CacheService {
     try {
       const fullKey = this.getFullKey(key);
       const data = await this.redis.get(fullKey);
-      
+
       if (data === null) {
         this.recordMiss();
         return null;
@@ -142,15 +143,17 @@ export class CacheService {
     try {
       const tagKey = this.getTagKey(tag);
       const keys = await this.redis.smembers(tagKey);
-      
+
       if (keys && keys.length > 0) {
         // Delete all keys associated with the tag
         await this.redis.del(...keys);
         // Delete the tag set itself
         await this.redis.del(tagKey);
         this.stats.deletes += keys.length;
-        
-        console.log(`[CacheService] Invalidated ${keys.length} keys for tag "${tag}"`);
+
+        console.log(
+          `[CacheService] Invalidated ${keys.length} keys for tag "${tag}"`
+        );
       }
     } catch (error) {
       console.error(`[CacheService] Error invalidating tag "${tag}":`, error);
@@ -174,7 +177,10 @@ export class CacheService {
       const result = await this.redis.exists(fullKey);
       return result === 1;
     } catch (error) {
-      console.error(`[CacheService] Error checking key existence "${key}":`, error);
+      console.error(
+        `[CacheService] Error checking key existence "${key}":`,
+        error
+      );
       return false;
     }
   }
@@ -187,7 +193,10 @@ export class CacheService {
       const fullKey = this.getFullKey(key);
       return await this.redis.ttl(fullKey);
     } catch (error) {
-      console.error(`[CacheService] Error getting TTL for key "${key}":`, error);
+      console.error(
+        `[CacheService] Error getting TTL for key "${key}":`,
+        error
+      );
       return -1;
     }
   }

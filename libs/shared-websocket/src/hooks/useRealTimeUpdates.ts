@@ -37,7 +37,7 @@ export function useRealTimeUpdates(config: RealTimeUpdateConfig): void {
     config.eventType,
     (payload: unknown) => {
       // Invalidate queries
-      config.queryKeys.forEach((queryKey) => {
+      config.queryKeys.forEach(queryKey => {
         queryClient.invalidateQueries({ queryKey });
       });
 
@@ -74,7 +74,9 @@ export function useRealTimeQueryUpdate<T>(
   useWebSocketSubscription(
     eventType,
     (payload: unknown) => {
-      queryClient.setQueryData<T>(queryKey, (oldData) => updater(oldData, payload));
+      queryClient.setQueryData<T>(queryKey, oldData =>
+        updater(oldData, payload)
+      );
     },
     [queryClient, ...queryKey]
   );

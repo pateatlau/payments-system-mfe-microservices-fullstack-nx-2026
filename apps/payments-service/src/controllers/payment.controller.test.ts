@@ -59,11 +59,7 @@ describe('PaymentController - updatePayment', () => {
     it('should return 401 if user is not authenticated', async () => {
       req.user = undefined;
 
-      await updatePayment(
-        req as AuthenticatedRequest,
-        res as Response,
-        next
-      );
+      await updatePayment(req as AuthenticatedRequest, res as Response, next);
 
       expect(res.status).toHaveBeenCalledWith(401);
       expect(res.json).toHaveBeenCalledWith({
@@ -82,11 +78,7 @@ describe('PaymentController - updatePayment', () => {
     it('should return 400 if payment ID is missing', async () => {
       req.params = {};
 
-      await updatePayment(
-        req as AuthenticatedRequest,
-        res as Response,
-        next
-      );
+      await updatePayment(req as AuthenticatedRequest, res as Response, next);
 
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
@@ -124,11 +116,7 @@ describe('PaymentController - updatePayment', () => {
         .spyOn(paymentService.paymentService, 'updatePayment')
         .mockResolvedValue(mockPayment as never);
 
-      await updatePayment(
-        req as AuthenticatedRequest,
-        res as Response,
-        next
-      );
+      await updatePayment(req as AuthenticatedRequest, res as Response, next);
 
       expect(res.status).not.toHaveBeenCalled();
       expect(res.json).toHaveBeenCalled();
@@ -146,11 +134,7 @@ describe('PaymentController - updatePayment', () => {
           new ApiError(404, 'PAYMENT_NOT_FOUND', 'Payment not found')
         );
 
-      await updatePayment(
-        req as AuthenticatedRequest,
-        res as Response,
-        next
-      );
+      await updatePayment(req as AuthenticatedRequest, res as Response, next);
 
       expect(next).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -172,15 +156,9 @@ describe('PaymentController - updatePayment', () => {
 
       jest
         .spyOn(paymentService.paymentService, 'updatePayment')
-        .mockRejectedValue(
-          new ApiError(403, 'FORBIDDEN', 'No permission')
-        );
+        .mockRejectedValue(new ApiError(403, 'FORBIDDEN', 'No permission'));
 
-      await updatePayment(
-        req as AuthenticatedRequest,
-        res as Response,
-        next
-      );
+      await updatePayment(req as AuthenticatedRequest, res as Response, next);
 
       expect(next).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -197,14 +175,14 @@ describe('PaymentController - updatePayment', () => {
       jest
         .spyOn(paymentService.paymentService, 'updatePayment')
         .mockRejectedValue(
-          new ApiError(400, 'INVALID_STATUS', 'Cannot update completed or failed payments')
+          new ApiError(
+            400,
+            'INVALID_STATUS',
+            'Cannot update completed or failed payments'
+          )
         );
 
-      await updatePayment(
-        req as AuthenticatedRequest,
-        res as Response,
-        next
-      );
+      await updatePayment(req as AuthenticatedRequest, res as Response, next);
 
       expect(next).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -224,11 +202,7 @@ describe('PaymentController - updatePayment', () => {
         .spyOn(paymentService.paymentService, 'updatePayment')
         .mockRejectedValue(genericError);
 
-      await updatePayment(
-        req as AuthenticatedRequest,
-        res as Response,
-        next
-      );
+      await updatePayment(req as AuthenticatedRequest, res as Response, next);
 
       expect(next).toHaveBeenCalledWith(genericError);
     });

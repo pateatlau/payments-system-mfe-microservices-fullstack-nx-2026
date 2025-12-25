@@ -102,10 +102,9 @@ describe('useEventBusIntegration', () => {
     });
 
     it('does not subscribe to auth events when disabled', async () => {
-      renderHook(
-        () => useEventBusIntegration({ enableAuthEvents: false }),
-        { wrapper }
-      );
+      renderHook(() => useEventBusIntegration({ enableAuthEvents: false }), {
+        wrapper,
+      });
 
       const loginPayload: AuthLoginPayload = {
         user: {
@@ -282,7 +281,9 @@ describe('useEventBusIntegration', () => {
 
       await waitFor(() => {
         expect(consoleSpy).toHaveBeenCalledWith(
-          expect.stringContaining('[EventBus:Shell] Event bus integration initialized'),
+          expect.stringContaining(
+            '[EventBus:Shell] Event bus integration initialized'
+          ),
           expect.any(Object)
         );
       });

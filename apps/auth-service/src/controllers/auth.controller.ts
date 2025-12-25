@@ -13,6 +13,10 @@ import {
   changePasswordSchema,
 } from '../validators/auth.validators';
 
+// Import Prisma via dynamic require to avoid dist path issues
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const getPrisma = () => require('../lib/prisma').prisma;
+
 /**
  * POST /auth/register
  * Register a new user
@@ -208,6 +212,80 @@ export const changePassword = async (
         message: 'Password changed successfully',
       },
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * GET /auth/internal/users/by-email
+ * Internal: Get minimal user info by email (id, email)
+ */
+export const getUserByEmailInternal = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const email = (req.query.email as string) || '';
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        error: { code: 'INVALID_REQUEST', message: 'email is required' },
+      });
+    }
+
+    const prisma = getPrisma();
+    const user = await prisma.user.findUnique({
+      where: { email },
+      select: { id: true, email: true },
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: { code: 'USER_NOT_FOUND', message: 'User not found' },
+      });
+    }
+
+    return res.status(200).json({ success: true, data: user });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * GET /auth/internal/users/:id
+ * Internal: Get minimal user info by id (id, email)
+ */
+export const getUserByIdInternal = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const userId = req.params.id;
+    if (!userId) {
+      return res.status(400).json({
+        success: false,
+        error: { code: 'INVALID_REQUEST', message: 'id is required' },
+      });
+    }
+
+    const prisma = getPrisma();
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, email: true },
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: { code: 'USER_NOT_FOUND', message: 'User not found' },
+      });
+    }
+
+    return res.status(200).json({ success: true, data: user });
   } catch (error) {
     next(error);
   }

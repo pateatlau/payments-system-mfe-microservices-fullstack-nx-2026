@@ -38,7 +38,10 @@ export class WebSocketClient implements IWebSocketClient {
   private subscriptions: Set<string> = new Set();
 
   constructor(config: WebSocketClientConfig) {
-    this.config = { ...DEFAULT_CONFIG, ...config } as Required<WebSocketClientConfig>;
+    this.config = {
+      ...DEFAULT_CONFIG,
+      ...config,
+    } as Required<WebSocketClientConfig>;
     this.reconnectionManager = new ReconnectionManager({
       maxAttempts: this.config.maxReconnectAttempts,
       initialDelay: this.config.reconnectDelay,
@@ -337,7 +340,7 @@ export class WebSocketClient implements IWebSocketClient {
 
     this.log('Re-subscribing to events', this.subscriptions.size);
 
-    this.subscriptions.forEach((eventType) => {
+    this.subscriptions.forEach(eventType => {
       this.send({
         type: 'subscribe',
         payload: { eventType },
@@ -377,7 +380,7 @@ export class WebSocketClient implements IWebSocketClient {
   private emit(event: string, payload: unknown): void {
     const callbacks = this.listeners.get(event);
     if (callbacks) {
-      callbacks.forEach((callback) => {
+      callbacks.forEach(callback => {
         try {
           callback(payload);
         } catch (error) {

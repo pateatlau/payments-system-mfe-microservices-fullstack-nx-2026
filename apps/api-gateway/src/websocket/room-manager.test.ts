@@ -160,8 +160,8 @@ describe('RoomManager', () => {
 
       const allInfo = manager.getAllRoomInfo();
       expect(allInfo.length).toBe(2);
-      expect(allInfo.some((info) => info.name === 'room1')).toBe(true);
-      expect(allInfo.some((info) => info.name === 'room2')).toBe(true);
+      expect(allInfo.some(info => info.name === 'room1')).toBe(true);
+      expect(allInfo.some(info => info.name === 'room2')).toBe(true);
     });
   });
 

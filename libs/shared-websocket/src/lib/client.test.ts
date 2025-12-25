@@ -205,7 +205,7 @@ describe('WebSocketClient', () => {
       client.subscribe('payment:created');
       client.unsubscribe('payment:created');
 
-      const calls = mockWs.send.mock.calls.map((call) => JSON.parse(call[0]));
+      const calls = mockWs.send.mock.calls.map(call => JSON.parse(call[0]));
       expect(calls[1].type).toBe('unsubscribe');
       expect(calls[1].payload.eventType).toBe('payment:created');
     });
@@ -305,8 +305,8 @@ describe('WebSocketClient', () => {
 
       jest.advanceTimersByTime(1000);
 
-      const calls = mockWs.send.mock.calls.map((call) => JSON.parse(call[0]));
-      const pings = calls.filter((call) => call.type === 'ping');
+      const calls = mockWs.send.mock.calls.map(call => JSON.parse(call[0]));
+      const pings = calls.filter(call => call.type === 'ping');
 
       expect(pings.length).toBeGreaterThan(0);
 

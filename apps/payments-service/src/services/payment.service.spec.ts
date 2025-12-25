@@ -4,6 +4,7 @@
 
 import { paymentService } from './payment.service';
 import { prisma } from '../lib/prisma';
+import { cache, CacheKeys, CacheTags } from '../lib/cache';
 
 // Mock Prisma
 jest.mock('db', () => ({
@@ -21,6 +22,25 @@ jest.mock('db', () => ({
     paymentTransaction: {
       create: jest.fn(),
     },
+  },
+}));
+
+// Mock cache module
+jest.mock('../lib/cache', () => ({
+  cache: {
+    delete: jest.fn(),
+    invalidateByTag: jest.fn(),
+    set: jest.fn(),
+    get: jest.fn(),
+  },
+  CacheKeys: {
+    payment: (id: string) => `payment:${id}`,
+    paymentList: (userId: string, page: number) =>
+      `payments:list:${userId}:${page}`,
+  },
+  CacheTags: {
+    payments: 'payments',
+    user: (id: string) => `user:${id}`,
   },
 }));
 
@@ -414,6 +434,16 @@ describe('PaymentService', () => {
 
       expect(result.status).toBe('completed');
       expect(result.completedAt).toBeDefined();
+
+      // Cache invalidations
+      expect(cache.delete).toHaveBeenCalledWith(CacheKeys.payment('payment-1'));
+      expect(cache.invalidateByTag).toHaveBeenCalledWith(
+        CacheTags.user('user-1')
+      );
+      expect(cache.invalidateByTag).toHaveBeenCalledWith(
+        CacheTags.user('user-2')
+      );
+      expect(cache.invalidateByTag).toHaveBeenCalledWith(CacheTags.payments);
     });
 
     it('should allow non-admin to cancel own pending payment', async () => {
@@ -490,6 +520,53 @@ describe('PaymentService', () => {
           cancelData
         )
       ).rejects.toThrow('You can only cancel pending payments');
+    });
+  });
+
+  describe('updatePayment', () => {
+    const existingPayment = {
+      id: 'payment-2',
+      senderId: 'user-10',
+      recipientId: 'user-20',
+      amount: 50,
+      description: 'old',
+      status: 'pending',
+      type: 'instant',
+      metadata: null,
+    };
+
+    it('invalidates caches for sender and recipients and global lists', async () => {
+      (prisma.payment.findUnique as jest.Mock).mockResolvedValue(
+        existingPayment
+      );
+      (prisma.user.findUnique as jest.Mock).mockResolvedValue({
+        id: 'user-30',
+      });
+      (prisma.payment.update as jest.Mock).mockResolvedValue({
+        ...existingPayment,
+        recipientId: 'user-30',
+        description: 'new',
+      });
+
+      const result = await paymentService.updatePayment(
+        'payment-2',
+        'user-10',
+        'ADMIN',
+        { description: 'new', recipientEmail: 'new@example.com' }
+      );
+
+      expect(result.description).toBe('new');
+      expect(cache.delete).toHaveBeenCalledWith(CacheKeys.payment('payment-2'));
+      expect(cache.invalidateByTag).toHaveBeenCalledWith(
+        CacheTags.user('user-10')
+      );
+      expect(cache.invalidateByTag).toHaveBeenCalledWith(
+        CacheTags.user('user-20')
+      );
+      expect(cache.invalidateByTag).toHaveBeenCalledWith(
+        CacheTags.user('user-30')
+      );
+      expect(cache.invalidateByTag).toHaveBeenCalledWith(CacheTags.payments);
     });
   });
 });

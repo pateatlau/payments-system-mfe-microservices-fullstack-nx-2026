@@ -26,9 +26,9 @@ export function useCreatePayment() {
       }
       return await createPayment(data);
     },
-    onSuccess: payment => {
+    onSuccess: async payment => {
       // Invalidate payments list to refetch after creation
-      queryClient.invalidateQueries({ queryKey: paymentKeys.all });
+      await queryClient.invalidateQueries({ queryKey: paymentKeys.all });
 
       // Emit payment created event
       eventBus.emit(
@@ -40,7 +40,7 @@ export function useCreatePayment() {
             amount: payment.amount,
             currency: payment.currency,
             status: payment.status as PaymentStatus,
-            type: (payment.type as unknown) as 'initiate' | 'payment',
+            type: payment.type as unknown as 'initiate' | 'payment',
             description: payment.description || undefined,
             createdAt: payment.createdAt,
             updatedAt: payment.updatedAt,
@@ -69,10 +69,10 @@ export function useUpdatePayment() {
     mutationFn: async ({ id, data }) => {
       return await updatePaymentStatus(id, data);
     },
-    onSuccess: (payment, variables) => {
+    onSuccess: async (payment, variables) => {
       if (payment) {
-        // Invalidate payments list
-        queryClient.invalidateQueries({ queryKey: paymentKeys.all });
+        // Invalidate payments list and wait for refetch
+        await queryClient.invalidateQueries({ queryKey: paymentKeys.all });
         // Update specific payment in cache
         queryClient.setQueryData(paymentKeys.detail(variables.id), payment);
 
@@ -86,7 +86,7 @@ export function useUpdatePayment() {
               amount: payment.amount,
               currency: payment.currency,
               status: payment.status as PaymentStatus,
-              type: (payment.type as unknown) as 'initiate' | 'payment',
+              type: payment.type as unknown as 'initiate' | 'payment',
               description: payment.description || undefined,
               createdAt: payment.createdAt,
               updatedAt: payment.updatedAt,
@@ -108,7 +108,7 @@ export function useUpdatePayment() {
                 amount: payment.amount,
                 currency: payment.currency,
                 status: payment.status as PaymentStatus,
-                type: (payment.type as unknown) as 'initiate' | 'payment',
+                type: payment.type as unknown as 'initiate' | 'payment',
                 description: payment.description || undefined,
                 createdAt: payment.createdAt,
                 updatedAt: payment.updatedAt,
@@ -130,7 +130,7 @@ export function useUpdatePayment() {
                 amount: payment.amount,
                 currency: payment.currency,
                 status: payment.status as PaymentStatus,
-                type: (payment.type as unknown) as 'initiate' | 'payment',
+                type: payment.type as unknown as 'initiate' | 'payment',
                 description: payment.description || undefined,
                 createdAt: payment.createdAt,
                 updatedAt: payment.updatedAt,
@@ -165,9 +165,9 @@ export function useDeletePayment() {
       });
       return true;
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       // Invalidate payments list to refetch after deletion
-      queryClient.invalidateQueries({ queryKey: paymentKeys.all });
+      await queryClient.invalidateQueries({ queryKey: paymentKeys.all });
     },
   });
 }
