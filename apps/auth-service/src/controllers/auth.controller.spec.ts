@@ -2,7 +2,7 @@
  * Auth Controller - Integration Tests
  */
 
-import type { Request, Response, NextFunction } from 'express';
+import type { Request, Response, NextFunction as _NextFunction } from 'express';
 import * as authController from './auth.controller';
 import * as authService from '../services/auth.service';
 import { ApiError as _ApiError } from '../middleware/errorHandler';

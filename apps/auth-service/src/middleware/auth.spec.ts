@@ -2,7 +2,7 @@
  * Auth Middleware - Unit Tests
  */
 
-import type { Request, Response, NextFunction } from 'express';
+import type { Request, Response, NextFunction as _NextFunction } from 'express';
 import { authenticate } from './auth';
 import { verifyAccessToken } from '../utils/token';
 import { ApiError as _ApiError } from './errorHandler';
