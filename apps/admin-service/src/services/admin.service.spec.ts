@@ -6,7 +6,7 @@ import { adminService } from './admin.service';
 import { prisma } from '../lib/prisma';
 
 // Mock Prisma
-jest.mock('db', () => ({
+jest.mock('../lib/prisma', () => ({
   prisma: {
     user: {
       findMany: jest.fn(),
@@ -157,13 +157,9 @@ describe('AdminService', () => {
       role: 'ADMIN',
       createdAt: new Date('2024-01-01'),
       updatedAt: new Date('2024-01-01'),
-      _count: {
-        sentPayments: 5,
-        receivedPayments: 3,
-      },
     };
 
-    it('should get user by ID with payment counts', async () => {
+    it('should get user by ID', async () => {
       (prisma.user.findUnique as jest.Mock).mockResolvedValue(mockUser);
 
       const result = await adminService.getUserById('user-1');
@@ -178,12 +174,6 @@ describe('AdminService', () => {
           role: true,
           createdAt: true,
           updatedAt: true,
-          _count: {
-            select: {
-              sentPayments: true,
-              receivedPayments: true,
-            },
-          },
         },
       });
     });
