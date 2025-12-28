@@ -17,6 +17,11 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+# Workflow permissions
+permissions:
+  contents: read
+  security-events: write
+
 env:
   NODE_VERSION: '24.11.x'
   PNPM_VERSION: '9'
