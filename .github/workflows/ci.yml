@@ -513,6 +513,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Full history for Nx affected commands
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -579,9 +581,8 @@ jobs:
 
       - name: Run Trivy vulnerability scanner
         # Pin to specific version for security and reproducibility
-        # Version 0.28.0 released 2024-12-10
-        # To update: Check https://github.com/aquasecurity/trivy-action/releases
-        uses: aquasecurity/trivy-action@0.28.0
+        # Version 0.33.1 - see https://github.com/aquasecurity/trivy-action/releases
+        uses: aquasecurity/trivy-action@0.33.1
         with:
           scan-type: 'fs'
           scan-ref: '.'

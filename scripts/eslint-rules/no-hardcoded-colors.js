@@ -99,7 +99,12 @@ module.exports = {
 
         // Check for hardcoded color utilities in other string contexts
         // e.g., clsx('bg-white', 'text-slate-600') or cn({ 'bg-gray-50': true })
-        if (typeof node.value === 'string' && node.value.includes('bg-')) {
+        // Check if string contains any of the blocked pattern prefixes
+        const containsBlockedPrefix = ['bg-', 'text-', 'border-', 'divide-', 'ring-', 'hover:'].some(
+          prefix => node.value.includes(prefix)
+        );
+
+        if (typeof node.value === 'string' && containsBlockedPrefix) {
           // Only validate if it looks like class names (contains common class separators)
           if (
             node.value.includes(' ') ||
