@@ -1,13 +1,16 @@
 import React, { useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button, Input, Label, Alert, Card } from '@mfe/shared-design-system';
-import { useUpdatePayment } from '../hooks/useUpdatePayment';
+import { updatePaymentDetails } from '../api/payments';
+import { paymentKeys } from '../hooks/usePayments';
 import {
   updatePaymentSchema,
   type UpdatePaymentFormData,
 } from '../schemas/updatePaymentSchema';
 import type { Payment } from 'shared-types';
+import type { UpdatePaymentDetailsDto } from '../api/types';
 
 interface PaymentUpdateFormProps {
   payment: Payment;
@@ -64,10 +67,24 @@ export function PaymentUpdateForm({
     },
   });
 
-  const updateMutation = useUpdatePayment({
+  const queryClient = useQueryClient();
+
+  const updateMutation = useMutation({
+    mutationFn: async (data: UpdatePaymentDetailsDto) => {
+      return await updatePaymentDetails(payment.id, data);
+    },
     onSuccess: updatedPayment => {
       setSuccessMessage('Payment updated successfully');
       setError(null);
+
+      // Invalidate queries to refetch fresh data
+      queryClient.invalidateQueries({
+        queryKey: paymentKeys.detail(payment.id),
+      });
+      queryClient.invalidateQueries({
+        queryKey: paymentKeys.lists(),
+      });
+
       reset({
         amount: updatedPayment.amount,
         currency: updatedPayment.currency,
@@ -77,7 +94,7 @@ export function PaymentUpdateForm({
       });
       onSuccess?.(updatedPayment);
     },
-    onError: err => {
+    onError: (err: Error) => {
       setError(err.message || 'Failed to update payment');
       setSuccessMessage(null);
     },
@@ -93,7 +110,7 @@ export function PaymentUpdateForm({
     setSuccessMessage(null);
 
     // Only send fields that have changed
-    const updates: Record<string, unknown> = {};
+    const updates: UpdatePaymentDetailsDto = {};
     if (data.amount !== payment.amount) updates.amount = data.amount;
     if (data.currency !== payment.currency) updates.currency = data.currency;
     if (data.description !== payment.description)
@@ -112,7 +129,7 @@ export function PaymentUpdateForm({
       return;
     }
 
-    updateMutation.mutate({ id: payment.id, data: updates });
+    updateMutation.mutate(updates);
   };
 
   // Clear messages when form changes
