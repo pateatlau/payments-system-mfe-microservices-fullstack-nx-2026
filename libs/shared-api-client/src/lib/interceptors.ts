@@ -162,7 +162,7 @@ function setupRequestInterceptor(
           if (deviceId && !config.headers['X-Device-ID']) {
             config.headers['X-Device-ID'] = deviceId;
           }
-        } catch (error) {
+        } catch (_error) {
           // localStorage might not be available (e.g., in private browsing)
           // Silently fail - device ID is optional
         }

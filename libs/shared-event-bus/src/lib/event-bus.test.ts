@@ -8,7 +8,6 @@ import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import { EventBus, createEventBus } from './event-bus';
 import type { AuthLoginPayload } from './events/auth';
 import type { PaymentCreatedPayload } from './events/payments';
-import type { SystemErrorPayload } from './events/system';
 
 describe('EventBus', () => {
   let eventBus: EventBus;
