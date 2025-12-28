@@ -208,6 +208,14 @@ export class ApiClient {
   setTokenProvider(provider: TokenProvider): void {
     this.tokenProvider = provider;
   }
+
+  /**
+   * Check if user is authenticated
+   */
+  isAuthenticated(): boolean {
+    const token = this.tokenProvider?.getAccessToken();
+    return !!token;
+  }
 }
 
 /**

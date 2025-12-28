@@ -11,7 +11,8 @@ import {
   from,
 } from '@apollo/client';
 import { setContext } from '@apollo/client/link/context';
-import { onError } from '@apollo/client/link/error';
+import { ErrorLink } from '@apollo/client/link/error';
+import { CombinedGraphQLErrors } from '@apollo/client/errors';
 
 export interface GraphQLClientConfig {
   uri: string;
@@ -43,44 +44,29 @@ export function createGraphQLClient(config: GraphQLClientConfig): ApolloClient {
   });
 
   // Error link - handle errors
-  const errorLink = onError(({ graphQLErrors, networkError }: { graphQLErrors?: readonly { message: string; locations?: unknown; path?: unknown; extensions?: { code?: string } }[]; networkError?: Error | null }) => {
-    if (graphQLErrors) {
-      graphQLErrors.forEach((error: { message: string; locations?: unknown; path?: unknown; extensions?: { code?: string } }) => {
-        const message = error.message;
-        const locations = error.locations;
-        const path = error.path;
-        const extensions = error.extensions;
-
+  const errorLink = new ErrorLink(({ error }) => {
+    if (CombinedGraphQLErrors.is(error)) {
+      // Handle GraphQL errors
+      error.errors.forEach((err) => {
         console.error(
-          `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`
+          `[GraphQL error]: Message: ${err.message}, Location: ${err.locations}, Path: ${err.path}`
         );
 
         // Handle authentication errors
-        if (
-          extensions &&
-          typeof extensions === 'object' &&
-          'code' in extensions &&
-          extensions.code === 'UNAUTHENTICATED'
-        ) {
+        if (err.extensions?.code === 'UNAUTHENTICATED') {
           // Token expired or invalid - could trigger token refresh
           onErrorCallback?.(new Error('Authentication required'));
         }
 
         // Handle authorization errors
-        if (
-          extensions &&
-          typeof extensions === 'object' &&
-          'code' in extensions &&
-          extensions.code === 'FORBIDDEN'
-        ) {
+        if (err.extensions?.code === 'FORBIDDEN') {
           onErrorCallback?.(new Error('Access denied'));
         }
       });
-    }
-
-    if (networkError) {
-      console.error(`[Network error]: ${networkError}`);
-      onErrorCallback?.(networkError);
+    } else {
+      // Handle network errors
+      console.error(`[Network error]: ${error}`);
+      onErrorCallback?.(error as Error);
     }
   });
 
