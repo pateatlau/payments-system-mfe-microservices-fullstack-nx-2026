@@ -43,9 +43,9 @@ export function createGraphQLClient(config: GraphQLClientConfig): ApolloClient {
   });
 
   // Error link - handle errors
-  const errorLink = onError(({ graphQLErrors, networkError }: any) => {
+  const errorLink = onError(({ graphQLErrors, networkError }: { graphQLErrors?: readonly { message: string; locations?: unknown; path?: unknown; extensions?: { code?: string } }[]; networkError?: Error | null }) => {
     if (graphQLErrors) {
-      graphQLErrors.forEach((error: any) => {
+      graphQLErrors.forEach((error: { message: string; locations?: unknown; path?: unknown; extensions?: { code?: string } }) => {
         const message = error.message;
         const locations = error.locations;
         const path = error.path;

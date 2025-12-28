@@ -41,7 +41,7 @@ export const generateAccessToken = (payload: JwtPayload): string => {
     role: payload.role,
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   return jwt.sign(tokenPayload, config.jwtSecret, {
     expiresIn: config.jwtExpiresIn,
   } as any);
@@ -61,7 +61,7 @@ export const generateRefreshToken = (payload: JwtPayload): string => {
     role: payload.role,
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   return jwt.sign(tokenPayload, config.jwtRefreshSecret, {
     expiresIn: config.jwtRefreshExpiresIn,
   } as any);

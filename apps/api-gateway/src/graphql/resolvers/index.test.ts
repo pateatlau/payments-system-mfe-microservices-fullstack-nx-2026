@@ -7,6 +7,7 @@
 import { resolvers } from './index';
 import type { GraphQLContext } from '../context';
 import axios from 'axios';
+import type { GraphQLResolveInfo } from 'graphql';
 
 // Mock axios
 jest.mock('axios');
@@ -51,7 +52,7 @@ describe('GraphQL Resolvers', () => {
           {},
           {},
           mockContext,
-          {} as any
+          {} as GraphQLResolveInfo
         );
 
         expect(result).toEqual(mockUser);
@@ -80,7 +81,7 @@ describe('GraphQL Resolvers', () => {
           {},
           { id: 'pay-1' },
           mockContext,
-          {} as any
+          {} as GraphQLResolveInfo
         );
 
         expect(result).toEqual(mockPayment);
@@ -98,7 +99,7 @@ describe('GraphQL Resolvers', () => {
           {},
           { id: 'pay-999' },
           mockContext,
-          {} as any
+          {} as GraphQLResolveInfo
         );
 
         expect(result).toBeNull();
@@ -138,7 +139,7 @@ describe('GraphQL Resolvers', () => {
             },
           },
           {} as GraphQLContext,
-          {} as any
+          {} as GraphQLResolveInfo
         );
 
         expect(result).toEqual(mockAuthResponse);
@@ -174,7 +175,7 @@ describe('GraphQL Resolvers', () => {
             },
           },
           mockContext,
-          {} as any
+          {} as GraphQLResolveInfo
         );
 
         expect(result).toEqual(mockPayment);

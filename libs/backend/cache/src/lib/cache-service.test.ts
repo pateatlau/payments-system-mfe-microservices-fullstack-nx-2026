@@ -35,12 +35,12 @@ describe('CacheService', () => {
     // Clean up test data
     try {
       await cacheService.flush();
-    } catch (error) {
+    } catch (_error) {
       // Ignore errors during cleanup
     }
     try {
       await cacheService.disconnect();
-    } catch (error) {
+    } catch (_error) {
       // Ignore errors during cleanup
     }
   });
@@ -52,7 +52,7 @@ describe('CacheService', () => {
     // Clear test keys
     try {
       await cacheService.flush();
-    } catch (error) {
+    } catch (_error) {
       // Ignore if Redis is not available
       console.log('Redis not available for tests, skipping flush');
     }

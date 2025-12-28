@@ -260,7 +260,7 @@ export class CacheService {
     try {
       const result = await this.redis.ping();
       return result === 'PONG';
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }

@@ -94,7 +94,7 @@ async function getThemePreference(): Promise<Theme | null> {
     const apiClient = getApiClient();
 
     // Check if user is authenticated before making API call
-    const tokenProvider = (apiClient as any).tokenProvider;
+    const tokenProvider = (apiClient as { tokenProvider?: { getAccessToken?: () => string | null } }).tokenProvider;
     const accessToken = tokenProvider?.getAccessToken?.();
 
     // Skip API call if user is not authenticated

@@ -19,7 +19,7 @@ describe('Button', () => {
     const button = screen.getByRole('button');
     const className = button.getAttribute('class') || '';
     expect(className).toMatch(
-      /bg-\(\-\-primary\)|bg-\[rgb\(var\(--primary\)\)\]/
+      /bg-\(--primary\)|bg-\[rgb\(var\(--primary\)\)\]/
     );
   });
 
@@ -28,7 +28,7 @@ describe('Button', () => {
     const button = screen.getByRole('button');
     const className = button.getAttribute('class') || '';
     expect(className).toMatch(
-      /bg-\(\-\-destructive\)|bg-\[rgb\(var\(--destructive\)\)\]/
+      /bg-\(--destructive\)|bg-\[rgb\(var\(--destructive\)\)\]/
     );
   });
 

@@ -4,6 +4,7 @@ import { RemoteErrorBoundary } from '../components/RemoteErrorBoundary';
 /**
  * Props for AdminDashboard component from admin-mfe
  */
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface AdminDashboardComponentProps {
   // Admin dashboard props (can be extended as needed)
 }

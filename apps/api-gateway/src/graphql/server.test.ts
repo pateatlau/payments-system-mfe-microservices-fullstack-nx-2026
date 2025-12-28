@@ -5,8 +5,6 @@
  */
 
 import { createApolloServer } from './server';
-import { typeDefs } from './schema';
-import { resolvers } from './resolvers';
 
 describe('GraphQL Server', () => {
   it('should create Apollo Server instance', () => {

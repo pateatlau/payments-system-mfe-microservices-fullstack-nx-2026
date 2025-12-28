@@ -33,11 +33,11 @@ describe('Input', () => {
   });
 
   it('should handle onChange events', () => {
-    let value = '';
+    let _value = '';
     render(
       <Input
         onChange={e => {
-          value = e.target.value;
+          _value = e.target.value;
         }}
       />
     );

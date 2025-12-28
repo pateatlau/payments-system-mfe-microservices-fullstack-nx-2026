@@ -55,6 +55,7 @@ declare module 'paymentsMfe/PaymentsPage' {
 }
 
 declare module 'adminMfe/AdminDashboard' {
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   interface AdminDashboardProps {
     // Admin dashboard props (can be extended as needed)
   }

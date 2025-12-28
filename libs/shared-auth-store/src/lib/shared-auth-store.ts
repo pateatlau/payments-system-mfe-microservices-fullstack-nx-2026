@@ -144,9 +144,9 @@ export const useAuthStore = create<AuthState>()(
             if (accessToken) {
               try {
                 await apiClient.post('/auth/logout', {});
-              } catch (error) {
+              } catch (_error) {
                 // Log error but continue with logout
-                console.warn('Logout API call failed:', error);
+                console.warn('Logout API call failed:', _error);
               }
             }
 
@@ -170,7 +170,7 @@ export const useAuthStore = create<AuthState>()(
                 'auth-mfe'
               );
             }
-          } catch (error) {
+          } catch (_error) {
             // Even if logout fails, clear local state
             set({
               user: null,

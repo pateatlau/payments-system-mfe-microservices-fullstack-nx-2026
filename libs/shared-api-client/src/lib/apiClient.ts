@@ -79,7 +79,7 @@ export class ApiClient {
     // Access environment variable (replaced by DefinePlugin at build time in browser)
     // DefinePlugin replaces process.env.NX_API_BASE_URL with the actual string value
     // Use dot notation so DefinePlugin can replace it properly
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+     
     const envBaseURL =
       typeof process !== 'undefined' && process.env
         ? (process.env as { NX_API_BASE_URL?: string }).NX_API_BASE_URL
