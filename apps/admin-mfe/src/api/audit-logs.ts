@@ -94,7 +94,7 @@ export async function getAvailableActions(): Promise<string[]> {
       '/admin/audit-logs/actions'
     );
     return response.data.data;
-  } catch (error) {
+  } catch (_error) {
     // Return empty array if endpoint not available yet
     console.warn('Failed to fetch available actions:', error);
     return [];

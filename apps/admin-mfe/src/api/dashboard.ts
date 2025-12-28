@@ -91,7 +91,7 @@ export async function getDashboardStats(): Promise<DashboardStats> {
       (paymentReports.byStatus.processing || 0);
 
     totalVolume = paymentReports.totalAmount;
-  } catch (error) {
+  } catch (_error) {
     // If payments API fails, set defaults
     activePayments = 0;
     totalVolume = 0;
@@ -113,7 +113,7 @@ export async function getDashboardStats(): Promise<DashboardStats> {
     } else {
       systemHealth = '0%';
     }
-  } catch (error) {
+  } catch (_error) {
     systemHealth = 'Unknown';
   }
 
@@ -137,7 +137,7 @@ export async function getRecentActivity(limit = 10) {
     });
 
     return auditLogsResponse.data;
-  } catch (error) {
+  } catch (_error) {
     // Audit logs endpoint may not be implemented yet
     // Return empty array to allow dashboard to still function
     return [];
