@@ -131,7 +131,7 @@ export const register = async (data: RegisterInput): Promise<AuthResponse> => {
       emailVerified: false,
       createdAt: user.createdAt.toISOString(),
     });
-  } catch (error) {
+  } catch (_error) {
     // Log error but don't fail registration - event publishing is non-critical
     // eslint-disable-next-line no-console
     console.error('Failed to publish user.created event:', error);
@@ -245,7 +245,7 @@ export const refreshAccessToken = async (
   let payload: JwtPayload;
   try {
     payload = verifyRefreshToken(refreshToken);
-  } catch (error) {
+  } catch (_error) {
     throw new ApiError(
       401,
       'INVALID_TOKEN',

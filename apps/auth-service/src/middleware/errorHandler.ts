@@ -4,7 +4,7 @@
  * Centralized error handling for the Auth Service
  */
 
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response, _NextFunction } from 'express';
 import { ZodError } from 'zod';
 import { logger } from '../utils/logger';
 

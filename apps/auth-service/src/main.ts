@@ -111,7 +111,7 @@ app.get('/metrics', async (_req, res) => {
     res.set('Content-Type', metrics.registry.contentType);
     const metricsOutput = await metrics.registry.metrics();
     res.send(metricsOutput);
-  } catch (error) {
+  } catch (_error) {
     logger.error('Error generating metrics', { error });
     res.status(500).send('Error generating metrics');
   }

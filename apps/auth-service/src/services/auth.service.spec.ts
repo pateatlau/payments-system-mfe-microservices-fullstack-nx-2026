@@ -6,7 +6,7 @@ import * as authService from './auth.service';
 import { prisma } from '../lib/prisma';
 import bcrypt from 'bcrypt';
 import { generateTokenPair, verifyRefreshToken } from '../utils/token';
-import { ApiError } from '../middleware/errorHandler';
+import { ApiError as _ApiError } from '../middleware/errorHandler';
 import { UserRole } from 'shared-types';
 
 // Mock dependencies

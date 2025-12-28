@@ -2,10 +2,10 @@
  * Auth Controller - Integration Tests
  */
 
-import type { Request, Response, NextFunction } from 'express';
+import type { Request, Response, _NextFunction } from 'express';
 import * as authController from './auth.controller';
 import * as authService from '../services/auth.service';
-import { ApiError } from '../middleware/errorHandler';
+import { ApiError as _ApiError } from '../middleware/errorHandler';
 import { ZodError } from 'zod';
 
 // Mock auth service

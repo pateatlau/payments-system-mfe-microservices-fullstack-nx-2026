@@ -4,7 +4,7 @@
  * Validates JWT tokens for protected routes
  */
 
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response, _NextFunction } from 'express';
 import { verifyAccessToken, JwtPayload } from '../utils/token';
 import { ApiError } from './errorHandler';
 
@@ -52,7 +52,7 @@ export const authenticate = (
     req.user = decoded;
 
     next();
-  } catch (error) {
+  } catch (_error) {
     if (error instanceof Error && error.name === 'TokenExpiredError') {
       return next(new ApiError(401, 'TOKEN_EXPIRED', 'Access token expired'));
     }

@@ -2,7 +2,7 @@
  * Error Handler Middleware - Unit Tests
  */
 
-import type { Request, Response, NextFunction } from 'express';
+import type { Request, Response, _NextFunction } from 'express';
 import { errorHandler, notFoundHandler, ApiError } from './errorHandler';
 import { ZodError } from 'zod';
 import { logger } from '../utils/logger';
