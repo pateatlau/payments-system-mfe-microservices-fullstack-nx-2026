@@ -31,8 +31,8 @@ const defaultConnectionOptions: Partial<RabbitMQConnectionOptions> = {
  * Manages a single connection to RabbitMQ with automatic reconnection
  */
 export class RabbitMQConnectionManager {
-  private connection: any | null = null;
-  private channel: any | null = null;
+  private connection: amqp.Connection | null = null;
+  private channel: amqp.Channel | null = null;
   private readonly options: RabbitMQConnectionOptions;
   private reconnecting = false;
   private reconnectTimer: NodeJS.Timeout | null = null;
