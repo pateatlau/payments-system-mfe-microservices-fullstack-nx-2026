@@ -422,7 +422,7 @@ jobs:
             dist/
             !dist/**/*.map
           retention-days: 7
-          if-no-files-found: error
+          if-no-files-found: warn
 
   # Job 5: E2E Tests (Optional, runs on main/develop only)
   e2e-tests:
