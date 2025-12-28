@@ -1,4 +1,7 @@
+const { nxPreset } = require('@nx/jest/preset');
+
 module.exports = {
+  ...nxPreset,
   displayName: 'payments-mfe',
   preset: 'ts-jest',
   testEnvironment: 'jsdom',
@@ -32,9 +35,6 @@ module.exports = {
       },
     ],
   },
-  transformIgnorePatterns: [
-    'node_modules/(?!(@mfe|shared-)/)',
-  ],
   testMatch: ['**/src/**/?(*.)+(spec|test).[jt]s?(x)'],
   collectCoverageFrom: [
     'src/**/*.{ts,tsx}',
