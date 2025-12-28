@@ -395,6 +395,9 @@ jobs:
           pnpm nx --version
           echo "Nx installed successfully"
 
+      - name: Generate Prisma clients
+        run: pnpm db:all:generate
+
       - name: Derive appropriate SHAs for base and head
         id: set-shas
         uses: nrwl/nx-set-shas@v4
