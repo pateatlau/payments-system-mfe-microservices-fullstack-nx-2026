@@ -62,3 +62,5 @@ nginx/ssl/*.csr
 
 # Local development folders (kept locally, not in remote repo)
 scripts/
+# But include eslint custom rules (needed for CI)
+!scripts/eslint-rules/
