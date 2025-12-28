@@ -4,7 +4,7 @@
 import '@jest/globals';
 
 declare module '@jest/globals' {
-  interface Matchers<R = void, T = {}> {
+  interface Matchers<R = void, _T = unknown> {
     toBeInTheDocument(): R;
     toBeVisible(): R;
     toBeEmpty(): R;
@@ -37,7 +37,7 @@ declare module '@jest/globals' {
 // Also extend matchers for global jest namespace
 declare global {
   namespace jest {
-    interface Matchers<R = void, T = {}> {
+    interface Matchers<R = void, _T = unknown> {
       toBeInTheDocument(): R;
       toBeVisible(): R;
       toBeEmpty(): R;

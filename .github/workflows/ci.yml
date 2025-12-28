@@ -336,7 +336,7 @@ jobs:
           pnpm nx affected --target=test \
             --base=${{ steps.set-shas.outputs.base }} \
             --head=${{ steps.set-shas.outputs.head }} \
-            --projects=api-gateway,auth-service,payments-service,admin-service,profile-service \
+            --exclude=auth-mfe,payments-mfe,admin-mfe,profile-mfe,shell \
             --coverage \
             --maxWorkers=2
 
@@ -394,6 +394,9 @@ jobs:
         run: |
           pnpm nx --version
           echo "Nx installed successfully"
+
+      - name: Generate Prisma clients
+        run: pnpm db:all:generate
 
       - name: Derive appropriate SHAs for base and head
         id: set-shas
