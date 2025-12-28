@@ -81,6 +81,7 @@ describe('AuthController', () => {
     });
 
     it('should handle validation errors', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const { registerSchema } = require('../validators/auth.validators');
       (registerSchema.parse as jest.Mock).mockImplementation(() => {
         throw new ZodError([]);

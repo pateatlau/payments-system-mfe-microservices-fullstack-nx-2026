@@ -55,7 +55,7 @@ export interface AuthResponse {
 export const register = async (data: RegisterInput): Promise<AuthResponse> => {
   // Check if user already exists (try cache first)
   const emailCacheKey = CacheKeys.userByEmail(data.email);
-  let existingUser = await cache.get<any>(emailCacheKey);
+  let existingUser = await cache.get<unknown>(emailCacheKey);
 
   if (!existingUser) {
     existingUser = await prisma.user.findUnique({
@@ -155,7 +155,7 @@ export const register = async (data: RegisterInput): Promise<AuthResponse> => {
 export const login = async (data: LoginInput): Promise<AuthResponse> => {
   // Try cache first (by email)
   const cacheKey = CacheKeys.userByEmail(data.email);
-  let user = await cache.get<any>(cacheKey);
+  let user = await cache.get<unknown>(cacheKey);
 
   if (!user) {
     // Cache miss - fetch from database

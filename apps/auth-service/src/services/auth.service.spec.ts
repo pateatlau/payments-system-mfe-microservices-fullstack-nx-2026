@@ -18,9 +18,6 @@ jest.mock('db', () => ({
       update: jest.fn(),
     },
     // userProfile removed - now in profile service (POC-3)
-    // userProfile: {
-      create: jest.fn(),
-    },
     refreshToken: {
       deleteMany: jest.fn(),
       create: jest.fn(),
