@@ -68,12 +68,25 @@ jobs:
           pnpm nx --version
           echo "Nx installed successfully"
 
+      - name: Debug - Check installation
+        run: |
+          echo "=== Checking pnpm list ==="
+          pnpm list --depth=0 | head -20 || true
+          echo "=== Checking if nx binary exists ==="
+          ls -la ./nx
+          echo "=== Checking node_modules/.nx ==="
+          ls -la node_modules/.nx 2>/dev/null || echo "No .nx directory"
+          echo "=== Checking for project.json files ==="
+          find apps libs -name "project.json" -type f | wc -l
+          echo "=== Testing nx list ==="
+          pnpm nx list || true
+
       - name: Derive appropriate SHAs for base and head
         id: set-shas
         uses: nrwl/nx-set-shas@v4
 
       - name: Run ESLint (affected)
-        run: pnpm nx affected --target=lint --base=${{ steps.set-shas.outputs.base }} --head=${{ steps.set-shas.outputs.head }}
+        run: pnpm nx affected --target=lint --base=${{ steps.set-shas.outputs.base }} --head=${{ steps.set-shas.outputs.head }} --verbose
 
       - name: Check for projects with typecheck target
         id: typecheck-projects
