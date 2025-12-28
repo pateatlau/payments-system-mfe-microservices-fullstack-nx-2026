@@ -139,7 +139,7 @@ export class RabbitMQConnectionManager {
   /**
    * Get the current channel
    */
-  async getChannel(): Promise<any> {
+  async getChannel(): Promise<amqp.Channel> {
     if (!this.channel) {
       await this.connect();
     }
@@ -154,7 +154,7 @@ export class RabbitMQConnectionManager {
   /**
    * Get the current connection
    */
-  async getConnection(): Promise<any> {
+  async getConnection(): Promise<amqp.Connection> {
     if (!this.connection) {
       await this.connect();
     }

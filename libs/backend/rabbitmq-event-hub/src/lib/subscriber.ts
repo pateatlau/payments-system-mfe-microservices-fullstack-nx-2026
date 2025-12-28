@@ -130,7 +130,7 @@ export class RabbitMQSubscriber {
       // Start consuming messages
       const consumer = await channel.consume(
         this.options.queue!,
-        async (msg: any) => {
+        async (msg: amqp.ConsumeMessage | null) => {
           if (!msg) {
             console.warn('[RabbitMQ Subscriber] Received null message');
             return;

@@ -235,7 +235,7 @@ export class RabbitMQPublisher {
   /**
    * Wait for publisher confirmation
    */
-  private async waitForConfirm(channel: any): Promise<void> {
+  private async waitForConfirm(channel: amqp.Channel): Promise<void> {
     // Use the promise-based API for waitForConfirms
     const timeout = this.options.timeout || 10000;
 
