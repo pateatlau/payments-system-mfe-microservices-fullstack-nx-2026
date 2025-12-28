@@ -32,6 +32,9 @@ module.exports = {
       },
     ],
   },
+  transformIgnorePatterns: [
+    'node_modules/(?!(@mfe|shared-)/)',
+  ],
   testMatch: ['**/src/**/?(*.)+(spec|test).[jt]s?(x)'],
   collectCoverageFrom: [
     'src/**/*.{ts,tsx}',
