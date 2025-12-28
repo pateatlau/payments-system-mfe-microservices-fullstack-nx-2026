@@ -3,8 +3,8 @@
  * Business logic for retrieving and managing audit logs
  */
 
-import { AuditLog, Prisma } from '@prisma/client';
 import { prisma } from '../lib/prisma';
+import type { AuditLog, Prisma } from '../lib/prisma';
 import {
   AuditLogFilters,
   AuditLogsListResponse,
