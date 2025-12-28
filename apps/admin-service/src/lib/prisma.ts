@@ -9,23 +9,18 @@
  *   const logs = await prisma.auditLog.findMany();
  */
 
-// Import and re-export types from the generated client location
-import type {
-  AuditLog,
-  User,
-  SystemConfig,
-  Prisma,
+// Import PrismaClient and types from the generated client location
+import {
+  PrismaClient,
+  type AuditLog,
+  type User,
+  type SystemConfig,
+  type Prisma,
+  UserRole,
 } from '../../node_modules/.prisma/admin-client';
 
 export type { AuditLog, User, SystemConfig, Prisma };
-
-// Dynamic require with absolute path to work from dist
-import path from 'path';
-const clientPath = path.join(
-  process.cwd(),
-  'apps/admin-service/node_modules/.prisma/admin-client'
-);
-const { PrismaClient } = require(clientPath);
+export { UserRole };
 
 /**
  * Prisma Client instance for Admin Service

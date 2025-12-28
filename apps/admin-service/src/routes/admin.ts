@@ -32,7 +32,7 @@ router.get('/audit-logs/actions', async (_req, res) => {
   try {
     const actions = await getAvailableActions();
     res.json({ success: true, data: actions });
-  } catch (error) {
+  } catch (_error) {
     res.status(500).json({
       success: false,
       error: 'Failed to retrieve available actions',

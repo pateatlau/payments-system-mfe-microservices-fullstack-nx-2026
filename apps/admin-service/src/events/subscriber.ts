@@ -18,7 +18,7 @@ import {
 } from '@payments-system/rabbitmq-event-hub';
 import { getConnectionManager } from './connection';
 import config from '../config';
-import { prisma } from '../lib/prisma';
+import { prisma, Prisma, UserRole } from '../lib/prisma';
 
 let userEventsSubscriber: RabbitMQSubscriber | null = null;
 let paymentEventsSubscriber: RabbitMQSubscriber | null = null;
@@ -68,11 +68,11 @@ async function handleUserCreated(
         id: userId,
         email,
         name,
-        role: role as any, // Type cast for denormalized field
+        role: role as UserRole,
         emailVerified,
         createdAt: new Date(createdAt),
         updatedAt: new Date(createdAt),
-      } as any,
+      },
     });
 
     console.log(`[Admin Service] Synced user.created: ${userId}`);
@@ -96,10 +96,11 @@ async function handleUserUpdated(
     const { userId, ...updates } = event.data;
 
     // Update denormalized user in admin_db
-    const updateData: any = { ...updates };
-    if (updates.updatedAt) {
-      updateData.updatedAt = new Date(updates.updatedAt);
-    }
+    const updateData: Prisma.UserUpdateInput = {
+      ...updates,
+      role: updates.role ? (updates.role as UserRole) : undefined,
+      updatedAt: updates.updatedAt ? new Date(updates.updatedAt) : undefined,
+    };
     await prisma.user.update({
       where: { id: userId },
       data: updateData,
@@ -167,7 +168,7 @@ async function handlePaymentEvent(
         resourceType: 'payment',
         resourceId: event.data.paymentId,
         userId: event.data.senderId,
-        details: event.data as any, // Cast to any for JSON field
+        details: event.data as Prisma.InputJsonValue,
       },
     });
 
