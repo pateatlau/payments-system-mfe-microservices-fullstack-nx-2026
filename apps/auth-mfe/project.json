@@ -50,7 +50,8 @@
       "options": {
         "jestConfig": "apps/auth-mfe/jest.config.js",
         "passWithNoTests": true
-      }
+      },
+      "// TODO": "Remove passWithNoTests once Jest test discovery issue is resolved. Test files exist in src/**/*.{spec,test}.{ts,tsx} but Jest --listTests finds nothing. Track in issue to investigate rootDir, testMatch patterns, and module resolution."
     }
   }
 }
