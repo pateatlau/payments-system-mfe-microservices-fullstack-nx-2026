@@ -35,12 +35,6 @@ module.exports = {
       },
     ],
   },
-  // Override testMatch to ensure we find all test files
-  testMatch: [
-    '**/?(*.)+(spec|test).?([mc])[jt]s?(x)',
-    '**/__tests__/**/*.[jt]s?(x)',
-    '**/?(*.)+(spec|test).[jt]s?(x)',
-  ],
   collectCoverageFrom: [
     'src/**/*.{ts,tsx}',
     '!src/**/*.d.ts',
