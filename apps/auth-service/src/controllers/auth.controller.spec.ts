@@ -5,7 +5,7 @@
 import type { Request, Response, NextFunction as _NextFunction } from 'express';
 import * as authController from './auth.controller';
 import * as authService from '../services/auth.service';
-import { ApiError as _ApiError } from '../middleware/errorHandler';
+import { ApiError } from '../middleware/errorHandler';
 import { ZodError } from 'zod';
 
 // Mock auth service
