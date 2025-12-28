@@ -4,7 +4,7 @@
  * HTTP handlers for authentication endpoints
  */
 
-import { Request, Response, _NextFunction } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import * as authService from '../services/auth.service';
 import {
   registerSchema,
@@ -38,7 +38,7 @@ export const register = async (
       success: true,
       data: result,
     });
-  } catch (_error) {
+  } catch (error) {
     next(error);
   }
 };
@@ -64,7 +64,7 @@ export const login = async (
       success: true,
       data: result,
     });
-  } catch (_error) {
+  } catch (error) {
     next(error);
   }
 };
@@ -90,7 +90,7 @@ export const refresh = async (
       success: true,
       data: result,
     });
-  } catch (_error) {
+  } catch (error) {
     next(error);
   }
 };
@@ -131,7 +131,7 @@ export const logout = async (
         message: 'Logged out successfully',
       },
     });
-  } catch (_error) {
+  } catch (error) {
     next(error);
   }
 };
@@ -167,7 +167,7 @@ export const getMe = async (
       success: true,
       data: user,
     });
-  } catch (_error) {
+  } catch (error) {
     next(error);
   }
 };
@@ -212,7 +212,7 @@ export const changePassword = async (
         message: 'Password changed successfully',
       },
     });
-  } catch (_error) {
+  } catch (error) {
     next(error);
   }
 };
@@ -249,7 +249,7 @@ export const getUserByEmailInternal = async (
     }
 
     return res.status(200).json({ success: true, data: user });
-  } catch (_error) {
+  } catch (error) {
     next(error);
   }
 };
@@ -286,7 +286,7 @@ export const getUserByIdInternal = async (
     }
 
     return res.status(200).json({ success: true, data: user });
-  } catch (_error) {
+  } catch (error) {
     next(error);
   }
 };

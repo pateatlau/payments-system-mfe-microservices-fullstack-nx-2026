@@ -96,7 +96,7 @@ export async function getAvailableActions(): Promise<string[]> {
     return response.data.data;
   } catch (_error) {
     // Return empty array if endpoint not available yet
-    console.warn('Failed to fetch available actions:', error);
+    console.warn('Failed to fetch available actions:', _error);
     return [];
   }
 }

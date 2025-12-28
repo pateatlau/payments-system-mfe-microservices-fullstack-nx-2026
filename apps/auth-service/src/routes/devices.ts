@@ -54,7 +54,7 @@ router.post(
         success: true,
         data: device,
       });
-    } catch (_error) {
+    } catch (error) {
       if (error instanceof ApiError) {
         throw error;
       }
@@ -80,7 +80,7 @@ router.get('/devices', authenticate, async (req: Request, res: Response) => {
       success: true,
       data: devices,
     });
-  } catch (_error) {
+  } catch (error) {
     if (error instanceof ApiError) {
       throw error;
     }
@@ -111,7 +111,7 @@ router.delete(
       await deviceService.logoutDevice(userId, deviceId);
 
       res.status(204).send();
-    } catch (_error) {
+    } catch (error) {
       if (error instanceof ApiError) {
         throw error;
       }
@@ -153,7 +153,7 @@ router.post(
         success: true,
         data: { loggedOutCount: count },
       });
-    } catch (_error) {
+    } catch (error) {
       if (error instanceof ApiError) {
         throw error;
       }

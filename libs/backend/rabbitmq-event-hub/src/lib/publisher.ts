@@ -5,6 +5,7 @@
  * Features: Publisher confirms, persistent messages, retry logic, message validation
  */
 
+import * as amqp from 'amqplib';
 import { v4 as uuidv4 } from 'uuid';
 import { RabbitMQConnectionManager } from './connection';
 import { BaseEvent, PublisherOptions, MessageProperties } from './types';
@@ -235,7 +236,7 @@ export class RabbitMQPublisher {
   /**
    * Wait for publisher confirmation
    */
-  private async waitForConfirm(channel: amqp.Channel): Promise<void> {
+  private async waitForConfirm(channel: amqp.ConfirmChannel): Promise<void> {
     // Use the promise-based API for waitForConfirms
     const timeout = this.options.timeout || 10000;
 

@@ -5,6 +5,7 @@
  * Features: Manual ack/nack, dead letter queue, message validation, error handling
  */
 
+import * as amqp from 'amqplib';
 import { RabbitMQConnectionManager } from './connection';
 import {
   BaseEvent,

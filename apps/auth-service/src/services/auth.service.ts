@@ -11,6 +11,7 @@
 
 import bcrypt from 'bcrypt';
 import { prisma } from '../lib/prisma';
+import type { User } from '@prisma/client';
 import { config } from '../config';
 import {
   generateTokenPair,
@@ -131,7 +132,7 @@ export const register = async (data: RegisterInput): Promise<AuthResponse> => {
       emailVerified: false,
       createdAt: user.createdAt.toISOString(),
     });
-  } catch (_error) {
+  } catch (error) {
     // Log error but don't fail registration - event publishing is non-critical
     // eslint-disable-next-line no-console
     console.error('Failed to publish user.created event:', error);
@@ -155,7 +156,7 @@ export const register = async (data: RegisterInput): Promise<AuthResponse> => {
 export const login = async (data: LoginInput): Promise<AuthResponse> => {
   // Try cache first (by email)
   const cacheKey = CacheKeys.userByEmail(data.email);
-  let user = await cache.get<unknown>(cacheKey);
+  let user = await cache.get<User>(cacheKey);
 
   if (!user) {
     // Cache miss - fetch from database
@@ -245,7 +246,7 @@ export const refreshAccessToken = async (
   let payload: JwtPayload;
   try {
     payload = verifyRefreshToken(refreshToken);
-  } catch (_error) {
+  } catch (error) {
     throw new ApiError(
       401,
       'INVALID_TOKEN',
