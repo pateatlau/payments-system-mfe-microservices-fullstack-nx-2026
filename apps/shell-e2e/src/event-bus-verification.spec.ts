@@ -140,7 +140,7 @@ test.describe('Event Bus Verification', () => {
       await expect(header).toBeVisible({ timeout: 5000 });
 
       // Verify user info is displayed in header (event should have updated header state)
-      const userInfo = page.locator('text=/customer|user|email/i');
+      const _userInfo = page.locator('text=/customer|user|email/i');
       // Header might show user info or just be visible
       await expect(header).toBeVisible();
     });
