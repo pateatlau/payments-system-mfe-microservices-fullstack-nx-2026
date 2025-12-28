@@ -17,6 +17,11 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+# Workflow permissions
+permissions:
+  contents: read
+  security-events: write
+
 env:
   NODE_VERSION: '24.11.x'
   PNPM_VERSION: '9'
@@ -394,7 +399,15 @@ jobs:
         id: set-shas
         uses: nrwl/nx-set-shas@v4
 
-      - name: Build affected projects
+      - name: Build all projects (main/develop)
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+        run: |
+          pnpm nx run-many --target=build \
+            --all \
+            --configuration=production
+
+      - name: Build affected projects (feature branches)
+        if: github.ref != 'refs/heads/main' && github.ref != 'refs/heads/develop'
         run: |
           pnpm nx affected --target=build \
             --base=${{ steps.set-shas.outputs.base }} \
@@ -409,6 +422,7 @@ jobs:
             dist/
             !dist/**/*.map
           retention-days: 7
+          if-no-files-found: warn
 
   # Job 5: E2E Tests (Optional, runs on main/develop only)
   e2e-tests:
