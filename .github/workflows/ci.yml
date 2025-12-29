@@ -113,7 +113,7 @@ jobs:
   test-frontend:
     name: Frontend Tests
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
 
     steps:
       - name: Checkout code
@@ -164,7 +164,7 @@ jobs:
           pnpm nx run-many --target=test \
             --projects=shell,auth-mfe,payments-mfe,admin-mfe,profile-mfe,shared-auth-store,shared-utils,shared-types \
             --coverage \
-            --maxWorkers=2
+            --runInBand
 
       - name: Run frontend unit tests (affected on feature branches)
         if: github.ref != 'refs/heads/main' && github.ref != 'refs/heads/develop'
@@ -174,7 +174,7 @@ jobs:
             --head=${{ steps.set-shas.outputs.head }} \
             --exclude=*-service,api-gateway \
             --coverage \
-            --maxWorkers=2
+            --runInBand
 
       - name: Upload frontend coverage
         uses: codecov/codecov-action@v4
