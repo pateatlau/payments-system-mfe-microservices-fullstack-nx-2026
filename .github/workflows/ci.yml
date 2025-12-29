@@ -158,7 +158,16 @@ jobs:
         id: set-shas
         uses: nrwl/nx-set-shas@v4
 
-      - name: Run frontend unit tests (affected)
+      - name: Run frontend unit tests (all on main/develop)
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+        run: |
+          pnpm nx run-many --target=test \
+            --projects=shell,auth-mfe,payments-mfe,admin-mfe,profile-mfe,shared-auth-store,shared-utils,shared-types \
+            --coverage \
+            --maxWorkers=2
+
+      - name: Run frontend unit tests (affected on feature branches)
+        if: github.ref != 'refs/heads/main' && github.ref != 'refs/heads/develop'
         run: |
           pnpm nx affected --target=test \
             --base=${{ steps.set-shas.outputs.base }} \
@@ -331,7 +340,16 @@ jobs:
         id: set-shas
         uses: nrwl/nx-set-shas@v4
 
-      - name: Run backend unit tests (affected)
+      - name: Run backend unit tests (all on main/develop)
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+        run: |
+          pnpm nx run-many --target=test \
+            --projects=api-gateway,auth-service,payments-service,admin-service,profile-service \
+            --coverage \
+            --maxWorkers=2
+
+      - name: Run backend unit tests (affected on feature branches)
+        if: github.ref != 'refs/heads/main' && github.ref != 'refs/heads/develop'
         run: |
           pnpm nx affected --target=test \
             --base=${{ steps.set-shas.outputs.base }} \
