@@ -374,6 +374,11 @@ jobs:
     timeout-minutes: 30
     needs: [lint-and-typecheck]
 
+    env:
+      # For E2E tests: frontend calls API Gateway directly (no nginx in CI)
+      # Set at job level to ensure it's available to all steps
+      NX_API_BASE_URL: http://localhost:3000/api
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -422,25 +427,31 @@ jobs:
 
       - name: Build all projects (main/develop)
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
-        env:
-          # For E2E tests: frontend calls API Gateway directly (no nginx in CI)
-          NX_API_BASE_URL: http://localhost:3000/api
         run: |
           echo "=== Build Environment ==="
           echo "NX_API_BASE_URL=$NX_API_BASE_URL"
+          # Export explicitly to ensure child processes inherit
+          export NX_API_BASE_URL="http://localhost:3000/api"
+          echo "After export: NX_API_BASE_URL=$NX_API_BASE_URL"
+          # Disable both local and cloud caching to ensure fresh builds
+          NX_CLOUD_DISTRIBUTED_EXECUTION=false \
+          NX_SKIP_NX_CACHE=true \
           pnpm nx run-many --target=build \
             --all \
             --configuration=production \
             --skip-nx-cache
           echo "=== Verifying built shell contains correct API URL ==="
           grep -o '"NX_API_BASE_URL":"[^"]*"' dist/apps/shell/*.js | head -3 || echo "Pattern not found"
+          # Also verify the actual content in main.js
+          echo "=== Grep for localhost:3000 in shell bundle ==="
+          grep -l "localhost:3000" dist/apps/shell/*.js || echo "localhost:3000 NOT found in bundle"
+          grep -l "https://localhost/api" dist/apps/shell/*.js && echo "WARNING: Wrong URL found!" || echo "Good: https://localhost/api not in bundle"
 
       - name: Build affected projects (feature branches)
         if: github.ref != 'refs/heads/main' && github.ref != 'refs/heads/develop'
-        env:
-          # For E2E tests: frontend calls API Gateway directly (no nginx in CI)
-          NX_API_BASE_URL: http://localhost:3000/api
         run: |
+          NX_CLOUD_DISTRIBUTED_EXECUTION=false \
+          NX_SKIP_NX_CACHE=true \
           pnpm nx affected --target=build \
             --base=${{ steps.set-shas.outputs.base }} \
             --head=${{ steps.set-shas.outputs.head }} \
