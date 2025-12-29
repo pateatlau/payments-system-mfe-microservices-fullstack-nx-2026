@@ -4,7 +4,7 @@
 
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { describe, expect, it, vi } from 'vitest';
+
 import * as preferencesHooks from '../hooks/usePreferences';
 import { PreferencesForm } from './PreferencesForm';
 import type { UserPreferences } from '../types/profile';
@@ -30,18 +30,19 @@ describe('PreferencesForm', () => {
   };
 
   afterEach(() => {
-    vi.restoreAllMocks();
+    jest.restoreAllMocks();
   });
 
   it('renders existing preferences in the form', () => {
-    vi.spyOn(preferencesHooks, 'usePreferences').mockReturnValue({
+    jest.spyOn(preferencesHooks, 'usePreferences').mockReturnValue({
       data: basePrefs,
       isLoading: false,
       error: null,
     } as unknown as ReturnType<typeof preferencesHooks.usePreferences>);
 
-    vi.spyOn(preferencesHooks, 'useUpdatePreferences').mockReturnValue({
-      mutate: vi.fn(),
+    jest.spyOn(preferencesHooks, 'useUpdatePreferences').mockReturnValue({
+      mutate: jest.fn(),
+      mutateAsync: jest.fn().mockResolvedValue(undefined),
       isPending: false,
       error: null,
     } as unknown as ReturnType<typeof preferencesHooks.useUpdatePreferences>);
@@ -54,15 +55,16 @@ describe('PreferencesForm', () => {
   });
 
   it('submits updated preferences via useUpdatePreferences', async () => {
-    vi.spyOn(preferencesHooks, 'usePreferences').mockReturnValue({
+    jest.spyOn(preferencesHooks, 'usePreferences').mockReturnValue({
       data: basePrefs,
       isLoading: false,
       error: null,
     } as unknown as ReturnType<typeof preferencesHooks.usePreferences>);
 
-    const mutateMock = vi.fn();
-    vi.spyOn(preferencesHooks, 'useUpdatePreferences').mockReturnValue({
-      mutate: mutateMock,
+    const mutateAsyncMock = jest.fn().mockResolvedValue(undefined);
+    jest.spyOn(preferencesHooks, 'useUpdatePreferences').mockReturnValue({
+      mutate: jest.fn(),
+      mutateAsync: mutateAsyncMock,
       isPending: false,
       error: null,
     } as unknown as ReturnType<typeof preferencesHooks.useUpdatePreferences>);
@@ -77,19 +79,20 @@ describe('PreferencesForm', () => {
     fireEvent.click(screen.getByRole('button', { name: /save preferences/i }));
 
     await waitFor(() => {
-      expect(mutateMock).toHaveBeenCalled();
+      expect(mutateAsyncMock).toHaveBeenCalled();
     });
   });
 
   it('shows validation error when language is invalid', async () => {
-    vi.spyOn(preferencesHooks, 'usePreferences').mockReturnValue({
+    jest.spyOn(preferencesHooks, 'usePreferences').mockReturnValue({
       data: basePrefs,
       isLoading: false,
       error: null,
     } as unknown as ReturnType<typeof preferencesHooks.usePreferences>);
 
-    vi.spyOn(preferencesHooks, 'useUpdatePreferences').mockReturnValue({
-      mutate: vi.fn(),
+    jest.spyOn(preferencesHooks, 'useUpdatePreferences').mockReturnValue({
+      mutate: jest.fn(),
+      mutateAsync: jest.fn().mockResolvedValue(undefined),
       isPending: false,
       error: null,
     } as unknown as ReturnType<typeof preferencesHooks.useUpdatePreferences>);

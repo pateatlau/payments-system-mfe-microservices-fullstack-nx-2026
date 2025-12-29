@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen } from '../test-utils';
 import { RecentActivity, type ActivityItem } from './RecentActivity';
 
 describe('RecentActivity', () => {
@@ -62,8 +62,10 @@ describe('RecentActivity', () => {
 
     render(<RecentActivity activities={manyActivities} maxItems={5} />);
 
-    // Should only show 5 activities
-    expect(screen.getAllByText(/Activity/).length).toBe(5);
+    // Should only show 5 activities (checking for specific activity numbers)
+    expect(screen.getByText('Activity 0')).toBeInTheDocument();
+    expect(screen.getByText('Activity 4')).toBeInTheDocument();
+    expect(screen.queryByText('Activity 5')).not.toBeInTheDocument();
   });
 
   it('shows empty state when no activities', () => {
@@ -85,6 +87,7 @@ describe('RecentActivity', () => {
     render(<RecentActivity activities={mockActivities} />);
 
     // Check for relative time formats (e.g., "5m ago", "15m ago")
-    expect(screen.getByText(/ago/i)).toBeInTheDocument();
+    const timestamps = screen.getAllByText(/ago/i);
+    expect(timestamps.length).toBeGreaterThan(0);
   });
 });

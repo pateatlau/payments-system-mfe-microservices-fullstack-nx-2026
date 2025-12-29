@@ -129,12 +129,12 @@ describe('Payment Validators', () => {
       expect(result.recipientId).toBe(data.recipientId);
     });
 
-    it('should use default currency USD', () => {
+    it('should use default currency INR', () => {
       const data = { ...validPaymentData, currency: undefined };
 
       const result = createPaymentSchema.parse(data);
 
-      expect(result.currency).toBe('USD');
+      expect(result.currency).toBe('INR');
     });
 
     it('should validate metadata', () => {

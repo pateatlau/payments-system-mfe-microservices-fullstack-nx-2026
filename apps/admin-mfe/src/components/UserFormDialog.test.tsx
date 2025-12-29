@@ -2,7 +2,7 @@
  * UserFormDialog Component Tests
  */
 
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '../test-utils';
 import { UserRole } from 'shared-types';
 import { UserFormDialog } from './UserFormDialog';
 import * as usersApi from '../api/users';

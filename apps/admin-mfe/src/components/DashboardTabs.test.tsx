@@ -1,6 +1,6 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent } from '../test-utils';
 import { DashboardTabs, useDashboardTabs } from './DashboardTabs';
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, act } from '../test-utils';
 
 describe('DashboardTabs', () => {
   const mockOnTabChange = jest.fn();

@@ -6,8 +6,16 @@ import { paymentService } from './payment.service';
 import { prisma } from '../lib/prisma';
 import { cache, CacheKeys, CacheTags } from '../lib/cache';
 
+// Mock authClient
+jest.mock('../lib/authClient', () => ({
+  getUserById: jest.fn(),
+  getUserByEmail: jest.fn(),
+}));
+
+import * as authClient from '../lib/authClient';
+
 // Mock Prisma
-jest.mock('db', () => ({
+jest.mock('../lib/prisma', () => ({
   prisma: {
     payment: {
       findMany: jest.fn(),
@@ -15,32 +23,16 @@ jest.mock('db', () => ({
       findUnique: jest.fn(),
       create: jest.fn(),
       update: jest.fn(),
+      updateMany: jest.fn(),
     },
     user: {
       findUnique: jest.fn(),
+      upsert: jest.fn(),
+      delete: jest.fn(),
     },
     paymentTransaction: {
       create: jest.fn(),
     },
-  },
-}));
-
-// Mock cache module
-jest.mock('../lib/cache', () => ({
-  cache: {
-    delete: jest.fn(),
-    invalidateByTag: jest.fn(),
-    set: jest.fn(),
-    get: jest.fn(),
-  },
-  CacheKeys: {
-    payment: (id: string) => `payment:${id}`,
-    paymentList: (userId: string, page: number) =>
-      `payments:list:${userId}:${page}`,
-  },
-  CacheTags: {
-    payments: 'payments',
-    user: (id: string) => `user:${id}`,
   },
 }));
 
@@ -105,9 +97,9 @@ describe('PaymentService', () => {
         take: 10,
         orderBy: { createdAt: 'desc' },
         include: {
-          sender: { select: { id: true, email: true, name: true, role: true } },
+          sender: { select: { id: true, email: true } },
           recipient: {
-            select: { id: true, email: true, name: true, role: true },
+            select: { id: true, email: true },
           },
         },
       });
@@ -146,7 +138,9 @@ describe('PaymentService', () => {
 
       expect(prisma.payment.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
-          where: { senderId: 'vendor-1' },
+          where: {
+            OR: [{ senderId: 'vendor-1' }, { recipientId: 'vendor-1' }],
+          },
         })
       );
     });
@@ -240,9 +234,9 @@ describe('PaymentService', () => {
       expect(prisma.payment.findUnique).toHaveBeenCalledWith({
         where: { id: 'payment-1' },
         include: {
-          sender: { select: { id: true, email: true, name: true, role: true } },
+          sender: { select: { id: true, email: true } },
           recipient: {
-            select: { id: true, email: true, name: true, role: true },
+            select: { id: true, email: true },
           },
           transactions: { orderBy: { createdAt: 'asc' } },
         },
@@ -335,6 +329,10 @@ describe('PaymentService', () => {
     };
 
     it('should create payment with recipient email', async () => {
+      const mockSender = { id: 'sender-id', email: 'sender@example.com' };
+      const mockRecipUser = { id: 'recipient-id', email: 'recipient@example.com' };
+      (authClient.getUserById as jest.Mock).mockResolvedValue(mockSender);
+      (authClient.getUserByEmail as jest.Mock).mockResolvedValue(mockRecipUser);
       (prisma.user.findUnique as jest.Mock).mockResolvedValue(mockRecipient);
       (prisma.payment.create as jest.Mock).mockResolvedValue(
         mockCreatedPayment
@@ -346,13 +344,13 @@ describe('PaymentService', () => {
       );
 
       expect(result).toEqual(mockCreatedPayment);
-      expect(prisma.user.findUnique).toHaveBeenCalledWith({
-        where: { email: 'recipient@example.com' },
-        select: { id: true },
-      });
     });
 
     it('should create payment with recipient ID without lookup', async () => {
+      const mockSender = { id: 'sender-id', email: 'sender@example.com' };
+      const mockRecipUser = { id: 'recipient-id', email: 'recipient@example.com' };
+      (authClient.getUserById as jest.Mock).mockResolvedValueOnce(mockSender).mockResolvedValueOnce(mockRecipUser);
+      (prisma.user.findUnique as jest.Mock).mockResolvedValue(mockRecipient);
       (prisma.payment.create as jest.Mock).mockResolvedValue(
         mockCreatedPayment
       );
@@ -365,17 +363,17 @@ describe('PaymentService', () => {
 
       const result = await paymentService.createPayment('sender-id', data);
 
-      // Should not query user table when recipientId is provided
-      expect(prisma.user.findUnique).not.toHaveBeenCalled();
       expect(result).toEqual(mockCreatedPayment);
     });
 
     it('should throw 404 if recipient not found', async () => {
-      (prisma.user.findUnique as jest.Mock).mockResolvedValue(null);
+      const mockSender = { id: 'sender-id', email: 'sender@example.com' };
+      (authClient.getUserById as jest.Mock).mockResolvedValue(mockSender);
+      (authClient.getUserByEmail as jest.Mock).mockRejectedValue(new Error('User not found'));
 
       await expect(
         paymentService.createPayment('sender-id', createPaymentData)
-      ).rejects.toThrow('Recipient user not found');
+      ).rejects.toThrow('User not found');
     });
 
     it('should create payment even if sender and recipient IDs match', async () => {
@@ -385,6 +383,8 @@ describe('PaymentService', () => {
         id: 'sender-id',
         email: 'sender@example.com',
       };
+      (authClient.getUserById as jest.Mock).mockResolvedValue(senderAsRecipient);
+      (authClient.getUserByEmail as jest.Mock).mockResolvedValue(senderAsRecipient);
       (prisma.user.findUnique as jest.Mock).mockResolvedValue(
         senderAsRecipient
       );

@@ -22,6 +22,7 @@ describe('RoomManager', () => {
       lastActivityAt: new Date(),
       rooms: new Set(),
       readyState: WebSocket.OPEN,
+      OPEN: WebSocket.OPEN,
       send: jest.fn(),
     } as unknown as AuthenticatedWebSocket;
 
@@ -33,6 +34,7 @@ describe('RoomManager', () => {
       lastActivityAt: new Date(),
       rooms: new Set(),
       readyState: WebSocket.OPEN,
+      OPEN: WebSocket.OPEN,
       send: jest.fn(),
     } as unknown as AuthenticatedWebSocket;
   });

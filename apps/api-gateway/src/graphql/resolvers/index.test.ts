@@ -4,13 +4,48 @@
  * POC-3: Tests for GraphQL resolvers
  */
 
-import { resolvers } from './index';
 import type { GraphQLContext } from '../context';
 import axios from 'axios';
 import type { GraphQLResolveInfo } from 'graphql';
 
-// Mock axios
-jest.mock('axios');
+// Create mock axios instance methods
+const mockGet = jest.fn();
+const mockPost = jest.fn();
+const mockPatch = jest.fn();
+const mockDelete = jest.fn();
+
+// Mock axios before importing resolvers
+jest.mock('axios', () => {
+  const actual = jest.requireActual('axios');
+  return {
+    ...actual,
+    default: {
+      ...actual.default,
+      create: jest.fn(() => ({
+        get: mockGet,
+        post: mockPost,
+        patch: mockPatch,
+        delete: mockDelete,
+      })),
+      isAxiosError: jest.fn((error: unknown) => {
+        return error !== null && typeof error === 'object' && 'isAxiosError' in error;
+      }),
+    },
+    create: jest.fn(() => ({
+      get: mockGet,
+      post: mockPost,
+      patch: mockPatch,
+      delete: mockDelete,
+    })),
+    isAxiosError: jest.fn((error: unknown) => {
+      return error !== null && typeof error === 'object' && 'isAxiosError' in error;
+    }),
+  };
+});
+
+// Import resolvers after axios is mocked
+import { resolvers } from './index';
+
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
 describe('GraphQL Resolvers', () => {
@@ -26,6 +61,10 @@ describe('GraphQL Resolvers', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // Ensure isAxiosError is set up in each test
+    mockedAxios.isAxiosError = jest.fn((error: unknown) => {
+      return error !== null && typeof error === 'object' && 'isAxiosError' in error;
+    });
   });
 
   describe('Query Resolvers', () => {
@@ -38,14 +77,12 @@ describe('GraphQL Resolvers', () => {
           role: 'CUSTOMER',
         };
 
-        mockedAxios.create = jest.fn().mockReturnValue({
-          get: jest.fn().mockResolvedValue({
+        mockGet.mockResolvedValue({
+          data: {
             data: {
-              data: {
-                user: mockUser,
-              },
+              user: mockUser,
             },
-          }),
+          },
         });
 
         const result = await resolvers.Query?.me?.(
@@ -69,12 +106,10 @@ describe('GraphQL Resolvers', () => {
           status: 'PENDING',
         };
 
-        mockedAxios.create = jest.fn().mockReturnValue({
-          get: jest.fn().mockResolvedValue({
-            data: {
-              data: mockPayment,
-            },
-          }),
+        mockGet.mockResolvedValue({
+          data: {
+            data: mockPayment,
+          },
         });
 
         const result = await resolvers.Query?.payment?.(
@@ -88,11 +123,9 @@ describe('GraphQL Resolvers', () => {
       });
 
       it('should return null if payment not found', async () => {
-        mockedAxios.create = jest.fn().mockReturnValue({
-          get: jest.fn().mockRejectedValue({
-            response: { status: 404 },
-            isAxiosError: true,
-          }),
+        mockGet.mockRejectedValue({
+          response: { status: 404 },
+          isAxiosError: true,
         });
 
         const result = await resolvers.Query?.payment?.(
@@ -122,12 +155,10 @@ describe('GraphQL Resolvers', () => {
           expiresIn: '15m',
         };
 
-        mockedAxios.create = jest.fn().mockReturnValue({
-          post: jest.fn().mockResolvedValue({
-            data: {
-              data: mockAuthResponse,
-            },
-          }),
+        mockPost.mockResolvedValue({
+          data: {
+            data: mockAuthResponse,
+          },
         });
 
         const result = await resolvers.Mutation?.login?.(
@@ -156,12 +187,10 @@ describe('GraphQL Resolvers', () => {
           status: 'PENDING',
         };
 
-        mockedAxios.create = jest.fn().mockReturnValue({
-          post: jest.fn().mockResolvedValue({
-            data: {
-              data: mockPayment,
-            },
-          }),
+        mockPost.mockResolvedValue({
+          data: {
+            data: mockPayment,
+          },
         });
 
         const result = await resolvers.Mutation?.createPayment?.(

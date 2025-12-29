@@ -16,7 +16,7 @@ import { paymentService } from '../services/payment.service';
 jest.mock('../services/payment.service');
 
 // Mock Prisma
-jest.mock('db', () => ({
+jest.mock('../lib/prisma', () => ({
   prisma: {
     payment: {
       findUnique: jest.fn(),

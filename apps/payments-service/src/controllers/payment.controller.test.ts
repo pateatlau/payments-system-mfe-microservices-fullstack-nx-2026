@@ -138,7 +138,7 @@ describe('PaymentController - updatePayment', () => {
 
       expect(next).toHaveBeenCalledWith(
         expect.objectContaining({
-          status: 404,
+          statusCode: 404,
           code: 'PAYMENT_NOT_FOUND',
         })
       );
@@ -162,7 +162,7 @@ describe('PaymentController - updatePayment', () => {
 
       expect(next).toHaveBeenCalledWith(
         expect.objectContaining({
-          status: 403,
+          statusCode: 403,
           code: 'FORBIDDEN',
         })
       );
@@ -186,7 +186,7 @@ describe('PaymentController - updatePayment', () => {
 
       expect(next).toHaveBeenCalledWith(
         expect.objectContaining({
-          status: 400,
+          statusCode: 400,
           code: 'INVALID_STATUS',
         })
       );
