@@ -16,6 +16,11 @@ const baseURL = process.env['BASE_URL'] || 'http://localhost:4200';
  */
 export default defineConfig({
   ...nxE2EPreset(__filename, { testDir: './src' }),
+
+  // Override Nx preset's workers:1 default for CI
+  // Use 2 workers to balance speed vs stability (GitHub Actions has 2 CPU cores)
+  workers: process.env.CI ? 2 : undefined,
+
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     baseURL,
