@@ -586,7 +586,18 @@ jobs:
       - name: Start backend services
         run: |
           pnpm dev:backend &
-          sleep 10 # Wait for services to start
+          echo "Waiting for backend services to be ready..."
+          # Wait for API Gateway health endpoint (it depends on other services)
+          for i in {1..60}; do
+            if curl -s http://localhost:3000/health > /dev/null 2>&1; then
+              echo "API Gateway is ready!"
+              break
+            fi
+            echo "Waiting for API Gateway... ($i/60)"
+            sleep 2
+          done
+          # Additional buffer for all services to stabilize
+          sleep 5
 
       - name: Run E2E tests
         run: pnpm nx e2e shell-e2e
