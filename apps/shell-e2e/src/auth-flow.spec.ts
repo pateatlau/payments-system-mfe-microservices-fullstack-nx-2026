@@ -37,11 +37,12 @@ test.describe('Authentication Flow', () => {
       }
     });
 
-    // Log console errors from the page
+    // Log console messages from the page (including our debug logs)
     page.on('console', (msg) => {
-      if (msg.type() === 'error') {
-        console.log('Browser Console Error:', msg.text());
-      }
+      const type = msg.type();
+      const text = msg.text();
+      // Log all messages for debugging
+      console.log(`Browser Console [${type}]:`, text);
     });
 
     await page.goto('/signin');
