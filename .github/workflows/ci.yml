@@ -426,10 +426,14 @@ jobs:
           # For E2E tests: frontend calls API Gateway directly (no nginx in CI)
           NX_API_BASE_URL: http://localhost:3000/api
         run: |
+          echo "=== Build Environment ==="
+          echo "NX_API_BASE_URL=$NX_API_BASE_URL"
           pnpm nx run-many --target=build \
             --all \
             --configuration=production \
             --skip-nx-cache
+          echo "=== Verifying built shell contains correct API URL ==="
+          grep -o '"NX_API_BASE_URL":"[^"]*"' dist/apps/shell/*.js | head -3 || echo "Pattern not found"
 
       - name: Build affected projects (feature branches)
         if: github.ref != 'refs/heads/main' && github.ref != 'refs/heads/develop'
