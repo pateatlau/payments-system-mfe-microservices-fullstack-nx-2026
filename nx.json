@@ -21,7 +21,7 @@
   "targetDefaults": {
     "build": {
       "dependsOn": ["^build"],
-      "inputs": ["production", "^production"],
+      "inputs": ["production", "^production", { "env": "NX_API_BASE_URL" }],
       "cache": true
     },
     "test": {
