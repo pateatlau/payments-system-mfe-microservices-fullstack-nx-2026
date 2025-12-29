@@ -19,11 +19,19 @@ test.describe('Authentication Flow', () => {
   test('should complete sign-in flow: sign in → redirect → payments page', async ({
     page,
   }) => {
+    // Capture ALL network requests for debugging
+    page.on('request', (request) => {
+      const url = request.url();
+      if (url.includes('/api/') || url.includes(':3000') || url.includes('auth') || url.includes('login')) {
+        console.log(`>>> API Request: ${request.method()} ${url}`);
+      }
+    });
+
     // Capture API requests and responses for debugging
     const apiResponses: { url: string; status: number; body?: string }[] = [];
     page.on('response', async (response) => {
       const url = response.url();
-      if (url.includes('/api/') || url.includes(':3000')) {
+      if (url.includes('/api/') || url.includes(':3000') || url.includes('auth') || url.includes('login')) {
         const status = response.status();
         let body: string | undefined;
         try {
@@ -32,9 +40,14 @@ test.describe('Authentication Flow', () => {
           body = '[could not read body]';
         }
         apiResponses.push({ url, status, body });
-        console.log(`API Response: ${status} ${url}`);
-        if (body) console.log(`  Body: ${body.substring(0, 500)}`);
+        console.log(`<<< API Response: ${status} ${url}`);
+        if (body) console.log(`    Body: ${body.substring(0, 500)}`);
       }
+    });
+
+    // Capture failed requests (network errors, CORS, etc.)
+    page.on('requestfailed', (request) => {
+      console.log(`!!! Request FAILED: ${request.url()} - ${request.failure()?.errorText}`);
     });
 
     // Log console messages from the page (including our debug logs)
