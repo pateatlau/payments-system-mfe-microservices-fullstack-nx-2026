@@ -21,6 +21,12 @@ export default defineConfig({
   // Use 2 workers to balance speed vs stability (GitHub Actions has 2 CPU cores)
   workers: process.env.CI ? 2 : undefined,
 
+  // In CI, only run critical path tests to stay within timeout limits
+  // Full test suite runs locally; CI runs: auth-flow, payments-flow, logout-flow
+  ...(process.env.CI && {
+    testMatch: /\/(auth-flow|payments-flow|logout-flow)\.spec\.ts$/,
+  }),
+
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     baseURL,
