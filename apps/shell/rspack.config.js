@@ -18,6 +18,10 @@ const rspack = require('@rspack/core');
 const path = require('path');
 const ReactRefreshPlugin = require('@rspack/plugin-react-refresh');
 
+// Debug: Log environment variables during config evaluation
+console.log('[Shell rspack.config.js] NX_API_BASE_URL:', process.env.NX_API_BASE_URL);
+console.log('[Shell rspack.config.js] NODE_ENV:', process.env.NODE_ENV);
+
 const isProduction = process.env.NODE_ENV === 'production';
 const isDevelopment = !isProduction;
 
