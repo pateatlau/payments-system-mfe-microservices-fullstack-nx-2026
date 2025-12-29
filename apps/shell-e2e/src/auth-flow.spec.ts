@@ -19,6 +19,31 @@ test.describe('Authentication Flow', () => {
   test('should complete sign-in flow: sign in → redirect → payments page', async ({
     page,
   }) => {
+    // Capture API requests and responses for debugging
+    const apiResponses: { url: string; status: number; body?: string }[] = [];
+    page.on('response', async (response) => {
+      const url = response.url();
+      if (url.includes('/api/') || url.includes(':3000')) {
+        const status = response.status();
+        let body: string | undefined;
+        try {
+          body = await response.text();
+        } catch {
+          body = '[could not read body]';
+        }
+        apiResponses.push({ url, status, body });
+        console.log(`API Response: ${status} ${url}`);
+        if (body) console.log(`  Body: ${body.substring(0, 500)}`);
+      }
+    });
+
+    // Log console errors from the page
+    page.on('console', (msg) => {
+      if (msg.type() === 'error') {
+        console.log('Browser Console Error:', msg.text());
+      }
+    });
+
     await page.goto('/signin');
 
     // Wait for sign-in form to load
@@ -35,6 +60,22 @@ test.describe('Authentication Flow', () => {
 
     // Submit form
     await page.click('button[type="submit"]');
+
+    // Wait a bit for the API call to complete
+    await page.waitForTimeout(3000);
+
+    // Log all API responses captured
+    console.log('=== All API Responses ===');
+    apiResponses.forEach((r) => {
+      console.log(`${r.status} ${r.url}`);
+      if (r.body) console.log(`  Body: ${r.body.substring(0, 200)}`);
+    });
+
+    // Check for any error message on the page
+    const errorMessage = await page.locator('[class*="error"], [role="alert"], .text-red-500, .text-destructive').textContent().catch(() => null);
+    if (errorMessage) {
+      console.log('Error message on page:', errorMessage);
+    }
 
     // Wait for redirect to payments page
     await expect(page).toHaveURL(/.*payments/, { timeout: 10000 });
