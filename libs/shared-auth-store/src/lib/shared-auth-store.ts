@@ -83,10 +83,6 @@ export const useAuthStore = create<AuthState>()(
         login: async (email: string, password: string) => {
           set({ isLoading: true, error: null });
           try {
-            // Debug: Log API client base URL
-            // eslint-disable-next-line no-console
-            console.log('[Auth Store] API Base URL:', (apiClient as unknown as { getAxiosInstance: () => { defaults: { baseURL: string } } }).getAxiosInstance().defaults.baseURL);
-
             const request: LoginRequest = { email, password };
             const response: LoginResponse = await apiClient.post(
               '/auth/login',
