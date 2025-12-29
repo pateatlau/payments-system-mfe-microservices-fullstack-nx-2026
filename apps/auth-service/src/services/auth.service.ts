@@ -11,7 +11,7 @@
 
 import bcrypt from 'bcrypt';
 import { prisma } from '../lib/prisma';
-import type { User } from '@prisma/client';
+import type { User } from '.prisma/auth-client';
 import { config } from '../config';
 import {
   generateTokenPair,
