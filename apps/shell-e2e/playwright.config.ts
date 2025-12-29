@@ -38,37 +38,38 @@ export default defineConfig({
   /* Note: Remotes must be built first (run: pnpm build:remotes) */
   webServer: process.env.CI
     ? [
-        // In CI, serve built files with http-server from dist/apps/*
+        // In CI, serve built files with 'serve' package (SPA mode + CORS)
+        // Remote MFEs need --cors for cross-origin Module Federation requests
         {
-          command: 'npx http-server dist/apps/auth-mfe -p 4201 --silent',
+          command: 'npx serve dist/apps/auth-mfe -l 4201 --cors --single',
           url: 'http://localhost:4201',
           reuseExistingServer: false,
           cwd: workspaceRoot,
           timeout: 30000,
         },
         {
-          command: 'npx http-server dist/apps/payments-mfe -p 4202 --silent',
+          command: 'npx serve dist/apps/payments-mfe -l 4202 --cors --single',
           url: 'http://localhost:4202',
           reuseExistingServer: false,
           cwd: workspaceRoot,
           timeout: 30000,
         },
         {
-          command: 'npx http-server dist/apps/admin-mfe -p 4203 --silent',
+          command: 'npx serve dist/apps/admin-mfe -l 4203 --cors --single',
           url: 'http://localhost:4203',
           reuseExistingServer: false,
           cwd: workspaceRoot,
           timeout: 30000,
         },
         {
-          command: 'npx http-server dist/apps/profile-mfe -p 4204 --silent',
+          command: 'npx serve dist/apps/profile-mfe -l 4204 --cors --single',
           url: 'http://localhost:4204',
           reuseExistingServer: false,
           cwd: workspaceRoot,
           timeout: 30000,
         },
         {
-          command: 'npx http-server dist/apps/shell -p 4200 --silent',
+          command: 'npx serve dist/apps/shell -l 4200 --cors --single',
           url: 'http://localhost:4200',
           reuseExistingServer: false,
           cwd: workspaceRoot,
