@@ -135,7 +135,7 @@ export const register = async (data: RegisterInput): Promise<AuthResponse> => {
   } catch (_error) {
     // Log error but don't fail registration - event publishing is non-critical
     // eslint-disable-next-line no-console
-    console.error('Failed to publish user.created event:', error);
+    console.error('Failed to publish user.created event:', _error);
   }
 
   return {

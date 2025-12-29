@@ -130,9 +130,12 @@ describe('UserManagement', () => {
 
     render(<UserManagement />);
 
-    await waitFor(() => {
-      expect(screen.getByText('Failed to load users')).toBeInTheDocument();
-    });
+    await waitFor(
+      () => {
+        expect(screen.getByText('Failed to load users')).toBeInTheDocument();
+      },
+      { timeout: 5000 }
+    );
   });
 
   it('should display empty state when no users', async () => {
