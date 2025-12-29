@@ -1,8 +1,5 @@
 import { test, expect } from '@playwright/test';
 
-// Skip tests that require backend API in CI (backend auth not fully configured yet)
-const isCI = !!process.env.CI;
-
 test.describe('Authentication Flow', () => {
   test.beforeEach(async ({ page }) => {
     // Clear localStorage before each test
@@ -22,7 +19,6 @@ test.describe('Authentication Flow', () => {
   test('should complete sign-in flow: sign in → redirect → payments page', async ({
     page,
   }) => {
-    test.skip(isCI, 'Requires backend auth service - skipped in CI for now');
     await page.goto('/signin');
 
     // Wait for sign-in form to load
@@ -35,7 +31,7 @@ test.describe('Authentication Flow', () => {
 
     // Fill in sign-in form
     await page.fill('input[type="email"]', 'customer@example.com');
-    await page.fill('input[type="password"]', 'password123');
+    await page.fill('input[type="password"]', 'TestPassword123!');
 
     // Submit form
     await page.click('button[type="submit"]');
@@ -52,7 +48,6 @@ test.describe('Authentication Flow', () => {
   test('should complete sign-up flow: sign up → redirect → payments page', async ({
     page,
   }) => {
-    test.skip(isCI, 'Requires backend auth service - skipped in CI for now');
     await page.goto('/signup');
 
     // Wait for sign-up form to load
@@ -66,14 +61,15 @@ test.describe('Authentication Flow', () => {
       timeout: 10000,
     });
 
-    // Fill in sign-up form
+    // Fill in sign-up form with unique email to avoid conflicts
+    const uniqueEmail = `newuser-${Date.now()}@example.com`;
     await page.fill('input[type="text"]', 'New User');
-    await page.fill('input[type="email"]', 'newuser@example.com');
-    await page.fill('input[type="password"]', 'Password123!@#');
+    await page.fill('input[type="email"]', uniqueEmail);
+    await page.fill('input[type="password"]', 'TestPassword123!');
 
     // Find and fill confirm password field (usually the second password input)
     const passwordInputs = page.locator('input[type="password"]');
-    await passwordInputs.nth(1).fill('Password123!@#');
+    await passwordInputs.nth(1).fill('TestPassword123!');
 
     // Submit form
     await page.click('button[type="submit"]');
@@ -97,7 +93,7 @@ test.describe('Authentication Flow', () => {
 
     // Fill in invalid email
     await page.fill('input[type="email"]', 'invalid-email');
-    await page.fill('input[type="password"]', 'password123');
+    await page.fill('input[type="password"]', 'TestPassword123!');
 
     // Submit form
     await page.click('button[type="submit"]');

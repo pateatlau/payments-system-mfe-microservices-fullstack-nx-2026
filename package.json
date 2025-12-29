@@ -122,6 +122,7 @@
     "db:validate": "prisma validate --schema=libs/backend/db/prisma/schema.prisma",
     "db:auth:migrate": "cd apps/auth-service && npx prisma migrate dev",
     "db:auth:generate": "cd apps/auth-service && npx prisma generate",
+    "db:auth:seed": "cd apps/auth-service && npx tsx prisma/seed.ts",
     "db:auth:studio": "cd apps/auth-service && npx prisma studio",
     "db:payments:migrate": "cd apps/payments-service && npx prisma migrate dev",
     "db:payments:generate": "cd apps/payments-service && npx prisma generate",

@@ -589,6 +589,9 @@ jobs:
           cd $GITHUB_WORKSPACE/apps/admin-service && npx prisma migrate deploy
           cd $GITHUB_WORKSPACE/apps/profile-service && npx prisma migrate deploy
 
+      - name: Seed auth database for E2E tests
+        run: pnpm db:auth:seed
+
       - name: Start backend services
         run: |
           pnpm dev:backend &

@@ -1,15 +1,11 @@
 import { test, expect } from '@playwright/test';
 
-// Skip entire test suite in CI - all tests require backend auth
-const isCI = !!process.env.CI;
-
 test.describe('Logout Flow', () => {
   test.beforeEach(async ({ page }) => {
-    test.skip(isCI, 'Requires backend auth service - skipped in CI for now');
     // Sign in before each test
     await page.goto('/signin');
     await page.fill('input[type="email"]', 'customer@example.com');
-    await page.fill('input[type="password"]', 'password123');
+    await page.fill('input[type="password"]', 'TestPassword123!');
     await page.click('button[type="submit"]');
 
     // Wait for redirect to payments page
