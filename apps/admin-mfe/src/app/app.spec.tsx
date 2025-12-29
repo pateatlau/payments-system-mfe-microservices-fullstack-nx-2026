@@ -20,7 +20,7 @@ global.WebSocket = jest.fn(() => ({
   send: jest.fn(),
   close: jest.fn(),
   readyState: 0,
-})) as any;
+})) as unknown as typeof WebSocket;
 
 describe('App', () => {
   const queryClient = new QueryClient({
