@@ -85,16 +85,29 @@ export const profileService = {
     // Ensure profile exists first
     await this.getOrCreateProfile(userId);
 
+    // Build update data - only include fields that are explicitly provided
+    // This prevents undefined fields from overwriting existing values with null
+    const updateData: Record<string, unknown> = {
+      updatedAt: new Date(),
+    };
+
+    if (data.phoneNumber !== undefined) {
+      updateData.phone = data.phoneNumber || null;
+    }
+    if (data.address !== undefined) {
+      updateData.address = data.address || null;
+    }
+    if (data.avatarUrl !== undefined) {
+      updateData.avatarUrl = data.avatarUrl || null;
+    }
+    if (data.bio !== undefined) {
+      updateData.bio = data.bio || null;
+    }
+
     // Update profile
     const profile = await prisma.userProfile.update({
       where: { userId },
-      data: {
-        phone: data.phoneNumber,
-        address: data.address,
-        avatarUrl: data.avatarUrl,
-        bio: data.bio,
-        updatedAt: new Date(),
-      },
+      data: updateData,
     });
 
     // Invalidate profile cache

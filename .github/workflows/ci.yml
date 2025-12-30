@@ -374,6 +374,11 @@ jobs:
     timeout-minutes: 30
     needs: [lint-and-typecheck]
 
+    env:
+      # For E2E tests: frontend calls API Gateway directly (no nginx in CI)
+      # Set at job level to ensure it's available to all steps
+      NX_API_BASE_URL: http://localhost:3000/api
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -423,17 +428,35 @@ jobs:
       - name: Build all projects (main/develop)
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
         run: |
+          echo "=== Build Environment ==="
+          echo "NX_API_BASE_URL=$NX_API_BASE_URL"
+          # Export explicitly to ensure child processes inherit
+          export NX_API_BASE_URL="http://localhost:3000/api"
+          echo "After export: NX_API_BASE_URL=$NX_API_BASE_URL"
+          # Disable both local and cloud caching to ensure fresh builds
+          NX_CLOUD_DISTRIBUTED_EXECUTION=false \
+          NX_SKIP_NX_CACHE=true \
           pnpm nx run-many --target=build \
             --all \
-            --configuration=production
+            --configuration=production \
+            --skip-nx-cache
+          echo "=== Verifying built shell contains correct API URL ==="
+          grep -o '"NX_API_BASE_URL":"[^"]*"' dist/apps/shell/*.js | head -3 || echo "Pattern not found"
+          # Also verify the actual content in main.js
+          echo "=== Grep for localhost:3000 in shell bundle ==="
+          grep -l "localhost:3000" dist/apps/shell/*.js || echo "localhost:3000 NOT found in bundle"
+          grep -l "https://localhost/api" dist/apps/shell/*.js && echo "WARNING: Wrong URL found!" || echo "Good: https://localhost/api not in bundle"
 
       - name: Build affected projects (feature branches)
         if: github.ref != 'refs/heads/main' && github.ref != 'refs/heads/develop'
         run: |
+          NX_CLOUD_DISTRIBUTED_EXECUTION=false \
+          NX_SKIP_NX_CACHE=true \
           pnpm nx affected --target=build \
             --base=${{ steps.set-shas.outputs.base }} \
             --head=${{ steps.set-shas.outputs.head }} \
-            --configuration=production
+            --configuration=production \
+            --skip-nx-cache
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
@@ -463,7 +486,7 @@ jobs:
         ports:
           - 5432:5432
         options: >-
-          --health-cmd pg_isready
+          --health-cmd "pg_isready -U testuser"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
@@ -477,7 +500,7 @@ jobs:
         ports:
           - 5433:5432
         options: >-
-          --health-cmd pg_isready
+          --health-cmd "pg_isready -U testuser"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
@@ -491,7 +514,7 @@ jobs:
         ports:
           - 5434:5432
         options: >-
-          --health-cmd pg_isready
+          --health-cmd "pg_isready -U testuser"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
@@ -505,7 +528,7 @@ jobs:
         ports:
           - 5435:5432
         options: >-
-          --health-cmd pg_isready
+          --health-cmd "pg_isready -U testuser"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
@@ -583,10 +606,24 @@ jobs:
           cd $GITHUB_WORKSPACE/apps/admin-service && npx prisma migrate deploy
           cd $GITHUB_WORKSPACE/apps/profile-service && npx prisma migrate deploy
 
+      - name: Seed auth database for E2E tests
+        run: pnpm db:auth:seed
+
       - name: Start backend services
         run: |
           pnpm dev:backend &
-          sleep 10 # Wait for services to start
+          echo "Waiting for backend services to be ready..."
+          # Wait for API Gateway health endpoint (it depends on other services)
+          for i in {1..60}; do
+            if curl -s http://localhost:3000/health > /dev/null 2>&1; then
+              echo "API Gateway is ready!"
+              break
+            fi
+            echo "Waiting for API Gateway... ($i/60)"
+            sleep 2
+          done
+          # Additional buffer for all services to stabilize
+          sleep 5
 
       - name: Run E2E tests
         run: pnpm nx e2e shell-e2e

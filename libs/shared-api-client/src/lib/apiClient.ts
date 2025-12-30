@@ -77,13 +77,13 @@ export class ApiClient {
     // API Gateway proxies to backend services (Auth, Payments, Admin, Profile)
 
     // Access environment variable (replaced by DefinePlugin at build time in browser)
-    // DefinePlugin replaces process.env.NX_API_BASE_URL with the actual string value
-    // Use dot notation so DefinePlugin can replace it properly
-     
-    const envBaseURL =
-      typeof process !== 'undefined' && process.env
-        ? (process.env as { NX_API_BASE_URL?: string }).NX_API_BASE_URL
-        : undefined;
+    // DefinePlugin replaces 'process.env.NX_API_BASE_URL' with the actual string value
+    // IMPORTANT: Access the full path directly without guards!
+    // DefinePlugin does literal text replacement - it replaces the EXACT string
+    // 'process.env.NX_API_BASE_URL' with the value. Any guards like
+    // 'typeof process !== undefined && process.env' would NOT be replaced
+    // and would fail at runtime since process.env is undefined in browser.
+    const envBaseURL = process.env.NX_API_BASE_URL;
     // Default to nginx proxy (HTTPS) for development
     // For direct API Gateway access, set NX_API_BASE_URL=http://localhost:3000/api
     const baseURL = config.baseURL ?? envBaseURL ?? 'https://localhost/api';

@@ -11,7 +11,15 @@ import { z } from 'zod';
 export const updateProfileSchema = z.object({
   phoneNumber: z.string().min(10).max(20).optional(), // maps to 'phone'
   address: z.string().min(1).max(500).optional(),
-  avatarUrl: z.string().url().optional(),
+  // TODO: Replace base64 data URL validation with proper URL validation
+  // once file upload to cloud storage (S3) is implemented
+  avatarUrl: z
+    .union([
+      z.string().url(),
+      z.string().startsWith('data:'), // Allow base64 data URLs temporarily
+      z.literal(''), // Allow empty string to clear avatar
+    ])
+    .optional(),
   bio: z.string().max(1000).optional(),
 });
 

@@ -31,6 +31,13 @@ export function AvatarUpload({ initialUrl, onFileChange }: AvatarUploadProps) {
   );
   const [error, setError] = useState<string | null>(null);
 
+  // Sync previewUrl when initialUrl prop changes (e.g., after profile loads from API)
+  useEffect(() => {
+    if (initialUrl !== undefined) {
+      setPreviewUrl(initialUrl ?? null);
+    }
+  }, [initialUrl]);
+
   // Cleanup preview URL on unmount
   useEffect(() => {
     return () => {

@@ -18,6 +18,10 @@ import {
   AlertDescription,
   Loading,
   Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@mfe/shared-design-system';
 import type { AuditLog, AuditLogFilters } from '../api/audit-logs';
 import { getAuditLogs, getAvailableActions } from '../api/audit-logs';
@@ -193,16 +197,20 @@ export function AuditLogs() {
           <div className="space-y-2">
             <Label htmlFor="action-filter">Filter by Action</Label>
             <Select
-              id="action-filter"
               value={filters.action || 'ALL'}
-              onChange={e => handleActionFilterChange(e.target.value)}
+              onValueChange={handleActionFilterChange}
             >
-              <option value="ALL">All Actions</option>
-              {availableActions.map(action => (
-                <option key={action} value={action}>
-                  {action.replace(/_/g, ' ')}
-                </option>
-              ))}
+              <SelectTrigger id="action-filter">
+                <SelectValue placeholder="Select action" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ALL">All Actions</SelectItem>
+                {(availableActions ?? []).map(action => (
+                  <SelectItem key={action} value={action}>
+                    {action.replace(/_/g, ' ')}
+                  </SelectItem>
+                ))}
+              </SelectContent>
             </Select>
           </div>
         </CardContent>

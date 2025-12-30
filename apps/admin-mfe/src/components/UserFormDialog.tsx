@@ -12,6 +12,10 @@ import {
   Alert,
   AlertDescription,
   Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@mfe/shared-design-system';
 import { UserRole } from 'shared-types';
 import { createUser, updateUser, type User } from '../api/users';
@@ -271,15 +275,19 @@ export function UserFormDialog({
                   Role <span className="text-red-500">*</span>
                 </Label>
                 <Select
-                  id="role"
                   value={formData.role}
-                  onChange={e =>
-                    handleInputChange('role', e.target.value as UserRole)
+                  onValueChange={value =>
+                    handleInputChange('role', value as UserRole)
                   }
                 >
-                  <option value={UserRole.CUSTOMER}>Customer</option>
-                  <option value={UserRole.VENDOR}>Vendor</option>
-                  <option value={UserRole.ADMIN}>Admin</option>
+                  <SelectTrigger id="role">
+                    <SelectValue placeholder="Select role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={UserRole.CUSTOMER}>Customer</SelectItem>
+                    <SelectItem value={UserRole.VENDOR}>Vendor</SelectItem>
+                    <SelectItem value={UserRole.ADMIN}>Admin</SelectItem>
+                  </SelectContent>
                 </Select>
                 <p className="text-xs text-muted-foreground">
                   Role can be changed later from the user list

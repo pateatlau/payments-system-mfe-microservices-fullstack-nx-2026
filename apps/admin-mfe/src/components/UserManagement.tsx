@@ -19,6 +19,10 @@ import {
   AlertDescription,
   Loading,
   Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@mfe/shared-design-system';
 import { UserRole } from 'shared-types';
 import {
@@ -234,16 +238,20 @@ export function UserManagement() {
             <div className="space-y-2">
               <Label htmlFor="role-filter">Filter by Role</Label>
               <Select
-                id="role-filter"
                 value={filters.role || 'ALL'}
-                onChange={e =>
-                  handleRoleFilterChange(e.target.value as UserRole | 'ALL')
+                onValueChange={value =>
+                  handleRoleFilterChange(value as UserRole | 'ALL')
                 }
               >
-                <option value="ALL">All Roles</option>
-                <option value={UserRole.ADMIN}>Admin</option>
-                <option value={UserRole.CUSTOMER}>Customer</option>
-                <option value={UserRole.VENDOR}>Vendor</option>
+                <SelectTrigger id="role-filter">
+                  <SelectValue placeholder="Select role" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ALL">All Roles</SelectItem>
+                  <SelectItem value={UserRole.ADMIN}>Admin</SelectItem>
+                  <SelectItem value={UserRole.CUSTOMER}>Customer</SelectItem>
+                  <SelectItem value={UserRole.VENDOR}>Vendor</SelectItem>
+                </SelectContent>
               </Select>
             </div>
           </div>
@@ -307,18 +315,19 @@ export function UserManagement() {
                       </td>
                       <td className="px-4 py-4 whitespace-nowrap">
                         <Select
-                          className="h-8 w-32 text-xs"
                           value={user.role}
-                          onChange={e =>
-                            handleRoleChange(
-                              user.id,
-                              e.target.value as UserRole
-                            )
+                          onValueChange={value =>
+                            handleRoleChange(user.id, value as UserRole)
                           }
                         >
-                          <option value={UserRole.ADMIN}>Admin</option>
-                          <option value={UserRole.CUSTOMER}>Customer</option>
-                          <option value={UserRole.VENDOR}>Vendor</option>
+                          <SelectTrigger className="h-8 w-32 text-xs">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value={UserRole.ADMIN}>Admin</SelectItem>
+                            <SelectItem value={UserRole.CUSTOMER}>Customer</SelectItem>
+                            <SelectItem value={UserRole.VENDOR}>Vendor</SelectItem>
+                          </SelectContent>
                         </Select>
                       </td>
                       <td className="px-4 py-4 whitespace-nowrap">

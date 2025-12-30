@@ -1,81 +1,156 @@
 /**
  * Select Component Tests
+ *
+ * Note: Radix UI Select uses portals for the dropdown content,
+ * which requires special handling in tests. These tests focus on
+ * the trigger and basic functionality that doesn't require portal rendering.
  */
 
-import { describe, it, expect } from '@jest/globals';
+import { describe, it, expect, beforeAll } from '@jest/globals';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { Select } from './Select';
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from './Select';
 
-// TODO: Fix Select test configuration issues
-describe.skip('Select', () => {
-  it('should render successfully', () => {
+// Mock ResizeObserver and PointerEvent for Radix UI
+beforeAll(() => {
+  global.ResizeObserver = class ResizeObserver {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  };
+
+  // Mock PointerEvent
+  class MockPointerEvent extends Event {
+    button: number;
+    ctrlKey: boolean;
+    pointerType: string;
+
+    constructor(type: string, props: PointerEventInit = {}) {
+      super(type, props);
+      this.button = props.button ?? 0;
+      this.ctrlKey = props.ctrlKey ?? false;
+      this.pointerType = props.pointerType ?? 'mouse';
+    }
+  }
+
+  global.PointerEvent =
+    MockPointerEvent as unknown as typeof globalThis.PointerEvent;
+
+  // Mock hasPointerCapture
+  Element.prototype.hasPointerCapture = () => false;
+  Element.prototype.setPointerCapture = () => {};
+  Element.prototype.releasePointerCapture = () => {};
+
+  // Mock scrollIntoView
+  Element.prototype.scrollIntoView = () => {};
+});
+
+describe('Select', () => {
+  it('should render the trigger successfully', () => {
     render(
       <Select>
-        <option value="1">Option 1</option>
-        <option value="2">Option 2</option>
+        <SelectTrigger>
+          <SelectValue placeholder="Select an option" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="1">Option 1</SelectItem>
+          <SelectItem value="2">Option 2</SelectItem>
+        </SelectContent>
       </Select>
     );
     expect(screen.getByRole('combobox')).toBeInTheDocument();
   });
 
-  it('should render options', () => {
+  it('should display placeholder text', () => {
     render(
       <Select>
-        <option value="1">Option 1</option>
-        <option value="2">Option 2</option>
-        <option value="3">Option 3</option>
+        <SelectTrigger>
+          <SelectValue placeholder="Select an option" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="1">Option 1</SelectItem>
+        </SelectContent>
       </Select>
     );
-    expect(screen.getByText('Option 1')).toBeInTheDocument();
-    expect(screen.getByText('Option 2')).toBeInTheDocument();
-    expect(screen.getByText('Option 3')).toBeInTheDocument();
+    expect(screen.getByText('Select an option')).toBeInTheDocument();
   });
 
-  it('should accept a default value', () => {
+  it('should display selected value', () => {
     render(
       <Select defaultValue="2">
-        <option value="1">Option 1</option>
-        <option value="2">Option 2</option>
+        <SelectTrigger>
+          <SelectValue placeholder="Select an option" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="1">Option 1</SelectItem>
+          <SelectItem value="2">Option 2</SelectItem>
+        </SelectContent>
       </Select>
     );
-    const select = screen.getByRole('combobox') as HTMLSelectElement;
-    expect(select.value).toBe('2');
+    expect(screen.getByText('Option 2')).toBeInTheDocument();
   });
 
   it('should be disabled when disabled prop is true', () => {
     render(
       <Select disabled>
-        <option value="1">Option 1</option>
+        <SelectTrigger>
+          <SelectValue placeholder="Select an option" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="1">Option 1</SelectItem>
+        </SelectContent>
       </Select>
     );
     expect(screen.getByRole('combobox')).toBeDisabled();
   });
 
-  it('should apply custom className', () => {
+  it('should apply custom className to trigger', () => {
     render(
-      <Select className="custom-class">
-        <option value="1">Option 1</option>
+      <Select>
+        <SelectTrigger className="custom-class">
+          <SelectValue placeholder="Select an option" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="1">Option 1</SelectItem>
+        </SelectContent>
       </Select>
     );
     expect(screen.getByRole('combobox')).toHaveClass('custom-class');
   });
 
-  it('should handle onChange events', () => {
-    let selectedValue = '';
+  it('should have correct aria attributes on trigger', () => {
     render(
-      <Select
-        onChange={e => {
-          selectedValue = e.target.value;
-        }}
-      >
-        <option value="1">Option 1</option>
-        <option value="2">Option 2</option>
+      <Select>
+        <SelectTrigger aria-label="Select option">
+          <SelectValue placeholder="Select an option" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="1">Option 1</SelectItem>
+        </SelectContent>
       </Select>
     );
-    const select = screen.getByRole('combobox') as HTMLSelectElement;
-    select.value = '2';
-    select.dispatchEvent(new Event('change', { bubbles: true }));
-    expect(selectedValue).toBe('2');
+    const trigger = screen.getByRole('combobox');
+    expect(trigger).toHaveAttribute('aria-label', 'Select option');
+  });
+
+  it('should render with controlled value', () => {
+    render(
+      <Select value="1">
+        <SelectTrigger>
+          <SelectValue placeholder="Select an option" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="1">Option 1</SelectItem>
+          <SelectItem value="2">Option 2</SelectItem>
+        </SelectContent>
+      </Select>
+    );
+    expect(screen.getByText('Option 1')).toBeInTheDocument();
   });
 });

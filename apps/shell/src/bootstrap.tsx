@@ -23,6 +23,7 @@ import {
   SignInRemote,
   SignUpRemote,
   PaymentsPageRemote,
+  ReportsPageRemote,
   AdminDashboardRemote,
   ProfilePageRemote,
 } from './remotes';
@@ -88,6 +89,7 @@ function AppWrapper() {
             SignInComponent: SignInRemote,
             SignUpComponent: SignUpRemote,
             PaymentsComponent: PaymentsPageRemote,
+            ReportsComponent: ReportsPageRemote,
             AdminDashboardComponent: AdminDashboardRemote,
             ProfilePageComponent: ProfilePageRemote,
           }}

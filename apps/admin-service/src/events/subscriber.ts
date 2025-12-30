@@ -18,7 +18,7 @@ import {
 } from '@payments-system/rabbitmq-event-hub';
 import { getConnectionManager } from './connection';
 import config from '../config';
-import { prisma, Prisma, UserRole } from '../lib/prisma';
+import { prisma, Prisma, UserRoleType } from '../lib/prisma';
 
 let userEventsSubscriber: RabbitMQSubscriber | null = null;
 let paymentEventsSubscriber: RabbitMQSubscriber | null = null;
@@ -68,7 +68,7 @@ async function handleUserCreated(
         id: userId,
         email,
         name,
-        role: role as UserRole,
+        role: role as UserRoleType,
         emailVerified,
         createdAt: new Date(createdAt),
         updatedAt: new Date(createdAt),
@@ -98,7 +98,7 @@ async function handleUserUpdated(
     // Update denormalized user in admin_db
     const updateData: Prisma.UserUpdateInput = {
       ...updates,
-      role: updates.role ? (updates.role as UserRole) : undefined,
+      role: updates.role ? (updates.role as UserRoleType) : undefined,
       updatedAt: updates.updatedAt ? new Date(updates.updatedAt) : undefined,
     };
     await prisma.user.update({

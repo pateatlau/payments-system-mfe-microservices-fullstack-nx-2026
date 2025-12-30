@@ -90,7 +90,9 @@ app.use(
   })
 );
 
-app.use(express.json());
+// Increase JSON body limit to 5MB for base64-encoded images
+// TODO: Replace with proper file upload to cloud storage (S3) and reduce limit
+app.use(express.json({ limit: '5mb' }));
 
 // Rate limiting
 // TODO: RESTORE ORIGINAL RATE LIMIT - Currently set to very high value temporarily

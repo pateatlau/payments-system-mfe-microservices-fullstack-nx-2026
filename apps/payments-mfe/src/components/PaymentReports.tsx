@@ -14,6 +14,7 @@ import {
   AlertDescription,
   Label,
   Button,
+  Input,
 } from '@mfe/shared-design-system';
 
 function percent(n: number, total: number): number {
@@ -169,10 +170,9 @@ export function PaymentReports() {
           <div className="grid gap-4 md:grid-cols-3">
             <div className="space-y-2 md:col-span-1">
               <Label htmlFor="startDate">Start date</Label>
-              <input
+              <Input
                 id="startDate"
                 type="date"
-                className="flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
                 value={startDate}
                 onChange={e => setStartDate(e.target.value)}
                 aria-label="Start date"
@@ -180,10 +180,9 @@ export function PaymentReports() {
             </div>
             <div className="space-y-2 md:col-span-1">
               <Label htmlFor="endDate">End date</Label>
-              <input
+              <Input
                 id="endDate"
                 type="date"
-                className="flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
                 value={endDate}
                 onChange={e => setEndDate(e.target.value)}
                 aria-label="End date"

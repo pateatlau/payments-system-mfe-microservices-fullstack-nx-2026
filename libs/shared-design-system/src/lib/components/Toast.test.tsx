@@ -7,8 +7,7 @@ import '@testing-library/jest-dom';
 import userEvent from '@testing-library/user-event';
 import { Toast, ToastContainer } from './Toast';
 
-// TODO: Fix Toast test configuration issues
-describe.skip('Toast', () => {
+describe('Toast', () => {
   it('renders with message', () => {
     render(<Toast message="Test message" onDismiss={jest.fn()} />);
     expect(screen.getByText('Test message')).toBeInTheDocument();
@@ -27,7 +26,7 @@ describe.skip('Toast', () => {
       <Toast variant="success" message="Success!" onDismiss={jest.fn()} />
     );
     const toast = container.firstChild as HTMLElement;
-    expect(toast).toHaveClass('bg-green-50');
+    expect(toast).toHaveClass('bg-emerald-50/80');
   });
 
   it('renders error variant', () => {
@@ -35,7 +34,7 @@ describe.skip('Toast', () => {
       <Toast variant="error" message="Error!" onDismiss={jest.fn()} />
     );
     const toast = container.firstChild as HTMLElement;
-    expect(toast).toHaveClass('bg-(--destructive)');
+    expect(toast).toHaveClass('bg-destructive');
   });
 
   it('renders warning variant', () => {
@@ -43,7 +42,7 @@ describe.skip('Toast', () => {
       <Toast variant="warning" message="Warning!" onDismiss={jest.fn()} />
     );
     const toast = container.firstChild as HTMLElement;
-    expect(toast).toHaveClass('bg-amber-50');
+    expect(toast).toHaveClass('bg-amber-50/80');
   });
 
   it('renders info variant', () => {
@@ -51,7 +50,7 @@ describe.skip('Toast', () => {
       <Toast variant="info" message="Info!" onDismiss={jest.fn()} />
     );
     const toast = container.firstChild as HTMLElement;
-    expect(toast).toHaveClass('bg-blue-50');
+    expect(toast).toHaveClass('bg-blue-50/80');
   });
 
   it('shows close button by default', () => {
@@ -114,8 +113,7 @@ describe.skip('Toast', () => {
   });
 });
 
-// TODO: Fix ToastContainer test configuration issues
-describe.skip('ToastContainer', () => {
+describe('ToastContainer', () => {
   it('renders children', () => {
     render(
       <ToastContainer>

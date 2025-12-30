@@ -4,6 +4,7 @@ jest.mock('@mfe/shared-api-client', () => ({
     get: jest.fn(),
     put: jest.fn(),
     setTokenProvider: jest.fn(),
+    isAuthenticated: jest.fn(() => false),
   })),
 }));
 
@@ -16,8 +17,7 @@ import {
 } from './theme-store';
 import * as apiClient from '@mfe/shared-api-client';
 
-// TODO: Fix theme-store test configuration issues
-describe.skip('theme-store', () => {
+describe('theme-store', () => {
   beforeEach(() => {
     // Clear DOM
     document.documentElement.classList.remove('dark');
@@ -162,6 +162,7 @@ describe.skip('theme-store', () => {
           data: { theme: 'dark' },
         }),
         put: jest.fn(),
+        isAuthenticated: jest.fn(() => true),
       };
       (apiClient.getApiClient as jest.Mock).mockReturnValue(mockApiClient);
 

@@ -14,6 +14,10 @@ import {
   Input,
   Label,
   Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
   cn,
 } from '@mfe/shared-design-system';
 
@@ -139,7 +143,6 @@ export function PaymentFilters({
 
   const {
     control,
-    register,
     watch,
     reset,
     formState: { errors },
@@ -245,40 +248,84 @@ export function PaymentFilters({
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               <div className="space-y-2">
                 <Label htmlFor="status">Status</Label>
-                <Select id="status" {...register('status')}>
-                  <option value="all">All statuses</option>
-                  <option value={PaymentStatus.PENDING}>Pending</option>
-                  <option value={PaymentStatus.PROCESSING}>Processing</option>
-                  <option value={PaymentStatus.COMPLETED}>Completed</option>
-                  <option value={PaymentStatus.FAILED}>Failed</option>
-                  <option value={PaymentStatus.CANCELLED}>Cancelled</option>
-                </Select>
+                <Controller
+                  control={control}
+                  name="status"
+                  render={({ field }) => (
+                    <Select
+                      value={field.value}
+                      onValueChange={field.onChange}
+                    >
+                      <SelectTrigger id="status">
+                        <SelectValue placeholder="Select status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All statuses</SelectItem>
+                        <SelectItem value={PaymentStatus.PENDING}>Pending</SelectItem>
+                        <SelectItem value={PaymentStatus.PROCESSING}>Processing</SelectItem>
+                        <SelectItem value={PaymentStatus.COMPLETED}>Completed</SelectItem>
+                        <SelectItem value={PaymentStatus.FAILED}>Failed</SelectItem>
+                        <SelectItem value={PaymentStatus.CANCELLED}>Cancelled</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="type">Type</Label>
-                <Select id="type" {...register('type')}>
-                  <option value="all">All types</option>
-                  <option value={PaymentType.INSTANT}>Instant</option>
-                  <option value={PaymentType.SCHEDULED}>Scheduled</option>
-                  <option value={PaymentType.RECURRING}>Recurring</option>
-                </Select>
+                <Controller
+                  control={control}
+                  name="type"
+                  render={({ field }) => (
+                    <Select
+                      value={field.value}
+                      onValueChange={field.onChange}
+                    >
+                      <SelectTrigger id="type">
+                        <SelectValue placeholder="Select type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All types</SelectItem>
+                        <SelectItem value={PaymentType.INSTANT}>Instant</SelectItem>
+                        <SelectItem value={PaymentType.SCHEDULED}>Scheduled</SelectItem>
+                        <SelectItem value={PaymentType.RECURRING}>Recurring</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
               </div>
 
               <div className="space-y-2">
                 <Label>Date range</Label>
                 <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                  <Input
-                    id="fromDate"
-                    type="date"
-                    aria-label="From date"
-                    {...register('fromDate')}
+                  <Controller
+                    control={control}
+                    name="fromDate"
+                    render={({ field }) => (
+                      <Input
+                        id="fromDate"
+                        type="date"
+                        aria-label="From date"
+                        value={field.value ?? ''}
+                        onChange={field.onChange}
+                        onBlur={field.onBlur}
+                      />
+                    )}
                   />
-                  <Input
-                    id="toDate"
-                    type="date"
-                    aria-label="To date"
-                    {...register('toDate')}
+                  <Controller
+                    control={control}
+                    name="toDate"
+                    render={({ field }) => (
+                      <Input
+                        id="toDate"
+                        type="date"
+                        aria-label="To date"
+                        value={field.value ?? ''}
+                        onChange={field.onChange}
+                        onBlur={field.onBlur}
+                      />
+                    )}
                   />
                 </div>
                 {errors.toDate?.message && (

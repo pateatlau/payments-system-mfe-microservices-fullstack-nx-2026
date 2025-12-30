@@ -10,16 +10,19 @@
  */
 
 import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Alert,
   AlertDescription,
   Button,
   Card,
-  Input,
   Label,
   Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
   Skeleton,
   Toast,
   ToastContainer,
@@ -51,6 +54,7 @@ export function PreferencesForm({ onSuccess }: PreferencesFormProps) {
     register,
     handleSubmit,
     reset,
+    control,
     formState: { errors },
   } = useForm<UpdatePreferencesFormData>({
     resolver: zodResolver(updatePreferencesSchema),
@@ -178,15 +182,26 @@ export function PreferencesForm({ onSuccess }: PreferencesFormProps) {
         {/* Theme */}
         <div className="space-y-1.5">
           <Label htmlFor="theme">Theme</Label>
-          <Select
-            id="theme"
-            disabled={isPreferencesLoading || isSubmitting}
-            {...register('theme')}
-          >
-            <option value="light">Light</option>
-            <option value="dark">Dark</option>
-            <option value="system">System</option>
-          </Select>
+          <Controller
+            control={control}
+            name="theme"
+            render={({ field }) => (
+              <Select
+                value={field.value}
+                onValueChange={field.onChange}
+                disabled={isPreferencesLoading || isSubmitting}
+              >
+                <SelectTrigger id="theme">
+                  <SelectValue placeholder="Select theme" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="light">Light</SelectItem>
+                  <SelectItem value="dark">Dark</SelectItem>
+                  <SelectItem value="system">System</SelectItem>
+                </SelectContent>
+              </Select>
+            )}
+          />
           {errors.theme && (
             <p className="text-xs text-red-600">
               {errors.theme.message as string}
@@ -197,12 +212,32 @@ export function PreferencesForm({ onSuccess }: PreferencesFormProps) {
         {/* Language */}
         <div className="space-y-1.5">
           <Label htmlFor="language">Language</Label>
-          <Input
-            id="language"
-            type="text"
-            placeholder="e.g. en, en-US"
-            disabled={isPreferencesLoading || isSubmitting}
-            {...register('language')}
+          <Controller
+            control={control}
+            name="language"
+            render={({ field }) => (
+              <Select
+                value={field.value}
+                onValueChange={field.onChange}
+                disabled={isPreferencesLoading || isSubmitting}
+              >
+                <SelectTrigger id="language">
+                  <SelectValue placeholder="Select language" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="en">English</SelectItem>
+                  <SelectItem value="es">Spanish (Español)</SelectItem>
+                  <SelectItem value="fr">French (Français)</SelectItem>
+                  <SelectItem value="de">German (Deutsch)</SelectItem>
+                  <SelectItem value="hi">Hindi (हिन्दी)</SelectItem>
+                  <SelectItem value="zh">Chinese (中文)</SelectItem>
+                  <SelectItem value="ja">Japanese (日本語)</SelectItem>
+                  <SelectItem value="pt">Portuguese (Português)</SelectItem>
+                  <SelectItem value="ar">Arabic (العربية)</SelectItem>
+                  <SelectItem value="ru">Russian (Русский)</SelectItem>
+                </SelectContent>
+              </Select>
+            )}
           />
           {errors.language && (
             <p className="text-xs text-red-600">
@@ -214,12 +249,26 @@ export function PreferencesForm({ onSuccess }: PreferencesFormProps) {
         {/* Currency */}
         <div className="space-y-1.5">
           <Label htmlFor="currency">Currency</Label>
-          <Input
-            id="currency"
-            type="text"
-            placeholder="e.g. USD, EUR"
-            disabled={isPreferencesLoading || isSubmitting}
-            {...register('currency')}
+          <Controller
+            control={control}
+            name="currency"
+            render={({ field }) => (
+              <Select
+                value={field.value}
+                onValueChange={field.onChange}
+                disabled={isPreferencesLoading || isSubmitting}
+              >
+                <SelectTrigger id="currency">
+                  <SelectValue placeholder="Select currency" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="INR">INR - Indian Rupee</SelectItem>
+                  <SelectItem value="USD">USD - US Dollar</SelectItem>
+                  <SelectItem value="EUR">EUR - Euro</SelectItem>
+                  <SelectItem value="GBP">GBP - British Pound</SelectItem>
+                </SelectContent>
+              </Select>
+            )}
           />
           {errors.currency && (
             <p className="text-xs text-red-600">
@@ -231,12 +280,36 @@ export function PreferencesForm({ onSuccess }: PreferencesFormProps) {
         {/* Timezone */}
         <div className="space-y-1.5">
           <Label htmlFor="timezone">Timezone</Label>
-          <Input
-            id="timezone"
-            type="text"
-            placeholder="e.g. America/New_York"
-            disabled={isPreferencesLoading || isSubmitting}
-            {...register('timezone')}
+          <Controller
+            control={control}
+            name="timezone"
+            render={({ field }) => (
+              <Select
+                value={field.value}
+                onValueChange={field.onChange}
+                disabled={isPreferencesLoading || isSubmitting}
+              >
+                <SelectTrigger id="timezone">
+                  <SelectValue placeholder="Select timezone" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="UTC">UTC - Coordinated Universal Time</SelectItem>
+                  <SelectItem value="America/New_York">America/New_York (EST/EDT)</SelectItem>
+                  <SelectItem value="America/Los_Angeles">America/Los_Angeles (PST/PDT)</SelectItem>
+                  <SelectItem value="America/Chicago">America/Chicago (CST/CDT)</SelectItem>
+                  <SelectItem value="Europe/London">Europe/London (GMT/BST)</SelectItem>
+                  <SelectItem value="Europe/Paris">Europe/Paris (CET/CEST)</SelectItem>
+                  <SelectItem value="Europe/Berlin">Europe/Berlin (CET/CEST)</SelectItem>
+                  <SelectItem value="Asia/Kolkata">Asia/Kolkata (IST)</SelectItem>
+                  <SelectItem value="Asia/Tokyo">Asia/Tokyo (JST)</SelectItem>
+                  <SelectItem value="Asia/Shanghai">Asia/Shanghai (CST)</SelectItem>
+                  <SelectItem value="Asia/Dubai">Asia/Dubai (GST)</SelectItem>
+                  <SelectItem value="Asia/Singapore">Asia/Singapore (SGT)</SelectItem>
+                  <SelectItem value="Australia/Sydney">Australia/Sydney (AEST/AEDT)</SelectItem>
+                  <SelectItem value="Pacific/Auckland">Pacific/Auckland (NZST/NZDT)</SelectItem>
+                </SelectContent>
+              </Select>
+            )}
           />
           {errors.timezone && (
             <p className="text-xs text-red-600">

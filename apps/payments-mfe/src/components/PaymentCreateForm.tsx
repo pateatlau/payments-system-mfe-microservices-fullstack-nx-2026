@@ -1,4 +1,4 @@
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import {
@@ -13,8 +13,14 @@ import {
   Alert,
   AlertDescription,
   Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  Skeleton,
 } from '@mfe/shared-design-system';
 import { PaymentType } from 'shared-types';
+import { useRecipients } from '../hooks/usePayments';
 
 /**
  * Create payment form schema using Zod
@@ -58,9 +64,12 @@ export function PaymentCreateForm({
   onSubmit,
   onCancel,
 }: PaymentCreateFormProps) {
+  const { data: recipients, isLoading: isLoadingRecipients } = useRecipients();
+
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors },
     reset,
   } = useForm<CreatePaymentFormData>({
@@ -114,12 +123,23 @@ export function PaymentCreateForm({
 
             <div>
               <Label htmlFor="currency">Currency *</Label>
-              <Select id="currency" {...register('currency')} className="mt-2">
-                <option value="INR">INR</option>
-                <option value="USD">USD</option>
-                <option value="EUR">EUR</option>
-                <option value="GBP">GBP</option>
-              </Select>
+              <Controller
+                control={control}
+                name="currency"
+                render={({ field }) => (
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger id="currency" className="mt-2">
+                      <SelectValue placeholder="Select currency" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="INR">INR</SelectItem>
+                      <SelectItem value="USD">USD</SelectItem>
+                      <SelectItem value="EUR">EUR</SelectItem>
+                      <SelectItem value="GBP">GBP</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              />
               {errors.currency && (
                 <p
                   className="mt-1 text-sm text-destructive-foreground"
@@ -133,11 +153,22 @@ export function PaymentCreateForm({
 
           <div>
             <Label htmlFor="type">Payment Type *</Label>
-            <Select id="type" {...register('type')} className="mt-2">
-              <option value={PaymentType.INSTANT}>Instant</option>
-              <option value={PaymentType.SCHEDULED}>Scheduled</option>
-              <option value={PaymentType.RECURRING}>Recurring</option>
-            </Select>
+            <Controller
+              control={control}
+              name="type"
+              render={({ field }) => (
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger id="type" className="mt-2">
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={PaymentType.INSTANT}>Instant</SelectItem>
+                    <SelectItem value={PaymentType.SCHEDULED}>Scheduled</SelectItem>
+                    <SelectItem value={PaymentType.RECURRING}>Recurring</SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
+            />
             {errors.type && (
               <p
                 className="mt-1 text-sm text-destructive-foreground"
@@ -168,14 +199,34 @@ export function PaymentCreateForm({
           </div>
 
           <div>
-            <Label htmlFor="recipientEmail">Recipient Email *</Label>
-            <Input
-              id="recipientEmail"
-              type="email"
-              {...register('recipientEmail')}
-              placeholder="recipient@example.com"
-              className="mt-2"
-            />
+            <Label htmlFor="recipientEmail">Recipient *</Label>
+            {isLoadingRecipients ? (
+              <Skeleton className="h-10 mt-2" />
+            ) : (
+              <Controller
+                control={control}
+                name="recipientEmail"
+                render={({ field }) => (
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger id="recipientEmail" className="mt-2">
+                      <SelectValue placeholder="Select recipient" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {recipients?.map((recipient) => (
+                        <SelectItem key={recipient.id} value={recipient.email}>
+                          {recipient.name} ({recipient.email})
+                        </SelectItem>
+                      ))}
+                      {(!recipients || recipients.length === 0) && (
+                        <SelectItem value="" disabled>
+                          No recipients available
+                        </SelectItem>
+                      )}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+            )}
             {errors.recipientEmail && (
               <p
                 className="mt-1 text-sm text-destructive-foreground"

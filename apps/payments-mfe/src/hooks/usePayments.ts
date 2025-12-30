@@ -1,4 +1,4 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import { useAuthStore } from 'shared-auth-store';
 import type { Payment } from '../api/types';
 import { listPayments } from '../api/payments';
@@ -83,6 +83,9 @@ export function usePayments(filters?: UsePaymentsFilters) {
       return applyClientFilters(data, filters);
     },
     enabled: !!user, // Only fetch if user is authenticated
+    // Keep previous data while fetching new data to prevent UI flicker
+    // This preserves component state (like filter panel expanded state)
+    placeholderData: keepPreviousData,
   });
 }
 
@@ -173,4 +176,22 @@ export function useInvalidatePayments() {
   return () => {
     queryClient.invalidateQueries({ queryKey: paymentKeys.all });
   };
+}
+
+/**
+ * Hook to fetch available recipients for payments
+ * Returns list of users that can receive payments (excludes current user)
+ */
+export function useRecipients() {
+  const { user } = useAuthStore();
+
+  return useQuery({
+    queryKey: ['recipients'] as const,
+    queryFn: async () => {
+      const { getRecipients } = await import('../api/payments');
+      return await getRecipients();
+    },
+    enabled: !!user, // Only fetch if user is authenticated
+    staleTime: 5 * 60 * 1000, // 5 minutes cache
+  });
 }

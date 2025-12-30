@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuthStore } from 'shared-auth-store';
 import { UserRole } from 'shared-types';
@@ -8,6 +8,53 @@ import {
   buttonVariants,
   cn,
 } from '@mfe/shared-design-system';
+import { getApiClient } from '@mfe/shared-api-client';
+
+/**
+ * User Avatar component
+ * Displays user's avatar image or a default ghost icon
+ */
+function UserAvatar({
+  avatarUrl,
+  userName,
+  size = 'md',
+}: {
+  avatarUrl: string | null;
+  userName: string;
+  size?: 'sm' | 'md';
+}) {
+  const sizeClasses = size === 'sm' ? 'w-8 h-8' : 'w-10 h-10';
+
+  if (avatarUrl) {
+    return (
+      <img
+        src={avatarUrl}
+        alt={`${userName}'s avatar`}
+        className={cn(sizeClasses, 'rounded-full object-cover border-2 border-primary-foreground/30')}
+      />
+    );
+  }
+
+  // Default ghost/placeholder avatar
+  return (
+    <div
+      className={cn(
+        sizeClasses,
+        'rounded-full bg-primary-foreground/20 flex items-center justify-center border-2 border-primary-foreground/30'
+      )}
+      aria-label={`${userName}'s avatar`}
+    >
+      <svg
+        className={size === 'sm' ? 'w-4 h-4' : 'w-5 h-5'}
+        fill="currentColor"
+        viewBox="0 0 24 24"
+        aria-hidden="true"
+      >
+        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+      </svg>
+    </div>
+  );
+}
 
 export interface HeaderProps {
   /**
@@ -31,9 +78,33 @@ export function Header({
   onLogout,
   branding = 'Payments System',
 }: HeaderProps) {
-  const { user, isAuthenticated, logout, hasRole } = useAuthStore();
+  const { user, isAuthenticated, logout, hasRole, accessToken } = useAuthStore();
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+
+  // Fetch user's avatar from profile service when authenticated
+  useEffect(() => {
+    if (!isAuthenticated || !accessToken) {
+      setAvatarUrl(null);
+      return;
+    }
+
+    const fetchAvatar = async () => {
+      try {
+        const apiClient = getApiClient();
+        const response = await apiClient.get<{ avatarUrl: string | null }>('/profile');
+        if (response?.data?.avatarUrl) {
+          setAvatarUrl(response.data.avatarUrl);
+        }
+      } catch {
+        // Silently fail - avatar is optional
+        setAvatarUrl(null);
+      }
+    };
+
+    fetchAvatar();
+  }, [isAuthenticated, accessToken]);
 
   const handleLogout = () => {
     if (onLogout) {
@@ -41,6 +112,7 @@ export function Header({
     } else {
       logout();
     }
+    setAvatarUrl(null);
   };
 
   const toggleMobileMenu = () => {
@@ -59,20 +131,6 @@ export function Header({
       pathname === path ||
       (pathname.startsWith(path + '/') && pathname[path.length] === '/')
     );
-  };
-
-  // Helper function to check if Reports tab is active
-  const isReportsActive = () => {
-    const pathname = location.pathname;
-    const search = location.search;
-    return pathname === '/payments' && search.includes('tab=reports');
-  };
-
-  // Helper function to check if Payments tab is active
-  const isPaymentsActive = () => {
-    const pathname = location.pathname;
-    const search = location.search;
-    return pathname === '/payments' && !search.includes('tab=reports');
   };
 
   // Helper function to get nav link classes
@@ -98,8 +156,8 @@ export function Header({
   };
 
   return (
-    <header className="sticky top-0 z-50 shadow-lg text-primary-foreground bg-primary">
-      <div className="container px-4 py-4 mx-auto">
+    <header className="sticky top-0 z-50 px-8 py-4 shadow-lg text-primary-foreground bg-primary">
+      <div className="max-w-7xl mx-auto">
         <div className="flex items-center justify-between">
           {/* Branding/Logo */}
           <div className="flex items-center gap-3">
@@ -113,17 +171,14 @@ export function Header({
               <div className="items-center hidden gap-4 md:flex">
                 <Link
                   to="/payments"
-                  className={getNavLinkClasses('/payments', isPaymentsActive())}
+                  className={getNavLinkClasses('/payments')}
                 >
                   Payments
                 </Link>
                 {hasRole(UserRole.VENDOR) && (
                   <Link
-                    to="/payments?tab=reports"
-                    className={getNavLinkClasses(
-                      '/payments',
-                      isReportsActive()
-                    )}
+                    to="/reports"
+                    className={getNavLinkClasses('/reports')}
                   >
                     Reports
                   </Link>
@@ -155,6 +210,9 @@ export function Header({
                     {user.role.toLowerCase()}
                   </span>
                 </div>
+
+                {/* User Avatar */}
+                <UserAvatar avatarUrl={avatarUrl} userName={user.name} />
 
                 {/* Logout Button */}
                 <Button
@@ -235,21 +293,15 @@ export function Header({
                 <>
                   <Link
                     to="/payments"
-                    className={getMobileNavLinkClasses(
-                      '/payments',
-                      isPaymentsActive()
-                    )}
+                    className={getMobileNavLinkClasses('/payments')}
                     onClick={closeMobileMenu}
                   >
                     Payments
                   </Link>
                   {hasRole(UserRole.VENDOR) && (
                     <Link
-                      to="/payments?tab=reports"
-                      className={getMobileNavLinkClasses(
-                        '/payments',
-                        isReportsActive()
-                      )}
+                      to="/reports"
+                      className={getMobileNavLinkClasses('/reports')}
                       onClick={closeMobileMenu}
                     >
                       Reports
@@ -275,13 +327,16 @@ export function Header({
                   {/* Mobile User Info and Logout */}
                   <div className="pt-4 mt-4 border-t border-primary-foreground/20">
                     {user && (
-                      <div className="px-4 py-2 mb-2">
-                        <p className="text-sm font-medium text-primary-foreground">
-                          {user.name}
-                        </p>
-                        <p className="text-xs capitalize text-primary-foreground/80">
-                          {user.role.toLowerCase()}
-                        </p>
+                      <div className="flex items-center gap-3 px-4 py-2 mb-2">
+                        <UserAvatar avatarUrl={avatarUrl} userName={user.name} size="sm" />
+                        <div>
+                          <p className="text-sm font-medium text-primary-foreground">
+                            {user.name}
+                          </p>
+                          <p className="text-xs capitalize text-primary-foreground/80">
+                            {user.role.toLowerCase()}
+                          </p>
+                        </div>
                       </div>
                     )}
 

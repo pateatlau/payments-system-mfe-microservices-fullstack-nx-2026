@@ -96,7 +96,7 @@ const profileApiClient = new ApiClient({
  *   const profile = await getProfile();
  *   console.log('User name:', profile.name);
  *   console.log('Phone:', profile.phone);
- * } catch (_error) {
+ * } catch (error) {
  *   console.error('Failed to load profile:', error);
  * }
  * ```
@@ -139,7 +139,7 @@ export async function getProfile(): Promise<Profile> {
  *     bio: 'Updated bio information'
  *   });
  *   console.log('Profile updated:', updatedProfile);
- * } catch (_error) {
+ * } catch (error) {
  *   console.error('Failed to update profile:', error);
  * }
  * ```

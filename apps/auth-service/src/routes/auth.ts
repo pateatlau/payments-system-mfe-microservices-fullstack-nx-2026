@@ -40,6 +40,7 @@ router.post('/auth/password', authenticate, authController.changePassword);
  * Internal user lookup routes (for service-to-service validation)
  * Note: In production, protect with network policies or service tokens.
  */
+router.get('/auth/internal/users', authController.listUsersInternal);
 router.get(
   '/auth/internal/users/by-email',
   authController.getUserByEmailInternal

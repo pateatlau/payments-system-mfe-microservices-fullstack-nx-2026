@@ -44,6 +44,8 @@ jest.mock('../api/audit-logs', () => ({
   getAvailableActions: jest.fn(),
 }));
 
+// Note: paymentsMfe/PaymentReports is mocked via moduleNameMapper in jest.config.cts
+
 // Mock the system health API
 jest.mock('../api/system-health', () => ({
   getSystemHealth: jest.fn(),
@@ -215,9 +217,7 @@ describe('AdminDashboard', () => {
     fireEvent.click(paymentsTab!);
 
     await waitFor(() => {
-      expect(
-        screen.getByText(/will be implemented in a future task/)
-      ).toBeInTheDocument();
+      expect(screen.getByTestId('payment-reports-mock')).toBeInTheDocument();
     });
   });
 

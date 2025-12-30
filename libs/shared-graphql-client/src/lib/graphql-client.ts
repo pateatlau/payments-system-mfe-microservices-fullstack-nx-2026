@@ -9,6 +9,7 @@ import {
   InMemoryCache,
   createHttpLink,
   from,
+  type ErrorLike,
 } from '@apollo/client';
 import { setContext } from '@apollo/client/link/context';
 import { ErrorLink } from '@apollo/client/link/error';
@@ -43,13 +44,22 @@ export function createGraphQLClient(config: GraphQLClientConfig): ApolloClient {
     };
   });
 
+  // Helper to convert ErrorLike to Error
+  const toError = (errorLike: ErrorLike): Error => {
+    if (errorLike instanceof Error) {
+      return errorLike;
+    }
+    // ErrorLike has message property
+    return new Error(errorLike.message);
+  };
+
   // Error link - handle errors
   const errorLink = new ErrorLink(({ error }) => {
     if (CombinedGraphQLErrors.is(error)) {
       // Handle GraphQL errors
       error.errors.forEach((err) => {
         console.error(
-          `[GraphQL error]: Message: ${err.message}, Location: ${err.locations}, Path: ${err.path}`
+          `[GraphQL error]: Message: ${err.message}, Location: ${JSON.stringify(err.locations)}, Path: ${err.path}`
         );
 
         // Handle authentication errors
@@ -64,9 +74,9 @@ export function createGraphQLClient(config: GraphQLClientConfig): ApolloClient {
         }
       });
     } else {
-      // Handle network errors
-      console.error(`[Network error]: ${error}`);
-      onErrorCallback?.(error as Error);
+      // Handle network errors - error is ErrorLike (has message property)
+      console.error(`[Network error]: ${error.message}`);
+      onErrorCallback?.(toError(error));
     }
   });
 
