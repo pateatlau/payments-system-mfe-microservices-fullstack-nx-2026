@@ -45,9 +45,12 @@ export const updateProfileSchema = z.object({
       z.literal(''), // Allow empty string to clear address
     ])
     .optional(),
+  // TODO: Replace base64 data URL validation with proper URL validation
+  // once file upload to cloud storage (S3) is implemented
   avatarUrl: z
     .union([
       z.string().url('Avatar URL must be a valid URL'),
+      z.string().startsWith('data:', 'Avatar must be a valid image'), // Allow base64 data URLs
       z.literal(''), // Allow empty string to clear avatar
     ])
     .optional(),
