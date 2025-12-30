@@ -5,6 +5,7 @@ import { UserRole } from 'shared-types';
 import { SignInPage, SignInComponentProps } from '../pages/SignInPage';
 import { SignUpPage, SignUpComponentProps } from '../pages/SignUpPage';
 import { PaymentsPage, PaymentsComponentProps } from '../pages/PaymentsPage';
+import { ReportsPage, ReportsComponentProps } from '../pages/ReportsPage';
 import { AdminPage, AdminDashboardComponentProps } from '../pages/AdminPage';
 import { HomePage } from '../pages/HomePage';
 import { ProtectedRoute } from '../components/ProtectedRoute';
@@ -25,6 +26,10 @@ export interface AppRoutesProps {
    * PaymentsPage component to use. Required for proper DI pattern.
    */
   PaymentsComponent: ComponentType<PaymentsComponentProps>;
+  /**
+   * ReportsPage component to use. Required for proper DI pattern.
+   */
+  ReportsComponent: ComponentType<ReportsComponentProps>;
   /**
    * AdminDashboard component to use. Required for proper DI pattern.
    */
@@ -63,6 +68,7 @@ export function AppRoutes({
   SignInComponent,
   SignUpComponent,
   PaymentsComponent,
+  ReportsComponent,
   AdminDashboardComponent,
   ProfilePageComponent,
 }: AppRoutesProps) {
@@ -105,6 +111,16 @@ export function AppRoutes({
         element={
           <ProtectedRoute>
             <PaymentsPage PaymentsComponent={PaymentsComponent} />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Reports route - requires VENDOR or ADMIN role */}
+      <Route
+        path="/reports"
+        element={
+          <ProtectedRoute requiredRole={UserRole.VENDOR}>
+            <ReportsPage ReportsComponent={ReportsComponent} />
           </ProtectedRoute>
         }
       />

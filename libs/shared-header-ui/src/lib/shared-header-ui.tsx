@@ -61,20 +61,6 @@ export function Header({
     );
   };
 
-  // Helper function to check if Reports tab is active
-  const isReportsActive = () => {
-    const pathname = location.pathname;
-    const search = location.search;
-    return pathname === '/payments' && search.includes('tab=reports');
-  };
-
-  // Helper function to check if Payments tab is active
-  const isPaymentsActive = () => {
-    const pathname = location.pathname;
-    const search = location.search;
-    return pathname === '/payments' && !search.includes('tab=reports');
-  };
-
   // Helper function to get nav link classes
   const getNavLinkClasses = (path: string, isActiveCheck?: boolean) => {
     const active = isActiveCheck !== undefined ? isActiveCheck : isActive(path);
@@ -113,17 +99,14 @@ export function Header({
               <div className="items-center hidden gap-4 md:flex">
                 <Link
                   to="/payments"
-                  className={getNavLinkClasses('/payments', isPaymentsActive())}
+                  className={getNavLinkClasses('/payments')}
                 >
                   Payments
                 </Link>
                 {hasRole(UserRole.VENDOR) && (
                   <Link
-                    to="/payments?tab=reports"
-                    className={getNavLinkClasses(
-                      '/payments',
-                      isReportsActive()
-                    )}
+                    to="/reports"
+                    className={getNavLinkClasses('/reports')}
                   >
                     Reports
                   </Link>
@@ -235,21 +218,15 @@ export function Header({
                 <>
                   <Link
                     to="/payments"
-                    className={getMobileNavLinkClasses(
-                      '/payments',
-                      isPaymentsActive()
-                    )}
+                    className={getMobileNavLinkClasses('/payments')}
                     onClick={closeMobileMenu}
                   >
                     Payments
                   </Link>
                   {hasRole(UserRole.VENDOR) && (
                     <Link
-                      to="/payments?tab=reports"
-                      className={getMobileNavLinkClasses(
-                        '/payments',
-                        isReportsActive()
-                      )}
+                      to="/reports"
+                      className={getMobileNavLinkClasses('/reports')}
                       onClick={closeMobileMenu}
                     >
                       Reports

@@ -19,7 +19,6 @@ import {
 } from '../hooks';
 import { useToasts } from '../hooks/useToasts';
 import { PaymentDetails } from './PaymentDetails';
-import { PaymentReports } from './PaymentReports';
 import { PaymentsSection } from './PaymentsSection';
 import type { UsePaymentsFilters } from '../hooks/usePayments';
 import type { PaymentWithParties } from './PaymentTableUtils';
@@ -48,17 +47,6 @@ function PaymentsPageInner({ onPaymentSuccess }: PaymentsPageProps = {}) {
   const dialogRef = useRef<HTMLDivElement | null>(null);
   const previouslyFocusedRef = useRef<HTMLElement | null>(null);
 
-  // Get tab from URL search params using browser native API
-  const getTabFromUrl = (): 'payments' | 'reports' => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const tab = urlParams.get('tab');
-    return tab === 'reports' ? 'reports' : 'payments';
-  };
-
-  const [activeTab, setActiveTab] = useState<'payments' | 'reports'>(
-    getTabFromUrl()
-  );
-
   const [filters, setFilters] = useState<UsePaymentsFilters>({
     status: 'all',
     type: 'all',
@@ -75,47 +63,21 @@ function PaymentsPageInner({ onPaymentSuccess }: PaymentsPageProps = {}) {
   // Real-time payment updates via WebSocket
   usePaymentUpdates();
 
-  // Listen for URL changes - update activeTab when URL changes
-  useEffect(() => {
-    const handleLocationChange = () => {
-      const tabFromUrl = getTabFromUrl();
-      setActiveTab(tabFromUrl);
-    };
-
-    window.addEventListener('popstate', handleLocationChange);
-
-    const checkInterval = setInterval(() => {
-      const tabFromUrl = getTabFromUrl();
-      setActiveTab(prev => {
-        if (prev !== tabFromUrl) {
-          return tabFromUrl;
-        }
-        return prev;
-      });
-    }, 50);
-
-    return () => {
-      window.removeEventListener('popstate', handleLocationChange);
-      clearInterval(checkInterval);
-    };
-  }, []);
-
-  // Sync URL when tab changes via tab click
-  useEffect(() => {
-    if (activeTab === 'reports') {
-      window.history.replaceState(null, '', '/payments?tab=reports');
-    } else {
-      window.history.replaceState(null, '', '/payments');
-    }
-  }, [activeTab]);
-
   // Fetch payments
+  // Note: We use placeholderData: keepPreviousData pattern via isPreviousData check
   const {
     data: payments,
     isLoading: isLoadingPayments,
+    isFetching: isFetchingPayments,
+    isPlaceholderData,
     error: paymentsError,
     refetch: refetchPayments,
   } = usePayments(filters);
+
+  // Track if this is the initial load (no data yet) vs a filter-driven refetch
+  // We have data if: payments exist OR we're showing placeholder (previous) data
+  const hasData = !!payments || isPlaceholderData;
+  const isInitialLoad = isLoadingPayments && !hasData;
 
   const paymentsWithParties: PaymentWithParties[] = (payments ?? []).map(
     payment => payment as PaymentWithParties
@@ -192,8 +154,9 @@ function PaymentsPageInner({ onPaymentSuccess }: PaymentsPageProps = {}) {
     });
   }, [paymentsError, addToast]);
 
-  // Loading state
-  if (isLoadingPayments) {
+  // Loading state - only show full-screen loading on initial load
+  // For filter-driven refetches, keep the UI visible to preserve filter panel state
+  if (isInitialLoad) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-muted">
         <Loading size="lg" label="Loading payments..." />
@@ -243,46 +206,16 @@ function PaymentsPageInner({ onPaymentSuccess }: PaymentsPageProps = {}) {
           <h1 className="mb-2 text-3xl font-bold text-foreground">Payments</h1>
           <p className="text-muted-foreground">
             {isVendor
-              ? 'Manage payments and view reports'
+              ? 'Manage your payments'
               : 'View your payment history'}
           </p>
         </div>
 
-        {/* Tab Navigation (Vendors/Admins only) */}
-        {isVendor && (
-          <div className="flex gap-2 mb-6 border-b border-border">
-            <button
-              onClick={() => setActiveTab('payments')}
-              className={`px-4 py-2 font-medium transition-colors ${
-                activeTab === 'payments'
-                  ? 'border-b-2 border-primary text-primary'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              Payments
-            </button>
-            <button
-              onClick={() => setActiveTab('reports')}
-              className={`px-4 py-2 font-medium transition-colors ${
-                activeTab === 'reports'
-                  ? 'border-b-2 border-primary text-primary'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              Reports
-            </button>
-          </div>
-        )}
-
-        {/* Reports Tab Content */}
-        {activeTab === 'reports' && isVendor && <PaymentReports />}
-
-        {/* Payments Tab Content */}
-        {activeTab === 'payments' && (
-          <PaymentsSection
+        {/* Payments Content */}
+        <PaymentsSection
             payments={paymentsWithParties}
             filters={filters}
-            isLoadingPayments={isLoadingPayments}
+            isLoadingPayments={isFetchingPayments}
             isVendor={isVendor}
             isAdmin={isAdmin}
             isCustomer={isCustomer}
@@ -298,7 +231,6 @@ function PaymentsPageInner({ onPaymentSuccess }: PaymentsPageProps = {}) {
             onRefetch={handleRefetch}
             onView={setSelectedPaymentId}
           />
-        )}
       </div>
 
       {/* Payment Details Modal */}

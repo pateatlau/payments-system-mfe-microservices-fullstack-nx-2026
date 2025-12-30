@@ -33,6 +33,12 @@ declare module 'paymentsMfe/PaymentsPage' {
   export default PaymentsPage;
 }
 
+declare module 'paymentsMfe/ReportsPage' {
+  import { ComponentType } from 'react';
+  const ReportsPage: ComponentType;
+  export default ReportsPage;
+}
+
 declare module 'adminMfe/AdminDashboard' {
   import { ComponentType } from 'react';
   const AdminDashboard: ComponentType;

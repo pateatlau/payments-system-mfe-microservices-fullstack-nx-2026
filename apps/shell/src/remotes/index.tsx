@@ -71,6 +71,12 @@ const LazyPaymentsPage = lazy(() =>
   }))
 );
 
+const LazyReportsPage = lazy(() =>
+  import('paymentsMfe/ReportsPage').catch(() => ({
+    default: () => <ErrorFallback componentName="ReportsPage" />,
+  }))
+);
+
 const LazyAdminDashboard = lazy(() =>
   import('adminMfe/AdminDashboard').catch(() => ({
     default: () => <ErrorFallback componentName="AdminDashboard" />,
@@ -89,6 +95,10 @@ export const SignUpRemote = withSuspense(LazySignUp, 'Loading sign up...');
 export const PaymentsPageRemote = withSuspense(
   LazyPaymentsPage,
   'Loading payments...'
+);
+export const ReportsPageRemote = withSuspense(
+  LazyReportsPage,
+  'Loading reports...'
 );
 export const AdminDashboardRemote = withSuspense(
   LazyAdminDashboard,
