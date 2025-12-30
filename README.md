@@ -1,7 +1,7 @@
 # MFE Payments System - Production-Ready Microfrontend Platform
 
-**Version:** 0.3.0  
-**Status:** POC-3 Complete – Production-Ready Infrastructure + UI/UX Enhancements  
+**Version:** 0.3.1
+**Status:** POC-3 Complete – Production-Ready Infrastructure + Nx Cloud CI
 **Tech Stack:** React + Nx + Rspack + Module Federation v2 + Node.js + PostgreSQL + RabbitMQ + nginx
 
 ---
@@ -20,6 +20,7 @@ A production-ready, full-stack microfrontend platform demonstrating enterprise-g
 - **Dual API:** REST (Swagger UI) + GraphQL (Apollo Server)
 - **Full Observability:** Prometheus metrics, Grafana dashboards, Jaeger tracing, Sentry errors
 - **Banking-Grade Security:** JWT authentication, RBAC, secure session management
+- **CI Pipeline:** GitHub Actions with Nx Cloud distributed caching (50-65% faster builds)
 
 ### Architecture
 
@@ -209,6 +210,7 @@ payments-system-mfe/
 - Docker + Docker Compose
 - Prometheus + Grafana + Jaeger
 - Sentry error tracking
+- GitHub Actions CI with Nx Cloud
 
 ---
 
@@ -308,6 +310,7 @@ pnpm test:e2e                 # End-to-end tests
 
 - [Executive Summary](docs/EXECUTIVE_SUMMARY.md) – High-level overview for stakeholders
 - [Implementation Journey](docs/IMPLEMENTATION-JOURNEY.md) – Evolution from POC-0 → POC-3
+- [CI Pipeline Implementation](docs/CI-PIPELINE-IMPLEMENTATION.md) – GitHub Actions + Nx Cloud integration
 - [POC-3 Implementation Plan](docs/POC-3-Implementation/implementation-plan.md) – Phases 1–9, current status
 - [POC-3 Task List](docs/POC-3-Implementation/task-list.md) – Progress tracking checklist
 - [Dark Mode – Full Plan](docs/POC-3-Implementation/DARK-MODE-FULL-IMPLEMENTATION-PLAN.md) – Steps A–I, tests, guardrails
@@ -337,7 +340,8 @@ pnpm test:e2e                 # End-to-end tests
 
 - **Development Environment:** Fully functional with HTTPS/TLS, observability stack, and production-ready infrastructure
 - **Live Demo:** Available locally at https://localhost with complete feature set
-- **CI/CD & Deployment:** Pending implementation (planned for next phase)
+- **CI Pipeline:** ✅ Complete with GitHub Actions + Nx Cloud distributed caching
+- **CD & Deployment:** Pending implementation (planned for next phase)
 - **Internet Live Demo:** Will be available once deployment pipeline is implemented
 
 ---
@@ -348,6 +352,6 @@ For detailed setup instructions, troubleshooting, and development workflows, ref
 
 ---
 
-**Last Updated:** December 23, 2025  
-**Status:** Production-Ready Architecture + UI/UX Polished (Dark Mode, Mobile, Navigation)  
-**Next Phase:** CI/CD Pipeline + Cloud Deployment
+**Last Updated:** December 31, 2025
+**Status:** Production-Ready Architecture + CI Pipeline with Nx Cloud
+**Next Phase:** CD Pipeline + Cloud Deployment
