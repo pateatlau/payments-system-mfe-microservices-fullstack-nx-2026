@@ -72,7 +72,7 @@ export function PaymentTable({
                 <th className="px-3 py-2 text-[10px] font-medium tracking-wider text-left uppercase text-muted-foreground">
                   To
                 </th>
-                <th className="px-3 py-2 text-[10px] font-medium tracking-wider text-left uppercase text-muted-foreground">
+                <th className="px-3 py-2 text-[10px] font-medium tracking-wider text-right uppercase text-muted-foreground">
                   Amount
                 </th>
                 <th className="px-3 py-2 text-[10px] font-medium tracking-wider text-left uppercase text-muted-foreground">

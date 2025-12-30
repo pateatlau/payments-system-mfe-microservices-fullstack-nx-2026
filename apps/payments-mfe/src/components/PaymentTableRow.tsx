@@ -98,7 +98,7 @@ export function PaymentTableRow({
               );
             })()}
           </td>
-          <td className="px-3 py-2 font-mono text-xs whitespace-nowrap text-foreground">
+          <td className="px-3 py-2 font-mono text-xs whitespace-nowrap text-foreground text-right">
             {formatCurrency(payment.amount, payment.currency)}
           </td>
           <td className="px-3 py-2 text-xs whitespace-nowrap text-muted-foreground">
