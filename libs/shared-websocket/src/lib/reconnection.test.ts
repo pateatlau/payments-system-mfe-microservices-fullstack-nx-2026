@@ -5,13 +5,21 @@
 import { ReconnectionManager } from './reconnection';
 
 describe('ReconnectionManager', () => {
+  // Store original Math.random to restore after tests
+  const originalRandom = Math.random;
+
   beforeEach(() => {
     jest.clearAllTimers();
     jest.useFakeTimers();
+    // Mock Math.random to return 0.5 (middle of range, no jitter effect)
+    // This makes tests deterministic - jitter calculation: 0.5 * 2 - 1 = 0
+    Math.random = jest.fn(() => 0.5);
   });
 
   afterEach(() => {
     jest.useRealTimers();
+    // Restore original Math.random
+    Math.random = originalRandom;
   });
 
   describe('getNextDelay', () => {
@@ -22,19 +30,35 @@ describe('ReconnectionManager', () => {
         maxDelay: 10000,
       });
 
-      // First attempt: ~1000ms
+      // First attempt: 1000ms (with mocked random = 0.5, jitter = 0)
       const delay1 = manager.getNextDelay();
-      expect(delay1).toBeGreaterThanOrEqual(800);
-      expect(delay1).toBeLessThanOrEqual(1200);
+      expect(delay1).toBe(1000);
 
-      // Increment attempts
+      // Increment attempts by running scheduled reconnect
       manager.scheduleReconnect(() => {});
       jest.advanceTimersByTime(delay1);
 
-      // Second attempt: ~2000ms
+      // Second attempt: 2000ms (1000 * 2^1)
       const delay2 = manager.getNextDelay();
-      expect(delay2).toBeGreaterThanOrEqual(1600);
-      expect(delay2).toBeLessThanOrEqual(2400);
+      expect(delay2).toBe(2000);
+    });
+
+    it('should apply jitter when random varies', () => {
+      const manager = new ReconnectionManager({
+        maxAttempts: 5,
+        initialDelay: 1000,
+        maxDelay: 10000,
+      });
+
+      // Test with random = 0 (minimum jitter: -20%)
+      (Math.random as jest.Mock).mockReturnValueOnce(0);
+      const delayMin = manager.getNextDelay();
+      expect(delayMin).toBe(800); // 1000 - 20%
+
+      // Test with random = 1 (maximum jitter: +20%)
+      (Math.random as jest.Mock).mockReturnValueOnce(1);
+      const delayMax = manager.getNextDelay();
+      expect(delayMax).toBe(1200); // 1000 + 20%
     });
 
     it('should cap delay at maxDelay', () => {
@@ -44,15 +68,15 @@ describe('ReconnectionManager', () => {
         maxDelay: 5000,
       });
 
-      // Simulate many attempts
+      // Simulate many attempts to exceed maxDelay
       for (let i = 0; i < 5; i++) {
         manager.scheduleReconnect(() => {});
-        const delay = manager.getNextDelay();
-        jest.advanceTimersByTime(delay);
+        jest.runAllTimers();
       }
 
+      // At attempt 5: 1000 * 2^5 = 32000, capped to 5000
       const delay = manager.getNextDelay();
-      expect(delay).toBeLessThanOrEqual(6000); // 5000 + 20% jitter
+      expect(delay).toBe(5000); // Capped at maxDelay (with jitter = 0)
     });
 
     it('should return -1 when max attempts reached', () => {
