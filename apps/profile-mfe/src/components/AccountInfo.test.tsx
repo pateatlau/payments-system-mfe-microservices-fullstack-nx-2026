@@ -3,21 +3,21 @@
  */
 
 import { render, screen } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+
 import { AccountInfo } from './AccountInfo';
 import { useAuthStore } from 'shared-auth-store';
 
-vi.mock('shared-auth-store', () => {
-  const actual = vi.requireActual('shared-auth-store');
+jest.mock('shared-auth-store', () => {
+  const actual = jest.requireActual('shared-auth-store');
   return {
     ...actual,
-    useAuthStore: vi.fn(),
+    useAuthStore: jest.fn(),
   };
 });
 
 describe('AccountInfo', () => {
   it('renders fallback message when no user is authenticated', () => {
-    (useAuthStore as unknown as vi.Mock).mockReturnValue({ user: null });
+    (useAuthStore as unknown as jest.Mock).mockReturnValue({ user: null });
 
     render(<AccountInfo />);
 
@@ -27,7 +27,7 @@ describe('AccountInfo', () => {
   });
 
   it('renders account details when user is present', () => {
-    (useAuthStore as unknown as vi.Mock).mockReturnValue({
+    (useAuthStore as unknown as jest.Mock).mockReturnValue({
       user: {
         id: 'user-1',
         email: 'user@example.com',

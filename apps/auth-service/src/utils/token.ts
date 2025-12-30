@@ -5,6 +5,7 @@
  */
 
 import jwt from 'jsonwebtoken';
+import type { SignOptions } from 'jsonwebtoken';
 import { config } from '../config';
 import { UserRole } from 'shared-types';
 
@@ -41,10 +42,11 @@ export const generateAccessToken = (payload: JwtPayload): string => {
     role: payload.role,
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return jwt.sign(tokenPayload, config.jwtSecret, {
+
+  const signOptions = {
     expiresIn: config.jwtExpiresIn,
-  } as any);
+  };
+  return jwt.sign(tokenPayload, config.jwtSecret, signOptions as SignOptions);
 };
 
 /**
@@ -61,10 +63,11 @@ export const generateRefreshToken = (payload: JwtPayload): string => {
     role: payload.role,
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return jwt.sign(tokenPayload, config.jwtRefreshSecret, {
+
+  const signOptions = {
     expiresIn: config.jwtRefreshExpiresIn,
-  } as any);
+  };
+  return jwt.sign(tokenPayload, config.jwtRefreshSecret, signOptions as SignOptions);
 };
 
 /**

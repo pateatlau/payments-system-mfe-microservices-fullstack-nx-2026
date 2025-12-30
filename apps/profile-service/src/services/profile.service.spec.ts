@@ -6,7 +6,7 @@ import { profileService } from './profile.service';
 import { prisma } from '../lib/prisma';
 
 // Mock Prisma
-jest.mock('db', () => ({
+jest.mock('../lib/prisma', () => ({
   prisma: {
     userProfile: {
       findUnique: jest.fn(),
@@ -29,16 +29,9 @@ describe('ProfileService', () => {
       phone: null,
       address: null,
       bio: null,
-      preferences: null,
+      preferences: {},
       createdAt: new Date(),
       updatedAt: new Date(),
-      user: {
-        id: 'user-1',
-        email: 'test@example.com',
-        name: 'Test User',
-        role: 'CUSTOMER',
-        createdAt: new Date(),
-      },
     };
 
     it('should return existing profile', async () => {
@@ -51,17 +44,6 @@ describe('ProfileService', () => {
       expect(result).toEqual(mockProfile);
       expect(prisma.userProfile.findUnique).toHaveBeenCalledWith({
         where: { userId: 'user-1' },
-        include: {
-          user: {
-            select: {
-              id: true,
-              email: true,
-              name: true,
-              role: true,
-              createdAt: true,
-            },
-          },
-        },
       });
       expect(prisma.userProfile.create).not.toHaveBeenCalled();
     });
@@ -80,18 +62,7 @@ describe('ProfileService', () => {
           address: null,
           avatarUrl: null,
           bio: null,
-          preferences: null,
-        },
-        include: {
-          user: {
-            select: {
-              id: true,
-              email: true,
-              name: true,
-              role: true,
-              createdAt: true,
-            },
-          },
+          preferences: {},
         },
       });
     });
@@ -105,16 +76,9 @@ describe('ProfileService', () => {
       phone: '+1234567890',
       address: '123 Main St',
       bio: 'Test bio',
-      preferences: null,
+      preferences: {},
       createdAt: new Date(),
       updatedAt: new Date(),
-      user: {
-        id: 'user-1',
-        email: 'test@example.com',
-        name: 'Test User',
-        role: 'CUSTOMER',
-        createdAt: new Date(),
-      },
     };
 
     it('should update profile', async () => {
@@ -164,7 +128,6 @@ describe('ProfileService', () => {
           theme: 'dark',
           language: 'en-US',
         },
-        user: {},
       };
 
       (prisma.userProfile.findUnique as jest.Mock).mockResolvedValue(
@@ -183,8 +146,7 @@ describe('ProfileService', () => {
       const mockProfile = {
         id: 'profile-1',
         userId: 'user-1',
-        preferences: null,
-        user: {},
+        preferences: {},
       };
 
       (prisma.userProfile.findUnique as jest.Mock).mockResolvedValue(
@@ -206,7 +168,6 @@ describe('ProfileService', () => {
           theme: 'light',
           language: 'en-US',
         },
-        user: {},
       };
 
       (prisma.userProfile.findUnique as jest.Mock).mockResolvedValue(
@@ -241,8 +202,7 @@ describe('ProfileService', () => {
       const mockProfile = {
         id: 'profile-1',
         userId: 'user-1',
-        preferences: null,
-        user: {},
+        preferences: {},
       };
 
       (prisma.userProfile.findUnique as jest.Mock).mockResolvedValue(

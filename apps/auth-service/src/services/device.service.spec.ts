@@ -10,7 +10,7 @@ import {
 } from './device.service';
 import { prisma } from '../lib/prisma';
 import { ApiError } from '../middleware/errorHandler';
-import { getEventPublisher } from '../events/publisher';
+import { getEventPublisher as _getEventPublisher } from '../events/publisher';
 
 // Mock dependencies
 jest.mock('../lib/prisma', () => ({

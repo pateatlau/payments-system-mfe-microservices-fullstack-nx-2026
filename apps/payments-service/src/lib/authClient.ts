@@ -16,7 +16,9 @@ async function httpGet<T>(path: string): Promise<T> {
     try {
       const body = await res.json();
       message = body?.error?.message || body?.message || message;
-    } catch {}
+    } catch {
+      // Ignore JSON parse errors, use default message
+    }
     throw new Error(message);
   }
   const data = await res.json();

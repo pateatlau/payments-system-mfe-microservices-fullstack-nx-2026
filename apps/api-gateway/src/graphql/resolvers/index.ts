@@ -401,6 +401,7 @@ export const resolvers: Resolvers<GraphQLContext> = {
 
   // Subscription Resolvers (placeholder - would use WebSocket in production)
   Subscription: {
+    // eslint-disable-next-line require-yield
     paymentUpdated: async function* (
       _parent: unknown,
       _args: { userId: string },
@@ -411,6 +412,7 @@ export const resolvers: Resolvers<GraphQLContext> = {
         extensions: { code: 'NOT_IMPLEMENTED' },
       });
     },
+    // eslint-disable-next-line require-yield
     userUpdated: async function* (
       _parent: unknown,
       _args: unknown,

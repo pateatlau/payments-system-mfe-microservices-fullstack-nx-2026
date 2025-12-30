@@ -363,7 +363,7 @@ test.describe('Dark Mode Across Different Pages', () => {
     await page.goto('/admin');
     await page.waitForLoadState('networkidle');
 
-    const htmlElement = page.locator('html');
+    const _htmlElement = page.locator('html');
 
     // Check that the page has semantic token classes
     const main = page.locator('main');
@@ -381,7 +381,7 @@ test.describe('Dark Mode Across Different Pages', () => {
     await page.goto('/profile');
     await page.waitForLoadState('networkidle');
 
-    const htmlElement = page.locator('html');
+    const _htmlElement = page.locator('html');
 
     // Look for form inputs and verify they use semantic tokens
     const inputs = page.locator(

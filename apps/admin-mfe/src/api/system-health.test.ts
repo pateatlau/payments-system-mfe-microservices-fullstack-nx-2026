@@ -25,20 +25,20 @@ describe('System Health API', () => {
 
   describe('getSystemHealth', () => {
     it('should fetch system health data', async () => {
-      const mockResponse = {
-        data: {
-          data: {
-            status: 'healthy',
-            timestamp: '2026-01-15T10:30:00.000Z',
-            services: {
-              database: 'healthy',
-              redis: 'healthy',
-              authService: 'healthy',
-              paymentsService: 'healthy',
-            },
-            version: '1.0.0',
-          },
+      const mockData = {
+        status: 'healthy',
+        timestamp: '2026-01-15T10:30:00.000Z',
+        services: {
+          database: 'healthy',
+          redis: 'healthy',
+          authService: 'healthy',
+          paymentsService: 'healthy',
         },
+        version: '1.0.0',
+      };
+
+      const mockResponse = {
+        data: mockData,
       };
 
       (adminApiClient.get as jest.Mock).mockResolvedValue(mockResponse);
@@ -46,7 +46,7 @@ describe('System Health API', () => {
       const result = await getSystemHealth();
 
       expect(adminApiClient.get).toHaveBeenCalledWith('/admin/health');
-      expect(result).toEqual(mockResponse.data.data);
+      expect(result).toEqual(mockData);
     });
 
     it('should handle API errors', async () => {
@@ -60,17 +60,15 @@ describe('System Health API', () => {
     it('should handle unhealthy services', async () => {
       const mockResponse = {
         data: {
-          data: {
-            status: 'degraded',
-            timestamp: '2026-01-15T10:30:00.000Z',
-            services: {
-              database: 'healthy',
-              redis: 'degraded',
-              authService: 'healthy',
-              paymentsService: 'unhealthy',
-            },
-            version: '1.0.0',
+          status: 'degraded',
+          timestamp: '2026-01-15T10:30:00.000Z',
+          services: {
+            database: 'healthy',
+            redis: 'degraded',
+            authService: 'healthy',
+            paymentsService: 'unhealthy',
           },
+          version: '1.0.0',
         },
       };
 

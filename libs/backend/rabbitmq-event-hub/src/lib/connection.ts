@@ -31,8 +31,8 @@ const defaultConnectionOptions: Partial<RabbitMQConnectionOptions> = {
  * Manages a single connection to RabbitMQ with automatic reconnection
  */
 export class RabbitMQConnectionManager {
-  private connection: any | null = null;
-  private channel: any | null = null;
+  private connection: amqp.Connection | null = null;
+  private channel: amqp.ConfirmChannel | null = null;
   private readonly options: RabbitMQConnectionOptions;
   private reconnecting = false;
   private reconnectTimer: NodeJS.Timeout | null = null;
@@ -74,19 +74,21 @@ export class RabbitMQConnectionManager {
       console.log('[RabbitMQ] Connecting to:', this.options.url);
 
       // Create connection
-      this.connection = await amqp.connect(this.options.url, {
+      this.connection = (await amqp.connect(this.options.url, {
         timeout: this.options.connectionTimeout,
         heartbeat: this.options.heartbeat,
-      });
+      })) as unknown as amqp.Connection;
 
       // Set up connection event handlers
-      this.connection.on('error', (err: Error) => {
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+      this.connection!.on('error', (err: Error) => {
         console.error('[RabbitMQ] Connection error:', err);
         this.stats.errors++;
         this.handleConnectionError(err);
       });
 
-      this.connection.on('close', () => {
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+      this.connection!.on('close', () => {
         console.log('[RabbitMQ] Connection closed');
         this.stats.connected = false;
         this.connection = null;
@@ -98,20 +100,23 @@ export class RabbitMQConnectionManager {
       if (!this.connection) {
         throw new Error('Connection not established');
       }
-      this.channel = await this.connection.createConfirmChannel();
+      this.channel = (await (this.connection as amqp.Connection & { createConfirmChannel: () => Promise<unknown> }).createConfirmChannel()) as unknown as amqp.ConfirmChannel;
 
       // Set prefetch
       if (this.options.prefetch) {
-        await this.channel.prefetch(this.options.prefetch);
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+        await this.channel!.prefetch(this.options.prefetch);
       }
 
       // Set up channel event handlers
-      this.channel.on('error', (err: Error) => {
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+      this.channel!.on('error', (err: Error) => {
         console.error('[RabbitMQ] Channel error:', err);
         this.stats.errors++;
       });
 
-      this.channel.on('close', () => {
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+      this.channel!.on('close', () => {
         console.log('[RabbitMQ] Channel closed');
         this.channel = null;
       });
@@ -139,7 +144,7 @@ export class RabbitMQConnectionManager {
   /**
    * Get the current channel
    */
-  async getChannel(): Promise<any> {
+  async getChannel(): Promise<amqp.ConfirmChannel> {
     if (!this.channel) {
       await this.connect();
     }
@@ -154,7 +159,7 @@ export class RabbitMQConnectionManager {
   /**
    * Get the current connection
    */
-  async getConnection(): Promise<any> {
+  async getConnection(): Promise<amqp.Connection> {
     if (!this.connection) {
       await this.connect();
     }
@@ -256,7 +261,7 @@ export class RabbitMQConnectionManager {
       // Close connection
       if (this.connection) {
         try {
-          await this.connection.close();
+          await (this.connection as amqp.Connection & { close: () => Promise<void> }).close();
         } catch (err) {
           console.warn('[RabbitMQ] Error closing connection:', err);
         }
@@ -295,15 +300,13 @@ export class RabbitMQConnectionManager {
    */
   async healthCheck(): Promise<boolean> {
     try {
-      if (!this.isConnected() || !this.connection) {
+      // Check if we have an active connection and channel
+      if (!this.isConnected() || !this.connection || !this.channel) {
         return false;
       }
 
-      // Try to create a temporary channel to verify connection
-      const tempChannel = await this.connection.createChannel();
-      await tempChannel.close();
-
-      return true;
+      // Verify the channel is still open by checking its connection
+      return this.stats.connected && !this.closed;
     } catch (error) {
       console.error('[RabbitMQ] Health check failed:', error);
       return false;

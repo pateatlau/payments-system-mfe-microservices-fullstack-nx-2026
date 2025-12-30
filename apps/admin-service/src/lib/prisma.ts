@@ -15,7 +15,21 @@ const clientPath = path.join(
   process.cwd(),
   'apps/admin-service/node_modules/.prisma/admin-client'
 );
-const { PrismaClient } = require(clientPath);
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const { PrismaClient, UserRole: UserRoleEnum } = require(clientPath);
+
+// Re-export UserRole enum (value for runtime)
+export const UserRole = UserRoleEnum;
+
+// Type-only re-exports from the generated client (stripped at compile time, doesn't affect runtime)
+// This allows TypeScript to understand the types while using dynamic require for runtime
+export type {
+  AuditLog,
+  User,
+  SystemConfig,
+  Prisma,
+  UserRole as UserRoleType,
+} from '../../node_modules/.prisma/admin-client';
 
 /**
  * Prisma Client instance for Admin Service

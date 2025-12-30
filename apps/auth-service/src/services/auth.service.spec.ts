@@ -10,7 +10,7 @@ import { ApiError } from '../middleware/errorHandler';
 import { UserRole } from 'shared-types';
 
 // Mock dependencies
-jest.mock('db', () => ({
+jest.mock('../lib/prisma', () => ({
   prisma: {
     user: {
       findUnique: jest.fn(),
@@ -18,9 +18,6 @@ jest.mock('db', () => ({
       update: jest.fn(),
     },
     // userProfile removed - now in profile service (POC-3)
-    // userProfile: {
-      create: jest.fn(),
-    },
     refreshToken: {
       deleteMany: jest.fn(),
       create: jest.fn(),

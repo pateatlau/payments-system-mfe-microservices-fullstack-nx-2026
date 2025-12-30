@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent } from '../test-utils';
 import { QuickActions, type QuickAction } from './QuickActions';
 
 describe('QuickActions', () => {
@@ -38,7 +38,7 @@ describe('QuickActions', () => {
 
     expect(screen.getByText('User Management')).toBeInTheDocument();
     expect(screen.getByText('Payment Reports')).toBeInTheDocument();
-    expect(screen.getByText('Coming Soon')).toBeInTheDocument();
+    expect(screen.getAllByText('Coming Soon').length).toBeGreaterThan(0);
   });
 
   it('displays action descriptions', () => {
@@ -64,7 +64,7 @@ describe('QuickActions', () => {
   it('does not call onClick for disabled actions', () => {
     render(<QuickActions actions={mockActions} />);
 
-    const comingSoonButton = screen.getByText('Coming Soon');
+    const comingSoonButton = screen.getByRole('button', { name: 'Coming Soon' });
     fireEvent.click(comingSoonButton);
 
     expect(mockOnClick).not.toHaveBeenCalled();
@@ -73,7 +73,7 @@ describe('QuickActions', () => {
   it('displays disabled state correctly', () => {
     render(<QuickActions actions={mockActions} />);
 
-    const disabledButton = screen.getByText('Coming Soon').closest('button');
+    const disabledButton = screen.getByRole('button', { name: 'Coming Soon' });
     expect(disabledButton).toBeDisabled();
   });
 

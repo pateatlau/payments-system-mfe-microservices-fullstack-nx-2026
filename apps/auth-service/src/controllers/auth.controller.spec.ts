@@ -2,7 +2,7 @@
  * Auth Controller - Integration Tests
  */
 
-import type { Request, Response, NextFunction } from 'express';
+import type { Request, Response, NextFunction as _NextFunction } from 'express';
 import * as authController from './auth.controller';
 import * as authService from '../services/auth.service';
 import { ApiError } from '../middleware/errorHandler';
@@ -81,6 +81,7 @@ describe('AuthController', () => {
     });
 
     it('should handle validation errors', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const { registerSchema } = require('../validators/auth.validators');
       (registerSchema.parse as jest.Mock).mockImplementation(() => {
         throw new ZodError([]);

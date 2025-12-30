@@ -28,7 +28,7 @@ router.get('/health', async (_req: Request, res: Response) => {
         database: 'connected',
       },
     });
-  } catch (error) {
+  } catch (_error) {
     res.status(503).json({
       success: false,
       data: {
@@ -56,7 +56,7 @@ router.get('/health/ready', async (_req: Request, res: Response) => {
         timestamp: new Date().toISOString(),
       },
     });
-  } catch (error) {
+  } catch (_error) {
     res.status(503).json({
       success: false,
       data: {

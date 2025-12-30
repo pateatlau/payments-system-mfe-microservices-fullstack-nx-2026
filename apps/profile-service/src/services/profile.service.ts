@@ -40,7 +40,7 @@ export const profileService = {
 
     // Try cache first
     const cacheKey = CacheKeys.profile(userId);
-    const cached = await cache.get<any>(cacheKey);
+    const cached = await cache.get<unknown>(cacheKey);
 
     if (cached) {
       return cached;

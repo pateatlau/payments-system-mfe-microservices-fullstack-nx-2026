@@ -397,7 +397,7 @@ test.describe('Full-Stack Payments Integration', () => {
       await expect(createButton).not.toBeVisible({ timeout: 5000 });
 
       // Try to access create endpoint directly (should fail)
-      const createResponsePromise = page.waitForResponse(
+      const _createResponsePromise = page.waitForResponse(
         response =>
           response.url().includes('/api/payments') &&
           response.request().method() === 'POST'

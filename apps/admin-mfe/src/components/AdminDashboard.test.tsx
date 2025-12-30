@@ -2,26 +2,132 @@
  * Admin Dashboard Component Tests
  */
 
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '../test-utils';
 import { useAuthStore } from 'shared-auth-store';
 import AdminDashboard from './AdminDashboard';
 
 // Mock the auth store
+const mockAuthStore = {
+  user: {
+    id: '1',
+    email: 'admin@example.com',
+    name: 'Admin User',
+    role: 'ADMIN',
+  },
+  isAuthenticated: true,
+  accessToken: 'mock-token',
+  refreshToken: 'mock-refresh-token',
+};
+
 jest.mock('shared-auth-store', () => ({
-  useAuthStore: jest.fn(),
+  useAuthStore: Object.assign(jest.fn(), {
+    getState: () => mockAuthStore,
+  }),
 }));
+
+// Mock the dashboard API
+jest.mock('../api/dashboard', () => ({
+  getDashboardStats: jest.fn(),
+  getRecentActivity: jest.fn(),
+}));
+
+// Mock the users API
+jest.mock('../api/users', () => ({
+  getUsers: jest.fn(),
+  updateUserRole: jest.fn(),
+  deleteUser: jest.fn(),
+}));
+
+// Mock the audit logs API
+jest.mock('../api/audit-logs', () => ({
+  getAuditLogs: jest.fn(),
+  getAvailableActions: jest.fn(),
+}));
+
+// Mock the system health API
+jest.mock('../api/system-health', () => ({
+  getSystemHealth: jest.fn(),
+  getServiceDisplayName: jest.fn((key: string) => key),
+  getStatusBadgeVariant: jest.fn(() => 'default'),
+  getStatusIcon: jest.fn(() => '✅'),
+}));
+
+// Mock the dashboard hooks
+jest.mock('../hooks/useDashboardUpdates', () => ({
+  useDashboardUpdates: jest.fn(),
+}));
+
+import { getDashboardStats, getRecentActivity } from '../api/dashboard';
+import { getUsers } from '../api/users';
+import { getAuditLogs, getAvailableActions } from '../api/audit-logs';
+import { getSystemHealth } from '../api/system-health';
 
 describe('AdminDashboard', () => {
   beforeEach(() => {
+    jest.clearAllMocks();
+
     // Mock user data
-    (useAuthStore as unknown as jest.Mock).mockReturnValue({
-      user: {
+    (useAuthStore as unknown as jest.Mock).mockReturnValue(mockAuthStore);
+
+    // Mock dashboard stats API
+    (getDashboardStats as jest.Mock).mockResolvedValue({
+      totalUsers: 1247,
+      activePayments: 89,
+      totalVolume: 45231,
+      systemHealth: '100%',
+    });
+
+    // Mock recent activity API
+    (getRecentActivity as jest.Mock).mockResolvedValue([
+      {
         id: '1',
-        email: 'admin@example.com',
-        name: 'Admin User',
-        role: 'ADMIN',
+        action: 'USER_REGISTERED',
+        userEmail: 'john.doe@example.com',
+        timestamp: new Date(Date.now() - 5 * 60000).toISOString(),
       },
-      isAuthenticated: true,
+      {
+        id: '2',
+        action: 'PAYMENT_COMPLETED',
+        userEmail: 'alice.smith@example.com',
+        timestamp: new Date(Date.now() - 15 * 60000).toISOString(),
+      },
+    ]);
+
+    // Mock users API
+    (getUsers as jest.Mock).mockResolvedValue({
+      users: [],
+      pagination: {
+        page: 1,
+        limit: 10,
+        total: 0,
+        totalPages: 0,
+      },
+    });
+
+    // Mock audit logs API
+    (getAuditLogs as jest.Mock).mockResolvedValue({
+      data: [],
+      pagination: {
+        page: 1,
+        limit: 20,
+        total: 0,
+        totalPages: 0,
+      },
+    });
+
+    (getAvailableActions as jest.Mock).mockResolvedValue([]);
+
+    // Mock system health API
+    (getSystemHealth as jest.Mock).mockResolvedValue({
+      status: 'healthy',
+      timestamp: new Date().toISOString(),
+      services: {
+        database: 'healthy',
+        redis: 'healthy',
+        authService: 'healthy',
+        paymentsService: 'healthy',
+      },
+      version: '1.0.0',
     });
   });
 
@@ -41,18 +147,18 @@ describe('AdminDashboard', () => {
   it('should render navigation tabs', () => {
     render(<AdminDashboard />);
 
-    expect(screen.getByText('Overview')).toBeInTheDocument();
-    expect(screen.getByText('User Management')).toBeInTheDocument();
-    expect(screen.getByText('Payment Reports')).toBeInTheDocument();
-    expect(screen.getByText('Audit Logs')).toBeInTheDocument();
-    expect(screen.getByText('System Health')).toBeInTheDocument();
+    expect(screen.getAllByText('Overview')[0]).toBeInTheDocument();
+    expect(screen.getAllByText('User Management').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Payment Reports').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Audit Logs').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('System Health').length).toBeGreaterThan(0);
   });
 
   it('should show overview tab content by default', () => {
     render(<AdminDashboard />);
 
-    expect(screen.getByText(/Demo Data/)).toBeInTheDocument();
     expect(screen.getByText('Quick Actions')).toBeInTheDocument();
+    expect(screen.getByText('Recent Activity')).toBeInTheDocument();
   });
 
   it('should load and display statistics after loading', async () => {
@@ -75,7 +181,7 @@ describe('AdminDashboard', () => {
     await waitFor(
       () => {
         expect(screen.getByText('Recent Activity')).toBeInTheDocument();
-        expect(screen.getByText('New user registered')).toBeInTheDocument();
+        expect(screen.getByText('user registered')).toBeInTheDocument();
       },
       { timeout: 2000 }
     );
@@ -84,12 +190,16 @@ describe('AdminDashboard', () => {
   it('should switch to users tab', async () => {
     render(<AdminDashboard />);
 
-    const usersTab = screen.getByText('User Management');
-    fireEvent.click(usersTab);
+    // Click the tab button (not the QuickAction card)
+    const usersTabs = screen.getAllByText('User Management');
+    const usersTab = usersTabs.find(
+      el => el.tagName === 'BUTTON' && el.closest('nav')
+    );
+    fireEvent.click(usersTab!);
 
     await waitFor(() => {
       expect(
-        screen.getByText(/User Management.*will be implemented/)
+        screen.getByText(/Manage users, roles, and permissions/)
       ).toBeInTheDocument();
     });
   });
@@ -97,12 +207,16 @@ describe('AdminDashboard', () => {
   it('should switch to payments tab', async () => {
     render(<AdminDashboard />);
 
-    const paymentsTab = screen.getByText('Payment Reports');
-    fireEvent.click(paymentsTab);
+    // Click the tab button (not the QuickAction card)
+    const paymentsTabs = screen.getAllByText('Payment Reports');
+    const paymentsTab = paymentsTabs.find(
+      el => el.tagName === 'BUTTON' && el.closest('nav')
+    );
+    fireEvent.click(paymentsTab!);
 
     await waitFor(() => {
       expect(
-        screen.getByText(/Payment Reports.*will be implemented/)
+        screen.getByText(/will be implemented in a future task/)
       ).toBeInTheDocument();
     });
   });
@@ -110,11 +224,14 @@ describe('AdminDashboard', () => {
   it('should switch to audit logs tab', async () => {
     render(<AdminDashboard />);
 
-    const auditTab = screen.getByText('Audit Logs');
-    fireEvent.click(auditTab);
+    // Click the tab button (not the QuickAction card)
+    const auditTabs = screen.getAllByText('Audit Logs');
+    const auditTab = auditTabs.find(
+      el => el.tagName === 'BUTTON' && el.closest('nav')
+    );
+    fireEvent.click(auditTab!);
 
     await waitFor(() => {
-      expect(screen.getByText('Audit Logs')).toBeInTheDocument();
       expect(
         screen.getByText('Track system activity and user actions')
       ).toBeInTheDocument();
@@ -124,11 +241,14 @@ describe('AdminDashboard', () => {
   it('should switch to system tab', async () => {
     render(<AdminDashboard />);
 
-    const systemTab = screen.getByText('System Health');
-    fireEvent.click(systemTab);
+    // Click the tab button (not the QuickAction card)
+    const systemTabs = screen.getAllByText('System Health');
+    const systemTab = systemTabs.find(
+      el => el.tagName === 'BUTTON' && el.closest('nav')
+    );
+    fireEvent.click(systemTab!);
 
     await waitFor(() => {
-      expect(screen.getByText('System Health')).toBeInTheDocument();
       expect(
         screen.getByText('Real-time monitoring of system services')
       ).toBeInTheDocument();
@@ -149,6 +269,7 @@ describe('AdminDashboard', () => {
 
   it('should handle missing user name gracefully', () => {
     (useAuthStore as unknown as jest.Mock).mockReturnValue({
+      ...mockAuthStore,
       user: {
         id: '1',
         email: 'admin@example.com',
@@ -164,6 +285,7 @@ describe('AdminDashboard', () => {
 
   it('should handle null user gracefully', () => {
     (useAuthStore as unknown as jest.Mock).mockReturnValue({
+      ...mockAuthStore,
       user: null,
       isAuthenticated: false,
     });

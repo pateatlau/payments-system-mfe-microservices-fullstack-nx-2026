@@ -14,7 +14,7 @@ import {
 } from '../validators/auth.validators';
 
 // Import Prisma via dynamic require to avoid dist path issues
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const getPrisma = () => require('../lib/prisma').prisma;
 
 /**

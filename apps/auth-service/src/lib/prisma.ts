@@ -15,6 +15,7 @@ const clientPath = path.join(
   process.cwd(),
   'apps/auth-service/node_modules/.prisma/auth-client'
 );
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const { PrismaClient } = require(clientPath);
 
 /**

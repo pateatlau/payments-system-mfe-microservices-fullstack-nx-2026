@@ -93,7 +93,7 @@ export function PreferencesForm({ onSuccess }: PreferencesFormProps) {
       await updatePreferencesMutation.mutateAsync(data);
       showSuccess('Preferences updated successfully!', 'Success');
       onSuccess?.();
-    } catch (error) {
+    } catch (_error) {
       showError(
         'Failed to update preferences. Please try again.',
         'Update Failed'

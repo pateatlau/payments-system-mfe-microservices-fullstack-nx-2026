@@ -101,9 +101,7 @@ describe('User Management API', () => {
       };
 
       const mockResponse = {
-        data: {
-          data: mockUser,
-        },
+        data: mockUser,
       };
 
       (adminApiClient.get as jest.Mock).mockResolvedValue(mockResponse);
@@ -143,9 +141,7 @@ describe('User Management API', () => {
       };
 
       const mockResponse = {
-        data: {
-          data: mockUser,
-        },
+        data: mockUser,
       };
 
       (adminApiClient.post as jest.Mock).mockResolvedValue(mockResponse);
@@ -195,9 +191,7 @@ describe('User Management API', () => {
       };
 
       const mockResponse = {
-        data: {
-          data: mockUser,
-        },
+        data: mockUser,
       };
 
       (adminApiClient.put as jest.Mock).mockResolvedValue(mockResponse);
@@ -229,14 +223,14 @@ describe('User Management API', () => {
 
   describe('updateUserRole', () => {
     it('should update user role', async () => {
+      const mockData = {
+        id: 'user-123',
+        role: UserRole.ADMIN,
+        updatedAt: '2026-01-02T00:00:00.000Z',
+      };
+
       const mockResponse = {
-        data: {
-          data: {
-            id: 'user-123',
-            role: UserRole.ADMIN,
-            updatedAt: '2026-01-02T00:00:00.000Z',
-          },
-        },
+        data: mockData,
       };
 
       (adminApiClient.put as jest.Mock).mockResolvedValue(mockResponse);
@@ -249,7 +243,7 @@ describe('User Management API', () => {
           role: UserRole.ADMIN,
         }
       );
-      expect(result).toEqual(mockResponse.data.data);
+      expect(result).toEqual(mockData);
     });
 
     it('should handle API errors', async () => {

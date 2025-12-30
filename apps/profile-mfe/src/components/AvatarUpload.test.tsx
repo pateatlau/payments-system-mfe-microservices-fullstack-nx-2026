@@ -4,13 +4,17 @@
 
 import type React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+
 import { AvatarUpload } from './AvatarUpload';
 
 function createFile(name: string, type: string, sizeBytes: number): File {
   const blob = new Blob([new Uint8Array(sizeBytes)], { type });
   return new File([blob], name, { type });
 }
+
+// Mock URL.createObjectURL and URL.revokeObjectURL
+global.URL.createObjectURL = jest.fn(() => 'mock-url');
+global.URL.revokeObjectURL = jest.fn();
 
 describe('AvatarUpload', () => {
   it('renders initial avatar when initialUrl is provided', () => {
@@ -20,7 +24,7 @@ describe('AvatarUpload', () => {
   });
 
   it('calls onFileChange with file when a valid image is selected', () => {
-    const handleChange = vi.fn();
+    const handleChange = jest.fn();
     render(<AvatarUpload onFileChange={handleChange} />);
 
     const input = screen.getByLabelText('avatar-file-input');
@@ -33,7 +37,7 @@ describe('AvatarUpload', () => {
   });
 
   it('shows error when non-image file is selected', () => {
-    const handleChange = vi.fn();
+    const handleChange = jest.fn();
     render(<AvatarUpload onFileChange={handleChange} />);
 
     const input = screen.getByLabelText('avatar-file-input');
@@ -48,7 +52,7 @@ describe('AvatarUpload', () => {
   });
 
   it('shows error when file exceeds max size', () => {
-    const handleChange = vi.fn();
+    const handleChange = jest.fn();
     render(<AvatarUpload onFileChange={handleChange} />);
 
     const input = screen.getByLabelText('avatar-file-input');
@@ -61,7 +65,7 @@ describe('AvatarUpload', () => {
   });
 
   it('clears preview and notifies parent when removed', () => {
-    const handleChange = vi.fn();
+    const handleChange = jest.fn();
     render(<AvatarUpload onFileChange={handleChange} />);
 
     const input = screen.getByLabelText('avatar-file-input');

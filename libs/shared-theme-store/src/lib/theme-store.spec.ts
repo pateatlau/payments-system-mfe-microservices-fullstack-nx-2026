@@ -1,3 +1,13 @@
+// Mock the API client BEFORE imports to prevent initialization errors
+jest.mock('@mfe/shared-api-client', () => ({
+  getApiClient: jest.fn(() => ({
+    get: jest.fn(),
+    put: jest.fn(),
+    setTokenProvider: jest.fn(),
+    isAuthenticated: jest.fn(() => false),
+  })),
+}));
+
 import { renderHook, act } from '@testing-library/react';
 import {
   useThemeStore,
@@ -6,11 +16,6 @@ import {
   type Theme,
 } from './theme-store';
 import * as apiClient from '@mfe/shared-api-client';
-
-// Mock the API client
-jest.mock('@mfe/shared-api-client', () => ({
-  getApiClient: jest.fn(),
-}));
 
 describe('theme-store', () => {
   beforeEach(() => {
@@ -157,6 +162,7 @@ describe('theme-store', () => {
           data: { theme: 'dark' },
         }),
         put: jest.fn(),
+        isAuthenticated: jest.fn(() => true),
       };
       (apiClient.getApiClient as jest.Mock).mockReturnValue(mockApiClient);
 

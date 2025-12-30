@@ -21,6 +21,7 @@ export default tseslint.config(
         {
           argsIgnorePattern: '^_',
           varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
         },
       ],
       '@typescript-eslint/no-explicit-any': 'error',
@@ -64,6 +65,7 @@ export default tseslint.config(
       '**/*.config.mjs',
       'pnpm-lock.yaml',
       '**/.__mf__temp/**',
+      '**/*.original.tsx',
     ],
   }
 );

@@ -7,11 +7,18 @@ import { getSystemHealth } from './system-health.controller';
 import { prisma } from '../lib/prisma';
 
 // Mock dependencies
-jest.mock('db', () => ({
+jest.mock('../lib/prisma', () => ({
   prisma: {
     $queryRaw: jest.fn(),
   },
 }));
+
+// Mock Redis to throw an error (simulates failed connection, results in 'unhealthy' status)
+jest.mock('ioredis', () => {
+  return jest.fn().mockImplementation(() => {
+    throw new Error('Redis connection failed');
+  });
+});
 
 // Mock fetch
 global.fetch = jest.fn();
@@ -44,7 +51,7 @@ describe('System Health Controller', () => {
   });
 
   describe('getSystemHealth', () => {
-    it('should return degraded status when all services are up (Redis unknown)', async () => {
+    it('should return degraded status when all services are up (Redis unhealthy)', async () => {
       await getSystemHealth(mockRequest as Request, mockResponse as Response);
 
       expect(jsonMock).toHaveBeenCalledWith(
@@ -55,7 +62,7 @@ describe('System Health Controller', () => {
             timestamp: expect.any(String),
             services: {
               database: 'healthy',
-              redis: 'unknown',
+              redis: 'unhealthy',
               authService: 'healthy',
               paymentsService: 'healthy',
               adminService: 'healthy',
@@ -107,7 +114,7 @@ describe('System Health Controller', () => {
             status: 'unhealthy',
             services: {
               database: 'healthy',
-              redis: 'unknown',
+              redis: 'unhealthy',
               authService: 'unhealthy',
               paymentsService: 'unhealthy',
               adminService: 'healthy',
@@ -149,7 +156,7 @@ describe('System Health Controller', () => {
             status: 'unhealthy',
             services: {
               database: 'healthy',
-              redis: 'unknown',
+              redis: 'unhealthy',
               authService: 'unhealthy',
               paymentsService: 'unhealthy',
               adminService: 'healthy',

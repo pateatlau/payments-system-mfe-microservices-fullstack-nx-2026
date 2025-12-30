@@ -14,9 +14,9 @@ import {
 } from '../index';
 
 // Create mock functions that will be used in the mocks
-const mockPost = jest.fn();
-const mockSetTokenProvider = jest.fn();
-const mockEmit = jest.fn();
+const _mockPost = jest.fn();
+const _mockSetTokenProvider = jest.fn();
+const _mockEmit = jest.fn();
 
 // Mock API client - define mocks inside factory to avoid hoisting issues
 jest.mock('@mfe/shared-api-client', () => {

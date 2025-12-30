@@ -15,6 +15,7 @@ const router = Router();
  * Extend Express Request to include userId from auth middleware
  */
 declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Express {
     interface Request {
       userId?: string;

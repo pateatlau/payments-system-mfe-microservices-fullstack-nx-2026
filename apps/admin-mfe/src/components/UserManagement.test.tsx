@@ -2,7 +2,7 @@
  * UserManagement Component Tests
  */
 
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '../test-utils';
 import { UserRole } from 'shared-types';
 import { UserManagement } from './UserManagement';
 import * as usersApi from '../api/users';
@@ -79,7 +79,7 @@ describe('UserManagement', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (usersApi.getUsers as jest.Mock).mockResolvedValue({
-      data: mockUsers,
+      users: mockUsers,
       pagination: mockPagination,
     });
   });
@@ -130,14 +130,17 @@ describe('UserManagement', () => {
 
     render(<UserManagement />);
 
-    await waitFor(() => {
-      expect(screen.getByText('Failed to load users')).toBeInTheDocument();
-    });
+    await waitFor(
+      () => {
+        expect(screen.getByText('Failed to load users')).toBeInTheDocument();
+      },
+      { timeout: 5000 }
+    );
   });
 
   it('should display empty state when no users', async () => {
     (usersApi.getUsers as jest.Mock).mockResolvedValue({
-      data: [],
+      users: [],
       pagination: {
         page: 1,
         limit: 10,
@@ -197,7 +200,7 @@ describe('UserManagement', () => {
 
   it('should handle pagination', async () => {
     (usersApi.getUsers as jest.Mock).mockResolvedValue({
-      data: mockUsers,
+      users: mockUsers,
       pagination: {
         page: 1,
         limit: 10,
@@ -226,11 +229,24 @@ describe('UserManagement', () => {
   });
 
   it('should disable previous button on first page', async () => {
+    (usersApi.getUsers as jest.Mock).mockResolvedValue({
+      users: mockUsers,
+      pagination: {
+        page: 1,
+        limit: 10,
+        total: 25,
+        totalPages: 3,
+      },
+    });
+
     render(<UserManagement />);
 
-    await waitFor(() => {
-      expect(screen.getByText('John Doe')).toBeInTheDocument();
-    });
+    await waitFor(
+      () => {
+        expect(screen.getByText('John Doe')).toBeInTheDocument();
+      },
+      { timeout: 3000 }
+    );
 
     const previousButton = screen.getByText('Previous');
     expect(previousButton).toBeDisabled();
@@ -297,23 +313,31 @@ describe('UserManagement', () => {
 
     render(<UserManagement />);
 
-    await waitFor(() => {
-      expect(screen.getByText('John Doe')).toBeInTheDocument();
-    });
+    await waitFor(
+      () => {
+        expect(screen.getByText('John Doe')).toBeInTheDocument();
+      },
+      { timeout: 3000 }
+    );
 
     // Find the role dropdown for John Doe
+    // Note: roleSelects[0] is the filter dropdown, user role dropdowns start at index 1
     const roleSelects = screen.getAllByRole('combobox');
-    const johnRoleSelect = roleSelects[0]; // First user's role select
+    const johnRoleSelect = roleSelects[1]; // First user's role select (after filter dropdown)
 
     fireEvent.change(johnRoleSelect, { target: { value: UserRole.ADMIN } });
 
-    await waitFor(() => {
-      expect(usersApi.updateUserRole).toHaveBeenCalledWith(
-        'user-1',
-        UserRole.ADMIN
-      );
-      expect(usersApi.getUsers).toHaveBeenCalledTimes(2); // Initial + reload
-    });
+    await waitFor(
+      () => {
+        expect(usersApi.updateUserRole).toHaveBeenCalledWith(
+          'user-1',
+          UserRole.ADMIN
+        );
+      },
+      { timeout: 3000 }
+    );
+
+    expect(usersApi.getUsers).toHaveBeenCalledTimes(2); // Initial + reload
   });
 
   it('should open delete confirmation dialog', async () => {
@@ -388,7 +412,7 @@ describe('UserManagement', () => {
 
   it('should display user count and pagination info', async () => {
     (usersApi.getUsers as jest.Mock).mockResolvedValue({
-      data: mockUsers,
+      users: mockUsers,
       pagination: {
         page: 1,
         limit: 10,

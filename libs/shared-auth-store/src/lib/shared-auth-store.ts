@@ -170,7 +170,7 @@ export const useAuthStore = create<AuthState>()(
                 'auth-mfe'
               );
             }
-          } catch (error) {
+          } catch (_error) {
             // Even if logout fails, clear local state
             set({
               user: null,

@@ -165,7 +165,7 @@ describe('Streaming HTTP Proxy Middleware', () => {
 
       expect(proxy).toBeDefined();
       expect(typeof proxy).toBe('function');
-      expect(proxy.length).toBe(3); // (req, res, next) => void
+      expect(proxy.length).toBe(2); // (req, res) => void - handles response directly
     });
 
     it('should handle multiple path rewrites', () => {

@@ -18,6 +18,10 @@ const rspack = require('@rspack/core');
 const path = require('path');
 const ReactRefreshPlugin = require('@rspack/plugin-react-refresh');
 
+// Debug: Log environment variables during config evaluation
+console.log('[Shell rspack.config.js] NX_API_BASE_URL:', process.env.NX_API_BASE_URL);
+console.log('[Shell rspack.config.js] NODE_ENV:', process.env.NODE_ENV);
+
 const isProduction = process.env.NODE_ENV === 'production';
 const isDevelopment = !isProduction;
 
@@ -232,22 +236,34 @@ module.exports = {
   },
   plugins: [
     new rspack.ProgressPlugin(),
-    // Define environment variables for browser (replaces process.env at build time)
+    // Define environment variables for browser (replaces process.env.* at build time)
+    // IMPORTANT: Define each key individually with JSON.stringify for proper replacement
+    // Using 'process.env': JSON.stringify({...}) creates a string, not an object!
     new rspack.DefinePlugin({
-      'process.env': JSON.stringify({
-        // POC-3: API Gateway URL
-        // Development & Production: Through nginx proxy (https://localhost/api)
-        // Direct API Gateway access (http://localhost:3000/api) available via env var
-        NX_API_BASE_URL: process.env.NX_API_BASE_URL || 'https://localhost/api',
-        // WebSocket URL: Through nginx proxy (wss://localhost/ws)
-        // Direct API Gateway access (ws://localhost:3000/ws) available via env var
-        NX_WS_URL: process.env.NX_WS_URL || 'wss://localhost/ws',
-        // Sentry (Frontend)
-        NX_SENTRY_DSN: process.env.NX_SENTRY_DSN || '',
-        NX_SENTRY_RELEASE: process.env.NX_SENTRY_RELEASE || '',
-        NX_APP_VERSION: process.env.NX_APP_VERSION || '0.0.1',
-        NODE_ENV: isProduction ? 'production' : 'development',
-      }),
+      // POC-3: API Gateway URL
+      // Development & Production: Through nginx proxy (https://localhost/api)
+      // Direct API Gateway access (http://localhost:3000/api) available via env var
+      'process.env.NX_API_BASE_URL': JSON.stringify(
+        process.env.NX_API_BASE_URL || 'https://localhost/api'
+      ),
+      // WebSocket URL: Through nginx proxy (wss://localhost/ws)
+      // Direct API Gateway access (ws://localhost:3000/ws) available via env var
+      'process.env.NX_WS_URL': JSON.stringify(
+        process.env.NX_WS_URL || 'wss://localhost/ws'
+      ),
+      // Sentry (Frontend)
+      'process.env.NX_SENTRY_DSN': JSON.stringify(
+        process.env.NX_SENTRY_DSN || ''
+      ),
+      'process.env.NX_SENTRY_RELEASE': JSON.stringify(
+        process.env.NX_SENTRY_RELEASE || ''
+      ),
+      'process.env.NX_APP_VERSION': JSON.stringify(
+        process.env.NX_APP_VERSION || '0.0.1'
+      ),
+      'process.env.NODE_ENV': JSON.stringify(
+        isProduction ? 'production' : 'development'
+      ),
     }),
     // Copy public assets (favicon.ico, etc.) to output directory
     new rspack.CopyRspackPlugin({

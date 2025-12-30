@@ -119,7 +119,7 @@ test.describe('Profile Accessibility', () => {
     await expect(tabNavigation).toBeVisible();
 
     // Check form inputs have proper labels
-    const phoneInput = page.locator('input[placeholder*="phone"]');
+    const _phoneInput = page.locator('input[placeholder*="phone"]');
     const phoneLabel = page.locator('label').filter({ hasText: /phone/i });
     await expect(phoneLabel).toBeVisible();
 

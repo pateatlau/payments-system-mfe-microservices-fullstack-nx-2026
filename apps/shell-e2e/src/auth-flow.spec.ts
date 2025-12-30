@@ -25,22 +25,19 @@ test.describe('Authentication Flow', () => {
     await expect(page.locator('input[type="email"]')).toBeVisible({
       timeout: 10000,
     });
-    await expect(page.locator('input[type="password"]')).toBeVisible({
-      timeout: 10000,
-    });
 
     // Fill in sign-in form
     await page.fill('input[type="email"]', 'customer@example.com');
-    await page.fill('input[type="password"]', 'password123');
+    await page.fill('input[type="password"]', 'TestPassword123!');
 
-    // Submit form
-    await page.click('button[type="submit"]');
+    // Submit form and wait for navigation to payments page
+    await Promise.all([
+      page.waitForURL(/.*payments/, { timeout: 20000 }),
+      page.click('button[type="submit"]'),
+    ]);
 
-    // Wait for redirect to payments page
-    await expect(page).toHaveURL(/.*payments/, { timeout: 10000 });
-
-    // Verify payments page is loaded
-    await expect(page.locator('h1, h2')).toContainText(/payment/i, {
+    // Verify payments page is loaded (use .first() as there may be multiple headings)
+    await expect(page.locator('h1, h2').first()).toContainText(/payment/i, {
       timeout: 10000,
     });
   });
@@ -57,18 +54,20 @@ test.describe('Authentication Flow', () => {
     await expect(page.locator('input[type="email"]')).toBeVisible({
       timeout: 10000,
     });
-    await expect(page.locator('input[type="password"]')).toBeVisible({
+    // Use .first() because sign-up form has 2 password fields (password + confirm)
+    await expect(page.locator('input[type="password"]').first()).toBeVisible({
       timeout: 10000,
     });
 
-    // Fill in sign-up form
+    // Fill in sign-up form with unique email to avoid conflicts
+    const uniqueEmail = `newuser-${Date.now()}@example.com`;
     await page.fill('input[type="text"]', 'New User');
-    await page.fill('input[type="email"]', 'newuser@example.com');
-    await page.fill('input[type="password"]', 'Password123!@#');
+    await page.fill('input[type="email"]', uniqueEmail);
+    await page.fill('input[type="password"]', 'TestPassword123!');
 
     // Find and fill confirm password field (usually the second password input)
     const passwordInputs = page.locator('input[type="password"]');
-    await passwordInputs.nth(1).fill('Password123!@#');
+    await passwordInputs.nth(1).fill('TestPassword123!');
 
     // Submit form
     await page.click('button[type="submit"]');
@@ -76,8 +75,8 @@ test.describe('Authentication Flow', () => {
     // Wait for redirect to payments page
     await expect(page).toHaveURL(/.*payments/, { timeout: 10000 });
 
-    // Verify payments page is loaded
-    await expect(page.locator('h1, h2')).toContainText(/payment/i, {
+    // Verify payments page is loaded (use .first() as there may be multiple headings)
+    await expect(page.locator('h1, h2').first()).toContainText(/payment/i, {
       timeout: 10000,
     });
   });
@@ -92,7 +91,7 @@ test.describe('Authentication Flow', () => {
 
     // Fill in invalid email
     await page.fill('input[type="email"]', 'invalid-email');
-    await page.fill('input[type="password"]', 'password123');
+    await page.fill('input[type="password"]', 'TestPassword123!');
 
     // Submit form
     await page.click('button[type="submit"]');
@@ -106,8 +105,8 @@ test.describe('Authentication Flow', () => {
   test('should show validation errors for weak password', async ({ page }) => {
     await page.goto('/signup');
 
-    // Wait for form to load
-    await expect(page.locator('input[type="text"]')).toBeVisible({
+    // Wait for form to load (use .first() for name field as there may be multiple text inputs)
+    await expect(page.locator('input[type="text"]').first()).toBeVisible({
       timeout: 10000,
     });
 

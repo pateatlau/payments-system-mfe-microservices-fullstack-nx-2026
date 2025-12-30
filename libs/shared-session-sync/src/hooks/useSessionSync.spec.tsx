@@ -2,7 +2,7 @@
  * Session Sync Hooks Tests
  */
 
-import { renderHook, waitFor } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 import { useSessionSync, useAutoSyncAuthState } from './useSessionSync';
 import { sessionSync } from '../lib/session-sync';
 import { useAuthStore } from 'shared-auth-store';

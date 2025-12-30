@@ -11,7 +11,6 @@ import {
   useLogoutOtherDevices,
 } from './useDeviceRegistration';
 import { getApiClient } from '@mfe/shared-api-client';
-import { getDeviceId } from '../lib/device-id';
 
 // Mock API client
 jest.mock('@mfe/shared-api-client', () => ({

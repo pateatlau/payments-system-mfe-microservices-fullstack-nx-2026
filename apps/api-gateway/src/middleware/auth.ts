@@ -26,6 +26,7 @@ export interface JwtPayload {
  * Extend Express Request to include user
  */
 declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Express {
     interface Request {
       user?: JwtPayload;
@@ -91,7 +92,7 @@ export const optionalAuth = (
     }
 
     next();
-  } catch (error) {
+  } catch (_error) {
     // Silently fail for optional auth
     next();
   }

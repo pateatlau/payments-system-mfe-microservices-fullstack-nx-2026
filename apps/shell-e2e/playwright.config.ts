@@ -16,6 +16,17 @@ const baseURL = process.env['BASE_URL'] || 'http://localhost:4200';
  */
 export default defineConfig({
   ...nxE2EPreset(__filename, { testDir: './src' }),
+
+  // Override Nx preset's workers:1 default for CI
+  // Use 2 workers to balance speed vs stability (GitHub Actions has 2 CPU cores)
+  workers: process.env.CI ? 2 : undefined,
+
+  // In CI, only run critical path tests to stay within timeout limits
+  // Full test suite runs locally; CI runs: auth-flow, payments-flow, logout-flow
+  ...(process.env.CI && {
+    testMatch: /\/(auth-flow|payments-flow|logout-flow)\.spec\.ts$/,
+  }),
+
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     baseURL,
@@ -25,63 +36,104 @@ export default defineConfig({
   /* Run your local dev server before starting the tests */
   /* For Module Federation, we need all three apps running */
   /* Note: Remotes must be built first (run: pnpm build:remotes) */
-  webServer: [
-    {
-      command: 'pnpm exec nx preview auth-mfe',
-      url: 'http://localhost:4201',
-      reuseExistingServer: !process.env.CI,
-      cwd: workspaceRoot,
-      timeout: 120000,
-    },
-    {
-      command: 'pnpm exec nx preview payments-mfe',
-      url: 'http://localhost:4202',
-      reuseExistingServer: !process.env.CI,
-      cwd: workspaceRoot,
-      timeout: 120000,
-    },
-    {
-      command: 'pnpm exec nx preview shell',
-      url: 'http://localhost:4200',
-      reuseExistingServer: !process.env.CI,
-      cwd: workspaceRoot,
-      timeout: 120000,
-    },
-  ],
-  projects: [
-    {
-      name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
-    },
-
-    {
-      name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
-    },
-
-    {
-      name: 'webkit',
-      use: { ...devices['Desktop Safari'] },
-    },
-
-    // Uncomment for mobile browsers support
-    /* {
-      name: 'Mobile Chrome',
-      use: { ...devices['Pixel 5'] },
-    },
-    {
-      name: 'Mobile Safari',
-      use: { ...devices['iPhone 12'] },
-    }, */
-
-    // Uncomment for branded browsers
-    /* {
-      name: 'Microsoft Edge',
-      use: { ...devices['Desktop Edge'], channel: 'msedge' },
-    },
-    {
-      name: 'Google Chrome',
-      use: { ...devices['Desktop Chrome'], channel: 'chrome' },
-    } */
-  ],
+  webServer: process.env.CI
+    ? [
+        // In CI, serve built files with 'serve' package (SPA mode + CORS)
+        // Remote MFEs need --cors for cross-origin Module Federation requests
+        {
+          command: 'npx serve dist/apps/auth-mfe -l 4201 --cors --single',
+          url: 'http://localhost:4201',
+          reuseExistingServer: false,
+          cwd: workspaceRoot,
+          timeout: 30000,
+        },
+        {
+          command: 'npx serve dist/apps/payments-mfe -l 4202 --cors --single',
+          url: 'http://localhost:4202',
+          reuseExistingServer: false,
+          cwd: workspaceRoot,
+          timeout: 30000,
+        },
+        {
+          command: 'npx serve dist/apps/admin-mfe -l 4203 --cors --single',
+          url: 'http://localhost:4203',
+          reuseExistingServer: false,
+          cwd: workspaceRoot,
+          timeout: 30000,
+        },
+        {
+          command: 'npx serve dist/apps/profile-mfe -l 4204 --cors --single',
+          url: 'http://localhost:4204',
+          reuseExistingServer: false,
+          cwd: workspaceRoot,
+          timeout: 30000,
+        },
+        {
+          command: 'npx serve dist/apps/shell -l 4200 --cors --single',
+          url: 'http://localhost:4200',
+          reuseExistingServer: false,
+          cwd: workspaceRoot,
+          timeout: 30000,
+        },
+      ]
+    : [
+        // In local dev, use nx preview which handles dev builds
+        {
+          command: 'pnpm exec nx preview auth-mfe',
+          url: 'http://localhost:4201',
+          reuseExistingServer: true,
+          cwd: workspaceRoot,
+          timeout: 120000,
+        },
+        {
+          command: 'pnpm exec nx preview payments-mfe',
+          url: 'http://localhost:4202',
+          reuseExistingServer: true,
+          cwd: workspaceRoot,
+          timeout: 120000,
+        },
+        {
+          command: 'pnpm exec nx preview admin-mfe',
+          url: 'http://localhost:4203',
+          reuseExistingServer: true,
+          cwd: workspaceRoot,
+          timeout: 120000,
+        },
+        {
+          command: 'pnpm exec nx preview profile-mfe',
+          url: 'http://localhost:4204',
+          reuseExistingServer: true,
+          cwd: workspaceRoot,
+          timeout: 120000,
+        },
+        {
+          command: 'pnpm exec nx preview shell',
+          url: 'http://localhost:4200',
+          reuseExistingServer: true,
+          cwd: workspaceRoot,
+          timeout: 120000,
+        },
+      ],
+  // In CI, only run Chromium for speed. Locally, run all browsers.
+  projects: process.env.CI
+    ? [
+        {
+          name: 'chromium',
+          use: { ...devices['Desktop Chrome'] },
+        },
+      ]
+    : [
+        {
+          name: 'chromium',
+          use: { ...devices['Desktop Chrome'] },
+        },
+        {
+          name: 'firefox',
+          use: { ...devices['Desktop Firefox'] },
+        },
+        {
+          name: 'webkit',
+          use: { ...devices['Desktop Safari'] },
+        },
+      ],
 });

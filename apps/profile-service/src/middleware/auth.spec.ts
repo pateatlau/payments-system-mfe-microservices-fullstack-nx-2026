@@ -5,7 +5,7 @@
 import type { Request, Response, NextFunction } from 'express';
 import { authenticate } from './auth';
 import jwt from 'jsonwebtoken';
-import config from '../config';
+import _config from '../config';
 
 // Mock jsonwebtoken
 jest.mock('jsonwebtoken');

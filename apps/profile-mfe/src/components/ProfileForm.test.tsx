@@ -4,7 +4,7 @@
 
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { describe, expect, it, vi } from 'vitest';
+
 import * as useProfileHooks from '../hooks/useProfile';
 import { ProfileForm } from './ProfileForm';
 import type { Profile } from '../types/profile';
@@ -30,18 +30,19 @@ describe('ProfileForm', () => {
   };
 
   afterEach(() => {
-    vi.restoreAllMocks();
+    jest.restoreAllMocks();
   });
 
   it('renders existing profile data in the form', async () => {
-    vi.spyOn(useProfileHooks, 'useProfile').mockReturnValue({
+    jest.spyOn(useProfileHooks, 'useProfile').mockReturnValue({
       data: baseProfile,
       isLoading: false,
       error: null,
     } as unknown as ReturnType<typeof useProfileHooks.useProfile>);
 
-    vi.spyOn(useProfileHooks, 'useUpdateProfile').mockReturnValue({
-      mutate: vi.fn(),
+    jest.spyOn(useProfileHooks, 'useUpdateProfile').mockReturnValue({
+      mutate: jest.fn(),
+      mutateAsync: jest.fn().mockResolvedValue(undefined),
       isPending: false,
       error: null,
     } as unknown as ReturnType<typeof useProfileHooks.useUpdateProfile>);
@@ -56,15 +57,16 @@ describe('ProfileForm', () => {
   });
 
   it('submits updated data via useUpdateProfile', async () => {
-    vi.spyOn(useProfileHooks, 'useProfile').mockReturnValue({
+    jest.spyOn(useProfileHooks, 'useProfile').mockReturnValue({
       data: baseProfile,
       isLoading: false,
       error: null,
     } as unknown as ReturnType<typeof useProfileHooks.useProfile>);
 
-    const mutateMock = vi.fn();
-    vi.spyOn(useProfileHooks, 'useUpdateProfile').mockReturnValue({
-      mutate: mutateMock,
+    const mutateAsyncMock = jest.fn().mockResolvedValue(undefined);
+    jest.spyOn(useProfileHooks, 'useUpdateProfile').mockReturnValue({
+      mutate: jest.fn(),
+      mutateAsync: mutateAsyncMock,
       isPending: false,
       error: null,
     } as unknown as ReturnType<typeof useProfileHooks.useUpdateProfile>);
@@ -79,19 +81,20 @@ describe('ProfileForm', () => {
     fireEvent.click(screen.getByRole('button', { name: /save changes/i }));
 
     await waitFor(() => {
-      expect(mutateMock).toHaveBeenCalled();
+      expect(mutateAsyncMock).toHaveBeenCalled();
     });
   });
 
   it('displays validation errors when form is invalid', async () => {
-    vi.spyOn(useProfileHooks, 'useProfile').mockReturnValue({
+    jest.spyOn(useProfileHooks, 'useProfile').mockReturnValue({
       data: baseProfile,
       isLoading: false,
       error: null,
     } as unknown as ReturnType<typeof useProfileHooks.useProfile>);
 
-    vi.spyOn(useProfileHooks, 'useUpdateProfile').mockReturnValue({
-      mutate: vi.fn(),
+    jest.spyOn(useProfileHooks, 'useUpdateProfile').mockReturnValue({
+      mutate: jest.fn(),
+      mutateAsync: jest.fn().mockResolvedValue(undefined),
       isPending: false,
       error: null,
     } as unknown as ReturnType<typeof useProfileHooks.useUpdateProfile>);
