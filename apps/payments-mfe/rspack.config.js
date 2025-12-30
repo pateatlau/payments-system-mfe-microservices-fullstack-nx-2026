@@ -248,19 +248,29 @@ module.exports = {
   },
   plugins: [
     new rspack.ProgressPlugin(),
-    // Define environment variables for browser (replaces process.env at build time)
+    // Define environment variables for browser (replaces process.env.* at build time)
+    // IMPORTANT: Define each key individually with JSON.stringify for proper replacement
+    // Using 'process.env': JSON.stringify({...}) creates a string, not an object!
     new rspack.DefinePlugin({
-      'process.env': JSON.stringify({
-        // POC-3: API Gateway URL
-        // Development & Production: Through nginx proxy (https://localhost/api)
-        // Direct API Gateway access (http://localhost:3000/api) available via env var
-        NX_API_BASE_URL: process.env.NX_API_BASE_URL || 'https://localhost/api',
-        // Sentry (Frontend)
-        NX_SENTRY_DSN: process.env.NX_SENTRY_DSN || '',
-        NX_SENTRY_RELEASE: process.env.NX_SENTRY_RELEASE || '',
-        NX_APP_VERSION: process.env.NX_APP_VERSION || '0.0.1',
-        NODE_ENV: isProduction ? 'production' : 'development',
-      }),
+      // POC-3: API Gateway URL
+      // Development & Production: Through nginx proxy (https://localhost/api)
+      // Direct API Gateway access (http://localhost:3000/api) available via env var
+      'process.env.NX_API_BASE_URL': JSON.stringify(
+        process.env.NX_API_BASE_URL || 'https://localhost/api'
+      ),
+      // Sentry (Frontend)
+      'process.env.NX_SENTRY_DSN': JSON.stringify(
+        process.env.NX_SENTRY_DSN || ''
+      ),
+      'process.env.NX_SENTRY_RELEASE': JSON.stringify(
+        process.env.NX_SENTRY_RELEASE || ''
+      ),
+      'process.env.NX_APP_VERSION': JSON.stringify(
+        process.env.NX_APP_VERSION || '0.0.1'
+      ),
+      'process.env.NODE_ENV': JSON.stringify(
+        isProduction ? 'production' : 'development'
+      ),
     }),
     // Copy public assets (favicon.ico, etc.) to output directory
     new rspack.CopyRspackPlugin({
