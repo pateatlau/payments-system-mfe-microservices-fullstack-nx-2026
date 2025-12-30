@@ -1,4 +1,4 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import { useAuthStore } from 'shared-auth-store';
 import type { Payment } from '../api/types';
 import { listPayments } from '../api/payments';
@@ -83,6 +83,9 @@ export function usePayments(filters?: UsePaymentsFilters) {
       return applyClientFilters(data, filters);
     },
     enabled: !!user, // Only fetch if user is authenticated
+    // Keep previous data while fetching new data to prevent UI flicker
+    // This preserves component state (like filter panel expanded state)
+    placeholderData: keepPreviousData,
   });
 }
 

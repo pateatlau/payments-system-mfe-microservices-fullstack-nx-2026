@@ -2,6 +2,9 @@
  * WebSocket Context Provider
  *
  * Provides WebSocket client to React components via Context API
+ *
+ * Note: This provider handles React StrictMode's double-mount behavior
+ * by using a ref to track mount state and prevent premature disconnection.
  */
 
 import React, {
@@ -9,6 +12,7 @@ import React, {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from 'react';
 import { WebSocketClient } from '../lib/client';
@@ -43,6 +47,11 @@ export function WebSocketProvider({
 }: WebSocketProviderProps): JSX.Element {
   const [status, setStatus] = useState<ConnectionStatus>('disconnected');
 
+  // Track if the component is mounted - helps handle React StrictMode's double-mount
+  const isMountedRef = useRef(false);
+  // Track the connection timeout to cancel it on unmount
+  const connectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   // Create WebSocket client
   // Recreates when url, token, or debug changes to ensure proper authentication
   const client = useMemo(() => {
@@ -61,28 +70,52 @@ export function WebSocketProvider({
   }, [url, token, debug]);
 
   // Connect/disconnect lifecycle
+  // Uses a small delay to handle React StrictMode's immediate unmount/remount
   useEffect(() => {
+    isMountedRef.current = true;
+
     // Listen for status changes
     const handleStatus = ({
       status: newStatus,
     }: {
       status: ConnectionStatus;
     }) => {
-      setStatus(newStatus);
+      if (isMountedRef.current) {
+        setStatus(newStatus);
+      }
     };
 
     client.on('status', handleStatus);
 
     // Auto-connect if enabled and token is available
-    // WebSocket requires authentication, so don't attempt connection without token
+    // Use a small delay to avoid connecting during StrictMode's first mount
+    // which gets immediately unmounted
     if (autoConnect && token) {
-      client.connect();
+      connectTimeoutRef.current = setTimeout(() => {
+        if (isMountedRef.current) {
+          client.connect();
+        }
+      }, 50);
     }
 
     // Cleanup on unmount
     return () => {
+      isMountedRef.current = false;
+
+      // Cancel pending connection
+      if (connectTimeoutRef.current) {
+        clearTimeout(connectTimeoutRef.current);
+        connectTimeoutRef.current = null;
+      }
+
       client.off('status', handleStatus);
-      client.disconnect();
+
+      // Only disconnect if we actually connected
+      // Check if client is in a connected or connecting state
+      const currentStatus = client.getStatus?.() ?? 'disconnected';
+      if (currentStatus !== 'disconnected') {
+        client.disconnect();
+      }
     };
   }, [client, autoConnect, token]);
 

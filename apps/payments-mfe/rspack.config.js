@@ -294,6 +294,7 @@ module.exports = {
       filename: 'remoteEntry.js',
       exposes: {
         './PaymentsPage': './src/components/PaymentsPage.tsx',
+        './ReportsPage': './src/components/ReportsPage.tsx',
       },
       shared: sharedDependencies,
     }),
