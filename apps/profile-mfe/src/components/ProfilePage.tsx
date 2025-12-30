@@ -67,7 +67,7 @@ export function ProfilePage() {
   };
 
   return (
-    <div className="w-full">
+    <div className="w-full pb-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-6">
