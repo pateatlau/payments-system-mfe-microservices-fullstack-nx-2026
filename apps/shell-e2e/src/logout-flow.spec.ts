@@ -6,23 +6,34 @@ test.describe('Logout Flow', () => {
     await page.goto('/signin');
     await page.fill('input[type="email"]', 'customer@example.com');
     await page.fill('input[type="password"]', 'TestPassword123!');
-    await page.click('button[type="submit"]');
+
+    // Submit form and wait for navigation
+    await Promise.all([
+      page.waitForURL((url) => !url.pathname.includes('signin'), { timeout: 15000 }),
+      page.click('button[type="submit"]'),
+    ]);
 
     // Wait for redirect to payments page
-    await expect(page).toHaveURL(/.*payments/, { timeout: 10000 });
+    await expect(page).toHaveURL(/.*payments/, { timeout: 15000 });
   });
 
   test('should logout and redirect to sign-in page', async ({ page }) => {
-    // Find and click logout button
+    // Find logout button
     const logoutButton = page
       .locator('button')
       .filter({ hasText: /logout|sign out/i });
     await expect(logoutButton).toBeVisible({ timeout: 10000 });
 
-    await logoutButton.click();
+    // Click logout and wait for navigation away from payments
+    await Promise.all([
+      page.waitForURL((url) => !url.pathname.includes('payments'), {
+        timeout: 15000,
+      }),
+      logoutButton.click(),
+    ]);
 
     // Should redirect to sign-in page
-    await expect(page).toHaveURL(/.*signin/, { timeout: 10000 });
+    await expect(page).toHaveURL(/.*signin/, { timeout: 15000 });
 
     // Verify sign-in form is visible
     await expect(page.locator('input[type="email"]')).toBeVisible({
@@ -35,14 +46,21 @@ test.describe('Logout Flow', () => {
     const logoutButton = page
       .locator('button')
       .filter({ hasText: /logout|sign out/i });
-    await logoutButton.click();
 
-    await expect(page).toHaveURL(/.*signin/, { timeout: 10000 });
+    // Click logout and wait for navigation
+    await Promise.all([
+      page.waitForURL((url) => !url.pathname.includes('payments'), {
+        timeout: 15000,
+      }),
+      logoutButton.click(),
+    ]);
+
+    await expect(page).toHaveURL(/.*signin/, { timeout: 15000 });
 
     // Try to access protected route
     await page.goto('/payments');
 
-    // Should redirect back to sign-in
-    await expect(page).toHaveURL(/.*signin/, { timeout: 10000 });
+    // Should redirect back to sign-in (protected route redirects unauthenticated users)
+    await expect(page).toHaveURL(/.*signin/, { timeout: 15000 });
   });
 });

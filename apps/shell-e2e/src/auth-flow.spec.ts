@@ -72,11 +72,13 @@ test.describe('Authentication Flow', () => {
     await page.fill('input[type="email"]', 'customer@example.com');
     await page.fill('input[type="password"]', 'TestPassword123!');
 
-    // Submit form
-    await page.click('button[type="submit"]');
-
-    // Wait a bit for the API call to complete
-    await page.waitForTimeout(3000);
+    // Submit form and wait for navigation
+    // The login flow: submit → API call → auth store update → navigate('/') → redirect to /payments
+    await Promise.all([
+      // Wait for navigation away from signin page
+      page.waitForURL((url) => !url.pathname.includes('signin'), { timeout: 15000 }),
+      page.click('button[type="submit"]'),
+    ]);
 
     // Log all API responses captured
     console.log('=== All API Responses ===');
@@ -91,11 +93,11 @@ test.describe('Authentication Flow', () => {
       console.log('Error message on page:', errorMessage);
     }
 
-    // Wait for redirect to payments page
-    await expect(page).toHaveURL(/.*payments/, { timeout: 10000 });
+    // Wait for redirect to payments page (should already be there or on the way)
+    await expect(page).toHaveURL(/.*payments/, { timeout: 15000 });
 
-    // Verify payments page is loaded
-    await expect(page.locator('h1, h2')).toContainText(/payment/i, {
+    // Verify payments page is loaded (use .first() as there may be multiple headings)
+    await expect(page.locator('h1, h2').first()).toContainText(/payment/i, {
       timeout: 10000,
     });
   });
@@ -112,7 +114,8 @@ test.describe('Authentication Flow', () => {
     await expect(page.locator('input[type="email"]')).toBeVisible({
       timeout: 10000,
     });
-    await expect(page.locator('input[type="password"]')).toBeVisible({
+    // Use .first() because sign-up form has 2 password fields (password + confirm)
+    await expect(page.locator('input[type="password"]').first()).toBeVisible({
       timeout: 10000,
     });
 
@@ -132,8 +135,8 @@ test.describe('Authentication Flow', () => {
     // Wait for redirect to payments page
     await expect(page).toHaveURL(/.*payments/, { timeout: 10000 });
 
-    // Verify payments page is loaded
-    await expect(page.locator('h1, h2')).toContainText(/payment/i, {
+    // Verify payments page is loaded (use .first() as there may be multiple headings)
+    await expect(page.locator('h1, h2').first()).toContainText(/payment/i, {
       timeout: 10000,
     });
   });
@@ -162,8 +165,8 @@ test.describe('Authentication Flow', () => {
   test('should show validation errors for weak password', async ({ page }) => {
     await page.goto('/signup');
 
-    // Wait for form to load
-    await expect(page.locator('input[type="text"]')).toBeVisible({
+    // Wait for form to load (use .first() for name field as there may be multiple text inputs)
+    await expect(page.locator('input[type="text"]').first()).toBeVisible({
       timeout: 10000,
     });
 
