@@ -11,6 +11,9 @@ const router = express.Router();
 // All payment routes require authentication
 router.use(authenticate);
 
+// Recipients list (for payment form dropdown)
+router.get('/payments/recipients', paymentController.getRecipients);
+
 // Payment CRUD
 router.get('/payments', paymentController.listPayments);
 router.get('/payments/reports', paymentController.getPaymentReports);

@@ -17,8 +17,10 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  Skeleton,
 } from '@mfe/shared-design-system';
 import { PaymentType } from 'shared-types';
+import { useRecipients } from '../hooks/usePayments';
 
 /**
  * Create payment form schema using Zod
@@ -62,6 +64,8 @@ export function PaymentCreateForm({
   onSubmit,
   onCancel,
 }: PaymentCreateFormProps) {
+  const { data: recipients, isLoading: isLoadingRecipients } = useRecipients();
+
   const {
     register,
     handleSubmit,
@@ -195,14 +199,34 @@ export function PaymentCreateForm({
           </div>
 
           <div>
-            <Label htmlFor="recipientEmail">Recipient Email *</Label>
-            <Input
-              id="recipientEmail"
-              type="email"
-              {...register('recipientEmail')}
-              placeholder="recipient@example.com"
-              className="mt-2"
-            />
+            <Label htmlFor="recipientEmail">Recipient *</Label>
+            {isLoadingRecipients ? (
+              <Skeleton className="h-10 mt-2" />
+            ) : (
+              <Controller
+                control={control}
+                name="recipientEmail"
+                render={({ field }) => (
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger id="recipientEmail" className="mt-2">
+                      <SelectValue placeholder="Select recipient" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {recipients?.map((recipient) => (
+                        <SelectItem key={recipient.id} value={recipient.email}>
+                          {recipient.name} ({recipient.email})
+                        </SelectItem>
+                      ))}
+                      {(!recipients || recipients.length === 0) && (
+                        <SelectItem value="" disabled>
+                          No recipients available
+                        </SelectItem>
+                      )}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+            )}
             {errors.recipientEmail && (
               <p
                 className="mt-1 text-sm text-destructive-foreground"

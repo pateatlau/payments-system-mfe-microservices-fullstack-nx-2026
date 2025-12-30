@@ -358,3 +358,39 @@ export async function getPaymentReports(
 
 // Import prisma for webhook handler
 import { prisma as db } from '../lib/prisma';
+import { getAllUsers } from '../lib/authClient';
+
+/**
+ * Get list of available recipients for payments
+ * Returns all users that can receive payments
+ */
+export async function getRecipients(
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    if (!req.user) {
+      res.status(401).json({
+        success: false,
+        error: {
+          code: 'UNAUTHORIZED',
+          message: 'Authentication required',
+        },
+      });
+      return;
+    }
+
+    const users = await getAllUsers();
+
+    // Exclude the current user from the list (can't send payment to yourself)
+    const recipients = users.filter((u) => u.id !== req.user?.userId);
+
+    res.json({
+      success: true,
+      data: recipients,
+    });
+  } catch (error) {
+    next(error);
+  }
+}

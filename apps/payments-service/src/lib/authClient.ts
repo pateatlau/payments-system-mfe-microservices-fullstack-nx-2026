@@ -2,8 +2,10 @@ import { config } from '../config';
 import { cache } from './cache';
 
 export type MinimalUser = { id: string; email: string };
+export type RecipientUser = { id: string; email: string; name: string };
 
 const ID_TTL = 30; // seconds
+const LIST_TTL = 60; // seconds for user list cache
 
 async function httpGet<T>(path: string): Promise<T> {
   const url = `${config.authService.url}${path}`;
@@ -49,4 +51,14 @@ export async function getUserById(userId: string): Promise<MinimalUser> {
   await cache.set(key, user, { ttl: ID_TTL });
   await cache.set(`identity:email:${user.email}`, user, { ttl: ID_TTL });
   return user;
+}
+
+export async function getAllUsers(): Promise<RecipientUser[]> {
+  const key = 'identity:all-users';
+  const cached = await cache.get<RecipientUser[]>(key);
+  if (cached) return cached;
+
+  const users = await httpGet<RecipientUser[]>('/auth/internal/users');
+  await cache.set(key, users, { ttl: LIST_TTL });
+  return users;
 }
