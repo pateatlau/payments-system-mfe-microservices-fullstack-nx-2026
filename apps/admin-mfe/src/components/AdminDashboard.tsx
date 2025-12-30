@@ -10,9 +10,12 @@
  * - Design system components
  */
 
-import { useMemo } from 'react';
+import { useMemo, Suspense, lazy } from 'react';
 import { useAuthStore } from 'shared-auth-store';
-import { Alert, AlertDescription } from '@mfe/shared-design-system';
+import { Alert, AlertDescription, Loading } from '@mfe/shared-design-system';
+
+// Lazy load PaymentReports from payments-mfe via Module Federation
+const PaymentReports = lazy(() => import('paymentsMfe/PaymentReports'));
 import { DashboardTabs, useDashboardTabs } from './DashboardTabs';
 import { DashboardStats } from './DashboardStats';
 import { RecentActivity } from './RecentActivity';
@@ -258,12 +261,15 @@ export function AdminDashboard() {
         {activeTab === 'users' && <UserManagement />}
 
         {activeTab === 'payments' && (
-          <Alert>
-            <AlertDescription>
-              💳 <strong>Payment Reports</strong> will be implemented in a
-              future task
-            </AlertDescription>
-          </Alert>
+          <Suspense
+            fallback={
+              <div className="flex items-center justify-center min-h-[200px]">
+                <Loading label="Loading payment reports..." />
+              </div>
+            }
+          >
+            <PaymentReports />
+          </Suspense>
         )}
 
         {activeTab === 'audit' && <AuditLogs />}

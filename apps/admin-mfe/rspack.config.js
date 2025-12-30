@@ -251,11 +251,16 @@ module.exports = {
       scriptLoading: 'defer',
     }),
     // Module Federation Plugin - Admin MFE acts as REMOTE exposing components
+    // Also acts as HOST consuming PaymentReports from payments-mfe
     new rspack.container.ModuleFederationPlugin({
       name: 'adminMfe',
       filename: 'remoteEntry.js',
       exposes: {
         './AdminDashboard': './src/components/AdminDashboard.tsx',
+      },
+      remotes: {
+        // Consume PaymentReports from payments-mfe
+        paymentsMfe: 'paymentsMfe@http://localhost:4202/remoteEntry.js',
       },
       shared: sharedDependencies,
     }),

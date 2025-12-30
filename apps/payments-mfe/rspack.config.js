@@ -295,6 +295,7 @@ module.exports = {
       exposes: {
         './PaymentsPage': './src/components/PaymentsPage.tsx',
         './ReportsPage': './src/components/ReportsPage.tsx',
+        './PaymentReports': './src/components/PaymentReports.tsx',
       },
       shared: sharedDependencies,
     }),

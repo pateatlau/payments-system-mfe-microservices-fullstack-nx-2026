@@ -18,6 +18,9 @@ module.exports = {
       '<rootDir>/../../libs/shared-event-bus/src/index.ts',
     '^@mfe/shared-design-system$':
       '<rootDir>/../../libs/shared-design-system/src/index.ts',
+    // Mock remote Module Federation modules
+    '^paymentsMfe/PaymentReports$':
+      '<rootDir>/src/__mocks__/paymentsMfe/PaymentReports.tsx',
     '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
   },
   coverageDirectory: '../../coverage/apps/admin-mfe',
