@@ -305,7 +305,7 @@ describe('UserManagement', () => {
       expect(screen.getByText('John Doe')).toBeInTheDocument();
     });
 
-    const editButtons = screen.getAllByText('Edit');
+    const editButtons = screen.getAllByRole('button', { name: 'Edit' });
     fireEvent.click(editButtons[0]);
 
     await waitFor(() => {
@@ -363,7 +363,7 @@ describe('UserManagement', () => {
       expect(screen.getByText('John Doe')).toBeInTheDocument();
     });
 
-    const deleteButtons = screen.getAllByText('Delete');
+    const deleteButtons = screen.getAllByRole('button', { name: 'Delete' });
     fireEvent.click(deleteButtons[0]);
 
     await waitFor(() => {
@@ -381,7 +381,7 @@ describe('UserManagement', () => {
     });
 
     // Open delete dialog
-    const deleteButtons = screen.getAllByText('Delete');
+    const deleteButtons = screen.getAllByRole('button', { name: 'Delete' });
     fireEvent.click(deleteButtons[0]);
 
     await waitFor(() => {
@@ -406,7 +406,7 @@ describe('UserManagement', () => {
     });
 
     // Open delete dialog
-    const deleteButtons = screen.getAllByText('Delete');
+    const deleteButtons = screen.getAllByRole('button', { name: 'Delete' });
     fireEvent.click(deleteButtons[0]);
 
     await waitFor(() => {
