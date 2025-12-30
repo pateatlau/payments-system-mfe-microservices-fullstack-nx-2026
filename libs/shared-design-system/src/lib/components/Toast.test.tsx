@@ -26,7 +26,7 @@ describe('Toast', () => {
       <Toast variant="success" message="Success!" onDismiss={jest.fn()} />
     );
     const toast = container.firstChild as HTMLElement;
-    expect(toast).toHaveClass('bg-emerald-50/80');
+    expect(toast).toHaveClass('bg-emerald-50');
   });
 
   it('renders error variant', () => {
@@ -42,7 +42,7 @@ describe('Toast', () => {
       <Toast variant="warning" message="Warning!" onDismiss={jest.fn()} />
     );
     const toast = container.firstChild as HTMLElement;
-    expect(toast).toHaveClass('bg-amber-50/80');
+    expect(toast).toHaveClass('bg-amber-50');
   });
 
   it('renders info variant', () => {
@@ -50,7 +50,7 @@ describe('Toast', () => {
       <Toast variant="info" message="Info!" onDismiss={jest.fn()} />
     );
     const toast = container.firstChild as HTMLElement;
-    expect(toast).toHaveClass('bg-blue-50/80');
+    expect(toast).toHaveClass('bg-blue-50');
   });
 
   it('shows close button by default', () => {

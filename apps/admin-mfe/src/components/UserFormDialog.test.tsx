@@ -7,6 +7,40 @@ import { UserRole } from 'shared-types';
 import { UserFormDialog } from './UserFormDialog';
 import * as usersApi from '../api/users';
 
+// Mock ResizeObserver for Radix UI Select
+beforeAll(() => {
+  global.ResizeObserver = class ResizeObserver {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  };
+
+  // Mock PointerEvent for Radix UI
+  class MockPointerEvent extends Event {
+    button: number;
+    ctrlKey: boolean;
+    pointerType: string;
+
+    constructor(type: string, props: PointerEventInit = {}) {
+      super(type, props);
+      this.button = props.button ?? 0;
+      this.ctrlKey = props.ctrlKey ?? false;
+      this.pointerType = props.pointerType ?? 'mouse';
+    }
+  }
+
+  global.PointerEvent =
+    MockPointerEvent as unknown as typeof globalThis.PointerEvent;
+
+  // Mock pointer capture methods
+  Element.prototype.hasPointerCapture = () => false;
+  Element.prototype.setPointerCapture = () => {};
+  Element.prototype.releasePointerCapture = () => {};
+
+  // Mock scrollIntoView
+  Element.prototype.scrollIntoView = () => {};
+});
+
 // Mock the users API
 jest.mock('../api/users', () => ({
   createUser: jest.fn(),

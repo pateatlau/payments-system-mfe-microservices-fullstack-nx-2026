@@ -290,3 +290,25 @@ export const getUserByIdInternal = async (
     next(error);
   }
 };
+
+/**
+ * GET /auth/internal/users
+ * Internal: Get all users (id, email, name) for recipient selection
+ */
+export const listUsersInternal = async (
+  _req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const prisma = getPrisma();
+    const users = await prisma.user.findMany({
+      select: { id: true, email: true, name: true },
+      orderBy: { name: 'asc' },
+    });
+
+    return res.status(200).json({ success: true, data: users });
+  } catch (error) {
+    next(error);
+  }
+};

@@ -199,7 +199,7 @@ function PaymentsPageInner({ onPaymentSuccess }: PaymentsPageProps = {}) {
   };
 
   return (
-    <div className="w-full">
+    <div className="w-full pb-8">
       <div className="mx-auto max-w-7xl">
         {/* Header */}
         <div className="mb-8">

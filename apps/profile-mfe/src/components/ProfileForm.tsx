@@ -237,16 +237,23 @@ export function ProfileForm({ onSuccess }: ProfileFormProps) {
               <AvatarUpload
                 initialUrl={watch('avatarUrl') || undefined}
                 onFileChange={(file: File | null) => {
-                  // For now we only set avatarUrl to empty string or
-                  // keep existing URL; upload flow will be wired in later.
+                  // TODO: Replace base64 storage with proper file upload to cloud storage (S3)
+                  // before production deployment. Base64 is a temporary workaround that:
+                  // - Increases database storage size significantly
+                  // - Slows down API responses with large payloads
+                  // - Should be replaced with: upload to S3/cloud -> store permanent URL
                   if (!file) {
                     setValue('avatarUrl', '');
                     return;
                   }
 
-                  // Create a preview URL for the selected file
-                  const previewUrl = URL.createObjectURL(file);
-                  setValue('avatarUrl', previewUrl);
+                  // Convert file to base64 data URL for persistence
+                  const reader = new FileReader();
+                  reader.onloadend = () => {
+                    const base64String = reader.result as string;
+                    setValue('avatarUrl', base64String);
+                  };
+                  reader.readAsDataURL(file);
                 }}
               />
             </div>

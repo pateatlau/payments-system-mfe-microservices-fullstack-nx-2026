@@ -192,3 +192,27 @@ export async function getPaymentReports(
 
   return response.data;
 }
+
+/**
+ * Recipient user type for payment recipient selection
+ */
+export interface Recipient {
+  id: string;
+  email: string;
+  name: string;
+}
+
+/**
+ * Get list of available recipients for payments
+ */
+export async function getRecipients(): Promise<Recipient[]> {
+  const response = await paymentsApiClient.get<Recipient[]>(
+    '/payments/recipients'
+  );
+
+  if (!response?.data) {
+    throw new Error('Invalid response structure from payments API');
+  }
+
+  return response.data;
+}

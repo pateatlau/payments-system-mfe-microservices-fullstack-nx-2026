@@ -177,3 +177,21 @@ export function useInvalidatePayments() {
     queryClient.invalidateQueries({ queryKey: paymentKeys.all });
   };
 }
+
+/**
+ * Hook to fetch available recipients for payments
+ * Returns list of users that can receive payments (excludes current user)
+ */
+export function useRecipients() {
+  const { user } = useAuthStore();
+
+  return useQuery({
+    queryKey: ['recipients'] as const,
+    queryFn: async () => {
+      const { getRecipients } = await import('../api/payments');
+      return await getRecipients();
+    },
+    enabled: !!user, // Only fetch if user is authenticated
+    staleTime: 5 * 60 * 1000, // 5 minutes cache
+  });
+}

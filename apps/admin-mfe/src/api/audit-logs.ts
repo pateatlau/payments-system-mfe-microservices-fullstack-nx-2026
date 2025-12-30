@@ -93,7 +93,7 @@ export async function getAvailableActions(): Promise<string[]> {
     const response = await adminApiClient.get<{ data: string[] }>(
       '/admin/audit-logs/actions'
     );
-    return response.data.data;
+    return response.data.data ?? [];
   } catch (_error) {
     // Return empty array if endpoint not available yet
     console.warn('Failed to fetch available actions:', _error);
