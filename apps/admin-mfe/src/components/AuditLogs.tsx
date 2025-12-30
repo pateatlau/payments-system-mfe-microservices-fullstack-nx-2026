@@ -205,7 +205,7 @@ export function AuditLogs() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="ALL">All Actions</SelectItem>
-                {availableActions.map(action => (
+                {(availableActions ?? []).map(action => (
                   <SelectItem key={action} value={action}>
                     {action.replace(/_/g, ' ')}
                   </SelectItem>
