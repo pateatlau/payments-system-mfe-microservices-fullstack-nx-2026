@@ -5,6 +5,16 @@
   "projectType": "library",
   "tags": [],
   "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/shared-graphql-client",
+        "main": "libs/shared-graphql-client/src/index.ts",
+        "tsConfig": "libs/shared-graphql-client/tsconfig.lib.json",
+        "assets": ["libs/shared-graphql-client/*.md"]
+      }
+    },
     "test": {
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
