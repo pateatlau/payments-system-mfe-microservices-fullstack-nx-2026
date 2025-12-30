@@ -17,8 +17,8 @@ import { Button, Card } from '@mfe/shared-design-system';
 const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024; // 5MB
 
 export interface AvatarUploadProps {
-  /** Optional initial avatar URL to display when no file is selected. */
-  initialUrl?: string | null;
+  /** Initial avatar URL to display when no file is selected. Empty string means no avatar. */
+  initialUrl?: string;
   /** Called whenever the selected file changes (null = clear avatar). */
   onFileChange?: (file: File | null) => void;
 }
@@ -27,14 +27,18 @@ export function AvatarUpload({ initialUrl, onFileChange }: AvatarUploadProps) {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [_file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(
-    initialUrl ?? null
+    initialUrl || null
   );
   const [error, setError] = useState<string | null>(null);
 
   // Sync previewUrl when initialUrl prop changes (e.g., after profile loads from API)
+  // Also handle when initialUrl becomes empty/undefined (user clicked Remove)
   useEffect(() => {
-    if (initialUrl !== undefined) {
-      setPreviewUrl(initialUrl ?? null);
+    if (initialUrl === undefined || initialUrl === '') {
+      // Clear preview when parent signals removal
+      setPreviewUrl(null);
+    } else {
+      setPreviewUrl(initialUrl);
     }
   }, [initialUrl]);
 

@@ -235,7 +235,7 @@ export function ProfileForm({ onSuccess }: ProfileFormProps) {
           <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
             <div className="shrink-0">
               <AvatarUpload
-                initialUrl={watch('avatarUrl') || undefined}
+                initialUrl={watch('avatarUrl') ?? ''}
                 onFileChange={(file: File | null) => {
                   // TODO: Replace base64 storage with proper file upload to cloud storage (S3)
                   // before production deployment. Base64 is a temporary workaround that:
@@ -262,7 +262,7 @@ export function ProfileForm({ onSuccess }: ProfileFormProps) {
                 Profile Photo
               </p>
               <p className="text-sm text-muted-foreground">
-                Recommended size: 200x200px. Max 2MB.
+                Recommended size: 200x200px. Max 5MB.
               </p>
             </div>
           </div>
