@@ -17,6 +17,10 @@ import {
   AlertDescription,
   Loading,
   Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@mfe/shared-design-system';
 import {
   getSystemHealth,
@@ -285,15 +289,19 @@ export function SystemHealth() {
               Refresh Interval:
             </label>
             <Select
-              className="w-48"
-              value={refreshInterval}
-              onChange={e => setRefreshInterval(Number(e.target.value))}
+              value={String(refreshInterval)}
+              onValueChange={value => setRefreshInterval(Number(value))}
               disabled={!autoRefresh}
             >
-              <option value={10}>10 seconds</option>
-              <option value={30}>30 seconds</option>
-              <option value={60}>1 minute</option>
-              <option value={300}>5 minutes</option>
+              <SelectTrigger className="w-48">
+                <SelectValue placeholder="Select interval" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="10">10 seconds</SelectItem>
+                <SelectItem value="30">30 seconds</SelectItem>
+                <SelectItem value="60">1 minute</SelectItem>
+                <SelectItem value="300">5 minutes</SelectItem>
+              </SelectContent>
             </Select>
             <span className="text-sm text-muted-foreground">
               {autoRefresh ? 'Active' : 'Paused'}

@@ -3,6 +3,9 @@
 
 /* Design System - CSS Custom Properties for shadcn/ui Theme */
 :root {
+  /* Color scheme for native browser controls (select dropdowns, date pickers) */
+  color-scheme: light;
+
   /* Semantic Color Tokens - Light Mode */
   --background: 255 255 255; /* White background */
   --foreground: 17 24 39; /* gray-900 text */
@@ -56,6 +59,9 @@
 
 /* Dark Mode Variables */
 .dark {
+  /* Color scheme for native browser controls (select dropdowns, date pickers) */
+  color-scheme: dark;
+
   /* Semantic Color Tokens - Dark Mode */
   --background: 17 24 39; /* gray-900 background */
   --foreground: 249 250 251; /* gray-50 text */

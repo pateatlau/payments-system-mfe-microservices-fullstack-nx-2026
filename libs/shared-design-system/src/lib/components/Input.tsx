@@ -23,6 +23,8 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           'placeholder:text-(--muted-foreground)',
           'focus:outline-none focus:ring-2 focus:ring-(--primary) focus:ring-offset-2',
           'disabled:cursor-not-allowed disabled:opacity-50',
+          // Inherit color-scheme from parent for native date picker theming
+          '[color-scheme:inherit]',
           // Date input: position the calendar picker icon at the right edge
           isDateInput && 'relative',
           isDateInput &&

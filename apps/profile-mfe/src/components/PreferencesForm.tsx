@@ -10,7 +10,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Alert,
@@ -20,6 +20,10 @@ import {
   Input,
   Label,
   Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
   Skeleton,
   Toast,
   ToastContainer,
@@ -51,6 +55,7 @@ export function PreferencesForm({ onSuccess }: PreferencesFormProps) {
     register,
     handleSubmit,
     reset,
+    control,
     formState: { errors },
   } = useForm<UpdatePreferencesFormData>({
     resolver: zodResolver(updatePreferencesSchema),
@@ -178,15 +183,26 @@ export function PreferencesForm({ onSuccess }: PreferencesFormProps) {
         {/* Theme */}
         <div className="space-y-1.5">
           <Label htmlFor="theme">Theme</Label>
-          <Select
-            id="theme"
-            disabled={isPreferencesLoading || isSubmitting}
-            {...register('theme')}
-          >
-            <option value="light">Light</option>
-            <option value="dark">Dark</option>
-            <option value="system">System</option>
-          </Select>
+          <Controller
+            control={control}
+            name="theme"
+            render={({ field }) => (
+              <Select
+                value={field.value}
+                onValueChange={field.onChange}
+                disabled={isPreferencesLoading || isSubmitting}
+              >
+                <SelectTrigger id="theme">
+                  <SelectValue placeholder="Select theme" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="light">Light</SelectItem>
+                  <SelectItem value="dark">Dark</SelectItem>
+                  <SelectItem value="system">System</SelectItem>
+                </SelectContent>
+              </Select>
+            )}
+          />
           {errors.theme && (
             <p className="text-xs text-red-600">
               {errors.theme.message as string}
