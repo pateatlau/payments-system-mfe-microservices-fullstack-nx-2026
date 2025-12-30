@@ -84,8 +84,8 @@ export function Header({
   };
 
   return (
-    <header className="sticky top-0 z-50 shadow-lg text-primary-foreground bg-primary">
-      <div className="container px-4 py-4 mx-auto">
+    <header className="sticky top-0 z-50 px-8 py-4 shadow-lg text-primary-foreground bg-primary">
+      <div className="max-w-7xl mx-auto">
         <div className="flex items-center justify-between">
           {/* Branding/Logo */}
           <div className="flex items-center gap-3">
