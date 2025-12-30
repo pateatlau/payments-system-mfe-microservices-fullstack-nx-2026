@@ -144,9 +144,9 @@ export const useAuthStore = create<AuthState>()(
             if (accessToken) {
               try {
                 await apiClient.post('/auth/logout', {});
-              } catch (_error) {
+              } catch (error) {
                 // Log error but continue with logout
-                console.warn('Logout API call failed:', _error);
+                console.warn('Logout API call failed:', error);
               }
             }
 

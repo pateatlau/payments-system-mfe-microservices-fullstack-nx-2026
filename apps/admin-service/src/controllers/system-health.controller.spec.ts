@@ -13,7 +13,7 @@ jest.mock('../lib/prisma', () => ({
   },
 }));
 
-// Mock Redis to throw an error (which results in 'unknown' status)
+// Mock Redis to throw an error (simulates failed connection, results in 'unhealthy' status)
 jest.mock('ioredis', () => {
   return jest.fn().mockImplementation(() => {
     throw new Error('Redis connection failed');

@@ -452,6 +452,32 @@ await expect(page.locator('h1, h2').first()).toContainText(/payment/i, {
     sleep 5  # Additional buffer for stabilization
 ```
 
+### Challenge 9: Skipped Tests and Mock Configuration
+
+**Problem:** Multiple test suites were skipped with vague TODO comments, reducing CI coverage:
+- `Select.test.tsx` - Component bug where `className` was applied to wrapper div instead of select element
+- `Toast.test.tsx` - Tests checking for wrong Tailwind class names (e.g., `bg-green-50` vs actual `bg-emerald-50/80`)
+- `theme-store.spec.ts` - Missing `isAuthenticated` method in API client mock
+
+**Solution:**
+1. **Fix component bugs:** Update components to match test expectations (e.g., apply `className` to the correct element)
+2. **Update test assertions:** Match actual component output (e.g., `bg-emerald-50/80` instead of `bg-green-50`, `bg-destructive` instead of invalid `bg-(--destructive)`)
+3. **Complete mock configurations:** Add all required methods to mocks
+4. **Remove `describe.skip`:** Re-enable all test suites after fixes
+5. **Standardize test file naming:** Rename `.test.tsx` to `.spec.tsx` for consistency (payments-mfe had 15 files renamed)
+
+```typescript
+// Example: Complete API client mock for theme-store tests
+jest.mock('@mfe/shared-api-client', () => ({
+  getApiClient: jest.fn(() => ({
+    get: jest.fn(),
+    put: jest.fn(),
+    setTokenProvider: jest.fn(),
+    isAuthenticated: jest.fn(() => false), // Required for auth checks
+  })),
+}));
+```
+
 ---
 
 ## E2E Testing Strategy
