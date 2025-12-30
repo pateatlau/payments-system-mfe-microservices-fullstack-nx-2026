@@ -1,8 +1,6 @@
 {
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
-  "installation": {
-    "version": "22.1.3"
-  },
+  "installation": { "version": "22.1.3" },
   "defaultBase": "main",
   "namedInputs": {
     "default": ["{projectRoot}/**/*", "sharedGlobals"],
@@ -74,14 +72,9 @@
         "linter": "none",
         "bundler": "rspack"
       },
-      "component": {
-        "style": "css"
-      },
-      "library": {
-        "style": "css",
-        "linter": "none",
-        "unitTestRunner": "jest"
-      }
+      "component": { "style": "css" },
+      "library": { "style": "css", "linter": "none", "unitTestRunner": "jest" }
     }
-  }
+  },
+  "nxCloudId": "69524f7134bb55830a5051a9"
 }
