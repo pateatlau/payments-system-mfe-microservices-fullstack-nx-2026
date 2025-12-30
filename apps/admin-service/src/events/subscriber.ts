@@ -19,6 +19,11 @@ import {
 import { getConnectionManager } from './connection';
 import config from '../config';
 import { prisma, Prisma, UserRoleType } from '../lib/prisma';
+import {
+  createAuditLog,
+  AuditAction,
+  ResourceType,
+} from '../services/audit.service';
 
 let userEventsSubscriber: RabbitMQSubscriber | null = null;
 let paymentEventsSubscriber: RabbitMQSubscriber | null = null;
@@ -75,6 +80,15 @@ async function handleUserCreated(
       },
     });
 
+    // Create audit log for user registration
+    await createAuditLog({
+      action: AuditAction.USER_REGISTERED,
+      resourceType: ResourceType.USER,
+      resourceId: userId,
+      userId: userId,
+      details: { email, role, source: 'auth_service_event' },
+    });
+
     console.log(`[Admin Service] Synced user.created: ${userId}`);
     context.ack();
   } catch (error) {
@@ -126,9 +140,23 @@ async function handleUserDeleted(
   try {
     const { userId } = event.data;
 
+    // Get user info before deleting for audit log
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { email: true },
+    });
+
     // Delete denormalized user from admin_db
     await prisma.user.delete({
       where: { id: userId },
+    });
+
+    // Create audit log for user deletion (from auth service)
+    await createAuditLog({
+      action: AuditAction.USER_DELETED,
+      resourceType: ResourceType.USER,
+      resourceId: userId,
+      details: { email: user?.email, source: 'auth_service_event' },
     });
 
     console.log(`[Admin Service] Synced user.deleted: ${userId}`);
@@ -161,14 +189,26 @@ async function handlePaymentEvent(
   context: EventContext
 ): Promise<void> {
   try {
+    // Map event type to audit action
+    const actionMap: Record<string, string> = {
+      'payment.created': AuditAction.PAYMENT_CREATED,
+      'payment.updated': AuditAction.PAYMENT_UPDATED,
+      'payment.completed': AuditAction.PAYMENT_COMPLETED,
+      'payment.failed': AuditAction.PAYMENT_FAILED,
+      'payment.cancelled': AuditAction.PAYMENT_CANCELLED,
+    };
+
+    const action = actionMap[event.type] || event.type;
+
     // Create audit log for payment event
-    await prisma.auditLog.create({
-      data: {
-        action: event.type,
-        resourceType: 'payment',
-        resourceId: event.data.paymentId,
-        userId: event.data.senderId,
-        details: event.data as Prisma.InputJsonValue,
+    await createAuditLog({
+      action,
+      resourceType: ResourceType.PAYMENT,
+      resourceId: event.data.paymentId,
+      userId: event.data.senderId,
+      details: {
+        ...event.data,
+        source: 'payments_service_event',
       },
     });
 
