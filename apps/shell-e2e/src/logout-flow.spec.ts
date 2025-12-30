@@ -57,10 +57,20 @@ test.describe('Logout Flow', () => {
 
     await expect(page).toHaveURL(/.*signin/, { timeout: 15000 });
 
-    // Try to access protected route
-    await page.goto('/payments');
+    // Wait for signin form to confirm we're fully on the signin page
+    await expect(page.locator('input[type="email"]')).toBeVisible({
+      timeout: 5000,
+    });
 
-    // Should redirect back to sign-in (protected route redirects unauthenticated users)
+    // Try to access protected route - use waitForURL to handle the redirect
+    await Promise.all([
+      page.waitForURL((url) => url.pathname.includes('signin'), {
+        timeout: 15000,
+      }),
+      page.goto('/payments'),
+    ]);
+
+    // Should have redirected back to sign-in (protected route redirects unauthenticated users)
     await expect(page).toHaveURL(/.*signin/, { timeout: 15000 });
   });
 });

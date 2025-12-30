@@ -47,8 +47,13 @@ test.describe('Payments Flow', () => {
       logoutButton.click(),
     ]);
 
+    // Wait for signin page to fully load after logout
+    await expect(page).toHaveURL(/.*signin/, { timeout: 15000 });
+    await expect(page.locator('input[type="email"]')).toBeVisible({
+      timeout: 10000,
+    });
+
     // Now sign in as vendor
-    await page.goto('/signin');
     await page.fill('input[type="email"]', 'vendor@example.com');
     await page.fill('input[type="password"]', 'TestPassword123!');
 
@@ -63,10 +68,11 @@ test.describe('Payments Flow', () => {
     // Wait for redirect to payments page
     await expect(page).toHaveURL(/.*payments/, { timeout: 15000 });
 
-    // Wait for create payment button (VENDOR only)
+    // Wait for create payment button (use .first() as there may be multiple)
     const createButton = page
       .locator('button')
-      .filter({ hasText: /create.*payment/i });
+      .filter({ hasText: /create.*payment/i })
+      .first();
     await expect(createButton).toBeVisible({ timeout: 10000 });
 
     // Click create payment button
@@ -96,9 +102,11 @@ test.describe('Payments Flow', () => {
   test('should show create payment button for CUSTOMER', async ({ page }) => {
     // Already signed in as customer from beforeEach
     // Verify create payment button IS visible (CUSTOMERs can create payments)
+    // Use .first() as there may be multiple buttons matching
     const createButton = page
       .locator('button')
-      .filter({ hasText: /create.*payment/i });
+      .filter({ hasText: /create.*payment/i })
+      .first();
     await expect(createButton).toBeVisible({ timeout: 10000 });
   });
 });

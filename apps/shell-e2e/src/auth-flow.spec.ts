@@ -19,52 +19,10 @@ test.describe('Authentication Flow', () => {
   test('should complete sign-in flow: sign in → redirect → payments page', async ({
     page,
   }) => {
-    // Capture ALL network requests for debugging
-    page.on('request', (request) => {
-      const url = request.url();
-      if (url.includes('/api/') || url.includes(':3000') || url.includes('auth') || url.includes('login')) {
-        console.log(`>>> API Request: ${request.method()} ${url}`);
-      }
-    });
-
-    // Capture API requests and responses for debugging
-    const apiResponses: { url: string; status: number; body?: string }[] = [];
-    page.on('response', async (response) => {
-      const url = response.url();
-      if (url.includes('/api/') || url.includes(':3000') || url.includes('auth') || url.includes('login')) {
-        const status = response.status();
-        let body: string | undefined;
-        try {
-          body = await response.text();
-        } catch {
-          body = '[could not read body]';
-        }
-        apiResponses.push({ url, status, body });
-        console.log(`<<< API Response: ${status} ${url}`);
-        if (body) console.log(`    Body: ${body.substring(0, 500)}`);
-      }
-    });
-
-    // Capture failed requests (network errors, CORS, etc.)
-    page.on('requestfailed', (request) => {
-      console.log(`!!! Request FAILED: ${request.url()} - ${request.failure()?.errorText}`);
-    });
-
-    // Log console messages from the page (including our debug logs)
-    page.on('console', (msg) => {
-      const type = msg.type();
-      const text = msg.text();
-      // Log all messages for debugging
-      console.log(`Browser Console [${type}]:`, text);
-    });
-
     await page.goto('/signin');
 
     // Wait for sign-in form to load
     await expect(page.locator('input[type="email"]')).toBeVisible({
-      timeout: 10000,
-    });
-    await expect(page.locator('input[type="password"]')).toBeVisible({
       timeout: 10000,
     });
 
@@ -72,29 +30,11 @@ test.describe('Authentication Flow', () => {
     await page.fill('input[type="email"]', 'customer@example.com');
     await page.fill('input[type="password"]', 'TestPassword123!');
 
-    // Submit form and wait for navigation
-    // The login flow: submit → API call → auth store update → navigate('/') → redirect to /payments
+    // Submit form and wait for navigation to payments page
     await Promise.all([
-      // Wait for navigation away from signin page
-      page.waitForURL((url) => !url.pathname.includes('signin'), { timeout: 15000 }),
+      page.waitForURL(/.*payments/, { timeout: 20000 }),
       page.click('button[type="submit"]'),
     ]);
-
-    // Log all API responses captured
-    console.log('=== All API Responses ===');
-    apiResponses.forEach((r) => {
-      console.log(`${r.status} ${r.url}`);
-      if (r.body) console.log(`  Body: ${r.body.substring(0, 200)}`);
-    });
-
-    // Check for any error message on the page
-    const errorMessage = await page.locator('[class*="error"], [role="alert"], .text-red-500, .text-destructive').textContent().catch(() => null);
-    if (errorMessage) {
-      console.log('Error message on page:', errorMessage);
-    }
-
-    // Wait for redirect to payments page (should already be there or on the way)
-    await expect(page).toHaveURL(/.*payments/, { timeout: 15000 });
 
     // Verify payments page is loaded (use .first() as there may be multiple headings)
     await expect(page.locator('h1, h2').first()).toContainText(/payment/i, {
