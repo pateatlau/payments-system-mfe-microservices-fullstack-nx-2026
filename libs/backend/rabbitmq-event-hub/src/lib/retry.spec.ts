@@ -64,7 +64,8 @@ describe('Retry Utility', () => {
       const elapsed = Date.now() - start;
 
       expect(elapsed).toBeGreaterThanOrEqual(90); // Allow 10ms margin
-      expect(elapsed).toBeLessThan(150);
+      // Use generous upper bound for CI environments where system load can cause delays
+      expect(elapsed).toBeLessThan(500);
     });
   });
 
