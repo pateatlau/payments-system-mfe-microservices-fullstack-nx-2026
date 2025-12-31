@@ -475,3 +475,93 @@ HTTPS Mode (Safari-compatible):
 | 10. Certificate Trust | macOS Keychain | Trust self-signed cert |
 
 All fixes are required for Safari to work correctly. Missing any single fix can cause Safari to fail while other browsers work fine.
+
+---
+
+## CI Compatibility: DefinePlugin Environment Variable Pattern
+
+**Important**: When implementing Fix 6 (API Client URLs), it's critical to use the correct pattern for accessing environment variables. Using the wrong pattern can break CI builds that rely on `NX_API_BASE_URL` to override the default HTTPS URLs.
+
+### The Problem
+
+After changing API client fallback URLs from `http://localhost:3000/api` to `https://localhost/api` for Safari compatibility, CI E2E tests started failing. The issue was in how environment variables were accessed.
+
+**The broken pattern**:
+```typescript
+// WRONG - Prevents DefinePlugin from replacing the env var
+const envBaseURL =
+  typeof process !== 'undefined' && process.env
+    ? (process.env as { NX_API_BASE_URL?: string }).NX_API_BASE_URL
+    : undefined;
+
+const apiClient = new ApiClient({
+  baseURL: envBaseURL || 'https://localhost/api',  // Falls back to HTTPS
+});
+```
+
+**Why this breaks CI**:
+1. Rspack's `DefinePlugin` replaces the **exact expression** `process.env.NX_API_BASE_URL` at build time
+2. The check `typeof process !== 'undefined' && process.env` is evaluated **at build time** by DefinePlugin
+3. In browser environments, `process` is not defined, so the check prevents DefinePlugin replacement
+4. Result: `envBaseURL` is always `undefined` at runtime
+5. The fallback `https://localhost/api` is used, which fails in CI (CI uses HTTP, not HTTPS via nginx)
+
+### The Solution
+
+Use a TypeScript ambient declaration to satisfy the type checker while allowing DefinePlugin to work:
+
+```typescript
+// CORRECT - Allows DefinePlugin replacement while maintaining type safety
+// Access environment variable (replaced by DefinePlugin at build time)
+// IMPORTANT: DefinePlugin replaces the EXACT expression `process.env.NX_API_BASE_URL`
+// Do NOT check if process/process.env exists - that would prevent the replacement
+// The DefinePlugin will replace this entire expression with the actual value at build time
+declare const process: { env: { NX_API_BASE_URL?: string } };
+const envBaseURL: string | undefined = process.env.NX_API_BASE_URL;
+
+const apiClient = new ApiClient({
+  baseURL: envBaseURL || 'https://localhost/api',
+});
+```
+
+**Why this works**:
+1. `declare const process` tells TypeScript that `process` exists (ambient declaration)
+2. DefinePlugin sees the exact expression `process.env.NX_API_BASE_URL` and replaces it
+3. At build time, if `NX_API_BASE_URL=http://localhost:3000/api` is set, it becomes: `const envBaseURL = "http://localhost:3000/api";`
+4. If not set, DefinePlugin replaces it with `undefined`, and the fallback is used
+5. CI sets the env var, so HTTP is used; Safari dev uses the HTTPS fallback
+
+### Files Updated with Correct Pattern
+
+- `apps/payments-mfe/src/api/payments.ts`
+- `apps/admin-mfe/src/api/adminApiClient.ts`
+- `apps/admin-mfe/src/api/dashboard.ts`
+- `apps/profile-mfe/src/api/profile.ts`
+
+### DefinePlugin Configuration
+
+The DefinePlugin in rspack config must include the env var replacement:
+
+```javascript
+// In rspack.config.js
+new rspack.DefinePlugin({
+  'process.env.NX_API_BASE_URL': JSON.stringify(process.env.NX_API_BASE_URL),
+  // ... other env vars
+}),
+```
+
+### Testing Both Environments
+
+| Environment | `NX_API_BASE_URL` | Result | Notes |
+|-------------|-------------------|--------|-------|
+| CI E2E Tests | `http://localhost:3000/api` | API calls use HTTP | Set by CI scripts |
+| Safari Dev | Not set | Fallback to `https://localhost/api` | HTTPS via nginx |
+| Chrome/Firefox Dev | Optional | Either works | Can use HTTP or HTTPS |
+
+### Quick Verification
+
+To verify the pattern is working correctly:
+
+1. **Check CI build logs**: Look for the DefinePlugin replacement in the build output
+2. **Check browser Network tab**: API calls should use the expected protocol (HTTPS in Safari, HTTP in CI)
+3. **Run E2E tests locally**: `pnpm test:e2e` should pass with both HTTP and HTTPS modes
