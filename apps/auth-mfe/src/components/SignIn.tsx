@@ -105,7 +105,7 @@ export function SignIn({ onSuccess, onNavigateToSignUp }: SignInProps = {}) {
           <img
             src={hdfcLogo}
             alt="HDFC Bank - We understand your world"
-            className="h-16 object-contain"
+            className="w-1/2 object-contain"
           />
         </div>
         <Card>
