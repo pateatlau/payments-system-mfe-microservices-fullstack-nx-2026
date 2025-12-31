@@ -101,7 +101,7 @@ export function SignIn({ onSuccess, onNavigateToSignUp }: SignInProps = {}) {
     <div className="flex items-center justify-center w-full">
       <div className="w-full max-w-md">
         {/* HDFC Bank Logo */}
-        <div className="flex justify-center mb-6">
+        <div className="flex justify-center">
           <img
             src={hdfcLogo}
             alt="HDFC Bank - We understand your world"
