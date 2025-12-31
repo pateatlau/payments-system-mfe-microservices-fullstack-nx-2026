@@ -79,6 +79,14 @@ module.exports = {
         ],
         type: 'asset/resource',
       },
+      // Image assets
+      {
+        test: /\.(png|jpg|jpeg|gif|svg|webp)$/,
+        type: 'asset/resource',
+        generator: {
+          filename: 'assets/[name].[hash][ext]',
+        },
+      },
     ],
   },
   // Source maps for development

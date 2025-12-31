@@ -6,6 +6,9 @@ import { Header } from './shared-header-ui';
 import { useAuthStore } from 'shared-auth-store';
 import type { User } from 'shared-auth-store';
 
+// Mock the logo image import
+jest.mock('../assets/hdfc-logo-00.png', () => 'test-logo.png');
+
 // Mock ThemeToggle to avoid Theme store side effects while still rendering a button
 jest.mock('@mfe/shared-design-system', () => {
   const actual = jest.requireActual('@mfe/shared-design-system');
@@ -74,6 +77,19 @@ describe('Header', () => {
     it('should render custom branding when provided', () => {
       renderWithRouter(<Header branding="Custom Brand" />);
       expect(screen.getByText('Custom Brand')).toBeInTheDocument();
+    });
+
+    it('should render the HDFC logo', () => {
+      renderWithRouter(<Header />);
+      const logo = screen.getByAltText('HDFC Bank Logo');
+      expect(logo).toBeInTheDocument();
+      expect(logo.getAttribute('src')).toBe('test-logo.png');
+    });
+
+    it('should link logo and branding to home page', () => {
+      renderWithRouter(<Header />);
+      const logoLink = screen.getByAltText('HDFC Bank Logo').closest('a');
+      expect(logoLink).toHaveAttribute('href', '/');
     });
 
     it('should show sign in and sign up buttons', () => {

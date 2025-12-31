@@ -9,6 +9,7 @@ import {
   cn,
 } from '@mfe/shared-design-system';
 import { getApiClient } from '@mfe/shared-api-client';
+import hdfcLogo from '../assets/hdfc-logo-00.png';
 
 /**
  * User Avatar component
@@ -161,7 +162,14 @@ export function Header({
         <div className="flex items-center justify-between">
           {/* Branding/Logo */}
           <div className="flex items-center gap-3">
-            <h1 className="text-xl font-bold tracking-tight">{branding}</h1>
+            <Link to="/" className="flex items-center gap-3 hover:opacity-90 transition-opacity">
+              <img
+                src={hdfcLogo}
+                alt="HDFC Bank Logo"
+                className="h-10 w-10 rounded"
+              />
+              <h1 className="text-xl font-bold tracking-tight">{branding}</h1>
+            </Link>
           </div>
 
           {/* Navigation and User Section */}
