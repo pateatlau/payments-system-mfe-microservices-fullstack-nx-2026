@@ -17,14 +17,14 @@ test.describe('Payments Flow', () => {
     await expect(page).toHaveURL(/.*payments/, { timeout: 15000 });
 
     // Wait for the payments page to finish loading
-    // The h1 "Payments" heading with subtitle indicates the page loaded successfully
-    // (loading state shows "Loading payments...", error shows "Error Loading Payments")
+    // The "Create Payment" button only appears after:
+    // 1. MFE loads (not showing Suspense fallback)
+    // 2. User is authenticated with CUSTOMER or VENDOR role
+    // 3. Payments query completes (not in isInitialLoad state)
+    // Using longer timeout (30s) since MFE loading + API call can take time in CI
     await expect(
-      page.locator('h1:has-text("Payments")').first()
-    ).toBeVisible({ timeout: 15000 });
-    await expect(
-      page.locator('text=/manage your payments|view your payment history/i').first()
-    ).toBeVisible({ timeout: 15000 });
+      page.locator('button').filter({ hasText: /create.*payment/i }).first()
+    ).toBeVisible({ timeout: 30000 });
   });
 
   test('should display payments page for authenticated user', async ({
@@ -79,20 +79,13 @@ test.describe('Payments Flow', () => {
     await expect(page).toHaveURL(/.*payments/, { timeout: 15000 });
 
     // Wait for the payments page to finish loading
-    // The h1 "Payments" heading with subtitle indicates the page loaded successfully
-    await expect(
-      page.locator('h1:has-text("Payments")').first()
-    ).toBeVisible({ timeout: 15000 });
-    await expect(
-      page.locator('text=/manage your payments|view your payment history/i').first()
-    ).toBeVisible({ timeout: 15000 });
-
-    // Wait for create payment button (use .first() as there may be multiple)
+    // The "Create Payment" button only appears after MFE + API loads
+    // Using longer timeout (30s) since MFE loading + API call can take time in CI
     const createButton = page
       .locator('button')
       .filter({ hasText: /create.*payment/i })
       .first();
-    await expect(createButton).toBeVisible({ timeout: 10000 });
+    await expect(createButton).toBeVisible({ timeout: 30000 });
 
     // Click create payment button
     await createButton.click();

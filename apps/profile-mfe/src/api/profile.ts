@@ -43,10 +43,10 @@ import type {
 } from '../types/profile';
 
 // Access environment variable (replaced by DefinePlugin at build time)
-const envBaseURL =
-  typeof process !== 'undefined' && process.env
-    ? (process.env as { NX_API_BASE_URL?: string }).NX_API_BASE_URL
-    : undefined;
+// IMPORTANT: DefinePlugin replaces the EXACT expression `process.env.NX_API_BASE_URL`
+// Do NOT check if process/process.env exists - that would prevent the replacement
+declare const process: { env: { NX_API_BASE_URL?: string } };
+const envBaseURL: string | undefined = process.env.NX_API_BASE_URL;
 
 /**
  * Profile Service API Client instance

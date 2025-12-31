@@ -26,10 +26,11 @@ import type {
  * - API Gateway → Payments Service: http://localhost:3002/api/payments/*
  */
 // Access environment variable (replaced by DefinePlugin at build time)
-const envBaseURL =
-  typeof process !== 'undefined' && process.env
-    ? (process.env as { NX_API_BASE_URL?: string }).NX_API_BASE_URL
-    : undefined;
+// IMPORTANT: DefinePlugin replaces the EXACT expression `process.env.NX_API_BASE_URL`
+// Do NOT check if process/process.env exists - that would prevent the replacement
+// The DefinePlugin will replace this entire expression with the actual value at build time
+declare const process: { env: { NX_API_BASE_URL?: string } };
+const envBaseURL: string | undefined = process.env.NX_API_BASE_URL;
 
 // Create token provider that accesses auth store directly (Zustand allows direct access)
 // Token provider functions access store state dynamically on each call
