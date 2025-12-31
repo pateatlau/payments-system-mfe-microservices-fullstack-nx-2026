@@ -207,6 +207,14 @@ module.exports = {
         ],
         type: 'javascript/auto',
       },
+      // Image assets (PNG, JPG, SVG, etc.)
+      {
+        test: /\.(png|jpg|jpeg|gif|svg|webp)$/,
+        type: 'asset/resource',
+        generator: {
+          filename: 'assets/[name].[hash][ext]',
+        },
+      },
     ],
   },
   plugins: [

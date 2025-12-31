@@ -15,6 +15,7 @@ import {
   Alert,
   AlertDescription,
 } from '@mfe/shared-design-system';
+import hdfcLogo from '../assets/hdfc-logo-03.png';
 
 /**
  * Sign-in form schema using Zod
@@ -99,6 +100,14 @@ export function SignIn({ onSuccess, onNavigateToSignUp }: SignInProps = {}) {
   return (
     <div className="flex items-center justify-center w-full">
       <div className="w-full max-w-md">
+        {/* HDFC Bank Logo */}
+        <div className="flex justify-center mb-6">
+          <img
+            src={hdfcLogo}
+            alt="HDFC Bank - We understand your world"
+            className="h-16 object-contain"
+          />
+        </div>
         <Card>
           <CardHeader>
             <CardTitle>Sign In</CardTitle>

@@ -4,6 +4,9 @@ import userEvent from '@testing-library/user-event';
 import { SignIn } from './SignIn';
 import { useAuthStore } from 'shared-auth-store';
 
+// Mock the logo image import
+jest.mock('../assets/hdfc-logo-03.png', () => 'test-logo.png');
+
 // Mock the auth store
 jest.mock('shared-auth-store', () => ({
   useAuthStore: jest.fn(),
@@ -36,6 +39,14 @@ describe('SignIn', () => {
     expect(
       screen.getByRole('button', { name: /sign in/i })
     ).toBeInTheDocument();
+  });
+
+  it('renders HDFC Bank logo above the form', () => {
+    render(<SignIn />);
+
+    const logo = screen.getByAltText('HDFC Bank - We understand your world');
+    expect(logo).toBeInTheDocument();
+    expect(logo).toHaveAttribute('src', 'test-logo.png');
   });
 
   it('displays validation error for invalid email', async () => {
