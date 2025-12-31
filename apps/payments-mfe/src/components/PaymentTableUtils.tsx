@@ -1,4 +1,12 @@
-import { Button, Input, Select } from '@mfe/shared-design-system';
+import {
+  Button,
+  Input,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@mfe/shared-design-system';
 import { PaymentStatus } from 'shared-types';
 import type { Payment } from '../api/types';
 
@@ -54,7 +62,8 @@ function getPartyDisplay(party?: PartyInfo | null): {
 }
 
 export interface PaymentTableRowEditProps {
-  statusRegister?: Record<string, unknown>;
+  statusValue: PaymentStatus;
+  onStatusChange: (value: PaymentStatus) => void;
   reasonRegister?: Record<string, unknown>;
   isUpdating: boolean;
   onSave: () => void;
@@ -64,7 +73,8 @@ export interface PaymentTableRowEditProps {
 
 function EditModeRow({
   payment,
-  statusRegister = {},
+  statusValue,
+  onStatusChange,
   reasonRegister = {},
   isUpdating,
   onSave,
@@ -113,12 +123,17 @@ function EditModeRow({
         {payment.type}
       </td>
       <td className="px-3 py-2 whitespace-nowrap">
-        <Select {...statusRegister}>
-          <option value={PaymentStatus.PENDING}>Pending</option>
-          <option value={PaymentStatus.PROCESSING}>Processing</option>
-          <option value={PaymentStatus.COMPLETED}>Completed</option>
-          <option value={PaymentStatus.FAILED}>Failed</option>
-          <option value={PaymentStatus.CANCELLED}>Cancelled</option>
+        <Select value={statusValue} onValueChange={onStatusChange}>
+          <SelectTrigger className="h-8 w-32 text-xs">
+            <SelectValue placeholder="Select status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={PaymentStatus.PENDING}>Pending</SelectItem>
+            <SelectItem value={PaymentStatus.PROCESSING}>Processing</SelectItem>
+            <SelectItem value={PaymentStatus.COMPLETED}>Completed</SelectItem>
+            <SelectItem value={PaymentStatus.FAILED}>Failed</SelectItem>
+            <SelectItem value={PaymentStatus.CANCELLED}>Cancelled</SelectItem>
+          </SelectContent>
         </Select>
       </td>
       <td className="px-3 py-2 whitespace-nowrap">
