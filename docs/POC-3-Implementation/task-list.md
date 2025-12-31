@@ -7,9 +7,16 @@
 
 **Latest Update (2025-12-31):**
 
+- **Safari Full Compatibility:** Complete Module Federation support for Safari browser
+  - nginx MFE proxy routes (`/mfe/{name}/*`) for HTTPS remote loading
+  - `crossOriginLoading: 'anonymous'` in all rspack configs
+  - API client URLs default to HTTPS (`https://localhost/api`)
+  - Backend helmet configured with `crossOriginResourcePolicy: 'cross-origin'`
+  - See [Cross-Browser Compatibility Guide](./CROSS_BROWSER_COMPATIBILITY.md) for 10-step fix details
 - **Nx Cloud Integration:** Enabled distributed caching for CI pipeline (~50-65% faster CI runs)
 - UI Fixes: Toast notifications fully opaque, preferences form with select dropdowns
 - Profile enhancements: Avatar in header, recipient email dropdown in payment form
+- HDFC Bank logo added to header and auth pages
 
 **Previous Update (2025-12-23):**
 

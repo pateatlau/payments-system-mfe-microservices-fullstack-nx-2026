@@ -15,6 +15,7 @@ import {
   Alert,
   AlertDescription,
 } from '@mfe/shared-design-system';
+import hdfcLogo from '../assets/hdfc-logo-03.png';
 
 /**
  * Password strength validation helper
@@ -162,6 +163,14 @@ export function SignUp({ onSuccess, onNavigateToSignIn }: SignUpProps = {}) {
   return (
     <div className="flex items-center justify-center w-full">
       <div className="w-full max-w-md">
+        {/* HDFC Bank Logo */}
+        <div className="flex justify-center">
+          <img
+            src={hdfcLogo}
+            alt="HDFC Bank - We understand your world"
+            className="w-1/2 object-contain"
+          />
+        </div>
         <Card>
           <CardHeader>
             <CardTitle>Sign Up</CardTitle>

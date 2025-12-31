@@ -3,9 +3,13 @@
  *
  * Module Federation v2 Host - consumes remote MFEs
  *
- * Remotes:
+ * Remotes (HTTP mode - direct access):
  * - authMfe: http://localhost:4201/remoteEntry.js
  * - paymentsMfe: http://localhost:4202/remoteEntry.js
+ *
+ * Remotes (HTTPS mode - via nginx proxy for Safari compatibility):
+ * - authMfe: https://localhost/mfe/auth/remoteEntry.js
+ * - paymentsMfe: https://localhost/mfe/payments/remoteEntry.js
  *
  * PostCSS loader configured for Tailwind CSS v4
  *
@@ -18,12 +22,30 @@ const rspack = require('@rspack/core');
 const path = require('path');
 const ReactRefreshPlugin = require('@rspack/plugin-react-refresh');
 
+// Check if running in HTTPS mode (via nginx proxy)
+const isHttpsMode = process.env.NX_HTTPS_MODE === 'true';
+
 // Debug: Log environment variables during config evaluation
 console.log('[Shell rspack.config.js] NX_API_BASE_URL:', process.env.NX_API_BASE_URL);
 console.log('[Shell rspack.config.js] NODE_ENV:', process.env.NODE_ENV);
+console.log('[Shell rspack.config.js] NX_HTTPS_MODE:', process.env.NX_HTTPS_MODE);
 
 const isProduction = process.env.NODE_ENV === 'production';
 const isDevelopment = !isProduction;
+
+/**
+ * Get remote MFE URL based on mode
+ * - HTTPS mode: Use nginx proxy paths (Safari-compatible, no mixed content)
+ * - HTTP mode: Direct access to MFE dev servers
+ */
+const getRemoteUrl = (mfeName, port) => {
+  if (isHttpsMode) {
+    // HTTPS mode: proxy through nginx to avoid mixed content (Safari requirement)
+    return `https://localhost/mfe/${mfeName}/remoteEntry.js`;
+  }
+  // HTTP mode: direct access to dev server
+  return `http://localhost:${port}/remoteEntry.js`;
+};
 
 /**
  * Shared dependencies configuration for Module Federation
@@ -122,6 +144,9 @@ module.exports = {
       ? '[name].[contenthash].chunk.js'
       : '[name].chunk.js',
     clean: true,
+    // CRITICAL for Safari: Sets crossorigin="anonymous" on dynamically loaded scripts
+    // This allows Module Federation to load remote entries with proper CORS handling
+    crossOriginLoading: 'anonymous',
   },
   resolve: {
     extensions: ['.tsx', '.ts', '.jsx', '.js', '.json'],
@@ -232,6 +257,14 @@ module.exports = {
         ],
         type: 'javascript/auto', // Required when experiments.css is false
       },
+      // Image assets (PNG, JPG, SVG, etc.)
+      {
+        test: /\.(png|jpg|jpeg|gif|svg|webp)$/,
+        type: 'asset/resource',
+        generator: {
+          filename: 'assets/[name].[hash][ext]',
+        },
+      },
     ],
   },
   plugins: [
@@ -286,11 +319,13 @@ module.exports = {
     new rspack.container.ModuleFederationPlugin({
       name: 'shell',
       remotes: {
-        // Remote MFE URLs - format: 'remoteName@http://host:port/remoteEntry.js'
-        authMfe: 'authMfe@http://localhost:4201/remoteEntry.js',
-        paymentsMfe: 'paymentsMfe@http://localhost:4202/remoteEntry.js',
-        adminMfe: 'adminMfe@http://localhost:4203/remoteEntry.js',
-        profileMfe: 'profileMfe@http://localhost:4204/remoteEntry.js',
+        // Remote MFE URLs - dynamically set based on HTTPS mode
+        // HTTPS mode: proxied through nginx (Safari-compatible)
+        // HTTP mode: direct access to dev servers
+        authMfe: `authMfe@${getRemoteUrl('auth', 4201)}`,
+        paymentsMfe: `paymentsMfe@${getRemoteUrl('payments', 4202)}`,
+        adminMfe: `adminMfe@${getRemoteUrl('admin', 4203)}`,
+        profileMfe: `profileMfe@${getRemoteUrl('profile', 4204)}`,
       },
       shared: sharedDependencies,
     }),
@@ -320,6 +355,9 @@ module.exports = {
       'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, PATCH, OPTIONS',
       'Access-Control-Allow-Headers':
         'X-Requested-With, content-type, Authorization',
+      // Cross-browser compatibility headers (Safari)
+      'Cross-Origin-Opener-Policy': 'same-origin-allow-popups',
+      'Cross-Origin-Resource-Policy': 'cross-origin',
     },
     client: {
       logging: 'warn',

@@ -101,6 +101,8 @@ module.exports = {
       ? '[name].[contenthash].chunk.js'
       : '[name].chunk.js',
     clean: true,
+    // CRITICAL for Safari: Sets crossorigin="anonymous" on dynamically loaded scripts
+    crossOriginLoading: 'anonymous',
   },
   resolve: {
     extensions: ['.tsx', '.ts', '.jsx', '.js', '.json'],
@@ -207,6 +209,14 @@ module.exports = {
         ],
         type: 'javascript/auto',
       },
+      // Image assets (PNG, JPG, SVG, etc.)
+      {
+        test: /\.(png|jpg|jpeg|gif|svg|webp)$/,
+        type: 'asset/resource',
+        generator: {
+          filename: 'assets/[name].[hash][ext]',
+        },
+      },
     ],
   },
   plugins: [
@@ -281,6 +291,9 @@ module.exports = {
       'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, PATCH, OPTIONS',
       'Access-Control-Allow-Headers':
         'X-Requested-With, content-type, Authorization',
+      // Cross-browser compatibility headers (Safari)
+      'Cross-Origin-Opener-Policy': 'same-origin-allow-popups',
+      'Cross-Origin-Resource-Policy': 'cross-origin',
     },
     client: {
       logging: 'warn',

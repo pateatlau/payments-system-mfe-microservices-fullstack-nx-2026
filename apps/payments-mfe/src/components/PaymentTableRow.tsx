@@ -4,6 +4,7 @@ import {
   StatusBadge,
   getStatusInfo,
 } from '@mfe/shared-design-system';
+import { PaymentStatus } from 'shared-types';
 import {
   formatCurrency,
   formatDate,
@@ -19,7 +20,8 @@ export interface PaymentTableRowProps {
   isVendor: boolean;
   isAdmin: boolean;
   deleteConfirmId: string | null;
-  statusRegister?: Record<string, unknown>;
+  statusValue: PaymentStatus;
+  onStatusChange: (value: PaymentStatus) => void;
   reasonRegister?: Record<string, unknown>;
   onEdit: (payment: PaymentWithParties) => void;
   onSave: () => void;
@@ -40,7 +42,8 @@ export function PaymentTableRow({
   isVendor,
   isAdmin,
   deleteConfirmId,
-  statusRegister,
+  statusValue,
+  onStatusChange,
   reasonRegister,
   onEdit,
   onSave,
@@ -55,7 +58,8 @@ export function PaymentTableRow({
       {isEditing ? (
         <EditModeRow
           payment={payment}
-          statusRegister={statusRegister}
+          statusValue={statusValue}
+          onStatusChange={onStatusChange}
           reasonRegister={reasonRegister}
           isUpdating={isUpdating}
           onSave={onSave}

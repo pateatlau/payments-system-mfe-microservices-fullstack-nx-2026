@@ -24,6 +24,13 @@ import type {
   UpdatePaymentStatusRequest,
 } from '../validators/payment.validators';
 import { cache, CacheKeys, CacheTags, PaymentsCacheTTL } from '../lib/cache';
+import {
+  publishPaymentCreated,
+  publishPaymentUpdated,
+  publishPaymentCompleted,
+  publishPaymentFailed,
+  publishPaymentCancelled,
+} from '../events/publisher';
 
 /**
  * Payment reports data structure
@@ -318,7 +325,22 @@ export const paymentService = {
     // Also invalidate global payments caches (e.g., admin lists)
     await cache.invalidateByTag(CacheTags.payments);
 
-    // TODO: Publish event: payment:created
+    // Publish payment.created event for audit logging
+    try {
+      await publishPaymentCreated({
+        paymentId: payment.id,
+        senderId: payment.senderId,
+        recipientId: payment.recipientId,
+        amount: Number(payment.amount),
+        currency: payment.currency,
+        description: payment.description ?? undefined,
+        status: payment.status,
+        createdAt: payment.createdAt.toISOString(),
+      });
+    } catch (error) {
+      // Log but don't fail the request if event publishing fails
+      console.error('[Payments Service] Failed to publish payment.created event:', error);
+    }
 
     return payment;
   },
@@ -508,7 +530,49 @@ export const paymentService = {
     // Also invalidate global payments caches (e.g., admin lists)
     await cache.invalidateByTag(CacheTags.payments);
 
-    // TODO: Publish event: payment:status:updated
+    // Publish appropriate event based on new status
+    try {
+      if (data.status === 'completed') {
+        await publishPaymentCompleted({
+          paymentId,
+          senderId: payment.senderId,
+          recipientId: payment.recipientId,
+          amount: Number(payment.amount),
+          currency: payment.currency,
+          completedAt: new Date().toISOString(),
+        });
+      } else if (data.status === 'failed') {
+        await publishPaymentFailed({
+          paymentId,
+          senderId: payment.senderId,
+          recipientId: payment.recipientId,
+          amount: Number(payment.amount),
+          currency: payment.currency,
+          failureReason: data.reason || 'Payment failed',
+          failedAt: new Date().toISOString(),
+        });
+      } else if (data.status === 'cancelled') {
+        await publishPaymentCancelled({
+          paymentId,
+          senderId: payment.senderId,
+          recipientId: payment.recipientId,
+          amount: Number(payment.amount),
+          currency: payment.currency,
+          cancelReason: data.reason,
+          cancelledAt: new Date().toISOString(),
+        });
+      } else {
+        // For other status changes (pending, processing)
+        await publishPaymentUpdated({
+          paymentId,
+          status: data.status,
+          updatedAt: new Date().toISOString(),
+        });
+      }
+    } catch (error) {
+      // Log but don't fail the request if event publishing fails
+      console.error('[Payments Service] Failed to publish payment status event:', error);
+    }
 
     return updatedPayment;
   },

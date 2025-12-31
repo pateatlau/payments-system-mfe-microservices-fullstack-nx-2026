@@ -12,6 +12,12 @@ import {
   createUserSchema,
 } from '../validators/admin.validators';
 import type { UserRole } from 'shared-types';
+import {
+  createAuditLog,
+  getRequestMetadata,
+  AuditAction,
+  ResourceType,
+} from '../services/audit.service';
 
 // Extend Express Request to include user
 interface AuthenticatedRequest extends Request {
@@ -105,6 +111,18 @@ export async function updateUser(
     const data = updateUserSchema.parse(req.body);
     const user = await adminService.updateUser(id, data);
 
+    // Create audit log
+    const { ipAddress, userAgent } = getRequestMetadata(req);
+    await createAuditLog({
+      action: AuditAction.USER_UPDATED,
+      resourceType: ResourceType.USER,
+      resourceId: id,
+      userId: req.user?.userId,
+      details: { updatedFields: Object.keys(data) },
+      ipAddress,
+      userAgent,
+    });
+
     res.json({
       success: true,
       data: user,
@@ -139,6 +157,18 @@ export async function updateUserRole(
 
     const data = updateUserRoleSchema.parse(req.body);
     const user = await adminService.updateUserRole(id, data);
+
+    // Create audit log
+    const { ipAddress, userAgent } = getRequestMetadata(req);
+    await createAuditLog({
+      action: AuditAction.USER_ROLE_CHANGED,
+      resourceType: ResourceType.USER,
+      resourceId: id,
+      userId: req.user?.userId,
+      details: { newRole: data.role },
+      ipAddress,
+      userAgent,
+    });
 
     res.json({
       success: true,
@@ -175,6 +205,18 @@ export async function updateUserStatus(
     const data = updateUserStatusSchema.parse(req.body);
     const user = await adminService.updateUserStatus(id, data);
 
+    // Create audit log
+    const { ipAddress, userAgent } = getRequestMetadata(req);
+    await createAuditLog({
+      action: AuditAction.USER_STATUS_CHANGED,
+      resourceType: ResourceType.USER,
+      resourceId: id,
+      userId: req.user?.userId,
+      details: { isActive: data.isActive, reason: data.reason },
+      ipAddress,
+      userAgent,
+    });
+
     res.json({
       success: true,
       data: user,
@@ -196,6 +238,18 @@ export async function createUser(
   try {
     const data = createUserSchema.parse(req.body);
     const user = await adminService.createUser(data);
+
+    // Create audit log
+    const { ipAddress, userAgent } = getRequestMetadata(req);
+    await createAuditLog({
+      action: AuditAction.USER_CREATED,
+      resourceType: ResourceType.USER,
+      resourceId: user.id,
+      userId: req.user?.userId,
+      details: { email: data.email, role: data.role },
+      ipAddress,
+      userAgent,
+    });
 
     res.status(201).json({
       success: true,
@@ -229,7 +283,21 @@ export async function deleteUser(
       return;
     }
 
+    // Get user info before deleting for audit log
+    const userToDelete = await adminService.getUserById(id);
     await adminService.deleteUser(id);
+
+    // Create audit log
+    const { ipAddress, userAgent } = getRequestMetadata(req);
+    await createAuditLog({
+      action: AuditAction.USER_DELETED,
+      resourceType: ResourceType.USER,
+      resourceId: id,
+      userId: req.user?.userId,
+      details: { deletedUserEmail: userToDelete?.email },
+      ipAddress,
+      userAgent,
+    });
 
     res.status(204).send();
   } catch (error) {

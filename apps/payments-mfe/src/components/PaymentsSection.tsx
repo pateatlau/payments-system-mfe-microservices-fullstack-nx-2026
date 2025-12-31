@@ -98,9 +98,19 @@ export function PaymentsSection({
     handleSubmit: handleSubmitUpdate,
     formState: { isSubmitting: isUpdating },
     reset: resetUpdateForm,
+    watch: watchUpdate,
+    setValue: setUpdateValue,
   } = useForm<UpdatePaymentFormData>({
     resolver: zodResolver(updatePaymentSchema),
   });
+
+  // Watch the status value for controlled Select component
+  const statusValue = watchUpdate('status') || PaymentStatus.PENDING;
+
+  // Handler for status change from Select component
+  const handleStatusChange = (value: PaymentStatus) => {
+    setUpdateValue('status', value);
+  };
 
   const onSubmitCreate = async (data: CreatePaymentFormData) => {
     try {
@@ -245,7 +255,8 @@ export function PaymentsSection({
         isAdmin={isAdmin}
         isCustomer={isCustomer}
         hasActiveFilters={hasActiveFilters}
-        statusRegister={registerUpdate('status')}
+        statusValue={statusValue}
+        onStatusChange={handleStatusChange}
         reasonRegister={registerUpdate('reason')}
         onEdit={startEdit}
         onSave={() => handleSubmitUpdate(onSubmitUpdate)()}

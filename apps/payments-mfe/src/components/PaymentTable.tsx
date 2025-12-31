@@ -4,6 +4,7 @@ import {
   Alert,
   AlertDescription,
 } from '@mfe/shared-design-system';
+import { PaymentStatus } from 'shared-types';
 import { PaymentTableRow } from './PaymentTableRow';
 import type { PaymentWithParties } from './PaymentTableUtils';
 
@@ -16,7 +17,8 @@ export interface PaymentTableProps {
   isAdmin: boolean;
   isCustomer: boolean;
   hasActiveFilters: boolean;
-  statusRegister?: Record<string, unknown>;
+  statusValue: PaymentStatus;
+  onStatusChange: (value: PaymentStatus) => void;
   reasonRegister?: Record<string, unknown>;
   onEdit: (payment: PaymentWithParties) => void;
   onSave: () => void;
@@ -43,7 +45,8 @@ export function PaymentTable({
   isAdmin,
   isCustomer,
   hasActiveFilters,
-  statusRegister,
+  statusValue,
+  onStatusChange,
   reasonRegister,
   onEdit,
   onSave,
@@ -103,7 +106,8 @@ export function PaymentTable({
                     isVendor={isVendor}
                     isAdmin={isAdmin}
                     deleteConfirmId={deleteConfirmId}
-                    statusRegister={statusRegister}
+                    statusValue={statusValue}
+                    onStatusChange={onStatusChange}
                     reasonRegister={reasonRegister}
                     onEdit={onEdit}
                     onSave={onSave}

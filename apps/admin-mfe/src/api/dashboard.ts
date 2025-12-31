@@ -24,22 +24,21 @@ interface PaymentReports {
 }
 
 // Access environment variable (replaced by DefinePlugin at build time)
-const envBaseURL =
-  typeof process !== 'undefined' && process.env
-    ? (process.env as { NX_API_BASE_URL?: string }).NX_API_BASE_URL
-    : undefined;
+// IMPORTANT: DefinePlugin replaces the EXACT expression `process.env.NX_API_BASE_URL`
+// Do NOT check if process/process.env exists - that would prevent the replacement
+declare const process: { env: { NX_API_BASE_URL?: string } };
+const envBaseURL: string | undefined = process.env.NX_API_BASE_URL;
 
 /**
  * Payments API client for admin dashboard (via API Gateway - POC-3)
  *
- * Development: Direct to API Gateway (http://localhost:3000/api)
- * Production: Through nginx proxy (https://localhost/api)
+ * Always uses HTTPS through nginx proxy (required for Safari compatibility)
+ * Direct API Gateway access (http://localhost:3000/api) can be set via NX_API_BASE_URL
  */
 const paymentsApiClient = new ApiClient({
   // Use API Gateway URL (without service suffix - added in API calls)
-  // Development: http://localhost:3000/api
-  // Production: https://localhost/api
-  baseURL: envBaseURL || 'http://localhost:3000/api',
+  // Always use HTTPS through nginx proxy for cross-browser compatibility
+  baseURL: envBaseURL || 'https://localhost/api',
   timeout: 30000,
   tokenProvider: {
     getAccessToken: () => useAuthStore.getState().accessToken ?? null,
