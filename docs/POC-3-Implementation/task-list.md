@@ -7,9 +7,11 @@
 
 **Latest Update (2025-12-31):**
 
+- **Cross-Browser Compatibility:** Added CSP and CORS headers for Safari/Firefox Module Federation support
 - **Nx Cloud Integration:** Enabled distributed caching for CI pipeline (~50-65% faster CI runs)
 - UI Fixes: Toast notifications fully opaque, preferences form with select dropdowns
 - Profile enhancements: Avatar in header, recipient email dropdown in payment form
+- HDFC Bank logo added to header and auth pages
 
 **Previous Update (2025-12-23):**
 

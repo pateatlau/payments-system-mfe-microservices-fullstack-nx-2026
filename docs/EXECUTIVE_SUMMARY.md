@@ -281,6 +281,27 @@ nginx serves as the primary ingress point with enterprise-grade capabilities:
 | Static Asset Caching    | Immutable assets cached for 1 year             |
 | WebSocket Support       | Upgrade handling for real-time features        |
 | Load Balancing          | least_conn for HTTP, ip_hash for persistent connections |
+| Cross-Browser Support   | CSP and CORS headers for Safari/Firefox compatibility |
+
+### Cross-Browser Compatibility
+
+The platform is tested and optimized for all major browsers:
+
+| Browser | Version | Status    | Notes                                    |
+| ------- | ------- | --------- | ---------------------------------------- |
+| Chrome  | Latest  | Supported | Primary development browser              |
+| Firefox | Latest  | Supported | CSP and CORS headers configured          |
+| Safari  | Latest  | Supported | Cross-Origin headers for Module Federation |
+| Edge    | Latest  | Supported | Chromium-based, full compatibility       |
+
+**Module Federation Compatibility:**
+
+Safari and Firefox require specific configuration for Module Federation remote loading:
+
+- Content Security Policy (CSP) includes localhost MFE ports in script-src and connect-src
+- CORS headers on remoteEntry.js endpoints for cross-origin script loading
+- Cross-Origin-Opener-Policy and Cross-Origin-Resource-Policy headers on dev servers
+- WebSocket upgrade headers for HMR across all browsers
 
 ### Database Architecture
 
