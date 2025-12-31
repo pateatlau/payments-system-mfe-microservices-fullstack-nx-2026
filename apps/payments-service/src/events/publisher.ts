@@ -177,6 +177,39 @@ export async function publishPaymentFailed(
   );
 }
 
+interface PaymentCancelledPayload {
+  paymentId: string;
+  senderId: string;
+  recipientId: string;
+  amount: number;
+  currency: string;
+  cancelReason?: string;
+  cancelledAt: string;
+}
+
+/**
+ * Publish payment.cancelled event
+ *
+ * Triggered when a payment is cancelled
+ * Subscribers: Admin Service (audit log), Profile Service (update status)
+ */
+export async function publishPaymentCancelled(
+  payload: PaymentCancelledPayload
+): Promise<void> {
+  const publisher = getEventPublisher();
+
+  await publisher.publish('payment.cancelled', payload, {
+    paymentId: payload.paymentId,
+    senderId: payload.senderId,
+    eventType: 'payment_lifecycle',
+  });
+
+  // eslint-disable-next-line no-console
+  console.log(
+    `[Payments Service] Published payment.cancelled event: ${payload.paymentId}`
+  );
+}
+
 /**
  * Close the publisher (for graceful shutdown)
  */
