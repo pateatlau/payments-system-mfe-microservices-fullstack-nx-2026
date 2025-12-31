@@ -9,7 +9,12 @@
 
 **Latest Updates (2025-12-31):**
 
-- Cross-Browser Compatibility: CSP and CORS headers for Safari/Firefox Module Federation support
+- Safari Full Compatibility: Complete Module Federation support for Safari browser
+  - nginx MFE proxy routes for HTTPS remote loading
+  - `crossOriginLoading: 'anonymous'` in all rspack configs
+  - API client URLs default to HTTPS
+  - Backend helmet configured with `crossOriginResourcePolicy: 'cross-origin'`
+  - See [Cross-Browser Compatibility Guide](./CROSS_BROWSER_COMPATIBILITY.md) for full details
 - Nx Cloud Integration: Distributed caching for CI pipeline (~50-65% faster builds)
 - HDFC Bank logo added to header and auth pages
 
@@ -38,7 +43,8 @@ This document provides a detailed, step-by-step implementation plan for POC-3, e
 - **Performance optimizations** (code splitting, lazy loading, bundle optimization)
 - **Optional GraphQL API** (alongside REST)
 - **UI/UX Enhancements** (dark mode, design consistency, mobile responsiveness)
-- **Cross-Browser Compatibility** (Chrome, Firefox, Safari, Edge support)
+- **Cross-Browser Compatibility** (Chrome, Firefox, Safari, Edge, Brave support)
+  - See [Cross-Browser Compatibility Guide](./CROSS_BROWSER_COMPATIBILITY.md)
 
 Each task is designed to be:
 

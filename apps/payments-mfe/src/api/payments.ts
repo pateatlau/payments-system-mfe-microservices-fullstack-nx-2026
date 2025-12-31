@@ -46,9 +46,9 @@ const tokenProvider: TokenProvider = {
 
 const paymentsApiClient = new ApiClient({
   // Use API Gateway URL (without /payments suffix - added in API calls)
-  // Development: http://localhost:3000/api
-  // Production: https://localhost/api
-  baseURL: envBaseURL || 'http://localhost:3000/api',
+  // Always use HTTPS through nginx proxy (required for Safari compatibility)
+  // Direct API Gateway access (http://localhost:3000/api) can be set via NX_API_BASE_URL
+  baseURL: envBaseURL || 'https://localhost/api',
   tokenProvider,
   onTokenRefresh: (accessToken: string, refreshToken: string) => {
     useAuthStore.setState({ accessToken, refreshToken });

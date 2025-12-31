@@ -56,9 +56,9 @@ const envBaseURL =
  */
 const profileApiClient = new ApiClient({
   // Use API Gateway URL
-  // Development: http://localhost:3000/api
-  // Production: https://localhost/api
-  baseURL: envBaseURL || 'http://localhost:3000/api',
+  // Always use HTTPS through nginx proxy (required for Safari compatibility)
+  // Direct API Gateway access (http://localhost:3000/api) can be set via NX_API_BASE_URL
+  baseURL: envBaseURL || 'https://localhost/api',
   timeout: 30000,
   tokenProvider: {
     getAccessToken: () => {

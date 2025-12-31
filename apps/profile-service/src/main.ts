@@ -56,7 +56,13 @@ app.use(
 );
 
 // Security middleware
-app.use(helmet());
+// CRITICAL for Safari: Allow cross-origin requests from MFE frontend
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+    crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' },
+  })
+);
 
 // CORS - allow frontend MFEs (shell/auth/payments/admin) and nginx proxy (HTTPS)
 const allowedOrigins = [

@@ -144,6 +144,9 @@ module.exports = {
       ? '[name].[contenthash].chunk.js'
       : '[name].chunk.js',
     clean: true,
+    // CRITICAL for Safari: Sets crossorigin="anonymous" on dynamically loaded scripts
+    // This allows Module Federation to load remote entries with proper CORS handling
+    crossOriginLoading: 'anonymous',
   },
   resolve: {
     extensions: ['.tsx', '.ts', '.jsx', '.js', '.json'],

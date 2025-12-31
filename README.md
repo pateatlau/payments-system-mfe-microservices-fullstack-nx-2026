@@ -21,6 +21,7 @@ A production-ready, full-stack microfrontend platform demonstrating enterprise-g
 - **Full Observability:** Prometheus metrics, Grafana dashboards, Jaeger tracing, Sentry errors
 - **Banking-Grade Security:** JWT authentication, RBAC, secure session management
 - **CI Pipeline:** GitHub Actions with Nx Cloud distributed caching (50-65% faster builds)
+- **Cross-Browser:** Full support for Chrome, Firefox, Safari, Edge, and Brave
 
 ### Architecture
 
@@ -108,11 +109,14 @@ pnpm dev:backend
 
 ```bash
 # Starts Shell app and all MFEs (Auth, Payments, Admin, Profile)
+# HTTPS mode - required for Safari compatibility
 pnpm dev:all
 
-# If HTTPS causes issues, use HTTP mode (no cert trust needed):
+# HTTP mode (Chrome/Firefox only - no Safari support):
 pnpm dev:mf
 ```
+
+> **Safari Users:** Must use `pnpm dev:all` (HTTPS mode). See [Cross-Browser Compatibility Guide](docs/POC-3-Implementation/CROSS_BROWSER_COMPATIBILITY.md) for details.
 
 ### 9. Access Application
 
@@ -145,6 +149,7 @@ pnpm test:e2e
 
 - If services fail to start: ensure Docker is running, then rerun `pnpm backend:setup` and `pnpm infra:start`.
 - If HTTPS shows cert errors: trust the generated cert (above) or use HTTP mode via `pnpm dev:mf`.
+- If Safari doesn't load MFEs: use `pnpm dev:all` (HTTPS mode required). See [Cross-Browser Compatibility Guide](docs/POC-3-Implementation/CROSS_BROWSER_COMPATIBILITY.md).
 - If ports are occupied: check 3000–3004, 4200–4204, 443/80, 9090, 3010, 16686, 5672/15672, 6379.
 
 ---
@@ -228,8 +233,8 @@ pnpm test:backend             # Run backend tests
 pnpm backend:setup            # Setup databases with Prisma
 
 # Frontend
-pnpm dev:mf:https             # Start frontend (HTTPS mode)
-pnpm dev:mf                   # Start frontend (HTTP mode)
+pnpm dev:all                  # Start frontend (HTTPS mode - Safari compatible)
+pnpm dev:mf                   # Start frontend (HTTP mode - Chrome/Firefox only)
 pnpm test                     # Run all frontend tests
 pnpm test:coverage            # Run tests with coverage
 
@@ -281,6 +286,7 @@ pnpm grafana:ui               # Open Grafana dashboards
 - Interactive API documentation (Swagger)
 - Advanced caching strategies
 - Cross-tab/device session sync
+- Full cross-browser compatibility (Chrome, Firefox, Safari, Edge, Brave)
 
 ---
 
@@ -316,6 +322,7 @@ pnpm test:e2e                 # End-to-end tests
 - [Dark Mode – Full Plan](docs/POC-3-Implementation/DARK-MODE-FULL-IMPLEMENTATION-PLAN.md) – Steps A–I, tests, guardrails
 - [Theme Guardrails](docs/POC-3-Implementation/THEME-GUARDRAILS.md) – ESLint rules and patterns
 - [SSL/TLS Setup Guide](docs/POC-3-Implementation/ssl-tls-setup-guide.md) – HTTPS config + troubleshooting
+- [Cross-Browser Compatibility](docs/POC-3-Implementation/CROSS_BROWSER_COMPATIBILITY.md) – Safari/Firefox/Chrome support
 - [Observability Setup](docs/POC-3-Implementation/OBSERVABILITY_LIVE_SETUP.md) – Prometheus/Grafana/Jaeger
 - [Swagger API Docs](docs/POC-3-Implementation/SWAGGER_API_DOCUMENTATION.md) – REST endpoints and auth
 

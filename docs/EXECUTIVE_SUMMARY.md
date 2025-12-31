@@ -291,17 +291,28 @@ The platform is tested and optimized for all major browsers:
 | ------- | ------- | --------- | ---------------------------------------- |
 | Chrome  | Latest  | Supported | Primary development browser              |
 | Firefox | Latest  | Supported | CSP and CORS headers configured          |
-| Safari  | Latest  | Supported | Cross-Origin headers for Module Federation |
+| Safari  | Latest  | Supported | Full Module Federation support (requires HTTPS mode) |
 | Edge    | Latest  | Supported | Chromium-based, full compatibility       |
+| Brave   | Latest  | Supported | Works like Chrome                        |
 
-**Module Federation Compatibility:**
+**Safari-Specific Considerations:**
 
-Safari and Firefox require specific configuration for Module Federation remote loading:
+Safari has the strictest security policies of all browsers. Full Safari compatibility requires:
 
-- Content Security Policy (CSP) includes localhost MFE ports in script-src and connect-src
-- CORS headers on remoteEntry.js endpoints for cross-origin script loading
-- Cross-Origin-Opener-Policy and Cross-Origin-Resource-Policy headers on dev servers
-- WebSocket upgrade headers for HMR across all browsers
+1. **HTTPS Mode**: All resources must be served over HTTPS (no mixed content allowed)
+2. **MFE Proxy Routes**: nginx proxies MFE remoteEntry.js and chunks via HTTPS
+3. **Cross-Origin Headers**: `crossOriginLoading: 'anonymous'` in rspack configs
+4. **API Client URLs**: Default to HTTPS (`https://localhost/api`)
+5. **Backend CORP Headers**: `crossOriginResourcePolicy: 'cross-origin'` in helmet config
+
+> **Note:** For complete Safari configuration details, see [Cross-Browser Compatibility Guide](./POC-3-Implementation/CROSS_BROWSER_COMPATIBILITY.md)
+
+**Development Commands:**
+
+| Mode | Command | Safari Compatible |
+| ---- | ------- | ----------------- |
+| HTTPS (Production-like) | `pnpm dev:all` | Yes |
+| HTTP (Quick development) | `pnpm dev:mf` | No |
 
 ### Database Architecture
 

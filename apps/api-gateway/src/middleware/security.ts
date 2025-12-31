@@ -29,4 +29,9 @@ export const securityMiddleware = helmet({
   },
   noSniff: true,
   xssFilter: true,
+  // CRITICAL for Safari: Allow cross-origin requests from MFE frontend
+  // Without this, Safari blocks API responses due to strict CORP enforcement
+  crossOriginResourcePolicy: { policy: 'cross-origin' },
+  // Allow popups for OAuth flows while maintaining security
+  crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' },
 });
