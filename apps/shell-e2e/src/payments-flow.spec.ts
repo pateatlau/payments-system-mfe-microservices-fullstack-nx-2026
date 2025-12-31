@@ -16,10 +16,15 @@ test.describe('Payments Flow', () => {
     // Wait for redirect to payments page
     await expect(page).toHaveURL(/.*payments/, { timeout: 15000 });
 
-    // Wait for the payments page to finish loading (filters section indicates page is ready)
-    await expect(page.locator('text=/status|filter/i').first()).toBeVisible({
-      timeout: 15000,
-    });
+    // Wait for the payments page to finish loading
+    // The h1 "Payments" heading with subtitle indicates the page loaded successfully
+    // (loading state shows "Loading payments...", error shows "Error Loading Payments")
+    await expect(
+      page.locator('h1:has-text("Payments")').first()
+    ).toBeVisible({ timeout: 15000 });
+    await expect(
+      page.locator('text=/manage your payments|view your payment history/i').first()
+    ).toBeVisible({ timeout: 15000 });
   });
 
   test('should display payments page for authenticated user', async ({
@@ -73,10 +78,14 @@ test.describe('Payments Flow', () => {
     // Wait for redirect to payments page
     await expect(page).toHaveURL(/.*payments/, { timeout: 15000 });
 
-    // Wait for the payments page to finish loading (filters section indicates page is ready)
-    await expect(page.locator('text=/status|filter/i').first()).toBeVisible({
-      timeout: 15000,
-    });
+    // Wait for the payments page to finish loading
+    // The h1 "Payments" heading with subtitle indicates the page loaded successfully
+    await expect(
+      page.locator('h1:has-text("Payments")').first()
+    ).toBeVisible({ timeout: 15000 });
+    await expect(
+      page.locator('text=/manage your payments|view your payment history/i').first()
+    ).toBeVisible({ timeout: 15000 });
 
     // Wait for create payment button (use .first() as there may be multiple)
     const createButton = page
