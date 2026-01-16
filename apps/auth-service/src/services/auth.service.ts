@@ -28,7 +28,11 @@ import { ApiError } from '../middleware/errorHandler';
 import { RegisterInput, LoginInput } from '../validators/auth.validators';
 import { UserRole } from 'shared-types';
 import { cache, CacheKeys, CacheTags, AuthCacheTTL } from '../lib/cache';
-import { publishUserCreated } from '../events/publisher';
+import {
+  publishUserCreated,
+  publishUserLogin,
+  publishUserLogout,
+} from '../events/publisher';
 import {
   blacklistToken,
   blacklistTokenFamily,
@@ -339,6 +343,19 @@ export const login = async (
     updatedAt: user.updatedAt,
   };
 
+  // Publish user.login event for audit logging
+  try {
+    await publishUserLogin({
+      userId: user.id,
+      email: user.email,
+      loginAt: new Date().toISOString(),
+      ipAddress: ip,
+    });
+  } catch (_error) {
+    // Log but don't fail login - event publishing is non-critical
+    console.error('Failed to publish user.login event:', _error);
+  }
+
   return {
     user: userResponse,
     accessToken: tokens.accessToken,
@@ -608,6 +625,17 @@ export const logout = async (
     await prisma.refreshToken.deleteMany({
       where: { userId },
     });
+  }
+
+  // Publish user.logout event for audit logging
+  try {
+    await publishUserLogout({
+      userId,
+      logoutAt: new Date().toISOString(),
+    });
+  } catch (_error) {
+    // Log but don't fail logout - event publishing is non-critical
+    console.error('Failed to publish user.logout event:', _error);
   }
 };
 
