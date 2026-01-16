@@ -1,7 +1,7 @@
 # Backend Hardening Plan - POC-3
 
 **Created:** December 23, 2025
-**Last Updated:** January 16, 2026
+**Last Updated:** January 17, 2026
 **Status:** ✅ **Phase 1 & 2 Complete** - Critical security fixes + Input validation implemented
 **Priority:** High
 
@@ -14,6 +14,7 @@
 - ✅ **Priority 1.2:** JWT Refresh Token Rotation (COMPLETED - Jan 16, 2026)
 - ✅ **Priority 1.3:** Account Lockout & Brute Force Protection (COMPLETED - Jan 16, 2026)
 - ✅ **Priority 1.4:** Audit Logging Infrastructure Fix (COMPLETED - Jan 16, 2026)
+- ✅ **Priority 1.5:** Payment Events Audit Logging Fix (COMPLETED - Jan 17, 2026)
 
 ### Phase 2: Input Validation & Sanitization ✅ COMPLETE
 - ✅ **Priority 2.1:** Enhanced Validation for Payments Service (COMPLETED - Jan 16, 2026)
@@ -539,6 +540,108 @@ The audit logs feature was implemented but not functioning properly due to two i
                                       │   audit_logs    │
                                       └─────────────────┘
 ```
+
+---
+
+#### Priority 1.5: Payment Events Audit Logging Fix ✅ COMPLETED
+
+**Status:** ✅ **COMPLETED** (January 17, 2026)
+**Effort:** 2 hours
+**Impact:** HIGH
+**Commits:**
+- `d65427a - fix(admin,payments): ensure RabbitMQ connection before event operations`
+- `f2a1c4a - feat(admin): show all audit actions in filter dropdown`
+
+**Problem Identified:**
+
+Despite the event subscription infrastructure being set up in Priority 1.4, payment events were still not appearing in audit logs. Investigation revealed:
+
+1. **Root Cause:** RabbitMQ connection race condition
+   - The `connection.ts` files used `connectionManager.connect().catch()` which is non-blocking
+   - Subscribers and publishers tried to initialize before the connection was established
+   - RabbitMQ Management UI showed 0 connections, 0 exchanges, 0 queues
+
+2. **Secondary Issue:** Audit log filter dropdown only showed existing actions
+   - `getAvailableActions()` queried database for distinct actions
+   - Payment actions didn't appear until events were already logged
+   - Users couldn't filter by payment actions before any existed
+
+**Implementation Summary:**
+
+✅ **Completed Tasks:**
+
+1. ✅ Fixed RabbitMQ connection initialization in admin-service:
+   - Added `initializeConnection()` function that properly awaits the connection promise
+   - Updated `startEventSubscriptions()` to call `initializeConnection()` before subscribing
+   - Ensures connection is established before any queue bindings
+
+2. ✅ Fixed RabbitMQ connection initialization in payments-service:
+   - Added `initializeConnection()` function (same pattern as admin-service)
+   - Added `initializePublisher()` function that awaits connection before initializing publisher
+   - Updated `main.ts` to call `initializePublisher()` at startup
+   - Added proper shutdown handling with `closePublisher()` and `closeSubscriber()`
+
+3. ✅ Fixed audit log actions dropdown:
+   - Changed `getAvailableActions()` to return all known actions from `AUDIT_ACTIONS` constant
+   - All 16 audit action types now available in filter dropdown immediately
+   - Includes all payment actions: `PAYMENT_CREATED`, `PAYMENT_UPDATED`, `PAYMENT_COMPLETED`, `PAYMENT_FAILED`, `PAYMENT_CANCELLED`
+
+**Files Modified:**
+
+- ✅ `apps/admin-service/src/events/connection.ts` - Added `initializeConnection()` function
+- ✅ `apps/admin-service/src/events/subscriber.ts` - Call `initializeConnection()` before subscribing
+- ✅ `apps/payments-service/src/events/connection.ts` - Added `initializeConnection()` function
+- ✅ `apps/payments-service/src/events/publisher.ts` - Added `initializePublisher()` function
+- ✅ `apps/payments-service/src/main.ts` - Initialize publisher at startup, proper shutdown
+- ✅ `apps/admin-service/src/services/audit-logs.service.ts` - Return all AUDIT_ACTIONS
+
+**Code Pattern Applied:**
+
+```typescript
+// Before (broken - non-blocking connection)
+export function getConnectionManager(): RabbitMQConnectionManager {
+  if (!connectionManager) {
+    connectionManager = new RabbitMQConnectionManager({ ... });
+    connectionManager.connect().catch(console.error); // Non-blocking!
+  }
+  return connectionManager;
+}
+
+// After (fixed - properly awaited connection)
+let connectionPromise: Promise<void> | null = null;
+
+export async function initializeConnection(): Promise<void> {
+  const manager = getConnectionManager();
+  if (!connectionPromise) {
+    connectionPromise = manager.connect();
+  }
+  try {
+    await connectionPromise; // Properly awaited!
+    console.log('[Service] RabbitMQ connection established');
+  } catch (error) {
+    connectionPromise = null; // Allow retry
+    throw error;
+  }
+}
+```
+
+**Success Criteria Met:**
+
+- ✅ RabbitMQ connections established at service startup
+- ✅ RabbitMQ Management UI shows 2 connections (admin-service + payments-service)
+- ✅ Exchanges and queues properly created and bound
+- ✅ Payment events (status changes) now appear in audit logs
+- ✅ All 16 audit action types available in filter dropdown
+- ✅ No regression in existing functionality
+
+**Testing Notes:**
+
+- After fix, RabbitMQ Management UI (http://localhost:15672) shows:
+  - 2 connections (admin-service, payments-service)
+  - Exchanges: `user.events`, `payment.events`
+  - Queues: `admin_service_user_events`, `admin_service_payment_events`
+- Changing payment status in UI triggers event that appears in audit logs
+- Filter dropdown shows all actions including payment actions before any logs exist
 
 ---
 
