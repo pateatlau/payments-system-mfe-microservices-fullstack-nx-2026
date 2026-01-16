@@ -1,8 +1,12 @@
 /**
  * Admin Controller - Integration Tests
+ *
+ * Updated to test new UUID validation behavior via Zod schemas.
+ * Invalid/missing UUIDs now trigger Zod validation errors passed to next().
  */
 
 import type { Request, Response } from 'express';
+import { ZodError } from 'zod';
 import {
   listUsers,
   getUserById,
@@ -15,21 +19,22 @@ import { adminService } from '../services/admin.service';
 // Mock admin service
 jest.mock('../services/admin.service');
 
-// Mock Zod validators
-jest.mock('../validators/admin.validators', () => ({
-  listUsersSchema: {
-    parse: jest.fn(data => data),
+// Mock audit service
+jest.mock('../services/audit.service', () => ({
+  createAuditLog: jest.fn().mockResolvedValue(null),
+  getRequestMetadata: jest.fn().mockReturnValue({ ipAddress: '127.0.0.1', userAgent: 'jest' }),
+  AuditAction: {
+    USER_UPDATED: 'USER_UPDATED',
+    USER_ROLE_CHANGED: 'USER_ROLE_CHANGED',
+    USER_STATUS_CHANGED: 'USER_STATUS_CHANGED',
   },
-  updateUserSchema: {
-    parse: jest.fn(data => data),
-  },
-  updateUserRoleSchema: {
-    parse: jest.fn(data => data),
-  },
-  updateUserStatusSchema: {
-    parse: jest.fn(data => data),
+  ResourceType: {
+    USER: 'user',
   },
 }));
+
+// Use real Zod validators to test UUID validation
+// The validators module is NOT mocked - we test real validation behavior
 
 describe('AdminController', () => {
   let mockRequest: Partial<Request>;
@@ -47,6 +52,8 @@ describe('AdminController', () => {
       query: {},
       params: {},
       body: {},
+      ip: '127.0.0.1',
+      headers: { 'user-agent': 'jest-test' },
     };
     mockResponse = {
       status: jest.fn().mockReturnThis(),
@@ -110,9 +117,9 @@ describe('AdminController', () => {
   });
 
   describe('getUserById', () => {
-    it('should return user by ID', async () => {
+    it('should return user by ID with valid UUID', async () => {
       const mockUser = {
-        id: 'user-1',
+        id: '123e4567-e89b-12d3-a456-426614174000',
         email: 'user@example.com',
         name: 'User Name',
         role: 'CUSTOMER',
@@ -124,7 +131,7 @@ describe('AdminController', () => {
 
       (adminService.getUserById as jest.Mock).mockResolvedValue(mockUser);
 
-      mockRequest.params = { id: 'user-1' };
+      mockRequest.params = { id: '123e4567-e89b-12d3-a456-426614174000' };
 
       await getUserById(
         mockRequest as Request,
@@ -136,10 +143,12 @@ describe('AdminController', () => {
         success: true,
         data: mockUser,
       });
-      expect(adminService.getUserById).toHaveBeenCalledWith('user-1');
+      expect(adminService.getUserById).toHaveBeenCalledWith(
+        '123e4567-e89b-12d3-a456-426614174000'
+      );
     });
 
-    it('should return 400 for missing ID', async () => {
+    it('should pass ZodError to next for missing ID', async () => {
       mockRequest.params = {};
 
       await getUserById(
@@ -148,21 +157,33 @@ describe('AdminController', () => {
         mockNext
       );
 
-      expect(mockResponse.status).toHaveBeenCalledWith(400);
-      expect(mockResponse.json).toHaveBeenCalledWith({
-        success: false,
-        error: {
-          code: 'BAD_REQUEST',
-          message: 'User ID is required',
-        },
-      });
+      // Zod validation error is passed to next middleware
+      expect(mockNext).toHaveBeenCalled();
+      const error = mockNext.mock.calls[0][0];
+      expect(error).toBeInstanceOf(ZodError);
+    });
+
+    it('should pass ZodError to next for invalid UUID format', async () => {
+      mockRequest.params = { id: 'not-a-valid-uuid' };
+
+      await getUserById(
+        mockRequest as Request,
+        mockResponse as Response,
+        mockNext
+      );
+
+      // Zod validation error is passed to next middleware
+      expect(mockNext).toHaveBeenCalled();
+      const error = mockNext.mock.calls[0][0];
+      expect(error).toBeInstanceOf(ZodError);
+      expect(error.errors[0].message).toBe('Invalid ID format');
     });
 
     it('should handle service errors', async () => {
       const serviceError = new Error('User not found');
       (adminService.getUserById as jest.Mock).mockRejectedValue(serviceError);
 
-      mockRequest.params = { id: 'user-1' };
+      mockRequest.params = { id: '123e4567-e89b-12d3-a456-426614174000' };
 
       await getUserById(
         mockRequest as Request,
@@ -175,9 +196,9 @@ describe('AdminController', () => {
   });
 
   describe('updateUser', () => {
-    it('should update user', async () => {
+    it('should update user with valid UUID', async () => {
       const mockUpdatedUser = {
-        id: 'user-1',
+        id: '123e4567-e89b-12d3-a456-426614174000',
         email: 'user@example.com',
         name: 'Updated Name',
         role: 'CUSTOMER',
@@ -185,7 +206,7 @@ describe('AdminController', () => {
 
       (adminService.updateUser as jest.Mock).mockResolvedValue(mockUpdatedUser);
 
-      mockRequest.params = { id: 'user-1' };
+      mockRequest.params = { id: '123e4567-e89b-12d3-a456-426614174000' };
       mockRequest.body = { name: 'Updated Name' };
 
       await updateUser(
@@ -199,12 +220,12 @@ describe('AdminController', () => {
         data: mockUpdatedUser,
       });
       expect(adminService.updateUser).toHaveBeenCalledWith(
-        'user-1',
+        '123e4567-e89b-12d3-a456-426614174000',
         expect.any(Object)
       );
     });
 
-    it('should return 400 for missing ID', async () => {
+    it('should pass ZodError to next for missing ID', async () => {
       mockRequest.params = {};
       mockRequest.body = { name: 'Test' };
 
@@ -214,21 +235,31 @@ describe('AdminController', () => {
         mockNext
       );
 
-      expect(mockResponse.status).toHaveBeenCalledWith(400);
-      expect(mockResponse.json).toHaveBeenCalledWith({
-        success: false,
-        error: {
-          code: 'BAD_REQUEST',
-          message: 'User ID is required',
-        },
-      });
+      expect(mockNext).toHaveBeenCalled();
+      const error = mockNext.mock.calls[0][0];
+      expect(error).toBeInstanceOf(ZodError);
+    });
+
+    it('should pass ZodError to next for invalid UUID format', async () => {
+      mockRequest.params = { id: 'invalid-uuid' };
+      mockRequest.body = { name: 'Test' };
+
+      await updateUser(
+        mockRequest as Request,
+        mockResponse as Response,
+        mockNext
+      );
+
+      expect(mockNext).toHaveBeenCalled();
+      const error = mockNext.mock.calls[0][0];
+      expect(error).toBeInstanceOf(ZodError);
     });
   });
 
   describe('updateUserRole', () => {
-    it('should update user role', async () => {
+    it('should update user role with valid UUID', async () => {
       const mockUpdatedUser = {
-        id: 'user-1',
+        id: '123e4567-e89b-12d3-a456-426614174000',
         email: 'user@example.com',
         name: 'User Name',
         role: 'VENDOR',
@@ -238,7 +269,7 @@ describe('AdminController', () => {
         mockUpdatedUser
       );
 
-      mockRequest.params = { id: 'user-1' };
+      mockRequest.params = { id: '123e4567-e89b-12d3-a456-426614174000' };
       mockRequest.body = { role: 'VENDOR' };
 
       await updateUserRole(
@@ -252,12 +283,12 @@ describe('AdminController', () => {
         data: mockUpdatedUser,
       });
       expect(adminService.updateUserRole).toHaveBeenCalledWith(
-        'user-1',
+        '123e4567-e89b-12d3-a456-426614174000',
         expect.any(Object)
       );
     });
 
-    it('should return 400 for missing ID', async () => {
+    it('should pass ZodError to next for missing ID', async () => {
       mockRequest.params = {};
       mockRequest.body = { role: 'VENDOR' };
 
@@ -267,14 +298,31 @@ describe('AdminController', () => {
         mockNext
       );
 
-      expect(mockResponse.status).toHaveBeenCalledWith(400);
+      expect(mockNext).toHaveBeenCalled();
+      const error = mockNext.mock.calls[0][0];
+      expect(error).toBeInstanceOf(ZodError);
+    });
+
+    it('should pass ZodError to next for invalid role', async () => {
+      mockRequest.params = { id: '123e4567-e89b-12d3-a456-426614174000' };
+      mockRequest.body = { role: 'INVALID_ROLE' };
+
+      await updateUserRole(
+        mockRequest as Request,
+        mockResponse as Response,
+        mockNext
+      );
+
+      expect(mockNext).toHaveBeenCalled();
+      const error = mockNext.mock.calls[0][0];
+      expect(error).toBeInstanceOf(ZodError);
     });
   });
 
   describe('updateUserStatus', () => {
-    it('should update user status', async () => {
+    it('should update user status with valid UUID', async () => {
       const mockUpdatedUser = {
-        id: 'user-1',
+        id: '123e4567-e89b-12d3-a456-426614174000',
         email: 'user@example.com',
         name: 'User Name',
         role: 'CUSTOMER',
@@ -284,7 +332,7 @@ describe('AdminController', () => {
         mockUpdatedUser
       );
 
-      mockRequest.params = { id: 'user-1' };
+      mockRequest.params = { id: '123e4567-e89b-12d3-a456-426614174000' };
       mockRequest.body = { isActive: false };
 
       await updateUserStatus(
@@ -298,12 +346,12 @@ describe('AdminController', () => {
         data: mockUpdatedUser,
       });
       expect(adminService.updateUserStatus).toHaveBeenCalledWith(
-        'user-1',
+        '123e4567-e89b-12d3-a456-426614174000',
         expect.any(Object)
       );
     });
 
-    it('should return 400 for missing ID', async () => {
+    it('should pass ZodError to next for missing ID', async () => {
       mockRequest.params = {};
       mockRequest.body = { isActive: false };
 
@@ -313,7 +361,24 @@ describe('AdminController', () => {
         mockNext
       );
 
-      expect(mockResponse.status).toHaveBeenCalledWith(400);
+      expect(mockNext).toHaveBeenCalled();
+      const error = mockNext.mock.calls[0][0];
+      expect(error).toBeInstanceOf(ZodError);
+    });
+
+    it('should pass ZodError to next for invalid isActive type', async () => {
+      mockRequest.params = { id: '123e4567-e89b-12d3-a456-426614174000' };
+      mockRequest.body = { isActive: 'not-a-boolean' };
+
+      await updateUserStatus(
+        mockRequest as Request,
+        mockResponse as Response,
+        mockNext
+      );
+
+      expect(mockNext).toHaveBeenCalled();
+      const error = mockNext.mock.calls[0][0];
+      expect(error).toBeInstanceOf(ZodError);
     });
   });
 });

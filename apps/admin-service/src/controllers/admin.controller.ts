@@ -10,6 +10,7 @@ import {
   updateUserRoleSchema,
   updateUserStatusSchema,
   createUserSchema,
+  uuidParamSchema,
 } from '../validators/admin.validators';
 import type { UserRole } from 'shared-types';
 import {
@@ -61,18 +62,8 @@ export async function getUserById(
   next: NextFunction
 ): Promise<void> {
   try {
-    const { id } = req.params;
-
-    if (!id) {
-      res.status(400).json({
-        success: false,
-        error: {
-          code: 'BAD_REQUEST',
-          message: 'User ID is required',
-        },
-      });
-      return;
-    }
+    // Validate UUID path parameter
+    const { id } = uuidParamSchema.parse(req.params);
 
     const user = await adminService.getUserById(id);
 
@@ -95,18 +86,8 @@ export async function updateUser(
   next: NextFunction
 ): Promise<void> {
   try {
-    const { id } = req.params;
-
-    if (!id) {
-      res.status(400).json({
-        success: false,
-        error: {
-          code: 'BAD_REQUEST',
-          message: 'User ID is required',
-        },
-      });
-      return;
-    }
+    // Validate UUID path parameter
+    const { id } = uuidParamSchema.parse(req.params);
 
     const data = updateUserSchema.parse(req.body);
     const user = await adminService.updateUser(id, data);
@@ -142,18 +123,8 @@ export async function updateUserRole(
   next: NextFunction
 ): Promise<void> {
   try {
-    const { id } = req.params;
-
-    if (!id) {
-      res.status(400).json({
-        success: false,
-        error: {
-          code: 'BAD_REQUEST',
-          message: 'User ID is required',
-        },
-      });
-      return;
-    }
+    // Validate UUID path parameter
+    const { id } = uuidParamSchema.parse(req.params);
 
     const data = updateUserRoleSchema.parse(req.body);
     const user = await adminService.updateUserRole(id, data);
@@ -189,18 +160,8 @@ export async function updateUserStatus(
   next: NextFunction
 ): Promise<void> {
   try {
-    const { id } = req.params;
-
-    if (!id) {
-      res.status(400).json({
-        success: false,
-        error: {
-          code: 'BAD_REQUEST',
-          message: 'User ID is required',
-        },
-      });
-      return;
-    }
+    // Validate UUID path parameter
+    const { id } = uuidParamSchema.parse(req.params);
 
     const data = updateUserStatusSchema.parse(req.body);
     const user = await adminService.updateUserStatus(id, data);
@@ -270,18 +231,8 @@ export async function deleteUser(
   next: NextFunction
 ): Promise<void> {
   try {
-    const { id } = req.params;
-
-    if (!id) {
-      res.status(400).json({
-        success: false,
-        error: {
-          code: 'BAD_REQUEST',
-          message: 'User ID is required',
-        },
-      });
-      return;
-    }
+    // Validate UUID path parameter
+    const { id } = uuidParamSchema.parse(req.params);
 
     // Get user info before deleting for audit log
     const userToDelete = await adminService.getUserById(id);
