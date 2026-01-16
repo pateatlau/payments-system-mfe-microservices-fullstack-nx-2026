@@ -13,6 +13,7 @@
 - ✅ **Priority 1.1:** Restore Rate Limiting (COMPLETED - Jan 16, 2026)
 - ✅ **Priority 1.2:** JWT Refresh Token Rotation (COMPLETED - Jan 16, 2026)
 - ✅ **Priority 1.3:** Account Lockout & Brute Force Protection (COMPLETED - Jan 16, 2026)
+- ✅ **Priority 1.4:** Audit Logging Infrastructure Fix (COMPLETED - Jan 16, 2026)
 
 ### Phases 2-7: Not Started
 - Phase 2: Input Validation & Sanitization
@@ -433,6 +434,107 @@ const CONFIG = {
 - Verify lockout message appears on 6th attempt
 - Test admin unlock endpoint to clear lockout
 - Redis keys use prefixes: `login_attempts:` and `account_lockout:`
+
+---
+
+#### Priority 1.4: Audit Logging Infrastructure Fix ✅ COMPLETED
+
+**Status:** ✅ **COMPLETED** (January 16, 2026)
+**Effort:** 2 hours
+**Impact:** HIGH
+**Commits:**
+- `0a0ce66 - feat: enable audit logging for login/logout and event subscriptions`
+- `dde1439 - fix: update RabbitMQ default credentials to admin:admin`
+
+**Problem Identified:**
+
+The audit logs feature was implemented but not functioning properly due to two issues:
+1. RabbitMQ event subscriptions were never started in admin-service
+2. Login/logout events were not being published by auth-service
+
+**Implementation Summary:**
+
+✅ **Completed Tasks:**
+
+1. ✅ Initialize RabbitMQ event subscriptions in admin-service:
+   - Import and call `startEventSubscriptions()` on server startup
+   - Add graceful shutdown with `closeSubscriptions()` on SIGTERM/SIGINT
+
+2. ✅ Add login/logout audit logging:
+   - Auth-service now publishes `user.login` event on successful login
+   - Auth-service now publishes `user.logout` event on logout
+   - Admin-service subscribes to and logs these events
+
+3. ✅ Fix RabbitMQ credentials:
+   - Updated default credentials from `guest:guest` to `admin:admin`
+   - Matches docker-compose.yml configuration
+   - Updated in auth-service, admin-service, and payments-service
+
+**Files Modified:**
+
+- ✅ `apps/admin-service/src/main.ts` - Initialize event subscriptions on startup
+- ✅ `apps/admin-service/src/events/subscriber.ts` - Add user.login/logout handlers
+- ✅ `apps/auth-service/src/services/auth.service.ts` - Publish login/logout events
+- ✅ `apps/admin-service/src/config/index.ts` - Fix RabbitMQ URL default
+- ✅ `apps/auth-service/src/config/index.ts` - Fix RabbitMQ URL default
+- ✅ `apps/payments-service/src/config/index.ts` - Fix RabbitMQ URL default
+
+**Audit Events Now Captured:**
+
+| Event | Trigger | Data Captured |
+|-------|---------|---------------|
+| USER_LOGIN | Successful login | userId, email, loginAt, ipAddress |
+| USER_LOGOUT | User logout | userId, logoutAt, email |
+| USER_REGISTERED | New user registration | userId, email, role |
+| USER_DELETED | User deletion | userId, email |
+| USER_UPDATED | Admin updates user | userId, updatedFields |
+| USER_ROLE_CHANGED | Role change | userId, newRole |
+| USER_STATUS_CHANGED | Status change | userId, isActive |
+| PAYMENT_* | Payment events | paymentId, amount, status |
+
+**RabbitMQ Queues Created:**
+
+- `admin_service_user_events` - Subscribes to `user.*` events
+- `admin_service_payment_events` - Subscribes to `payment.*` events
+
+**Success Criteria Met:**
+
+- ✅ Login events logged with IP address
+- ✅ Logout events logged
+- ✅ All user lifecycle events captured
+- ✅ Event subscriptions start automatically on admin-service startup
+- ✅ Graceful shutdown closes subscriptions properly
+
+**Testing Notes:**
+
+- Requires `.env` file to have correct `RABBITMQ_URL=amqp://admin:admin@localhost:5672`
+- Or run with: `export $(grep -v '^#' .env | xargs) && pnpm dev:backend`
+- Verify queues exist: `curl -s -u admin:admin http://localhost:15672/api/queues | jq -r '.[].name'`
+- Check audit logs: Admin MFE → Audit Logs tab
+
+**Architecture Diagram:**
+
+```
+┌─────────────────┐    user.login     ┌─────────────────┐
+│  Auth Service   │ ────────────────► │    RabbitMQ     │
+│   (port 3001)   │    user.logout    │  (port 5672)    │
+└─────────────────┘                   └────────┬────────┘
+                                               │
+                                               │ user.*
+                                               ▼
+                                      ┌─────────────────┐
+                                      │  Admin Service  │
+                                      │   (port 3003)   │
+                                      └────────┬────────┘
+                                               │
+                                               │ createAuditLog()
+                                               ▼
+                                      ┌─────────────────┐
+                                      │   PostgreSQL    │
+                                      │  (admin_db)     │
+                                      │   audit_logs    │
+                                      └─────────────────┘
+```
 
 ---
 
