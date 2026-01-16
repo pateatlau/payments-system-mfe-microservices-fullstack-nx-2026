@@ -1,11 +1,15 @@
 /**
  * Audit Logs Controller
  * Handles retrieval of audit log entries
+ *
+ * Enhanced with:
+ * - Zod schema validation for query parameters
+ * - Strict enum validation for action/resourceType filters
  */
 
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { getAuditLogs } from '../services/audit-logs.service';
-import { AuditLogFilters } from '../types/audit-logs.types';
+import { auditLogsQuerySchema } from '../validators/admin.validators';
 
 /**
  * GET /api/admin/audit-logs
@@ -13,22 +17,12 @@ import { AuditLogFilters } from '../types/audit-logs.types';
  */
 export async function listAuditLogs(
   req: Request,
-  res: Response
+  res: Response,
+  next: NextFunction
 ): Promise<void> {
   try {
-    const filters: AuditLogFilters = {
-      page: req.query.page ? parseInt(req.query.page as string, 10) : 1,
-      limit: req.query.limit ? parseInt(req.query.limit as string, 10) : 20,
-      action: req.query.action as string | undefined,
-      userId: req.query.userId as string | undefined,
-      resourceType: req.query.resourceType as string | undefined,
-      startDate: req.query.startDate
-        ? new Date(req.query.startDate as string)
-        : undefined,
-      endDate: req.query.endDate
-        ? new Date(req.query.endDate as string)
-        : undefined,
-    };
+    // Validate and parse query parameters using Zod schema
+    const filters = auditLogsQuerySchema.parse(req.query);
 
     const result = await getAuditLogs(filters);
 
@@ -37,11 +31,7 @@ export async function listAuditLogs(
       data: result,
     });
   } catch (error) {
-    console.error('[Admin Controller] Error listing audit logs:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Failed to retrieve audit logs',
-      message: error instanceof Error ? error.message : 'Unknown error',
-    });
+    // Let the error middleware handle Zod validation errors
+    next(error);
   }
 }

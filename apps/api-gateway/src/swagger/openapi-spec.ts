@@ -300,6 +300,49 @@ Obtain a token via \`POST /api/auth/login\`.
           },
         },
 
+        // Audit Log schemas
+        AuditAction: {
+          type: 'string',
+          enum: [
+            'USER_CREATED',
+            'USER_UPDATED',
+            'USER_DELETED',
+            'USER_ROLE_CHANGED',
+            'USER_STATUS_CHANGED',
+            'USER_REGISTERED',
+            'USER_LOGIN',
+            'USER_LOGOUT',
+            'USER_PASSWORD_CHANGED',
+            'PAYMENT_CREATED',
+            'PAYMENT_UPDATED',
+            'PAYMENT_COMPLETED',
+            'PAYMENT_FAILED',
+            'PAYMENT_CANCELLED',
+            'SYSTEM_CONFIG_CHANGED',
+          ],
+          example: 'USER_LOGIN',
+        },
+        AuditResourceType: {
+          type: 'string',
+          enum: ['USER', 'PAYMENT', 'SYSTEM'],
+          example: 'USER',
+        },
+        AuditLog: {
+          type: 'object',
+          properties: {
+            id: { type: 'string', format: 'uuid' },
+            action: { $ref: '#/components/schemas/AuditAction' },
+            resourceType: { $ref: '#/components/schemas/AuditResourceType' },
+            resourceId: { type: 'string', format: 'uuid', nullable: true },
+            userId: { type: 'string', format: 'uuid', nullable: true },
+            userEmail: { type: 'string', format: 'email', nullable: true },
+            details: { type: 'object', nullable: true },
+            ipAddress: { type: 'string', nullable: true },
+            userAgent: { type: 'string', nullable: true },
+            createdAt: { type: 'string', format: 'date-time' },
+          },
+        },
+
         // Common schemas
         SuccessResponse: {
           type: 'object',
@@ -1298,6 +1341,80 @@ Obtain a token via \`POST /api/auth/login\`.
                 },
               },
             },
+            '401': { $ref: '#/components/responses/UnauthorizedError' },
+            '403': { $ref: '#/components/responses/ForbiddenError' },
+          },
+        },
+      },
+      '/api/admin/audit-logs': {
+        get: {
+          tags: ['Admin'],
+          summary: 'List audit logs',
+          description:
+            'Get a paginated list of audit logs with optional filtering (ADMIN only)',
+          operationId: 'getAuditLogs',
+          security: [{ bearerAuth: [] }],
+          parameters: [
+            { $ref: '#/components/parameters/PageParam' },
+            { $ref: '#/components/parameters/LimitParam' },
+            {
+              name: 'action',
+              in: 'query',
+              description: 'Filter by audit action',
+              schema: { $ref: '#/components/schemas/AuditAction' },
+            },
+            {
+              name: 'resourceType',
+              in: 'query',
+              description: 'Filter by resource type',
+              schema: { $ref: '#/components/schemas/AuditResourceType' },
+            },
+            {
+              name: 'userId',
+              in: 'query',
+              description: 'Filter by user ID',
+              schema: { type: 'string', format: 'uuid' },
+            },
+            {
+              name: 'startDate',
+              in: 'query',
+              description: 'Filter logs from this date (ISO 8601)',
+              schema: { type: 'string', format: 'date-time' },
+            },
+            {
+              name: 'endDate',
+              in: 'query',
+              description: 'Filter logs until this date (ISO 8601)',
+              schema: { type: 'string', format: 'date-time' },
+            },
+          ],
+          responses: {
+            '200': {
+              description: 'List of audit logs',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      success: { type: 'boolean', example: true },
+                      data: {
+                        type: 'object',
+                        properties: {
+                          logs: {
+                            type: 'array',
+                            items: { $ref: '#/components/schemas/AuditLog' },
+                          },
+                          pagination: {
+                            $ref: '#/components/schemas/PaginationMeta',
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            '400': { $ref: '#/components/responses/ValidationError' },
             '401': { $ref: '#/components/responses/UnauthorizedError' },
             '403': { $ref: '#/components/responses/ForbiddenError' },
           },
