@@ -316,7 +316,7 @@ pnpm test:e2e                 # End-to-end tests
 
 - [Executive Summary](docs/EXECUTIVE_SUMMARY.md) – High-level overview for stakeholders
 - [Implementation Journey](docs/IMPLEMENTATION-JOURNEY.md) – Evolution from POC-0 → POC-3
-- [CI Pipeline Implementation](docs/CI-PIPELINE-IMPLEMENTATION.md) – GitHub Actions + Nx Cloud integration
+- **[CI/CD Documentation](docs/CICD.md) – Complete CI/CD guide (CI complete, CD planned)**
 - [POC-3 Implementation Plan](docs/POC-3-Implementation/implementation-plan.md) – Phases 1–9, current status
 - [POC-3 Task List](docs/POC-3-Implementation/task-list.md) – Progress tracking checklist
 - [Dark Mode – Full Plan](docs/POC-3-Implementation/DARK-MODE-FULL-IMPLEMENTATION-PLAN.md) – Steps A–I, tests, guardrails
@@ -359,6 +359,6 @@ For detailed setup instructions, troubleshooting, and development workflows, ref
 
 ---
 
-**Last Updated:** December 31, 2025
+**Last Updated:** January 16, 2026
 **Status:** Production-Ready Architecture + CI Pipeline with Nx Cloud
 **Next Phase:** CD Pipeline + Cloud Deployment
