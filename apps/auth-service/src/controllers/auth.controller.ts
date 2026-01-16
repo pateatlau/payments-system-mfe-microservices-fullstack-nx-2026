@@ -18,6 +18,14 @@ import {
 const getPrisma = () => require('../lib/prisma').prisma;
 
 /**
+ * Helper to extract request metadata for fingerprinting
+ */
+const getRequestMeta = (req: Request) => ({
+  ip: req.ip || req.socket.remoteAddress || 'unknown',
+  userAgent: req.get('user-agent') || 'unknown',
+});
+
+/**
  * POST /auth/register
  * Register a new user
  */
@@ -30,8 +38,8 @@ export const register = async (
     // Validate request body
     const data = registerSchema.parse(req.body);
 
-    // Register user
-    const result = await authService.register(data);
+    // Register user with request metadata for token fingerprinting
+    const result = await authService.register(data, getRequestMeta(req));
 
     // Return response
     res.status(201).json({
@@ -56,8 +64,8 @@ export const login = async (
     // Validate request body
     const data = loginSchema.parse(req.body);
 
-    // Login user
-    const result = await authService.login(data);
+    // Login user with request metadata for token fingerprinting
+    const result = await authService.login(data, getRequestMeta(req));
 
     // Return response
     res.status(200).json({
@@ -71,7 +79,7 @@ export const login = async (
 
 /**
  * POST /auth/refresh
- * Refresh access token
+ * Refresh access token (with rotation - returns new refresh token too)
  */
 export const refresh = async (
   req: Request,
@@ -82,10 +90,13 @@ export const refresh = async (
     // Validate request body
     const data = refreshTokenSchema.parse(req.body);
 
-    // Refresh token
-    const result = await authService.refreshAccessToken(data.refreshToken);
+    // Refresh token with rotation (returns new access AND refresh token)
+    const result = await authService.refreshAccessToken(
+      data.refreshToken,
+      getRequestMeta(req)
+    );
 
-    // Return response
+    // Return response with both tokens
     res.status(200).json({
       success: true,
       data: result,
