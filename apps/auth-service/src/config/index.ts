@@ -33,8 +33,9 @@ export const config = {
   eventHubUrl: process.env['EVENT_HUB_URL'] ?? 'http://localhost:3005',
 
   // RabbitMQ (POC-3: Event-driven architecture)
+  // Note: Using admin:admin credentials as per docker-compose.yml
   rabbitmq: {
-    url: process.env['RABBITMQ_URL'] ?? 'amqp://guest:guest@localhost:5672',
+    url: process.env['RABBITMQ_URL'] ?? 'amqp://admin:admin@localhost:5672',
     exchange: process.env['RABBITMQ_EXCHANGE'] ?? 'payments_events',
   },
 

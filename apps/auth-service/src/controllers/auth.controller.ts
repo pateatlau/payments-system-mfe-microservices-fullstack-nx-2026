@@ -18,6 +18,14 @@ import {
 const getPrisma = () => require('../lib/prisma').prisma;
 
 /**
+ * Helper to extract request metadata for fingerprinting
+ */
+const getRequestMeta = (req: Request) => ({
+  ip: req.ip || req.socket.remoteAddress || 'unknown',
+  userAgent: req.get('user-agent') || 'unknown',
+});
+
+/**
  * POST /auth/register
  * Register a new user
  */
@@ -30,8 +38,8 @@ export const register = async (
     // Validate request body
     const data = registerSchema.parse(req.body);
 
-    // Register user
-    const result = await authService.register(data);
+    // Register user with request metadata for token fingerprinting
+    const result = await authService.register(data, getRequestMeta(req));
 
     // Return response
     res.status(201).json({
@@ -56,8 +64,8 @@ export const login = async (
     // Validate request body
     const data = loginSchema.parse(req.body);
 
-    // Login user
-    const result = await authService.login(data);
+    // Login user with request metadata for token fingerprinting
+    const result = await authService.login(data, getRequestMeta(req));
 
     // Return response
     res.status(200).json({
@@ -71,7 +79,7 @@ export const login = async (
 
 /**
  * POST /auth/refresh
- * Refresh access token
+ * Refresh access token (with rotation - returns new refresh token too)
  */
 export const refresh = async (
   req: Request,
@@ -82,10 +90,13 @@ export const refresh = async (
     // Validate request body
     const data = refreshTokenSchema.parse(req.body);
 
-    // Refresh token
-    const result = await authService.refreshAccessToken(data.refreshToken);
+    // Refresh token with rotation (returns new access AND refresh token)
+    const result = await authService.refreshAccessToken(
+      data.refreshToken,
+      getRequestMeta(req)
+    );
 
-    // Return response
+    // Return response with both tokens
     res.status(200).json({
       success: true,
       data: result,
@@ -308,6 +319,88 @@ export const listUsersInternal = async (
     });
 
     return res.status(200).json({ success: true, data: users });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Import login attempts service for admin functions
+import {
+  unlockAccount as unlockAccountService,
+  getAccountLockoutStatus,
+  getFailedAttemptCount,
+} from '../services/login-attempts.service';
+
+/**
+ * GET /auth/admin/lockout/:email
+ * Admin: Get account lockout status
+ */
+export const getAccountLockout = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const email = req.params.email;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        error: { code: 'INVALID_REQUEST', message: 'email is required' },
+      });
+    }
+
+    const lockout = await getAccountLockoutStatus(email);
+    const failedAttempts = await getFailedAttemptCount(email);
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        email,
+        isLocked: !!lockout,
+        failedAttempts,
+        lockout: lockout
+          ? {
+              lockedAt: lockout.lockedAt,
+              unlockAt: lockout.unlockAt,
+              reason: lockout.reason,
+              failedAttempts: lockout.failedAttempts,
+            }
+          : null,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * POST /auth/admin/unlock/:email
+ * Admin: Unlock a locked account
+ */
+export const unlockAccount = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const email = req.params.email;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        error: { code: 'INVALID_REQUEST', message: 'email is required' },
+      });
+    }
+
+    await unlockAccountService(email);
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        message: `Account ${email} has been unlocked`,
+      },
+    });
   } catch (error) {
     next(error);
   }

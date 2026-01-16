@@ -20,8 +20,9 @@ const configSchema = z.object({
   apiGatewayUrl: z.string().default('http://localhost:3000'),
   eventHubUrl: z.string().default('http://localhost:3004'),
   // RabbitMQ (POC-3: Event-driven architecture)
+  // Note: Using admin:admin credentials as per docker-compose.yml
   rabbitmq: z.object({
-    url: z.string().default('amqp://guest:guest@localhost:5672'),
+    url: z.string().default('amqp://admin:admin@localhost:5672'),
     exchange: z.string().default('payments_events'),
   }),
   logLevel: z.string().default('info'),

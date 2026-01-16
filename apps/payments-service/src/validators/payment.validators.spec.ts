@@ -1,12 +1,26 @@
 /**
  * Payment Validators - Unit Tests
+ *
+ * Tests for enhanced validation including:
+ * - XSS sanitization
+ * - Amount limits
+ * - ISO 4217 currency validation
+ * - UUID validation
  */
 
 import {
   listPaymentsSchema,
   createPaymentSchema,
   updatePaymentStatusSchema,
+  updatePaymentSchema,
   webhookPayloadSchema,
+  uuidParamSchema,
+  reportsQuerySchema,
+  MAX_PAYMENT_AMOUNT,
+  MIN_PAYMENT_AMOUNT,
+  ISO_4217_CURRENCIES,
+  PAYMENT_STATUSES,
+  PAYMENT_TYPES,
 } from './payment.validators';
 import { ZodError } from 'zod';
 
@@ -91,14 +105,31 @@ describe('Payment Validators', () => {
       }).toThrow(ZodError);
     });
 
-    it('should accept any string for status (filtered at service layer)', () => {
-      const result = listPaymentsSchema.parse({ status: 'invalid' });
-      expect(result.status).toBe('invalid');
+    // Enhanced: status and type are now strict enums
+    it('should validate valid status enum', () => {
+      PAYMENT_STATUSES.forEach((status) => {
+        const result = listPaymentsSchema.parse({ status });
+        expect(result.status).toBe(status);
+      });
     });
 
-    it('should accept any string for type (filtered at service layer)', () => {
-      const result = listPaymentsSchema.parse({ type: 'invalid' });
-      expect(result.type).toBe('invalid');
+    it('should validate valid type enum', () => {
+      PAYMENT_TYPES.forEach((type) => {
+        const result = listPaymentsSchema.parse({ type });
+        expect(result.type).toBe(type);
+      });
+    });
+
+    it('should reject invalid status', () => {
+      expect(() => {
+        listPaymentsSchema.parse({ status: 'invalid' });
+      }).toThrow(ZodError);
+    });
+
+    it('should reject invalid type', () => {
+      expect(() => {
+        listPaymentsSchema.parse({ type: 'invalid' });
+      }).toThrow(ZodError);
     });
   });
 
@@ -227,6 +258,139 @@ describe('Payment Validators', () => {
         createPaymentSchema.parse(data);
       }).toThrow(ZodError);
     });
+
+    // Enhanced: XSS sanitization tests
+    describe('XSS sanitization', () => {
+      it('should sanitize HTML tags from description', () => {
+        const data = {
+          ...validPaymentData,
+          description: '<script>alert("xss")</script>Test payment',
+        };
+
+        const result = createPaymentSchema.parse(data);
+        expect(result.description).toBe('alert("xss")Test payment');
+        expect(result.description).not.toContain('<script>');
+      });
+
+      it('should sanitize javascript: protocol from description', () => {
+        const data = {
+          ...validPaymentData,
+          description: 'javascript:alert("xss") Payment',
+        };
+
+        const result = createPaymentSchema.parse(data);
+        expect(result.description).not.toContain('javascript:');
+      });
+
+      it('should sanitize onclick handlers from description', () => {
+        const data = {
+          ...validPaymentData,
+          description: 'Test onclick=alert("xss") payment',
+        };
+
+        const result = createPaymentSchema.parse(data);
+        expect(result.description).not.toMatch(/onclick\s*=/i);
+      });
+
+      it('should trim whitespace from description', () => {
+        const data = {
+          ...validPaymentData,
+          description: '  Test payment  ',
+        };
+
+        const result = createPaymentSchema.parse(data);
+        expect(result.description).toBe('Test payment');
+      });
+
+      it('should remove null bytes from description', () => {
+        const data = {
+          ...validPaymentData,
+          description: 'Test\0payment',
+        };
+
+        const result = createPaymentSchema.parse(data);
+        expect(result.description).toBe('Testpayment');
+      });
+    });
+
+    // Enhanced: Amount limits tests
+    describe('Amount limits', () => {
+      it('should accept minimum valid amount', () => {
+        const data = {
+          ...validPaymentData,
+          amount: MIN_PAYMENT_AMOUNT,
+        };
+
+        const result = createPaymentSchema.parse(data);
+        expect(result.amount).toBe(MIN_PAYMENT_AMOUNT);
+      });
+
+      it('should accept maximum valid amount', () => {
+        const data = {
+          ...validPaymentData,
+          amount: MAX_PAYMENT_AMOUNT,
+        };
+
+        const result = createPaymentSchema.parse(data);
+        expect(result.amount).toBe(MAX_PAYMENT_AMOUNT);
+      });
+
+      it('should reject amount exceeding maximum', () => {
+        const data = {
+          ...validPaymentData,
+          amount: MAX_PAYMENT_AMOUNT + 1,
+        };
+
+        expect(() => {
+          createPaymentSchema.parse(data);
+        }).toThrow(ZodError);
+      });
+
+      it('should reject amount below minimum', () => {
+        const data = {
+          ...validPaymentData,
+          amount: MIN_PAYMENT_AMOUNT / 2,
+        };
+
+        expect(() => {
+          createPaymentSchema.parse(data);
+        }).toThrow(ZodError);
+      });
+    });
+
+    // Enhanced: ISO 4217 currency validation tests
+    describe('ISO 4217 currency validation', () => {
+      it('should accept valid ISO 4217 currencies', () => {
+        const validCurrencies = ['USD', 'EUR', 'GBP', 'INR', 'JPY'];
+        validCurrencies.forEach((currency) => {
+          const data = { ...validPaymentData, currency };
+          const result = createPaymentSchema.parse(data);
+          expect(result.currency).toBe(currency);
+        });
+      });
+
+      it('should normalize currency to uppercase', () => {
+        const data = { ...validPaymentData, currency: 'usd' };
+        const result = createPaymentSchema.parse(data);
+        expect(result.currency).toBe('USD');
+      });
+
+      it('should reject invalid currency code', () => {
+        const data = { ...validPaymentData, currency: 'XYZ' };
+
+        expect(() => {
+          createPaymentSchema.parse(data);
+        }).toThrow(ZodError);
+      });
+
+      it('should reject currency code with wrong length', () => {
+        const data = { ...validPaymentData, currency: 'US' };
+
+        expect(() => {
+          createPaymentSchema.parse(data);
+        }).toThrow(ZodError);
+      });
+    });
   });
 
   describe('updatePaymentStatusSchema', () => {
@@ -354,15 +518,145 @@ describe('Payment Validators', () => {
       }).toThrow(ZodError);
     });
 
-    it('should accept pspTransactionId of any length', () => {
+    it('should accept pspTransactionId within length limit', () => {
+      const payload = {
+        paymentId: '123e4567-e89b-12d3-a456-426614174000',
+        status: 'completed',
+        pspTransactionId: 'a'.repeat(255),
+      };
+
+      const result = webhookPayloadSchema.parse(payload);
+      expect(result.pspTransactionId).toBe('a'.repeat(255));
+    });
+
+    it('should reject pspTransactionId exceeding length limit', () => {
       const payload = {
         paymentId: '123e4567-e89b-12d3-a456-426614174000',
         status: 'completed',
         pspTransactionId: 'a'.repeat(256),
       };
 
+      expect(() => {
+        webhookPayloadSchema.parse(payload);
+      }).toThrow(ZodError);
+    });
+
+    it('should sanitize XSS in failureReason', () => {
+      const payload = {
+        paymentId: '123e4567-e89b-12d3-a456-426614174000',
+        status: 'failed',
+        failureReason: '<script>alert("xss")</script>Insufficient funds',
+      };
+
       const result = webhookPayloadSchema.parse(payload);
-      expect(result.pspTransactionId).toBe('a'.repeat(256));
+      expect(result.failureReason).not.toContain('<script>');
+      expect(result.failureReason).toContain('Insufficient funds');
+    });
+  });
+
+  describe('uuidParamSchema', () => {
+    it('should validate valid UUID', () => {
+      const result = uuidParamSchema.parse({
+        id: '123e4567-e89b-12d3-a456-426614174000',
+      });
+      expect(result.id).toBe('123e4567-e89b-12d3-a456-426614174000');
+    });
+
+    it('should reject invalid UUID format', () => {
+      expect(() => {
+        uuidParamSchema.parse({ id: 'invalid-uuid' });
+      }).toThrow(ZodError);
+    });
+
+    it('should reject empty string', () => {
+      expect(() => {
+        uuidParamSchema.parse({ id: '' });
+      }).toThrow(ZodError);
+    });
+
+    it('should reject missing id', () => {
+      expect(() => {
+        uuidParamSchema.parse({});
+      }).toThrow(ZodError);
+    });
+  });
+
+  describe('reportsQuerySchema', () => {
+    it('should validate date range parameters', () => {
+      const result = reportsQuerySchema.parse({
+        startDate: '2024-01-01',
+        endDate: '2024-12-31',
+      });
+
+      expect(result.startDate).toBeInstanceOf(Date);
+      expect(result.endDate).toBeInstanceOf(Date);
+    });
+
+    it('should accept empty query', () => {
+      const result = reportsQuerySchema.parse({});
+      expect(result.startDate).toBeUndefined();
+      expect(result.endDate).toBeUndefined();
+    });
+  });
+
+  describe('updatePaymentSchema', () => {
+    it('should validate update with amount', () => {
+      const result = updatePaymentSchema.parse({ amount: 100 });
+      expect(result.amount).toBe(100);
+    });
+
+    it('should validate update with description', () => {
+      const result = updatePaymentSchema.parse({
+        description: 'Updated description',
+      });
+      expect(result.description).toBe('Updated description');
+    });
+
+    it('should reject empty update', () => {
+      expect(() => {
+        updatePaymentSchema.parse({});
+      }).toThrow(ZodError);
+    });
+
+    it('should sanitize XSS in description', () => {
+      const result = updatePaymentSchema.parse({
+        description: '<img src=x onerror=alert("xss")>Test',
+      });
+      expect(result.description).not.toContain('<img');
+      expect(result.description).not.toMatch(/onerror\s*=/i);
+    });
+
+    it('should reject amount exceeding maximum', () => {
+      expect(() => {
+        updatePaymentSchema.parse({ amount: MAX_PAYMENT_AMOUNT + 1 });
+      }).toThrow(ZodError);
+    });
+  });
+
+  describe('Exported constants', () => {
+    it('should export PAYMENT_STATUSES array', () => {
+      expect(PAYMENT_STATUSES).toContain('pending');
+      expect(PAYMENT_STATUSES).toContain('completed');
+      expect(PAYMENT_STATUSES.length).toBe(5);
+    });
+
+    it('should export PAYMENT_TYPES array', () => {
+      expect(PAYMENT_TYPES).toContain('instant');
+      expect(PAYMENT_TYPES).toContain('scheduled');
+      expect(PAYMENT_TYPES).toContain('recurring');
+      expect(PAYMENT_TYPES.length).toBe(3);
+    });
+
+    it('should export ISO_4217_CURRENCIES array', () => {
+      expect(ISO_4217_CURRENCIES).toContain('USD');
+      expect(ISO_4217_CURRENCIES).toContain('EUR');
+      expect(ISO_4217_CURRENCIES).toContain('INR');
+      expect(ISO_4217_CURRENCIES.length).toBeGreaterThan(10);
+    });
+
+    it('should export amount limits', () => {
+      expect(MAX_PAYMENT_AMOUNT).toBe(10_000_000);
+      expect(MIN_PAYMENT_AMOUNT).toBe(0.01);
     });
   });
 });

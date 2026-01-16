@@ -22,7 +22,9 @@ jest.mock('../lib/prisma', () => ({
       deleteMany: jest.fn(),
       create: jest.fn(),
       findFirst: jest.fn(),
+      findMany: jest.fn(),
       delete: jest.fn(),
+      update: jest.fn(),
     },
   },
 }));
@@ -223,6 +225,9 @@ describe('AuthService', () => {
       id: 'token-1',
       userId: 'user-1',
       token: mockRefreshToken,
+      tokenFamily: 'family-1',
+      isRevoked: false,
+      fingerprint: null,
       expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
     };
 
@@ -232,17 +237,24 @@ describe('AuthService', () => {
       expiresIn: '15m',
     };
 
-    it('should refresh access token with valid refresh token', async () => {
+    it('should refresh access token with valid refresh token (with rotation)', async () => {
       (verifyRefreshToken as jest.Mock).mockReturnValue(mockPayload);
       (prisma.refreshToken.findFirst as jest.Mock).mockResolvedValue(
         mockStoredToken
       );
       (generateTokenPair as jest.Mock).mockReturnValue(mockTokens);
+      // Token rotation mocks
+      (prisma.refreshToken.update as jest.Mock).mockResolvedValue({});
+      (prisma.refreshToken.create as jest.Mock).mockResolvedValue({});
+      // Mock findMany for cleanup of old revoked tokens (returns empty - no old tokens to clean)
+      (prisma.refreshToken.findMany as jest.Mock).mockResolvedValue([]);
 
       const result = await authService.refreshAccessToken(mockRefreshToken);
 
+      // Token rotation now returns both tokens
       expect(result).toEqual({
         accessToken: mockTokens.accessToken,
+        refreshToken: mockTokens.refreshToken,
         expiresIn: mockTokens.expiresIn,
       });
 
@@ -253,6 +265,13 @@ describe('AuthService', () => {
           userId: mockPayload.userId,
         },
       });
+      // Old token should be marked as revoked
+      expect(prisma.refreshToken.update).toHaveBeenCalledWith({
+        where: { id: mockStoredToken.id },
+        data: { isRevoked: true },
+      });
+      // New rotated token should be created in same family
+      expect(prisma.refreshToken.create).toHaveBeenCalled();
     });
 
     it('should throw error if refresh token is invalid', async () => {
@@ -271,6 +290,8 @@ describe('AuthService', () => {
     it('should throw error if refresh token not found in database', async () => {
       (verifyRefreshToken as jest.Mock).mockReturnValue(mockPayload);
       (prisma.refreshToken.findFirst as jest.Mock).mockResolvedValue(null);
+      // No other tokens for user - returns "token not found" error
+      (prisma.refreshToken.findMany as jest.Mock).mockResolvedValue([]);
 
       await expect(
         authService.refreshAccessToken(mockRefreshToken)

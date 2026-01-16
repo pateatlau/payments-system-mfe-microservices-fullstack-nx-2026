@@ -55,6 +55,18 @@ interface UserDeletedEvent {
   deletedAt: string;
 }
 
+interface UserLoginEvent {
+  userId: string;
+  email: string;
+  loginAt: string;
+  ipAddress?: string;
+}
+
+interface UserLogoutEvent {
+  userId: string;
+  logoutAt: string;
+}
+
 /**
  * Handle user.created event
  *
@@ -168,6 +180,71 @@ async function handleUserDeleted(
 }
 
 /**
+ * Handle user.login event
+ *
+ * Create audit log for user login
+ */
+async function handleUserLogin(
+  event: BaseEvent<UserLoginEvent>,
+  context: EventContext
+): Promise<void> {
+  try {
+    const { userId, email, loginAt, ipAddress } = event.data;
+
+    // Create audit log for user login
+    await createAuditLog({
+      action: AuditAction.USER_LOGIN,
+      resourceType: ResourceType.USER,
+      resourceId: userId,
+      userId: userId,
+      details: { email, loginAt, source: 'auth_service_event' },
+      ipAddress: ipAddress || undefined,
+    });
+
+    console.log(`[Admin Service] Logged user.login: ${userId} (${email})`);
+    context.ack();
+  } catch (error) {
+    console.error('[Admin Service] Error handling user.login:', error);
+    context.nack(true); // Requeue for retry
+  }
+}
+
+/**
+ * Handle user.logout event
+ *
+ * Create audit log for user logout
+ */
+async function handleUserLogout(
+  event: BaseEvent<UserLogoutEvent>,
+  context: EventContext
+): Promise<void> {
+  try {
+    const { userId, logoutAt } = event.data;
+
+    // Get user info for audit log
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { email: true },
+    });
+
+    // Create audit log for user logout
+    await createAuditLog({
+      action: AuditAction.USER_LOGOUT,
+      resourceType: ResourceType.USER,
+      resourceId: userId,
+      userId: userId,
+      details: { email: user?.email, logoutAt, source: 'auth_service_event' },
+    });
+
+    console.log(`[Admin Service] Logged user.logout: ${userId}`);
+    context.ack();
+  } catch (error) {
+    console.error('[Admin Service] Error handling user.logout:', error);
+    context.nack(true); // Requeue for retry
+  }
+}
+
+/**
  * Payment Event Handlers (for audit logging)
  */
 
@@ -253,6 +330,12 @@ export async function subscribeToUserEvents(): Promise<void> {
         break;
       case 'user.deleted':
         await handleUserDeleted(event as BaseEvent<UserDeletedEvent>, context);
+        break;
+      case 'user.login':
+        await handleUserLogin(event as BaseEvent<UserLoginEvent>, context);
+        break;
+      case 'user.logout':
+        await handleUserLogout(event as BaseEvent<UserLogoutEvent>, context);
         break;
       default:
         console.log(`[Admin Service] Unknown user event: ${event.type}`);

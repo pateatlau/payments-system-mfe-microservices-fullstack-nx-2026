@@ -90,10 +90,13 @@ export async function getAuditLogs(
  */
 export async function getAvailableActions(): Promise<string[]> {
   try {
-    const response = await adminApiClient.get<{ data: string[] }>(
+    // ApiClient.get<T> returns ApiResponse<T> where response.data is T
+    // Backend returns { success: true, data: string[] }
+    // So T = string[] and response.data = string[]
+    const response = await adminApiClient.get<string[]>(
       '/admin/audit-logs/actions'
     );
-    return response.data.data ?? [];
+    return response.data ?? [];
   } catch (_error) {
     // Return empty array if endpoint not available yet
     console.warn('Failed to fetch available actions:', _error);

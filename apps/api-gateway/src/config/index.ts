@@ -16,12 +16,15 @@ export const config = {
     'http://localhost:4200,http://localhost:4201,http://localhost:4202,http://localhost:4203,https://localhost'
   ).split(','),
 
-  // Rate Limiting
-  // TODO: RESTORE ORIGINAL RATE LIMIT - Currently set to very high value temporarily
+  // Rate Limiting - RESTORED to production-ready values
   rateLimit: {
     windowMs: 15 * 60 * 1000, // 15 minutes
-    // Original: max: 100, // Limit each IP to 100 requests per windowMs
-    max: 100000, // Temporary high value (to be restored to 100)
+    max: 100, // RESTORED: Limit each IP to 100 requests per 15 minutes
+  },
+
+  // Redis
+  redis: {
+    url: process.env['REDIS_URL'] ?? 'redis://localhost:6379',
   },
 
   // JWT

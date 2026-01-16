@@ -36,6 +36,9 @@ describe('AuthController', () => {
     mockRequest = {
       body: {},
       user: undefined,
+      ip: '127.0.0.1',
+      socket: { remoteAddress: '127.0.0.1' },
+      get: jest.fn().mockReturnValue('test-user-agent'),
     };
     mockResponse = {
       status: jest.fn().mockReturnThis(),

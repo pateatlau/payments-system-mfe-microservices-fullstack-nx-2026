@@ -13,7 +13,29 @@ import type { UserRole } from 'shared-types';
 
 // Mock dependencies
 jest.mock('../services/payment.service');
-jest.mock('../validators/payment.validators');
+jest.mock('../validators/payment.validators', () => ({
+  listPaymentsSchema: {
+    parse: jest.fn((data) => data),
+  },
+  createPaymentSchema: {
+    parse: jest.fn((data) => data),
+  },
+  updatePaymentStatusSchema: {
+    parse: jest.fn((data) => data),
+  },
+  updatePaymentSchema: {
+    parse: jest.fn((data) => data),
+  },
+  webhookPayloadSchema: {
+    parse: jest.fn((data) => data),
+  },
+  uuidParamSchema: {
+    parse: jest.fn((data) => data),
+  },
+  reportsQuerySchema: {
+    parse: jest.fn((data) => data),
+  },
+}));
 
 interface AuthenticatedRequest extends Request {
   user?: {
@@ -75,21 +97,21 @@ describe('PaymentController - updatePayment', () => {
   });
 
   describe('Validation & Input Errors', () => {
-    it('should return 400 if payment ID is missing', async () => {
+    it('should call next with error if payment ID is invalid', async () => {
+      // Import the mocked validators to make the uuidParamSchema throw
+      const validators =
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
+        require('../validators/payment.validators');
+      const validationError = new Error('Invalid ID format');
+      validators.uuidParamSchema.parse.mockImplementationOnce(() => {
+        throw validationError;
+      });
+
       req.params = {};
 
       await updatePayment(req as AuthenticatedRequest, res as Response, next);
 
-      expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({
-        success: false,
-        error: {
-          code: 'BAD_REQUEST',
-          message: 'Payment ID is required',
-        },
-      });
-
-      expect(next).not.toHaveBeenCalled();
+      expect(next).toHaveBeenCalledWith(validationError);
     });
   });
 

@@ -21,6 +21,10 @@ import {
   initTracing,
   correlationIdMiddleware,
 } from '@mfe-poc/observability';
+import {
+  startEventSubscriptions,
+  closeSubscriptions,
+} from './events/subscriber';
 
 /**
  * Initialize OpenTelemetry Tracing (must be first, before any other imports/initialization)
@@ -96,17 +100,21 @@ app.use(
   })
 );
 
-// Rate limiting
-// TODO: RESTORE ORIGINAL RATE LIMIT - Currently set to very high value temporarily
+// Rate limiting - RESTORED to production-ready values
 // Type assertion needed for express-rate-limit compatibility with Express 5
 // Disabled in development to allow for testing and auto-refresh features
 const isDevelopment = process.env['NODE_ENV'] !== 'production';
 if (!isDevelopment) {
   const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    // Original: max: 100, // Limit each IP to 100 requests per windowMs
-    max: 100000, // Temporary high value (to be restored to 100)
+    max: 100, // RESTORED: Limit each IP to 100 requests per 15 minutes
     message: 'Too many requests from this IP, please try again later.',
+    standardHeaders: true, // Return rate limit info in RateLimit-* headers
+    legacyHeaders: false, // Disable X-RateLimit-* headers
+    // Skip health checks and metrics endpoints
+    skip: (req) => {
+      return req.path === '/health' || req.path === '/metrics';
+    },
   });
   app.use(limiter as unknown as express.RequestHandler);
 }
@@ -150,10 +158,19 @@ initSentryErrorHandler(app);
 app.use(errorHandler);
 
 // Start server
-const server = app.listen(config.port, () => {
+const server = app.listen(config.port, async () => {
   logger.info(`Admin Service listening on port ${config.port}`);
   logger.info(`Environment: ${config.nodeEnv}`);
   logger.info(`Health check: http://localhost:${config.port}/health`);
+
+  // Initialize RabbitMQ event subscriptions for audit logging
+  try {
+    await startEventSubscriptions();
+    logger.info('Event subscriptions initialized successfully');
+  } catch (error) {
+    logger.error('Failed to initialize event subscriptions:', error);
+    // Don't crash the service - event subscriptions can be retried
+  }
 });
 
 server.on('error', error => {
@@ -162,16 +179,18 @@ server.on('error', error => {
 });
 
 // Graceful shutdown
-process.on('SIGTERM', () => {
+process.on('SIGTERM', async () => {
   logger.info('SIGTERM signal received: closing HTTP server');
+  await closeSubscriptions();
   server.close(() => {
     logger.info('HTTP server closed');
     process.exit(0);
   });
 });
 
-process.on('SIGINT', () => {
+process.on('SIGINT', async () => {
   logger.info('SIGINT signal received: closing HTTP server');
+  await closeSubscriptions();
   server.close(() => {
     logger.info('HTTP server closed');
     process.exit(0);
