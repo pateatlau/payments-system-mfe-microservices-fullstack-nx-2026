@@ -11,6 +11,8 @@ import {
   loginSchema,
   refreshTokenSchema,
   changePasswordSchema,
+  uuidParamSchema,
+  emailParamSchema,
 } from '../validators/auth.validators';
 
 // Import Prisma via dynamic require to avoid dist path issues
@@ -275,13 +277,8 @@ export const getUserByIdInternal = async (
   next: NextFunction
 ) => {
   try {
-    const userId = req.params.id;
-    if (!userId) {
-      return res.status(400).json({
-        success: false,
-        error: { code: 'INVALID_REQUEST', message: 'id is required' },
-      });
-    }
+    // Validate UUID path parameter
+    const { id: userId } = uuidParamSchema.parse(req.params);
 
     const prisma = getPrisma();
     const user = await prisma.user.findUnique({
@@ -341,14 +338,8 @@ export const getAccountLockout = async (
   next: NextFunction
 ) => {
   try {
-    const email = req.params.email;
-
-    if (!email) {
-      return res.status(400).json({
-        success: false,
-        error: { code: 'INVALID_REQUEST', message: 'email is required' },
-      });
-    }
+    // Validate email path parameter
+    const { email } = emailParamSchema.parse(req.params);
 
     const lockout = await getAccountLockoutStatus(email);
     const failedAttempts = await getFailedAttemptCount(email);
@@ -384,14 +375,8 @@ export const unlockAccount = async (
   next: NextFunction
 ) => {
   try {
-    const email = req.params.email;
-
-    if (!email) {
-      return res.status(400).json({
-        success: false,
-        error: { code: 'INVALID_REQUEST', message: 'email is required' },
-      });
-    }
+    // Validate email path parameter
+    const { email } = emailParamSchema.parse(req.params);
 
     await unlockAccountService(email);
 
