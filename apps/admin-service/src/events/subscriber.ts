@@ -16,7 +16,7 @@ import {
   BaseEvent,
   EventContext,
 } from '@payments-system/rabbitmq-event-hub';
-import { getConnectionManager } from './connection';
+import { getConnectionManager, initializeConnection } from './connection';
 import config from '../config';
 import { prisma, Prisma, UserRoleType } from '../lib/prisma';
 import {
@@ -378,6 +378,9 @@ export async function subscribeToPaymentEvents(): Promise<void> {
  * Start all subscriptions
  */
 export async function startEventSubscriptions(): Promise<void> {
+  // Ensure RabbitMQ connection is established before subscribing
+  await initializeConnection();
+
   await subscribeToUserEvents();
   await subscribeToPaymentEvents();
   console.log('[Admin Service] All event subscriptions active');

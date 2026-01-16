@@ -9,6 +9,7 @@ import { RabbitMQConnectionManager } from '@payments-system/rabbitmq-event-hub';
 import config from '../config';
 
 let connectionManager: RabbitMQConnectionManager | null = null;
+let connectionPromise: Promise<void> | null = null;
 
 /**
  * Get or create RabbitMQ connection manager
@@ -27,14 +28,30 @@ export function getConnectionManager(): RabbitMQConnectionManager {
       },
       prefetch: 10,
     });
-
-    // Connect on first access
-    connectionManager.connect().catch(error => {
-      console.error('[Admin Service] Failed to connect to RabbitMQ:', error);
-    });
   }
 
   return connectionManager;
+}
+
+/**
+ * Initialize RabbitMQ connection
+ * Must be called before using the connection manager
+ */
+export async function initializeConnection(): Promise<void> {
+  const manager = getConnectionManager();
+
+  if (!connectionPromise) {
+    connectionPromise = manager.connect();
+  }
+
+  try {
+    await connectionPromise;
+    console.log('[Admin Service] RabbitMQ connection established');
+  } catch (error) {
+    console.error('[Admin Service] Failed to connect to RabbitMQ:', error);
+    connectionPromise = null; // Allow retry on next call
+    throw error;
+  }
 }
 
 /**
