@@ -10,6 +10,8 @@ import {
   updatePaymentSchema,
   updatePaymentStatusSchema,
   webhookPayloadSchema,
+  uuidParamSchema,
+  reportsQuerySchema,
 } from '../validators/payment.validators';
 import type { UserRole } from 'shared-types';
 
@@ -79,17 +81,9 @@ export async function getPaymentById(
       return;
     }
 
-    const { id } = req.params;
-    if (!id) {
-      res.status(400).json({
-        success: false,
-        error: {
-          code: 'BAD_REQUEST',
-          message: 'Payment ID is required',
-        },
-      });
-      return;
-    }
+    // Validate UUID param
+    const { id } = uuidParamSchema.parse(req.params);
+
     const payment = await paymentService.getPaymentById(
       id,
       req.user.userId,
@@ -157,17 +151,9 @@ export async function updatePaymentStatus(
       return;
     }
 
-    const { id } = req.params;
-    if (!id) {
-      res.status(400).json({
-        success: false,
-        error: {
-          code: 'BAD_REQUEST',
-          message: 'Payment ID is required',
-        },
-      });
-      return;
-    }
+    // Validate UUID param
+    const { id } = uuidParamSchema.parse(req.params);
+
     const data = updatePaymentStatusSchema.parse(req.body);
     const payment = await paymentService.updatePaymentStatus(
       id,
@@ -205,17 +191,8 @@ export async function updatePayment(
       return;
     }
 
-    const { id } = req.params;
-    if (!id) {
-      res.status(400).json({
-        success: false,
-        error: {
-          code: 'BAD_REQUEST',
-          message: 'Payment ID is required',
-        },
-      });
-      return;
-    }
+    // Validate UUID param
+    const { id } = uuidParamSchema.parse(req.params);
 
     const data = updatePaymentSchema.parse(req.body);
 
@@ -332,13 +309,8 @@ export async function getPaymentReports(
       return;
     }
 
-    // Parse query parameters
-    const startDate = req.query.startDate
-      ? new Date(req.query.startDate as string)
-      : undefined;
-    const endDate = req.query.endDate
-      ? new Date(req.query.endDate as string)
-      : undefined;
+    // Validate query parameters
+    const { startDate, endDate } = reportsQuerySchema.parse(req.query);
 
     const reports = await paymentService.getPaymentReports(
       req.user.userId,

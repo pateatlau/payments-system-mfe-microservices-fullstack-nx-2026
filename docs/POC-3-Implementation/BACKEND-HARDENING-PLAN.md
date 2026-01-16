@@ -15,8 +15,12 @@
 - ✅ **Priority 1.3:** Account Lockout & Brute Force Protection (COMPLETED - Jan 16, 2026)
 - ✅ **Priority 1.4:** Audit Logging Infrastructure Fix (COMPLETED - Jan 16, 2026)
 
-### Phases 2-7: Not Started
-- Phase 2: Input Validation & Sanitization
+### Phase 2: Input Validation & Sanitization - IN PROGRESS
+- ✅ **Priority 2.1:** Enhanced Validation for Payments Service (COMPLETED - Jan 16, 2026)
+- ⏳ **Priority 2.2:** Add Validation to Admin Service
+- ⏳ **Priority 2.3:** Enhance Existing Validators
+
+### Phases 3-7: Not Started
 - Phase 3: Secrets Management
 - Phase 4: Database Security Hardening
 - Phase 5: Service Resilience
@@ -540,32 +544,83 @@ The audit logs feature was implemented but not functioning properly due to two i
 
 ### Phase 2: Input Validation & Sanitization (Week 2) 🛡️
 
-#### Priority 2.1: Add Validation to Payments Service
+#### Priority 2.1: Enhanced Validation for Payments Service ✅ COMPLETED
 
-**Effort:** 4 hours  
+**Status:** ✅ **COMPLETED** (January 16, 2026)
+**Effort:** 4 hours
 **Impact:** MEDIUM-HIGH
 
-**Tasks:**
+**Implementation Summary:**
 
-1. Create Zod validators for all payment endpoints:
-   - Create payment request
-   - Update payment request
-   - Payment filters/query params
-2. Add validation middleware to routes
-3. Add sanitization for text fields
-4. Add amount validation (positive, max limits)
-5. Add currency validation (ISO 4217)
+The payments service already had Zod validators. This task enhanced them with:
 
-**New Files:**
+✅ **Completed Tasks:**
 
-- `apps/payments-service/src/validators/payment.validators.ts`
-- `apps/payments-service/src/middleware/validate.ts`
+1. ✅ Enhanced text sanitization (XSS prevention):
+   - Removes HTML tags
+   - Removes `javascript:` protocol
+   - Removes event handler attributes (`onclick=`, etc.)
+   - Trims whitespace
+   - Normalizes Unicode (NFC)
+   - Removes null bytes
 
-**Success Criteria:**
+2. ✅ Enhanced amount validation:
+   - Minimum: $0.01
+   - Maximum: $10,000,000 (prevents overflow/fraud)
+   - Positive number validation
 
-- All payment endpoints validated
-- Invalid requests return 400 with details
-- Sanitization prevents XSS
+3. ✅ Added ISO 4217 currency validation:
+   - Validates against 40+ common ISO currency codes
+   - Auto-uppercase normalization
+   - Rejects invalid currency codes
+
+4. ✅ Added UUID validation for path parameters:
+   - New `uuidParamSchema` for validating `:id` params
+   - Consistent error handling via Zod
+
+5. ✅ Enhanced enum validation:
+   - `status` and `type` query params now use strict enums (was any string)
+   - Prevents filter manipulation attacks
+
+6. ✅ Added length limits on webhook fields:
+   - `pspTransactionId`: max 255 chars
+   - `pspStatus`: max 100 chars
+   - `failureReason`: max 1000 chars
+
+7. ✅ Added `reportsQuerySchema` for reports endpoint
+
+**Files Modified:**
+
+- ✅ `apps/payments-service/src/validators/payment.validators.ts` - Enhanced validators
+- ✅ `apps/payments-service/src/controllers/payment.controller.ts` - Integrated UUID param validation
+- ✅ `apps/payments-service/src/validators/payment.validators.spec.ts` - Added 45+ new tests
+- ✅ `apps/payments-service/src/controllers/payment.controller.spec.ts` - Updated mocks
+- ✅ `apps/payments-service/src/controllers/payment.controller.test.ts` - Updated mocks
+
+**New Exports:**
+
+```typescript
+// Constants for reuse across services
+export { PAYMENT_STATUSES, PAYMENT_TYPES, ISO_4217_CURRENCIES, MAX_PAYMENT_AMOUNT, MIN_PAYMENT_AMOUNT };
+
+// New schemas
+export { uuidParamSchema, reportsQuerySchema };
+```
+
+**Success Criteria Met:**
+
+- ✅ All payment endpoints validated
+- ✅ Invalid requests return 400 with validation details
+- ✅ XSS sanitization prevents script injection
+- ✅ Amount limits prevent overflow/fraud
+- ✅ ISO 4217 currency validation enforced
+- ✅ 130 unit tests passing
+
+**Testing Notes:**
+
+- All 130 tests pass in payments-service
+- Build compiles successfully
+- No regression in existing functionality
 
 ---
 

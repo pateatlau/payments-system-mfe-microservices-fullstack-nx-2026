@@ -951,6 +951,23 @@ export function usePaymentEvents() {
 }
 ```
 
+## Backend Hardening Implementation Rules
+
+When implementing backend hardening tasks from `docs/POC-3-Implementation/BACKEND-HARDENING-PLAN.md`:
+
+1. **Implement 1 priority (task) at a time** - Do not start the next priority until the current one is complete
+2. **Test and verify after implementation** - Ensure no regression; all existing services must remain working
+3. **Update the doc with implementation status** - Mark priorities as complete in BACKEND-HARDENING-PLAN.md
+4. **Wait for user confirmation** - After completing a priority, wait for the user to manually test and confirm before proceeding to the next priority
+
+**Workflow per priority:**
+1. Read existing code to understand current state
+2. Implement changes following existing patterns
+3. Test the implementation (run services, verify endpoints)
+4. Update BACKEND-HARDENING-PLAN.md with completion status
+5. Report to user and wait for their manual verification
+6. Only proceed to next priority after user confirms
+
 ## Documentation
 
 Key resources in `docs/`:

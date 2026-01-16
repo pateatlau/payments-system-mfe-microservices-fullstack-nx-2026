@@ -14,6 +14,8 @@ jest.mock('./lib/cache', () => ({
     get: jest.fn().mockResolvedValue(null),
     set: jest.fn().mockResolvedValue('OK'),
     del: jest.fn().mockResolvedValue(1),
+    delete: jest.fn().mockResolvedValue(undefined),
+    exists: jest.fn().mockResolvedValue(false),
     invalidateTag: jest.fn().mockResolvedValue(undefined),
     invalidateByTag: jest.fn().mockResolvedValue(undefined),
     flush: jest.fn().mockResolvedValue(undefined),

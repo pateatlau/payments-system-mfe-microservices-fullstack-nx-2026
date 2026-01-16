@@ -31,16 +31,25 @@ jest.mock('../lib/prisma', () => ({
 // Mock Zod validators
 jest.mock('../validators/payment.validators', () => ({
   listPaymentsSchema: {
-    parse: jest.fn(data => data),
+    parse: jest.fn((data) => data),
   },
   createPaymentSchema: {
-    parse: jest.fn(data => data),
+    parse: jest.fn((data) => data),
   },
   updatePaymentStatusSchema: {
-    parse: jest.fn(data => data),
+    parse: jest.fn((data) => data),
+  },
+  updatePaymentSchema: {
+    parse: jest.fn((data) => data),
   },
   webhookPayloadSchema: {
-    parse: jest.fn(data => data),
+    parse: jest.fn((data) => data),
+  },
+  uuidParamSchema: {
+    parse: jest.fn((data) => data),
+  },
+  reportsQuerySchema: {
+    parse: jest.fn((data) => data),
   },
 }));
 
@@ -180,8 +189,17 @@ describe('PaymentController', () => {
       );
     });
 
-    it('should return 400 for invalid ID', async () => {
-      mockRequest.params = {};
+    it('should call next with error for invalid UUID', async () => {
+      const validationError = new Error('Invalid ID format');
+      const {
+        uuidParamSchema,
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
+      } = require('../validators/payment.validators');
+      uuidParamSchema.parse.mockImplementationOnce(() => {
+        throw validationError;
+      });
+
+      mockRequest.params = { id: 'invalid-uuid' };
 
       await getPaymentById(
         mockRequest as Request,
@@ -189,14 +207,7 @@ describe('PaymentController', () => {
         mockNext
       );
 
-      expect(mockResponse.status).toHaveBeenCalledWith(400);
-      expect(mockResponse.json).toHaveBeenCalledWith({
-        success: false,
-        error: {
-          code: 'BAD_REQUEST',
-          message: 'Payment ID is required',
-        },
-      });
+      expect(mockNext).toHaveBeenCalledWith(validationError);
     });
 
     it('should handle service errors', async () => {
@@ -339,8 +350,17 @@ describe('PaymentController', () => {
       );
     });
 
-    it('should return 400 for invalid ID', async () => {
-      mockRequest.params = {};
+    it('should call next with error for invalid UUID', async () => {
+      const validationError = new Error('Invalid ID format');
+      const {
+        uuidParamSchema,
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
+      } = require('../validators/payment.validators');
+      uuidParamSchema.parse.mockImplementationOnce(() => {
+        throw validationError;
+      });
+
+      mockRequest.params = { id: 'invalid-uuid' };
       mockRequest.body = { status: 'completed' };
 
       await updatePaymentStatus(
@@ -349,14 +369,7 @@ describe('PaymentController', () => {
         mockNext
       );
 
-      expect(mockResponse.status).toHaveBeenCalledWith(400);
-      expect(mockResponse.json).toHaveBeenCalledWith({
-        success: false,
-        error: {
-          code: 'BAD_REQUEST',
-          message: 'Payment ID is required',
-        },
-      });
+      expect(mockNext).toHaveBeenCalledWith(validationError);
     });
 
     it('should handle service errors', async () => {

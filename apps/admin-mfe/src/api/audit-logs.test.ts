@@ -116,10 +116,9 @@ describe('Audit Logs API', () => {
 
   describe('getAvailableActions', () => {
     it('should return list of available actions', async () => {
+      // API returns { data: string[] } - the data property IS the array
       const mockResponse = {
-        data: {
-          data: ['USER_LOGIN', 'PAYMENT_CREATED', 'SYSTEM_CONFIG_CHANGED'],
-        },
+        data: ['USER_LOGIN', 'PAYMENT_CREATED', 'SYSTEM_CONFIG_CHANGED'],
       };
 
       (adminApiClient.get as jest.Mock).mockResolvedValue(mockResponse);
@@ -132,9 +131,7 @@ describe('Audit Logs API', () => {
 
     it('should include user actions', async () => {
       const mockResponse = {
-        data: {
-          data: ['USER_LOGIN', 'USER_LOGOUT', 'USER_CREATED', 'USER_UPDATED', 'USER_DELETED', 'USER_ROLE_CHANGED'],
-        },
+        data: ['USER_LOGIN', 'USER_LOGOUT', 'USER_CREATED', 'USER_UPDATED', 'USER_DELETED', 'USER_ROLE_CHANGED'],
       };
 
       (adminApiClient.get as jest.Mock).mockResolvedValue(mockResponse);
@@ -151,9 +148,7 @@ describe('Audit Logs API', () => {
 
     it('should include payment actions', async () => {
       const mockResponse = {
-        data: {
-          data: ['PAYMENT_CREATED', 'PAYMENT_UPDATED', 'PAYMENT_COMPLETED', 'PAYMENT_FAILED', 'PAYMENT_CANCELLED'],
-        },
+        data: ['PAYMENT_CREATED', 'PAYMENT_UPDATED', 'PAYMENT_COMPLETED', 'PAYMENT_FAILED', 'PAYMENT_CANCELLED'],
       };
 
       (adminApiClient.get as jest.Mock).mockResolvedValue(mockResponse);
@@ -169,9 +164,7 @@ describe('Audit Logs API', () => {
 
     it('should include system actions', async () => {
       const mockResponse = {
-        data: {
-          data: ['SYSTEM_CONFIG_CHANGED', 'ADMIN_ACTION'],
-        },
+        data: ['SYSTEM_CONFIG_CHANGED', 'ADMIN_ACTION'],
       };
 
       (adminApiClient.get as jest.Mock).mockResolvedValue(mockResponse);
