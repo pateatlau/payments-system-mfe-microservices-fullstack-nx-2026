@@ -122,7 +122,9 @@ export const updateProfileSchema = z.object({
   avatarUrl: z
     .union([
       z.string().url().max(2048), // Max URL length
-      z.string().startsWith('data:').max(2 * 1024 * 1024), // Allow base64, max 2MB
+      // Base64 encoding expands data by ~4/3, so 2MB decoded ≈ 2.67MB base64 string
+      // Using Math.ceil(2 * 1024 * 1024 * 4 / 3) = 2796203 characters
+      z.string().startsWith('data:').max(2796203),
       z.literal(''), // Allow empty string to clear avatar
     ])
     .optional(),
