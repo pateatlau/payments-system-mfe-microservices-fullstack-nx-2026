@@ -96,17 +96,21 @@ app.use(
   })
 );
 
-// Rate limiting
-// TODO: RESTORE ORIGINAL RATE LIMIT - Currently set to very high value temporarily
+// Rate limiting - RESTORED to production-ready values
 // Type assertion needed for express-rate-limit compatibility with Express 5
 // Disabled in development to allow for testing and auto-refresh features
 const isDevelopment = process.env['NODE_ENV'] !== 'production';
 if (!isDevelopment) {
   const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    // Original: max: 100, // Limit each IP to 100 requests per windowMs
-    max: 100000, // Temporary high value (to be restored to 100)
+    max: 100, // RESTORED: Limit each IP to 100 requests per 15 minutes
     message: 'Too many requests from this IP, please try again later.',
+    standardHeaders: true, // Return rate limit info in RateLimit-* headers
+    legacyHeaders: false, // Disable X-RateLimit-* headers
+    // Skip health checks and metrics endpoints
+    skip: (req) => {
+      return req.path === '/health' || req.path === '/metrics';
+    },
   });
   app.use(limiter as unknown as express.RequestHandler);
 }
