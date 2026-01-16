@@ -72,9 +72,12 @@ const PHONE_PATTERN = /^[+]?[\d\s().\-/]+$/;
 
 /**
  * Timezone validation pattern
- * Matches IANA timezone format: America/New_York, Europe/London, UTC, etc.
+ * Matches IANA timezone format including multi-part zones:
+ * - America/New_York, Europe/London (two-part)
+ * - America/Indiana/Indianapolis, America/Argentina/Buenos_Aires (multi-part)
+ * - UTC (special case)
  */
-const TIMEZONE_PATTERN = /^[A-Za-z_]+\/[A-Za-z_]+$|^UTC$/;
+const TIMEZONE_PATTERN = /^[A-Za-z_]+(?:\/[A-Za-z_]+)+$|^UTC$/;
 
 /**
  * Language code pattern (ISO 639-1 / BCP 47)

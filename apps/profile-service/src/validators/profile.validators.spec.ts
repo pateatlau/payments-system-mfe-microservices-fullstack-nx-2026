@@ -290,6 +290,19 @@ describe('updatePreferencesSchema', () => {
       }
     });
 
+    it('should accept multi-part IANA timezone formats', () => {
+      const multiPartTimezones = [
+        'America/Indiana/Indianapolis',
+        'America/Argentina/Buenos_Aires',
+        'America/Kentucky/Louisville',
+      ];
+
+      for (const timezone of multiPartTimezones) {
+        const result = updatePreferencesSchema.parse({ timezone });
+        expect(result.timezone).toBe(timezone);
+      }
+    });
+
     it('should reject invalid timezone formats', () => {
       const invalidTimezones = [
         'EST',
