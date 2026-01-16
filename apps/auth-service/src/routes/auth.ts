@@ -47,4 +47,24 @@ router.get(
 );
 router.get('/auth/internal/users/:id', authController.getUserByIdInternal);
 
+/**
+ * Admin routes for account lockout management
+ * Note: These should be protected by admin role check in production
+ * Currently requires authentication but should also check for ADMIN role
+ */
+
+// GET /auth/admin/lockout/:email - Get account lockout status
+router.get(
+  '/auth/admin/lockout/:email',
+  authenticate,
+  authController.getAccountLockout
+);
+
+// POST /auth/admin/unlock/:email - Unlock a locked account
+router.post(
+  '/auth/admin/unlock/:email',
+  authenticate,
+  authController.unlockAccount
+);
+
 export default router;

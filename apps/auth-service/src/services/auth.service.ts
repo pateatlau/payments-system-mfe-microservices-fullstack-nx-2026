@@ -40,6 +40,11 @@ import {
   validateFingerprint,
   generateTokenFamily,
 } from './token-blacklist.service';
+import {
+  checkLoginAttempt,
+  recordFailedAttempt,
+  recordSuccessfulLogin,
+} from './login-attempts.service';
 
 /**
  * User response (without password)
@@ -176,19 +181,47 @@ export const register = async (
 };
 
 /**
+ * Login response with optional lockout warning
+ */
+export interface LoginResponse extends AuthResponse {
+  warning?: string;
+}
+
+/**
  * Login a user
+ *
+ * SECURITY: Implements brute force protection
+ * - Tracks failed login attempts by email
+ * - Locks account after 5 failed attempts
+ * - Auto-unlocks after 15 minutes
+ * - Exponential backoff between attempts
  *
  * @param data - Login data
  * @param requestMeta - Optional request metadata for fingerprinting
  * @returns Auth response with user and tokens
- * @throws ApiError if credentials are invalid
+ * @throws ApiError if credentials are invalid or account is locked
  */
 export const login = async (
   data: LoginInput,
   requestMeta?: { ip: string; userAgent: string }
-): Promise<AuthResponse> => {
-  // Check if user's tokens are globally blacklisted (e.g., password was changed)
-  // We'll check this after we get the user ID
+): Promise<LoginResponse> => {
+  const ip = requestMeta?.ip || 'unknown';
+
+  // SECURITY: Check if login attempts are allowed (brute force protection)
+  const attemptCheck = await checkLoginAttempt(data.email, ip);
+
+  if (!attemptCheck.allowed) {
+    // Account is locked or rate limited
+    throw new ApiError(
+      429,
+      'ACCOUNT_LOCKED',
+      attemptCheck.message || 'Too many failed login attempts. Please try again later.',
+      {
+        lockedUntil: attemptCheck.lockedUntil?.toISOString(),
+        waitSeconds: attemptCheck.waitSeconds,
+      }
+    );
+  }
 
   // Try cache first (by email)
   const cacheKey = CacheKeys.userByEmail(data.email);
@@ -216,15 +249,52 @@ export const login = async (
   }
 
   if (!user) {
-    throw new ApiError(401, 'INVALID_CREDENTIALS', 'Invalid email or password');
+    // SECURITY: Record failed attempt even for non-existent users
+    // (prevents enumeration attacks)
+    const failedResult = await recordFailedAttempt(data.email, ip);
+
+    throw new ApiError(
+      401,
+      'INVALID_CREDENTIALS',
+      'Invalid email or password',
+      failedResult.remainingAttempts <= 2
+        ? { remainingAttempts: failedResult.remainingAttempts }
+        : undefined
+    );
   }
 
   // Verify password
   const passwordValid = await bcrypt.compare(data.password, user.passwordHash);
 
   if (!passwordValid) {
-    throw new ApiError(401, 'INVALID_CREDENTIALS', 'Invalid email or password');
+    // SECURITY: Record failed attempt
+    const failedResult = await recordFailedAttempt(data.email, ip);
+
+    // If account is now locked, throw appropriate error
+    if (!failedResult.allowed && failedResult.lockedUntil) {
+      throw new ApiError(
+        429,
+        'ACCOUNT_LOCKED',
+        failedResult.message || 'Account locked due to too many failed attempts.',
+        {
+          lockedUntil: failedResult.lockedUntil.toISOString(),
+          waitSeconds: failedResult.waitSeconds,
+        }
+      );
+    }
+
+    throw new ApiError(
+      401,
+      'INVALID_CREDENTIALS',
+      'Invalid email or password',
+      failedResult.remainingAttempts <= 2
+        ? { remainingAttempts: failedResult.remainingAttempts }
+        : undefined
+    );
   }
+
+  // SECURITY: Clear failed attempts on successful login
+  await recordSuccessfulLogin(data.email);
 
   // Generate tokens
   const jwtPayload: JwtPayload = {

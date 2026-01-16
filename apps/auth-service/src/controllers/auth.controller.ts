@@ -323,3 +323,85 @@ export const listUsersInternal = async (
     next(error);
   }
 };
+
+// Import login attempts service for admin functions
+import {
+  unlockAccount as unlockAccountService,
+  getAccountLockoutStatus,
+  getFailedAttemptCount,
+} from '../services/login-attempts.service';
+
+/**
+ * GET /auth/admin/lockout/:email
+ * Admin: Get account lockout status
+ */
+export const getAccountLockout = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const email = req.params.email;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        error: { code: 'INVALID_REQUEST', message: 'email is required' },
+      });
+    }
+
+    const lockout = await getAccountLockoutStatus(email);
+    const failedAttempts = await getFailedAttemptCount(email);
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        email,
+        isLocked: !!lockout,
+        failedAttempts,
+        lockout: lockout
+          ? {
+              lockedAt: lockout.lockedAt,
+              unlockAt: lockout.unlockAt,
+              reason: lockout.reason,
+              failedAttempts: lockout.failedAttempts,
+            }
+          : null,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * POST /auth/admin/unlock/:email
+ * Admin: Unlock a locked account
+ */
+export const unlockAccount = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const email = req.params.email;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        error: { code: 'INVALID_REQUEST', message: 'email is required' },
+      });
+    }
+
+    await unlockAccountService(email);
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        message: `Account ${email} has been unlocked`,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
