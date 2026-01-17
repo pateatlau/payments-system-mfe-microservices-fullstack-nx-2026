@@ -47,3 +47,24 @@ export type {
   SecretRotationMetadata,
   RotationPolicy,
 } from './lib/types';
+
+// Configuration validation (POC-3 Phase 3.2)
+export {
+  validateConfig,
+  validateNoInsecureDefaults,
+  isProduction,
+  productionRequired,
+  getEnv,
+  getEnvNumber,
+  getEnvBoolean,
+  commonSchemas,
+  NodeEnvSchema,
+  LogLevelSchema,
+  urlSchema,
+  portSchema,
+  postgresUrlSchema,
+  redisUrlSchema,
+  rabbitmqUrlSchema,
+  jwtDurationSchema,
+} from './lib/config-validator';
+export type { NodeEnv, LogLevel, ConfigValidationResult } from './lib/config-validator';

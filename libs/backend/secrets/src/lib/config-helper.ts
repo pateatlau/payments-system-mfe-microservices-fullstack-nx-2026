@@ -30,13 +30,13 @@ import { SecretManager } from './secret-manager';
  *
  * @param envVarName - Name of the env var for versioned secrets (e.g., 'JWT_SECRETS')
  * @param legacyEnvVarName - Name of the legacy single secret env var (e.g., 'JWT_SECRET')
- * @param defaultSecret - Default secret for development (NEVER use in production)
+ * @param defaultSecret - Default secret for development (NEVER use in production). Pass undefined to require secret.
  * @returns Array of JwtSecret objects
  */
 export function parseJwtSecrets(
   envVarName: string,
   legacyEnvVarName: string,
-  defaultSecret: string
+  defaultSecret?: string
 ): JwtSecret[] {
   const nodeEnv = process.env['NODE_ENV'] || 'development';
 
@@ -86,8 +86,8 @@ export function parseJwtSecrets(
     ];
   }
 
-  // Use default only in development
-  if (nodeEnv === 'production') {
+  // Use default only in development (if provided)
+  if (nodeEnv === 'production' || !defaultSecret) {
     throw new Error(
       `CRITICAL: No ${legacyEnvVarName} or ${envVarName} configured in production`
     );
