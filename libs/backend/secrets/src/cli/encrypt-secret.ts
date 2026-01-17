@@ -41,9 +41,12 @@ async function main() {
     process.exit(1);
   }
 
+  // Check for --quiet flag
+  const quietFlag = args.includes('--quiet') || args.includes('-q');
+
   switch (command) {
     case 'generate-key':
-      handleGenerateKey();
+      handleGenerateKey(quietFlag);
       break;
     case 'encrypt':
       await handleEncrypt(args[1]);
@@ -80,6 +83,9 @@ Commands:
   test            Test encryption/decryption round-trip
   help            Show this help message
 
+Options:
+  --quiet, -q    Output only the result (no extra text), useful for scripting
+
 Environment Variables:
   ENCRYPTION_MASTER_KEY - Required for encrypt/decrypt commands
                           64-char hex or 44-char base64 master key
@@ -88,17 +94,23 @@ Examples:
   # Generate a new master key
   npx ts-node libs/backend/secrets/src/cli/encrypt-secret.ts generate-key
 
-  # Set the key and encrypt a secret
-  export ENCRYPTION_MASTER_KEY=$(npx ts-node libs/backend/secrets/src/cli/encrypt-secret.ts generate-key | tail -1)
-  npx ts-node libs/backend/secrets/src/cli/encrypt-secret.ts encrypt "my-database-password"
+  # Generate key in quiet mode (for shell scripting)
+  export ENCRYPTION_MASTER_KEY=$(npx ts-node libs/backend/secrets/src/cli/encrypt-secret.ts generate-key --quiet)
 
   # Encrypt directly with key
   ENCRYPTION_MASTER_KEY=<key> npx ts-node libs/backend/secrets/src/cli/encrypt-secret.ts encrypt "secret"
 `);
 }
 
-function handleGenerateKey() {
+function handleGenerateKey(quiet = false) {
   const key = generateMasterKey();
+
+  if (quiet) {
+    // In quiet mode, only output the key (no extra whitespace or text)
+    process.stdout.write(key);
+    return;
+  }
+
   console.log('Generated new master encryption key (256-bit AES):');
   console.log('');
   console.log('Add this to your environment:');

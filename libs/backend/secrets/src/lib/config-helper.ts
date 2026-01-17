@@ -151,8 +151,8 @@ export function generateSecretsEnvValue(secrets: JwtSecret[]): string {
   const sanitized = secrets.map((s) => ({
     kid: s.kid,
     secret: s.secret,
-    createdAt: s.createdAt.toISOString(),
-    expiresAt: s.expiresAt?.toISOString() || null,
+    createdAt: s.createdAt?.toISOString() ?? null,
+    expiresAt: s.expiresAt?.toISOString() ?? null,
     isActive: s.isActive,
     canVerify: s.canVerify,
   }));

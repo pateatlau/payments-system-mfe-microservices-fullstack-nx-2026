@@ -58,8 +58,8 @@ const paymentsConfigSchema = z.object({
   logLevel: LogLevelSchema.default('info'),
 
   // Pagination
-  defaultPageSize: z.number().int().positive().default(10),
-  maxPageSize: z.number().int().positive().default(100),
+  defaultPageSize: z.coerce.number().int().positive().default(10),
+  maxPageSize: z.coerce.number().int().positive().default(100),
 });
 
 // Validate and parse configuration
@@ -80,8 +80,8 @@ const rawConfig = {
   },
   redisUrl: process.env['REDIS_URL'],
   logLevel: process.env['LOG_LEVEL'],
-  defaultPageSize: 10,
-  maxPageSize: 100,
+  defaultPageSize: process.env['DEFAULT_PAGE_SIZE'],
+  maxPageSize: process.env['MAX_PAGE_SIZE'],
 };
 
 // Type for the validated config (ensures non-optional types from defaults)

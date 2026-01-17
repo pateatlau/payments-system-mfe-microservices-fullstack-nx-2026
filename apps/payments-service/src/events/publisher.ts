@@ -229,6 +229,7 @@ export async function closePublisher(): Promise<void> {
   if (publisher) {
     await publisher.close();
     publisher = null;
+    publisherInitialized = false; // Reset flag to allow re-initialization
     // eslint-disable-next-line no-console
     console.log('[Payments Service] Event publisher closed');
   }

@@ -404,21 +404,81 @@ const rotateSecretsSchema = z.object({
 });
 
 /**
- * GET /auth/admin/secrets/status
- * Admin: Get status of all JWT secrets (without exposing actual secret values)
- *
- * POC-3 Phase 3.1: Secret rotation admin endpoint
+ * Helper to check admin role
+ * Returns 403 response if not admin, null if authorized
+ */
+const requireAdmin = (req: Request, res: Response): Response | null => {
+  if (req.user?.role !== 'ADMIN') {
+    return res.status(403).json({
+      success: false,
+      error: {
+        code: 'FORBIDDEN',
+        message: 'Admin access required',
+      },
+    });
+  }
+  return null;
+};
+
+/**
+ * @swagger
+ * /auth/admin/secrets/status:
+ *   get:
+ *     summary: Get status of all JWT secrets
+ *     description: Returns the status of all JWT and refresh secrets without exposing actual secret values. Requires ADMIN role.
+ *     tags:
+ *       - Admin - Secrets
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Secrets status retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     jwtSecrets:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           kid:
+ *                             type: string
+ *                           createdAt:
+ *                             type: string
+ *                             format: date-time
+ *                           expiresAt:
+ *                             type: string
+ *                             format: date-time
+ *                             nullable: true
+ *                           isActive:
+ *                             type: boolean
+ *                           canVerify:
+ *                             type: boolean
+ *                     refreshSecrets:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *       401:
+ *         description: Authentication required
+ *       403:
+ *         description: Admin access required
  */
 export const getSecretsStatus = async (
-  _req: Request,
+  req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    // TODO: Add ADMIN role check in production
-    // if (req.user?.role !== 'ADMIN') {
-    //   return res.status(403).json({ success: false, error: { code: 'FORBIDDEN', message: 'Admin access required' } });
-    // }
+    // Check admin role
+    const forbidden = requireAdmin(req, res);
+    if (forbidden) return forbidden;
 
     const secretManager = getSecretManager();
     const status = secretManager.getSecretsStatus();
@@ -448,14 +508,46 @@ export const getSecretsStatus = async (
 };
 
 /**
- * POST /auth/admin/secrets/rotate
- * Admin: Rotate JWT secrets
- *
- * POC-3 Phase 3.1: Secret rotation admin endpoint
- *
- * IMPORTANT: This generates new secrets and returns the environment variable
- * values that should be set. The actual rotation requires updating the
- * environment and restarting services.
+ * @swagger
+ * /auth/admin/secrets/rotate:
+ *   post:
+ *     summary: Rotate JWT secrets
+ *     description: Generates new JWT and/or refresh secrets. Requires ADMIN role. Note that this affects the current service instance only; for production use, update environment variables and restart services.
+ *     tags:
+ *       - Admin - Secrets
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - reason
+ *             properties:
+ *               type:
+ *                 type: string
+ *                 enum: [jwt, refresh, both]
+ *                 default: both
+ *                 description: Which secrets to rotate
+ *               reason:
+ *                 type: string
+ *                 minLength: 1
+ *                 maxLength: 500
+ *                 description: Reason for rotation (for audit)
+ *               expiresInDays:
+ *                 type: integer
+ *                 minimum: 1
+ *                 maximum: 365
+ *                 description: Days until the new secret expires
+ *     responses:
+ *       200:
+ *         description: Secrets rotated successfully
+ *       401:
+ *         description: Authentication required
+ *       403:
+ *         description: Admin access required
  */
 export const rotateSecrets = async (
   req: Request,
@@ -463,10 +555,9 @@ export const rotateSecrets = async (
   next: NextFunction
 ) => {
   try {
-    // TODO: Add ADMIN role check in production
-    // if (req.user?.role !== 'ADMIN') {
-    //   return res.status(403).json({ success: false, error: { code: 'FORBIDDEN', message: 'Admin access required' } });
-    // }
+    // Check admin role
+    const forbidden = requireAdmin(req, res);
+    if (forbidden) return forbidden;
 
     // Validate request body
     const data = rotateSecretsSchema.parse(req.body);
@@ -534,18 +625,58 @@ export const rotateSecrets = async (
 };
 
 /**
- * GET /auth/admin/secrets/rotation-history
- * Admin: Get secret rotation history
- *
- * POC-3 Phase 3.1: Secret rotation admin endpoint
+ * @swagger
+ * /auth/admin/secrets/rotation-history:
+ *   get:
+ *     summary: Get secret rotation history
+ *     description: Returns the history of all secret rotations performed. Requires ADMIN role.
+ *     tags:
+ *       - Admin - Secrets
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Rotation history retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     rotations:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           rotatedAt:
+ *                             type: string
+ *                             format: date-time
+ *                           oldKid:
+ *                             type: string
+ *                           newKid:
+ *                             type: string
+ *                           triggeredBy:
+ *                             type: string
+ *                           reason:
+ *                             type: string
+ *       401:
+ *         description: Authentication required
+ *       403:
+ *         description: Admin access required
  */
 export const getRotationHistory = async (
-  _req: Request,
+  req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    // TODO: Add ADMIN role check in production
+    // Check admin role
+    const forbidden = requireAdmin(req, res);
+    if (forbidden) return forbidden;
 
     const secretManager = getSecretManager();
     const history = secretManager.getRotationHistory();
@@ -568,18 +699,57 @@ export const getRotationHistory = async (
 };
 
 /**
- * POST /auth/admin/secrets/check-expiring
- * Admin: Check for expiring secrets and trigger warnings
- *
- * POC-3 Phase 3.1: Secret rotation admin endpoint
+ * @swagger
+ * /auth/admin/secrets/check-expiring:
+ *   post:
+ *     summary: Check for expiring secrets
+ *     description: Checks for secrets that are expiring soon (within 30 days) and triggers warnings. Requires ADMIN role.
+ *     tags:
+ *       - Admin - Secrets
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Expiry check completed
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     message:
+ *                       type: string
+ *                     expiringSecrets:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           kid:
+ *                             type: string
+ *                           expiresAt:
+ *                             type: string
+ *                             format: date-time
+ *                           daysUntilExpiry:
+ *                             type: integer
+ *                             nullable: true
+ *       401:
+ *         description: Authentication required
+ *       403:
+ *         description: Admin access required
  */
 export const checkExpiringSecrets = async (
-  _req: Request,
+  req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    // TODO: Add ADMIN role check in production
+    // Check admin role
+    const forbidden = requireAdmin(req, res);
+    if (forbidden) return forbidden;
 
     const secretManager = getSecretManager();
 
