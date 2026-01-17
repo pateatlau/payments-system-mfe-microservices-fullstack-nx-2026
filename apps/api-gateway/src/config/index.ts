@@ -2,7 +2,29 @@
  * API Gateway Configuration
  *
  * Centralized configuration for the API Gateway service
+ *
+ * POC-3 Phase 3.1: JWT Secret Rotation Support
+ * - Supports versioned secrets via JWT_SECRETS env var (JSON array)
+ * - Falls back to legacy JWT_SECRET for backwards compatibility
  */
+
+import {
+  parseJwtSecrets,
+  SecretManager,
+} from '@payments-system/secrets';
+
+// Parse JWT secrets from environment
+const jwtSecrets = parseJwtSecrets(
+  'JWT_SECRETS',
+  'JWT_SECRET',
+  'your-secret-key-change-in-production'
+);
+
+const jwtRefreshSecrets = parseJwtSecrets(
+  'JWT_REFRESH_SECRETS',
+  'JWT_REFRESH_SECRET',
+  'your-refresh-secret-change-in-production'
+);
 
 export const config = {
   // Server
@@ -27,12 +49,13 @@ export const config = {
     url: process.env['REDIS_URL'] ?? 'redis://localhost:6379',
   },
 
-  // JWT
-  jwtSecret:
-    process.env['JWT_SECRET'] ?? 'your-secret-key-change-in-production',
-  jwtRefreshSecret:
-    process.env['JWT_REFRESH_SECRET'] ??
-    'your-refresh-secret-change-in-production',
+  // JWT - Legacy single secret (for backwards compatibility)
+  jwtSecret: jwtSecrets[0]?.secret ?? '',
+  jwtRefreshSecret: jwtRefreshSecrets[0]?.secret ?? '',
+
+  // JWT Secrets with key versioning (POC-3 Phase 3.1)
+  jwtSecrets,
+  jwtRefreshSecrets,
 
   // Backend Services
   services: {
@@ -45,3 +68,31 @@ export const config = {
   // Logging
   logLevel: process.env['LOG_LEVEL'] ?? 'info',
 } as const;
+
+/**
+ * Secret Manager singleton for API Gateway
+ */
+let secretManagerInstance: SecretManager | null = null;
+
+export function getSecretManager(): SecretManager {
+  if (!secretManagerInstance) {
+    secretManagerInstance = new SecretManager({
+      jwtSecrets: config.jwtSecrets,
+      jwtRefreshSecrets: config.jwtRefreshSecrets,
+      redisUrl: config.redis.url,
+      onSecretExpiring: (secret, daysUntilExpiry) => {
+        console.warn(
+          `[API Gateway] WARNING: JWT secret ${secret.kid} expires in ${daysUntilExpiry} days`
+        );
+      },
+    });
+  }
+  return secretManagerInstance;
+}
+
+/**
+ * Reset secret manager (for testing)
+ */
+export function resetSecretManager(): void {
+  secretManagerInstance = null;
+}

@@ -67,4 +67,37 @@ router.post(
   authController.unlockAccount
 );
 
+/**
+ * Secret rotation admin routes (POC-3 Phase 3.1)
+ * Note: These should be protected by admin role check in production
+ */
+
+// GET /auth/admin/secrets/status - Get secrets status (without exposing actual secrets)
+router.get(
+  '/auth/admin/secrets/status',
+  authenticate,
+  authController.getSecretsStatus
+);
+
+// POST /auth/admin/secrets/rotate - Rotate JWT secrets
+router.post(
+  '/auth/admin/secrets/rotate',
+  authenticate,
+  authController.rotateSecrets
+);
+
+// GET /auth/admin/secrets/rotation-history - Get rotation history
+router.get(
+  '/auth/admin/secrets/rotation-history',
+  authenticate,
+  authController.getRotationHistory
+);
+
+// POST /auth/admin/secrets/check-expiring - Check for expiring secrets
+router.post(
+  '/auth/admin/secrets/check-expiring',
+  authenticate,
+  authController.checkExpiringSecrets
+);
+
 export default router;

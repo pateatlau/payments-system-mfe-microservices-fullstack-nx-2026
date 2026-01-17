@@ -2,11 +2,16 @@
  * Authentication Middleware
  *
  * Validates JWT tokens and extracts user information
+ *
+ * POC-3 Phase 3.1: JWT Secret Rotation Support
+ * - Uses SecretManager for multi-secret verification
+ * - Supports tokens signed with any verifiable secret
+ * - Uses 'kid' header to identify the correct secret
  */
 
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import { config } from '../config';
+import { getSecretManager } from '../config';
 import { ApiError } from './errorHandler';
 import { UserRole } from 'shared-types';
 
@@ -37,6 +42,8 @@ declare global {
 /**
  * Authentication middleware
  * Validates JWT token and attaches user to request
+ *
+ * POC-3 Phase 3.1: Now uses SecretManager for multi-secret support
  */
 export const authenticate = (
   req: Request,
@@ -53,11 +60,20 @@ export const authenticate = (
 
     const token = authHeader.substring(7); // Remove 'Bearer ' prefix
 
-    // Verify token
-    const decoded = jwt.verify(token, config.jwtSecret) as JwtPayload;
+    // Verify token using SecretManager (supports multiple secrets)
+    const secretManager = getSecretManager();
+    const result = secretManager.verifyAccessToken<JwtPayload>(token);
+
+    if (!result.success) {
+      // Check for specific error types
+      if (result.error?.includes('expired')) {
+        return next(new ApiError(401, 'TOKEN_EXPIRED', 'Access token expired'));
+      }
+      return next(new ApiError(401, 'TOKEN_INVALID', 'Invalid access token'));
+    }
 
     // Attach user to request
-    req.user = decoded;
+    req.user = result.payload;
 
     next();
   } catch (error) {
@@ -76,6 +92,8 @@ export const authenticate = (
 /**
  * Optional authentication middleware
  * Attaches user if token is present, but doesn't require it
+ *
+ * POC-3 Phase 3.1: Now uses SecretManager for multi-secret support
  */
 export const optionalAuth = (
   req: Request,
@@ -87,8 +105,12 @@ export const optionalAuth = (
 
     if (authHeader && authHeader.startsWith('Bearer ')) {
       const token = authHeader.substring(7);
-      const decoded = jwt.verify(token, config.jwtSecret) as JwtPayload;
-      req.user = decoded;
+      const secretManager = getSecretManager();
+      const result = secretManager.verifyAccessToken<JwtPayload>(token);
+
+      if (result.success && result.payload) {
+        req.user = result.payload;
+      }
     }
 
     next();

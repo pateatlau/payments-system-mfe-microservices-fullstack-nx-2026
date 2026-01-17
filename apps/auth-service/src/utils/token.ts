@@ -1,12 +1,16 @@
 /**
  * Token Utilities
  *
- * JWT token generation and validation
+ * JWT token generation and validation with key versioning support.
+ *
+ * POC-3 Phase 3.1: JWT Secret Rotation
+ * - Tokens include 'kid' (key ID) in header for identifying which secret was used
+ * - Supports verifying tokens signed with old secrets during rotation
+ * - Falls back to legacy behavior for backwards compatibility
  */
 
 import jwt from 'jsonwebtoken';
-import type { SignOptions } from 'jsonwebtoken';
-import { config } from '../config';
+import { config, getSecretManager } from '../config';
 import { UserRole } from 'shared-types';
 
 /**
@@ -29,10 +33,12 @@ export interface TokenPair {
 }
 
 /**
- * Generate access token
+ * Generate access token with key versioning
+ *
+ * POC-3 Phase 3.1: Now includes 'kid' in JWT header for secret rotation support
  *
  * @param payload - User data to encode in token
- * @returns JWT access token
+ * @returns JWT access token with kid header
  */
 export const generateAccessToken = (payload: JwtPayload): string => {
   const tokenPayload = {
@@ -42,18 +48,19 @@ export const generateAccessToken = (payload: JwtPayload): string => {
     role: payload.role,
   };
 
-
-  const signOptions = {
+  const secretManager = getSecretManager();
+  return secretManager.signAccessToken(tokenPayload, {
     expiresIn: config.jwtExpiresIn,
-  };
-  return jwt.sign(tokenPayload, config.jwtSecret, signOptions as SignOptions);
+  });
 };
 
 /**
- * Generate refresh token
+ * Generate refresh token with key versioning
+ *
+ * POC-3 Phase 3.1: Now includes 'kid' in JWT header for secret rotation support
  *
  * @param payload - User data to encode in token
- * @returns JWT refresh token
+ * @returns JWT refresh token with kid header
  */
 export const generateRefreshToken = (payload: JwtPayload): string => {
   const tokenPayload = {
@@ -63,11 +70,10 @@ export const generateRefreshToken = (payload: JwtPayload): string => {
     role: payload.role,
   };
 
-
-  const signOptions = {
+  const secretManager = getSecretManager();
+  return secretManager.signRefreshToken(tokenPayload, {
     expiresIn: config.jwtRefreshExpiresIn,
-  };
-  return jwt.sign(tokenPayload, config.jwtRefreshSecret, signOptions as SignOptions);
+  });
 };
 
 /**
@@ -85,23 +91,79 @@ export const generateTokenPair = (payload: JwtPayload): TokenPair => {
 };
 
 /**
- * Verify access token
+ * Verify access token with multi-secret support
+ *
+ * POC-3 Phase 3.1: Supports verifying tokens signed with any active/verifiable secret.
+ * Uses 'kid' header to identify the correct secret, falls back to trying all secrets.
  *
  * @param token - JWT access token
  * @returns Decoded payload
  * @throws Error if token is invalid or expired
  */
 export const verifyAccessToken = (token: string): JwtPayload => {
-  return jwt.verify(token, config.jwtSecret) as JwtPayload;
+  const secretManager = getSecretManager();
+  const result = secretManager.verifyAccessToken<JwtPayload>(token);
+
+  if (!result.success) {
+    // Throw appropriate JWT error for backwards compatibility
+    const error = new jwt.JsonWebTokenError(result.error || 'Token verification failed');
+    throw error;
+  }
+
+  return result.payload as JwtPayload;
 };
 
 /**
- * Verify refresh token
+ * Verify refresh token with multi-secret support
+ *
+ * POC-3 Phase 3.1: Supports verifying tokens signed with any active/verifiable secret.
  *
  * @param token - JWT refresh token
  * @returns Decoded payload
  * @throws Error if token is invalid or expired
  */
 export const verifyRefreshToken = (token: string): JwtPayload => {
-  return jwt.verify(token, config.jwtRefreshSecret) as JwtPayload;
+  const secretManager = getSecretManager();
+  const result = secretManager.verifyRefreshToken<JwtPayload>(token);
+
+  if (!result.success) {
+    // Throw appropriate JWT error for backwards compatibility
+    const error = new jwt.JsonWebTokenError(result.error || 'Token verification failed');
+    throw error;
+  }
+
+  return result.payload as JwtPayload;
+};
+
+/**
+ * Decode token without verification (for debugging/logging)
+ *
+ * @param token - JWT token
+ * @returns Decoded payload or null
+ */
+export const decodeToken = (token: string): JwtPayload | null => {
+  try {
+    const decoded = jwt.decode(token) as JwtPayload | null;
+    return decoded;
+  } catch {
+    return null;
+  }
+};
+
+/**
+ * Get the key ID (kid) from a token
+ *
+ * @param token - JWT token
+ * @returns Key ID or null if not present
+ */
+export const getTokenKid = (token: string): string | null => {
+  try {
+    const decoded = jwt.decode(token, { complete: true });
+    if (decoded && typeof decoded === 'object' && decoded.header) {
+      return (decoded.header as { kid?: string }).kid || null;
+    }
+    return null;
+  } catch {
+    return null;
+  }
 };

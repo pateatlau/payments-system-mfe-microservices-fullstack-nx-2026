@@ -1,5 +1,7 @@
 /**
  * Token Utilities - Unit Tests
+ *
+ * POC-3 Phase 3.1: Updated to work with SecretManager
  */
 
 import jwt from 'jsonwebtoken';
@@ -11,10 +13,51 @@ import {
   verifyRefreshToken,
   JwtPayload,
 } from './token';
-import { config } from '../config';
 import { UserRole } from 'shared-types';
 
-// Mock config
+// Mock secrets for testing
+const mockJwtSecret = 'test-access-secret';
+const mockRefreshSecret = 'test-refresh-secret';
+
+// Mock SecretManager
+const mockSecretManager = {
+  signAccessToken: jest.fn((payload: object, options: { expiresIn?: string }) => {
+    return jwt.sign(payload, mockJwtSecret, {
+      expiresIn: options.expiresIn || '15m',
+      header: { alg: 'HS256', typ: 'JWT', kid: 'test-v1' } as jwt.JwtHeader,
+    });
+  }),
+  signRefreshToken: jest.fn((payload: object, options: { expiresIn?: string }) => {
+    return jwt.sign(payload, mockRefreshSecret, {
+      expiresIn: options.expiresIn || '7d',
+      header: { alg: 'HS256', typ: 'JWT', kid: 'test-refresh-v1' } as jwt.JwtHeader,
+    });
+  }),
+  verifyAccessToken: jest.fn((token: string) => {
+    try {
+      const payload = jwt.verify(token, mockJwtSecret) as JwtPayload;
+      return { success: true, payload, kid: 'test-v1' };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Verification failed',
+      };
+    }
+  }),
+  verifyRefreshToken: jest.fn((token: string) => {
+    try {
+      const payload = jwt.verify(token, mockRefreshSecret) as JwtPayload;
+      return { success: true, payload, kid: 'test-refresh-v1' };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Verification failed',
+      };
+    }
+  }),
+};
+
+// Mock config module
 jest.mock('../config', () => ({
   config: {
     jwtSecret: 'test-access-secret',
@@ -22,7 +65,11 @@ jest.mock('../config', () => ({
     jwtExpiresIn: '15m',
     jwtRefreshExpiresIn: '7d',
   },
+  getSecretManager: () => mockSecretManager,
 }));
+
+// Import config after mock
+import { config } from '../config';
 
 describe('Token Utilities', () => {
   const mockPayload: JwtPayload = {
@@ -43,7 +90,7 @@ describe('Token Utilities', () => {
       expect(token).toBeDefined();
       expect(typeof token).toBe('string');
 
-      const decoded = jwt.verify(token, config.jwtSecret) as JwtPayload;
+      const decoded = jwt.verify(token, mockJwtSecret) as JwtPayload;
       expect(decoded.userId).toBe(mockPayload.userId);
       expect(decoded.email).toBe(mockPayload.email);
       expect(decoded.name).toBe(mockPayload.name);
@@ -57,6 +104,13 @@ describe('Token Utilities', () => {
       expect(decoded.exp).toBeDefined();
       expect(decoded.iat).toBeDefined();
     });
+
+    it('should include kid in token header (POC-3 Phase 3.1)', () => {
+      const token = generateAccessToken(mockPayload);
+      const decoded = jwt.decode(token, { complete: true });
+
+      expect(decoded?.header.kid).toBe('test-v1');
+    });
   });
 
   describe('generateRefreshToken', () => {
@@ -66,7 +120,7 @@ describe('Token Utilities', () => {
       expect(token).toBeDefined();
       expect(typeof token).toBe('string');
 
-      const decoded = jwt.verify(token, config.jwtRefreshSecret) as JwtPayload;
+      const decoded = jwt.verify(token, mockRefreshSecret) as JwtPayload;
       expect(decoded.userId).toBe(mockPayload.userId);
       expect(decoded.email).toBe(mockPayload.email);
       expect(decoded.name).toBe(mockPayload.name);
@@ -79,6 +133,13 @@ describe('Token Utilities', () => {
 
       expect(decoded.exp).toBeDefined();
       expect(decoded.iat).toBeDefined();
+    });
+
+    it('should include kid in token header (POC-3 Phase 3.1)', () => {
+      const token = generateRefreshToken(mockPayload);
+      const decoded = jwt.decode(token, { complete: true });
+
+      expect(decoded?.header.kid).toBe('test-refresh-v1');
     });
   });
 
@@ -93,11 +154,11 @@ describe('Token Utilities', () => {
       // Verify both tokens are valid
       const accessDecoded = jwt.verify(
         tokens.accessToken,
-        config.jwtSecret
+        mockJwtSecret
       ) as JwtPayload;
       const refreshDecoded = jwt.verify(
         tokens.refreshToken,
-        config.jwtRefreshSecret
+        mockRefreshSecret
       ) as JwtPayload;
 
       expect(accessDecoded.userId).toBe(mockPayload.userId);
@@ -129,7 +190,13 @@ describe('Token Utilities', () => {
     });
 
     it('should throw error for expired token', () => {
-      const expiredToken = jwt.sign(mockPayload, config.jwtSecret, {
+      // Create an expired token directly (not through SecretManager mock)
+      mockSecretManager.verifyAccessToken.mockReturnValueOnce({
+        success: false,
+        error: 'jwt expired',
+      });
+
+      const expiredToken = jwt.sign(mockPayload, mockJwtSecret, {
         expiresIn: '-1h', // Expired 1 hour ago
       });
 
@@ -161,7 +228,13 @@ describe('Token Utilities', () => {
     });
 
     it('should throw error for expired token', () => {
-      const expiredToken = jwt.sign(mockPayload, config.jwtRefreshSecret, {
+      // Create an expired token directly
+      mockSecretManager.verifyRefreshToken.mockReturnValueOnce({
+        success: false,
+        error: 'jwt expired',
+      });
+
+      const expiredToken = jwt.sign(mockPayload, mockRefreshSecret, {
         expiresIn: '-1d', // Expired 1 day ago
       });
 

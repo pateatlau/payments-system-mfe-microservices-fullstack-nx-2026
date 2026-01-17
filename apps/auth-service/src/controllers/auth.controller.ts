@@ -390,3 +390,230 @@ export const unlockAccount = async (
     next(error);
   }
 };
+
+// Import SecretManager for admin secret management
+import { getSecretManager } from '../config';
+import { SecretManager } from '@payments-system/secrets';
+import { z } from 'zod';
+
+// Validation schema for secret rotation request
+const rotateSecretsSchema = z.object({
+  type: z.enum(['jwt', 'refresh', 'both']).default('both'),
+  reason: z.string().min(1).max(500),
+  expiresInDays: z.number().int().min(1).max(365).optional(),
+});
+
+/**
+ * GET /auth/admin/secrets/status
+ * Admin: Get status of all JWT secrets (without exposing actual secret values)
+ *
+ * POC-3 Phase 3.1: Secret rotation admin endpoint
+ */
+export const getSecretsStatus = async (
+  _req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    // TODO: Add ADMIN role check in production
+    // if (req.user?.role !== 'ADMIN') {
+    //   return res.status(403).json({ success: false, error: { code: 'FORBIDDEN', message: 'Admin access required' } });
+    // }
+
+    const secretManager = getSecretManager();
+    const status = secretManager.getSecretsStatus();
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        jwtSecrets: status.jwtSecrets.map((s) => ({
+          kid: s.kid,
+          createdAt: s.createdAt,
+          expiresAt: s.expiresAt,
+          isActive: s.isActive,
+          canVerify: s.canVerify,
+        })),
+        refreshSecrets: status.refreshSecrets.map((s) => ({
+          kid: s.kid,
+          createdAt: s.createdAt,
+          expiresAt: s.expiresAt,
+          isActive: s.isActive,
+          canVerify: s.canVerify,
+        })),
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * POST /auth/admin/secrets/rotate
+ * Admin: Rotate JWT secrets
+ *
+ * POC-3 Phase 3.1: Secret rotation admin endpoint
+ *
+ * IMPORTANT: This generates new secrets and returns the environment variable
+ * values that should be set. The actual rotation requires updating the
+ * environment and restarting services.
+ */
+export const rotateSecrets = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    // TODO: Add ADMIN role check in production
+    // if (req.user?.role !== 'ADMIN') {
+    //   return res.status(403).json({ success: false, error: { code: 'FORBIDDEN', message: 'Admin access required' } });
+    // }
+
+    // Validate request body
+    const data = rotateSecretsSchema.parse(req.body);
+
+    const secretManager = getSecretManager();
+    const triggeredBy = req.user?.email || 'unknown';
+    const results: {
+      jwt?: { kid: string; envValue: string };
+      refresh?: { kid: string; envValue: string };
+    } = {};
+
+    // Generate new secrets
+    if (data.type === 'jwt' || data.type === 'both') {
+      const newJwtSecret = SecretManager.generateSecret({
+        expiresInDays: data.expiresInDays,
+      });
+
+      // Rotate the secret in memory (affects current instance only)
+      secretManager.rotateJwtSecret(newJwtSecret, triggeredBy, data.reason);
+
+      results.jwt = {
+        kid: newJwtSecret.kid,
+        // Generate the env value (includes actual secret for admin to set)
+        envValue: `Set JWT_SECRETS env var to include new secret with kid "${newJwtSecret.kid}". ` +
+          `See rotation history for details.`,
+      };
+
+      console.log(
+        `[Auth Admin] JWT secret rotated by ${triggeredBy}: ${newJwtSecret.kid}`
+      );
+    }
+
+    if (data.type === 'refresh' || data.type === 'both') {
+      const newRefreshSecret = SecretManager.generateSecret({
+        expiresInDays: data.expiresInDays,
+      });
+
+      // Rotate the secret in memory
+      secretManager.rotateRefreshSecret(newRefreshSecret, triggeredBy, data.reason);
+
+      results.refresh = {
+        kid: newRefreshSecret.kid,
+        envValue: `Set JWT_REFRESH_SECRETS env var to include new secret with kid "${newRefreshSecret.kid}". ` +
+          `See rotation history for details.`,
+      };
+
+      console.log(
+        `[Auth Admin] Refresh secret rotated by ${triggeredBy}: ${newRefreshSecret.kid}`
+      );
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        message: 'Secrets rotated successfully for current instance. ' +
+          'Note: To persist rotation, update environment variables and restart all services.',
+        rotated: results,
+        warning: 'This rotation affects the current service instance only. ' +
+          'For production, implement proper secret distribution via secrets manager (e.g., Vault, AWS KMS).',
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * GET /auth/admin/secrets/rotation-history
+ * Admin: Get secret rotation history
+ *
+ * POC-3 Phase 3.1: Secret rotation admin endpoint
+ */
+export const getRotationHistory = async (
+  _req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    // TODO: Add ADMIN role check in production
+
+    const secretManager = getSecretManager();
+    const history = secretManager.getRotationHistory();
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        rotations: history.map((r) => ({
+          rotatedAt: r.rotatedAt,
+          oldKid: r.oldKid,
+          newKid: r.newKid,
+          triggeredBy: r.triggeredBy,
+          reason: r.reason,
+        })),
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * POST /auth/admin/secrets/check-expiring
+ * Admin: Check for expiring secrets and trigger warnings
+ *
+ * POC-3 Phase 3.1: Secret rotation admin endpoint
+ */
+export const checkExpiringSecrets = async (
+  _req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    // TODO: Add ADMIN role check in production
+
+    const secretManager = getSecretManager();
+
+    // This will log warnings and disable expired secrets
+    secretManager.checkExpiringSecrets();
+
+    const status = secretManager.getSecretsStatus();
+
+    // Find secrets that are expiring soon (within 30 days)
+    const now = new Date();
+    const warningThreshold = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+
+    const expiringSecrets = [
+      ...status.jwtSecrets,
+      ...status.refreshSecrets,
+    ].filter((s) => s.expiresAt && new Date(s.expiresAt) <= warningThreshold);
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        message: 'Secret expiry check complete',
+        expiringSecrets: expiringSecrets.map((s) => ({
+          kid: s.kid,
+          expiresAt: s.expiresAt,
+          daysUntilExpiry: s.expiresAt
+            ? Math.ceil(
+                (new Date(s.expiresAt).getTime() - now.getTime()) /
+                  (24 * 60 * 60 * 1000)
+              )
+            : null,
+        })),
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};

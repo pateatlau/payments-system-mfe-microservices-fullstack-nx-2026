@@ -2,7 +2,30 @@
  * Auth Service Configuration
  *
  * Centralized configuration for the Auth Service
+ *
+ * POC-3 Phase 3.1: JWT Secret Rotation Support
+ * - Supports versioned secrets via JWT_SECRETS env var (JSON array)
+ * - Falls back to legacy JWT_SECRET for backwards compatibility
+ * - Validates secrets on startup (fail fast in production)
  */
+
+import {
+  parseJwtSecrets,
+  SecretManager,
+} from '@payments-system/secrets';
+
+// Parse JWT secrets from environment
+const jwtSecrets = parseJwtSecrets(
+  'JWT_SECRETS',
+  'JWT_SECRET',
+  'your-secret-key-change-in-production'
+);
+
+const jwtRefreshSecrets = parseJwtSecrets(
+  'JWT_REFRESH_SECRETS',
+  'JWT_REFRESH_SECRET',
+  'your-refresh-secret-change-in-production'
+);
 
 export const config = {
   // Server
@@ -16,15 +39,17 @@ export const config = {
       'postgresql://postgres:postgres@localhost:5432/auth_db',
   },
 
-  // JWT
-  jwtSecret:
-    process.env['JWT_SECRET'] ?? 'your-secret-key-change-in-production',
-  jwtRefreshSecret:
-    process.env['JWT_REFRESH_SECRET'] ??
-    'your-refresh-secret-change-in-production',
+  // JWT - Legacy single secret (for backwards compatibility with existing code)
+  // New code should use secretManager instead
+  jwtSecret: jwtSecrets[0]?.secret ?? '',
+  jwtRefreshSecret: jwtRefreshSecrets[0]?.secret ?? '',
   jwtExpiresIn: (process.env['JWT_EXPIRES_IN'] ?? '15m') as string, // 15 minutes
   jwtRefreshExpiresIn: (process.env['JWT_REFRESH_EXPIRES_IN'] ??
     '7d') as string, // 7 days
+
+  // JWT Secrets with key versioning (POC-3 Phase 3.1)
+  jwtSecrets,
+  jwtRefreshSecrets,
 
   // Password Hashing
   bcryptRounds: parseInt(process.env['BCRYPT_ROUNDS'] ?? '10', 10),
@@ -45,3 +70,39 @@ export const config = {
   // Logging
   logLevel: process.env['LOG_LEVEL'] ?? 'info',
 } as const;
+
+/**
+ * Secret Manager singleton
+ *
+ * Use this for JWT operations with key versioning support.
+ * Provides:
+ * - signAccessToken() / verifyAccessToken()
+ * - signRefreshToken() / verifyRefreshToken()
+ * - Secret rotation methods
+ */
+let secretManagerInstance: SecretManager | null = null;
+
+export function getSecretManager(): SecretManager {
+  if (!secretManagerInstance) {
+    secretManagerInstance = new SecretManager({
+      jwtSecrets: config.jwtSecrets,
+      jwtRefreshSecrets: config.jwtRefreshSecrets,
+      redisUrl: config.redisUrl,
+      onSecretExpiring: (secret, daysUntilExpiry) => {
+        console.warn(
+          `[Auth Service] WARNING: JWT secret ${secret.kid} expires in ${daysUntilExpiry} days. ` +
+            'Please rotate secrets before expiry.'
+        );
+        // TODO: In production, send alert to monitoring system
+      },
+    });
+  }
+  return secretManagerInstance;
+}
+
+/**
+ * Reset secret manager (for testing)
+ */
+export function resetSecretManager(): void {
+  secretManagerInstance = null;
+}
