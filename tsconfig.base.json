@@ -58,7 +58,8 @@
       "@mfe/shared-theme-store": ["libs/shared-theme-store/src/index.ts"],
       "@payments-system/shared-graphql-client": [
         "libs/shared-graphql-client/src/index.ts"
-      ]
+      ],
+      "@payments-system/secrets": ["libs/backend/secrets/src/index.ts"]
     }
   },
   "files": [],

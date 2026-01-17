@@ -10,6 +10,7 @@ import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 import healthRoutes from './routes/health';
 import { paymentRoutes, webhookRouter } from './routes/payment';
 import { startUserEventSubscriber, closeSubscriber } from './events/subscriber';
+import { initializePublisher, closePublisher } from './events/publisher';
 import {
   initSentry,
   initSentryErrorHandler,
@@ -126,14 +127,28 @@ const server = app.listen(port, () => {
 });
 
 /**
- * Initialize RabbitMQ Event Subscriber (async, non-blocking)
- * This enables automatic user synchronization from Auth Service
+ * Initialize RabbitMQ Event Publisher and Subscriber (async, non-blocking)
+ * Publisher: Publishes payment events to RabbitMQ
+ * Subscriber: Enables automatic user synchronization from Auth Service
  */
-startUserEventSubscriber().catch(error => {
-  logger.error('Failed to start RabbitMQ subscriber', { error });
-  // Non-fatal: service can still operate with manual upserts
-  // but user sync from auth service won't work
-});
+(async () => {
+  try {
+    await initializePublisher();
+    logger.info('RabbitMQ publisher initialized successfully');
+  } catch (error) {
+    logger.error('Failed to initialize RabbitMQ publisher', { error });
+    // Non-fatal: payments can still be created, but events won't be published
+  }
+
+  try {
+    await startUserEventSubscriber();
+    logger.info('RabbitMQ subscriber initialized successfully');
+  } catch (error) {
+    logger.error('Failed to start RabbitMQ subscriber', { error });
+    // Non-fatal: service can still operate with manual upserts
+    // but user sync from auth service won't work
+  }
+})();
 
 /**
  * Graceful Shutdown
@@ -141,11 +156,12 @@ startUserEventSubscriber().catch(error => {
 const shutdown = async (signal: string) => {
   logger.info(`Received ${signal}, shutting down gracefully...`);
 
-  // Close RabbitMQ subscriber
+  // Close RabbitMQ publisher and subscriber
   try {
+    await closePublisher();
     await closeSubscriber();
   } catch (error) {
-    logger.error('Error closing RabbitMQ subscriber', { error });
+    logger.error('Error closing RabbitMQ connections', { error });
   }
 
   // Close HTTP server

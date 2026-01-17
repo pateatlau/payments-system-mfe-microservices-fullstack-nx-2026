@@ -11,10 +11,11 @@
  */
 
 import { RabbitMQPublisher } from '@payments-system/rabbitmq-event-hub';
-import { getConnectionManager } from './connection';
+import { getConnectionManager, initializeConnection } from './connection';
 import { config } from '../config';
 
 let publisher: RabbitMQPublisher | null = null;
+let publisherInitialized = false;
 
 /**
  * Get or create event publisher
@@ -32,18 +33,29 @@ export function getEventPublisher(): RabbitMQPublisher {
         appId: 'payments-service',
       },
     });
-
-    // Initialize exchange
-    publisher.initialize().catch(error => {
-      // eslint-disable-next-line no-console
-      console.error(
-        '[Payments Service] Failed to initialize publisher:',
-        error
-      );
-    });
   }
 
   return publisher;
+}
+
+/**
+ * Initialize event publisher (ensures connection and exchange are ready)
+ */
+export async function initializePublisher(): Promise<void> {
+  if (publisherInitialized) {
+    return;
+  }
+
+  // Ensure RabbitMQ connection is established first
+  await initializeConnection();
+
+  // Initialize the publisher/exchange
+  const pub = getEventPublisher();
+  await pub.initialize();
+
+  publisherInitialized = true;
+  // eslint-disable-next-line no-console
+  console.log('[Payments Service] Event publisher initialized');
 }
 
 /**
@@ -217,6 +229,7 @@ export async function closePublisher(): Promise<void> {
   if (publisher) {
     await publisher.close();
     publisher = null;
+    publisherInitialized = false; // Reset flag to allow re-initialization
     // eslint-disable-next-line no-console
     console.log('[Payments Service] Event publisher closed');
   }

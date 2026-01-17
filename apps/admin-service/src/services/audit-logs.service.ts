@@ -9,6 +9,7 @@ import {
   AuditLogFilters,
   AuditLogsListResponse,
 } from '../types/audit-logs.types';
+import { AUDIT_ACTIONS } from '../validators/admin.validators';
 
 /**
  * Get paginated list of audit logs with optional filters
@@ -115,14 +116,11 @@ export async function getAuditLogs(
 
 /**
  * Get available actions for filtering
- * Returns unique list of actions from audit logs
+ * Returns all known audit action types for the filter dropdown
  */
 export async function getAvailableActions(): Promise<string[]> {
-  const actions = await prisma.auditLog.findMany({
-    select: { action: true },
-    distinct: ['action'],
-    orderBy: { action: 'asc' },
-  });
-
-  return actions.map((a: { action: string }) => a.action);
+  // Return all known actions from the AUDIT_ACTIONS constant
+  // This ensures all action types are available in the filter dropdown,
+  // even if no logs exist for that action type yet
+  return [...AUDIT_ACTIONS].sort();
 }
