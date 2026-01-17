@@ -1,8 +1,8 @@
 // Payments Service Database Schema
 // Database: payments_db (port 5433)
-// 
+//
 // This schema defines the payment processing data model.
-// 
+//
 // ZERO COUPLING PATTERN: Payments Service maintains a minimal denormalized User table
 // synchronized via RabbitMQ events from Auth Service. This enables recipient validation
 // without coupling to Auth Service API.
@@ -11,6 +11,11 @@
 // 1. Auth Service publishes: auth.user.created, auth.user.updated, auth.user.deleted
 // 2. Payments Service subscribes and updates local User table
 // 3. Payment creation validates recipients against local User table (no API calls)
+//
+// Field-Level Encryption (Phase 4.3 - Database Security Hardening):
+// - PaymentMethod.cardNumber: Encrypted with AES-256-GCM, searchable via last4 digits
+// - PaymentMethod.bankAccountNumber: Encrypted with AES-256-GCM, not searchable
+// Encryption is handled transparently by Prisma middleware.
 
 generator client {
   provider = "prisma-client-js"
@@ -36,6 +41,12 @@ enum PaymentType {
   recurring
 }
 
+enum PaymentMethodType {
+  card
+  bank_account
+  wallet
+}
+
 // Minimal denormalized User table - synchronized via RabbitMQ events from Auth Service
 // Only stores fields needed for payment validation (id, email)
 // This enables zero-coupling: Payments Service can validate recipients without calling Auth Service API
@@ -45,11 +56,44 @@ model User {
   // Note: Only minimal fields needed for recipient validation
   // Full user data is in auth_db, this is just for validation
 
-  sentPayments     Payment[] @relation("SentPayments")
-  receivedPayments Payment[] @relation("ReceivedPayments")
+  sentPayments     Payment[]       @relation("SentPayments")
+  receivedPayments Payment[]       @relation("ReceivedPayments")
+  paymentMethods   PaymentMethod[]
 
   @@index([email])
   @@map("users")
+}
+
+// PaymentMethod model - stores encrypted payment credentials
+// All sensitive fields are encrypted at rest with AES-256-GCM
+model PaymentMethod {
+  id                   String            @id @default(uuid())
+  userId               String            @map("user_id")
+  user                 User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type                 PaymentMethodType
+  label                String?                              // User-friendly label (e.g., "My Visa ****1234")
+  isDefault            Boolean           @default(false) @map("is_default")
+  // Card fields (encrypted)
+  cardNumber           String?           @map("card_number")        // Encrypted full card number
+  cardLast4            String?           @map("card_last_4")        // Last 4 digits (unencrypted for display)
+  cardLast4Idx         String?           @map("card_last_4_idx")    // Blind index for search
+  cardExpiryMonth      String?           @map("card_expiry_month")  // Encrypted
+  cardExpiryYear       String?           @map("card_expiry_year")   // Encrypted
+  cardholderName       String?           @map("cardholder_name")    // Encrypted
+  // Bank account fields (encrypted)
+  bankAccountNumber    String?           @map("bank_account_number") // Encrypted bank account number
+  bankRoutingNumber    String?           @map("bank_routing_number") // Encrypted routing number
+  bankAccountLast4     String?           @map("bank_account_last_4") // Last 4 digits (unencrypted for display)
+  bankAccountLast4Idx  String?           @map("bank_account_last_4_idx") // Blind index for search
+  bankName             String?           @map("bank_name")
+  // Timestamps
+  createdAt            DateTime          @default(now()) @map("created_at")
+  updatedAt            DateTime          @updatedAt @map("updated_at")
+
+  @@index([userId])
+  @@index([cardLast4Idx])
+  @@index([bankAccountLast4Idx])
+  @@map("payment_methods")
 }
 
 model Payment {

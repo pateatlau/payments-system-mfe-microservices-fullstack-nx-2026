@@ -1,9 +1,14 @@
 // Profile Service Database Schema
 // Database: profile_db (port 5435)
-// 
+//
 // This schema defines the user profile data model.
 // User reference (userId) is stored as a string without foreign key.
 // User existence is validated via Auth Service.
+//
+// Field-Level Encryption (Phase 4.3 - Database Security Hardening):
+// - phone: Encrypted with AES-256-GCM, searchable via blind index (phone_idx)
+// - address: Encrypted with AES-256-GCM, not searchable
+// Encryption is handled transparently by Prisma middleware.
 
 generator client {
   provider = "prisma-client-js"
@@ -19,13 +24,15 @@ model UserProfile {
   id          String   @id @default(uuid())
   userId      String   @unique @map("user_id")  // Reference to User ID (no FK)
   avatarUrl   String?  @map("avatar_url")
-  phone       String?
-  address     String?
+  phone       String?                           // Encrypted PII field
+  phoneIdx    String?  @map("phone_idx")        // Blind index for phone search (HMAC-SHA256 hash)
+  address     String?                           // Encrypted PII field (not searchable)
   bio         String?
   preferences Json?
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
   @@index([userId])
+  @@index([phoneIdx])                           // Index for phone search via blind index
   @@map("user_profiles")
 }
