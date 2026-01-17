@@ -236,9 +236,9 @@ export class FieldEncryptionManager {
         throw new Error('Invalid encrypted value format');
       }
 
-      const versionStr = parts[2];
+      const versionStr = parts[2] as string;
       // const keyId = parts[3]; // Can be used for key rotation
-      const base64Ciphertext = parts[4];
+      const base64Ciphertext = parts[4] as string;
 
       // Check version
       const version = parseInt(versionStr.replace('v', ''), 10);
