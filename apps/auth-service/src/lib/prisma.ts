@@ -10,6 +10,11 @@
  * - Connection timeout: 30s
  * - Idle timeout: 600s (10 minutes)
  *
+ * Query Monitoring (Phase 4.2 - Database Security Hardening):
+ * - Query timeout: 10s (configurable via DB_QUERY_TIMEOUT_MS)
+ * - Slow query logging: >1s (configurable via DB_SLOW_QUERY_THRESHOLD_MS)
+ * - Query performance metrics for Prometheus
+ *
  * Usage:
  *   import { prisma } from './lib/prisma';
  *   const users = await prisma.user.findMany();
@@ -17,6 +22,12 @@
 
 // Dynamic require with absolute path to work from dist
 import path from 'path';
+import {
+  createQueryMonitorMiddleware,
+  getQueryStats as getQueryStatsFromMonitor,
+  getQueryMonitorConfigFromEnv,
+  type QueryStats,
+} from '@payments-system/db';
 const clientPath = path.join(
   process.cwd(),
   'apps/auth-service/node_modules/.prisma/auth-client'
@@ -144,7 +155,7 @@ const prismaClientSingleton = () => {
         : ['error'],
   });
 
-  // Add middleware to track connection metrics
+  // Add middleware to track connection metrics (Phase 4.1)
   client.$use(async (params: { model?: string; action: string }, next: (params: unknown) => Promise<unknown>) => {
     const startTime = Date.now();
     poolMetrics.activeConnections++;
@@ -175,6 +186,14 @@ const prismaClientSingleton = () => {
     }
   });
 
+  // Add query monitoring middleware (Phase 4.2)
+  const queryMonitorConfig = getQueryMonitorConfigFromEnv(SERVICE_NAME);
+  console.log(`[${SERVICE_NAME}] Initializing query monitor with config:`, {
+    queryTimeoutMs: queryMonitorConfig.queryTimeoutMs,
+    slowQueryThresholdMs: queryMonitorConfig.slowQueryThresholdMs,
+  });
+  client.$use(createQueryMonitorMiddleware(queryMonitorConfig));
+
   return client;
 };
 
@@ -202,6 +221,14 @@ export async function disconnectPrisma(): Promise<void> {
   console.log(`[${SERVICE_NAME}] Disconnecting Prisma client...`);
   await prisma.$disconnect();
   console.log(`[${SERVICE_NAME}] Prisma client disconnected`);
+}
+
+/**
+ * Get query statistics for monitoring
+ * Returns stats like total queries, slow queries, timeouts, avg duration
+ */
+export function getQueryStats(): QueryStats | undefined {
+  return getQueryStatsFromMonitor(SERVICE_NAME);
 }
 
 export default prisma;

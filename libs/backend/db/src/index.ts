@@ -1,12 +1,16 @@
-/**
- * Backend Database Library
- *
- * This library provides:
- * - Prisma client singleton instance
- * - Database models and types
- * - Database utilities
- */
+// Query monitoring exports
+export {
+  createQueryMonitorMiddleware,
+  getQueryStats,
+  resetQueryStats,
+  getAllQueryStats,
+  formatQueryStats,
+  getQueryMonitorConfigFromEnv,
+} from './lib/query-monitor';
 
-export { prisma, default as prismaClient } from './lib/prisma';
-export * from './lib/db';
-export * from '@prisma/client';
+export type {
+  QueryMonitorConfig,
+  SlowQueryInfo,
+  QueryTimeoutInfo,
+  QueryStats,
+} from './lib/query-monitor';
