@@ -68,3 +68,21 @@ export {
   jwtDurationSchema,
 } from './lib/config-validator';
 export type { NodeEnv, LogLevel, ConfigValidationResult } from './lib/config-validator';
+
+// Secrets Encryption (POC-3 Phase 3.3)
+export {
+  LocalEncryptionProvider,
+  SecretsEncryptionManager,
+  generateMasterKey,
+  createEncryptionManagerFromEnv,
+  isEncrypted,
+  parseEncryptedValue,
+  formatEncryptedValue,
+} from './lib/encryption';
+export type {
+  EncryptionProvider,
+  EncryptionResult,
+  DecryptionResult,
+  SecretAccessEvent,
+  AuditCallback,
+} from './lib/encryption';
