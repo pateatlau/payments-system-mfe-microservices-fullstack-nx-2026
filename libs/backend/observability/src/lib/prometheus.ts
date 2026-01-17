@@ -76,7 +76,7 @@ export function createHttpMetrics(registry: Registry) {
 
 /**
  * Database Metrics
- * Track database query performance
+ * Track database query performance and connection pool health
  */
 export function createDatabaseMetrics(registry: Registry) {
   const dbQueryDuration = new Histogram({
@@ -94,9 +94,67 @@ export function createDatabaseMetrics(registry: Registry) {
     registers: [registry],
   });
 
+  // Connection pool metrics
+  const dbPoolActiveConnections = new Gauge({
+    name: 'db_pool_active_connections',
+    help: 'Number of active database connections in the pool',
+    labelNames: ['service'],
+    registers: [registry],
+  });
+
+  const dbPoolIdleConnections = new Gauge({
+    name: 'db_pool_idle_connections',
+    help: 'Number of idle database connections in the pool',
+    labelNames: ['service'],
+    registers: [registry],
+  });
+
+  const dbPoolWaitingRequests = new Gauge({
+    name: 'db_pool_waiting_requests',
+    help: 'Number of requests waiting for a connection',
+    labelNames: ['service'],
+    registers: [registry],
+  });
+
+  const dbPoolTotalConnections = new Gauge({
+    name: 'db_pool_total_connections',
+    help: 'Total number of connections in the pool',
+    labelNames: ['service'],
+    registers: [registry],
+  });
+
+  const dbPoolMaxConnections = new Gauge({
+    name: 'db_pool_max_connections',
+    help: 'Maximum number of connections allowed in the pool',
+    labelNames: ['service'],
+    registers: [registry],
+  });
+
+  const dbConnectionTimeouts = new Counter({
+    name: 'db_connection_timeouts_total',
+    help: 'Total number of connection pool timeouts',
+    labelNames: ['service'],
+    registers: [registry],
+  });
+
+  const dbConnectionAcquisitionDuration = new Histogram({
+    name: 'db_connection_acquisition_duration_seconds',
+    help: 'Time spent acquiring a connection from the pool',
+    labelNames: ['service'],
+    buckets: [0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1, 5, 10, 30],
+    registers: [registry],
+  });
+
   return {
     dbQueryDuration,
     dbQueryErrorsTotal,
+    dbPoolActiveConnections,
+    dbPoolIdleConnections,
+    dbPoolWaitingRequests,
+    dbPoolTotalConnections,
+    dbPoolMaxConnections,
+    dbConnectionTimeouts,
+    dbConnectionAcquisitionDuration,
   };
 }
 
