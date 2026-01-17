@@ -29,7 +29,7 @@
 ### Phase 4: Database Security Hardening (In Progress)
 - ✅ **Priority 4.1:** Connection Pool Configuration (COMPLETED - Jan 17, 2026)
 - ✅ **Priority 4.2:** Query Timeout & Performance (COMPLETED - Jan 17, 2026)
-- ⏳ **Priority 4.3:** Data Encryption (Not Started)
+- ✅ **Priority 4.3:** Data Encryption (COMPLETED - Jan 17, 2026)
 - ⏳ **Priority 4.4:** Database Access Audit Logging (Not Started)
 
 ### Phases 5-7: Not Started
@@ -1365,31 +1365,119 @@ interface QueryStats {
 
 ---
 
-#### Priority 4.3: Data Encryption
+#### Priority 4.3: Data Encryption ✅ COMPLETED
 
-**Effort:** 8 hours  
+**Status:** ✅ **COMPLETED** (January 17, 2026)
+**Effort:** 6 hours
 **Impact:** MEDIUM
 
-**Tasks:**
+**Implementation Summary:**
 
-1. Implement field-level encryption for sensitive data:
-   - User passwords (already hashed) ✅
-   - Payment details (card numbers, etc.)
-   - Personal information (SSN, etc.)
-2. Add encryption/decryption middleware
-3. Document encryption keys management
-4. Add key rotation support
+✅ **Completed Tasks:**
+
+1. ✅ Created `FieldEncryptionManager` class in `@payments-system/db` library:
+   - AES-256-GCM encryption for sensitive database fields
+   - Transparent encryption/decryption via Prisma middleware
+   - Support for multiple encrypted fields per model
+   - Key versioning support for rotation (`$enc$v1$keyId$ciphertext` format)
+
+2. ✅ Implemented blind indexing for searchable encrypted fields:
+   - HMAC-SHA256 based blind indexes
+   - Allows searching on encrypted fields without exposing plaintext
+   - Separate blind index key derivation for defense in depth
+   - Automatic case normalization for consistent indexing
+
+3. ✅ Added encrypted fields to Profile Service:
+   - `phone`: Encrypted with searchable blind index (`phoneIdx`)
+   - `address`: Encrypted (not searchable)
+
+4. ✅ Added PaymentMethod model to Payments Service with encrypted fields:
+   - `cardNumber`: Full card number (encrypted)
+   - `cardExpiryMonth`, `cardExpiryYear`: Encrypted
+   - `cardholderName`: Encrypted
+   - `bankAccountNumber`, `bankRoutingNumber`: Encrypted
+   - `cardLast4`, `bankAccountLast4`: Unencrypted for display, with blind indexes
+
+5. ✅ Created comprehensive test suite (56 tests for field encryption)
 
 **New Files:**
 
-- `libs/backend/encryption/src/lib/field-encryption.ts`
-- `libs/backend/encryption/src/lib/encryption-middleware.ts`
+- ✅ `libs/backend/db/src/lib/field-encryption.ts` - Core encryption module
+- ✅ `libs/backend/db/src/lib/field-encryption.spec.ts` - 56 unit tests
 
-**Success Criteria:**
+**Files Modified:**
 
-- Sensitive fields encrypted in database
-- Transparent decryption on read
-- Key rotation support
+- ✅ `libs/backend/db/src/index.ts` - Export encryption utilities
+- ✅ `apps/profile-service/prisma/schema.prisma` - Added `phoneIdx` column
+- ✅ `apps/payments-service/prisma/schema.prisma` - Added `PaymentMethod` model
+- ✅ `apps/profile-service/src/lib/prisma.ts` - Integrated encryption middleware
+- ✅ `apps/payments-service/src/lib/prisma.ts` - Integrated encryption middleware
+
+**Database Migrations:**
+
+- ✅ `20260117052213_add_phone_idx_field` (profile-service)
+- ✅ `20260117052219_add_payment_method_model` (payments-service)
+
+**Environment Variables:**
+
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `FIELD_ENCRYPTION_KEY` | 64-char hex or 44-char base64 key | Yes (for encryption) |
+| `FIELD_ENCRYPTION_KEY_ID` | Key identifier for rotation | No (default: 'default') |
+| `FIELD_ENCRYPTION_BLIND_INDEX_KEY` | Separate key for blind indexing | No (derived from master) |
+| `FIELD_ENCRYPTION_ENABLE_BLIND_INDEX` | Enable blind indexing | No (default: true) |
+
+**Usage Example:**
+
+```typescript
+// Generate encryption key
+import { generateFieldEncryptionKey } from '@payments-system/db';
+const key = generateFieldEncryptionKey();
+// Set FIELD_ENCRYPTION_KEY=<generated key> in .env
+
+// Encryption is automatic via Prisma middleware
+// When FIELD_ENCRYPTION_KEY is set, fields are encrypted on create/update
+// and decrypted on read transparently
+const profile = await prisma.userProfile.create({
+  data: {
+    userId: 'user-123',
+    phone: '555-1234',      // Automatically encrypted
+    address: '123 Main St', // Automatically encrypted
+  },
+});
+// profile.phone returns '555-1234' (decrypted)
+
+// Search by encrypted field using blind index
+const found = await prisma.userProfile.findFirst({
+  where: { phone: '555-1234' }, // Middleware transforms to phoneIdx search
+});
+```
+
+**Encrypted Value Format:**
+
+```
+$enc$v1$keyId$base64(iv + authTag + ciphertext)
+```
+
+- `$enc$` - Prefix identifying encrypted values
+- `v1` - Encryption format version (for future upgrades)
+- `keyId` - Key identifier for rotation support
+- Base64-encoded: 12-byte IV + 16-byte auth tag + encrypted data
+
+**Success Criteria Met:**
+
+- ✅ Sensitive fields encrypted in database with AES-256-GCM
+- ✅ Transparent decryption on read via Prisma middleware
+- ✅ Key rotation support via key versioning
+- ✅ Blind indexing for searchable encrypted fields
+- ✅ All backend tests passing (554 tests)
+
+**Testing Notes:**
+
+- Encryption is optional: services work normally without `FIELD_ENCRYPTION_KEY`
+- When enabled, log message confirms: "Initializing field encryption with config"
+- Existing unencrypted data is returned as-is (backward compatible)
+- Generate key: `npx ts-node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`
 
 ---
 

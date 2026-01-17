@@ -15,6 +15,12 @@
  * - Slow query logging: >1s (configurable via DB_SLOW_QUERY_THRESHOLD_MS)
  * - Query performance metrics for Prometheus
  *
+ * Field-Level Encryption (Phase 4.3 - Database Security Hardening):
+ * - PaymentMethod: cardNumber, cardExpiryMonth, cardExpiryYear, cardholderName,
+ *   bankAccountNumber, bankRoutingNumber are encrypted with AES-256-GCM
+ * - cardLast4/bankAccountLast4 indexes for searchable encrypted fields
+ * - Encryption key: FIELD_ENCRYPTION_KEY environment variable
+ *
  * Usage:
  *   import { prisma } from './lib/prisma';
  *   const payments = await prisma.payment.findMany();
@@ -26,7 +32,10 @@ import {
   createQueryMonitorMiddleware,
   getQueryStats as getQueryStatsFromMonitor,
   getQueryMonitorConfigFromEnv,
+  createFieldEncryptionMiddleware,
+  createFieldEncryptionManagerFromEnv,
   type QueryStats,
+  type ModelEncryptionConfig,
 } from '@payments-system/db';
 const clientPath = path.join(
   process.cwd(),
@@ -48,6 +57,28 @@ const POOL_CONFIG = {
   connectTimeout: parseInt(process.env.DB_CONNECTION_TIMEOUT || '30', 10),
   /** Idle timeout in seconds (connections idle longer than this are closed) */
   poolTimeout: parseInt(process.env.DB_POOL_TIMEOUT || '600', 10),
+};
+
+/**
+ * Field-level encryption configuration for PaymentMethod model
+ * Encrypts sensitive payment credentials:
+ * - Card: number, expiry, cardholder name
+ * - Bank: account number, routing number
+ * cardLast4/bankAccountLast4 fields allow searchable blind indexes
+ */
+const ENCRYPTION_CONFIG: ModelEncryptionConfig = {
+  PaymentMethod: [
+    { fieldName: 'cardNumber', searchable: false },
+    { fieldName: 'cardExpiryMonth', searchable: false },
+    { fieldName: 'cardExpiryYear', searchable: false },
+    { fieldName: 'cardholderName', searchable: false },
+    { fieldName: 'bankAccountNumber', searchable: false },
+    { fieldName: 'bankRoutingNumber', searchable: false },
+    // Note: cardLast4 and bankAccountLast4 are stored unencrypted for display purposes
+    // cardLast4Idx and bankAccountLast4Idx provide searchable blind indexes
+    { fieldName: 'cardLast4', searchable: true, indexFieldName: 'cardLast4Idx' },
+    { fieldName: 'bankAccountLast4', searchable: true, indexFieldName: 'bankAccountLast4Idx' },
+  ],
 };
 
 /**
@@ -193,6 +224,22 @@ const prismaClientSingleton = () => {
     slowQueryThresholdMs: queryMonitorConfig.slowQueryThresholdMs,
   });
   client.$use(createQueryMonitorMiddleware(queryMonitorConfig));
+
+  // Add field encryption middleware (Phase 4.3)
+  const encryptionManager = createFieldEncryptionManagerFromEnv(SERVICE_NAME);
+  if (encryptionManager) {
+    console.log(`[${SERVICE_NAME}] Initializing field encryption with config:`, {
+      keyId: encryptionManager.getKeyId(),
+      blindIndexEnabled: encryptionManager.isBlindIndexEnabled(),
+      encryptedModels: Object.keys(ENCRYPTION_CONFIG),
+    });
+    client.$use(createFieldEncryptionMiddleware(encryptionManager, ENCRYPTION_CONFIG));
+  } else {
+    console.log(
+      `[${SERVICE_NAME}] Field encryption not configured. ` +
+        'Set FIELD_ENCRYPTION_KEY environment variable to enable.'
+    );
+  }
 
   return client;
 };
