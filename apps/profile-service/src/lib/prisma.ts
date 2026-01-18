@@ -33,8 +33,12 @@ import {
   getQueryMonitorConfigFromEnv,
   createFieldEncryptionMiddleware,
   createFieldEncryptionManagerFromEnv,
+  createDbAuditMiddleware,
+  getDbAuditConfigFromEnv,
+  trackAuditEvent,
   type QueryStats,
   type ModelEncryptionConfig,
+  type DbAuditEvent,
 } from '@payments-system/db';
 const clientPath = path.join(
   process.cwd(),
@@ -252,6 +256,30 @@ const prismaClientSingleton = () => {
         'Set FIELD_ENCRYPTION_KEY environment variable to enable.'
     );
   }
+
+  // Add database audit middleware (Phase 4.4)
+  const auditConfig = getDbAuditConfigFromEnv(SERVICE_NAME);
+  console.log(`[${SERVICE_NAME}] Initializing database audit with config:`, {
+    enabled: auditConfig.enabled,
+    excludeModels: auditConfig.excludeModels,
+  });
+  client.$use(
+    createDbAuditMiddleware({
+      ...auditConfig,
+      onAuditEvent: (event: DbAuditEvent) => {
+        // Track in local stats
+        trackAuditEvent(event);
+        // Log the event (in production, this could publish to RabbitMQ)
+        console.log(`[${SERVICE_NAME}] DB Audit:`, {
+          action: event.action,
+          model: event.model,
+          recordId: event.recordId,
+          userId: event.userId,
+          durationMs: event.durationMs,
+        });
+      },
+    })
+  );
 
   return client;
 };

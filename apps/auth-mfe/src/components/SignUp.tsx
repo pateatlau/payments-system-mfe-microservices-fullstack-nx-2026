@@ -2,7 +2,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useAuthStore, type SignUpData } from 'shared-auth-store';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   Button,
   Input,
@@ -15,6 +15,7 @@ import {
   Alert,
   AlertDescription,
 } from '@mfe/shared-design-system';
+import { getApiClient } from '@mfe/shared-api-client';
 import hdfcLogo from '../assets/hdfc-logo-03.png';
 
 /**
@@ -25,8 +26,15 @@ const passwordStrengthRegex =
   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#^()_+\-=[\]{};':"\\|,.<>/])[A-Za-z\d@$!%*?&#^()_+\-=[\]{};':"\\|,.<>/]{12,}$/;
 
 /**
+ * Phone number validation regex
+ * Accepts formats: +1234567890, 123-456-7890, (123) 456-7890, etc.
+ */
+const phoneRegex = /^[+]?[(]?[0-9]{1,4}[)]?[-\s./0-9]*$/;
+
+/**
  * Sign-up form schema using Zod
  * Banking-grade password requirements: minimum 12 characters with complexity
+ * Optional phone and address fields for profile creation
  */
 const signUpSchema = z
   .object({
@@ -35,6 +43,24 @@ const signUpSchema = z
       .min(1, 'Name is required')
       .min(2, 'Name must be at least 2 characters'),
     email: z.string().email('Invalid email address'),
+    phone: z
+      .string()
+      .optional()
+      .refine(
+        val => !val || (val.length >= 10 && val.length <= 20),
+        'Phone number must be 10-20 characters'
+      )
+      .refine(
+        val => !val || phoneRegex.test(val),
+        'Invalid phone number format'
+      ),
+    address: z
+      .string()
+      .optional()
+      .refine(
+        val => !val || val.length <= 500,
+        'Address must be at most 500 characters'
+      ),
     password: z
       .string()
       .min(12, 'Password must be at least 12 characters')
@@ -72,6 +98,7 @@ export function SignUp({ onSuccess, onNavigateToSignIn }: SignUpProps = {}) {
   const { signup, isLoading, error, clearError, isAuthenticated } =
     useAuthStore();
   const onSuccessCalledRef = useRef(false);
+  const [profileUpdateError, setProfileUpdateError] = useState<string | null>(null);
 
   const {
     register,
@@ -83,6 +110,8 @@ export function SignUp({ onSuccess, onNavigateToSignIn }: SignUpProps = {}) {
     defaultValues: {
       name: '',
       email: '',
+      phone: '',
+      address: '',
       password: '',
       confirmPassword: '',
     },
@@ -115,12 +144,31 @@ export function SignUp({ onSuccess, onNavigateToSignIn }: SignUpProps = {}) {
 
   const onSubmit = async (data: SignUpFormData) => {
     try {
+      setProfileUpdateError(null);
       const signUpData: SignUpData = {
         email: data.email,
         password: data.password,
         name: data.name,
       };
       await signup(signUpData);
+
+      // If phone or address provided, update the profile
+      if (data.phone || data.address) {
+        try {
+          const apiClient = getApiClient();
+          await apiClient.put('/profile', {
+            phone: data.phone || undefined,
+            address: data.address || undefined,
+          });
+        } catch (profileErr) {
+          // Don't fail signup if profile update fails - user can update later
+          // eslint-disable-next-line no-console
+          console.warn('Profile update after signup failed:', profileErr);
+          setProfileUpdateError(
+            'Account created but failed to save contact details. You can update them in your profile.'
+          );
+        }
+      }
       // Navigation is handled by SignUpPage component via Navigate component
       // when isAuthenticated becomes true. onSuccess is called via useEffect above.
     } catch (err) {
@@ -223,6 +271,42 @@ export function SignUp({ onSuccess, onNavigateToSignIn }: SignUpProps = {}) {
                 )}
               </div>
 
+              {/* Phone field (optional) */}
+              <div className="space-y-2">
+                <Label htmlFor="phone">Phone Number (Optional)</Label>
+                <Input
+                  id="phone"
+                  type="tel"
+                  {...register('phone')}
+                  placeholder="+91 98765 43210"
+                  disabled={isFormLoading}
+                  autoComplete="tel"
+                />
+                {errors.phone && (
+                  <p className="text-sm text-destructive" role="alert">
+                    {errors.phone.message}
+                  </p>
+                )}
+              </div>
+
+              {/* Address field (optional) */}
+              <div className="space-y-2">
+                <Label htmlFor="address">Address (Optional)</Label>
+                <Input
+                  id="address"
+                  type="text"
+                  {...register('address')}
+                  placeholder="123, MG Road, Bengaluru, Karnataka 560001"
+                  disabled={isFormLoading}
+                  autoComplete="street-address"
+                />
+                {errors.address && (
+                  <p className="text-sm text-destructive" role="alert">
+                    {errors.address.message}
+                  </p>
+                )}
+              </div>
+
               {/* Password field */}
               <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>
@@ -272,6 +356,13 @@ export function SignUp({ onSuccess, onNavigateToSignIn }: SignUpProps = {}) {
               {error && (
                 <Alert variant="destructive">
                   <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+
+              {/* Profile update warning (non-blocking) */}
+              {profileUpdateError && (
+                <Alert>
+                  <AlertDescription>{profileUpdateError}</AlertDescription>
                 </Alert>
               )}
 

@@ -21,6 +21,12 @@ import { UserRole } from 'shared-types';
 import { createUser, updateUser, type User } from '../api/users';
 
 /**
+ * Phone number validation regex
+ * Accepts formats: +1234567890, 123-456-7890, (123) 456-7890, etc.
+ */
+const phoneRegex = /^[+]?[(]?[0-9]{1,4}[)]?[-\s./0-9]*$/;
+
+/**
  * Form data interface
  */
 interface UserFormData {
@@ -28,6 +34,8 @@ interface UserFormData {
   email: string;
   password: string;
   role: UserRole;
+  phone: string;
+  address: string;
 }
 
 /**
@@ -37,6 +45,8 @@ interface ValidationErrors {
   name?: string;
   email?: string;
   password?: string;
+  phone?: string;
+  address?: string;
 }
 
 /**
@@ -75,6 +85,8 @@ export function UserFormDialog({
     email: user?.email || '',
     password: '',
     role: user?.role || UserRole.CUSTOMER,
+    phone: '',
+    address: '',
   });
 
   // Validation state
@@ -122,6 +134,20 @@ export function UserFormDialog({
       }
     }
 
+    // Phone validation (optional, but must be valid format if provided)
+    if (formData.phone && formData.phone.trim()) {
+      if (formData.phone.length < 10 || formData.phone.length > 20) {
+        newErrors.phone = 'Phone number must be 10-20 characters';
+      } else if (!phoneRegex.test(formData.phone)) {
+        newErrors.phone = 'Invalid phone number format';
+      }
+    }
+
+    // Address validation (optional, max 500 chars)
+    if (formData.address && formData.address.length > 500) {
+      newErrors.address = 'Address must be at most 500 characters';
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -154,6 +180,8 @@ export function UserFormDialog({
           email: formData.email,
           password: formData.password,
           role: formData.role,
+          phone: formData.phone || undefined,
+          address: formData.address || undefined,
         });
       }
 
@@ -292,6 +320,42 @@ export function UserFormDialog({
                 <p className="text-xs text-muted-foreground">
                   Role can be changed later from the user list
                 </p>
+              </div>
+            )}
+
+            {/* Phone (only in create mode - optional) */}
+            {!isEditMode && (
+              <div className="space-y-2">
+                <Label htmlFor="phone">Phone Number (Optional)</Label>
+                <Input
+                  id="phone"
+                  type="tel"
+                  value={formData.phone}
+                  onChange={e => handleInputChange('phone', e.target.value)}
+                  placeholder="+91 98765 43210"
+                  className={errors.phone ? 'border-red-500' : ''}
+                />
+                {errors.phone && (
+                  <p className="text-sm text-red-500">{errors.phone}</p>
+                )}
+              </div>
+            )}
+
+            {/* Address (only in create mode - optional) */}
+            {!isEditMode && (
+              <div className="space-y-2">
+                <Label htmlFor="address">Address (Optional)</Label>
+                <Input
+                  id="address"
+                  type="text"
+                  value={formData.address}
+                  onChange={e => handleInputChange('address', e.target.value)}
+                  placeholder="123, MG Road, Bengaluru, Karnataka 560001"
+                  className={errors.address ? 'border-red-500' : ''}
+                />
+                {errors.address && (
+                  <p className="text-sm text-red-500">{errors.address}</p>
+                )}
               </div>
             )}
           </div>

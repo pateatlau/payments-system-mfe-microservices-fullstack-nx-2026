@@ -185,7 +185,7 @@ export function ProfileForm({ onSuccess }: ProfileFormProps) {
           <Input
             id="phoneNumber"
             type="tel"
-            placeholder="+1 (555) 000-0000"
+            placeholder="+91 98765 43210"
             disabled={isSubmitting}
             {...register('phoneNumber')}
           />
@@ -201,7 +201,7 @@ export function ProfileForm({ onSuccess }: ProfileFormProps) {
           <Label htmlFor="address">Address</Label>
           <Input
             id="address"
-            placeholder="123 Main St, Anytown, USA"
+            placeholder="123, MG Road, Bengaluru, Karnataka 560001"
             disabled={isSubmitting}
             {...register('address')}
           />
