@@ -13,9 +13,8 @@ import {
   createFieldEncryptionMiddleware,
   createFieldEncryptionManagerFromEnv,
   generateFieldEncryptionKey,
-  FieldEncryptionConfig,
-  EncryptedFieldConfig,
-  FieldEncryptionAuditEvent,
+  type EncryptedFieldConfig,
+  type FieldEncryptionAuditEvent,
 } from './field-encryption';
 
 describe('FieldEncryptionManager', () => {

@@ -5,9 +5,6 @@ import {
   getAllQueryStats,
   formatQueryStats,
   getQueryMonitorConfigFromEnv,
-  QueryMonitorConfig,
-  SlowQueryInfo,
-  QueryTimeoutInfo,
 } from './query-monitor';
 
 describe('QueryMonitor', () => {
