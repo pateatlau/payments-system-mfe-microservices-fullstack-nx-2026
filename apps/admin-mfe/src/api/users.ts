@@ -69,6 +69,8 @@ export interface CreateUserRequest {
   password: string;
   name: string;
   role: UserRole;
+  phone?: string;
+  address?: string;
 }
 
 /**
@@ -126,11 +128,36 @@ export async function getUserById(userId: string): Promise<UserWithProfile> {
 /**
  * Create new user
  *
- * @param userData - User data (email, password, name, role)
+ * @param userData - User data (email, password, name, role, optional phone/address)
  * @returns Promise with created user
  */
 export async function createUser(userData: CreateUserRequest): Promise<User> {
-  const response = await adminApiClient.post<User>('/admin/users', userData);
+  // Extract phone and address from userData
+  const { phone, address, ...userDataWithoutProfile } = userData;
+
+  // Create the user
+  const response = await adminApiClient.post<User>(
+    '/admin/users',
+    userDataWithoutProfile
+  );
+
+  // If phone or address provided, update the user's profile
+  if (phone || address) {
+    try {
+      await adminApiClient.put(`/admin/users/${response.data.id}/profile`, {
+        phone: phone || undefined,
+        address: address || undefined,
+      });
+    } catch (profileErr) {
+      // Log but don't fail - user was created successfully
+      // eslint-disable-next-line no-console
+      console.warn(
+        'Failed to set profile details for new user:',
+        response.data.id,
+        profileErr
+      );
+    }
+  }
 
   return response.data;
 }
