@@ -30,3 +30,19 @@ export type {
   ModelEncryptionConfig,
   EncryptedValue,
 } from './lib/field-encryption';
+
+// Database audit middleware exports (Phase 4.4 - Database Access Audit Logging)
+export {
+  createDbAuditMiddleware,
+  DbAuditAction,
+  getDbAuditConfigFromEnv,
+  getDbAuditStats,
+  resetDbAuditStats,
+  trackAuditEvent,
+} from './lib/audit-middleware';
+
+export type {
+  DbAuditConfig,
+  DbAuditEvent,
+  DbAuditActionType,
+} from './lib/audit-middleware';

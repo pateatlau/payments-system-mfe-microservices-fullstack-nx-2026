@@ -26,7 +26,11 @@ import {
   createQueryMonitorMiddleware,
   getQueryStats as getQueryStatsFromMonitor,
   getQueryMonitorConfigFromEnv,
+  createDbAuditMiddleware,
+  getDbAuditConfigFromEnv,
+  trackAuditEvent,
   type QueryStats,
+  type DbAuditEvent,
 } from '@payments-system/db';
 const clientPath = path.join(
   process.cwd(),
@@ -224,6 +228,35 @@ const prismaClientSingleton = () => {
     slowQueryThresholdMs: queryMonitorConfig.slowQueryThresholdMs,
   });
   client.$use(createQueryMonitorMiddleware(queryMonitorConfig));
+
+  // Add database audit middleware (Phase 4.4)
+  const auditConfig = getDbAuditConfigFromEnv(SERVICE_NAME);
+  // Exclude AuditLog model to prevent infinite recursion
+  auditConfig.excludeModels = [
+    ...(auditConfig.excludeModels || []),
+    'AuditLog', // Don't audit audit logs
+  ];
+  console.log(`[${SERVICE_NAME}] Initializing database audit with config:`, {
+    enabled: auditConfig.enabled,
+    excludeModels: auditConfig.excludeModels,
+  });
+  client.$use(
+    createDbAuditMiddleware({
+      ...auditConfig,
+      onAuditEvent: (event: DbAuditEvent) => {
+        // Track in local stats
+        trackAuditEvent(event);
+        // Log the event (admin-service already writes to AuditLog table via RabbitMQ)
+        console.log(`[${SERVICE_NAME}] DB Audit:`, {
+          action: event.action,
+          model: event.model,
+          recordId: event.recordId,
+          userId: event.userId,
+          durationMs: event.durationMs,
+        });
+      },
+    })
+  );
 
   return client;
 };
