@@ -409,11 +409,7 @@ importers:
         specifier: ^2.3.0
         version: 2.8.1
 
-  libs/backend/db:
-    dependencies:
-      tslib:
-        specifier: ^2.3.0
-        version: 2.8.1
+  libs/backend/db: {}
 
   libs/backend/event-hub:
     dependencies:

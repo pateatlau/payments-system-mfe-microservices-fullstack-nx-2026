@@ -1,11 +1,7 @@
 {
-  "name": "db",
+  "name": "@payments-system/db",
   "version": "0.0.1",
-  "private": true,
-  "type": "commonjs",
+  "description": "Database utilities and query monitoring for the payments system",
   "main": "./src/index.js",
-  "types": "./src/index.d.ts",
-  "dependencies": {
-    "tslib": "^2.3.0"
-  }
+  "types": "./src/index.d.ts"
 }

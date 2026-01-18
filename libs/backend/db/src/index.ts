@@ -1,12 +1,32 @@
-/**
- * Backend Database Library
- *
- * This library provides:
- * - Prisma client singleton instance
- * - Database models and types
- * - Database utilities
- */
+// Query monitoring exports
+export {
+  createQueryMonitorMiddleware,
+  getQueryStats,
+  resetQueryStats,
+  getAllQueryStats,
+  formatQueryStats,
+  getQueryMonitorConfigFromEnv,
+} from './lib/query-monitor';
 
-export { prisma, default as prismaClient } from './lib/prisma';
-export * from './lib/db';
-export * from '@prisma/client';
+export type {
+  QueryMonitorConfig,
+  SlowQueryInfo,
+  QueryTimeoutInfo,
+  QueryStats,
+} from './lib/query-monitor';
+
+// Field encryption exports (Phase 4.3 - Data Encryption)
+export {
+  FieldEncryptionManager,
+  createFieldEncryptionMiddleware,
+  createFieldEncryptionManagerFromEnv,
+  generateFieldEncryptionKey,
+} from './lib/field-encryption';
+
+export type {
+  FieldEncryptionConfig,
+  FieldEncryptionAuditEvent,
+  EncryptedFieldConfig,
+  ModelEncryptionConfig,
+  EncryptedValue,
+} from './lib/field-encryption';
