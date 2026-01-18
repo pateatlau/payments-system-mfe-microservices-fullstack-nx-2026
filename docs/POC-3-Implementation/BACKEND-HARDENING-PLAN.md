@@ -1676,31 +1676,103 @@ The resilience library provides a comprehensive circuit breaker solution:
 
 ---
 
-#### Priority 5.2: Retry Policies
+#### Priority 5.2: Retry Policies ✅ COMPLETED
 
-**Effort:** 4 hours  
+**Effort:** 4 hours
 **Impact:** MEDIUM
 
 **Tasks:**
 
-1. Implement exponential backoff retry:
+1. ✅ Implement exponential backoff retry:
    - Max retries: 3
    - Initial delay: 100ms
    - Backoff factor: 2x
    - Max delay: 5s
-2. Add retry for idempotent operations only
-3. Add retry budget (prevent retry storms)
-4. Add retry metrics
+2. ✅ Add retry for idempotent operations only
+3. ✅ Add retry budget (prevent retry storms)
+4. ✅ Add retry metrics
 
 **New Files:**
 
-- `libs/backend/resilience/src/lib/retry-policy.ts`
+- ✅ `libs/backend/resilience/src/lib/retry-policy.ts` - Core retry implementation
+- ✅ `libs/backend/resilience/src/lib/retry-policy.spec.ts` - Unit tests (33 tests)
 
 **Success Criteria:**
 
-- Transient failures auto-retry
-- Retry budget prevents storms
-- Metrics track retry success/failure
+- ✅ Transient failures auto-retry
+- ✅ Retry budget prevents storms
+- ✅ Metrics track retry success/failure
+
+**Implementation Details:**
+
+The retry policy provides comprehensive retry functionality:
+
+1. **Exponential Backoff Retry** (`withRetry`, `withHttpRetry`):
+   - Configurable: maxRetries (3), initialDelayMs (100), backoffFactor (2), maxDelayMs (5000)
+   - Jitter added to prevent thundering herd
+   - Delay formula: `initialDelay * backoffFactor^(attempt-1)` capped at maxDelay
+
+2. **Idempotent Operation Detection**:
+   - Auto-detects idempotency from HTTP method (GET, HEAD, OPTIONS, PUT, DELETE = idempotent)
+   - POST and PATCH are non-idempotent by default
+   - Explicit override via `isIdempotent` config option
+   - Non-idempotent operations are never retried
+
+3. **Retry Budget** (`RetryBudget` class):
+   - Prevents retry storms by limiting retry ratio within a time window
+   - Default: 20% max retry ratio in 10s window
+   - Minimum request threshold before budget applies (default: 10)
+   - Per-service budget tracking
+   - Auto-cleanup of old entries outside time window
+
+4. **Retryable Error Detection**:
+   - Network errors: ECONNRESET, ETIMEDOUT, ECONNREFUSED, EPIPE, ENOTFOUND, etc.
+   - HTTP status codes: 408, 429, 500, 502, 503, 504
+   - Timeout errors detected from error name/message
+   - Custom `isRetryable` function support
+
+5. **Prometheus Metrics**:
+   - `retry_attempts_total` - Total retry attempts (by service, operation, attempt)
+   - `retry_successes_total` - Successful operations (by attempts needed)
+   - `retry_failures_total` - Failed operations after all retries
+   - `retry_exhausted_total` - Operations where retries were exhausted
+   - `retry_budget_exhausted_total` - Retries blocked by budget
+   - `retry_attempt_duration_seconds` - Duration histogram per attempt
+   - `retry_budget_ratio` - Current budget utilization
+
+6. **RetryPolicy Class**:
+   - Reusable policy configuration
+   - `execute()` for general operations
+   - `executeHttp()` with automatic HTTP method detection
+   - Budget stats and reset methods
+
+7. **Service-Level Policies**:
+   - `registerServiceRetryPolicy()` - Register per-service policy
+   - `getServiceRetryPolicy()` - Retrieve registered policy
+   - `getOrCreateServiceRetryPolicy()` - Get or create with defaults
+
+**Usage Example:**
+```typescript
+import { withRetry, withHttpRetry, createRetryPolicy } from '@payments-system/resilience';
+
+// Basic retry
+const result = await withRetry(
+  () => httpClient.get('/api/data'),
+  { maxRetries: 3, operationName: 'fetchData', serviceName: 'api-gateway' }
+);
+
+// HTTP-aware retry (auto-detects idempotency)
+const result = await withHttpRetry(
+  () => httpClient.post('/api/payments'),
+  { method: 'POST', isIdempotent: true } // Explicitly mark as idempotent
+);
+
+// Reusable policy
+const policy = createRetryPolicy({ maxRetries: 5, serviceName: 'payments' });
+const result = await policy.executeHttp(() => fetch('/api'), 'GET');
+```
+
+**Tests:** 33 retry policy tests + 26 circuit breaker tests = 59 total resilience tests passing
 
 ---
 

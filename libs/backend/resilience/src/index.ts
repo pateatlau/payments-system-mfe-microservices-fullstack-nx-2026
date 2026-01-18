@@ -1,13 +1,14 @@
 /**
  * @payments-system/resilience
  *
- * Service resilience library providing circuit breaker patterns for:
- * - Inter-service HTTP calls
- * - Database operations
- * - Redis cache operations
- * - RabbitMQ message operations
+ * Service resilience library providing:
+ * - Circuit breaker patterns for inter-service calls
+ * - Retry policies with exponential backoff
+ * - Retry budgets to prevent retry storms
+ * - Database, Redis, and RabbitMQ resilience
  *
- * Phase 5.1 - Service Resilience
+ * Phase 5.1 - Circuit Breaker Implementation
+ * Phase 5.2 - Retry Policies
  */
 
 // Core circuit breaker
@@ -93,3 +94,45 @@ export {
 } from './lib/circuit-metrics';
 
 export type { CircuitBreakerMetrics } from './lib/circuit-metrics';
+
+// Retry policies (Phase 5.2)
+export {
+  // Main retry functions
+  withRetry,
+  withHttpRetry,
+  // Retry Policy class
+  RetryPolicy,
+  createRetryPolicy,
+  // Retry budget
+  getRetryBudget,
+  getRetryBudgetStats,
+  getAllRetryBudgetStats,
+  resetRetryBudget,
+  resetAllRetryBudgets,
+  // Idempotency helpers
+  isIdempotentMethod,
+  isSafeToRetry,
+  // Error detection
+  isRetryableError,
+  // Delay calculation
+  calculateRetryDelay,
+  // Metrics
+  initRetryMetrics,
+  updateBudgetMetrics,
+  // Service policies
+  registerServiceRetryPolicy,
+  getServiceRetryPolicy,
+  getOrCreateServiceRetryPolicy,
+  getAllServiceRetryPolicies,
+} from './lib/retry-policy';
+
+export type {
+  IdempotentMethod,
+  NonIdempotentMethod,
+  HttpMethod,
+  RetryPolicyConfig,
+  RetryResult,
+  RetryBudgetConfig,
+  RetryBudgetStats,
+  HttpRetryConfig,
+} from './lib/retry-policy';
