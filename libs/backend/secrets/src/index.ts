@@ -32,13 +32,13 @@
  * ```
  */
 
-export { SecretManager } from './lib/secret-manager';
-export type { SignTokenOptions } from './lib/secret-manager';
+export { SecretManager } from './lib/secret-manager.js';
+export type { SignTokenOptions } from './lib/secret-manager.js';
 export {
   parseJwtSecrets,
   createSecretManagerFromEnv,
   generateSecretsEnvValue,
-} from './lib/config-helper';
+} from './lib/config-helper.js';
 export type {
   JwtSecret,
   SecretManagerConfig,
@@ -46,7 +46,7 @@ export type {
   GenerateSecretOptions,
   SecretRotationMetadata,
   RotationPolicy,
-} from './lib/types';
+} from './lib/types.js';
 
 // Configuration validation (POC-3 Phase 3.2)
 export {
@@ -66,8 +66,8 @@ export {
   redisUrlSchema,
   rabbitmqUrlSchema,
   jwtDurationSchema,
-} from './lib/config-validator';
-export type { NodeEnv, LogLevel, ConfigValidationResult } from './lib/config-validator';
+} from './lib/config-validator.js';
+export type { NodeEnv, LogLevel, ConfigValidationResult } from './lib/config-validator.js';
 
 // Secrets Encryption (POC-3 Phase 3.3)
 export {
@@ -78,11 +78,11 @@ export {
   isEncrypted,
   parseEncryptedValue,
   formatEncryptedValue,
-} from './lib/encryption';
+} from './lib/encryption.js';
 export type {
   EncryptionProvider,
   EncryptionResult,
   DecryptionResult,
   SecretAccessEvent,
   AuditCallback,
-} from './lib/encryption';
+} from './lib/encryption.js';

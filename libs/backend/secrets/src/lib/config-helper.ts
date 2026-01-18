@@ -6,8 +6,8 @@
  * - Multiple secrets with versioning (JSON format)
  */
 
-import type { JwtSecret } from './types';
-import { SecretManager } from './secret-manager';
+import type { JwtSecret } from './types.js';
+import { SecretManager } from './secret-manager.js';
 
 /**
  * Environment variable format for multiple secrets:

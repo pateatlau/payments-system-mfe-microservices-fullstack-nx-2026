@@ -1,0 +1,7 @@
+{
+  "name": "@payments-system/resilience",
+  "version": "0.0.1",
+  "description": "Service resilience library with circuit breaker patterns for the payments system",
+  "main": "./src/index.js",
+  "types": "./src/index.d.ts"
+}

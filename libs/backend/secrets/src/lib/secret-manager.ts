@@ -18,7 +18,7 @@ import type {
   GenerateSecretOptions,
   SecretRotationMetadata,
   RotationPolicy,
-} from './types';
+} from './types.js';
 
 /**
  * Default rotation policy
