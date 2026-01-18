@@ -77,10 +77,16 @@ function buildDatabaseUrl(): string {
 
   // Add connection pool parameters if not already present
   if (!url.searchParams.has('connection_limit')) {
-    url.searchParams.set('connection_limit', POOL_CONFIG.connectionLimit.toString());
+    url.searchParams.set(
+      'connection_limit',
+      POOL_CONFIG.connectionLimit.toString()
+    );
   }
   if (!url.searchParams.has('connect_timeout')) {
-    url.searchParams.set('connect_timeout', POOL_CONFIG.connectTimeout.toString());
+    url.searchParams.set(
+      'connect_timeout',
+      POOL_CONFIG.connectTimeout.toString()
+    );
   }
   if (!url.searchParams.has('pool_timeout')) {
     url.searchParams.set('pool_timeout', POOL_CONFIG.poolTimeout.toString());
@@ -103,7 +109,7 @@ interface PoolMetrics {
   lastUpdated: Date;
 }
 
-let poolMetrics: PoolMetrics = {
+const poolMetrics: PoolMetrics = {
   activeConnections: 0,
   idleConnections: 0,
   waitingRequests: 0,
@@ -150,11 +156,14 @@ export function getPoolConfig(): typeof POOL_CONFIG {
 const prismaClientSingleton = () => {
   const databaseUrl = buildDatabaseUrl();
 
-  console.log(`[${SERVICE_NAME}] Initializing Prisma client with pool config:`, {
-    maxConnections: POOL_CONFIG.connectionLimit,
-    connectTimeout: `${POOL_CONFIG.connectTimeout}s`,
-    poolTimeout: `${POOL_CONFIG.poolTimeout}s`,
-  });
+  console.log(
+    `[${SERVICE_NAME}] Initializing Prisma client with pool config:`,
+    {
+      maxConnections: POOL_CONFIG.connectionLimit,
+      connectTimeout: `${POOL_CONFIG.connectTimeout}s`,
+      poolTimeout: `${POOL_CONFIG.poolTimeout}s`,
+    }
+  );
 
   const client = new PrismaClient({
     datasources: {
@@ -169,35 +178,44 @@ const prismaClientSingleton = () => {
   });
 
   // Add middleware to track connection metrics (Phase 4.1)
-  client.$use(async (params: { model?: string; action: string }, next: (params: unknown) => Promise<unknown>) => {
-    const startTime = Date.now();
-    poolMetrics.activeConnections++;
-    poolMetrics.lastUpdated = new Date();
-
-    try {
-      const result = await next(params);
-      return result;
-    } catch (error: unknown) {
-      // Track connection timeout errors
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      if (
-        errorMessage.includes('timeout') ||
-        errorMessage.includes('connection')
-      ) {
-        poolMetrics.connectionTimeouts++;
-        console.error(`[${SERVICE_NAME}] Database connection error:`, {
-          action: params.action,
-          model: params.model,
-          error: errorMessage,
-          duration: Date.now() - startTime,
-        });
-      }
-      throw error;
-    } finally {
-      poolMetrics.activeConnections = Math.max(0, poolMetrics.activeConnections - 1);
+  client.$use(
+    async (
+      params: { model?: string; action: string },
+      next: (params: unknown) => Promise<unknown>
+    ) => {
+      const startTime = Date.now();
+      poolMetrics.activeConnections++;
       poolMetrics.lastUpdated = new Date();
+
+      try {
+        const result = await next(params);
+        return result;
+      } catch (error: unknown) {
+        // Track connection timeout errors
+        const errorMessage =
+          error instanceof Error ? error.message : String(error);
+        if (
+          errorMessage.includes('timeout') ||
+          errorMessage.includes('connection')
+        ) {
+          poolMetrics.connectionTimeouts++;
+          console.error(`[${SERVICE_NAME}] Database connection error:`, {
+            action: params.action,
+            model: params.model,
+            error: errorMessage,
+            duration: Date.now() - startTime,
+          });
+        }
+        throw error;
+      } finally {
+        poolMetrics.activeConnections = Math.max(
+          0,
+          poolMetrics.activeConnections - 1
+        );
+        poolMetrics.lastUpdated = new Date();
+      }
     }
-  });
+  );
 
   // Add query monitoring middleware (Phase 4.2)
   const queryMonitorConfig = getQueryMonitorConfigFromEnv(SERVICE_NAME);
