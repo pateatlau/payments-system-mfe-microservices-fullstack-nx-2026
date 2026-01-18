@@ -136,3 +136,40 @@ export type {
   RetryBudgetStats,
   HttpRetryConfig,
 } from './lib/retry-policy';
+
+// Feature flags (Phase 5.3)
+export {
+  FeatureFlagManager,
+  getFeatureFlagManager,
+  resetFeatureFlagManager,
+  isFeatureEnabled,
+  isFeatureDisabled,
+  getFeatureFlag,
+  setFeatureFlag,
+  registerFeatureFlag,
+  DegradationFlags,
+  initDegradationFlags,
+} from './lib/feature-flags';
+
+export type {
+  FeatureFlagValue,
+  FeatureFlag,
+  FeatureFlagConfig,
+  FeatureFlagOverride,
+} from './lib/feature-flags';
+
+// Graceful degradation (Phase 5.3)
+export {
+  DegradedModeManager,
+  createDegradedModeManager,
+  HealthLevel,
+  createHealthCheckHandlers,
+} from './lib/degraded-mode';
+
+export type {
+  HealthCheckResult,
+  ComponentHealth,
+  DegradedModeConfig,
+  ComponentConfig,
+  HealthMiddlewareConfig,
+} from './lib/degraded-mode';
