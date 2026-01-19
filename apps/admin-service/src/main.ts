@@ -22,6 +22,12 @@ import {
   correlationIdMiddleware,
 } from '@mfe-poc/observability';
 import {
+  createResponseSanitizer,
+  createRequestLimitsMiddleware,
+  getBodyParserOptions,
+  bodyParserErrorHandler,
+} from '@payments-system/middleware';
+import {
   startEventSubscriptions,
   closeSubscriptions,
 } from './events/subscriber';
@@ -119,9 +125,39 @@ if (!isDevelopment) {
   app.use(limiter as unknown as express.RequestHandler);
 }
 
-// Body parsing
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// Request size limits middleware
+// Protects against oversized URLs, headers, and parameter pollution
+const requestLimits = createRequestLimitsMiddleware({
+  serviceName: 'admin-service',
+  maxUrlLength: 2048,
+  maxHeaderSize: 8 * 1024, // 8KB
+  maxHeaderCount: 100,
+  maxParameterCount: 50,
+  skipPaths: ['/health', '/metrics'],
+});
+app.use(requestLimits);
+
+// Body parsing with size limits
+const { jsonOptions, urlEncodedOptions } = getBodyParserOptions({
+  jsonLimit: '1mb',
+  urlEncodedLimit: '1mb',
+});
+app.use(express.json(jsonOptions));
+app.use(express.urlencoded(urlEncodedOptions));
+
+// Body parser error handler (converts body-parser errors to consistent format)
+app.use(bodyParserErrorHandler('admin-service'));
+
+// Response sanitization middleware
+// Prevents PII leakage and removes stack traces in production
+app.use(
+  createResponseSanitizer({
+    removeStackTraces: config.nodeEnv === 'production',
+    redactPii: true,
+    sanitizePaths: true,
+    environment: config.nodeEnv,
+  })
+);
 
 // Request logging
 app.use((req, _res, next) => {

@@ -3,6 +3,7 @@
  */
 
 import express from 'express';
+import helmet from 'helmet';
 import cors from 'cors';
 import { config } from './config';
 import { logger } from './utils/logger';
@@ -20,6 +21,12 @@ import {
   initTracing,
   correlationIdMiddleware,
 } from '@mfe-poc/observability';
+import {
+  createResponseSanitizer,
+  createRequestLimitsMiddleware,
+  getBodyParserOptions,
+  bodyParserErrorHandler,
+} from '@payments-system/middleware';
 
 /**
  * Initialize OpenTelemetry Tracing (must be first, before any other imports/initialization)
@@ -51,6 +58,40 @@ app.use(
     httpActiveConnections: metrics.http.httpActiveConnections,
     httpErrorsTotal: metrics.http.httpErrorsTotal,
     normalizePath: defaultPathNormalizer,
+  })
+);
+
+// Security headers via Helmet
+// Protects against common web vulnerabilities (XSS, clickjacking, MIME sniffing, etc.)
+app.use(
+  helmet({
+    // Content Security Policy - restrict resource loading
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        scriptSrc: ["'self'"],
+        imgSrc: ["'self'", 'data:', 'https:'],
+      },
+    },
+    // HTTP Strict Transport Security
+    hsts: {
+      maxAge: 31536000, // 1 year
+      includeSubDomains: true,
+      preload: true,
+    },
+    // Prevent clickjacking
+    frameguard: {
+      action: 'deny',
+    },
+    // Prevent MIME type sniffing
+    noSniff: true,
+    // XSS filter (legacy browsers)
+    xssFilter: true,
+    // CRITICAL for Safari: Allow cross-origin requests from MFE frontend
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+    // Allow popups for OAuth flows while maintaining security
+    crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' },
   })
 );
 
@@ -86,9 +127,39 @@ app.use(
   })
 );
 
-// Middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// Request size limits middleware
+// Protects against oversized URLs, headers, and parameter pollution
+const requestLimits = createRequestLimitsMiddleware({
+  serviceName: 'payments-service',
+  maxUrlLength: 2048,
+  maxHeaderSize: 8 * 1024, // 8KB
+  maxHeaderCount: 100,
+  maxParameterCount: 50,
+  skipPaths: ['/health', '/metrics'],
+});
+app.use(requestLimits);
+
+// Body parsing with size limits
+const { jsonOptions, urlEncodedOptions } = getBodyParserOptions({
+  jsonLimit: '1mb',
+  urlEncodedLimit: '1mb',
+});
+app.use(express.json(jsonOptions));
+app.use(express.urlencoded(urlEncodedOptions));
+
+// Body parser error handler (converts body-parser errors to consistent format)
+app.use(bodyParserErrorHandler('payments-service'));
+
+// Response sanitization middleware
+// Prevents PII leakage and removes stack traces in production
+app.use(
+  createResponseSanitizer({
+    removeStackTraces: config.nodeEnv === 'production',
+    redactPii: true,
+    sanitizePaths: true,
+    environment: config.nodeEnv,
+  })
+);
 
 // Routes
 app.use(healthRoutes);

@@ -61,7 +61,8 @@
       ],
       "@payments-system/secrets": ["libs/backend/secrets/src/index.ts"],
       "@payments-system/db": ["libs/backend/db/src/index.ts"],
-      "@payments-system/resilience": ["libs/backend/resilience/src/index.ts"]
+      "@payments-system/resilience": ["libs/backend/resilience/src/index.ts"],
+      "@payments-system/middleware": ["libs/backend/middleware/src/index.ts"]
     }
   },
   "files": [],

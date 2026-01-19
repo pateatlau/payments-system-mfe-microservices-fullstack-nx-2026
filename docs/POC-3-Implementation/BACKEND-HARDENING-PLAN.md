@@ -1,8 +1,8 @@
 # Backend Hardening Plan - POC-3
 
 **Created:** December 23, 2025
-**Last Updated:** January 19, 2026
-**Status:** ✅ **Phase 1, 2, 3 & 4 Complete** - Critical security fixes + Input validation + Secrets management + Database security hardening fully implemented
+**Last Updated:** January 20, 2026
+**Status:** ✅ **Phase 1-6 Complete** - All backend hardening phases complete including Critical security fixes + Input validation + Secrets management + Database security hardening + Service resilience + Enhanced API Security (Headers, Response sanitization, Request limits, API versioning)
 **Priority:** High
 
 ---
@@ -32,10 +32,19 @@
 - ✅ **Priority 4.3:** Data Encryption (COMPLETED - Jan 17, 2026)
 - ✅ **Priority 4.4:** Database Access Audit Logging (COMPLETED - Jan 19, 2026)
 
-### Phases 5-7: Not Started
-- Phase 5: Service Resilience
-- Phase 6: Enhanced API Security
-- Phase 7: Advanced Security Features
+### Phase 5: Service Resilience ✅ COMPLETE
+- ✅ **Priority 5.1:** Circuit Breaker Implementation (COMPLETED - Jan 19, 2026)
+- ✅ **Priority 5.2:** Retry Policies (COMPLETED - Jan 19, 2026)
+- ✅ **Priority 5.3:** Graceful Degradation (COMPLETED - Jan 19, 2026)
+
+### Phase 6: Enhanced API Security ✅ COMPLETE
+- ✅ **Priority 6.1:** Security Headers on All Services (COMPLETED - Jan 19, 2026)
+- ✅ **Priority 6.2:** Response Sanitization (COMPLETED - Jan 19, 2026)
+- ✅ **Priority 6.3:** Request Size Limits (COMPLETED - Jan 19, 2026)
+- ✅ **Priority 6.4:** API Versioning (COMPLETED - Jan 20, 2026)
+
+### Phase 7: Advanced Security Features - Not Started
+- Phase 7: MFA, Anomaly Detection, Enhanced Audit Logging
 
 ---
 
@@ -1853,110 +1862,396 @@ The graceful degradation system provides comprehensive resilience capabilities:
 
 ### Phase 6: Enhanced API Security (Week 6) 🔒
 
-#### Priority 6.1: Security Headers on All Services
+#### Priority 6.1: Security Headers on All Services ✅ COMPLETED
 
-**Effort:** 2 hours  
+**Status:** ✅ **COMPLETED** (January 19, 2026)
+**Effort:** 2 hours
 **Impact:** MEDIUM
 
-**Tasks:**
+**Implementation Summary:**
 
-1. Add Helmet middleware to all services:
-   - Auth Service
-   - Payments Service
-   - Profile Service (already has it)
-   - Admin Service (already has it)
-2. Configure CSP for each service
-3. Add security header tests
+✅ **Completed Tasks:**
 
-**Files to Modify:**
+1. ✅ Added Helmet middleware to Auth Service:
+   - Content Security Policy (CSP) with restrictive directives
+   - HTTP Strict Transport Security (HSTS) with 1-year max-age, preload
+   - X-Frame-Options: DENY (prevent clickjacking)
+   - X-Content-Type-Options: nosniff (prevent MIME sniffing)
+   - Cross-Origin-Resource-Policy: cross-origin (for MFE frontend)
+   - Cross-Origin-Opener-Policy: same-origin-allow-popups (for OAuth)
+   - X-XSS-Protection (legacy browser support)
+   - X-DNS-Prefetch-Control, X-Download-Options, X-Permitted-Cross-Domain-Policies
 
-- `apps/auth-service/src/main.ts`
-- `apps/payments-service/src/main.ts`
+2. ✅ Added Helmet middleware to Payments Service:
+   - Same configuration as Auth Service for consistency
 
-**Success Criteria:**
+3. ✅ Added comprehensive security header test suites:
+   - Tests for all security headers (CSP, HSTS, X-Frame-Options, etc.)
+   - Tests for cross-origin policies
+   - Tests for removed dangerous headers (X-Powered-By)
 
-- All services have security headers
-- CSP properly configured
-- Security headers tested
+**Note:** Admin Service and Profile Service already had Helmet configured.
 
----
+**Files Modified:**
 
-#### Priority 6.2: Response Sanitization
-
-**Effort:** 3 hours  
-**Impact:** MEDIUM
-
-**Tasks:**
-
-1. Implement response sanitization middleware:
-   - Remove stack traces in production
-   - Sanitize error messages
-   - Remove internal IDs/paths
-2. Add PII detection and redaction
-3. Add test suite
+- ✅ `apps/auth-service/src/main.ts` - Added Helmet middleware with CSP
+- ✅ `apps/payments-service/src/main.ts` - Added Helmet middleware with CSP
 
 **New Files:**
 
-- `libs/backend/middleware/src/lib/response-sanitizer.ts`
+- ✅ `apps/auth-service/src/middleware/security-headers.spec.ts` - 18 unit tests
+- ✅ `apps/payments-service/src/middleware/security-headers.spec.ts` - 18 unit tests
 
-**Success Criteria:**
+**Security Headers Configured:**
 
-- Responses sanitized in production
-- No PII leaked in errors
-- Stack traces only in development
+| Header | Value | Purpose |
+|--------|-------|---------|
+| Content-Security-Policy | default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: | XSS prevention |
+| Strict-Transport-Security | max-age=31536000; includeSubDomains; preload | Force HTTPS |
+| X-Frame-Options | DENY | Prevent clickjacking |
+| X-Content-Type-Options | nosniff | Prevent MIME sniffing |
+| Cross-Origin-Resource-Policy | cross-origin | Allow MFE requests |
+| Cross-Origin-Opener-Policy | same-origin-allow-popups | Allow OAuth popups |
+| X-DNS-Prefetch-Control | off | Disable DNS prefetching |
+| X-Download-Options | noopen | Prevent file download attacks (IE) |
+| X-Permitted-Cross-Domain-Policies | none | Disable Flash/PDF cross-domain |
+| Referrer-Policy | no-referrer | Privacy protection |
+
+**Success Criteria Met:**
+
+- ✅ All services have security headers (API Gateway, Auth, Payments, Admin, Profile)
+- ✅ CSP properly configured with restrictive directives
+- ✅ Security headers tested (36 new tests total)
+- ✅ All backend tests passing (auth: 125, payments: 148)
+- ✅ Builds successful
+
+**Testing Notes:**
+
+- Tests use `supertest` for HTTP request testing
+- Tests verify header presence and correct values
+- Tests confirm X-Powered-By header is removed (security best practice)
+
+**New Dependencies Added:**
+
+- `supertest@^7.2.2` - HTTP assertions library for testing Express apps
+- `@types/supertest@^6.0.3` - TypeScript types for supertest
 
 ---
 
-#### Priority 6.3: Request Size Limits
+#### Priority 6.2: Response Sanitization ✅ COMPLETED
 
-**Effort:** 2 hours  
+**Status:** ✅ **COMPLETED** (January 19, 2026)
+**Effort:** 4 hours
+**Impact:** MEDIUM
+
+**Implementation Summary:**
+
+✅ **Completed Tasks:**
+
+1. ✅ Created `@payments-system/middleware` library with response sanitizer:
+   - Express middleware that wraps `res.json()` to sanitize outgoing responses
+   - Stack trace removal in production (configurable via `environment` option)
+   - Internal path sanitization (Unix paths, Windows paths, node_modules)
+   - Internal error detail sanitization (ECONNREFUSED, Prisma errors, database errors)
+
+2. ✅ Implemented comprehensive PII detection and redaction:
+   - **Email addresses** - Regex pattern detection
+   - **Phone numbers** - Multiple formats (555-123-4567, (555) 123-4567, +1 555 123 4567)
+   - **SSN** - Social Security Number pattern (123-45-6789)
+   - **Credit card numbers** - 16-digit patterns with various separators
+   - **JWT tokens** - Full JWT pattern detection
+   - **API keys** - Common API key formats (sk_live, pk_test, ghp_*)
+   - **IPv4 addresses** - IP address pattern
+   - **Bank account numbers** - Account number patterns
+   - **Date of birth** - DOB patterns
+   - **Password in URLs** - URL-embedded passwords
+
+3. ✅ Added sensitive field redaction by field name:
+   - password, passwordHash, token, accessToken, refreshToken
+   - apiKey, secretKey, secret, privateKey, encryptionKey
+   - creditCard, cardNumber, cvv, ssn, bankAccount, routingNumber
+   - Authorization header
+
+4. ✅ Added sanitization statistics tracking:
+   - `trackSanitizationEvent()` - Track sanitization events
+   - `getSanitizationStats()` - Get stats per service
+   - `resetSanitizationStats()` - Reset stats
+   - Stats include: piiRedacted, stackTracesRemoved, fieldsRedacted, pathsSanitized
+
+5. ✅ Created comprehensive test suite (38 unit tests):
+   - PII pattern detection tests
+   - Path sanitization tests
+   - Object sanitization tests
+   - Error response sanitization tests
+   - Statistics tracking tests
+   - Edge case tests
+
+6. ✅ Integrated middleware into all 4 backend services:
+   - auth-service, payments-service, admin-service, profile-service
+   - Configuration: removeStackTraces in production, redactPii always on
+
+**New Library:**
+
+- `libs/backend/middleware/` - Backend middleware library
+  - `src/lib/response-sanitizer.ts` - Core sanitization logic
+  - `src/lib/response-sanitizer.spec.ts` - 38 unit tests
+  - `src/index.ts` - Library exports
+
+**Files Modified:**
+
+- ✅ `apps/auth-service/src/main.ts` - Added response sanitizer middleware
+- ✅ `apps/payments-service/src/main.ts` - Added response sanitizer middleware
+- ✅ `apps/admin-service/src/main.ts` - Added response sanitizer middleware
+- ✅ `apps/profile-service/src/main.ts` - Added response sanitizer middleware
+- ✅ `tsconfig.base.json` - Added @payments-system/middleware path alias
+- ✅ `package.json` - Added supertest and @types/supertest for testing
+
+**Configuration Options:**
+
+```typescript
+interface ResponseSanitizerConfig {
+  removeStackTraces?: boolean;    // Remove stack traces from error responses
+  redactPii?: boolean;            // Enable PII detection and redaction
+  sanitizePaths?: boolean;        // Sanitize internal file paths
+  customPiiPatterns?: RegExp[];   // Additional custom PII patterns
+  redactFields?: string[];        // Additional field names to redact
+  environment?: string;           // 'development' | 'production' | 'test'
+  onSanitize?: (event) => void;   // Callback when sanitization occurs
+}
+```
+
+**Usage Example:**
+
+```typescript
+import { createResponseSanitizer } from '@payments-system/middleware';
+
+app.use(
+  createResponseSanitizer({
+    removeStackTraces: process.env.NODE_ENV === 'production',
+    redactPii: true,
+    sanitizePaths: true,
+    environment: process.env.NODE_ENV,
+  })
+);
+```
+
+**PII Patterns Detected:**
+
+| Pattern Type | Example | Replacement |
+|--------------|---------|-------------|
+| Email | john.doe@example.com | [REDACTED] |
+| Phone | 555-123-4567 | [REDACTED] |
+| SSN | 123-45-6789 | [REDACTED] |
+| Credit Card | 4111-1111-1111-1111 | [REDACTED] |
+| JWT Token | eyJhbGciOiJI... | [REDACTED] |
+| API Key | sk_live_abc123 | [REDACTED] |
+| IPv4 | 192.168.1.100 | [REDACTED] |
+
+**Success Criteria Met:**
+
+- ✅ Stack traces removed in production
+- ✅ Internal error details sanitized (ECONNREFUSED, Prisma, database)
+- ✅ Internal file paths sanitized
+- ✅ PII detected and redacted (10+ pattern types)
+- ✅ Sensitive fields redacted by name (15+ field patterns)
+- ✅ Statistics tracking for monitoring
+- ✅ 38 unit tests passing
+- ✅ All backend services integrated
+- ✅ All backend tests passing (auth: 125, payments: 148, admin: 102, profile: 63)
+
+**Testing Notes:**
+
+- Middleware wraps res.json() to intercept all JSON responses
+- Error responses (4xx, 5xx) receive additional sanitization
+- Development mode preserves stack traces for debugging
+- Custom PII patterns can be added per-service
+- Statistics can be exposed via /metrics endpoint for Prometheus scraping
+
+---
+
+---
+
+#### Priority 6.3: Request Size Limits ✅ COMPLETED
+
+**Status:** ✅ **COMPLETED** (January 19, 2026)
+**Effort:** 3 hours
 **Impact:** LOW-MEDIUM
 
-**Tasks:**
+**Implementation Summary:**
 
-1. Add request body size limits:
-   - JSON: 10MB max
-   - URL-encoded: 10MB max
-   - File uploads: 50MB max
-2. Add URL length limits
-3. Add header size limits
-4. Add proper error messages
+✅ **Completed Tasks:**
 
-**Files to Modify:**
+1. ✅ Created request limits middleware in `@payments-system/middleware` library:
+   - URL length check middleware (default: 2048 characters)
+   - Header size check middleware (default: 8KB total, 100 headers max)
+   - Parameter count check middleware (default: 100 parameters max)
+   - Helper functions for body parser configuration
 
-- All service `main.ts` files
+2. ✅ Added body size limits to all services:
+   - JSON body: 1MB default (5MB for profile-service for avatar uploads)
+   - URL-encoded body: 1MB default
+   - GraphQL body: 1MB (API Gateway)
 
-**Success Criteria:**
+3. ✅ Added URL length limits (2048 characters):
+   - Prevents buffer overflow attacks
+   - Returns HTTP 414 (URI Too Long) for violations
 
-- Large requests rejected
-- Proper error messages
-- Limits configurable per endpoint
+4. ✅ Added header size limits:
+   - Maximum header size: 8KB
+   - Maximum header count: 100
+   - Returns HTTP 431 (Request Header Fields Too Large) for violations
+
+5. ✅ Added parameter count limits (prevents parameter pollution):
+   - Maximum query parameters: 50-100 per service
+   - Maximum body parameters: 50-100 per service
+   - Returns HTTP 400 (Bad Request) for violations
+
+6. ✅ Added proper error messages with consistent format:
+   - Error code (e.g., BODY_TOO_LARGE, URL_TOO_LONG)
+   - Human-readable message
+   - Appropriate HTTP status codes
+
+7. ✅ Added statistics tracking for monitoring:
+   - `trackLimitViolation()` - Track violations
+   - `getRequestLimitsStats()` - Get stats per service
+   - `resetRequestLimitsStats()` - Reset stats
+
+8. ✅ Created comprehensive test suite (36 unit tests)
+
+**New Files:**
+
+- `libs/backend/middleware/src/lib/request-limits.ts` - Core middleware
+- `libs/backend/middleware/src/lib/request-limits.spec.ts` - 36 unit tests
+
+**Files Modified:**
+
+- ✅ `apps/api-gateway/src/main.ts` - Added request limits middleware
+- ✅ `apps/auth-service/src/main.ts` - Added request limits + body parser options
+- ✅ `apps/payments-service/src/main.ts` - Added request limits + body parser options
+- ✅ `apps/admin-service/src/main.ts` - Added request limits + body parser options
+- ✅ `apps/profile-service/src/main.ts` - Added request limits (5MB JSON for avatars)
+- ✅ `libs/backend/middleware/src/index.ts` - Export request limits utilities
+
+**Default Limits:**
+
+| Limit Type | Default Value | HTTP Status on Violation |
+|------------|---------------|-------------------------|
+| JSON body | 1MB (5MB profile) | 413 Payload Too Large |
+| URL-encoded body | 1MB | 413 Payload Too Large |
+| URL length | 2048 chars | 414 URI Too Long |
+| Header size | 8KB | 431 Request Header Fields Too Large |
+| Header count | 100 | 431 Request Header Fields Too Large |
+| Parameter count | 50-100 | 400 Bad Request |
+
+**Usage Example:**
+
+```typescript
+import {
+  createRequestLimitsMiddleware,
+  getBodyParserOptions,
+  bodyParserErrorHandler,
+} from '@payments-system/middleware';
+
+// Request limits middleware (URL, headers, parameters)
+const requestLimits = createRequestLimitsMiddleware({
+  serviceName: 'my-service',
+  maxUrlLength: 2048,
+  maxHeaderSize: 8 * 1024,
+  maxHeaderCount: 100,
+  maxParameterCount: 50,
+  skipPaths: ['/health', '/metrics'],
+});
+app.use(requestLimits);
+
+// Body parsing with size limits
+const { jsonOptions, urlEncodedOptions } = getBodyParserOptions({
+  jsonLimit: '1mb',
+  urlEncodedLimit: '1mb',
+});
+app.use(express.json(jsonOptions));
+app.use(express.urlencoded(urlEncodedOptions));
+
+// Error handler for body parser errors
+app.use(bodyParserErrorHandler('my-service'));
+```
+
+**Error Response Format:**
+
+```json
+{
+  "success": false,
+  "error": {
+    "code": "BODY_TOO_LARGE",
+    "message": "Request body too large. Maximum size is 1.0MB"
+  }
+}
+```
+
+**Success Criteria Met:**
+
+- ✅ Large requests rejected with appropriate status codes
+- ✅ Proper error messages with consistent format
+- ✅ Limits configurable per service
+- ✅ Statistics tracking for monitoring
+- ✅ 36 unit tests passing
+- ✅ All backend builds successful
+- ✅ All backend tests passing
+
+**Testing Notes:**
+
+- Health and metrics endpoints are skipped from limits checking
+- Profile service has 5MB limit for base64-encoded avatar images
+- API Gateway applies limits before proxying to services
+- Statistics can be exposed via `/metrics` endpoint for Prometheus scraping
 
 ---
 
-#### Priority 6.4: API Versioning
+#### Priority 6.4: API Versioning ✅ COMPLETED (Jan 20, 2026)
 
-**Effort:** 4 hours  
+**Effort:** 4 hours
 **Impact:** LOW
 
 **Tasks:**
 
-1. Implement API versioning strategy:
-   - URL-based versioning (/api/v1/...)
-   - Header-based versioning (Accept: application/vnd.api+json; version=1)
-2. Add version deprecation warnings
-3. Document versioning policy
+1. ✅ Implement API versioning strategy:
+   - ✅ URL-based versioning (/api/v1/...)
+   - ✅ Header-based versioning (Accept: application/vnd.api+json; version=1)
+2. ✅ Add version deprecation warnings
+3. ✅ Document versioning policy
 
-**Files to Modify:**
+**Files Created/Modified:**
 
-- `apps/api-gateway/src/routes/proxy-routes.ts`
-- All service route files
+- `apps/api-gateway/src/middleware/apiVersion.ts` - API versioning middleware
+- `apps/api-gateway/src/middleware/apiVersion.spec.ts` - Unit tests (27 tests)
+- `apps/api-gateway/src/routes/proxy-routes.ts` - Updated with versioning
+- `docs/POC-3-Implementation/API-VERSIONING-POLICY.md` - Versioning policy documentation
+
+**Implementation Details:**
+
+1. **URL-Based Versioning**: `/api/v1/auth/login`, `/api/v2/payments`, etc.
+2. **Header-Based Versioning**: `Accept: application/vnd.api+json; version=1`
+3. **Version Resolution Priority**: URL > Header > Default
+4. **Response Headers**:
+   - `X-API-Version` - Version used for request
+   - `X-API-Version-Source` - How version was determined (url/header/default)
+   - `X-API-Latest-Version` - Latest stable version
+   - `X-API-Supported-Versions` - All supported versions
+5. **Deprecation Headers** (for deprecated versions):
+   - `Deprecation: true`
+   - `Sunset` - RFC 7231 date when version removed
+   - `Warning` - RFC 7234 deprecation warning
+   - `Link` - Links to docs and successor version
+6. **Version Info Endpoint**: `GET /api/version` - Returns versioning information
+7. **Helper Middleware**:
+   - `requireVersion(1, 2)` - Restrict route to specific versions
+   - `versionedHandler({ 1: v1Handler, 2: v2Handler })` - Version-specific handlers
 
 **Success Criteria:**
 
-- Multiple API versions supported
-- Deprecation warnings in responses
-- Clear migration path
+- ✅ Multiple API versions supported (v1, configurable for more)
+- ✅ Deprecation warnings in responses via headers
+- ✅ Clear migration path documented
+- ✅ All 27 unit tests passing
 
 ---
 
