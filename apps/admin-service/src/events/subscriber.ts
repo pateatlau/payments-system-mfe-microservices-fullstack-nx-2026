@@ -70,7 +70,9 @@ interface UserLogoutEvent {
 /**
  * Handle user.created event
  *
- * Create denormalized User copy in admin_db
+ * Create or update denormalized User copy in admin_db
+ * Uses upsert to handle cases where the user was already created
+ * synchronously by the admin createUser() endpoint
  */
 async function handleUserCreated(
   event: BaseEvent<UserCreatedEvent>,
@@ -79,15 +81,26 @@ async function handleUserCreated(
   try {
     const { userId, email, name, role, emailVerified, createdAt } = event.data;
 
-    // Create denormalized user in admin_db (passwordHash omitted for security)
-    await prisma.user.create({
-      data: {
+    // Upsert denormalized user in admin_db (passwordHash omitted for security)
+    // Using upsert because the user may have already been created by the
+    // admin createUser() endpoint for immediate availability
+    await prisma.user.upsert({
+      where: { id: userId },
+      create: {
         id: userId,
         email,
         name,
         role: role as UserRoleType,
         emailVerified,
         createdAt: new Date(createdAt),
+        updatedAt: new Date(createdAt),
+      },
+      update: {
+        // Update in case auth service has more accurate data
+        email,
+        name,
+        role: role as UserRoleType,
+        emailVerified,
         updatedAt: new Date(createdAt),
       },
     });

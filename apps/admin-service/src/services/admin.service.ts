@@ -274,7 +274,10 @@ export const adminService = {
    * Create new user
    *
    * Proxies to Auth Service to create user in auth_db (where login happens)
-   * The created user will be synced back to admin_db via RabbitMQ user.created event
+   * Also creates the user locally in admin_db for immediate availability
+   *
+   * Note: The RabbitMQ user.created event will also try to create the user,
+   * but will handle the duplicate gracefully (upsert pattern).
    */
   async createUser(data: CreateUserRequest) {
     // Call Auth Service API to create user in auth_db
@@ -305,15 +308,42 @@ export const adminService = {
       }
 
       const result = await response.json();
+      const createdUser = result.data.user;
+
+      // Create user locally in admin_db for immediate availability
+      // This prevents race condition where loadUsers() is called before
+      // the RabbitMQ user.created event is processed
+      try {
+        await db.user.create({
+          data: {
+            id: createdUser.id,
+            email: createdUser.email,
+            name: createdUser.name,
+            role: createdUser.role as UserRole,
+            emailVerified: false,
+            createdAt: new Date(createdUser.createdAt),
+            updatedAt: new Date(createdUser.updatedAt),
+          },
+        });
+        console.log(`[Admin Service] User created locally: ${createdUser.id}`);
+      } catch (dbError) {
+        // If user already exists (from event), that's fine - just log it
+        // This can happen if the event was processed very quickly
+        console.log(
+          `[Admin Service] User may already exist locally (from event): ${createdUser.id}`,
+          dbError
+        );
+      }
 
       // Return user details (without tokens)
       return {
-        id: result.data.user.id,
-        email: result.data.user.email,
-        name: result.data.user.name,
-        role: result.data.user.role,
-        createdAt: result.data.user.createdAt,
-        updatedAt: result.data.user.updatedAt,
+        id: createdUser.id,
+        email: createdUser.email,
+        name: createdUser.name,
+        role: createdUser.role,
+        emailVerified: false,
+        createdAt: createdUser.createdAt,
+        updatedAt: createdUser.updatedAt,
       };
     } catch (error) {
       if (error instanceof ApiError) {

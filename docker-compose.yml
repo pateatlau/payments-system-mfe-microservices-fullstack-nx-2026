@@ -39,6 +39,7 @@ services:
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/ssl:/etc/nginx/ssl:ro
+      - ./nginx/error-pages:/etc/nginx/error-pages:ro
     depends_on:
       rabbitmq:
         condition: service_healthy

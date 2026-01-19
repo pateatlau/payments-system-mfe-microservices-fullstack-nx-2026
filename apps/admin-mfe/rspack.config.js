@@ -274,6 +274,7 @@ module.exports = {
     port: 4203,
     host: '0.0.0.0', // Bind to all interfaces for Docker nginx access
     hot: true,
+    liveReload: false, // Disable live reload - prevents auto page refresh on HMR failure
     historyApiFallback: true,
     allowedHosts: 'all', // Allow nginx proxy requests
     // Serve static files from assets directory
@@ -320,4 +321,17 @@ module.exports = {
   },
   // Source maps for development
   devtool: isDevelopment ? 'eval-source-map' : 'source-map',
+  // Watch options - prevent unnecessary rebuilds from non-source files
+  watchOptions: {
+    ignored: [
+      '**/node_modules/**',
+      '**/.nx/**',
+      '**/dist/**',
+      '**/.git/**',
+      '**/coverage/**',
+      '**/*.tsbuildinfo',
+      '**/tmp/**',
+    ],
+    aggregateTimeout: 300,
+  },
 };
