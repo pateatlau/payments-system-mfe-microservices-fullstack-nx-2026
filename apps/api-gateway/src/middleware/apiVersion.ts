@@ -333,7 +333,7 @@ export function versionedHandler(handlers: {
           code: 'NO_HANDLER_FOR_VERSION',
           message: `No handler available for API version ${version}`,
           requestedVersion: version,
-          availableVersions: Object.keys(handlers)
+          supportedVersionsForRoute: Object.keys(handlers)
             .filter((k) => k !== 'default')
             .map(Number),
         },

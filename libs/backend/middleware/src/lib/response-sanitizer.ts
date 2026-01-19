@@ -161,30 +161,39 @@ export function redactPiiFromString(
   let result = value;
 
   // Apply built-in PII patterns
+  // Use replace() directly to avoid lastIndex issues with global regexes
   for (const [, pattern] of Object.entries(PII_PATTERNS)) {
-    if (pattern.test(result)) {
+    // Reset lastIndex before replacement to ensure consistent behavior
+    pattern.lastIndex = 0;
+    const newResult = result.replace(pattern, REDACTED);
+    if (newResult !== result) {
       config.onSanitize({
         type: 'pii',
         originalLength: result.length,
         timestamp: new Date(),
       });
-      result = result.replace(pattern, REDACTED);
+      result = newResult;
     }
-    // Reset lastIndex for global patterns
+    // Reset lastIndex after replacement for safety
     pattern.lastIndex = 0;
   }
 
   // Apply custom PII patterns
   for (const pattern of config.customPiiPatterns) {
-    if (pattern.test(result)) {
+    // Reset lastIndex before replacement
+    if (pattern.global) {
+      pattern.lastIndex = 0;
+    }
+    const newResult = result.replace(pattern, REDACTED);
+    if (newResult !== result) {
       config.onSanitize({
         type: 'pii',
         originalLength: result.length,
         timestamp: new Date(),
       });
-      result = result.replace(pattern, REDACTED);
+      result = newResult;
     }
-    // Reset lastIndex for global patterns
+    // Reset lastIndex after replacement for safety
     if (pattern.global) {
       pattern.lastIndex = 0;
     }
@@ -239,11 +248,15 @@ function isSensitiveField(
 
   const allSensitiveFields = sensitiveFields.map((f) => f.toLowerCase());
 
+  // Match criteria:
+  // 1. Exact match: "password" === "password"
+  // 2. Field contains sensitive word: "userPassword" includes "password"
+  // Note: We removed sensitive.includes(lowerField) to avoid false positives
+  // like 'api' matching 'apikey' when 'api' is not in the sensitive list
   return allSensitiveFields.some(
     (sensitive) =>
       lowerField === sensitive ||
-      lowerField.includes(sensitive) ||
-      sensitive.includes(lowerField)
+      lowerField.includes(sensitive)
   );
 }
 

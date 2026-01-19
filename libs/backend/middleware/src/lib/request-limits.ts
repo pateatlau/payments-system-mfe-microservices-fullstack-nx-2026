@@ -417,6 +417,7 @@ export function createRequestLimitsMiddleware(
   } = config;
 
   // Create wrapped error handler that tracks stats
+  // Always ensure wrappedErrorHandler is a function, never undefined
   const wrappedErrorHandler: RequestLimitsConfig['onError'] = trackStats
     ? (error, req, res) => {
         trackLimitViolation(serviceName, error.type, req.path);
@@ -426,7 +427,7 @@ export function createRequestLimitsMiddleware(
           defaultErrorHandler(error, req, res);
         }
       }
-    : onError;
+    : onError || defaultErrorHandler;
 
   const configWithHandler: RequestLimitsConfig = {
     ...restConfig,
