@@ -62,68 +62,102 @@ export interface ApiError {
 }
 
 /**
+ * Resolve the API base URL at runtime
+ * This function is called lazily when the axios instance is first needed,
+ * ensuring that runtime overrides (like window.__ENV__) have been loaded.
+ *
+ * URL Resolution Order:
+ * 1. Explicit config.baseURL (passed to ApiClient constructor)
+ * 2. Runtime window.__ENV__?.API_BASE_URL (for CI/runtime override)
+ * 3. Build-time process.env.NX_API_BASE_URL (replaced by DefinePlugin)
+ * 4. Default: https://localhost/api (nginx proxy for local dev)
+ */
+function resolveBaseURL(configBaseURL?: string): string {
+  // 1. Explicit config takes highest priority
+  if (configBaseURL) {
+    return configBaseURL;
+  }
+
+  // 2. Check for runtime override (useful for CI where we inject env.js after build)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const runtimeBaseURL = typeof window !== 'undefined' ? (window as any).__ENV__?.API_BASE_URL : undefined;
+  if (runtimeBaseURL) {
+    return runtimeBaseURL;
+  }
+
+  // 3. Build-time environment variable (replaced by DefinePlugin)
+  const envBaseURL = process.env.NX_API_BASE_URL;
+  if (envBaseURL) {
+    return envBaseURL;
+  }
+
+  // 4. Default fallback
+  return 'https://localhost/api';
+}
+
+/**
  * Type-safe API Client
+ *
+ * IMPORTANT: The axios instance is created lazily on first use to ensure
+ * runtime configuration (like window.__ENV__) has been loaded before
+ * determining the base URL. This is critical for CI environments where
+ * env.js is injected at runtime.
  */
 export class ApiClient {
-  private axiosInstance: AxiosInstance;
+  private _axiosInstance: AxiosInstance | null = null;
   private tokenProvider?: TokenProvider;
   private onTokenRefresh?: (accessToken: string, refreshToken: string) => void;
   private onUnauthorized?: () => void;
+  private configBaseURL?: string;
+  private configTimeout: number;
+  private configRefreshURL?: string;
 
   constructor(config: ApiClientConfig = {}) {
-    // POC-3: Using API Gateway
-    // Development: Direct to API Gateway (http://localhost:3000/api)
-    // Production: Through nginx proxy (https://localhost/api)
-    // API Gateway proxies to backend services (Auth, Payments, Admin, Profile)
-
-    // API URL Resolution Order:
-    // 1. Explicit config.baseURL (passed to ApiClient constructor)
-    // 2. Runtime window.__ENV__?.API_BASE_URL (for CI/runtime override)
-    // 3. Build-time process.env.NX_API_BASE_URL (replaced by DefinePlugin)
-    // 4. Default: https://localhost/api (nginx proxy for local dev)
-    //
-    // DefinePlugin replaces 'process.env.NX_API_BASE_URL' with the actual string value
-    // IMPORTANT: Access the full path directly without guards!
-    const envBaseURL = process.env.NX_API_BASE_URL;
-
-    // Check for runtime override (useful for CI where we can inject config after build)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const runtimeBaseURL = typeof window !== 'undefined' ? (window as any).__ENV__?.API_BASE_URL : undefined;
-
-    const baseURL = config.baseURL ?? runtimeBaseURL ?? envBaseURL ?? 'https://localhost/api';
-
-    this.axiosInstance = axios.create({
-      baseURL,
-      timeout: config.timeout ?? 30000,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-
+    // Store config for lazy initialization
+    this.configBaseURL = config.baseURL;
+    this.configTimeout = config.timeout ?? 30000;
+    this.configRefreshURL = config.refreshURL;
     this.tokenProvider = config.tokenProvider;
     this.onTokenRefresh = config.onTokenRefresh;
     this.onUnauthorized = config.onUnauthorized;
+  }
 
-    // Setup interceptors
-    // Use refreshURL if provided, otherwise use baseURL (for services other than auth)
-    const refreshURL = config.refreshURL ?? baseURL;
+  /**
+   * Get or create the axios instance lazily
+   * This ensures runtime config (window.__ENV__) is available
+   */
+  private get axiosInstance(): AxiosInstance {
+    if (!this._axiosInstance) {
+      const baseURL = resolveBaseURL(this.configBaseURL);
+      const refreshURL = this.configRefreshURL ?? baseURL;
 
-    setupInterceptors(
-      this.axiosInstance,
-      {
-        getAccessToken: () => this.tokenProvider?.getAccessToken() ?? null,
-        getRefreshToken: () => this.tokenProvider?.getRefreshToken() ?? null,
-        setTokens: (accessToken, refreshToken) => {
-          this.tokenProvider?.setTokens(accessToken, refreshToken);
-          this.onTokenRefresh?.(accessToken, refreshToken);
+      this._axiosInstance = axios.create({
+        baseURL,
+        timeout: this.configTimeout,
+        headers: {
+          'Content-Type': 'application/json',
         },
-        clearTokens: () => {
-          this.tokenProvider?.clearTokens();
-          this.onUnauthorized?.();
+      });
+
+      // Setup interceptors
+      setupInterceptors(
+        this._axiosInstance,
+        {
+          getAccessToken: () => this.tokenProvider?.getAccessToken() ?? null,
+          getRefreshToken: () => this.tokenProvider?.getRefreshToken() ?? null,
+          setTokens: (accessToken, refreshToken) => {
+            this.tokenProvider?.setTokens(accessToken, refreshToken);
+            this.onTokenRefresh?.(accessToken, refreshToken);
+          },
+          clearTokens: () => {
+            this.tokenProvider?.clearTokens();
+            this.onUnauthorized?.();
+          },
         },
-      },
-      refreshURL
-    );
+        refreshURL
+      );
+    }
+    return this._axiosInstance;
   }
 
   /**
