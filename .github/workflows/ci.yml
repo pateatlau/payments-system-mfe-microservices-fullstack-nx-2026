@@ -91,12 +91,12 @@ jobs:
         uses: nrwl/nx-set-shas@v4
 
       - name: Run ESLint (affected)
-        run: pnpm nx affected --target=lint --base=${{ steps.set-shas.outputs.base }} --head=${{ steps.set-shas.outputs.head }} --verbose
+        run: NX_NO_CLOUD=true pnpm nx affected --target=lint --base=${{ steps.set-shas.outputs.base }} --head=${{ steps.set-shas.outputs.head }} --verbose
 
       - name: Check for projects with typecheck target
         id: typecheck-projects
         run: |
-          PROJECTS=$(pnpm nx print-affected --target=typecheck --select=projects --base=${{ steps.set-shas.outputs.base }} --head=${{ steps.set-shas.outputs.head }} 2>/dev/null || echo "")
+          PROJECTS=$(NX_NO_CLOUD=true pnpm nx print-affected --target=typecheck --select=projects --base=${{ steps.set-shas.outputs.base }} --head=${{ steps.set-shas.outputs.head }} 2>/dev/null || echo "")
           if [ -n "$PROJECTS" ]; then
             echo "has_projects=true" >> $GITHUB_OUTPUT
             echo "Projects with typecheck: $PROJECTS"
@@ -107,7 +107,7 @@ jobs:
 
       - name: Run TypeScript type check (affected)
         if: steps.typecheck-projects.outputs.has_projects == 'true'
-        run: pnpm nx affected --target=typecheck --base=${{ steps.set-shas.outputs.base }} --head=${{ steps.set-shas.outputs.head }}
+        run: NX_NO_CLOUD=true pnpm nx affected --target=typecheck --base=${{ steps.set-shas.outputs.base }} --head=${{ steps.set-shas.outputs.head }}
 
   # Job 2: Frontend Unit Tests
   test-frontend:
@@ -161,7 +161,7 @@ jobs:
       - name: Run frontend unit tests (all on main/develop)
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
         run: |
-          pnpm nx run-many --target=test \
+          NX_NO_CLOUD=true pnpm nx run-many --target=test \
             --projects=shell,auth-mfe,payments-mfe,admin-mfe,profile-mfe,shared-auth-store,shared-utils,shared-types \
             --coverage \
             --runInBand
@@ -169,7 +169,7 @@ jobs:
       - name: Run frontend unit tests (affected on feature branches)
         if: github.ref != 'refs/heads/main' && github.ref != 'refs/heads/develop'
         run: |
-          pnpm nx affected --target=test \
+          NX_NO_CLOUD=true pnpm nx affected --target=test \
             --base=${{ steps.set-shas.outputs.base }} \
             --head=${{ steps.set-shas.outputs.head }} \
             --exclude=*-service,api-gateway \
@@ -343,7 +343,7 @@ jobs:
       - name: Run backend unit tests (all on main/develop)
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
         run: |
-          pnpm nx run-many --target=test \
+          NX_NO_CLOUD=true pnpm nx run-many --target=test \
             --projects=api-gateway,auth-service,payments-service,admin-service,profile-service \
             --coverage \
             --maxWorkers=2
@@ -351,7 +351,7 @@ jobs:
       - name: Run backend unit tests (affected on feature branches)
         if: github.ref != 'refs/heads/main' && github.ref != 'refs/heads/develop'
         run: |
-          pnpm nx affected --target=test \
+          NX_NO_CLOUD=true pnpm nx affected --target=test \
             --base=${{ steps.set-shas.outputs.base }} \
             --head=${{ steps.set-shas.outputs.head }} \
             --exclude=auth-mfe,payments-mfe,admin-mfe,profile-mfe,shell \
@@ -715,7 +715,7 @@ jobs:
           echo "=== Backend services ready ==="
 
       - name: Run E2E tests
-        run: pnpm nx e2e shell-e2e
+        run: NX_NO_CLOUD=true pnpm nx e2e shell-e2e
         # Note: Playwright will start the frontend preview servers automatically
         # via webServer config in playwright.config.ts
 
