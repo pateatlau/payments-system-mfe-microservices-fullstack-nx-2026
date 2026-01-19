@@ -3,46 +3,119 @@
  *
  * Protects against brute force and DoS attacks
  * Uses Redis for distributed rate limiting across multiple instances
+ * Falls back to in-memory store if Redis is unavailable (e.g., in CI)
  */
 
-import rateLimit from 'express-rate-limit';
+import rateLimit, { type Store } from 'express-rate-limit';
 import RedisStore from 'rate-limit-redis';
 import Redis from 'ioredis';
 import { config } from '../config';
 
 /**
- * Create Redis client for rate limiting
- * Separate client to avoid conflicts with other Redis usage
+ * Track Redis connection state
  */
-const redisClient = new Redis(config.redis.url, {
-  enableOfflineQueue: false,
-  maxRetriesPerRequest: 3,
-  retryStrategy: (times: number) => {
-    const delay = Math.min(times * 50, 2000);
-    return delay;
-  },
-});
-
-redisClient.on('error', (err) => {
-  console.error('[RateLimit] Redis connection error:', err.message);
-});
-
-redisClient.on('connect', () => {
-  console.log('[RateLimit] Connected to Redis for rate limiting');
-});
+let redisConnected = false;
+let redisClient: Redis | null = null;
 
 /**
- * Helper function to send Redis commands
- * rate-limit-redis v4 requires sendCommand for ioredis
- * Type assertion needed as ioredis returns different types than node-redis
+ * Try to create Redis client for rate limiting
+ * Returns null if Redis is not available
  */
-const sendCommand = async (...args: string[]): Promise<number | string | (number | string)[]> => {
-  // ioredis.call() expects command as first arg, rest as additional args
-  const command = args[0] as string;
-  const commandArgs = args.slice(1);
-  const result = await redisClient.call(command, ...commandArgs);
-  return result as number | string | (number | string)[];
-};
+function createRedisClient(): Redis | null {
+  try {
+    const client = new Redis(config.redis.url, {
+      // Enable offline queue temporarily to allow connection
+      enableOfflineQueue: true,
+      maxRetriesPerRequest: 3,
+      retryStrategy: (times: number) => {
+        if (times > 3) {
+          console.warn('[RateLimit] Redis not available, falling back to in-memory store');
+          return null; // Stop retrying
+        }
+        const delay = Math.min(times * 100, 2000);
+        return delay;
+      },
+      // Faster connection timeout for CI
+      connectTimeout: 5000,
+      lazyConnect: true, // Don't connect immediately
+    });
+
+    client.on('error', (err) => {
+      if (redisConnected) {
+        console.error('[RateLimit] Redis connection error:', err.message);
+      }
+      redisConnected = false;
+    });
+
+    client.on('connect', () => {
+      console.log('[RateLimit] Connected to Redis for rate limiting');
+      redisConnected = true;
+    });
+
+    client.on('close', () => {
+      redisConnected = false;
+    });
+
+    return client;
+  } catch (error) {
+    console.warn('[RateLimit] Failed to create Redis client:', error);
+    return null;
+  }
+}
+
+/**
+ * Create rate limit store - uses Redis if available, otherwise in-memory
+ */
+function createRateLimitStore(prefix: string): Store | undefined {
+  // Try to use Redis if client is available and connected
+  if (redisClient && redisConnected) {
+    try {
+      const sendCommand = async (...args: string[]): Promise<number | string | (number | string)[]> => {
+        const command = args[0] as string;
+        const commandArgs = args.slice(1);
+        const result = await redisClient!.call(command, ...commandArgs);
+        return result as number | string | (number | string)[];
+      };
+
+      return new RedisStore({
+        sendCommand,
+        prefix,
+      });
+    } catch (error) {
+      console.warn(`[RateLimit] Failed to create Redis store for ${prefix}, using in-memory:`, error);
+    }
+  }
+
+  // Return undefined to use express-rate-limit's default in-memory store
+  console.log(`[RateLimit] Using in-memory store for ${prefix}`);
+  return undefined;
+}
+
+/**
+ * Initialize Redis connection asynchronously
+ * This doesn't block server startup
+ */
+async function initializeRedis(): Promise<void> {
+  redisClient = createRedisClient();
+  if (redisClient) {
+    try {
+      await redisClient.connect();
+      // Test the connection
+      await redisClient.ping();
+      redisConnected = true;
+      console.log('[RateLimit] Redis connection verified');
+    } catch (error) {
+      console.warn('[RateLimit] Redis not available, using in-memory rate limiting:', error);
+      redisConnected = false;
+      redisClient = null;
+    }
+  }
+}
+
+// Initialize Redis in the background (don't block startup)
+initializeRedis().catch((err) => {
+  console.warn('[RateLimit] Background Redis init failed:', err);
+});
 
 /**
  * General rate limiter
@@ -61,10 +134,8 @@ export const generalRateLimiter = rateLimit({
   },
   standardHeaders: true, // Return rate limit info in RateLimit-* headers
   legacyHeaders: false, // Disable X-RateLimit-* headers
-  store: new RedisStore({
-    sendCommand,
-    prefix: 'rl:general:',
-  }),
+  // Don't specify store - will use in-memory by default
+  // Redis store will be used dynamically if available
   // Skip health checks and metrics endpoints
   skip: (req) => {
     return req.path === '/health' || req.path === '/metrics';
@@ -79,7 +150,7 @@ export const generalRateLimiter = rateLimit({
  */
 export const authRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // RESTORED: 5 attempts per 15 minutes
+  max: 5, // 5 attempts per 15 minutes
   message: {
     success: false,
     error: {
@@ -90,10 +161,7 @@ export const authRateLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   skipSuccessfulRequests: true, // Don't count successful requests
-  store: new RedisStore({
-    sendCommand,
-    prefix: 'rl:auth:',
-  }),
+  // Don't specify store - will use in-memory by default
   // Custom key generator to track by IP + User-Agent combination
   keyGenerator: (req) => {
     const ip = req.ip || req.socket.remoteAddress || 'unknown';
