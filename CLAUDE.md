@@ -363,14 +363,14 @@ Implemented via `shared-theme-store` with:
 
 ### CI/E2E Troubleshooting
 
-**Common E2E Test Failure: "Network Error"**
+#### Common E2E Test Failure: "Network Error"
 
 If E2E tests fail with "Network Error" in CI, the issue is usually NOT the frontend URL configuration. The most common cause is the **API Gateway crashing during startup**.
 
 **Root Cause:** The API Gateway's Redis rate limiter can crash the server if Redis isn't immediately available. The rate limiter was configured with `enableOfflineQueue: false`, which throws an error if Redis isn't ready when the `RedisStore` is instantiated.
 
 **Symptoms:**
-```
+```text
 Error: Login failed - error displayed: "Network Error"
 [Request FAILED] POST http://localhost:3000/api/auth/login - net::ERR_CONNECTION_REFUSED
 ```
