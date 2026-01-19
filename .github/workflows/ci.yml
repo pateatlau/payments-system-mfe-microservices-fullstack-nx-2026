@@ -596,6 +596,25 @@ jobs:
           name: build-artifacts
           path: dist/
 
+      - name: Verify and fix frontend API URL
+        env:
+          NX_API_BASE_URL: http://localhost:3000/api
+        run: |
+          echo "=== Checking API URL in frontend bundles ==="
+          # Check if bundles have the correct API URL
+          if grep -rq "localhost:3000" dist/apps/shell/*.js 2>/dev/null; then
+            echo "✅ Shell bundle has correct API URL (localhost:3000)"
+          else
+            echo "⚠️ Shell bundle missing localhost:3000, rebuilding frontend..."
+            export NX_API_BASE_URL="http://localhost:3000/api"
+            pnpm nx run-many --target=build --projects=shell,auth-mfe,payments-mfe,admin-mfe,profile-mfe --configuration=production --skip-nx-cache
+            echo "Frontend rebuilt with NX_API_BASE_URL=$NX_API_BASE_URL"
+          fi
+          # Final verification
+          echo "=== Final verification ==="
+          grep -l "localhost:3000" dist/apps/shell/*.js || echo "WARNING: localhost:3000 still not found!"
+          grep -l "https://localhost/api" dist/apps/shell/*.js && echo "ERROR: Wrong URL https://localhost/api found!" || echo "Good: https://localhost/api not in bundle"
+
       - name: Generate Prisma clients
         run: pnpm db:all:generate
 
