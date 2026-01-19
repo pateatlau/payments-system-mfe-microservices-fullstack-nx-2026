@@ -4,7 +4,7 @@
  * POC-3 Phase 6.4: API Versioning
  */
 
-import { Request, Response, NextFunction } from 'express';
+import { Response, NextFunction } from 'express';
 import {
   apiVersionMiddleware,
   setVersionConfig,

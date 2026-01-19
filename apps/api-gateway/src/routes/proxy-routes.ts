@@ -13,14 +13,13 @@
  * POC-3 Implementation: Production-ready streaming HTTP proxy with circuit breaker
  */
 
-import { Router, Request, Response, NextFunction } from 'express';
+import { Router, Request, Response } from 'express';
 import { createStreamingProxy, ProxyTarget, getAllProxyCircuitStats } from '../middleware/proxy';
 import { logger } from '../utils/logger';
 import {
   apiVersionMiddleware,
   setVersionConfig,
   getVersionConfig,
-  VersionedRequest,
 } from '../middleware/apiVersion';
 
 /**

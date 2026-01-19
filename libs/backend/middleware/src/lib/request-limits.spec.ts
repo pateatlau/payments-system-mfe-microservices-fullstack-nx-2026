@@ -16,7 +16,7 @@ import {
   resetRequestLimitsStats,
   DEFAULT_LIMITS,
 } from './request-limits';
-import type { Request, Response, NextFunction } from 'express';
+import type { Request, Response } from 'express';
 
 // Mock Request, Response, and NextFunction
 function createMockRequest(
