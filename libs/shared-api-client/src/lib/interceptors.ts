@@ -206,7 +206,7 @@ function setupResponseInterceptor(
 
         if (isAuthEndpoint) {
           // For auth endpoints, pass through the original error
-          // so the UI can show "Invalid credentials" message
+          // so the UI can show appropriate error message
           if (error.response?.data) {
             const apiError = error.response.data as {
               error?: { message: string };
@@ -215,9 +215,19 @@ function setupResponseInterceptor(
               return Promise.reject(new Error(apiError.error.message));
             }
           }
-          return Promise.reject(
-            new Error('Invalid email or password. Please try again.')
-          );
+
+          // Endpoint-specific fallback messages
+          let fallbackMessage = 'Authentication failed. Please try again.';
+          if (requestUrl.includes('/auth/login')) {
+            fallbackMessage = 'Invalid email or password. Please try again.';
+          } else if (requestUrl.includes('/auth/register')) {
+            fallbackMessage =
+              'Registration failed. Please check your details and try again.';
+          } else if (requestUrl.includes('/auth/refresh')) {
+            fallbackMessage = 'Session expired. Please sign in again.';
+          }
+
+          return Promise.reject(new Error(fallbackMessage));
         }
 
         // If already refreshing, wait for it to complete
