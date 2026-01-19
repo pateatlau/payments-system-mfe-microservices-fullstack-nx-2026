@@ -64,7 +64,7 @@ export function SignUpPage({ SignUpComponent }: SignUpPageProps) {
 
   return (
     <RemoteErrorBoundary componentName="SignUp">
-      <div className="h-full min-h-0 flex items-center justify-center">
+      <div className="min-h-full flex flex-col items-center justify-center py-8">
         <SignUpComponent
           onSuccess={handleSuccess}
           onNavigateToSignIn={handleNavigateToSignIn}
