@@ -671,7 +671,8 @@ jobs:
           echo "=== Starting backend services ==="
 
           # Start backend services and capture output to file for debugging
-          pnpm dev:backend > backend.log 2>&1 &
+          # NX_NO_CLOUD=true prevents Nx Cloud authorization failures
+          NX_NO_CLOUD=true pnpm dev:backend > backend.log 2>&1 &
           BACKEND_PID=$!
           echo "Backend started with PID: $BACKEND_PID"
 
