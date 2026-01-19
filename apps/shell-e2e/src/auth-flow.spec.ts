@@ -38,8 +38,10 @@ test.describe('Authentication Flow', () => {
     await Promise.race([
       page.waitForURL(/.*payments/, { timeout: 30000 }),
       page.waitForSelector('[role="alert"], .error, [class*="error"]', { timeout: 30000 })
-        .then(() => {
-          throw new Error('Login failed - error message displayed on page');
+        .then(async () => {
+          // Capture the actual error message for debugging
+          const errorText = await page.locator('[role="alert"]').first().textContent();
+          throw new Error(`Login failed - error displayed: "${errorText}"`);
         }),
     ]);
 
@@ -83,8 +85,10 @@ test.describe('Authentication Flow', () => {
     await Promise.race([
       page.waitForURL(/.*payments/, { timeout: 30000 }),
       page.waitForSelector('[role="alert"], .error, [class*="error"]', { timeout: 30000 })
-        .then(() => {
-          throw new Error('Sign-up failed - error message displayed on page');
+        .then(async () => {
+          // Capture the actual error message for debugging
+          const errorText = await page.locator('[role="alert"]').first().textContent();
+          throw new Error(`Sign-up failed - error displayed: "${errorText}"`);
         }),
     ]);
 
