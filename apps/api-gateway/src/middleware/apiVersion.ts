@@ -89,13 +89,13 @@ function extractVersionFromHeader(acceptHeader: string | undefined): number | nu
 
   // Match: application/vnd.api+json; version=N or application/vnd.api.vN+json
   const versionMatch = acceptHeader.match(/version=(\d+)/i);
-  if (versionMatch) {
+  if (versionMatch && versionMatch[1]) {
     return parseInt(versionMatch[1], 10);
   }
 
   // Alternative format: application/vnd.api.v1+json
   const altMatch = acceptHeader.match(/vnd\.api\.v(\d+)/i);
-  if (altMatch) {
+  if (altMatch && altMatch[1]) {
     return parseInt(altMatch[1], 10);
   }
 
@@ -109,7 +109,7 @@ function extractVersionFromHeader(acceptHeader: string | undefined): number | nu
 function extractVersionFromUrl(path: string): { version: number | null; strippedPath: string } {
   // Match /api/v1/, /api/v2/, etc.
   const versionMatch = path.match(/^\/api\/v(\d+)(\/.*)?$/);
-  if (versionMatch) {
+  if (versionMatch && versionMatch[1]) {
     const version = parseInt(versionMatch[1], 10);
     // Strip version from path: /api/v1/auth/login -> /api/auth/login
     const remainingPath = versionMatch[2] || '';
