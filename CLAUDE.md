@@ -361,6 +361,47 @@ Implemented via `shared-theme-store` with:
 - Test nginx proxy: `curl -k https://localhost/health`
 - Check RabbitMQ: `pnpm rabbitmq:ui` (http://localhost:15672, admin/admin)
 
+### CI/E2E Troubleshooting
+
+**Common E2E Test Failure: "Network Error"**
+
+If E2E tests fail with "Network Error" in CI, the issue is usually NOT the frontend URL configuration. The most common cause is the **API Gateway crashing during startup**.
+
+**Root Cause:** The API Gateway's Redis rate limiter can crash the server if Redis isn't immediately available. The rate limiter was configured with `enableOfflineQueue: false`, which throws an error if Redis isn't ready when the `RedisStore` is instantiated.
+
+**Symptoms:**
+```
+Error: Login failed - error displayed: "Network Error"
+[Request FAILED] POST http://localhost:3000/api/auth/login - net::ERR_CONNECTION_REFUSED
+```
+
+**Diagnosis Steps:**
+1. Check if the backend actually started: Look for "API Gateway started on port 3000" in CI logs
+2. Check for Redis connection errors immediately after startup
+3. Verify ports are listening: `netstat -tlnp | grep 3000`
+
+**The Fix (already implemented):**
+- Rate limiter now uses `lazyConnect: true` for Redis
+- Redis initialization happens asynchronously (doesn't block startup)
+- Falls back to in-memory rate limiting if Redis is unavailable
+- See `apps/api-gateway/src/middleware/rateLimit.ts`
+
+**API URL Resolution in CI:**
+
+The frontend uses a layered URL resolution strategy (see `libs/shared-api-client/src/lib/apiClient.ts`):
+1. **Explicit config** - Passed to ApiClient constructor
+2. **Runtime override** - `window.__ENV__.API_BASE_URL` (set by env.js in CI)
+3. **Build-time** - `process.env.NX_API_BASE_URL` (replaced by DefinePlugin)
+4. **Default fallback** - `https://localhost/api`
+
+The API client uses **lazy initialization** to ensure `window.__ENV__` is available before determining the URL. The axios instance is only created on the first API call, not when the module loads.
+
+**CI Build Verification:**
+The CI workflow verifies the correct URL is baked into the bundle:
+```bash
+grep -q 'localhost:3000' dist/apps/shell/*.js
+```
+
 ## Access Points
 
 | Service | URL | Credentials | Notes |
