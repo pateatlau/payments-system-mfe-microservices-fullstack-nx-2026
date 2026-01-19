@@ -8,13 +8,20 @@
  *   - Admin Service proxy (/api/admin -> http://localhost:3003)
  *   - Profile Service proxy (/api/profile -> http://localhost:3004)
  *   - Circuit breaker protection for all services (Phase 5.1)
+ *   - API versioning support (Phase 6.4): /api/v1/auth, /api/v2/auth, etc.
  *
  * POC-3 Implementation: Production-ready streaming HTTP proxy with circuit breaker
  */
 
-import { Router } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
 import { createStreamingProxy, ProxyTarget, getAllProxyCircuitStats } from '../middleware/proxy';
 import { logger } from '../utils/logger';
+import {
+  apiVersionMiddleware,
+  setVersionConfig,
+  getVersionConfig,
+  VersionedRequest,
+} from '../middleware/apiVersion';
 
 /**
  * Circuit breaker configuration (shared across services)
@@ -27,6 +34,37 @@ const circuitBreakerConfig = {
 };
 
 const router = Router();
+
+/**
+ * Initialize API versioning configuration
+ *
+ * Currently supports v1 only. When adding v2:
+ * 1. Add 2 to supportedVersions array
+ * 2. Update latestVersion to 2
+ * 3. Add v1 to deprecatedVersions with sunset date
+ */
+setVersionConfig({
+  supportedVersions: [1],
+  defaultVersion: 1,
+  latestVersion: 1,
+  deprecatedVersions: [
+    // Example for future deprecation:
+    // { version: 1, sunsetDate: '2027-01-01', message: 'Please migrate to v2' }
+  ],
+  allowUnversioned: true, // Allow /api/auth as alias for /api/v1/auth
+});
+
+/**
+ * Apply API versioning middleware to all API routes
+ * This extracts version from URL or headers and adds it to the request
+ */
+router.use('/api', apiVersionMiddleware);
+
+/**
+ * Versioned routes (/api/v1/*, /api/v2/*)
+ * These are rewritten by apiVersionMiddleware to /api/*
+ * So they are handled by the same proxy routes below
+ */
 
 /**
  * Service target configurations
@@ -155,11 +193,54 @@ router.use(
 );
 
 /**
+ * API Version Info Endpoint
+ *
+ * GET /api/version - Returns current API versioning information
+ */
+router.get('/api/version', (_req: Request, res: Response) => {
+  const config = getVersionConfig();
+  res.json({
+    success: true,
+    data: {
+      currentVersion: config.latestVersion,
+      supportedVersions: config.supportedVersions,
+      defaultVersion: config.defaultVersion,
+      deprecatedVersions: config.deprecatedVersions.map((d) => ({
+        version: d.version,
+        sunsetDate: d.sunsetDate,
+        message: d.message,
+      })),
+      versioningMethods: {
+        urlBased: {
+          description: 'Include version in URL path',
+          example: '/api/v1/auth/login',
+          format: '/api/v{version}/{resource}',
+        },
+        headerBased: {
+          description: 'Include version in Accept header',
+          example: 'Accept: application/vnd.api+json; version=1',
+          alternativeFormat: 'Accept: application/vnd.api.v1+json',
+        },
+      },
+      documentation: '/api-docs',
+    },
+  });
+});
+
+/**
  * Log proxy route initialization
  */
+const versionConfig = getVersionConfig();
 logger.info('API Gateway proxy routes initialized', {
   services: Object.keys(services),
   routes: ['/api/auth', '/api/payments', '/api/admin', '/api/profile'],
+  versionedRoutes: ['/api/v1/auth', '/api/v1/payments', '/api/v1/admin', '/api/v1/profile'],
+  apiVersioning: {
+    supportedVersions: versionConfig.supportedVersions,
+    defaultVersion: versionConfig.defaultVersion,
+    latestVersion: versionConfig.latestVersion,
+    deprecatedVersions: versionConfig.deprecatedVersions.length,
+  },
   circuitBreaker: {
     enabled: circuitBreakerConfig.enabled,
     errorThresholdPercentage: circuitBreakerConfig.errorThresholdPercentage,
@@ -170,7 +251,8 @@ logger.info('API Gateway proxy routes initialized', {
 
 /**
  * Export circuit stats getter for health endpoint
+ * Export version config getter for other modules
  */
-export { getAllProxyCircuitStats };
+export { getAllProxyCircuitStats, getVersionConfig };
 
 export default router;
