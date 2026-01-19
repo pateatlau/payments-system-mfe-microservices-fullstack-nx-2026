@@ -76,17 +76,21 @@ export class ApiClient {
     // Production: Through nginx proxy (https://localhost/api)
     // API Gateway proxies to backend services (Auth, Payments, Admin, Profile)
 
-    // Access environment variable (replaced by DefinePlugin at build time in browser)
+    // API URL Resolution Order:
+    // 1. Explicit config.baseURL (passed to ApiClient constructor)
+    // 2. Runtime window.__ENV__?.API_BASE_URL (for CI/runtime override)
+    // 3. Build-time process.env.NX_API_BASE_URL (replaced by DefinePlugin)
+    // 4. Default: https://localhost/api (nginx proxy for local dev)
+    //
     // DefinePlugin replaces 'process.env.NX_API_BASE_URL' with the actual string value
     // IMPORTANT: Access the full path directly without guards!
-    // DefinePlugin does literal text replacement - it replaces the EXACT string
-    // 'process.env.NX_API_BASE_URL' with the value. Any guards like
-    // 'typeof process !== undefined && process.env' would NOT be replaced
-    // and would fail at runtime since process.env is undefined in browser.
     const envBaseURL = process.env.NX_API_BASE_URL;
-    // Default to nginx proxy (HTTPS) for development
-    // For direct API Gateway access, set NX_API_BASE_URL=http://localhost:3000/api
-    const baseURL = config.baseURL ?? envBaseURL ?? 'https://localhost/api';
+
+    // Check for runtime override (useful for CI where we can inject config after build)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const runtimeBaseURL = typeof window !== 'undefined' ? (window as any).__ENV__?.API_BASE_URL : undefined;
+
+    const baseURL = config.baseURL ?? runtimeBaseURL ?? envBaseURL ?? 'https://localhost/api';
 
     this.axiosInstance = axios.create({
       baseURL,
