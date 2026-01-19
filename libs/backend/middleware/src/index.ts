@@ -5,3 +5,4 @@
  */
 
 export * from './lib/response-sanitizer';
+export * from './lib/request-limits';

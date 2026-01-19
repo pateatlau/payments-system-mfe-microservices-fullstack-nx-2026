@@ -59,6 +59,10 @@ import {
   initTracing,
   correlationIdMiddleware,
 } from '@mfe-poc/observability';
+import {
+  createRequestLimitsMiddleware,
+  bodyParserErrorHandler,
+} from '@payments-system/middleware';
 import { createApolloServer, applyGraphQLMiddleware } from './graphql/server';
 import { optionalAuth } from './middleware/auth';
 import { setupSwagger } from './swagger';
@@ -115,6 +119,18 @@ app.use(requestLogger);
 // 4. Rate limiting
 // Type assertion needed for express-rate-limit compatibility with Express 5
 app.use(generalRateLimiter as unknown as express.RequestHandler);
+
+// 5. Request size limits (URL, headers, parameters)
+// Note: Body size limits are handled by individual services since API Gateway uses streaming proxy
+const requestLimits = createRequestLimitsMiddleware({
+  serviceName: 'api-gateway',
+  maxUrlLength: 2048,
+  maxHeaderSize: 8 * 1024, // 8KB
+  maxHeaderCount: 100,
+  maxParameterCount: 100,
+  skipPaths: ['/health', '/metrics'],
+});
+app.use(requestLimits);
 
 /**
  * Routes
@@ -174,8 +190,11 @@ const wsServer = createWebSocketServer(httpServer);
     // Initialize GraphQL server
     apolloServer = createApolloServer();
 
-    // GraphQL needs body parsing (JSON) - apply it only for /graphql route
-    app.use('/graphql', express.json());
+    // GraphQL needs body parsing (JSON) - apply it only for /graphql route with size limit
+    app.use('/graphql', express.json({ limit: '1mb' }));
+
+    // Body parser error handler for GraphQL endpoint
+    app.use('/graphql', bodyParserErrorHandler('api-gateway'));
 
     // Apply optional auth to extract user from token if present
     app.use('/graphql', optionalAuth);

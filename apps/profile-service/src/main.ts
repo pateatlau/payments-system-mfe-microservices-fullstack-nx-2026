@@ -21,7 +21,11 @@ import {
   initTracing,
   correlationIdMiddleware,
 } from '@mfe-poc/observability';
-import { createResponseSanitizer } from '@payments-system/middleware';
+import {
+  createResponseSanitizer,
+  createRequestLimitsMiddleware,
+  bodyParserErrorHandler,
+} from '@payments-system/middleware';
 
 /**
  * Initialize OpenTelemetry Tracing (must be first, before any other imports/initialization)
@@ -97,9 +101,25 @@ app.use(
   })
 );
 
+// Request size limits middleware
+// Protects against oversized URLs, headers, and parameter pollution
+const requestLimits = createRequestLimitsMiddleware({
+  serviceName: 'profile-service',
+  maxUrlLength: 2048,
+  maxHeaderSize: 8 * 1024, // 8KB
+  maxHeaderCount: 100,
+  maxParameterCount: 50,
+  skipPaths: ['/health', '/metrics'],
+});
+app.use(requestLimits);
+
 // Increase JSON body limit to 5MB for base64-encoded images
 // TODO: Replace with proper file upload to cloud storage (S3) and reduce limit
 app.use(express.json({ limit: '5mb' }));
+app.use(express.urlencoded({ limit: '1mb', extended: true }));
+
+// Body parser error handler (converts body-parser errors to consistent format)
+app.use(bodyParserErrorHandler('profile-service'));
 
 // Response sanitization middleware
 // Prevents PII leakage and removes stack traces in production
