@@ -16,7 +16,6 @@ import {
 } from './feature-flags';
 
 import {
-  DegradedModeManager,
   createDegradedModeManager,
   HealthLevel,
   createHealthCheckHandlers,

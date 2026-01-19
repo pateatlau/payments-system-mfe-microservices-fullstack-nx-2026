@@ -99,9 +99,8 @@ function getDependencyKey(serviceName: string, dependencyType: DependencyType, d
  * @param config - Circuit breaker configuration
  * @returns The circuit breaker instance
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function createDependencyCircuitBreaker(
-  action: (...args: any[]) => Promise<any>,
+  action: (...args: unknown[]) => Promise<unknown>,
   config: DependencyCircuitBreakerConfig
 ): CircuitBreakerInstance {
   const {

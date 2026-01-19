@@ -127,7 +127,7 @@ export class HttpCircuitBreaker {
       errorThresholdPercentage = 50,
       resetTimeout = 30000,
       volumeThreshold = 5,
-      logger = console.log.bind(console),
+      logger = (msg: string, ctx: Record<string, unknown>) => process.stdout.write(JSON.stringify({ message: msg, ...ctx }) + '\n'),
       fallback,
       onOpen,
       onClose,

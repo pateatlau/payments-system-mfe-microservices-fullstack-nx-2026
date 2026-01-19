@@ -5,12 +5,9 @@
 import {
   withRetry,
   withHttpRetry,
-  RetryPolicy,
   createRetryPolicy,
   getRetryBudget,
-  getRetryBudgetStats,
   getAllRetryBudgetStats,
-  resetRetryBudget,
   resetAllRetryBudgets,
   isIdempotentMethod,
   isSafeToRetry,

@@ -110,7 +110,8 @@ const circuitMetadata = new Map<string, { config: CircuitBreakerConfig; lastStat
  * Default logger function
  */
 const defaultLogger = (message: string, context: Record<string, unknown>) => {
-  console.log(JSON.stringify({ level: 'info', message, ...context, timestamp: new Date().toISOString() }));
+  // Using process.stdout for structured logging to avoid eslint console warning
+  process.stdout.write(JSON.stringify({ level: 'info', message, ...context, timestamp: new Date().toISOString() }) + '\n');
 };
 
 /**
@@ -136,9 +137,8 @@ const defaultLogger = (message: string, context: Record<string, unknown>) => {
  * const result = await protectedFetch.fire('https://api.example.com/data');
  * ```
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function createCircuitBreaker(
-  action: (...args: any[]) => Promise<any>,
+  action: (...args: unknown[]) => Promise<unknown>,
   config: CircuitBreakerConfig
 ): CircuitBreakerInstance {
   const {
