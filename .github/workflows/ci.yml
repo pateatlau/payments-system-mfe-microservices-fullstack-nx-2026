@@ -446,17 +446,18 @@ jobs:
 
           echo "=== Verifying built shell contains correct API URL ==="
           echo "Looking for 'localhost:3000' in shell bundle..."
-          grep -o 'localhost:3000[^"]*' dist/apps/shell/*.js | head -5 || echo "localhost:3000 NOT found"
-
-          echo "Looking for 'https://localhost/api' (wrong URL) in shell bundle..."
-          if grep -q 'https://localhost/api' dist/apps/shell/*.js; then
-            echo "ERROR: Wrong URL 'https://localhost/api' found in bundle!"
-            grep -o 'https://localhost/api[^"]*' dist/apps/shell/*.js | head -5
-            exit 1
+          if grep -q 'localhost:3000' dist/apps/shell/*.js; then
+            echo "GOOD: Found 'localhost:3000' in bundle (build-time env var was applied)"
+            grep -o 'localhost:3000[^"]*' dist/apps/shell/*.js | head -5
           else
-            echo "Good: 'https://localhost/api' NOT in bundle"
+            echo "ERROR: 'localhost:3000' NOT found in bundle!"
+            echo "This means NX_API_BASE_URL was not applied at build time"
+            exit 1
           fi
 
+          # Note: The fallback URL 'https://localhost/api' will also be in the bundle
+          # because it's a hardcoded default. This is expected. What matters is that
+          # the runtime URL resolution picks up window.__ENV__ or the DefinePlugin value first.
           echo "=== Bundle verification complete ==="
 
       - name: Build affected projects (feature branches)
@@ -615,14 +616,12 @@ jobs:
         run: |
           echo "=== Verifying downloaded build artifacts ==="
           echo "Checking if 'localhost:3000' is in shell bundle..."
-          grep -o 'localhost:3000[^"]*' dist/apps/shell/*.js | head -5 || echo "WARNING: localhost:3000 NOT found in downloaded bundle"
-
-          echo "Checking if wrong URL 'https://localhost/api' is in shell bundle..."
-          if grep -q 'https://localhost/api' dist/apps/shell/*.js; then
-            echo "ERROR: Downloaded bundle has wrong URL 'https://localhost/api'"
-            echo "This means the build job did not use the correct env var"
+          if grep -q 'localhost:3000' dist/apps/shell/*.js; then
+            echo "GOOD: Found 'localhost:3000' in downloaded bundle"
+            grep -o 'localhost:3000[^"]*' dist/apps/shell/*.js | head -5
           else
-            echo "Good: 'https://localhost/api' NOT in downloaded bundle"
+            echo "WARNING: 'localhost:3000' NOT found in downloaded bundle"
+            echo "Runtime env.js injection will be needed"
           fi
 
       - name: Inject runtime API URL configuration
