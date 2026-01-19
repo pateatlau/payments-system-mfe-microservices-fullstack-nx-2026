@@ -430,26 +430,41 @@ jobs:
         run: |
           echo "=== Build Environment ==="
           echo "NX_API_BASE_URL=$NX_API_BASE_URL"
-          # Export explicitly to ensure child processes inherit
-          export NX_API_BASE_URL="http://localhost:3000/api"
-          echo "After export: NX_API_BASE_URL=$NX_API_BASE_URL"
-          # Disable both local and cloud caching to ensure fresh builds
+
+          # Delete any existing dist to ensure clean build
+          rm -rf dist/
+
+          # Build with explicit env var and ALL caching disabled
+          NX_API_BASE_URL="http://localhost:3000/api" \
+          NX_NO_CLOUD=true \
           NX_CLOUD_DISTRIBUTED_EXECUTION=false \
           NX_SKIP_NX_CACHE=true \
           pnpm nx run-many --target=build \
             --all \
             --configuration=production \
             --skip-nx-cache
+
           echo "=== Verifying built shell contains correct API URL ==="
-          grep -o '"NX_API_BASE_URL":"[^"]*"' dist/apps/shell/*.js | head -3 || echo "Pattern not found"
-          # Also verify the actual content in main.js
-          echo "=== Grep for localhost:3000 in shell bundle ==="
-          grep -l "localhost:3000" dist/apps/shell/*.js || echo "localhost:3000 NOT found in bundle"
-          grep -l "https://localhost/api" dist/apps/shell/*.js && echo "WARNING: Wrong URL found!" || echo "Good: https://localhost/api not in bundle"
+          echo "Looking for 'localhost:3000' in shell bundle..."
+          grep -o 'localhost:3000[^"]*' dist/apps/shell/*.js | head -5 || echo "localhost:3000 NOT found"
+
+          echo "Looking for 'https://localhost/api' (wrong URL) in shell bundle..."
+          if grep -q 'https://localhost/api' dist/apps/shell/*.js; then
+            echo "ERROR: Wrong URL 'https://localhost/api' found in bundle!"
+            grep -o 'https://localhost/api[^"]*' dist/apps/shell/*.js | head -5
+            exit 1
+          else
+            echo "Good: 'https://localhost/api' NOT in bundle"
+          fi
+
+          echo "=== Bundle verification complete ==="
 
       - name: Build affected projects (feature branches)
         if: github.ref != 'refs/heads/main' && github.ref != 'refs/heads/develop'
         run: |
+          rm -rf dist/
+          NX_API_BASE_URL="http://localhost:3000/api" \
+          NX_NO_CLOUD=true \
           NX_CLOUD_DISTRIBUTED_EXECUTION=false \
           NX_SKIP_NX_CACHE=true \
           pnpm nx affected --target=build \
@@ -596,11 +611,25 @@ jobs:
           name: build-artifacts
           path: dist/
 
+      - name: Verify downloaded artifacts have correct API URL
+        run: |
+          echo "=== Verifying downloaded build artifacts ==="
+          echo "Checking if 'localhost:3000' is in shell bundle..."
+          grep -o 'localhost:3000[^"]*' dist/apps/shell/*.js | head -5 || echo "WARNING: localhost:3000 NOT found in downloaded bundle"
+
+          echo "Checking if wrong URL 'https://localhost/api' is in shell bundle..."
+          if grep -q 'https://localhost/api' dist/apps/shell/*.js; then
+            echo "ERROR: Downloaded bundle has wrong URL 'https://localhost/api'"
+            echo "This means the build job did not use the correct env var"
+          else
+            echo "Good: 'https://localhost/api' NOT in downloaded bundle"
+          fi
+
       - name: Inject runtime API URL configuration
         run: |
           echo "=== Injecting runtime API URL for E2E tests ==="
           # Create env.js that sets window.__ENV__ with the correct API URL
-          # This overrides the build-time URL at runtime
+          # This provides a runtime override in case build-time URL is wrong
           ENV_SCRIPT='window.__ENV__ = { API_BASE_URL: "http://localhost:3000/api" };'
 
           # Inject into all frontend apps
@@ -614,6 +643,12 @@ jobs:
                 sed -i 's|<head>|<head><script src="/env.js"></script>|' "dist/apps/$app/index.html"
                 echo "Updated index.html for $app"
               fi
+
+              # Verify the injection worked
+              echo "--- $app/index.html head section ---"
+              head -10 "dist/apps/$app/index.html"
+              echo "--- $app/env.js contents ---"
+              cat "dist/apps/$app/env.js"
             fi
           done
 
