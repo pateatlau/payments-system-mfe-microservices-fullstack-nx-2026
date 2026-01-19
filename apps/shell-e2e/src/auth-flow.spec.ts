@@ -47,8 +47,8 @@ test.describe('Authentication Flow', () => {
   }) => {
     await page.goto('/signup');
 
-    // Wait for sign-up form to load
-    await expect(page.locator('input[type="text"]')).toBeVisible({
+    // Wait for sign-up form to load - use specific selectors for name field
+    await expect(page.locator('input#name, input[name="name"]').first()).toBeVisible({
       timeout: 10000,
     });
     await expect(page.locator('input[type="email"]')).toBeVisible({
@@ -61,7 +61,7 @@ test.describe('Authentication Flow', () => {
 
     // Fill in sign-up form with unique email to avoid conflicts
     const uniqueEmail = `newuser-${Date.now()}@example.com`;
-    await page.fill('input[type="text"]', 'New User');
+    await page.locator('input#name, input[name="name"]').first().fill('New User');
     await page.fill('input[type="email"]', uniqueEmail);
     await page.fill('input[type="password"]', 'TestPassword123!');
 
@@ -105,13 +105,13 @@ test.describe('Authentication Flow', () => {
   test('should show validation errors for weak password', async ({ page }) => {
     await page.goto('/signup');
 
-    // Wait for form to load (use .first() for name field as there may be multiple text inputs)
-    await expect(page.locator('input[type="text"]').first()).toBeVisible({
+    // Wait for form to load - use specific selector for name field
+    await expect(page.locator('input#name, input[name="name"]').first()).toBeVisible({
       timeout: 10000,
     });
 
     // Fill in form with weak password
-    await page.fill('input[type="text"]', 'New User');
+    await page.locator('input#name, input[name="name"]').first().fill('New User');
     await page.fill('input[type="email"]', 'newuser@example.com');
     await page.fill('input[type="password"]', 'weak');
 
@@ -146,7 +146,7 @@ test.describe('Authentication Flow', () => {
 
     // Should navigate to sign-up page
     await expect(page).toHaveURL(/.*signup/);
-    await expect(page.locator('input[type="text"]')).toBeVisible({
+    await expect(page.locator('input#name, input[name="name"]').first()).toBeVisible({
       timeout: 10000,
     });
 
