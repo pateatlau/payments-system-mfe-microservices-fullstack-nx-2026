@@ -6,8 +6,7 @@
  * Falls back to in-memory store if Redis is unavailable (e.g., in CI)
  */
 
-import rateLimit, { type Store } from 'express-rate-limit';
-import RedisStore from 'rate-limit-redis';
+import rateLimit from 'express-rate-limit';
 import Redis from 'ioredis';
 import { config } from '../config';
 
@@ -63,33 +62,8 @@ function createRedisClient(): Redis | null {
   }
 }
 
-/**
- * Create rate limit store - uses Redis if available, otherwise in-memory
- */
-function createRateLimitStore(prefix: string): Store | undefined {
-  // Try to use Redis if client is available and connected
-  if (redisClient && redisConnected) {
-    try {
-      const sendCommand = async (...args: string[]): Promise<number | string | (number | string)[]> => {
-        const command = args[0] as string;
-        const commandArgs = args.slice(1);
-        const result = await redisClient!.call(command, ...commandArgs);
-        return result as number | string | (number | string)[];
-      };
-
-      return new RedisStore({
-        sendCommand,
-        prefix,
-      });
-    } catch (error) {
-      console.warn(`[RateLimit] Failed to create Redis store for ${prefix}, using in-memory:`, error);
-    }
-  }
-
-  // Return undefined to use express-rate-limit's default in-memory store
-  console.log(`[RateLimit] Using in-memory store for ${prefix}`);
-  return undefined;
-}
+// Note: createRateLimitStore removed - using in-memory store by default for reliability
+// Redis store can be re-enabled later if needed for distributed rate limiting
 
 /**
  * Initialize Redis connection asynchronously
