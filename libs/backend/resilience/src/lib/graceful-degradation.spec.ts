@@ -341,7 +341,10 @@ describe('Degraded Mode Manager', () => {
     });
 
     it('should handle health check timeout', async () => {
+      jest.useFakeTimers();
+
       const slowHealthCheck = () => new Promise<boolean>((resolve) => {
+        // This timer would be 10s in real time
         setTimeout(() => resolve(true), 10000);
       });
 
@@ -352,10 +355,19 @@ describe('Degraded Mode Manager', () => {
         ],
       });
 
-      const result = await manager.performHealthCheck();
+      const resultPromise = manager.performHealthCheck();
+
+      // Advance timers to trigger the timeout (100ms component timeout)
+      jest.advanceTimersByTime(150);
+
+      const result = await resultPromise;
 
       expect(result.components['slow'].isHealthy).toBe(false);
       expect(result.components['slow'].lastError).toContain('timeout');
+
+      // Advance remaining timers to clean up the 10s timer
+      jest.runAllTimers();
+      jest.useRealTimers();
     });
 
     it('should unregister components', () => {

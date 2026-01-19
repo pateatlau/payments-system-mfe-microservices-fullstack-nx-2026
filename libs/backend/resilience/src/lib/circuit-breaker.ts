@@ -373,16 +373,21 @@ export function closeCircuit(name: string): boolean {
 
 /**
  * Reset circuit breaker statistics
+ *
+ * Note: Stats reset is not supported by opossum - this function always returns false.
+ * Statistics accumulate over the lifetime of the circuit breaker.
+ * To reset stats, remove and recreate the circuit breaker.
+ *
+ * @param name - Circuit breaker name
+ * @returns false - reset not supported
  */
 export function resetCircuitStats(name: string): boolean {
   const breaker = circuitBreakers.get(name);
   if (!breaker) {
     return false;
   }
-  // opossum doesn't have a reset method, but we can track this externally
-  // Access stats to ensure the breaker is valid (side effect)
-  void breaker.stats;
-  return true;
+  // opossum doesn't support resetting stats - return false to indicate operation not supported
+  return false;
 }
 
 /**

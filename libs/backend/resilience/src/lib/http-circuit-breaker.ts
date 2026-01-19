@@ -151,11 +151,20 @@ export class HttpCircuitBreaker {
     // Create circuit breaker for HTTP requests
     this.breaker = createCircuitBreaker(
       async (requestConfig: HttpRequestConfig) => {
+        // Normalize URL: use as-is if absolute, otherwise join with baseUrl
+        let normalizedUrl: string;
+        if (requestConfig.url.startsWith('http')) {
+          normalizedUrl = requestConfig.url;
+        } else {
+          // Ensure exactly one slash between baseUrl and path
+          const basePath = this.baseUrl.endsWith('/') ? this.baseUrl.slice(0, -1) : this.baseUrl;
+          const pathPart = requestConfig.url.startsWith('/') ? requestConfig.url : `/${requestConfig.url}`;
+          normalizedUrl = `${basePath}${pathPart}`;
+        }
+
         return this.httpClient({
           ...requestConfig,
-          url: requestConfig.url.startsWith('http')
-            ? requestConfig.url
-            : `${this.baseUrl}${requestConfig.url}`,
+          url: normalizedUrl,
           headers: {
             ...this.defaultHeaders,
             ...requestConfig.headers,

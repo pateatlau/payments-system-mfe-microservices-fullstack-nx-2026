@@ -211,12 +211,15 @@ export function getServiceDependencyStats(serviceName: string): Record<string, C
 
 /**
  * Check if all dependencies for a service are healthy
+ *
+ * Note: HALF_OPEN state is considered unhealthy as the circuit is still
+ * recovering and not fully operational.
  */
 export function areServiceDependenciesHealthy(serviceName: string): boolean {
   for (const [key] of dependencyBreakers) {
     if (key.startsWith(`${serviceName}:`)) {
       const state = getCircuitState(key);
-      if (state === CircuitState.OPEN) {
+      if (state === CircuitState.OPEN || state === CircuitState.HALF_OPEN) {
         return false;
       }
     }
@@ -285,7 +288,7 @@ export function createDatabaseCircuitBreaker(
 /**
  * Wrap a Prisma operation with circuit breaker protection
  */
-export function withDatabaseCircuitBreaker<T>(
+export async function withDatabaseCircuitBreaker<T>(
   serviceName: string,
   operation: () => Promise<T>,
   options?: { dependencyId?: string; fallback?: () => T }
@@ -298,11 +301,15 @@ export function withDatabaseCircuitBreaker<T>(
     return operation();
   }
 
-  if (options?.fallback) {
-    entry.breaker.fallback(options.fallback);
+  // Handle per-call fallback without mutating the shared circuit breaker
+  try {
+    return await entry.breaker.fire(operation) as T;
+  } catch (error) {
+    if (options?.fallback) {
+      return options.fallback();
+    }
+    throw error;
   }
-
-  return entry.breaker.fire(operation) as Promise<T>;
 }
 
 // ============================================================================
@@ -348,7 +355,7 @@ export function createRedisCircuitBreaker(
 /**
  * Wrap a Redis operation with circuit breaker protection
  */
-export function withRedisCircuitBreaker<T>(
+export async function withRedisCircuitBreaker<T>(
   serviceName: string,
   operation: () => Promise<T>,
   options?: { dependencyId?: string; fallback?: () => T }
@@ -361,11 +368,15 @@ export function withRedisCircuitBreaker<T>(
     return operation();
   }
 
-  if (options?.fallback) {
-    entry.breaker.fallback(options.fallback);
+  // Handle per-call fallback without mutating the shared circuit breaker
+  try {
+    return await entry.breaker.fire(operation) as T;
+  } catch (error) {
+    if (options?.fallback) {
+      return options.fallback();
+    }
+    throw error;
   }
-
-  return entry.breaker.fire(operation) as Promise<T>;
 }
 
 // ============================================================================
@@ -413,7 +424,7 @@ export function createRabbitMQCircuitBreaker(
 /**
  * Wrap a RabbitMQ operation with circuit breaker protection
  */
-export function withRabbitMQCircuitBreaker<T>(
+export async function withRabbitMQCircuitBreaker<T>(
   serviceName: string,
   operation: () => Promise<T>,
   options?: { dependencyId?: string; fallback?: () => T }
@@ -426,11 +437,15 @@ export function withRabbitMQCircuitBreaker<T>(
     return operation();
   }
 
-  if (options?.fallback) {
-    entry.breaker.fallback(options.fallback);
+  // Handle per-call fallback without mutating the shared circuit breaker
+  try {
+    return await entry.breaker.fire(operation) as T;
+  } catch (error) {
+    if (options?.fallback) {
+      return options.fallback();
+    }
+    throw error;
   }
-
-  return entry.breaker.fire(operation) as Promise<T>;
 }
 
 // ============================================================================

@@ -178,9 +178,11 @@ export function createMetricCallbacks(
       metrics.failuresTotal.inc(labels);
     },
     onTimeout: (_name: string) => {
+      metrics.requestsTotal.inc(labels);
       metrics.timeoutsTotal.inc(labels);
     },
     onReject: (_name: string) => {
+      metrics.requestsTotal.inc(labels);
       metrics.rejectsTotal.inc(labels);
     },
     onOpen: (_name: string) => {
