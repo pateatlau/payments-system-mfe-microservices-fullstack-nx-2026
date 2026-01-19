@@ -3,7 +3,7 @@
  */
 
 import { prisma as db } from '../lib/prisma';
-import { publishAdminUserDeleted } from '../events/publisher';
+import { publishAdminUserDeleted, publishAdminUserUpdated } from '../events/publisher';
 
 /**
  * Admin Service - Zero Coupling Pattern
@@ -170,6 +170,29 @@ export const adminService = {
       },
     });
 
+    // Publish event for Auth Service to update user and invalidate cache
+    try {
+      const changes: { name?: string; email?: string } = {};
+      if (data.name && data.name !== existingUser.name) {
+        changes.name = data.name;
+      }
+      if (data.email && data.email !== existingUser.email) {
+        changes.email = data.email;
+      }
+
+      if (Object.keys(changes).length > 0) {
+        await publishAdminUserUpdated({
+          userId,
+          updatedBy: 'admin', // TODO: Pass actual admin user ID from request context
+          updatedAt: new Date().toISOString(),
+          changes,
+        });
+      }
+    } catch (error) {
+      // Log error but don't fail the update - the local update succeeded
+      console.error('[Admin Service] Failed to publish admin.user.updated event:', error);
+    }
+
     return updatedUser;
   },
 
@@ -202,6 +225,21 @@ export const adminService = {
         updatedAt: true,
       },
     });
+
+    // Publish event for Auth Service to update user and invalidate cache
+    if (data.role !== existingUser.role) {
+      try {
+        await publishAdminUserUpdated({
+          userId,
+          updatedBy: 'admin', // TODO: Pass actual admin user ID from request context
+          updatedAt: new Date().toISOString(),
+          changes: { role: data.role },
+        });
+      } catch (error) {
+        // Log error but don't fail the update - the local update succeeded
+        console.error('[Admin Service] Failed to publish admin.user.updated event:', error);
+      }
+    }
 
     return updatedUser;
   },

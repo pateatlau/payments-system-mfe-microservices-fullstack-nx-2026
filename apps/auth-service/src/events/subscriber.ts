@@ -19,6 +19,7 @@ import { getConnectionManager } from './connection';
 import { config } from '../config';
 import { prisma } from '../lib/prisma';
 import { publishUserDeleted } from './publisher';
+import { cache, CacheTags } from '../lib/cache';
 
 let adminEventsSubscriber: RabbitMQSubscriber | null = null;
 
@@ -74,6 +75,15 @@ async function handleAdminUserDeleted(
     await prisma.user.delete({
       where: { id: userId },
     });
+
+    // Invalidate user cache
+    try {
+      await cache.invalidateByTag(CacheTags.user(userId));
+      console.log(`[Auth Service] Invalidated cache for deleted user ${userId}`);
+    } catch (cacheError) {
+      // Log but don't fail - user is already deleted
+      console.error(`[Auth Service] Failed to invalidate cache for user ${userId}:`, cacheError);
+    }
 
     console.log(`[Auth Service] Deleted user ${userId} from auth_db (reason: ${reason || 'admin action'})`);
 
@@ -140,6 +150,15 @@ async function handleAdminUserUpdated(
       where: { id: userId },
       data: updateData,
     });
+
+    // Invalidate user cache to ensure fresh data on next login
+    try {
+      await cache.invalidateByTag(CacheTags.user(userId));
+      console.log(`[Auth Service] Invalidated cache for user ${userId}`);
+    } catch (cacheError) {
+      // Log but don't fail - database is already updated
+      console.error(`[Auth Service] Failed to invalidate cache for user ${userId}:`, cacheError);
+    }
 
     console.log(`[Auth Service] Updated user ${userId} in auth_db:`, Object.keys(updateData));
 
