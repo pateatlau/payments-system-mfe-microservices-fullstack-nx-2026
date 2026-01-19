@@ -5,6 +5,7 @@
  */
 
 import express from 'express';
+import helmet from 'helmet';
 import { config } from './config';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 import healthRoutes from './routes/health';
@@ -60,6 +61,40 @@ app.use(
     httpActiveConnections: metrics.http.httpActiveConnections,
     httpErrorsTotal: metrics.http.httpErrorsTotal,
     normalizePath: defaultPathNormalizer,
+  })
+);
+
+// Security headers via Helmet
+// Protects against common web vulnerabilities (XSS, clickjacking, MIME sniffing, etc.)
+app.use(
+  helmet({
+    // Content Security Policy - restrict resource loading
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        scriptSrc: ["'self'"],
+        imgSrc: ["'self'", 'data:', 'https:'],
+      },
+    },
+    // HTTP Strict Transport Security
+    hsts: {
+      maxAge: 31536000, // 1 year
+      includeSubDomains: true,
+      preload: true,
+    },
+    // Prevent clickjacking
+    frameguard: {
+      action: 'deny',
+    },
+    // Prevent MIME type sniffing
+    noSniff: true,
+    // XSS filter (legacy browsers)
+    xssFilter: true,
+    // CRITICAL for Safari: Allow cross-origin requests from MFE frontend
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+    // Allow popups for OAuth flows while maintaining security
+    crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' },
   })
 );
 
