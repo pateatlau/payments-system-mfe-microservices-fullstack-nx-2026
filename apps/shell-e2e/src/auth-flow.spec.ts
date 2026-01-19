@@ -19,7 +19,37 @@ test.describe('Authentication Flow', () => {
   test('should complete sign-in flow: sign in → redirect → payments page', async ({
     page,
   }) => {
+    // Intercept ALL requests to debug URL issues in CI
+    const apiRequests: string[] = [];
+    const failedRequests: string[] = [];
+
+    // Listen for request failures
+    page.on('requestfailed', request => {
+      const failure = request.failure();
+      failedRequests.push(`FAILED: ${request.method()} ${request.url()} - ${failure?.errorText || 'unknown error'}`);
+      console.log(`[Request FAILED] ${request.method()} ${request.url()} - ${failure?.errorText}`);
+    });
+
+    await page.route('**/*', async (route, request) => {
+      const url = request.url();
+      // Capture any request that looks like an API call
+      if (url.includes('/api/') || url.includes('/auth/') || url.includes('localhost:3000') || url.includes('localhost/api')) {
+        apiRequests.push(`${request.method()} ${url}`);
+        console.log(`[API Request] ${request.method()} ${url}`);
+      }
+      await route.continue();
+    });
+
     await page.goto('/signin');
+
+    // Debug: Log what window.__ENV__ contains
+    const envConfig = await page.evaluate(() => {
+      return {
+        windowEnv: (window as unknown as { __ENV__?: { API_BASE_URL?: string } }).__ENV__,
+        processEnvExists: typeof process !== 'undefined',
+      };
+    });
+    console.log('[DEBUG] window.__ENV__:', JSON.stringify(envConfig));
 
     // Wait for sign-in form to load
     await expect(page.locator('input[type="email"]')).toBeVisible({
@@ -41,7 +71,15 @@ test.describe('Authentication Flow', () => {
         .then(async () => {
           // Capture the actual error message for debugging
           const errorText = await page.locator('[role="alert"]').first().textContent();
-          throw new Error(`Login failed - error displayed: "${errorText}"`);
+          // Include API requests in error message for debugging
+          const apiInfo = apiRequests.length > 0
+            ? `\nAPI requests made: ${apiRequests.join(', ')}`
+            : '\nNo API requests intercepted';
+          const failedInfo = failedRequests.length > 0
+            ? `\nFailed requests: ${failedRequests.join(', ')}`
+            : '';
+          const envInfo = `\nwindow.__ENV__: ${JSON.stringify(envConfig)}`;
+          throw new Error(`Login failed - error displayed: "${errorText}"${apiInfo}${failedInfo}${envInfo}`);
         }),
     ]);
 
