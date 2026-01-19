@@ -99,8 +99,9 @@ function getDependencyKey(serviceName: string, dependencyType: DependencyType, d
  * @param config - Circuit breaker configuration
  * @returns The circuit breaker instance
  */
-export function createDependencyCircuitBreaker(
-  action: (...args: unknown[]) => Promise<unknown>,
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Generic wrapper needs to accept any function signature
+export function createDependencyCircuitBreaker<T extends (...args: any[]) => Promise<any>>(
+  action: T,
   config: DependencyCircuitBreakerConfig
 ): CircuitBreakerInstance {
   const {

@@ -137,8 +137,9 @@ const defaultLogger = (message: string, context: Record<string, unknown>) => {
  * const result = await protectedFetch.fire('https://api.example.com/data');
  * ```
  */
-export function createCircuitBreaker(
-  action: (...args: unknown[]) => Promise<unknown>,
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Generic wrapper needs to accept any function signature
+export function createCircuitBreaker<T extends (...args: any[]) => Promise<any>>(
+  action: T,
   config: CircuitBreakerConfig
 ): CircuitBreakerInstance {
   const {
