@@ -668,19 +668,51 @@ jobs:
 
       - name: Start backend services
         run: |
-          pnpm dev:backend &
+          echo "=== Starting backend services ==="
+
+          # Start backend services and capture output to file for debugging
+          pnpm dev:backend > backend.log 2>&1 &
+          BACKEND_PID=$!
+          echo "Backend started with PID: $BACKEND_PID"
+
+          # Wait for API Gateway health endpoint
           echo "Waiting for backend services to be ready..."
-          # Wait for API Gateway health endpoint (it depends on other services)
+          READY=false
           for i in {1..60}; do
             if curl -s http://localhost:3000/health > /dev/null 2>&1; then
               echo "API Gateway is ready!"
+              READY=true
               break
             fi
             echo "Waiting for API Gateway... ($i/60)"
+
+            # Check if backend process is still running
+            if ! kill -0 $BACKEND_PID 2>/dev/null; then
+              echo "ERROR: Backend process died! Showing logs:"
+              cat backend.log
+              exit 1
+            fi
+
             sleep 2
           done
+
+          if [ "$READY" = false ]; then
+            echo "ERROR: Backend services failed to start within timeout!"
+            echo "=== Backend logs ==="
+            cat backend.log
+            echo "=== Checking what's listening on ports ==="
+            netstat -tlnp 2>/dev/null || ss -tlnp 2>/dev/null || echo "netstat/ss not available"
+            exit 1
+          fi
+
+          # Show what ports are actually listening
+          echo "=== Services listening on ports ==="
+          netstat -tlnp 2>/dev/null | grep -E ':(3000|3001|3002|3003|3004)' || ss -tlnp 2>/dev/null | grep -E ':(3000|3001|3002|3003|3004)' || echo "Port check not available"
+
           # Additional buffer for all services to stabilize
           sleep 5
+
+          echo "=== Backend services ready ==="
 
       - name: Run E2E tests
         run: pnpm nx e2e shell-e2e
