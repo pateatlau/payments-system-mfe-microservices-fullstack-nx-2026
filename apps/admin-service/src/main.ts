@@ -21,6 +21,7 @@ import {
   initTracing,
   correlationIdMiddleware,
 } from '@mfe-poc/observability';
+import { createResponseSanitizer } from '@payments-system/middleware';
 import {
   startEventSubscriptions,
   closeSubscriptions,
@@ -122,6 +123,17 @@ if (!isDevelopment) {
 // Body parsing
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Response sanitization middleware
+// Prevents PII leakage and removes stack traces in production
+app.use(
+  createResponseSanitizer({
+    removeStackTraces: config.nodeEnv === 'production',
+    redactPii: true,
+    sanitizePaths: true,
+    environment: config.nodeEnv,
+  })
+);
 
 // Request logging
 app.use((req, _res, next) => {

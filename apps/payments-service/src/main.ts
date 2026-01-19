@@ -21,6 +21,7 @@ import {
   initTracing,
   correlationIdMiddleware,
 } from '@mfe-poc/observability';
+import { createResponseSanitizer } from '@payments-system/middleware';
 
 /**
  * Initialize OpenTelemetry Tracing (must be first, before any other imports/initialization)
@@ -124,6 +125,17 @@ app.use(
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Response sanitization middleware
+// Prevents PII leakage and removes stack traces in production
+app.use(
+  createResponseSanitizer({
+    removeStackTraces: config.nodeEnv === 'production',
+    redactPii: true,
+    sanitizePaths: true,
+    environment: config.nodeEnv,
+  })
+);
 
 // Routes
 app.use(healthRoutes);
