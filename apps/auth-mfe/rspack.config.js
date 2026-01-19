@@ -278,7 +278,7 @@ module.exports = {
   devServer: {
     port: 4201,
     host: '0.0.0.0', // Bind to all interfaces for Docker nginx access
-    hot: true,
+    hot: true, // HMR enabled - falls back to page refresh for changes that can't be hot-reloaded
     liveReload: false, // Disable live reload - prevents auto page refresh on HMR failure
     historyApiFallback: true,
     allowedHosts: 'all', // Allow nginx proxy requests
@@ -302,6 +302,7 @@ module.exports = {
         errors: true,
         warnings: false,
       },
+      reconnect: 5, // Limit reconnection attempts to prevent reload loops
       // HMR WebSocket configuration for HTTPS mode
       webSocketURL:
         process.env.NX_HTTPS_MODE === 'true'
