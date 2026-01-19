@@ -20,29 +20,12 @@ import { config } from '../config';
 import { prisma } from '../lib/prisma';
 import { publishUserDeleted } from './publisher';
 import { cache, CacheTags } from '../lib/cache';
+import type {
+  RabbitMQAdminUserDeletedPayload,
+  RabbitMQAdminUserUpdatedPayload,
+} from 'shared-types';
 
 let adminEventsSubscriber: RabbitMQSubscriber | null = null;
-
-/**
- * Admin User Event Payloads
- */
-interface AdminUserDeletedEvent {
-  userId: string;
-  deletedBy: string;
-  deletedAt: string;
-  reason?: string;
-}
-
-interface AdminUserUpdatedEvent {
-  userId: string;
-  updatedBy: string;
-  updatedAt: string;
-  changes: {
-    role?: string;
-    name?: string;
-    email?: string;
-  };
-}
 
 /**
  * Handle admin.user.deleted event
@@ -52,7 +35,7 @@ interface AdminUserUpdatedEvent {
  * 2. Publishes user.deleted event for other services (Profile, Payments)
  */
 async function handleAdminUserDeleted(
-  event: BaseEvent<AdminUserDeletedEvent>,
+  event: BaseEvent<RabbitMQAdminUserDeletedPayload>,
   context: EventContext
 ): Promise<void> {
   const { userId, deletedBy, reason } = event.data;
@@ -114,7 +97,7 @@ async function handleAdminUserDeleted(
  * updates the user in auth_db.
  */
 async function handleAdminUserUpdated(
-  event: BaseEvent<AdminUserUpdatedEvent>,
+  event: BaseEvent<RabbitMQAdminUserUpdatedPayload>,
   context: EventContext
 ): Promise<void> {
   const { userId, updatedBy, changes } = event.data;
@@ -194,10 +177,10 @@ export async function initializeSubscriber(): Promise<void> {
   await adminEventsSubscriber.subscribe(async (event, context) => {
     switch (event.type) {
       case 'admin.user.deleted':
-        await handleAdminUserDeleted(event as BaseEvent<AdminUserDeletedEvent>, context);
+        await handleAdminUserDeleted(event as BaseEvent<RabbitMQAdminUserDeletedPayload>, context);
         break;
       case 'admin.user.updated':
-        await handleAdminUserUpdated(event as BaseEvent<AdminUserUpdatedEvent>, context);
+        await handleAdminUserUpdated(event as BaseEvent<RabbitMQAdminUserUpdatedPayload>, context);
         break;
       default:
         console.log(`[Auth Service] Unknown admin event: ${event.type}`);

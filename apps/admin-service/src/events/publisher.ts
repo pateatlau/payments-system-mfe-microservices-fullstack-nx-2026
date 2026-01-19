@@ -13,13 +13,18 @@
 import { RabbitMQPublisher } from '@payments-system/rabbitmq-event-hub';
 import { getConnectionManager } from './connection';
 import config from '../config';
+import type {
+  RabbitMQAdminUserDeletedPayload,
+  RabbitMQAdminUserUpdatedPayload,
+} from 'shared-types';
 
 let publisher: RabbitMQPublisher | null = null;
+let initializationPromise: Promise<void> | null = null;
 
 /**
- * Get or create event publisher
+ * Get or create event publisher (internal - creates instance without waiting for init)
  */
-export function getEventPublisher(): RabbitMQPublisher {
+function createPublisher(): RabbitMQPublisher {
   if (!publisher) {
     const connectionManager = getConnectionManager();
 
@@ -32,35 +37,35 @@ export function getEventPublisher(): RabbitMQPublisher {
         appId: 'admin-service',
       },
     });
-
-    // Initialize exchange
-    publisher.initialize().catch(error => {
-      console.error('[Admin Service] Failed to initialize publisher:', error);
-    });
   }
 
   return publisher;
 }
 
 /**
- * Admin User Event Payloads
+ * Get initialized event publisher
+ *
+ * Ensures the publisher is fully initialized before returning.
+ * Uses a cached initialization promise to prevent race conditions
+ * when multiple publish calls happen concurrently.
  */
-interface AdminUserDeletedPayload {
-  userId: string;
-  deletedBy: string;
-  deletedAt: string;
-  reason?: string;
-}
+export async function getEventPublisher(): Promise<RabbitMQPublisher> {
+  const pub = createPublisher();
 
-interface AdminUserUpdatedPayload {
-  userId: string;
-  updatedBy: string;
-  updatedAt: string;
-  changes: {
-    role?: string;
-    name?: string;
-    email?: string;
-  };
+  // If not yet initialized, start initialization
+  if (!initializationPromise) {
+    initializationPromise = pub.initialize().catch(error => {
+      // Reset on failure so next call can retry
+      initializationPromise = null;
+      console.error('[Admin Service] Failed to initialize publisher:', error);
+      throw error;
+    });
+  }
+
+  // Wait for initialization to complete
+  await initializationPromise;
+
+  return pub;
 }
 
 /**
@@ -70,9 +75,9 @@ interface AdminUserUpdatedPayload {
  * Subscribers: Auth Service (delete user from auth_db)
  */
 export async function publishAdminUserDeleted(
-  payload: AdminUserDeletedPayload
+  payload: RabbitMQAdminUserDeletedPayload
 ): Promise<void> {
-  const eventPublisher = getEventPublisher();
+  const eventPublisher = await getEventPublisher();
 
   await eventPublisher.publish('admin.user.deleted', payload, {
     userId: payload.userId,
@@ -89,9 +94,9 @@ export async function publishAdminUserDeleted(
  * Subscribers: Auth Service (update user in auth_db)
  */
 export async function publishAdminUserUpdated(
-  payload: AdminUserUpdatedPayload
+  payload: RabbitMQAdminUserUpdatedPayload
 ): Promise<void> {
-  const eventPublisher = getEventPublisher();
+  const eventPublisher = await getEventPublisher();
 
   await eventPublisher.publish('admin.user.updated', payload, {
     userId: payload.userId,

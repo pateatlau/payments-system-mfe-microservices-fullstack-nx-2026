@@ -5,7 +5,14 @@
  * This provides a single import point for all types
  */
 
-// Re-export all event types from shared-event-bus
+// RabbitMQ event types (backend inter-service communication)
+export type {
+  RabbitMQAdminUserDeletedPayload,
+  RabbitMQAdminUserUpdatedPayload,
+  AdminUserChanges,
+} from './rabbitmq-admin';
+
+// Re-export all event types from shared-event-bus (frontend inter-MFE communication)
 export type {
   AppEvent,
   AppEventType,
