@@ -3,6 +3,7 @@
  */
 
 import { prisma as db } from '../lib/prisma';
+import { publishAdminUserDeleted } from '../events/publisher';
 
 /**
  * Admin Service - Zero Coupling Pattern
@@ -290,8 +291,15 @@ export const adminService = {
 
   /**
    * Delete user
+   *
+   * This function:
+   * 1. Deletes user from admin_db (local denormalized copy)
+   * 2. Publishes admin.user.deleted event for Auth Service to delete from auth_db
+   *
+   * The event-driven approach ensures Auth Service removes the user from its database,
+   * allowing the email to be re-used for new registrations.
    */
-  async deleteUser(userId: string) {
+  async deleteUser(userId: string, deletedBy?: string) {
     // Check if user exists
     const existingUser = await db.user.findUnique({
       where: { id: userId },
@@ -316,9 +324,24 @@ export const adminService = {
       }
     }
 
-    // Delete user
+    // Delete user from admin_db
     await db.user.delete({
       where: { id: userId },
     });
+
+    // Publish event for Auth Service to delete user from auth_db
+    // This enables re-registration with the same email
+    try {
+      await publishAdminUserDeleted({
+        userId,
+        deletedBy: deletedBy || 'unknown',
+        deletedAt: new Date().toISOString(),
+        reason: 'Admin deleted user',
+      });
+    } catch (error) {
+      // Log error but don't fail the deletion - the local delete succeeded
+      // Auth Service will eventually be notified via retry or manual intervention
+      console.error('[Admin Service] Failed to publish admin.user.deleted event:', error);
+    }
   },
 };
