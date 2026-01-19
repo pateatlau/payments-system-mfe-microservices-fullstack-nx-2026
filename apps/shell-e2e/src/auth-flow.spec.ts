@@ -22,6 +22,14 @@ test.describe('Authentication Flow', () => {
     // Intercept ALL requests to debug URL issues in CI
     const apiRequests: string[] = [];
     const failedRequests: string[] = [];
+    const consoleLogs: string[] = [];
+
+    // Capture browser console logs for debugging
+    page.on('console', msg => {
+      const text = `[Browser ${msg.type()}] ${msg.text()}`;
+      consoleLogs.push(text);
+      console.log(text);
+    });
 
     // Listen for request failures
     page.on('requestfailed', request => {
@@ -42,11 +50,13 @@ test.describe('Authentication Flow', () => {
 
     await page.goto('/signin');
 
-    // Debug: Log what window.__ENV__ contains
+    // Enable API URL debug logging and capture window.__ENV__
     const envConfig = await page.evaluate(() => {
+      // Enable debug logging for ApiClient URL resolution
+      (window as unknown as { __DEBUG_API_URL__: boolean }).__DEBUG_API_URL__ = true;
       return {
         windowEnv: (window as unknown as { __ENV__?: { API_BASE_URL?: string } }).__ENV__,
-        processEnvExists: typeof process !== 'undefined',
+        hasWindow: typeof window !== 'undefined',
       };
     });
     console.log('[DEBUG] window.__ENV__:', JSON.stringify(envConfig));
@@ -79,7 +89,10 @@ test.describe('Authentication Flow', () => {
             ? `\nFailed requests: ${failedRequests.join(', ')}`
             : '';
           const envInfo = `\nwindow.__ENV__: ${JSON.stringify(envConfig)}`;
-          throw new Error(`Login failed - error displayed: "${errorText}"${apiInfo}${failedInfo}${envInfo}`);
+          const consoleInfo = consoleLogs.length > 0
+            ? `\nBrowser console (ApiClient logs): ${consoleLogs.filter(l => l.includes('ApiClient')).join('; ')}`
+            : '';
+          throw new Error(`Login failed - error displayed: "${errorText}"${apiInfo}${failedInfo}${envInfo}${consoleInfo}`);
         }),
     ]);
 

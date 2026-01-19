@@ -73,25 +73,34 @@ export interface ApiError {
  * 4. Default: https://localhost/api (nginx proxy for local dev)
  */
 function resolveBaseURL(configBaseURL?: string): string {
+  // Debug logging to diagnose URL resolution in CI
+  const debug = typeof window !== 'undefined' && (window as unknown as { __DEBUG_API_URL__?: boolean }).__DEBUG_API_URL__;
+
   // 1. Explicit config takes highest priority
   if (configBaseURL) {
+    if (debug) console.log('[ApiClient] Using explicit config baseURL:', configBaseURL);
     return configBaseURL;
   }
 
   // 2. Check for runtime override (useful for CI where we inject env.js after build)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const runtimeBaseURL = typeof window !== 'undefined' ? (window as any).__ENV__?.API_BASE_URL : undefined;
+  if (debug) console.log('[ApiClient] window.__ENV__?.API_BASE_URL:', runtimeBaseURL);
   if (runtimeBaseURL) {
+    if (debug) console.log('[ApiClient] Using runtime baseURL:', runtimeBaseURL);
     return runtimeBaseURL;
   }
 
   // 3. Build-time environment variable (replaced by DefinePlugin)
   const envBaseURL = process.env.NX_API_BASE_URL;
+  if (debug) console.log('[ApiClient] process.env.NX_API_BASE_URL:', envBaseURL);
   if (envBaseURL) {
+    if (debug) console.log('[ApiClient] Using build-time baseURL:', envBaseURL);
     return envBaseURL;
   }
 
   // 4. Default fallback
+  if (debug) console.log('[ApiClient] Using default fallback URL');
   return 'https://localhost/api';
 }
 
