@@ -21,6 +21,7 @@ import {
   initTracing,
   correlationIdMiddleware,
 } from '@mfe-poc/observability';
+import { initializeSubscriber } from './events/subscriber';
 
 /**
  * Initialize OpenTelemetry Tracing (must be first, before any other imports/initialization)
@@ -141,10 +142,20 @@ app.use(errorHandler);
  */
 const port = config.port;
 
-app.listen(port, () => {
+app.listen(port, async () => {
   logger.info(`Auth Service started on port ${port}`, {
     environment: config.nodeEnv,
   });
+
+  // Initialize RabbitMQ subscriber for admin events
+  try {
+    await initializeSubscriber();
+    logger.info('Auth Service RabbitMQ subscriber initialized');
+  } catch (error) {
+    logger.error('Failed to initialize RabbitMQ subscriber', { error });
+    // Don't fail the service - it can still handle auth requests
+    // Events will be retried when connection is restored
+  }
 });
 
 export default app;

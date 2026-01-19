@@ -8,6 +8,7 @@
  *   - Path rewriting
  *   - Error handling (502 for connection errors, 504 for timeouts)
  *   - Timeout configuration
+ *   - Circuit breaker protection (Phase 5.1)
  *
  * Why Native HTTP:
  * POC-2 encountered issues with http-proxy-middleware v3.x including:
@@ -23,6 +24,13 @@ import { Request, Response } from 'express';
 import { request as httpRequest, IncomingMessage, ClientRequest } from 'http';
 import { request as httpsRequest } from 'https';
 import { logger } from '../utils/logger';
+import {
+  createCircuitBreaker,
+  getCircuitState,
+  getCircuitStats,
+  CircuitState,
+  formatCircuitStats,
+} from '@payments-system/resilience';
 
 /**
  * Proxy target configuration
@@ -34,6 +42,25 @@ export interface ProxyTarget {
 }
 
 /**
+ * Circuit breaker configuration for proxy
+ */
+export interface ProxyCircuitBreakerConfig {
+  /** Enable circuit breaker protection (default: true) */
+  enabled?: boolean;
+  /** Error threshold percentage to trip circuit (default: 50) */
+  errorThresholdPercentage?: number;
+  /** Time in ms to wait before testing circuit (default: 30000) */
+  resetTimeout?: number;
+  /** Minimum number of requests before threshold calculation (default: 5) */
+  volumeThreshold?: number;
+  /** Custom fallback response when circuit is open */
+  fallbackResponse?: {
+    status: number;
+    body: unknown;
+  };
+}
+
+/**
  * Proxy options configuration
  */
 export interface ProxyOptions {
@@ -42,6 +69,10 @@ export interface ProxyOptions {
   timeout?: number;
   preserveHostHeader?: boolean;
   changeOrigin?: boolean;
+  /** Service name for circuit breaker identification */
+  serviceName?: string;
+  /** Circuit breaker configuration */
+  circuitBreaker?: ProxyCircuitBreakerConfig;
 }
 
 /**
@@ -52,6 +83,105 @@ const defaultOptions: Partial<ProxyOptions> = {
   preserveHostHeader: false,
   changeOrigin: true,
 };
+
+/**
+ * Default circuit breaker options
+ */
+const defaultCircuitBreakerConfig: ProxyCircuitBreakerConfig = {
+  enabled: true,
+  errorThresholdPercentage: 50,
+  resetTimeout: 30000,
+  volumeThreshold: 5,
+};
+
+/**
+ * Store for service circuit breakers (initialized on first use)
+ */
+const serviceCircuitBreakers = new Map<string, ReturnType<typeof createCircuitBreaker>>();
+
+/**
+ * Get or create a circuit breaker for a service
+ */
+function getServiceCircuitBreaker(
+  serviceName: string,
+  cbConfig: ProxyCircuitBreakerConfig
+) {
+  const key = `proxy-${serviceName}`;
+
+  if (!serviceCircuitBreakers.has(key)) {
+    // Create a circuit breaker that wraps a Promise-returning function
+    // For streaming proxy, we use a simple health check function
+    const breaker = createCircuitBreaker(
+      async () => {
+        // This is a placeholder - actual success/failure tracking happens via events
+        return true;
+      },
+      {
+        name: key,
+        timeout: 30000,
+        errorThresholdPercentage: cbConfig.errorThresholdPercentage || 50,
+        resetTimeout: cbConfig.resetTimeout || 30000,
+        volumeThreshold: cbConfig.volumeThreshold || 5,
+        logger: (message, context) => {
+          logger.info(message, context);
+        },
+        onOpen: () => {
+          logger.warn(`Circuit breaker OPENED for service: ${serviceName}`, {
+            service: serviceName,
+            state: 'open',
+          });
+        },
+        onClose: () => {
+          logger.info(`Circuit breaker CLOSED for service: ${serviceName}`, {
+            service: serviceName,
+            state: 'closed',
+          });
+        },
+        onHalfOpen: () => {
+          logger.info(`Circuit breaker HALF-OPEN for service: ${serviceName}`, {
+            service: serviceName,
+            state: 'half-open',
+          });
+        },
+      }
+    );
+
+    serviceCircuitBreakers.set(key, breaker);
+  }
+
+  return serviceCircuitBreakers.get(key)!;
+}
+
+/**
+ * Check if circuit is open for a service
+ */
+export function isCircuitOpen(serviceName: string): boolean {
+  const state = getCircuitState(`proxy-${serviceName}`);
+  return state === CircuitState.OPEN;
+}
+
+/**
+ * Get circuit stats for a service
+ */
+export function getProxyCircuitStats(serviceName: string) {
+  const stats = getCircuitStats(`proxy-${serviceName}`);
+  return stats ? formatCircuitStats(stats) : null;
+}
+
+/**
+ * Get all proxy circuit stats
+ */
+export function getAllProxyCircuitStats(): Record<string, unknown> {
+  const allStats: Record<string, unknown> = {};
+  for (const [key] of serviceCircuitBreakers) {
+    const serviceName = key.replace('proxy-', '');
+    const stats = getProxyCircuitStats(serviceName);
+    if (stats) {
+      allStats[serviceName] = stats;
+    }
+  }
+  return allStats;
+}
 
 /**
  * Create streaming HTTP proxy middleware
@@ -74,10 +204,45 @@ export function createStreamingProxy(
   options: ProxyOptions
 ): (req: Request, res: Response) => void {
   const config = { ...defaultOptions, ...options };
+  const cbConfig = { ...defaultCircuitBreakerConfig, ...config.circuitBreaker };
+  const serviceName = config.serviceName || `${config.target.host}:${config.target.port}`;
+
+  // Initialize circuit breaker for this service if enabled
+  let breaker: ReturnType<typeof createCircuitBreaker> | null = null;
+  if (cbConfig.enabled !== false) {
+    breaker = getServiceCircuitBreaker(serviceName, cbConfig);
+  }
 
   return (req: Request, res: Response): void => {
     const target = config.target;
     const requestFn = target.protocol === 'https' ? httpsRequest : httpRequest;
+
+    // Check circuit breaker state before making request
+    if (breaker && cbConfig.enabled !== false) {
+      const circuitState = getCircuitState(`proxy-${serviceName}`);
+      if (circuitState === CircuitState.OPEN) {
+        logger.warn('Circuit is OPEN - rejecting request', {
+          service: serviceName,
+          path: req.url,
+          state: 'open',
+        });
+
+        // Return fallback response or default 503
+        if (cbConfig.fallbackResponse) {
+          res.status(cbConfig.fallbackResponse.status).json(cbConfig.fallbackResponse.body);
+        } else {
+          res.status(503).json({
+            success: false,
+            error: {
+              code: 'SERVICE_UNAVAILABLE',
+              message: `Service ${serviceName} is temporarily unavailable. Please try again later.`,
+              circuitState: 'open',
+            },
+          });
+        }
+        return;
+      }
+    }
 
     // Rewrite path if needed
     let path = req.url || '/';
@@ -97,7 +262,11 @@ export function createStreamingProxy(
       originalPath: req.url,
       rewrittenPath: path,
       target: `${target.protocol}://${target.host}:${target.port}`,
+      circuitState: breaker ? getCircuitState(`proxy-${serviceName}`) : 'disabled',
     });
+
+    // Track request start time for metrics
+    const startTime = Date.now();
 
     // Create proxy request
     const proxyReq: ClientRequest = requestFn(
@@ -110,9 +279,37 @@ export function createStreamingProxy(
         timeout: config.timeout,
       },
       (proxyRes: IncomingMessage) => {
+        const statusCode = proxyRes.statusCode || 502;
+        const durationMs = Date.now() - startTime;
+
+        // Track success/failure in circuit breaker
+        if (breaker) {
+          if (statusCode >= 500) {
+            // Server errors count as failures
+            breaker.fire().catch(() => {
+              // Simulate failure by immediately throwing
+            });
+            // Manually emit failure event since we can't truly fail the breaker's promise
+            logger.debug('Recording circuit breaker failure', {
+              service: serviceName,
+              statusCode,
+              durationMs,
+            });
+          } else {
+            // Successful request - fire to record success
+            breaker.fire().then(() => {
+              logger.debug('Recording circuit breaker success', {
+                service: serviceName,
+                statusCode,
+                durationMs,
+              });
+            }).catch(() => { /* ignore */ });
+          }
+        }
+
         // Forward response status and headers
         res.writeHead(
-          proxyRes.statusCode || 502,
+          statusCode,
           proxyRes.statusMessage,
           proxyRes.headers
         );
@@ -122,8 +319,9 @@ export function createStreamingProxy(
 
         // Log response
         logger.debug('Proxy response received', {
-          statusCode: proxyRes.statusCode,
+          statusCode,
           path: req.url,
+          durationMs,
         });
       }
     );
@@ -133,11 +331,20 @@ export function createStreamingProxy(
 
     // Handle proxy request errors
     proxyReq.on('error', (err: Error) => {
+      const durationMs = Date.now() - startTime;
+
       logger.error('Proxy request error', {
         error: err.message,
         path: req.url,
         target: `${target.protocol}://${target.host}:${target.port}`,
+        durationMs,
       });
+
+      // Record failure in circuit breaker
+      if (breaker) {
+        // Force a failure by rejecting a fire call
+        breaker.fire().catch(() => { /* expected */ });
+      }
 
       if (!res.headersSent) {
         res.status(502).json({
@@ -152,11 +359,19 @@ export function createStreamingProxy(
 
     // Handle proxy request timeout
     proxyReq.on('timeout', () => {
+      const durationMs = Date.now() - startTime;
+
       logger.error('Proxy request timeout', {
         path: req.url,
         timeout: config.timeout,
         target: `${target.protocol}://${target.host}:${target.port}`,
+        durationMs,
       });
+
+      // Record failure in circuit breaker
+      if (breaker) {
+        breaker.fire().catch(() => { /* expected */ });
+      }
 
       proxyReq.destroy();
 

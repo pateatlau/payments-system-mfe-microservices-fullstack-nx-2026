@@ -79,9 +79,15 @@ describe('ApiClient', () => {
     process.env['NX_API_BASE_URL'] = 'http://localhost:3000/api';
   });
 
-  describe('constructor', () => {
-    it('should create axios instance with default config', () => {
-      new ApiClient();
+  describe('lazy initialization', () => {
+    it('should create axios instance with default config on first use', () => {
+      const client = new ApiClient();
+
+      // Axios not created yet (lazy initialization)
+      expect(mockedAxios.create).not.toHaveBeenCalled();
+
+      // Trigger lazy initialization by accessing the axios instance
+      client.getAxiosInstance();
 
       expect(mockedAxios.create).toHaveBeenCalledWith({
         baseURL: 'http://localhost:3000/api',
@@ -92,11 +98,14 @@ describe('ApiClient', () => {
       });
     });
 
-    it('should create axios instance with custom config', () => {
-      new ApiClient({
+    it('should create axios instance with custom config on first use', () => {
+      const client = new ApiClient({
         baseURL: 'https://api.example.com',
         timeout: 60000,
       });
+
+      // Trigger lazy initialization
+      client.getAxiosInstance();
 
       expect(mockedAxios.create).toHaveBeenCalledWith({
         baseURL: 'https://api.example.com',
@@ -107,11 +116,25 @@ describe('ApiClient', () => {
       });
     });
 
-    it('should setup interceptors', () => {
-      new ApiClient({ tokenProvider });
+    it('should setup interceptors on first use', () => {
+      const client = new ApiClient({ tokenProvider });
+
+      // Trigger lazy initialization
+      client.getAxiosInstance();
 
       expect(mockAxiosInstance.interceptors.request.use).toHaveBeenCalled();
       expect(mockAxiosInstance.interceptors.response.use).toHaveBeenCalled();
+    });
+
+    it('should only create axios instance once', () => {
+      const client = new ApiClient({ tokenProvider });
+
+      // Multiple accesses should only create once
+      client.getAxiosInstance();
+      client.getAxiosInstance();
+      client.getAxiosInstance();
+
+      expect(mockedAxios.create).toHaveBeenCalledTimes(1);
     });
   });
 

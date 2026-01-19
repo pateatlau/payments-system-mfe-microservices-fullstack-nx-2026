@@ -2,9 +2,12 @@
  * Health Check Routes
  *
  * Provides health check endpoints for monitoring
+ * Includes circuit breaker status (Phase 5.1)
  */
 
 import { Router, Request, Response } from 'express';
+import { getAllProxyCircuitStats } from '../middleware/proxy';
+import { getAllCircuitStats, hasOpenCircuits, getOpenCircuits } from '@payments-system/resilience';
 
 const router = Router();
 
@@ -49,6 +52,38 @@ router.get('/health/live', (_req: Request, res: Response) => {
     data: {
       alive: true,
       timestamp: new Date().toISOString(),
+    },
+  });
+});
+
+/**
+ * GET /health/circuits
+ * Circuit breaker status endpoint
+ * Returns status of all circuit breakers for monitoring
+ */
+router.get('/health/circuits', (_req: Request, res: Response) => {
+  const proxyStats = getAllProxyCircuitStats();
+  const allStats = getAllCircuitStats();
+  const openCircuits = getOpenCircuits();
+  const hasDegraded = hasOpenCircuits();
+
+  res.status(hasDegraded ? 503 : 200).json({
+    success: true,
+    data: {
+      healthy: !hasDegraded,
+      degraded: hasDegraded,
+      openCircuits,
+      timestamp: new Date().toISOString(),
+      services: proxyStats,
+      circuits: allStats.map(stat => ({
+        name: stat.name,
+        state: stat.state,
+        successes: stat.successes,
+        failures: stat.failures,
+        timeouts: stat.timeouts,
+        rejects: stat.rejects,
+        lastStateChange: stat.lastStateChange,
+      })),
     },
   });
 });

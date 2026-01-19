@@ -430,26 +430,42 @@ jobs:
         run: |
           echo "=== Build Environment ==="
           echo "NX_API_BASE_URL=$NX_API_BASE_URL"
-          # Export explicitly to ensure child processes inherit
-          export NX_API_BASE_URL="http://localhost:3000/api"
-          echo "After export: NX_API_BASE_URL=$NX_API_BASE_URL"
-          # Disable both local and cloud caching to ensure fresh builds
+
+          # Delete any existing dist to ensure clean build
+          rm -rf dist/
+
+          # Build with explicit env var and ALL caching disabled
+          NX_API_BASE_URL="http://localhost:3000/api" \
+          NX_NO_CLOUD=true \
           NX_CLOUD_DISTRIBUTED_EXECUTION=false \
           NX_SKIP_NX_CACHE=true \
           pnpm nx run-many --target=build \
             --all \
             --configuration=production \
             --skip-nx-cache
+
           echo "=== Verifying built shell contains correct API URL ==="
-          grep -o '"NX_API_BASE_URL":"[^"]*"' dist/apps/shell/*.js | head -3 || echo "Pattern not found"
-          # Also verify the actual content in main.js
-          echo "=== Grep for localhost:3000 in shell bundle ==="
-          grep -l "localhost:3000" dist/apps/shell/*.js || echo "localhost:3000 NOT found in bundle"
-          grep -l "https://localhost/api" dist/apps/shell/*.js && echo "WARNING: Wrong URL found!" || echo "Good: https://localhost/api not in bundle"
+          echo "Looking for 'localhost:3000' in shell bundle..."
+          if grep -q 'localhost:3000' dist/apps/shell/*.js; then
+            echo "GOOD: Found 'localhost:3000' in bundle (build-time env var was applied)"
+            grep -o 'localhost:3000[^"]*' dist/apps/shell/*.js | head -5
+          else
+            echo "ERROR: 'localhost:3000' NOT found in bundle!"
+            echo "This means NX_API_BASE_URL was not applied at build time"
+            exit 1
+          fi
+
+          # Note: The fallback URL 'https://localhost/api' will also be in the bundle
+          # because it's a hardcoded default. This is expected. What matters is that
+          # the runtime URL resolution picks up window.__ENV__ or the DefinePlugin value first.
+          echo "=== Bundle verification complete ==="
 
       - name: Build affected projects (feature branches)
         if: github.ref != 'refs/heads/main' && github.ref != 'refs/heads/develop'
         run: |
+          rm -rf dist/
+          NX_API_BASE_URL="http://localhost:3000/api" \
+          NX_NO_CLOUD=true \
           NX_CLOUD_DISTRIBUTED_EXECUTION=false \
           NX_SKIP_NX_CACHE=true \
           pnpm nx affected --target=build \
@@ -596,6 +612,47 @@ jobs:
           name: build-artifacts
           path: dist/
 
+      - name: Verify downloaded artifacts have correct API URL
+        run: |
+          echo "=== Verifying downloaded build artifacts ==="
+          echo "Checking if 'localhost:3000' is in shell bundle..."
+          if grep -q 'localhost:3000' dist/apps/shell/*.js; then
+            echo "GOOD: Found 'localhost:3000' in downloaded bundle"
+            grep -o 'localhost:3000[^"]*' dist/apps/shell/*.js | head -5
+          else
+            echo "WARNING: 'localhost:3000' NOT found in downloaded bundle"
+            echo "Runtime env.js injection will be needed"
+          fi
+
+      - name: Inject runtime API URL configuration
+        run: |
+          echo "=== Injecting runtime API URL for E2E tests ==="
+          # Create env.js that sets window.__ENV__ with the correct API URL
+          # This provides a runtime override in case build-time URL is wrong
+          ENV_SCRIPT='window.__ENV__ = { API_BASE_URL: "http://localhost:3000/api" };'
+
+          # Inject into all frontend apps
+          for app in shell auth-mfe payments-mfe admin-mfe profile-mfe; do
+            if [ -d "dist/apps/$app" ]; then
+              echo "$ENV_SCRIPT" > "dist/apps/$app/env.js"
+              echo "Created env.js for $app"
+
+              # Add script tag to index.html to load env.js before other scripts
+              if [ -f "dist/apps/$app/index.html" ]; then
+                sed -i 's|<head>|<head><script src="/env.js"></script>|' "dist/apps/$app/index.html"
+                echo "Updated index.html for $app"
+              fi
+
+              # Verify the injection worked
+              echo "--- $app/index.html head section ---"
+              head -10 "dist/apps/$app/index.html"
+              echo "--- $app/env.js contents ---"
+              cat "dist/apps/$app/env.js"
+            fi
+          done
+
+          echo "=== Runtime config injection complete ==="
+
       - name: Generate Prisma clients
         run: pnpm db:all:generate
 
@@ -611,19 +668,51 @@ jobs:
 
       - name: Start backend services
         run: |
-          pnpm dev:backend &
+          echo "=== Starting backend services ==="
+
+          # Start backend services and capture output to file for debugging
+          pnpm dev:backend > backend.log 2>&1 &
+          BACKEND_PID=$!
+          echo "Backend started with PID: $BACKEND_PID"
+
+          # Wait for API Gateway health endpoint
           echo "Waiting for backend services to be ready..."
-          # Wait for API Gateway health endpoint (it depends on other services)
+          READY=false
           for i in {1..60}; do
             if curl -s http://localhost:3000/health > /dev/null 2>&1; then
               echo "API Gateway is ready!"
+              READY=true
               break
             fi
             echo "Waiting for API Gateway... ($i/60)"
+
+            # Check if backend process is still running
+            if ! kill -0 $BACKEND_PID 2>/dev/null; then
+              echo "ERROR: Backend process died! Showing logs:"
+              cat backend.log
+              exit 1
+            fi
+
             sleep 2
           done
+
+          if [ "$READY" = false ]; then
+            echo "ERROR: Backend services failed to start within timeout!"
+            echo "=== Backend logs ==="
+            cat backend.log
+            echo "=== Checking what's listening on ports ==="
+            netstat -tlnp 2>/dev/null || ss -tlnp 2>/dev/null || echo "netstat/ss not available"
+            exit 1
+          fi
+
+          # Show what ports are actually listening
+          echo "=== Services listening on ports ==="
+          netstat -tlnp 2>/dev/null | grep -E ':(3000|3001|3002|3003|3004)' || ss -tlnp 2>/dev/null | grep -E ':(3000|3001|3002|3003|3004)' || echo "Port check not available"
+
           # Additional buffer for all services to stabilize
           sleep 5
+
+          echo "=== Backend services ready ==="
 
       - name: Run E2E tests
         run: pnpm nx e2e shell-e2e

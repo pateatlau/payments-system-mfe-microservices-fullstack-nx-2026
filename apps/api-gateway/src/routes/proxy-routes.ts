@@ -7,13 +7,24 @@
  *   - Payments Service proxy (/api/payments -> http://localhost:3002)
  *   - Admin Service proxy (/api/admin -> http://localhost:3003)
  *   - Profile Service proxy (/api/profile -> http://localhost:3004)
+ *   - Circuit breaker protection for all services (Phase 5.1)
  *
- * POC-3 Implementation: Production-ready streaming HTTP proxy
+ * POC-3 Implementation: Production-ready streaming HTTP proxy with circuit breaker
  */
 
 import { Router } from 'express';
-import { createStreamingProxy, ProxyTarget } from '../middleware/proxy';
+import { createStreamingProxy, ProxyTarget, getAllProxyCircuitStats } from '../middleware/proxy';
 import { logger } from '../utils/logger';
+
+/**
+ * Circuit breaker configuration (shared across services)
+ */
+const circuitBreakerConfig = {
+  enabled: true,
+  errorThresholdPercentage: 50,  // Open circuit after 50% errors
+  resetTimeout: 30000,           // Try again after 30 seconds
+  volumeThreshold: 5,            // Minimum 5 requests before calculating threshold
+};
 
 const router = Router();
 
@@ -59,10 +70,12 @@ router.use(
   '/api/auth',
   createStreamingProxy({
     target: services['auth']!,
+    serviceName: 'auth-service',
     pathRewrite: {
       '^': '/auth', // Prepend /auth to the path
     },
     timeout: 30000,
+    circuitBreaker: circuitBreakerConfig,
   })
 );
 
@@ -81,10 +94,12 @@ router.use(
   '/api/payments',
   createStreamingProxy({
     target: services['payments']!,
+    serviceName: 'payments-service',
     pathRewrite: {
       '^': '/payments', // Prepend /payments to the path
     },
     timeout: 30000,
+    circuitBreaker: circuitBreakerConfig,
   })
 );
 
@@ -106,10 +121,12 @@ router.use(
   '/api/admin',
   createStreamingProxy({
     target: services['admin']!,
+    serviceName: 'admin-service',
     pathRewrite: {
       '^': '/api/admin', // Prepend /api/admin to the path
     },
     timeout: 30000,
+    circuitBreaker: circuitBreakerConfig,
   })
 );
 
@@ -128,10 +145,12 @@ router.use(
   '/api/profile',
   createStreamingProxy({
     target: services['profile']!,
+    serviceName: 'profile-service',
     pathRewrite: {
       '^': '/api/profile', // Prepend /api/profile to the path
     },
     timeout: 30000,
+    circuitBreaker: circuitBreakerConfig,
   })
 );
 
@@ -141,6 +160,17 @@ router.use(
 logger.info('API Gateway proxy routes initialized', {
   services: Object.keys(services),
   routes: ['/api/auth', '/api/payments', '/api/admin', '/api/profile'],
+  circuitBreaker: {
+    enabled: circuitBreakerConfig.enabled,
+    errorThresholdPercentage: circuitBreakerConfig.errorThresholdPercentage,
+    resetTimeout: circuitBreakerConfig.resetTimeout,
+    volumeThreshold: circuitBreakerConfig.volumeThreshold,
+  },
 });
+
+/**
+ * Export circuit stats getter for health endpoint
+ */
+export { getAllProxyCircuitStats };
 
 export default router;

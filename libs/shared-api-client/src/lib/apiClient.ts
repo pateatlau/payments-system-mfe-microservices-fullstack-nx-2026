@@ -62,64 +62,111 @@ export interface ApiError {
 }
 
 /**
+ * Resolve the API base URL at runtime
+ * This function is called lazily when the axios instance is first needed,
+ * ensuring that runtime overrides (like window.__ENV__) have been loaded.
+ *
+ * URL Resolution Order:
+ * 1. Explicit config.baseURL (passed to ApiClient constructor)
+ * 2. Runtime window.__ENV__?.API_BASE_URL (for CI/runtime override)
+ * 3. Build-time process.env.NX_API_BASE_URL (replaced by DefinePlugin)
+ * 4. Default: https://localhost/api (nginx proxy for local dev)
+ */
+function resolveBaseURL(configBaseURL?: string): string {
+  // Debug logging to diagnose URL resolution in CI
+  const debug = typeof window !== 'undefined' && (window as unknown as { __DEBUG_API_URL__?: boolean }).__DEBUG_API_URL__;
+
+  // 1. Explicit config takes highest priority
+  if (configBaseURL) {
+    if (debug) console.log('[ApiClient] Using explicit config baseURL:', configBaseURL);
+    return configBaseURL;
+  }
+
+  // 2. Check for runtime override (useful for CI where we inject env.js after build)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const runtimeBaseURL = typeof window !== 'undefined' ? (window as any).__ENV__?.API_BASE_URL : undefined;
+  if (debug) console.log('[ApiClient] window.__ENV__?.API_BASE_URL:', runtimeBaseURL);
+  if (runtimeBaseURL) {
+    if (debug) console.log('[ApiClient] Using runtime baseURL:', runtimeBaseURL);
+    return runtimeBaseURL;
+  }
+
+  // 3. Build-time environment variable (replaced by DefinePlugin)
+  const envBaseURL = process.env.NX_API_BASE_URL;
+  if (debug) console.log('[ApiClient] process.env.NX_API_BASE_URL:', envBaseURL);
+  if (envBaseURL) {
+    if (debug) console.log('[ApiClient] Using build-time baseURL:', envBaseURL);
+    return envBaseURL;
+  }
+
+  // 4. Default fallback
+  if (debug) console.log('[ApiClient] Using default fallback URL');
+  return 'https://localhost/api';
+}
+
+/**
  * Type-safe API Client
+ *
+ * IMPORTANT: The axios instance is created lazily on first use to ensure
+ * runtime configuration (like window.__ENV__) has been loaded before
+ * determining the base URL. This is critical for CI environments where
+ * env.js is injected at runtime.
  */
 export class ApiClient {
-  private axiosInstance: AxiosInstance;
+  private _axiosInstance: AxiosInstance | null = null;
   private tokenProvider?: TokenProvider;
   private onTokenRefresh?: (accessToken: string, refreshToken: string) => void;
   private onUnauthorized?: () => void;
+  private configBaseURL?: string;
+  private configTimeout: number;
+  private configRefreshURL?: string;
 
   constructor(config: ApiClientConfig = {}) {
-    // POC-3: Using API Gateway
-    // Development: Direct to API Gateway (http://localhost:3000/api)
-    // Production: Through nginx proxy (https://localhost/api)
-    // API Gateway proxies to backend services (Auth, Payments, Admin, Profile)
-
-    // Access environment variable (replaced by DefinePlugin at build time in browser)
-    // DefinePlugin replaces 'process.env.NX_API_BASE_URL' with the actual string value
-    // IMPORTANT: Access the full path directly without guards!
-    // DefinePlugin does literal text replacement - it replaces the EXACT string
-    // 'process.env.NX_API_BASE_URL' with the value. Any guards like
-    // 'typeof process !== undefined && process.env' would NOT be replaced
-    // and would fail at runtime since process.env is undefined in browser.
-    const envBaseURL = process.env.NX_API_BASE_URL;
-    // Default to nginx proxy (HTTPS) for development
-    // For direct API Gateway access, set NX_API_BASE_URL=http://localhost:3000/api
-    const baseURL = config.baseURL ?? envBaseURL ?? 'https://localhost/api';
-
-    this.axiosInstance = axios.create({
-      baseURL,
-      timeout: config.timeout ?? 30000,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-
+    // Store config for lazy initialization
+    this.configBaseURL = config.baseURL;
+    this.configTimeout = config.timeout ?? 30000;
+    this.configRefreshURL = config.refreshURL;
     this.tokenProvider = config.tokenProvider;
     this.onTokenRefresh = config.onTokenRefresh;
     this.onUnauthorized = config.onUnauthorized;
+  }
 
-    // Setup interceptors
-    // Use refreshURL if provided, otherwise use baseURL (for services other than auth)
-    const refreshURL = config.refreshURL ?? baseURL;
+  /**
+   * Get or create the axios instance lazily
+   * This ensures runtime config (window.__ENV__) is available
+   */
+  private get axiosInstance(): AxiosInstance {
+    if (!this._axiosInstance) {
+      const baseURL = resolveBaseURL(this.configBaseURL);
+      const refreshURL = this.configRefreshURL ?? baseURL;
 
-    setupInterceptors(
-      this.axiosInstance,
-      {
-        getAccessToken: () => this.tokenProvider?.getAccessToken() ?? null,
-        getRefreshToken: () => this.tokenProvider?.getRefreshToken() ?? null,
-        setTokens: (accessToken, refreshToken) => {
-          this.tokenProvider?.setTokens(accessToken, refreshToken);
-          this.onTokenRefresh?.(accessToken, refreshToken);
+      this._axiosInstance = axios.create({
+        baseURL,
+        timeout: this.configTimeout,
+        headers: {
+          'Content-Type': 'application/json',
         },
-        clearTokens: () => {
-          this.tokenProvider?.clearTokens();
-          this.onUnauthorized?.();
+      });
+
+      // Setup interceptors
+      setupInterceptors(
+        this._axiosInstance,
+        {
+          getAccessToken: () => this.tokenProvider?.getAccessToken() ?? null,
+          getRefreshToken: () => this.tokenProvider?.getRefreshToken() ?? null,
+          setTokens: (accessToken, refreshToken) => {
+            this.tokenProvider?.setTokens(accessToken, refreshToken);
+            this.onTokenRefresh?.(accessToken, refreshToken);
+          },
+          clearTokens: () => {
+            this.tokenProvider?.clearTokens();
+            this.onUnauthorized?.();
+          },
         },
-      },
-      refreshURL
-    );
+        refreshURL
+      );
+    }
+    return this._axiosInstance;
   }
 
   /**

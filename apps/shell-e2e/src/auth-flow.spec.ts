@@ -19,7 +19,47 @@ test.describe('Authentication Flow', () => {
   test('should complete sign-in flow: sign in → redirect → payments page', async ({
     page,
   }) => {
+    // Intercept ALL requests to debug URL issues in CI
+    const apiRequests: string[] = [];
+    const failedRequests: string[] = [];
+    const consoleLogs: string[] = [];
+
+    // Capture browser console logs for debugging
+    page.on('console', msg => {
+      const text = `[Browser ${msg.type()}] ${msg.text()}`;
+      consoleLogs.push(text);
+      console.log(text);
+    });
+
+    // Listen for request failures
+    page.on('requestfailed', request => {
+      const failure = request.failure();
+      failedRequests.push(`FAILED: ${request.method()} ${request.url()} - ${failure?.errorText || 'unknown error'}`);
+      console.log(`[Request FAILED] ${request.method()} ${request.url()} - ${failure?.errorText}`);
+    });
+
+    await page.route('**/*', async (route, request) => {
+      const url = request.url();
+      // Capture any request that looks like an API call
+      if (url.includes('/api/') || url.includes('/auth/') || url.includes('localhost:3000') || url.includes('localhost/api')) {
+        apiRequests.push(`${request.method()} ${url}`);
+        console.log(`[API Request] ${request.method()} ${url}`);
+      }
+      await route.continue();
+    });
+
     await page.goto('/signin');
+
+    // Enable API URL debug logging and capture window.__ENV__
+    const envConfig = await page.evaluate(() => {
+      // Enable debug logging for ApiClient URL resolution
+      (window as unknown as { __DEBUG_API_URL__: boolean }).__DEBUG_API_URL__ = true;
+      return {
+        windowEnv: (window as unknown as { __ENV__?: { API_BASE_URL?: string } }).__ENV__,
+        hasWindow: typeof window !== 'undefined',
+      };
+    });
+    console.log('[DEBUG] window.__ENV__:', JSON.stringify(envConfig));
 
     // Wait for sign-in form to load
     await expect(page.locator('input[type="email"]')).toBeVisible({
@@ -30,10 +70,30 @@ test.describe('Authentication Flow', () => {
     await page.fill('input[type="email"]', 'customer@example.com');
     await page.fill('input[type="password"]', 'TestPassword123!');
 
-    // Submit form and wait for navigation to payments page
-    await Promise.all([
-      page.waitForURL(/.*payments/, { timeout: 20000 }),
-      page.click('button[type="submit"]'),
+    // Submit form
+    await page.click('button[type="submit"]');
+
+    // Wait for either successful redirect OR error message
+    // This helps diagnose failures in CI
+    await Promise.race([
+      page.waitForURL(/.*payments/, { timeout: 30000 }),
+      page.waitForSelector('[role="alert"], .error, [class*="error"]', { timeout: 30000 })
+        .then(async () => {
+          // Capture the actual error message for debugging
+          const errorText = await page.locator('[role="alert"]').first().textContent();
+          // Include API requests in error message for debugging
+          const apiInfo = apiRequests.length > 0
+            ? `\nAPI requests made: ${apiRequests.join(', ')}`
+            : '\nNo API requests intercepted';
+          const failedInfo = failedRequests.length > 0
+            ? `\nFailed requests: ${failedRequests.join(', ')}`
+            : '';
+          const envInfo = `\nwindow.__ENV__: ${JSON.stringify(envConfig)}`;
+          const consoleInfo = consoleLogs.length > 0
+            ? `\nBrowser console (ApiClient logs): ${consoleLogs.filter(l => l.includes('ApiClient')).join('; ')}`
+            : '';
+          throw new Error(`Login failed - error displayed: "${errorText}"${apiInfo}${failedInfo}${envInfo}${consoleInfo}`);
+        }),
     ]);
 
     // Verify payments page is loaded (use .first() as there may be multiple headings)
@@ -47,8 +107,8 @@ test.describe('Authentication Flow', () => {
   }) => {
     await page.goto('/signup');
 
-    // Wait for sign-up form to load
-    await expect(page.locator('input[type="text"]')).toBeVisible({
+    // Wait for sign-up form to load - use specific selectors for name field
+    await expect(page.locator('input#name, input[name="name"]').first()).toBeVisible({
       timeout: 10000,
     });
     await expect(page.locator('input[type="email"]')).toBeVisible({
@@ -61,7 +121,7 @@ test.describe('Authentication Flow', () => {
 
     // Fill in sign-up form with unique email to avoid conflicts
     const uniqueEmail = `newuser-${Date.now()}@example.com`;
-    await page.fill('input[type="text"]', 'New User');
+    await page.locator('input#name, input[name="name"]').first().fill('New User');
     await page.fill('input[type="email"]', uniqueEmail);
     await page.fill('input[type="password"]', 'TestPassword123!');
 
@@ -72,8 +132,16 @@ test.describe('Authentication Flow', () => {
     // Submit form
     await page.click('button[type="submit"]');
 
-    // Wait for redirect to payments page
-    await expect(page).toHaveURL(/.*payments/, { timeout: 10000 });
+    // Wait for either successful redirect OR error message
+    await Promise.race([
+      page.waitForURL(/.*payments/, { timeout: 30000 }),
+      page.waitForSelector('[role="alert"], .error, [class*="error"]', { timeout: 30000 })
+        .then(async () => {
+          // Capture the actual error message for debugging
+          const errorText = await page.locator('[role="alert"]').first().textContent();
+          throw new Error(`Sign-up failed - error displayed: "${errorText}"`);
+        }),
+    ]);
 
     // Verify payments page is loaded (use .first() as there may be multiple headings)
     await expect(page.locator('h1, h2').first()).toContainText(/payment/i, {
@@ -105,13 +173,13 @@ test.describe('Authentication Flow', () => {
   test('should show validation errors for weak password', async ({ page }) => {
     await page.goto('/signup');
 
-    // Wait for form to load (use .first() for name field as there may be multiple text inputs)
-    await expect(page.locator('input[type="text"]').first()).toBeVisible({
+    // Wait for form to load - use specific selector for name field
+    await expect(page.locator('input#name, input[name="name"]').first()).toBeVisible({
       timeout: 10000,
     });
 
     // Fill in form with weak password
-    await page.fill('input[type="text"]', 'New User');
+    await page.locator('input#name, input[name="name"]').first().fill('New User');
     await page.fill('input[type="email"]', 'newuser@example.com');
     await page.fill('input[type="password"]', 'weak');
 
@@ -146,7 +214,7 @@ test.describe('Authentication Flow', () => {
 
     // Should navigate to sign-up page
     await expect(page).toHaveURL(/.*signup/);
-    await expect(page.locator('input[type="text"]')).toBeVisible({
+    await expect(page.locator('input#name, input[name="name"]').first()).toBeVisible({
       timeout: 10000,
     });
 

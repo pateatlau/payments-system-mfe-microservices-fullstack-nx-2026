@@ -236,7 +236,7 @@ export async function deleteUser(
 
     // Get user info before deleting for audit log
     const userToDelete = await adminService.getUserById(id);
-    await adminService.deleteUser(id);
+    await adminService.deleteUser(id, req.user?.userId);
 
     // Create audit log
     const { ipAddress, userAgent } = getRequestMetadata(req);

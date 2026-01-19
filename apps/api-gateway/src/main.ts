@@ -228,10 +228,13 @@ process.on('SIGTERM', async () => {
     // Close WebSocket server
     await wsServer.close();
 
-    // Close rate limit Redis connection
-    const { rateLimitRedisClient } = await import('./middleware/rateLimit');
-    await rateLimitRedisClient.quit();
-    logger.info('Rate limit Redis connection closed');
+    // Close rate limit Redis connection (if available)
+    const { getRateLimitRedisClient } = await import('./middleware/rateLimit');
+    const rateLimitRedisClient = getRateLimitRedisClient();
+    if (rateLimitRedisClient) {
+      await rateLimitRedisClient.quit();
+      logger.info('Rate limit Redis connection closed');
+    }
 
     // Close HTTP server
     httpServer.close(() => {
