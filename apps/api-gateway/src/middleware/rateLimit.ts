@@ -147,6 +147,9 @@ export const authRateLimiter = rateLimit({
 });
 
 /**
- * Export Redis client for cleanup on shutdown
+ * Get Redis client for cleanup on shutdown
+ * Returns null if Redis is not being used
  */
-export const rateLimitRedisClient = redisClient;
+export function getRateLimitRedisClient(): Redis | null {
+  return redisClient;
+}
