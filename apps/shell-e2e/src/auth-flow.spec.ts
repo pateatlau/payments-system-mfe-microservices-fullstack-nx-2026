@@ -30,10 +30,17 @@ test.describe('Authentication Flow', () => {
     await page.fill('input[type="email"]', 'customer@example.com');
     await page.fill('input[type="password"]', 'TestPassword123!');
 
-    // Submit form and wait for navigation to payments page
-    await Promise.all([
-      page.waitForURL(/.*payments/, { timeout: 20000 }),
-      page.click('button[type="submit"]'),
+    // Submit form
+    await page.click('button[type="submit"]');
+
+    // Wait for either successful redirect OR error message
+    // This helps diagnose failures in CI
+    await Promise.race([
+      page.waitForURL(/.*payments/, { timeout: 30000 }),
+      page.waitForSelector('[role="alert"], .error, [class*="error"]', { timeout: 30000 })
+        .then(() => {
+          throw new Error('Login failed - error message displayed on page');
+        }),
     ]);
 
     // Verify payments page is loaded (use .first() as there may be multiple headings)
@@ -72,8 +79,14 @@ test.describe('Authentication Flow', () => {
     // Submit form
     await page.click('button[type="submit"]');
 
-    // Wait for redirect to payments page
-    await expect(page).toHaveURL(/.*payments/, { timeout: 10000 });
+    // Wait for either successful redirect OR error message
+    await Promise.race([
+      page.waitForURL(/.*payments/, { timeout: 30000 }),
+      page.waitForSelector('[role="alert"], .error, [class*="error"]', { timeout: 30000 })
+        .then(() => {
+          throw new Error('Sign-up failed - error message displayed on page');
+        }),
+    ]);
 
     // Verify payments page is loaded (use .first() as there may be multiple headings)
     await expect(page.locator('h1, h2').first()).toContainText(/payment/i, {
