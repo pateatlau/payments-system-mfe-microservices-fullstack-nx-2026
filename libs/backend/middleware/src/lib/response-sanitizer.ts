@@ -80,13 +80,13 @@ export const PII_PATTERNS = {
 
 /**
  * Fields commonly containing sensitive data
+ * NOTE: accessToken and refreshToken are intentionally NOT included here
+ * because they are returned in successful login/refresh responses.
+ * They should only be redacted in error responses, not in auth responses.
  */
 export const SENSITIVE_FIELDS = [
   'password',
   'passwordHash',
-  'token',
-  'accessToken',
-  'refreshToken',
   'apiKey',
   'secret',
   'secretKey',
@@ -103,6 +103,12 @@ export const SENSITIVE_FIELDS = [
   'routingNumber',
   'pin',
 ];
+
+/**
+ * Fields that should only be redacted in error responses
+ * These are sensitive but are legitimately returned in successful auth responses
+ */
+export const AUTH_TOKEN_FIELDS = ['token', 'accessToken', 'refreshToken'];
 
 /**
  * Internal path patterns to sanitize
@@ -214,16 +220,24 @@ export function sanitizePathsFromString(
 
 /**
  * Check if a field name is sensitive
+ * @param fieldName - The field name to check
+ * @param config - Sanitizer configuration
+ * @param isErrorResponse - Whether this is an error response (4xx/5xx)
  */
 function isSensitiveField(
   fieldName: string,
-  config: Required<ResponseSanitizerConfig>
+  config: Required<ResponseSanitizerConfig>,
+  isErrorResponse = false
 ): boolean {
   const lowerField = fieldName.toLowerCase();
-  const allSensitiveFields = [
-    ...SENSITIVE_FIELDS,
-    ...config.redactFields,
-  ].map((f) => f.toLowerCase());
+
+  // Build list of sensitive fields
+  // Auth token fields are only considered sensitive in error responses
+  const sensitiveFields = isErrorResponse
+    ? [...SENSITIVE_FIELDS, ...AUTH_TOKEN_FIELDS, ...config.redactFields]
+    : [...SENSITIVE_FIELDS, ...config.redactFields];
+
+  const allSensitiveFields = sensitiveFields.map((f) => f.toLowerCase());
 
   return allSensitiveFields.some(
     (sensitive) =>
@@ -235,11 +249,16 @@ function isSensitiveField(
 
 /**
  * Recursively sanitize an object
+ * @param obj - The object to sanitize
+ * @param config - Sanitizer configuration
+ * @param depth - Current recursion depth (for infinite recursion prevention)
+ * @param isErrorResponse - Whether this is an error response (affects which fields are redacted)
  */
 export function sanitizeObject(
   obj: unknown,
   config: Required<ResponseSanitizerConfig>,
-  depth = 0
+  depth = 0,
+  isErrorResponse = false
 ): unknown {
   // Prevent infinite recursion
   if (depth > 20) {
@@ -253,8 +272,10 @@ export function sanitizeObject(
   if (typeof obj === 'string') {
     let result = obj;
 
-    // Redact PII
-    if (config.redactPii) {
+    // Redact PII (but NOT for auth token values in successful responses)
+    // We only apply PII patterns to string values in error responses or
+    // when they're not direct token field values
+    if (config.redactPii && isErrorResponse) {
       result = redactPiiFromString(result, config);
     }
 
@@ -267,7 +288,9 @@ export function sanitizeObject(
   }
 
   if (Array.isArray(obj)) {
-    return obj.map((item) => sanitizeObject(item, config, depth + 1));
+    return obj.map((item) =>
+      sanitizeObject(item, config, depth + 1, isErrorResponse)
+    );
   }
 
   if (typeof obj === 'object') {
@@ -275,7 +298,7 @@ export function sanitizeObject(
 
     for (const [key, value] of Object.entries(obj)) {
       // Check for sensitive field names
-      if (isSensitiveField(key, config)) {
+      if (isSensitiveField(key, config, isErrorResponse)) {
         config.onSanitize({
           type: 'field',
           field: key,
@@ -301,7 +324,7 @@ export function sanitizeObject(
       }
 
       // Recursively sanitize nested objects
-      sanitized[key] = sanitizeObject(value, config, depth + 1);
+      sanitized[key] = sanitizeObject(value, config, depth + 1, isErrorResponse);
     }
 
     return sanitized;
@@ -321,7 +344,8 @@ export function sanitizeErrorResponse(
     return body;
   }
 
-  const sanitized = sanitizeObject(body, config);
+  // Pass isErrorResponse=true to redact auth tokens in error responses
+  const sanitized = sanitizeObject(body, config, 0, true);
 
   // Additional error-specific sanitization
   if (

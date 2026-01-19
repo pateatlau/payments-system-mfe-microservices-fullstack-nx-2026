@@ -12,6 +12,7 @@ import {
   sanitizeErrorResponse,
   PII_PATTERNS,
   SENSITIVE_FIELDS,
+  AUTH_TOKEN_FIELDS,
   trackSanitizationEvent,
   getSanitizationStats,
   resetSanitizationStats,
@@ -481,13 +482,65 @@ describe('Response Sanitizer', () => {
     });
   });
 
+  describe('Auth Response Handling', () => {
+    it('should NOT redact accessToken in successful login responses', () => {
+      const config = createConfig({});
+      const loginResponse = {
+        success: true,
+        accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.dozjgNryP4J3jVmNHl0w5N_XgL0n3I9PlFUP0THsR8U',
+        refreshToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJyZWZyZXNoIn0.KxbAbXzGmqYNxnD9yRTd_vy1v8nOUVMfmRWUO6-zKJ8',
+        user: { id: '123', email: 'user@example.com' },
+      };
+
+      // sanitizeObject with isErrorResponse=false should NOT redact tokens
+      const sanitized = sanitizeObject(loginResponse, config, 0, false) as typeof loginResponse;
+
+      // Tokens should be preserved (not redacted) for successful responses
+      expect(sanitized.accessToken).toBe(loginResponse.accessToken);
+      expect(sanitized.refreshToken).toBe(loginResponse.refreshToken);
+      expect(sanitized.success).toBe(true);
+    });
+
+    it('should redact accessToken in error responses', () => {
+      const config = createConfig({});
+      const errorResponse = {
+        success: false,
+        error: 'Token validation failed',
+        accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.dozjgNryP4J3jVmNHl0w5N_XgL0n3I9PlFUP0THsR8U',
+      };
+
+      // sanitizeErrorResponse should redact tokens
+      const sanitized = sanitizeErrorResponse(errorResponse, config) as typeof errorResponse;
+
+      // Tokens should be redacted in error responses
+      expect(sanitized.accessToken).toBe('[REDACTED]');
+    });
+
+    it('should always redact password field regardless of response type', () => {
+      const config = createConfig({});
+      const response = {
+        success: true,
+        password: 'secret123',
+        user: { password: 'also-secret' },
+      };
+
+      // Even in successful responses, password should always be redacted
+      const sanitized = sanitizeObject(response, config, 0, false) as {
+        success: boolean;
+        password: string;
+        user: { password: string };
+      };
+
+      expect(sanitized.password).toBe('[REDACTED]');
+      expect(sanitized.user.password).toBe('[REDACTED]');
+    });
+  });
+
   describe('Sensitive Fields Validation', () => {
     it('should have all expected sensitive fields defined', () => {
+      // Core sensitive fields that are always redacted
       const expectedFields = [
         'password',
-        'token',
-        'accessToken',
-        'refreshToken',
         'apiKey',
         'secret',
         'creditCard',
@@ -496,6 +549,18 @@ describe('Response Sanitizer', () => {
 
       for (const field of expectedFields) {
         expect(SENSITIVE_FIELDS).toContain(field);
+      }
+    });
+
+    it('should have auth token fields separate from always-sensitive fields', () => {
+      // Auth token fields are only redacted in error responses
+      // This allows successful login responses to return tokens
+      const authTokenFields = ['token', 'accessToken', 'refreshToken'];
+
+      for (const field of authTokenFields) {
+        expect(AUTH_TOKEN_FIELDS).toContain(field);
+        // These should NOT be in SENSITIVE_FIELDS to allow auth responses to work
+        expect(SENSITIVE_FIELDS).not.toContain(field);
       }
     });
   });
