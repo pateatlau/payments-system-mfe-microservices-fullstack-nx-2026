@@ -342,7 +342,8 @@ module.exports = {
   devServer: {
     port: 4200,
     host: '0.0.0.0', // Bind to all interfaces for Docker nginx access
-    hot: true,
+    hot: true, // HMR enabled - falls back to page refresh for changes that can't be hot-reloaded
+    liveReload: false, // Disable live reload - prevents auto page refresh on HMR failure
     historyApiFallback: true, // Required for SPA routing
     allowedHosts: 'all', // Allow nginx proxy requests
     // Serve static files from public directory
@@ -365,6 +366,9 @@ module.exports = {
         errors: true,
         warnings: false,
       },
+      // Prevent page reload on HMR errors - just log them
+      // This stops the reload loop when hot-update.json fails
+      reconnect: 5, // Limit reconnection attempts (default is infinite)
       // HMR WebSocket configuration:
       // - HTTP mode (localhost:4200): ws://localhost:4200/ws (direct to dev server)
       // - HTTPS mode (localhost via nginx): wss://localhost/hmr/shell (nginx proxies to dev server)
@@ -391,4 +395,18 @@ module.exports = {
   },
   // Source maps for development
   devtool: isDevelopment ? 'eval-source-map' : 'source-map',
+  // Watch options - prevent unnecessary rebuilds from non-source files
+  watchOptions: {
+    ignored: [
+      '**/node_modules/**',
+      '**/.nx/**',
+      '**/dist/**',
+      '**/.git/**',
+      '**/coverage/**',
+      '**/*.tsbuildinfo',
+      '**/tmp/**',
+    ],
+    // Aggregate multiple changes into single rebuild (reduces rebuild frequency)
+    aggregateTimeout: 300,
+  },
 };

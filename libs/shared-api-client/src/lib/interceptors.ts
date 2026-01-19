@@ -196,6 +196,40 @@ function setupResponseInterceptor(
 
       // Handle 401 Unauthorized (token expired or invalid)
       if (error.response?.status === 401 && originalRequest) {
+        // Skip token refresh for auth endpoints (login, register, refresh)
+        // These endpoints return 401 for invalid credentials, not expired tokens
+        const requestUrl = originalRequest.url || '';
+        const isAuthEndpoint =
+          requestUrl.includes('/auth/login') ||
+          requestUrl.includes('/auth/register') ||
+          requestUrl.includes('/auth/refresh');
+
+        if (isAuthEndpoint) {
+          // For auth endpoints, pass through the original error
+          // so the UI can show appropriate error message
+          if (error.response?.data) {
+            const apiError = error.response.data as {
+              error?: { message: string };
+            };
+            if (apiError.error?.message) {
+              return Promise.reject(new Error(apiError.error.message));
+            }
+          }
+
+          // Endpoint-specific fallback messages
+          let fallbackMessage = 'Authentication failed. Please try again.';
+          if (requestUrl.includes('/auth/login')) {
+            fallbackMessage = 'Invalid email or password. Please try again.';
+          } else if (requestUrl.includes('/auth/register')) {
+            fallbackMessage =
+              'Registration failed. Please check your details and try again.';
+          } else if (requestUrl.includes('/auth/refresh')) {
+            fallbackMessage = 'Session expired. Please sign in again.';
+          }
+
+          return Promise.reject(new Error(fallbackMessage));
+        }
+
         // If already refreshing, wait for it to complete
         if (isRefreshing) {
           return new Promise((resolve, reject) => {
