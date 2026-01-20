@@ -3,11 +3,18 @@
  */
 
 import { SessionManager, createSessionManager } from './session-manager';
-import type { SessionRequestContext, SessionConfig } from './session-types';
-import { DEFAULT_SESSION_CONFIG } from './session-types';
+import type { SessionRequestContext } from './session-types';
+import type Redis from 'ioredis';
+
+// Mock Redis type - partial implementation for testing
+type MockRedis = Pick<Redis, 'get' | 'set' | 'del' | 'sadd' | 'smembers' | 'srem' | 'expire' | 'lpush' | 'ltrim' | 'lrange'> & {
+  _storage: Map<string, string>;
+  _sets: Map<string, Set<string>>;
+  _clear: () => void;
+};
 
 // Mock Redis
-const createMockRedis = () => {
+const createMockRedis = (): MockRedis => {
   const storage = new Map<string, string>();
   const sets = new Map<string, Set<string>>();
   const expires = new Map<string, number>();
@@ -55,11 +62,11 @@ const createMockRedis = () => {
       sets.clear();
       expires.clear();
     },
-  } as unknown as ReturnType<typeof createMockRedis>;
+  };
 };
 
 describe('SessionManager', () => {
-  let redis: ReturnType<typeof createMockRedis>;
+  let redis: MockRedis;
   let sessionManager: SessionManager;
 
   const defaultContext: SessionRequestContext = {
@@ -72,7 +79,7 @@ describe('SessionManager', () => {
 
   beforeEach(() => {
     redis = createMockRedis();
-    sessionManager = new SessionManager(redis as any, {
+    sessionManager = new SessionManager(redis as unknown as Redis, {
       maxConcurrentSessions: 5,
       sessionTimeoutSeconds: 1800, // 30 minutes
       absoluteSessionLifetimeSeconds: 86400, // 24 hours
@@ -117,7 +124,7 @@ describe('SessionManager', () => {
 
     it('should evict oldest session when limit reached', async () => {
       // Create manager with limit of 2 sessions
-      const limitedManager = new SessionManager(redis as any, {
+      const limitedManager = new SessionManager(redis as unknown as Redis, {
         maxConcurrentSessions: 2,
         evictionStrategy: 'oldest',
         enableActivityTracking: false,
@@ -150,7 +157,7 @@ describe('SessionManager', () => {
     });
 
     it('should warn when approaching session limit', async () => {
-      const limitedManager = new SessionManager(redis as any, {
+      const limitedManager = new SessionManager(redis as unknown as Redis, {
         maxConcurrentSessions: 2,
         enableActivityTracking: false,
       });
@@ -173,7 +180,7 @@ describe('SessionManager', () => {
     });
 
     it('should throw when limit reached with no eviction strategy', async () => {
-      const strictManager = new SessionManager(redis as any, {
+      const strictManager = new SessionManager(redis as unknown as Redis, {
         maxConcurrentSessions: 1,
         evictionStrategy: 'none',
         enableActivityTracking: false,
@@ -259,7 +266,7 @@ describe('SessionManager', () => {
     });
 
     it('should detect fingerprint mismatch when validation enabled', async () => {
-      const strictManager = new SessionManager(redis as any, {
+      const strictManager = new SessionManager(redis as unknown as Redis, {
         enableFingerprinting: true,
         validateFingerprintOnRequest: true,
         fingerprintMismatchTolerance: 0.1, // Very strict
@@ -652,14 +659,14 @@ describe('SessionManager', () => {
         SESSION_FINGERPRINTING: 'true',
       };
 
-      const manager = createSessionManager(redis as any);
+      const manager = createSessionManager(redis as unknown as Redis);
       expect(manager).toBeInstanceOf(SessionManager);
 
       process.env = originalEnv;
     });
 
     it('should allow config override', () => {
-      const manager = createSessionManager(redis as any, {
+      const manager = createSessionManager(redis as unknown as Redis, {
         maxConcurrentSessions: 3,
         evictionStrategy: 'least_active',
       });
