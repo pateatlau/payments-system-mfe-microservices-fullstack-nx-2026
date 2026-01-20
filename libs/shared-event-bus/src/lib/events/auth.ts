@@ -55,13 +55,23 @@ export interface AuthSessionExpiredPayload {
 }
 
 /**
+ * Auth signup event payload
+ * Emitted when a user successfully registers (but needs to verify email)
+ */
+export interface AuthSignupPayload {
+  email: string;
+  emailVerificationRequired: boolean;
+}
+
+/**
  * Auth events union type
  */
 export type AuthEvent =
   | (BaseEvent<AuthLoginPayload> & { type: 'auth:login' })
   | (BaseEvent<AuthLogoutPayload> & { type: 'auth:logout' })
   | (BaseEvent<AuthTokenRefreshedPayload> & { type: 'auth:token-refreshed' })
-  | (BaseEvent<AuthSessionExpiredPayload> & { type: 'auth:session-expired' });
+  | (BaseEvent<AuthSessionExpiredPayload> & { type: 'auth:session-expired' })
+  | (BaseEvent<AuthSignupPayload> & { type: 'auth:signup' });
 
 /**
  * Auth event type strings

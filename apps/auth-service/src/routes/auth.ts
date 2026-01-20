@@ -7,6 +7,7 @@
 import { Router } from 'express';
 import * as authController from '../controllers/auth.controller';
 import * as mfaController from '../controllers/mfa.controller';
+import * as emailVerificationController from '../controllers/email-verification.controller';
 import { authenticate } from '../middleware/auth';
 
 const router = Router();
@@ -32,6 +33,19 @@ router.post('/auth/forgot-password', authController.forgotPassword);
 
 // POST /auth/reset-password - Reset password with token
 router.post('/auth/reset-password', authController.resetPassword);
+
+/**
+ * Email Verification routes (POC-3 Priority 1.2)
+ */
+
+// POST /auth/verify-email - Verify email with token (API call)
+router.post('/auth/verify-email', emailVerificationController.verifyEmail);
+
+// GET /auth/verify-email/:token - Verify email via clickable link
+router.get('/auth/verify-email/:token', emailVerificationController.verifyEmailByLink);
+
+// POST /auth/resend-verification - Resend verification email
+router.post('/auth/resend-verification', emailVerificationController.resendVerification);
 
 /**
  * Protected routes (authentication required)

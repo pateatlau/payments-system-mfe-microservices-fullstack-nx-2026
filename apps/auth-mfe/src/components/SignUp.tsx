@@ -2,7 +2,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useAuthStore, type SignUpData } from 'shared-auth-store';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import {
   Button,
   Input,
@@ -16,8 +16,8 @@ import {
   Alert,
   AlertDescription,
 } from '@mfe/shared-design-system';
-import { getApiClient } from '@mfe/shared-api-client';
 import hdfcLogo from '../assets/hdfc-logo-03.png';
+import { VerificationPending } from './VerificationPending';
 
 /**
  * Password strength validation helper
@@ -96,10 +96,16 @@ export interface SignUpProps {
  * SignUp component with form validation and auth store integration
  */
 export function SignUp({ onSuccess, onNavigateToSignIn }: SignUpProps = {}) {
-  const { signup, isLoading, error, clearError, isAuthenticated } =
-    useAuthStore();
+  const {
+    signup,
+    isLoading,
+    error,
+    clearError,
+    isAuthenticated,
+    emailVerificationPending,
+    clearEmailVerificationPending,
+  } = useAuthStore();
   const onSuccessCalledRef = useRef(false);
-  const [profileUpdateError, setProfileUpdateError] = useState<string | null>(null);
 
   const {
     register,
@@ -121,11 +127,14 @@ export function SignUp({ onSuccess, onNavigateToSignIn }: SignUpProps = {}) {
   // Watch password for real-time strength feedback
   const password = watch('password');
 
-  // Clear auth store error when component mounts (to clear stale errors from previous sessions)
+  // Clear auth store error and verification state when component mounts
+  // (to clear stale state from previous sessions)
   // Note: We use an empty dependency array so this only runs on mount, not when error changes.
   // This allows error messages to be displayed to users before being cleared.
   useEffect(() => {
     clearError();
+    // Note: We don't clear emailVerificationPending on mount because we want to
+    // preserve it if user refreshes the page after registration
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -145,7 +154,6 @@ export function SignUp({ onSuccess, onNavigateToSignIn }: SignUpProps = {}) {
 
   const onSubmit = async (data: SignUpFormData) => {
     try {
-      setProfileUpdateError(null);
       const signUpData: SignUpData = {
         email: data.email,
         password: data.password,
@@ -153,25 +161,13 @@ export function SignUp({ onSuccess, onNavigateToSignIn }: SignUpProps = {}) {
       };
       await signup(signUpData);
 
-      // If phone or address provided, update the profile
-      if (data.phone || data.address) {
-        try {
-          const apiClient = getApiClient();
-          await apiClient.put('/profile', {
-            phone: data.phone || undefined,
-            address: data.address || undefined,
-          });
-        } catch (profileErr) {
-          // Don't fail signup if profile update fails - user can update later
-          // eslint-disable-next-line no-console
-          console.warn('Profile update after signup failed:', profileErr);
-          setProfileUpdateError(
-            'Account created but failed to save contact details. You can update them in your profile.'
-          );
-        }
-      }
-      // Navigation is handled by SignUpPage component via Navigate component
-      // when isAuthenticated becomes true. onSuccess is called via useEffect above.
+      // Note: Profile update (phone/address) is deferred until after email verification
+      // since the user is not authenticated at this point. They can update their profile
+      // after verifying their email and logging in.
+
+      // If signup was successful and email verification is required,
+      // the emailVerificationPending state will be set and we'll show the
+      // VerificationPending component. No navigation needed.
     } catch (err) {
       // Error is handled by auth store
       // eslint-disable-next-line no-console
@@ -208,6 +204,19 @@ export function SignUp({ onSuccess, onNavigateToSignIn }: SignUpProps = {}) {
   };
 
   const passwordStrength = getPasswordStrength(password);
+
+  // Show verification pending screen after successful registration
+  if (emailVerificationPending) {
+    return (
+      <VerificationPending
+        verificationState={emailVerificationPending}
+        onNavigateToSignIn={onNavigateToSignIn}
+        onTryDifferentEmail={() => {
+          clearEmailVerificationPending();
+        }}
+      />
+    );
+  }
 
   return (
     <div className="flex items-center justify-center w-full">
@@ -355,13 +364,6 @@ export function SignUp({ onSuccess, onNavigateToSignIn }: SignUpProps = {}) {
               {error && (
                 <Alert variant="destructive">
                   <AlertDescription>{error}</AlertDescription>
-                </Alert>
-              )}
-
-              {/* Profile update warning (non-blocking) */}
-              {profileUpdateError && (
-                <Alert>
-                  <AlertDescription>{profileUpdateError}</AlertDescription>
                 </Alert>
               )}
 

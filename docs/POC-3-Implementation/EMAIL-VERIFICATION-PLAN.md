@@ -9,16 +9,19 @@
 
 ## 📊 Implementation Progress
 
-### Phase 1: Backend Infrastructure ⏳ PENDING
-- ⏳ **Priority 1.1:** Verification Token Generation & Storage
-- ⏳ **Priority 1.2:** Email Verification Endpoints
-- ⏳ **Priority 1.3:** Login Flow Modification (Block Unverified Users)
-- ⏳ **Priority 1.4:** Resend Verification Endpoint
+### Phase 1: Backend Infrastructure ✅ COMPLETE
+- ✅ **Priority 1.1:** Verification Token Generation & Storage (Completed 2026-01-20)
+- ✅ **Priority 1.2:** Email Verification Endpoints (Completed 2026-01-20)
+- ✅ **Priority 1.3:** Login Flow Modification (Completed 2026-01-20)
+- ✅ **Priority 1.4:** Resend Verification Endpoint (Completed in 1.2)
+- ✅ **Priority 1.5:** Registration Flow Modification (Completed 2026-01-20)
 
-### Phase 2: Event-Driven Email Integration ⏳ PENDING
-- ⏳ **Priority 2.1:** Publish Email Verification Events
-- ⏳ **Priority 2.2:** Email Service Subscriber (Optional - Future)
-- ⏳ **Priority 2.3:** Email Templates (Optional - Future)
+### Phase 2: Event-Driven Email Integration 📌 TODO (Future)
+- 📌 **Priority 2.1:** Publish Email Verification Events - *Requires email service infrastructure*
+- 📌 **Priority 2.2:** Email Service Subscriber - *Requires SendGrid/AWS SES/SMTP setup*
+- 📌 **Priority 2.3:** Email Templates - *Requires email service*
+
+> **Note:** Phase 2 is deferred until production email infrastructure is in place. The `_dev` token response provides sufficient functionality for development and testing.
 
 ### Phase 3: Frontend Integration ⏳ PENDING
 - ⏳ **Priority 3.1:** Post-Registration Verification UI
@@ -214,9 +217,10 @@ model User {
 
 ## Phase 1: Backend Infrastructure
 
-### Priority 1.1: Verification Token Generation & Storage
+### Priority 1.1: Verification Token Generation & Storage ✅ COMPLETED
 
-**File:** `apps/auth-service/src/services/email-verification.service.ts` (New)
+**Status:** ✅ Completed 2026-01-20
+**File:** `apps/auth-service/src/services/email-verification.service.ts`
 
 **Implementation:**
 
@@ -232,142 +236,195 @@ interface VerificationTokenPayload {
 
 // Token stored in Redis with structure:
 // Key: email_verification:{userId}
-// Value: { token, createdAt, attempts }
-// TTL: 24 hours
+// Value: { token, userId, email, createdAt, expiresAt }
+// TTL: 24 hours (86400 seconds)
 ```
 
-**Tasks:**
-- [ ] Create `email-verification.service.ts` with token generation
-- [ ] Add Redis storage for verification tokens (24h TTL)
-- [ ] Add token validation logic
-- [ ] Add single-use token enforcement (delete after use)
-- [ ] Add rate limiting for token generation (max 5 per hour)
+**Completed Tasks:**
+- [x] Create `email-verification.service.ts` with token generation
+- [x] Add Redis storage for verification tokens (24h TTL)
+- [x] Add token validation logic (JWT verify + Redis check)
+- [x] Add single-use token enforcement (delete after use via `consumeVerificationToken`)
+- [x] Add rate limiting for token generation (max 5 per hour using atomic Redis increment)
 
-**Files to Create/Modify:**
-- `apps/auth-service/src/services/email-verification.service.ts` (New)
-- `apps/auth-service/src/lib/cache.ts` (Add verification token methods)
+**Functions Implemented:**
+| Function | Description |
+|----------|-------------|
+| `generateVerificationToken(userId, email)` | Creates JWT token, stores in Redis, enforces rate limit |
+| `validateVerificationToken(token)` | Verifies JWT signature, checks Redis for single-use |
+| `consumeVerificationToken(userId)` | Deletes token from Redis (call after verification) |
+| `getVerificationStatus(userId)` | Check if user has pending verification |
+| `getRateLimitStatus(userId)` | Get remaining rate limit info |
+| `clearVerificationToken(userId)` | Admin: clear token for user |
+| `clearRateLimit(userId)` | Admin: reset rate limit for user |
+
+**Security Features:**
+- JWT signed with application secret (`config.jwtSecret`)
+- Atomic rate limiting via Redis `INCR` with TTL
+- Privacy-safe logging (emails masked as `j*****e@example.com`)
+- OpenTelemetry tracing for observability
+
+**Files Created/Modified:**
+- `apps/auth-service/src/services/email-verification.service.ts` (New - 350+ lines)
 
 ---
 
-### Priority 1.2: Email Verification Endpoints
+### Priority 1.2: Email Verification Endpoints ✅ COMPLETED
 
-**File:** `apps/auth-service/src/controllers/email-verification.controller.ts` (New)
+**Status:** ✅ Completed 2026-01-20
+**File:** `apps/auth-service/src/controllers/email-verification.controller.ts`
 
-**Endpoints:**
+**Endpoints Implemented:**
 
-```typescript
-// POST /auth/verify-email
-// Body: { token: string }
-// Response: { success: true, message: "Email verified successfully" }
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/auth/verify-email` | Verify email with JWT token (API call) |
+| GET | `/auth/verify-email/:token` | Verify via clickable link (supports redirect) |
+| POST | `/auth/resend-verification` | Resend verification email |
 
-// GET /auth/verify-email/:token
-// Query params: ?redirect=true (optional)
-// Response: Redirect to frontend or JSON response
-```
+**Completed Tasks:**
+- [x] Create `email-verification.controller.ts`
+- [x] Add POST `/auth/verify-email` endpoint
+- [x] Add GET `/auth/verify-email/:token` endpoint (for clickable links with ?redirect=true)
+- [x] Add POST `/auth/resend-verification` endpoint
+- [x] Add proper error responses (TOKEN_EXPIRED, INVALID_TOKEN, TOKEN_ALREADY_USED, ALREADY_VERIFIED)
+- [x] Add Swagger/OpenAPI documentation for all endpoints
+- [x] Create `email-verification.validators.ts` with Zod schemas
 
-**Tasks:**
-- [ ] Create `email-verification.controller.ts`
-- [ ] Add POST `/auth/verify-email` endpoint
-- [ ] Add GET `/auth/verify-email/:token` endpoint (for clickable links)
-- [ ] Add proper error responses (expired, invalid, already verified)
-- [ ] Add Swagger/OpenAPI documentation
+**Error Codes:**
+| Code | Description |
+|------|-------------|
+| `TOKEN_EXPIRED` | Verification link has expired (24h TTL) |
+| `INVALID_TOKEN` | Invalid verification link or JWT |
+| `TOKEN_ALREADY_USED` | Token was already consumed |
+| `RATE_LIMITED` | Too many resend requests (max 5/hour) |
 
-**Files to Create/Modify:**
-- `apps/auth-service/src/controllers/email-verification.controller.ts` (New)
-- `apps/auth-service/src/routes/auth.ts` (Add routes)
+**Security Features:**
+- Email enumeration prevention (resend always returns success)
+- Development mode token exposure for testing (`_dev` field)
+- Privacy-safe logging with masked emails
+- Proper cache invalidation on verification
+
+**Files Created/Modified:**
+- `apps/auth-service/src/controllers/email-verification.controller.ts` (New - 300+ lines)
 - `apps/auth-service/src/validators/email-verification.validators.ts` (New)
+- `apps/auth-service/src/routes/auth.ts` (Added 3 routes)
 
 ---
 
-### Priority 1.3: Login Flow Modification
+### Priority 1.3: Login Flow Modification ✅ COMPLETED
 
+**Status:** ✅ Completed 2026-01-20
 **File:** `apps/auth-service/src/services/auth.service.ts`
 
 **Changes to `login()` function:**
 
 ```typescript
-// After credential validation, before token generation:
+// After credential validation, before MFA check:
 if (!user.emailVerified) {
   throw new ApiError(
     403,
     'EMAIL_NOT_VERIFIED',
     'Please verify your email address before logging in. Check your inbox for the verification link.',
-    { canResend: true, email: user.email }
+    { canResend: true, email: maskEmailForLog(user.email) }
   );
 }
 ```
 
-**Tasks:**
-- [ ] Add `emailVerified` check in login flow
-- [ ] Return appropriate error code and message
-- [ ] Include `canResend` flag in error response
-- [ ] Update Swagger documentation
+**Completed Tasks:**
+- [x] Add `emailVerified` check in login flow (after password validation, before MFA)
+- [x] Return appropriate error code (`EMAIL_NOT_VERIFIED`) and message
+- [x] Include `canResend: true` flag in error response
+- [x] Include masked email for privacy (`j*****e@example.com`)
+- [x] Add comprehensive Swagger documentation for `/auth/login` endpoint
+- [x] Add unit test for unverified user login rejection
 
-**Files to Modify:**
-- `apps/auth-service/src/services/auth.service.ts`
-
----
-
-### Priority 1.4: Resend Verification Endpoint
-
-**File:** `apps/auth-service/src/controllers/email-verification.controller.ts`
-
-**Endpoint:**
-
-```typescript
-// POST /auth/resend-verification
-// Body: { email: string }
-// Rate limited: 3 requests per hour per email
-// Response: { success: true, message: "If account exists, verification email sent" }
+**Error Response (403 Forbidden):**
+```json
+{
+  "success": false,
+  "error": {
+    "code": "EMAIL_NOT_VERIFIED",
+    "message": "Please verify your email address before logging in.",
+    "data": {
+      "canResend": true,
+      "email": "j*****e@example.com"
+    }
+  }
+}
 ```
 
-**Security Considerations:**
-- Always return success (prevent email enumeration)
-- Rate limit by email AND IP
-- Don't reveal if email exists in system
-
-**Tasks:**
-- [ ] Add POST `/auth/resend-verification` endpoint
-- [ ] Implement rate limiting (3 per hour per email)
-- [ ] Generate new verification token
-- [ ] Invalidate old token
-- [ ] Publish new verification event
-
-**Files to Modify:**
-- `apps/auth-service/src/controllers/email-verification.controller.ts`
-- `apps/auth-service/src/routes/auth.ts`
+**Files Modified:**
+- `apps/auth-service/src/services/auth.service.ts` (Added check + helper function)
+- `apps/auth-service/src/controllers/auth.controller.ts` (Added Swagger docs)
+- `apps/auth-service/src/services/auth.service.spec.ts` (Added unit test)
 
 ---
 
-### Priority 1.5: Registration Flow Modification
+### Priority 1.4: Resend Verification Endpoint ✅ COMPLETED (in 1.2)
 
+**Status:** ✅ Completed 2026-01-20 (implemented as part of Priority 1.2)
+**File:** `apps/auth-service/src/controllers/email-verification.controller.ts`
+
+**Endpoint:** `POST /auth/resend-verification`
+
+**Completed Tasks:**
+- [x] Add POST `/auth/resend-verification` endpoint
+- [x] Implement rate limiting (5 per hour per user via token generation)
+- [x] Generate new verification token (invalidates previous)
+- [x] Email enumeration prevention (always returns success)
+- [ ] Publish new verification event (Phase 2)
+
+**Security Features:**
+- Always returns success to prevent email enumeration
+- Rate limited via `generateVerificationToken()` (max 5/hour)
+- Masked email in development response
+- Privacy-safe logging
+
+---
+
+### Priority 1.5: Registration Flow Modification ✅ COMPLETED
+
+**Status:** ✅ Completed 2026-01-20
 **File:** `apps/auth-service/src/services/auth.service.ts`
 
-**Changes to `register()` function:**
+**New Registration Response:**
 
 ```typescript
-// Current: Returns auth tokens immediately
-// New: Returns verification required response
-
 interface RegistrationResponse {
   success: true;
   message: string;
   emailVerificationRequired: true;
-  // Only in development mode:
-  verificationToken?: string;
+  email: string;
+  // Development mode only:
+  _dev?: {
+    verificationToken: string;
+    userId: string;
+    expiresAt: string;
+    verifyUrl: string;
+  };
 }
 ```
 
-**Tasks:**
-- [ ] Modify `register()` to not return auth tokens
-- [ ] Generate verification token on registration
-- [ ] Store token in Redis
-- [ ] Return verification required response
-- [ ] Include token in response for development mode only
+**Completed Tasks:**
+- [x] Modify `register()` to not return auth tokens
+- [x] Generate verification token on registration automatically
+- [x] Store token in Redis (via `generateVerificationToken`)
+- [x] Return verification required response
+- [x] Include token in `_dev` field for development mode only
+- [x] Add comprehensive Swagger documentation for `/auth/register`
+- [x] Update unit tests for new registration flow
 
-**Files to Modify:**
-- `apps/auth-service/src/services/auth.service.ts`
-- `apps/auth-service/src/controllers/auth.controller.ts`
+**Testing Flow:**
+1. `POST /auth/register` → Returns `{ emailVerificationRequired: true, _dev: { verificationToken } }`
+2. `POST /auth/verify-email` with `{ token }` → Returns `{ success: true }`
+3. `POST /auth/login` → Returns auth tokens
+
+**Files Modified:**
+- `apps/auth-service/src/services/auth.service.ts` (New `RegistrationResponse` type, modified `register()`)
+- `apps/auth-service/src/controllers/auth.controller.ts` (New Swagger docs, updated response format)
+- `apps/auth-service/src/services/auth.service.spec.ts` (Updated tests)
+- `apps/auth-service/src/controllers/auth.controller.spec.ts` (Updated tests)
 
 ---
 
@@ -433,34 +490,50 @@ interface EmailVerificationRequestedPayload {
 
 ## Phase 3: Frontend Integration
 
-### Priority 3.1: Post-Registration Verification UI
+### Priority 3.1: Post-Registration Verification UI ✅ COMPLETED
 
-**File:** `apps/auth-mfe/src/components/SignUp.tsx`
+**Status:** ✅ Completed 2026-01-20
 
-**Changes:**
-- After successful registration, show verification message
-- Display "Check your email" UI instead of redirecting to dashboard
-- Provide "Resend verification" button
+**Files Modified/Created:**
+- `libs/shared-auth-store/src/lib/shared-auth-store.ts` - Added `emailVerificationPending` state
+- `libs/shared-auth-store/src/index.ts` - Exported `EmailVerificationPendingState` type
+- `apps/auth-mfe/src/components/VerificationPending.tsx` (NEW)
+- `apps/auth-mfe/src/components/SignUp.tsx` - Shows `VerificationPending` after registration
 
-**New Component:** `apps/auth-mfe/src/components/VerificationPending.tsx`
+**Changes Made:**
 
-```typescript
-interface VerificationPendingProps {
-  email: string;
-  onResendClick: () => void;
-  onBackToLogin: () => void;
-}
-```
+1. **Updated Auth Store:**
+   - Added `EmailVerificationPendingState` interface
+   - Added `emailVerificationPending` state to store
+   - Added `clearEmailVerificationPending()` action
+   - Modified `signup()` to handle new `RegistrationResponse` format
+   - Emits `auth:signup` event (not `auth:login`) when verification required
 
-**Tasks:**
-- [ ] Create `VerificationPending` component
-- [ ] Update SignUp to show verification pending state
-- [ ] Add resend functionality
-- [ ] Add countdown timer for resend cooldown
+2. **Created `VerificationPending` Component:**
+   - Shows email verification instructions
+   - Displays masked email for privacy
+   - Resend button with 60-second cooldown timer
+   - DEV MODE panel showing verification token/URL for testing
+   - "Go to Sign In" and "Use different email" navigation options
 
-**Files to Create/Modify:**
-- `apps/auth-mfe/src/components/VerificationPending.tsx` (New)
-- `apps/auth-mfe/src/components/SignUp.tsx`
+3. **Updated `SignUp` Component:**
+   - Renders `VerificationPending` when `emailVerificationPending` is set
+   - Removed profile update logic (deferred until after email verification)
+   - Cleaned up unused state and imports
+
+**Completed Tasks:**
+- [x] Create `VerificationPending` component
+- [x] Update SignUp to show verification pending state
+- [x] Add resend functionality with API call to `/auth/resend-verification`
+- [x] Add countdown timer for resend cooldown (60 seconds)
+
+**Testing Flow:**
+1. Fill out SignUp form and submit
+2. `VerificationPending` component is displayed
+3. DEV MODE panel shows verification token and URL
+4. Click "Resend Verification Email" - shows success, starts 60s cooldown
+5. Click "Go to Sign In" - navigates to login page
+6. Click "Use a different email address" - returns to SignUp form
 
 ---
 

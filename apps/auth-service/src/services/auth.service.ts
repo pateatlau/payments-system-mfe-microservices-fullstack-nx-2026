@@ -50,6 +50,18 @@ import {
   recordSuccessfulLogin,
 } from './login-attempts.service';
 import { isMfaRequired, verifyMfaCode } from './mfa.service';
+import { generateVerificationToken } from './email-verification.service';
+
+/**
+ * Mask an email address for privacy-safe responses/logging
+ * e.g., "john.doe@example.com" -> "j*****e@example.com"
+ */
+function maskEmailForLog(email: string): string {
+  const [localPart, domain] = email.split('@');
+  if (!localPart || !domain) return '***@***';
+  if (localPart.length <= 2) return `${localPart[0]}*@${domain}`;
+  return `${localPart[0]}${'*'.repeat(Math.min(localPart.length - 2, 5))}${localPart[localPart.length - 1]}@${domain}`;
+}
 
 /**
  * User response (without password)
@@ -75,17 +87,40 @@ export interface AuthResponse {
 }
 
 /**
+ * Registration response (POC-3 Priority 1.5)
+ * Returns verification required info instead of auth tokens
+ */
+export interface RegistrationResponse {
+  success: true;
+  message: string;
+  emailVerificationRequired: true;
+  email: string;
+  /** Development only: verification token for manual testing */
+  _dev?: {
+    verificationToken: string;
+    userId: string;
+    expiresAt: string;
+    verifyUrl: string;
+  };
+}
+
+/**
  * Register a new user
  *
+ * POC-3 Priority 1.5: Registration now requires email verification
+ * - Does NOT return auth tokens immediately
+ * - Generates email verification token
+ * - User must verify email before logging in
+ *
  * @param data - Registration data
- * @param requestMeta - Optional request metadata for fingerprinting
- * @returns Auth response with user and tokens
+ * @param _requestMeta - Optional request metadata (unused now, kept for API compatibility)
+ * @returns Registration response with verification info
  * @throws ApiError if email already exists
  */
 export const register = async (
   data: RegisterInput,
-  requestMeta?: { ip: string; userAgent: string }
-): Promise<AuthResponse> => {
+  _requestMeta?: { ip: string; userAgent: string }
+): Promise<RegistrationResponse> => {
   // Check if user already exists (try cache first)
   const emailCacheKey = CacheKeys.userByEmail(data.email);
   let existingUser = await cache.get<unknown>(emailCacheKey);
@@ -103,7 +138,7 @@ export const register = async (
   // Hash password
   const passwordHash = await bcrypt.hash(data.password, config.bcryptRounds);
 
-  // Create user
+  // Create user (emailVerified defaults to false)
   const user = await prisma.user.create({
     data: {
       email: data.email,
@@ -113,55 +148,15 @@ export const register = async (
     },
   });
 
-  // TODO (POC-3 Phase 4): User profile creation will be handled via RabbitMQ event
-  // When auth.user.created event is published, profile service will create the profile
-  // This maintains service isolation - auth service only manages users and tokens
+  // Generate email verification token
+  const verificationResult = await generateVerificationToken(user.id, user.email);
 
-  // Generate tokens
-  const jwtPayload: JwtPayload = {
-    userId: user.id,
-    email: user.email,
-    name: user.name,
-    role: user.role as UserRole,
-  };
-
-  const tokens = generateTokenPair(jwtPayload);
-
-  // Generate token family and fingerprint for rotation tracking
-  const tokenFamily = generateTokenFamily();
-  const fingerprint = requestMeta
-    ? generateFingerprint(requestMeta.ip, requestMeta.userAgent)
-    : null;
-
-  // Delete old refresh tokens for this user (prevent unique constraint violations)
-  await prisma.refreshToken.deleteMany({
-    where: { userId: user.id },
-  });
-
-  // Store new refresh token with family and fingerprint
-  await prisma.refreshToken.create({
-    data: {
-      userId: user.id,
-      token: tokens.refreshToken,
-      tokenFamily,
-      fingerprint,
-      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
-    },
-  });
-
-  // Return user and tokens
-  const userResponse: UserResponse = {
-    id: user.id,
-    email: user.email,
-    name: user.name,
-    role: user.role as UserRole,
-    emailVerified: user.emailVerified,
-    createdAt: user.createdAt,
-    updatedAt: user.updatedAt,
-  };
-
-  // Don't cache after registration - userResponse lacks passwordHash
-  // Login will fetch from DB and cache properly with passwordHash included
+  if (!verificationResult.success || !verificationResult.token) {
+    // This shouldn't happen for a new user, but handle gracefully
+    console.error(
+      `[Auth] Failed to generate verification token for new user ${user.id}`
+    );
+  }
 
   // Publish user.created event for other services (Profile, Payments, Admin)
   try {
@@ -175,16 +170,38 @@ export const register = async (
     });
   } catch (_error) {
     // Log error but don't fail registration - event publishing is non-critical
-    // eslint-disable-next-line no-console
     console.error('Failed to publish user.created event:', _error);
   }
 
-  return {
-    user: userResponse,
-    accessToken: tokens.accessToken,
-    refreshToken: tokens.refreshToken,
-    expiresIn: tokens.expiresIn,
+  console.log(
+    `[Auth] User registered: ${user.id} (${maskEmailForLog(user.email)}) - verification required`
+  );
+
+  // Build response
+  const response: RegistrationResponse = {
+    success: true,
+    message:
+      'Registration successful. Please check your email to verify your account.',
+    emailVerificationRequired: true,
+    email: user.email,
   };
+
+  // In development mode, include verification token for manual testing
+  const isDevelopment =
+    process.env.NODE_ENV === 'development' ||
+    process.env.NODE_ENV === 'local' ||
+    process.env.ALLOW_DEV_TOKENS === 'true';
+
+  if (isDevelopment && verificationResult.token) {
+    response._dev = {
+      verificationToken: verificationResult.token,
+      userId: user.id,
+      expiresAt: verificationResult.expiresAt || '',
+      verifyUrl: `https://localhost/verify-email?token=${verificationResult.token}`,
+    };
+  }
+
+  return response;
 };
 
 /**
@@ -304,6 +321,20 @@ export const login = async (
 
   // SECURITY: Clear failed attempts on successful login
   await recordSuccessfulLogin(data.email);
+
+  // SECURITY: Check if email is verified (POC-3 Priority 1.3)
+  // Block login for unverified users to enforce email verification
+  if (!user.emailVerified) {
+    throw new ApiError(
+      403,
+      'EMAIL_NOT_VERIFIED',
+      'Please verify your email address before logging in. Check your inbox for the verification link.',
+      {
+        canResend: true,
+        email: maskEmailForLog(user.email),
+      }
+    );
+  }
 
   // Check if MFA is required for this user
   const mfaEnabled = await isMfaRequired(user.id);

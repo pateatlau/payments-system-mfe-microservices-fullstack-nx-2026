@@ -55,15 +55,12 @@ describe('AuthController', () => {
         password: 'SecurePassword123!@#',
         name: 'Test User',
       };
+      // POC-3 Priority 1.5: Registration returns verification required response
       const mockResult = {
-        user: {
-          id: 'user-1',
-          email: 'test@example.com',
-          name: 'Test User',
-        },
-        accessToken: 'access-token',
-        refreshToken: 'refresh-token',
-        expiresIn: '15m',
+        success: true,
+        message: 'Registration successful. Please check your email to verify your account.',
+        emailVerificationRequired: true,
+        email: 'test@example.com',
       };
 
       mockRequest.body = mockRegisterData;
@@ -76,10 +73,8 @@ describe('AuthController', () => {
       );
 
       expect(mockResponse.status).toHaveBeenCalledWith(201);
-      expect(mockResponse.json).toHaveBeenCalledWith({
-        success: true,
-        data: mockResult,
-      });
+      // Controller now returns result directly (not wrapped in { success, data })
+      expect(mockResponse.json).toHaveBeenCalledWith(mockResult);
       expect(mockNext).not.toHaveBeenCalled();
     });
 

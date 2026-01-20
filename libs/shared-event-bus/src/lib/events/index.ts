@@ -15,6 +15,7 @@ import type {
   AuthLogoutPayload,
   AuthTokenRefreshedPayload,
   AuthSessionExpiredPayload,
+  AuthSignupPayload,
 } from './auth';
 import type {
   PaymentEvent,
@@ -57,6 +58,7 @@ export type EventPayloadMap = {
   'auth:logout': AuthLogoutPayload;
   'auth:token-refreshed': AuthTokenRefreshedPayload;
   'auth:session-expired': AuthSessionExpiredPayload;
+  'auth:signup': AuthSignupPayload;
   'payments:created': PaymentCreatedPayload;
   'payments:updated': PaymentUpdatedPayload;
   'payments:completed': PaymentCompletedPayload;
