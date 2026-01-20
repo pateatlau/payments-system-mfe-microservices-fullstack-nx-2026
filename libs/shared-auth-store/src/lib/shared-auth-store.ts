@@ -401,6 +401,10 @@ export const useAuthStore = create<AuthState>()(
                 },
                 'auth-mfe'
               );
+            } else {
+              // Response was successful but had neither emailVerificationRequired nor data
+              // This is an unexpected state - treat it as an error
+              throw new Error(response.message ?? 'Sign-up failed');
             }
           } catch (error) {
             const errorMessage =
