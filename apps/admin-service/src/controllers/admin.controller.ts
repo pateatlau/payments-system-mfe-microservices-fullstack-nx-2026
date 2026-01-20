@@ -90,7 +90,7 @@ export async function updateUser(
     const { id } = uuidParamSchema.parse(req.params);
 
     const data = updateUserSchema.parse(req.body);
-    const user = await adminService.updateUser(id, data);
+    const user = await adminService.updateUser(id, data, req.user?.userId);
 
     // Create audit log
     const { ipAddress, userAgent } = getRequestMetadata(req);
@@ -127,7 +127,7 @@ export async function updateUserRole(
     const { id } = uuidParamSchema.parse(req.params);
 
     const data = updateUserRoleSchema.parse(req.body);
-    const user = await adminService.updateUserRole(id, data);
+    const user = await adminService.updateUserRole(id, data, req.user?.userId);
 
     // Create audit log
     const { ipAddress, userAgent } = getRequestMetadata(req);
