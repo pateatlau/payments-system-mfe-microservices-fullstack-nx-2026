@@ -65,6 +65,12 @@ const LazySignUp = lazy(() =>
   }))
 );
 
+const LazyForgotPassword = lazy(() =>
+  import('authMfe/ForgotPassword').catch(() => ({
+    default: () => <ErrorFallback componentName="ForgotPassword" />,
+  }))
+);
+
 const LazyPaymentsPage = lazy(() =>
   import('paymentsMfe/PaymentsPage').catch(() => ({
     default: () => <ErrorFallback componentName="PaymentsPage" />,
@@ -92,6 +98,10 @@ const LazyProfilePage = lazy(() =>
 // Export wrapped components with Suspense
 export const SignInRemote = withSuspense(LazySignIn, 'Loading sign in...');
 export const SignUpRemote = withSuspense(LazySignUp, 'Loading sign up...');
+export const ForgotPasswordRemote = withSuspense(
+  LazyForgotPassword,
+  'Loading forgot password...'
+);
 export const PaymentsPageRemote = withSuspense(
   LazyPaymentsPage,
   'Loading payments...'

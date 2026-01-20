@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from 'react';
 import {
   Button,
   Input,
+  PasswordInput,
   Label,
   Card,
   CardHeader,
@@ -310,9 +311,8 @@ export function SignUp({ onSuccess, onNavigateToSignIn }: SignUpProps = {}) {
               {/* Password field */}
               <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>
-                <Input
+                <PasswordInput
                   id="password"
-                  type="password"
                   {...register('password')}
                   placeholder="Enter your password"
                   disabled={isFormLoading}
@@ -337,9 +337,8 @@ export function SignUp({ onSuccess, onNavigateToSignIn }: SignUpProps = {}) {
               {/* Confirm Password field */}
               <div className="space-y-2">
                 <Label htmlFor="confirmPassword">Confirm Password</Label>
-                <Input
+                <PasswordInput
                   id="confirmPassword"
-                  type="password"
                   {...register('confirmPassword')}
                   placeholder="Confirm your password"
                   disabled={isFormLoading}

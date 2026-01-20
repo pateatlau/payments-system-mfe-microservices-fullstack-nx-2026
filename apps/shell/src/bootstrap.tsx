@@ -22,6 +22,7 @@ import {
 import {
   SignInRemote,
   SignUpRemote,
+  ForgotPasswordRemote,
   PaymentsPageRemote,
   ReportsPageRemote,
   AdminDashboardRemote,
@@ -88,6 +89,7 @@ function AppWrapper() {
           remotes={{
             SignInComponent: SignInRemote,
             SignUpComponent: SignUpRemote,
+            ForgotPasswordComponent: ForgotPasswordRemote,
             PaymentsComponent: PaymentsPageRemote,
             ReportsComponent: ReportsPageRemote,
             AdminDashboardComponent: AdminDashboardRemote,
