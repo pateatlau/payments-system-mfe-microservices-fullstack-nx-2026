@@ -72,6 +72,8 @@ describe('useAuthStore', () => {
       isAuthenticated: false,
       isLoading: false,
       error: null,
+      mfaPending: false,
+      mfaToken: null,
     });
     // Clear localStorage
     if (typeof localStorage !== 'undefined') {
@@ -86,6 +88,12 @@ describe('useAuthStore', () => {
       expect(state.isAuthenticated).toBe(false);
       expect(state.isLoading).toBe(false);
       expect(state.error).toBeNull();
+    });
+
+    it('should have initial MFA state', () => {
+      const state = useAuthStore.getState();
+      expect(state.mfaPending).toBe(false);
+      expect(state.mfaToken).toBeNull();
     });
   });
 
@@ -309,6 +317,236 @@ describe('useAuthStore', () => {
       const state = useAuthStore.getState();
       expect(state.isAuthenticated).toBe(false);
       expect(state.error).toBe('Login failed');
+    });
+
+    it('should set MFA pending state when MFA is required', async () => {
+      const mockUser: User = {
+        id: 'user-mfa',
+        email: 'mfa@example.com',
+        name: 'MFA User',
+        role: 'CUSTOMER',
+        emailVerified: true,
+        createdAt: '2026-01-01T00:00:00.000Z',
+        updatedAt: '2026-01-01T00:00:00.000Z',
+      };
+
+      const mockResponse = {
+        success: true,
+        data: {
+          user: mockUser,
+          accessToken: '',
+          refreshToken: '',
+          mfaRequired: true,
+          mfaToken: 'mfa-temp-token-123',
+        },
+      };
+
+      getMockPost().mockResolvedValueOnce(mockResponse);
+
+      const { login } = useAuthStore.getState();
+
+      await login('mfa@example.com', 'password123');
+
+      const state = useAuthStore.getState();
+      expect(state.mfaPending).toBe(true);
+      expect(state.mfaToken).toBe('mfa-temp-token-123');
+      expect(state.user).not.toBeNull();
+      expect(state.user?.email).toBe('mfa@example.com');
+      expect(state.isAuthenticated).toBe(false); // Not authenticated until MFA complete
+      expect(state.accessToken).toBeNull();
+      expect(state.refreshToken).toBeNull();
+      expect(state.isLoading).toBe(false);
+      expect(state.error).toBeNull();
+
+      // Verify event was NOT emitted (login not complete)
+      expect(getMockEmit()).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('completeMfaLogin', () => {
+    it('should complete MFA login successfully', async () => {
+      const mockUser: User = {
+        id: 'user-mfa',
+        email: 'mfa@example.com',
+        name: 'MFA User',
+        role: 'CUSTOMER',
+        emailVerified: true,
+        createdAt: '2026-01-01T00:00:00.000Z',
+        updatedAt: '2026-01-01T00:00:00.000Z',
+      };
+
+      // Set up MFA pending state
+      useAuthStore.setState({
+        user: mockUser,
+        mfaPending: true,
+        mfaToken: 'mfa-temp-token-123',
+        isAuthenticated: false,
+      });
+
+      const mockResponse = {
+        success: true,
+        data: {
+          user: mockUser,
+          accessToken: 'access-token-mfa',
+          refreshToken: 'refresh-token-mfa',
+        },
+      };
+
+      getMockPost().mockResolvedValueOnce(mockResponse);
+
+      const { completeMfaLogin } = useAuthStore.getState();
+
+      await completeMfaLogin('123456');
+
+      const state = useAuthStore.getState();
+      expect(state.isAuthenticated).toBe(true);
+      expect(state.mfaPending).toBe(false);
+      expect(state.mfaToken).toBeNull();
+      expect(state.accessToken).toBe('access-token-mfa');
+      expect(state.refreshToken).toBe('refresh-token-mfa');
+      expect(state.isLoading).toBe(false);
+      expect(state.error).toBeNull();
+
+      // Verify API call
+      expect(getMockPost()).toHaveBeenCalledWith('/auth/mfa/complete', {
+        mfaToken: 'mfa-temp-token-123',
+        code: '123456',
+      });
+
+      // Verify event emission
+      expect(getMockEmit()).toHaveBeenCalledWith(
+        'auth:login',
+        {
+          user: {
+            id: mockUser.id,
+            email: mockUser.email,
+            name: mockUser.name,
+            role: mockUser.role,
+          },
+          accessToken: 'access-token-mfa',
+          refreshToken: 'refresh-token-mfa',
+        },
+        'auth-mfe'
+      );
+    });
+
+    it('should handle MFA verification errors', async () => {
+      const mockUser: User = {
+        id: 'user-mfa',
+        email: 'mfa@example.com',
+        name: 'MFA User',
+        role: 'CUSTOMER',
+        emailVerified: true,
+        createdAt: '2026-01-01T00:00:00.000Z',
+        updatedAt: '2026-01-01T00:00:00.000Z',
+      };
+
+      // Set up MFA pending state
+      useAuthStore.setState({
+        user: mockUser,
+        mfaPending: true,
+        mfaToken: 'mfa-temp-token-123',
+        isAuthenticated: false,
+      });
+
+      getMockPost().mockRejectedValueOnce(new Error('Invalid MFA code'));
+
+      const { completeMfaLogin } = useAuthStore.getState();
+
+      await completeMfaLogin('000000');
+
+      const state = useAuthStore.getState();
+      expect(state.isAuthenticated).toBe(false);
+      expect(state.mfaPending).toBe(true); // Still pending, user can retry
+      expect(state.mfaToken).toBe('mfa-temp-token-123'); // Token preserved
+      expect(state.error).toBe('Invalid MFA code');
+      expect(state.isLoading).toBe(false);
+    });
+
+    it('should handle MFA API response with success false', async () => {
+      const mockUser: User = {
+        id: 'user-mfa',
+        email: 'mfa@example.com',
+        name: 'MFA User',
+        role: 'CUSTOMER',
+        emailVerified: true,
+        createdAt: '2026-01-01T00:00:00.000Z',
+        updatedAt: '2026-01-01T00:00:00.000Z',
+      };
+
+      // Set up MFA pending state
+      useAuthStore.setState({
+        user: mockUser,
+        mfaPending: true,
+        mfaToken: 'mfa-temp-token-123',
+        isAuthenticated: false,
+      });
+
+      const mockResponse = {
+        success: false,
+        data: null,
+        message: 'Invalid verification code',
+      };
+
+      getMockPost().mockResolvedValueOnce(mockResponse);
+
+      const { completeMfaLogin } = useAuthStore.getState();
+
+      await completeMfaLogin('000000');
+
+      const state = useAuthStore.getState();
+      expect(state.isAuthenticated).toBe(false);
+      expect(state.error).toBe('Invalid verification code');
+    });
+
+    it('should set error when no MFA token is present', async () => {
+      // No MFA token set
+      useAuthStore.setState({
+        mfaPending: false,
+        mfaToken: null,
+      });
+
+      const { completeMfaLogin } = useAuthStore.getState();
+
+      await completeMfaLogin('123456');
+
+      const state = useAuthStore.getState();
+      expect(state.error).toBe('MFA session expired. Please login again.');
+      expect(getMockPost()).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('cancelMfaLogin', () => {
+    it('should cancel MFA login and clear state', () => {
+      const mockUser: User = {
+        id: 'user-mfa',
+        email: 'mfa@example.com',
+        name: 'MFA User',
+        role: 'CUSTOMER',
+        emailVerified: true,
+        createdAt: '2026-01-01T00:00:00.000Z',
+        updatedAt: '2026-01-01T00:00:00.000Z',
+      };
+
+      // Set up MFA pending state
+      useAuthStore.setState({
+        user: mockUser,
+        mfaPending: true,
+        mfaToken: 'mfa-temp-token-123',
+        isAuthenticated: false,
+        error: 'Some previous error',
+      });
+
+      const { cancelMfaLogin } = useAuthStore.getState();
+
+      cancelMfaLogin();
+
+      const state = useAuthStore.getState();
+      expect(state.user).toBeNull();
+      expect(state.mfaPending).toBe(false);
+      expect(state.mfaToken).toBeNull();
+      expect(state.error).toBeNull();
+      expect(state.isLoading).toBe(false);
     });
   });
 

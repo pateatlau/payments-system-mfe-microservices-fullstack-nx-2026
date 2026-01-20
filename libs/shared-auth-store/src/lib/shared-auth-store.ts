@@ -7,6 +7,8 @@ import type {
   LoginResponse,
   RegisterRequest,
   RegisterResponse,
+  MfaCompleteRequest,
+  MfaCompleteResponse,
 } from 'shared-types';
 import type { User, UserRole } from 'shared-types';
 
@@ -30,7 +32,13 @@ export interface AuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
+  // MFA state
+  mfaPending: boolean;
+  mfaToken: string | null;
+  // Actions
   login: (email: string, password: string) => Promise<void>;
+  completeMfaLogin: (code: string) => Promise<void>;
+  cancelMfaLogin: () => void;
   logout: () => Promise<void>;
   signup: (data: SignUpData) => Promise<void>;
   setAccessToken: (accessToken: string, refreshToken: string) => void;
@@ -79,9 +87,12 @@ export const useAuthStore = create<AuthState>()(
         isAuthenticated: false,
         isLoading: false,
         error: null,
+        // MFA initial state
+        mfaPending: false,
+        mfaToken: null,
 
         login: async (email: string, password: string) => {
-          set({ isLoading: true, error: null });
+          set({ isLoading: true, error: null, mfaPending: false, mfaToken: null });
           try {
             const request: LoginRequest = { email, password };
             const response: LoginResponse = await apiClient.post(
@@ -93,7 +104,27 @@ export const useAuthStore = create<AuthState>()(
               throw new Error(response.message ?? 'Login failed');
             }
 
-            const { user, accessToken, refreshToken } = response.data;
+            const data = response.data;
+
+            // Check if MFA is required
+            if ('mfaRequired' in data && data.mfaRequired === true) {
+              // MFA required - store temporary token and wait for MFA code
+              set({
+                user: data.user,
+                mfaPending: true,
+                mfaToken: data.mfaToken,
+                isLoading: false,
+                error: null,
+                // Don't set authenticated yet
+                isAuthenticated: false,
+                accessToken: null,
+                refreshToken: null,
+              });
+              return;
+            }
+
+            // Standard login (no MFA)
+            const { user, accessToken, refreshToken } = data;
 
             set({
               user,
@@ -102,6 +133,8 @@ export const useAuthStore = create<AuthState>()(
               isAuthenticated: true,
               isLoading: false,
               error: null,
+              mfaPending: false,
+              mfaToken: null,
             });
 
             // Emit login event to event bus
@@ -131,8 +164,82 @@ export const useAuthStore = create<AuthState>()(
               isAuthenticated: false,
               isLoading: false,
               error: errorMessage,
+              mfaPending: false,
+              mfaToken: null,
             });
           }
+        },
+
+        completeMfaLogin: async (code: string) => {
+          const { mfaToken } = get();
+
+          if (!mfaToken) {
+            set({ error: 'MFA session expired. Please login again.' });
+            return;
+          }
+
+          set({ isLoading: true, error: null });
+
+          try {
+            const request: MfaCompleteRequest = { mfaToken, code };
+            const response: MfaCompleteResponse = await apiClient.post(
+              '/auth/mfa/complete',
+              request
+            );
+
+            if (!response.success || !response.data) {
+              throw new Error(response.message ?? 'MFA verification failed');
+            }
+
+            const { accessToken, refreshToken, user: updatedUser } = response.data;
+
+            set({
+              user: updatedUser,
+              accessToken,
+              refreshToken,
+              isAuthenticated: true,
+              isLoading: false,
+              error: null,
+              mfaPending: false,
+              mfaToken: null,
+            });
+
+            // Emit login event to event bus
+            eventBus.emit(
+              'auth:login',
+              {
+                user: {
+                  id: updatedUser.id,
+                  email: updatedUser.email,
+                  name: updatedUser.name,
+                  role: updatedUser.role,
+                },
+                accessToken,
+                refreshToken,
+              },
+              'auth-mfe'
+            );
+          } catch (error) {
+            const errorMessage =
+              error instanceof Error
+                ? error.message
+                : 'MFA verification failed. Please try again.';
+            set({
+              isLoading: false,
+              error: errorMessage,
+              // Keep MFA state so user can retry
+            });
+          }
+        },
+
+        cancelMfaLogin: () => {
+          set({
+            user: null,
+            mfaPending: false,
+            mfaToken: null,
+            error: null,
+            isLoading: false,
+          });
         },
 
         logout: async () => {
@@ -282,6 +389,7 @@ export const useAuthStore = create<AuthState>()(
         accessToken: state.accessToken,
         refreshToken: state.refreshToken,
         isAuthenticated: state.isAuthenticated,
+        // Don't persist MFA state - user should re-login if page refreshes during MFA
       }),
     }
   )

@@ -2257,33 +2257,195 @@ app.use(bodyParserErrorHandler('my-service'));
 
 ### Phase 7: Advanced Security Features (Week 7+) 🚀
 
-#### Priority 7.1: Multi-Factor Authentication (MFA)
+#### Priority 7.1: Multi-Factor Authentication (MFA) ✅ COMPLETED
 
-**Effort:** 12 hours  
+**Effort:** 12 hours
 **Impact:** HIGH
+**Status:** ✅ Completed on 2026-01-19
 
 **Tasks:**
 
-1. Implement TOTP-based MFA:
-   - Use `speakeasy` library
-   - Generate QR codes for setup
-   - Verify TOTP codes
-2. Add SMS-based MFA (optional)
-3. Add backup codes
-4. Add MFA recovery flow
-5. Add MFA enforcement policies
+1. ✅ Implement TOTP-based MFA:
+   - ✅ Use `speakeasy` library for TOTP generation/verification
+   - ✅ Generate QR codes using `qrcode` library for authenticator app setup
+   - ✅ Verify TOTP codes during login
+2. ⏳ Add SMS-based MFA (deferred - optional feature)
+3. ✅ Add backup codes (10 codes, single-use, encrypted storage)
+4. ✅ Add MFA recovery flow via backup codes
+5. ✅ Add MFA enforcement policies (optional per-user)
 
 **New Files:**
 
-- `apps/auth-service/src/services/mfa.service.ts`
-- `apps/auth-service/src/controllers/mfa.controller.ts`
+- ✅ `apps/auth-service/src/services/mfa.service.ts` - MFA business logic
+- ✅ `apps/auth-service/src/controllers/mfa.controller.ts` - HTTP handlers
+- ✅ `apps/auth-service/src/validators/mfa.validators.ts` - Zod validation schemas
+
+**Modified Files:**
+
+- ✅ `apps/auth-service/prisma/schema.prisma` - Added MFA fields to User model
+- ✅ `apps/auth-service/src/services/auth.service.ts` - MFA check in login flow
+- ✅ `apps/auth-service/src/controllers/auth.controller.ts` - MFA complete endpoint
+- ✅ `apps/auth-service/src/routes/auth.ts` - MFA routes
+- ✅ `apps/api-gateway/src/routes/proxy-routes.ts` - Updated documentation
+
+**New API Endpoints:**
+
+| Endpoint | Method | Auth | Description |
+|----------|--------|------|-------------|
+| `/api/auth/mfa/setup` | POST | Required | Generate MFA setup (QR code + backup codes) |
+| `/api/auth/mfa/verify-setup` | POST | Required | Verify MFA setup with TOTP code |
+| `/api/auth/mfa/verify` | POST | None | Verify MFA code during login |
+| `/api/auth/mfa/complete` | POST | None | Complete login after MFA verification |
+| `/api/auth/mfa/status` | GET | Required | Get MFA status for current user |
+| `/api/auth/mfa/disable` | POST | Required | Disable MFA (requires password + TOTP) |
+| `/api/auth/mfa/backup-codes/regenerate` | POST | Required | Regenerate backup codes |
+
+**Security Implementation:**
+
+- ✅ MFA secrets encrypted using AES-256-GCM before database storage
+- ✅ Backup codes hashed with SHA-256 for storage
+- ✅ MFA token (5-minute TTL) for two-step login flow
+- ✅ TOTP window tolerance of ±1 step for clock drift
+- ✅ Single-use backup codes with used flag tracking
+
+**Login Flow with MFA:**
+
+1. User submits email/password → returns `mfaRequired: true` + `mfaToken`
+2. User submits `mfaToken` + TOTP code to `/auth/mfa/complete`
+3. Returns full auth response with access/refresh tokens
 
 **Success Criteria:**
 
-- Users can enable MFA
-- TOTP verification works
-- Backup codes available
-- Recovery flow tested
+- ✅ Users can enable MFA via authenticator app
+- ✅ TOTP verification works with 6-digit codes
+- ✅ 10 backup codes available (8-character alphanumeric)
+- ✅ Recovery flow via backup codes tested
+- ✅ All existing auth-service tests pass (108 tests)
+- ✅ Build completes successfully
+
+---
+
+#### Priority 7.1.1: MFA Settings UI ✅ COMPLETED
+
+**Effort:** 4 hours
+**Impact:** HIGH
+**Status:** ✅ Completed on 2026-01-20
+
+**Description:**
+Frontend UI for users to enable, configure, and disable MFA from their profile settings.
+
+**New Frontend Files:**
+
+- ✅ `apps/profile-mfe/src/api/mfa.ts` - MFA API client functions
+- ✅ `apps/profile-mfe/src/hooks/useMfa.ts` - TanStack Query hooks for MFA operations
+- ✅ `apps/profile-mfe/src/components/MfaSettings.tsx` - Full MFA Settings UI component
+
+**Modified Frontend Files:**
+
+- ✅ `apps/profile-mfe/src/components/ProfilePage.tsx` - Added "Security" tab
+- ✅ `libs/shared-auth-store/src/lib/shared-auth-store.ts` - Added MFA login flow support
+- ✅ `libs/shared-types/src/lib/api/auth.ts` - Added MFA TypeScript types
+- ✅ `apps/auth-mfe/src/components/SignIn.tsx` - Added MFA verification form in login flow
+
+**MFA Settings UI Features:**
+
+1. **Status Display**
+   - Shows MFA enabled/disabled status
+   - Shows remaining backup codes count
+
+2. **Enable MFA Flow**
+   - Click "Enable Two-Factor Authentication"
+   - QR code displayed for scanning with authenticator app
+   - Manual entry key shown for apps that don't support QR
+   - Backup codes displayed (user must save these)
+   - Verification form to enter 6-digit TOTP code
+   - MFA enabled after successful verification
+
+3. **Disable MFA Flow**
+   - Requires current password
+   - Requires current TOTP code
+   - Confirms before disabling
+
+4. **Regenerate Backup Codes**
+   - Requires current TOTP code
+   - Generates 10 new backup codes
+   - Invalidates old backup codes
+
+**Login Flow with MFA (Frontend):**
+
+```
+┌────────────────────┐
+│  Sign In Form      │
+│  (email/password)  │
+└─────────┬──────────┘
+          │ Submit
+          ▼
+┌────────────────────┐
+│  POST /auth/login  │
+└─────────┬──────────┘
+          │
+    ┌─────┴─────┐
+    │           │
+    ▼           ▼
+┌──────────┐  ┌─────────────────┐
+│ No MFA   │  │  MFA Required   │
+│          │  │  mfaPending=true│
+└────┬─────┘  └────────┬────────┘
+     │                 │
+     │                 ▼
+     │        ┌──────────────────┐
+     │        │  MFA Code Form   │
+     │        │  (6-digit TOTP)  │
+     │        └────────┬─────────┘
+     │                 │ Submit
+     │                 ▼
+     │        ┌────────────────────────┐
+     │        │ POST /auth/mfa/complete│
+     │        └────────┬───────────────┘
+     │                 │
+     ▼                 ▼
+┌────────────────────────────┐
+│  Authenticated             │
+│  accessToken + refreshToken│
+│  Redirect to home          │
+└────────────────────────────┘
+```
+
+**How to Test MFA End-to-End:**
+
+1. Start services:
+   ```bash
+   pnpm infra:start
+   pnpm dev:backend
+   pnpm dev:mf
+   ```
+
+2. Navigate to `http://localhost:4200` and sign in
+
+3. Go to **Profile → Security tab**
+
+4. Click **"Enable Two-Factor Authentication"**:
+   - Scan QR code with Google Authenticator or Authy
+   - Save the backup codes shown
+   - Enter 6-digit code from authenticator
+   - Click "Verify & Enable MFA"
+
+5. Test MFA login:
+   - Log out
+   - Log in with email/password
+   - Enter 6-digit code when prompted
+   - Successfully logged in
+
+**Success Criteria:**
+
+- ✅ MFA Settings accessible via Profile → Security tab
+- ✅ QR code displays correctly for authenticator setup
+- ✅ Backup codes displayed and can be saved
+- ✅ MFA can be enabled after TOTP verification
+- ✅ MFA can be disabled with password + TOTP
+- ✅ Backup codes can be regenerated
+- ✅ Login flow shows MFA form when MFA is enabled
+- ✅ All frontend builds pass
 
 ---
 

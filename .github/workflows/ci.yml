@@ -677,12 +677,12 @@ jobs:
           echo "Backend started with PID: $BACKEND_PID"
 
           # Wait for API Gateway health endpoint
-          echo "Waiting for backend services to be ready..."
-          READY=false
+          echo "Waiting for API Gateway to be ready..."
+          GATEWAY_READY=false
           for i in {1..60}; do
             if curl -s http://localhost:3000/health > /dev/null 2>&1; then
               echo "API Gateway is ready!"
-              READY=true
+              GATEWAY_READY=true
               break
             fi
             echo "Waiting for API Gateway... ($i/60)"
@@ -697,8 +697,8 @@ jobs:
             sleep 2
           done
 
-          if [ "$READY" = false ]; then
-            echo "ERROR: Backend services failed to start within timeout!"
+          if [ "$GATEWAY_READY" = false ]; then
+            echo "ERROR: API Gateway failed to start within timeout!"
             echo "=== Backend logs ==="
             cat backend.log
             echo "=== Checking what's listening on ports ==="
@@ -706,12 +706,66 @@ jobs:
             exit 1
           fi
 
+          # Wait for auth-service health endpoint
+          echo "Waiting for auth-service health endpoint..."
+          AUTH_READY=false
+          for i in {1..30}; do
+            if curl -s http://localhost:3001/health > /dev/null 2>&1; then
+              echo "Auth service health endpoint is ready!"
+              AUTH_READY=true
+              break
+            fi
+            echo "Waiting for auth-service health... ($i/30)"
+            sleep 2
+          done
+
+          if [ "$AUTH_READY" = false ]; then
+            echo "ERROR: Auth service health check failed!"
+            echo "=== Checking if port 3001 is listening ==="
+            netstat -tlnp 2>/dev/null | grep ':3001' || ss -tlnp 2>/dev/null | grep ':3001' || echo "Port 3001 not found"
+            echo "=== Recent backend logs ==="
+            tail -100 backend.log
+            exit 1
+          fi
+
+          # CRITICAL: Wait for auth login endpoint to be functional through API Gateway proxy
+          # This is the actual endpoint E2E tests will hit, not just the health check
+          echo "Waiting for auth login endpoint to be functional via API Gateway..."
+          LOGIN_READY=false
+          for i in {1..30}; do
+            # Test a login request - we expect 401 (bad credentials) or 400 (validation error), NOT 502 (bad gateway)
+            HTTP_CODE=$(curl -s -o /dev/null -w '%{http_code}' \
+              -X POST http://localhost:3000/api/auth/login \
+              -H 'Content-Type: application/json' \
+              -d '{"email":"test@test.com","password":"test"}' 2>/dev/null)
+
+            if [ "$HTTP_CODE" != "502" ] && [ "$HTTP_CODE" != "503" ] && [ "$HTTP_CODE" != "504" ] && [ "$HTTP_CODE" != "000" ]; then
+              echo "Auth login endpoint is functional! (HTTP $HTTP_CODE)"
+              LOGIN_READY=true
+              break
+            fi
+            echo "Waiting for auth login endpoint... ($i/30, HTTP $HTTP_CODE)"
+            sleep 2
+          done
+
+          if [ "$LOGIN_READY" = false ]; then
+            echo "ERROR: Auth login endpoint not functional after 60 seconds!"
+            echo "=== Testing direct auth-service ==="
+            curl -v -X POST http://localhost:3001/auth/login \
+              -H 'Content-Type: application/json' \
+              -d '{"email":"test@test.com","password":"test"}' 2>&1 || true
+            echo "=== Testing API Gateway proxy ==="
+            curl -v -X POST http://localhost:3000/api/auth/login \
+              -H 'Content-Type: application/json' \
+              -d '{"email":"test@test.com","password":"test"}' 2>&1 || true
+            echo "=== Recent backend logs ==="
+            tail -200 backend.log
+            exit 1
+          fi
+
           # Show what ports are actually listening
           echo "=== Services listening on ports ==="
           netstat -tlnp 2>/dev/null | grep -E ':(3000|3001|3002|3003|3004)' || ss -tlnp 2>/dev/null | grep -E ':(3000|3001|3002|3003|3004)' || echo "Port check not available"
-
-          # Additional buffer for all services to stabilize
-          sleep 5
 
           echo "=== Backend services ready ==="
 

@@ -49,6 +49,7 @@ import {
   recordFailedAttempt,
   recordSuccessfulLogin,
 } from './login-attempts.service';
+import { isMfaRequired, verifyMfaCode } from './mfa.service';
 
 /**
  * User response (without password)
@@ -185,10 +186,12 @@ export const register = async (
 };
 
 /**
- * Login response with optional lockout warning
+ * Login response with optional lockout warning and MFA flag
  */
 export interface LoginResponse extends AuthResponse {
   warning?: string;
+  mfaRequired?: boolean;
+  mfaToken?: string; // Temporary token for MFA verification step
 }
 
 /**
@@ -300,6 +303,49 @@ export const login = async (
   // SECURITY: Clear failed attempts on successful login
   await recordSuccessfulLogin(data.email);
 
+  // Check if MFA is required for this user
+  const mfaEnabled = await isMfaRequired(user.id);
+
+  if (mfaEnabled) {
+    // MFA is required - return partial response with MFA token
+    // The MFA token is a short-lived JWT that allows the user to complete MFA verification
+    const mfaPayload: JwtPayload = {
+      userId: user.id,
+      email: user.email,
+      name: user.name,
+      role: user.role as UserRole,
+    };
+
+    // Generate a short-lived MFA token (5 minutes)
+    const jwt = await import('jsonwebtoken');
+    const mfaToken = jwt.default.sign(
+      { ...mfaPayload, purpose: 'mfa_verification' },
+      config.jwtSecret,
+      { expiresIn: '5m' }
+    );
+
+    // Return partial response indicating MFA is required
+    const userResponse: UserResponse = {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      role: user.role as UserRole,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    };
+
+    console.log(`[Auth] MFA required for user ${user.id}`);
+
+    return {
+      user: userResponse,
+      accessToken: '', // Empty - not provided until MFA is verified
+      refreshToken: '', // Empty - not provided until MFA is verified
+      expiresIn: '',
+      mfaRequired: true,
+      mfaToken, // Temporary token for MFA verification
+    };
+  }
+
   // Generate tokens
   const jwtPayload: JwtPayload = {
     userId: user.id,
@@ -355,6 +401,151 @@ export const login = async (
     // Log but don't fail login - event publishing is non-critical
     console.error('Failed to publish user.login event:', _error);
   }
+
+  return {
+    user: userResponse,
+    accessToken: tokens.accessToken,
+    refreshToken: tokens.refreshToken,
+    expiresIn: tokens.expiresIn,
+  };
+};
+
+/**
+ * Complete login after MFA verification
+ *
+ * This function is called after the user has successfully verified their MFA code.
+ * It generates the final access and refresh tokens.
+ *
+ * @param mfaToken - The temporary MFA token from the initial login
+ * @param mfaCode - The TOTP or backup code provided by the user
+ * @param requestMeta - Request metadata for fingerprinting
+ * @returns Full auth response with tokens
+ * @throws ApiError if MFA token is invalid or MFA code verification fails
+ */
+export const completeMfaLogin = async (
+  mfaToken: string,
+  mfaCode: string,
+  requestMeta?: { ip: string; userAgent: string }
+): Promise<AuthResponse> => {
+  // Verify the MFA token
+  const jwt = await import('jsonwebtoken');
+  let payload: JwtPayload & { purpose?: string };
+
+  try {
+    payload = jwt.default.verify(mfaToken, config.jwtSecret) as JwtPayload & {
+      purpose?: string;
+    };
+  } catch (_error) {
+    throw new ApiError(
+      401,
+      'INVALID_MFA_TOKEN',
+      'MFA session expired. Please login again.'
+    );
+  }
+
+  // Verify the token purpose
+  if (payload.purpose !== 'mfa_verification') {
+    throw new ApiError(
+      401,
+      'INVALID_MFA_TOKEN',
+      'Invalid MFA token. Please login again.'
+    );
+  }
+
+  // Verify the MFA code
+  let codeValid: boolean;
+
+  try {
+    codeValid = await verifyMfaCode(payload.userId, mfaCode);
+  } catch (error) {
+    // Log the error for debugging
+    console.error('[Auth] MFA code verification error:', error);
+
+    // If it's an ApiError, re-throw it (e.g., INVALID_CODE_FORMAT)
+    if (error instanceof ApiError) {
+      throw error;
+    }
+
+    // For other errors, throw a generic error
+    throw new ApiError(
+      500,
+      'MFA_VERIFICATION_ERROR',
+      'An error occurred during MFA verification. Please try again.'
+    );
+  }
+
+  if (!codeValid) {
+    throw new ApiError(
+      401,
+      'INVALID_MFA_CODE',
+      'Invalid MFA code. Please try again.'
+    );
+  }
+
+  // Get user from database for the response
+  const user = await prisma.user.findUnique({
+    where: { id: payload.userId },
+  });
+
+  if (!user) {
+    throw new ApiError(404, 'USER_NOT_FOUND', 'User not found');
+  }
+
+  // Generate tokens
+  const jwtPayload: JwtPayload = {
+    userId: user.id,
+    email: user.email,
+    name: user.name,
+    role: user.role as UserRole,
+  };
+
+  const tokens = generateTokenPair(jwtPayload);
+
+  // Generate token family and fingerprint for rotation tracking
+  const tokenFamily = generateTokenFamily();
+  const fingerprint = requestMeta
+    ? generateFingerprint(requestMeta.ip, requestMeta.userAgent)
+    : null;
+
+  // Delete old refresh tokens for this user
+  await prisma.refreshToken.deleteMany({
+    where: { userId: user.id },
+  });
+
+  // Store new refresh token
+  await prisma.refreshToken.create({
+    data: {
+      userId: user.id,
+      token: tokens.refreshToken,
+      tokenFamily,
+      fingerprint,
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+    },
+  });
+
+  // Return user and tokens
+  const userResponse: UserResponse = {
+    id: user.id,
+    email: user.email,
+    name: user.name,
+    role: user.role as UserRole,
+    createdAt: user.createdAt,
+    updatedAt: user.updatedAt,
+  };
+
+  // Publish user.login event for audit logging
+  try {
+    await publishUserLogin({
+      userId: user.id,
+      email: user.email,
+      loginAt: new Date().toISOString(),
+      ipAddress: requestMeta?.ip || 'unknown',
+    });
+  } catch (_error) {
+    console.error('Failed to publish user.login event:', _error);
+  }
+
+  console.log(`[Auth] MFA login completed for user ${user.id}`);
 
   return {
     user: userResponse,
