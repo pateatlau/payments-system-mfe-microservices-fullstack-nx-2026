@@ -425,7 +425,6 @@ export class LoginPatternAnalyzer {
 
     try {
       const historyKey = REDIS_KEYS.LOGIN_HISTORY + event.userId;
-      const patternKey = REDIS_KEYS.LOGIN_PATTERN + event.userId;
 
       // Store the login event
       const storedEvent: StoredLoginEvent = {

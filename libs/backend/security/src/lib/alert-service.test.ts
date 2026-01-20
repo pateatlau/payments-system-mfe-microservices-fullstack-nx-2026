@@ -2,11 +2,24 @@
  * Alert Service Tests
  */
 
-import { AlertService } from './alert-service';
+import { AlertService, EmailService } from './alert-service';
 import type { Anomaly, SecurityAlert, UserNotification } from './types';
+import type Redis from 'ioredis';
 
-// Mock Redis
-const createMockRedis = () => ({
+// Mock Redis type for testing
+type MockRedis = {
+  get: jest.Mock;
+  set: jest.Mock;
+  lpush: jest.Mock;
+  ltrim: jest.Mock;
+  lrange: jest.Mock;
+  lindex: jest.Mock;
+  lset: jest.Mock;
+  expire: jest.Mock;
+  exists: jest.Mock;
+};
+
+const createMockRedis = (): MockRedis => ({
   get: jest.fn(),
   set: jest.fn(),
   lpush: jest.fn(),
@@ -23,8 +36,8 @@ global.fetch = jest.fn();
 
 describe('AlertService', () => {
   let alertService: AlertService;
-  let mockRedis: ReturnType<typeof createMockRedis>;
-  let mockEmailService: { sendEmail: jest.Mock };
+  let mockRedis: MockRedis;
+  let mockEmailService: EmailService;
 
   beforeEach(() => {
     mockRedis = createMockRedis();
@@ -33,7 +46,7 @@ describe('AlertService', () => {
     jest.spyOn(console, 'error').mockImplementation();
 
     alertService = new AlertService(
-      mockRedis as any,
+      mockRedis as unknown as Redis,
       {
         enableSlack: true,
         slackWebhookUrl: 'https://hooks.slack.test/webhook',
@@ -42,7 +55,7 @@ describe('AlertService', () => {
         riskThreshold: 70,
         userNotificationThreshold: 50,
       },
-      mockEmailService as any
+      mockEmailService
     );
   });
 
@@ -335,7 +348,7 @@ describe('AlertService', () => {
     });
 
     it('should not send Slack when not configured', async () => {
-      const serviceNoSlack = new AlertService(mockRedis as any, {
+      const serviceNoSlack = new AlertService(mockRedis as unknown as Redis, {
         enableSlack: false,
         riskThreshold: 70,
         userNotificationThreshold: 50,
@@ -414,7 +427,7 @@ describe('AlertService', () => {
     });
 
     it('should not send email when not configured', async () => {
-      const serviceNoEmail = new AlertService(mockRedis as any, {
+      const serviceNoEmail = new AlertService(mockRedis as unknown as Redis, {
         enableEmail: false,
         riskThreshold: 70,
         userNotificationThreshold: 50,
@@ -441,7 +454,7 @@ describe('AlertService', () => {
 
   describe('default configuration', () => {
     it('should use default config when not provided', () => {
-      const serviceDefault = new AlertService(mockRedis as any);
+      const serviceDefault = new AlertService(mockRedis as unknown as Redis);
 
       // Should not throw
       expect(serviceDefault).toBeDefined();

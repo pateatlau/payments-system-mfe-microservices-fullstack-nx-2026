@@ -4,9 +4,29 @@
 
 import { AnomalyDetectionService } from './anomaly-detection-service';
 import type { LoginEvent, TransactionEvent } from './types';
+import type Redis from 'ioredis';
 
-// Mock Redis
-const createMockRedis = () => ({
+// Mock Redis type for testing
+type MockRedis = {
+  get: jest.Mock;
+  set: jest.Mock;
+  lpush: jest.Mock;
+  ltrim: jest.Mock;
+  lrange: jest.Mock;
+  lindex: jest.Mock;
+  lset: jest.Mock;
+  expire: jest.Mock;
+  exists: jest.Mock;
+  zadd: jest.Mock;
+  zcount: jest.Mock;
+  zrangebyscore: jest.Mock;
+  zremrangebyscore: jest.Mock;
+  incr: jest.Mock;
+  incrbyfloat: jest.Mock;
+  del: jest.Mock;
+};
+
+const createMockRedis = (): MockRedis => ({
   get: jest.fn(),
   set: jest.fn(),
   lpush: jest.fn(),
@@ -27,7 +47,7 @@ const createMockRedis = () => ({
 
 describe('AnomalyDetectionService', () => {
   let service: AnomalyDetectionService;
-  let mockRedis: ReturnType<typeof createMockRedis>;
+  let mockRedis: MockRedis;
 
   beforeEach(() => {
     mockRedis = createMockRedis();
@@ -36,7 +56,7 @@ describe('AnomalyDetectionService', () => {
     jest.spyOn(console, 'error').mockImplementation();
 
     service = new AnomalyDetectionService({
-      redis: mockRedis as any,
+      redis: mockRedis as unknown as Redis,
     });
   });
 

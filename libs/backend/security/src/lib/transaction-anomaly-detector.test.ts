@@ -4,9 +4,22 @@
 
 import { TransactionAnomalyDetector } from './transaction-anomaly-detector';
 import type { TransactionEvent, TransactionPattern } from './types';
+import type Redis from 'ioredis';
 
-// Mock Redis
-const createMockRedis = () => ({
+// Mock Redis type for testing
+type MockRedis = {
+  get: jest.Mock;
+  set: jest.Mock;
+  lpush: jest.Mock;
+  ltrim: jest.Mock;
+  expire: jest.Mock;
+  zadd: jest.Mock;
+  zcount: jest.Mock;
+  zremrangebyscore: jest.Mock;
+  incrbyfloat: jest.Mock;
+};
+
+const createMockRedis = (): MockRedis => ({
   get: jest.fn(),
   set: jest.fn(),
   lpush: jest.fn(),
@@ -20,11 +33,11 @@ const createMockRedis = () => ({
 
 describe('TransactionAnomalyDetector', () => {
   let detector: TransactionAnomalyDetector;
-  let mockRedis: ReturnType<typeof createMockRedis>;
+  let mockRedis: MockRedis;
 
   beforeEach(() => {
     mockRedis = createMockRedis();
-    detector = new TransactionAnomalyDetector(mockRedis as any);
+    detector = new TransactionAnomalyDetector(mockRedis as unknown as Redis);
   });
 
   describe('analyzeTransaction', () => {
@@ -332,7 +345,7 @@ describe('TransactionAnomalyDetector', () => {
 
   describe('disabled analysis', () => {
     it('should return empty array when transaction analysis is disabled', async () => {
-      const disabledDetector = new TransactionAnomalyDetector(mockRedis as any, {
+      const disabledDetector = new TransactionAnomalyDetector(mockRedis as unknown as Redis, {
         transactionAnalysisEnabled: false,
       });
 

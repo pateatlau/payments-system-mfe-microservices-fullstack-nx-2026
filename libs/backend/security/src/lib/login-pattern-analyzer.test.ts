@@ -5,9 +5,24 @@
 import { LoginPatternAnalyzer } from './login-pattern-analyzer';
 import type { LoginEvent, LoginPattern, GeoLocation } from './types';
 import { GeoIPService } from './geoip';
+import type Redis from 'ioredis';
 
-// Mock Redis
-const createMockRedis = () => ({
+// Mock Redis type for testing
+type MockRedis = {
+  get: jest.Mock;
+  set: jest.Mock;
+  lpush: jest.Mock;
+  ltrim: jest.Mock;
+  lindex: jest.Mock;
+  expire: jest.Mock;
+  incr: jest.Mock;
+  del: jest.Mock;
+  zadd: jest.Mock;
+  zrangebyscore: jest.Mock;
+  zremrangebyscore: jest.Mock;
+};
+
+const createMockRedis = (): MockRedis => ({
   get: jest.fn(),
   set: jest.fn(),
   lpush: jest.fn(),
@@ -23,7 +38,7 @@ const createMockRedis = () => ({
 
 describe('LoginPatternAnalyzer', () => {
   let analyzer: LoginPatternAnalyzer;
-  let mockRedis: ReturnType<typeof createMockRedis>;
+  let mockRedis: MockRedis;
   let mockGeoIP: jest.Mocked<GeoIPService>;
 
   beforeEach(() => {
@@ -39,7 +54,7 @@ describe('LoginPatternAnalyzer', () => {
       formatLocation: jest.fn(),
     } as unknown as jest.Mocked<GeoIPService>;
 
-    analyzer = new LoginPatternAnalyzer(mockRedis as any, mockGeoIP);
+    analyzer = new LoginPatternAnalyzer(mockRedis as unknown as Redis, mockGeoIP);
   });
 
   describe('analyzeLogin', () => {
