@@ -1,0 +1,15 @@
+{
+  "name": "@payments-system/security",
+  "version": "0.0.1",
+  "private": true,
+  "type": "commonjs",
+  "main": "./src/index.js",
+  "types": "./src/index.d.ts",
+  "dependencies": {
+    "tslib": "^2.3.0"
+  },
+  "peerDependencies": {
+    "ioredis": "^5.8.2",
+    "geoip-lite": "^1.4.10"
+  }
+}
