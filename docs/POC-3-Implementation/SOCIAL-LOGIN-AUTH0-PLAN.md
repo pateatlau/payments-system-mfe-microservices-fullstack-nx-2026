@@ -10,23 +10,27 @@
 ## Implementation Progress
 
 ### Phase 1: Auth0 Setup & Configuration - PENDING
+
 - **Priority 1.1:** Auth0 Tenant Setup
 - **Priority 1.2:** Configure Social Identity Providers
 - **Priority 1.3:** Auth0 Application Configuration
 
 ### Phase 2: Backend Integration - PENDING
+
 - **Priority 2.1:** OAuth Callback Endpoints
 - **Priority 2.2:** User Account Linking Service
 - **Priority 2.3:** Database Schema Updates
 - **Priority 2.4:** MFA Integration for Social Users
 
 ### Phase 3: Frontend Integration - PENDING
+
 - **Priority 3.1:** Social Login Buttons Component
 - **Priority 3.2:** Sign In Page Integration
 - **Priority 3.3:** Sign Up Page Integration
 - **Priority 3.4:** Account Linking UI (Profile Page)
 
 ### Phase 4: Testing & Security - PENDING
+
 - **Priority 4.1:** Unit & Integration Tests
 - **Priority 4.2:** E2E Tests
 - **Priority 4.3:** Security Audit
@@ -40,6 +44,7 @@ This document outlines the implementation plan for social login (Google, GitHub,
 **Approach:** Auth0 Federation - Auth0 handles social OAuth handshakes only. User management, MFA, sessions, and JWTs remain in our infrastructure.
 
 **Supported Providers:**
+
 - Google
 - GitHub
 - Facebook
@@ -306,13 +311,13 @@ model User {
 
 ### New Endpoints
 
-| Method | Endpoint | Auth | Description |
-|--------|----------|------|-------------|
-| GET | `/auth/oauth/authorize` | No | Redirect to Auth0 for social login |
-| GET | `/auth/oauth/callback` | No | Auth0 callback handler |
-| POST | `/auth/oauth/link` | Yes | Link social account to existing user |
-| DELETE | `/auth/oauth/unlink/:provider` | Yes | Unlink social account |
-| GET | `/auth/oauth/accounts` | Yes | List linked social accounts |
+| Method | Endpoint                       | Auth | Description                          |
+| ------ | ------------------------------ | ---- | ------------------------------------ |
+| GET    | `/auth/oauth/authorize`        | No   | Redirect to Auth0 for social login   |
+| GET    | `/auth/oauth/callback`         | No   | Auth0 callback handler               |
+| POST   | `/auth/oauth/link`             | Yes  | Link social account to existing user |
+| DELETE | `/auth/oauth/unlink/:provider` | Yes  | Unlink social account                |
+| GET    | `/auth/oauth/accounts`         | Yes  | List linked social accounts          |
 
 ### Endpoint Details
 
@@ -321,12 +326,14 @@ model User {
 Initiates social login flow by redirecting to Auth0.
 
 **Query Parameters:**
+
 - `provider` (required): `google`, `github`, `facebook`, `linkedin`, `twitter`
 - `returnUrl` (optional): URL to redirect after login (default: `/`)
 
 **Response:** 302 Redirect to Auth0
 
 **Example:**
+
 ```
 GET /api/auth/oauth/authorize?provider=google&returnUrl=/dashboard
 → Redirects to: https://YOUR_TENANT.auth0.com/authorize?...
@@ -337,10 +344,12 @@ GET /api/auth/oauth/authorize?provider=google&returnUrl=/dashboard
 Handles Auth0 callback after social authentication.
 
 **Query Parameters (from Auth0):**
+
 - `code`: Authorization code
 - `state`: CSRF token + returnUrl (encoded)
 
 **Response:**
+
 ```typescript
 // Success (user has MFA disabled or MFA verified)
 // → Redirects to returnUrl with tokens in fragment
@@ -362,6 +371,7 @@ Links a social account to the currently authenticated user.
 **Headers:** `Authorization: Bearer <accessToken>`
 
 **Request:**
+
 ```json
 {
   "provider": "github",
@@ -370,6 +380,7 @@ Links a social account to the currently authenticated user.
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -389,10 +400,12 @@ Unlinks a social account from the user.
 **Headers:** `Authorization: Bearer <accessToken>`
 
 **Validation:**
+
 - Cannot unlink if it's the only auth method (no password set)
 - At least one auth method must remain
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -407,6 +420,7 @@ Lists all linked social accounts for the current user.
 **Headers:** `Authorization: Bearer <accessToken>`
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -435,6 +449,7 @@ Lists all linked social accounts for the current user.
 **Impact:** Foundation for all social login
 
 **Tasks:**
+
 - [ ] Create Auth0 account (free tier: 7,500 MAU)
 - [ ] Create new tenant (e.g., `payments-system-dev`)
 - [ ] Note tenant domain: `YOUR_TENANT.auth0.com`
@@ -445,6 +460,7 @@ Lists all linked social accounts for the current user.
   - Allowed Web Origins: `https://localhost`
 
 **Auth0 Application Settings to Record:**
+
 ```env
 # Add to apps/auth-service/.env
 AUTH0_DOMAIN=YOUR_TENANT.auth0.com
@@ -455,6 +471,7 @@ AUTH0_AUDIENCE=https://payments-system-api
 ```
 
 **Success Criteria:**
+
 - [ ] Auth0 tenant created
 - [ ] Application configured
 - [ ] Environment variables documented
@@ -469,6 +486,7 @@ AUTH0_AUDIENCE=https://payments-system-api
 **Per-Provider Setup:**
 
 #### Google
+
 - [ ] Create project in Google Cloud Console
 - [ ] Enable Google+ API
 - [ ] Create OAuth 2.0 credentials
@@ -476,11 +494,13 @@ AUTH0_AUDIENCE=https://payments-system-api
 - [ ] Enable Google connection in Auth0 Dashboard
 
 #### GitHub
+
 - [ ] Create OAuth App in GitHub Developer Settings
 - [ ] Set callback URL to Auth0
 - [ ] Enable GitHub connection in Auth0 Dashboard
 
 #### Facebook
+
 - [ ] Create App in Facebook Developers
 - [ ] Configure Facebook Login product
 - [ ] Add Auth0 callback URL
@@ -488,12 +508,14 @@ AUTH0_AUDIENCE=https://payments-system-api
 - [ ] Enable Facebook connection in Auth0 Dashboard
 
 #### LinkedIn
+
 - [ ] Create App in LinkedIn Developers
 - [ ] Request `r_liteprofile` and `r_emailaddress` scopes
 - [ ] Add Auth0 callback URL
 - [ ] Enable LinkedIn connection in Auth0 Dashboard
 
 #### X/Twitter
+
 - [ ] Apply for Twitter Developer Account (may take time)
 - [ ] Create Project and App
 - [ ] Enable OAuth 2.0
@@ -503,6 +525,7 @@ AUTH0_AUDIENCE=https://payments-system-api
 **Note:** X/Twitter requires developer account approval which can take days. Plan accordingly.
 
 **Success Criteria:**
+
 - [ ] All 5 providers configured in Auth0
 - [ ] Test login works for each provider in Auth0 Dashboard
 
@@ -514,6 +537,7 @@ AUTH0_AUDIENCE=https://payments-system-api
 **Impact:** Security and flow configuration
 
 **Tasks:**
+
 - [ ] Configure Auth0 Rules/Actions (optional, for customization)
 - [ ] Set up Custom Domain (optional, for branding)
 - [ ] Configure logout URLs
@@ -521,6 +545,7 @@ AUTH0_AUDIENCE=https://payments-system-api
 - [ ] Configure connection-specific settings (scopes, permissions)
 
 **Auth0 Rules (Optional):**
+
 ```javascript
 // Rule: Add custom claims to ID token
 exports.onExecutePostLogin = async (event, api) => {
@@ -530,6 +555,7 @@ exports.onExecutePostLogin = async (event, api) => {
 ```
 
 **Success Criteria:**
+
 - [ ] Auth0 application fully configured
 - [ ] Test end-to-end flow in Auth0 Dashboard
 
@@ -553,7 +579,7 @@ import { authService } from './auth.service';
 import { encryptionService } from './encryption.service';
 
 interface Auth0Profile {
-  sub: string;           // Provider user ID
+  sub: string; // Provider user ID
   email?: string;
   email_verified?: boolean;
   name?: string;
@@ -573,14 +599,21 @@ export class OAuthService {
   /**
    * Generate Auth0 authorization URL
    */
-  getAuthorizationUrl(provider: string, returnUrl: string, state: string): string {
+  getAuthorizationUrl(
+    provider: string,
+    returnUrl: string,
+    state: string
+  ): string {
     // Build Auth0 authorize URL with connection parameter
   }
 
   /**
    * Handle Auth0 callback - exchange code for profile
    */
-  async handleCallback(code: string, state: string): Promise<SocialLoginResult> {
+  async handleCallback(
+    code: string,
+    state: string
+  ): Promise<SocialLoginResult> {
     // 1. Exchange code for Auth0 tokens
     // 2. Get user profile from Auth0
     // 3. Find or create user in our database
@@ -592,7 +625,10 @@ export class OAuthService {
   /**
    * Find existing user by OAuth provider ID
    */
-  async findUserByOAuth(provider: string, providerAccountId: string): Promise<User | null> {
+  async findUserByOAuth(
+    provider: string,
+    providerAccountId: string
+  ): Promise<User | null> {
     // Query OAuthAccount → User
   }
 
@@ -606,14 +642,21 @@ export class OAuthService {
   /**
    * Create new user from OAuth profile
    */
-  async createUserFromOAuth(profile: Auth0Profile, provider: string): Promise<User> {
+  async createUserFromOAuth(
+    profile: Auth0Profile,
+    provider: string
+  ): Promise<User> {
     // Create User + OAuthAccount in transaction
   }
 
   /**
    * Link OAuth account to existing user
    */
-  async linkOAuthAccount(userId: string, profile: Auth0Profile, provider: string): Promise<void> {
+  async linkOAuthAccount(
+    userId: string,
+    profile: Auth0Profile,
+    provider: string
+  ): Promise<void> {
     // Create OAuthAccount for existing user
   }
 
@@ -718,6 +761,7 @@ export { router as oauthRoutes };
 ```
 
 **Tasks:**
+
 - [ ] Create `oauth.service.ts` with core OAuth logic
 - [ ] Create `oauth.controller.ts` with route handlers
 - [ ] Create `oauth.routes.ts` and register in main.ts
@@ -727,6 +771,7 @@ export { router as oauthRoutes };
 - [ ] Add Swagger documentation
 
 **Files to Create/Modify:**
+
 - `apps/auth-service/src/services/oauth.service.ts` (New)
 - `apps/auth-service/src/controllers/oauth.controller.ts` (New)
 - `apps/auth-service/src/routes/oauth.routes.ts` (New)
@@ -734,6 +779,7 @@ export { router as oauthRoutes };
 - `apps/auth-service/src/main.ts` (Register routes)
 
 **Success Criteria:**
+
 - [ ] `/auth/oauth/authorize` redirects to Auth0
 - [ ] `/auth/oauth/callback` handles Auth0 response
 - [ ] User created/found in database
@@ -749,7 +795,10 @@ export { router as oauthRoutes };
 **Account Linking Logic:**
 
 ```typescript
-async function handleSocialLogin(profile: Auth0Profile, provider: string): Promise<User> {
+async function handleSocialLogin(
+  profile: Auth0Profile,
+  provider: string
+): Promise<User> {
   // 1. Check if OAuth account already linked
   const existingOAuth = await findOAuthAccount(provider, profile.sub);
   if (existingOAuth) {
@@ -766,8 +815,11 @@ async function handleSocialLogin(profile: Auth0Profile, provider: string): Promi
         return existingUser;
       }
       // Otherwise, require manual linking (security)
-      throw new ApiError(409, 'EMAIL_EXISTS',
-        'An account with this email already exists. Please sign in and link your social account.');
+      throw new ApiError(
+        409,
+        'EMAIL_EXISTS',
+        'An account with this email already exists. Please sign in and link your social account.'
+      );
     }
   }
 
@@ -777,6 +829,7 @@ async function handleSocialLogin(profile: Auth0Profile, provider: string): Promi
 ```
 
 **Tasks:**
+
 - [ ] Implement account lookup by OAuth provider ID
 - [ ] Implement account lookup by email
 - [ ] Implement auto-linking for verified emails
@@ -785,6 +838,7 @@ async function handleSocialLogin(profile: Auth0Profile, provider: string): Promi
 - [ ] Add audit logging for OAuth events
 
 **Success Criteria:**
+
 - [ ] Existing OAuth users recognized
 - [ ] Email matching auto-links (if verified)
 - [ ] New users created correctly
@@ -798,12 +852,14 @@ async function handleSocialLogin(profile: Auth0Profile, provider: string): Promi
 **Impact:** Stores OAuth account data
 
 **Tasks:**
+
 - [ ] Add `OAuthAccount` model to schema.prisma
 - [ ] Add relation to `User` model
 - [ ] Create and run migration
 - [ ] Generate Prisma client
 
 **Commands:**
+
 ```bash
 # After updating schema.prisma
 pnpm db:auth:generate
@@ -811,6 +867,7 @@ pnpm db:auth:migrate --name add_oauth_accounts
 ```
 
 **Success Criteria:**
+
 - [ ] Migration runs successfully
 - [ ] Prisma client updated
 - [ ] No breaking changes to existing data
@@ -824,20 +881,22 @@ pnpm db:auth:migrate --name add_oauth_accounts
 
 **MFA Scenarios:**
 
-| Scenario | Behavior |
-|----------|----------|
-| New social user, first login | Recommend MFA setup (can skip) |
-| Existing user with MFA, social login | Require MFA verification |
-| Social user enables MFA later | Normal MFA setup flow |
-| Social user with MFA logs in | Require TOTP after OAuth |
+| Scenario                             | Behavior                       |
+| ------------------------------------ | ------------------------------ |
+| New social user, first login         | Recommend MFA setup (can skip) |
+| Existing user with MFA, social login | Require MFA verification       |
+| Social user enables MFA later        | Normal MFA setup flow          |
+| Social user with MFA logs in         | Require TOTP after OAuth       |
 
 **Tasks:**
+
 - [ ] Add MFA check after OAuth profile received
 - [ ] Create MFA recommendation page/flow
 - [ ] Integrate with existing `/auth/mfa/verify` endpoint
 - [ ] Store MFA preference for social users
 
 **Implementation:**
+
 ```typescript
 async function handleCallback(code: string): Promise<SocialLoginResult> {
   const profile = await exchangeCodeForProfile(code);
@@ -864,6 +923,7 @@ async function handleCallback(code: string): Promise<SocialLoginResult> {
 ```
 
 **Success Criteria:**
+
 - [ ] MFA enforced for users who have it enabled
 - [ ] MFA recommendation shown to new social users
 - [ ] Users can skip MFA recommendation
@@ -939,6 +999,7 @@ export function SocialLoginButtons({
 ```
 
 **Tasks:**
+
 - [ ] Create `SocialLoginButtons` component
 - [ ] Create social provider icons (Google, GitHub, Facebook, LinkedIn, X)
 - [ ] Add loading states
@@ -947,10 +1008,12 @@ export function SocialLoginButtons({
 - [ ] Add unit tests
 
 **Files to Create:**
+
 - `libs/shared-design-system/src/lib/components/SocialLoginButtons.tsx`
 - `libs/shared-design-system/src/lib/components/icons/social/` (icon components)
 
 **Success Criteria:**
+
 - [ ] Component renders all providers
 - [ ] Click events fire correctly
 - [ ] Loading/disabled states work
@@ -966,12 +1029,14 @@ export function SocialLoginButtons({
 **File:** `apps/auth-mfe/src/components/SignIn.tsx`
 
 **Changes:**
+
 - Add `SocialLoginButtons` component
 - Add "or" divider between social and email login
 - Handle social login redirect
 - Handle OAuth callback redirect
 
 **Layout:**
+
 ```
 ┌────────────────────────────────────────┐
 │           Sign In                      │
@@ -1005,6 +1070,7 @@ export function SocialLoginButtons({
 ```
 
 **Tasks:**
+
 - [ ] Add `SocialLoginButtons` to SignIn component
 - [ ] Add divider with "or" text
 - [ ] Implement `handleSocialLogin(provider)` function
@@ -1012,6 +1078,7 @@ export function SocialLoginButtons({
 - [ ] Handle errors from OAuth callback
 
 **Success Criteria:**
+
 - [ ] Social buttons appear on signin page
 - [ ] Clicking button redirects to Auth0
 - [ ] Successful login returns to app
@@ -1027,16 +1094,19 @@ export function SocialLoginButtons({
 **File:** `apps/auth-mfe/src/components/SignUp.tsx`
 
 **Changes:**
+
 - Add `SocialLoginButtons` component (same as SignIn)
 - Social signup creates new user automatically
 - Same redirect flow as SignIn
 
 **Tasks:**
+
 - [ ] Add `SocialLoginButtons` to SignUp component
 - [ ] Add "or" divider
 - [ ] Reuse same OAuth redirect logic
 
 **Success Criteria:**
+
 - [ ] Social buttons appear on signup page
 - [ ] New user created on first social login
 - [ ] Existing user with same email handled
@@ -1051,12 +1121,14 @@ export function SocialLoginButtons({
 **File:** `apps/profile-mfe/src/components/LinkedAccounts.tsx`
 
 **Features:**
+
 - List currently linked social accounts
 - Link new social account
 - Unlink existing social account
 - Warning when unlinking last auth method
 
 **Component:**
+
 ```typescript
 export function LinkedAccounts() {
   const { data: accounts, isLoading } = useLinkedAccounts();
@@ -1081,6 +1153,7 @@ export function LinkedAccounts() {
 ```
 
 **Tasks:**
+
 - [ ] Create `LinkedAccounts` component
 - [ ] Create `useLinkedAccounts` hook (TanStack Query)
 - [ ] Create `useLinkAccount` mutation
@@ -1090,10 +1163,12 @@ export function LinkedAccounts() {
 - [ ] Add confirmation dialog for unlinking
 
 **Files to Create:**
+
 - `apps/profile-mfe/src/components/LinkedAccounts.tsx`
 - `apps/profile-mfe/src/hooks/useOAuthAccounts.ts`
 
 **Success Criteria:**
+
 - [ ] Users can see linked accounts
 - [ ] Users can link new accounts
 - [ ] Users can unlink accounts
@@ -1109,6 +1184,7 @@ export function LinkedAccounts() {
 **File:** `apps/auth-mfe/src/components/MfaRecommendation.tsx`
 
 **Features:**
+
 - Shown after first social login
 - Explains benefits of MFA
 - "Enable MFA" button → MFA setup flow
@@ -1154,6 +1230,7 @@ export function MfaRecommendation({
 ```
 
 **Tasks:**
+
 - [ ] Create `MfaRecommendation` component
 - [ ] Add route in shell app
 - [ ] Handle "Enable MFA" flow
@@ -1161,6 +1238,7 @@ export function MfaRecommendation({
 - [ ] Store "Don't show again" preference
 
 **Success Criteria:**
+
 - [ ] Page shown after first social login
 - [ ] Enable MFA works
 - [ ] Skip works
@@ -1178,10 +1256,12 @@ export function MfaRecommendation({
 **Test Files to Create:**
 
 #### Backend Tests
+
 - `apps/auth-service/src/services/oauth.service.spec.ts`
 - `apps/auth-service/src/controllers/oauth.controller.spec.ts`
 
 **Test Cases:**
+
 - [ ] Authorization URL generation (each provider)
 - [ ] Callback handling (success)
 - [ ] Callback handling (error from Auth0)
@@ -1195,11 +1275,13 @@ export function MfaRecommendation({
 - [ ] MFA recommendation flow
 
 #### Frontend Tests
+
 - `libs/shared-design-system/src/lib/components/SocialLoginButtons.spec.tsx`
 - `apps/auth-mfe/src/components/MfaRecommendation.spec.tsx`
 - `apps/profile-mfe/src/components/LinkedAccounts.spec.tsx`
 
 **Test Cases:**
+
 - [ ] Social buttons render correctly
 - [ ] Click handlers fire
 - [ ] Loading states display
@@ -1208,6 +1290,7 @@ export function MfaRecommendation({
 - [ ] Link/unlink flows work
 
 **Success Criteria:**
+
 - [ ] All unit tests pass
 - [ ] Coverage > 70% for new code
 
@@ -1221,6 +1304,7 @@ export function MfaRecommendation({
 **File:** `apps/shell-e2e/src/social-login.spec.ts`
 
 **Test Cases:**
+
 - [ ] New user signs up with Google
 - [ ] Existing user signs in with Google
 - [ ] User with MFA signs in with Google (MFA required)
@@ -1229,11 +1313,13 @@ export function MfaRecommendation({
 - [ ] Error handling (Auth0 error, user cancels)
 
 **Note:** E2E tests for OAuth are tricky. Consider:
+
 - Mock Auth0 responses in test environment
 - Use Auth0's test users feature
 - Or skip OAuth redirect, test callback handler directly
 
 **Success Criteria:**
+
 - [ ] Critical flows covered
 - [ ] Tests run in CI
 
@@ -1245,6 +1331,7 @@ export function MfaRecommendation({
 **Impact:** Ensures security
 
 **Security Checklist:**
+
 - [ ] CSRF protection via state parameter
 - [ ] State parameter stored in Redis with expiry
 - [ ] Auth0 tokens encrypted before storage
@@ -1256,6 +1343,7 @@ export function MfaRecommendation({
 - [ ] Cannot link account already linked to another user
 
 **Tasks:**
+
 - [ ] Review code for security issues
 - [ ] Test for CSRF vulnerabilities
 - [ ] Test for open redirect vulnerabilities
@@ -1263,6 +1351,7 @@ export function MfaRecommendation({
 - [ ] Document security considerations
 
 **Success Criteria:**
+
 - [ ] No critical vulnerabilities
 - [ ] Security best practices followed
 
@@ -1338,17 +1427,18 @@ oauth_mfa:{mfa_token}
 
 ### Attack Vectors & Mitigations
 
-| Attack | Mitigation |
-|--------|------------|
-| CSRF | State parameter with signature, stored in Redis |
-| Open Redirect | Whitelist allowed returnUrl domains |
-| Token Theft | Short-lived Auth0 tokens, encrypted storage |
-| Account Takeover | Email verification required for auto-linking |
-| Replay Attack | Single-use authorization codes, state validation |
+| Attack           | Mitigation                                       |
+| ---------------- | ------------------------------------------------ |
+| CSRF             | State parameter with signature, stored in Redis  |
+| Open Redirect    | Whitelist allowed returnUrl domains              |
+| Token Theft      | Short-lived Auth0 tokens, encrypted storage      |
+| Account Takeover | Email verification required for auto-linking     |
+| Replay Attack    | Single-use authorization codes, state validation |
 
 ### Audit Events
 
 Log the following events:
+
 - `oauth.authorize.initiated` - User started OAuth flow
 - `oauth.callback.success` - OAuth callback successful
 - `oauth.callback.error` - OAuth callback failed
@@ -1363,6 +1453,7 @@ Log the following events:
 ## Rollout Plan
 
 ### Development Phase
+
 1. Set up Auth0 tenant (dev environment)
 2. Implement backend OAuth service
 3. Implement frontend components
@@ -1370,12 +1461,14 @@ Log the following events:
 5. Add remaining providers
 
 ### Staging Phase
+
 1. Create staging Auth0 tenant
 2. Deploy to staging environment
 3. Full E2E testing
 4. Security review
 
 ### Production Phase
+
 1. Create production Auth0 tenant
 2. Configure production social provider apps
 3. Deploy with feature flag (disabled)
@@ -1384,13 +1477,13 @@ Log the following events:
 
 ### Provider Priority
 
-| Provider | Priority | Reason |
-|----------|----------|--------|
-| Google | 1 | Most common, easiest to set up |
-| GitHub | 2 | Developer-focused, simple OAuth |
-| Facebook | 3 | Large user base, moderate setup |
-| LinkedIn | 4 | Professional use case |
-| X/Twitter | 5 | Requires approval, complex API |
+| Provider  | Priority | Reason                          |
+| --------- | -------- | ------------------------------- |
+| Google    | 1        | Most common, easiest to set up  |
+| GitHub    | 2        | Developer-focused, simple OAuth |
+| Facebook  | 3        | Large user base, moderate setup |
+| LinkedIn  | 4        | Professional use case           |
+| X/Twitter | 5        | Requires approval, complex API  |
 
 **Recommendation:** Ship with Google + GitHub first, add others iteratively.
 
@@ -1400,32 +1493,34 @@ Log the following events:
 
 ### Auth0 Pricing
 
-| Tier | MAU Limit | Cost | Notes |
-|------|-----------|------|-------|
-| Free | 7,500 | $0 | Sufficient for dev/staging |
-| Essentials | 10,000+ | ~$23/month | Production tier |
-| Professional | Custom | ~$0.02/MAU | Volume pricing |
+| Tier         | MAU Limit | Cost       | Notes                      |
+| ------------ | --------- | ---------- | -------------------------- |
+| Free         | 7,500     | $0         | Sufficient for dev/staging |
+| Essentials   | 10,000+   | ~$23/month | Production tier            |
+| Professional | Custom    | ~$0.02/MAU | Volume pricing             |
 
 ### Development Cost
 
-| Phase | Effort |
-|-------|--------|
-| Phase 1: Auth0 Setup | 4 hours |
-| Phase 2: Backend | 10 hours |
-| Phase 3: Frontend | 10 hours |
-| Phase 4: Testing | 9 hours |
-| **Total** | **~33 hours** |
+| Phase                | Effort        |
+| -------------------- | ------------- |
+| Phase 1: Auth0 Setup | 4 hours       |
+| Phase 2: Backend     | 10 hours      |
+| Phase 3: Frontend    | 10 hours      |
+| Phase 4: Testing     | 9 hours       |
+| **Total**            | **~33 hours** |
 
 ---
 
 ## Dependencies
 
 ### Required
+
 - Auth0 account (free tier sufficient for development)
 - Social provider developer accounts (Google, GitHub, Facebook, LinkedIn, X)
 - Existing auth infrastructure (JWT, MFA, sessions)
 
 ### npm Packages
+
 - `auth0` - Auth0 SDK for Node.js
 - No frontend SDK needed (redirect-based flow)
 
@@ -1433,13 +1528,13 @@ Log the following events:
 
 ## Success Metrics
 
-| Metric | Target | Measurement |
-|--------|--------|-------------|
-| Social login adoption | 20%+ | Users who use social login |
-| Conversion improvement | 10%+ | Signup completion rate |
-| MFA adoption (social users) | 50%+ | Social users who enable MFA |
-| Error rate | <1% | OAuth flow failures |
-| Support tickets | <5% | OAuth-related issues |
+| Metric                      | Target | Measurement                 |
+| --------------------------- | ------ | --------------------------- |
+| Social login adoption       | 20%+   | Users who use social login  |
+| Conversion improvement      | 10%+   | Signup completion rate      |
+| MFA adoption (social users) | 50%+   | Social users who enable MFA |
+| Error rate                  | <1%    | OAuth flow failures         |
+| Support tickets             | <5%    | OAuth-related issues        |
 
 ---
 
@@ -1458,7 +1553,7 @@ Log the following events:
 
 ## Appendix A: Auth0 Configuration Screenshots
 
-*To be added during implementation*
+_To be added during implementation_
 
 ---
 
