@@ -23,6 +23,22 @@ export interface SignUpData {
 }
 
 /**
+ * Email verification pending state
+ * Returned after successful registration when email verification is required
+ */
+export interface EmailVerificationPendingState {
+  email: string;
+  message: string;
+  // DEV ONLY: Token info for testing (only present in development mode)
+  _dev?: {
+    verificationToken: string;
+    userId: string;
+    expiresAt: string;
+    verifyUrl: string;
+  };
+}
+
+/**
  * Auth state interface
  */
 export interface AuthState {
@@ -35,6 +51,8 @@ export interface AuthState {
   // MFA state
   mfaPending: boolean;
   mfaToken: string | null;
+  // Email verification state
+  emailVerificationPending: EmailVerificationPendingState | null;
   // Actions
   login: (email: string, password: string) => Promise<void>;
   completeMfaLogin: (code: string) => Promise<void>;
@@ -45,6 +63,7 @@ export interface AuthState {
   hasRole: (role: UserRole) => boolean;
   hasAnyRole: (roles: UserRole[]) => boolean;
   clearError: () => void;
+  clearEmailVerificationPending: () => void;
 }
 
 /**
@@ -90,6 +109,8 @@ export const useAuthStore = create<AuthState>()(
         // MFA initial state
         mfaPending: false,
         mfaToken: null,
+        // Email verification initial state
+        emailVerificationPending: null,
 
         login: async (email: string, password: string) => {
           set({ isLoading: true, error: null, mfaPending: false, mfaToken: null });
@@ -290,7 +311,7 @@ export const useAuthStore = create<AuthState>()(
         },
 
         signup: async (data: SignUpData) => {
-          set({ isLoading: true, error: null });
+          set({ isLoading: true, error: null, emailVerificationPending: null });
           try {
             const request: RegisterRequest = {
               email: data.email,
@@ -298,41 +319,89 @@ export const useAuthStore = create<AuthState>()(
               name: data.name,
               role: data.role,
             };
-            const response: RegisterResponse = await apiClient.post(
-              '/auth/register',
-              request
-            );
 
-            if (!response.success || !response.data) {
+            // Response can be either:
+            // 1. New flow: { success, emailVerificationRequired, email, message, _dev? }
+            // 2. Legacy flow: { success, data: { user, accessToken, refreshToken } }
+            type VerificationRequiredResponse = {
+              success: true;
+              emailVerificationRequired: true;
+              email: string;
+              message: string;
+              _dev?: {
+                verificationToken: string;
+                userId: string;
+                expiresAt: string;
+                verifyUrl: string;
+              };
+            };
+
+            const response = await apiClient.post('/auth/register', request);
+
+            if (!response.success) {
               throw new Error(response.message ?? 'Sign-up failed');
             }
 
-            const { user, accessToken, refreshToken } = response.data;
-
-            set({
-              user,
-              accessToken,
-              refreshToken,
-              isAuthenticated: true,
-              isLoading: false,
-              error: null,
-            });
-
-            // Emit login event to event bus (signup also logs user in)
-            eventBus.emit(
-              'auth:login',
-              {
-                user: {
-                  id: user.id,
-                  email: user.email,
-                  name: user.name,
-                  role: user.role,
+            // Check if email verification is required (new flow)
+            const verificationResponse = response as unknown as VerificationRequiredResponse;
+            if (verificationResponse.emailVerificationRequired) {
+              set({
+                user: null,
+                accessToken: null,
+                refreshToken: null,
+                isAuthenticated: false,
+                isLoading: false,
+                error: null,
+                emailVerificationPending: {
+                  email: verificationResponse.email,
+                  message: verificationResponse.message,
+                  _dev: verificationResponse._dev,
                 },
+              });
+
+              // Emit signup event (not login - user needs to verify email first)
+              eventBus.emit(
+                'auth:signup',
+                {
+                  email: verificationResponse.email,
+                  emailVerificationRequired: true,
+                },
+                'auth-mfe'
+              );
+              return;
+            }
+
+            // Legacy flow: direct login after signup (kept for backwards compatibility)
+            const legacyResponse = response as RegisterResponse;
+            if (legacyResponse.data) {
+              const { user, accessToken, refreshToken } = legacyResponse.data;
+
+              set({
+                user,
                 accessToken,
                 refreshToken,
-              },
-              'auth-mfe'
-            );
+                isAuthenticated: true,
+                isLoading: false,
+                error: null,
+                emailVerificationPending: null,
+              });
+
+              // Emit login event to event bus (signup also logs user in)
+              eventBus.emit(
+                'auth:login',
+                {
+                  user: {
+                    id: user.id,
+                    email: user.email,
+                    name: user.name,
+                    role: user.role,
+                  },
+                  accessToken,
+                  refreshToken,
+                },
+                'auth-mfe'
+              );
+            }
           } catch (error) {
             const errorMessage =
               error instanceof Error
@@ -345,6 +414,7 @@ export const useAuthStore = create<AuthState>()(
               isAuthenticated: false,
               isLoading: false,
               error: errorMessage,
+              emailVerificationPending: null,
             });
           }
         },
@@ -379,6 +449,10 @@ export const useAuthStore = create<AuthState>()(
 
         clearError: () => {
           set({ error: null });
+        },
+
+        clearEmailVerificationPending: () => {
+          set({ emailVerificationPending: null });
         },
       };
     },

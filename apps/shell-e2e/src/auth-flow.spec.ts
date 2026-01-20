@@ -102,7 +102,7 @@ test.describe('Authentication Flow', () => {
     });
   });
 
-  test('should complete sign-up flow: sign up → redirect → payments page', async ({
+  test('should complete sign-up flow: sign up → show email verification pending', async ({
     page,
   }) => {
     await page.goto('/signup');
@@ -132,20 +132,26 @@ test.describe('Authentication Flow', () => {
     // Submit form
     await page.click('button[type="submit"]');
 
-    // Wait for either successful redirect OR error message
-    await Promise.race([
-      page.waitForURL(/.*payments/, { timeout: 30000 }),
-      page.waitForSelector('[role="alert"], .error, [class*="error"]', { timeout: 30000 })
-        .then(async () => {
-          // Capture the actual error message for debugging
-          const errorText = await page.locator('[role="alert"]').first().textContent();
-          throw new Error(`Sign-up failed - error displayed: "${errorText}"`);
-        }),
-    ]);
+    // With email verification enabled, sign-up shows the verification pending screen
+    // instead of redirecting to the payments page
+    await expect(page.locator('h1, h2, [class*="CardTitle"]').first()).toContainText(
+      /verify your email/i,
+      { timeout: 10000 }
+    );
 
-    // Verify payments page is loaded (use .first() as there may be multiple headings)
-    await expect(page.locator('h1, h2').first()).toContainText(/payment/i, {
-      timeout: 10000,
+    // Verify the verification pending UI shows the expected content
+    await expect(page.locator('text=/verification link/i')).toBeVisible({
+      timeout: 5000,
+    });
+
+    // Verify "Go to Sign In" button is visible
+    await expect(page.locator('button:has-text("Go to Sign In")')).toBeVisible({
+      timeout: 5000,
+    });
+
+    // Verify "Resend Verification Email" button is visible
+    await expect(page.locator('button:has-text("Resend Verification Email")')).toBeVisible({
+      timeout: 5000,
     });
   });
 

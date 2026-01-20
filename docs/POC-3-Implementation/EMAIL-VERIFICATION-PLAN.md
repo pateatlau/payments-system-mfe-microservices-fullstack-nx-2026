@@ -16,10 +16,12 @@
 - ✅ **Priority 1.4:** Resend Verification Endpoint (Completed in 1.2)
 - ✅ **Priority 1.5:** Registration Flow Modification (Completed 2026-01-20)
 
-### Phase 2: Event-Driven Email Integration ⏳ PENDING
-- ⏳ **Priority 2.1:** Publish Email Verification Events
-- ⏳ **Priority 2.2:** Email Service Subscriber (Optional - Future)
-- ⏳ **Priority 2.3:** Email Templates (Optional - Future)
+### Phase 2: Event-Driven Email Integration 📌 TODO (Future)
+- 📌 **Priority 2.1:** Publish Email Verification Events - *Requires email service infrastructure*
+- 📌 **Priority 2.2:** Email Service Subscriber - *Requires SendGrid/AWS SES/SMTP setup*
+- 📌 **Priority 2.3:** Email Templates - *Requires email service*
+
+> **Note:** Phase 2 is deferred until production email infrastructure is in place. The `_dev` token response provides sufficient functionality for development and testing.
 
 ### Phase 3: Frontend Integration ⏳ PENDING
 - ⏳ **Priority 3.1:** Post-Registration Verification UI
@@ -488,34 +490,50 @@ interface EmailVerificationRequestedPayload {
 
 ## Phase 3: Frontend Integration
 
-### Priority 3.1: Post-Registration Verification UI
+### Priority 3.1: Post-Registration Verification UI ✅ COMPLETED
 
-**File:** `apps/auth-mfe/src/components/SignUp.tsx`
+**Status:** ✅ Completed 2026-01-20
 
-**Changes:**
-- After successful registration, show verification message
-- Display "Check your email" UI instead of redirecting to dashboard
-- Provide "Resend verification" button
+**Files Modified/Created:**
+- `libs/shared-auth-store/src/lib/shared-auth-store.ts` - Added `emailVerificationPending` state
+- `libs/shared-auth-store/src/index.ts` - Exported `EmailVerificationPendingState` type
+- `apps/auth-mfe/src/components/VerificationPending.tsx` (NEW)
+- `apps/auth-mfe/src/components/SignUp.tsx` - Shows `VerificationPending` after registration
 
-**New Component:** `apps/auth-mfe/src/components/VerificationPending.tsx`
+**Changes Made:**
 
-```typescript
-interface VerificationPendingProps {
-  email: string;
-  onResendClick: () => void;
-  onBackToLogin: () => void;
-}
-```
+1. **Updated Auth Store:**
+   - Added `EmailVerificationPendingState` interface
+   - Added `emailVerificationPending` state to store
+   - Added `clearEmailVerificationPending()` action
+   - Modified `signup()` to handle new `RegistrationResponse` format
+   - Emits `auth:signup` event (not `auth:login`) when verification required
 
-**Tasks:**
-- [ ] Create `VerificationPending` component
-- [ ] Update SignUp to show verification pending state
-- [ ] Add resend functionality
-- [ ] Add countdown timer for resend cooldown
+2. **Created `VerificationPending` Component:**
+   - Shows email verification instructions
+   - Displays masked email for privacy
+   - Resend button with 60-second cooldown timer
+   - DEV MODE panel showing verification token/URL for testing
+   - "Go to Sign In" and "Use different email" navigation options
 
-**Files to Create/Modify:**
-- `apps/auth-mfe/src/components/VerificationPending.tsx` (New)
-- `apps/auth-mfe/src/components/SignUp.tsx`
+3. **Updated `SignUp` Component:**
+   - Renders `VerificationPending` when `emailVerificationPending` is set
+   - Removed profile update logic (deferred until after email verification)
+   - Cleaned up unused state and imports
+
+**Completed Tasks:**
+- [x] Create `VerificationPending` component
+- [x] Update SignUp to show verification pending state
+- [x] Add resend functionality with API call to `/auth/resend-verification`
+- [x] Add countdown timer for resend cooldown (60 seconds)
+
+**Testing Flow:**
+1. Fill out SignUp form and submit
+2. `VerificationPending` component is displayed
+3. DEV MODE panel shows verification token and URL
+4. Click "Resend Verification Email" - shows success, starts 60s cooldown
+5. Click "Go to Sign In" - navigates to login page
+6. Click "Use a different email address" - returns to SignUp form
 
 ---
 

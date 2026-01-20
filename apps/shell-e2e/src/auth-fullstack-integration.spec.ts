@@ -22,7 +22,7 @@ test.describe('Full-Stack Authentication Integration', () => {
   });
 
   test.describe('Registration End-to-End', () => {
-    test('should register new user and receive tokens from backend', async ({
+    test('should register new user and receive email verification required response', async ({
       page,
     }) => {
       // Track API call
@@ -57,27 +57,42 @@ test.describe('Full-Stack Authentication Integration', () => {
       // Wait for API response
       const registerResponse = await registerResponsePromise;
 
-      // Verify backend API response
+      // Verify backend API response - now returns email verification required
       expect(registerResponse.status()).toBe(201);
       const responseBody = await registerResponse.json();
       expect(responseBody).toHaveProperty('success', true);
-      expect(responseBody.data).toHaveProperty('accessToken');
-      expect(responseBody.data).toHaveProperty('refreshToken');
-      expect(responseBody.data).toHaveProperty('user');
-      expect(responseBody.data.user).toHaveProperty('email', testEmail);
+      expect(responseBody).toHaveProperty('emailVerificationRequired', true);
+      expect(responseBody).toHaveProperty('email', testEmail);
+      expect(responseBody).toHaveProperty('message');
 
-      // Verify frontend redirect to payments
-      await expect(page).toHaveURL(/.*payments/, { timeout: 10000 });
+      // In development mode, _dev field contains verification token for testing
+      if (responseBody._dev) {
+        expect(responseBody._dev).toHaveProperty('verificationToken');
+        expect(responseBody._dev).toHaveProperty('verifyUrl');
+      }
 
-      // Verify tokens are stored (check localStorage)
+      // Verify frontend shows email verification pending screen (not redirect to payments)
+      await expect(page.locator('h1, h2, [class*="CardTitle"]').first()).toContainText(
+        /verify your email/i,
+        { timeout: 10000 }
+      );
+
+      // User should NOT be authenticated (no tokens stored)
       const tokens = await page.evaluate(() => {
-        return {
-          accessToken: localStorage.getItem('auth_accessToken'),
-          refreshToken: localStorage.getItem('auth_refreshToken'),
-        };
+        const authStorage = localStorage.getItem('auth-storage');
+        if (!authStorage) return null;
+        try {
+          const parsed = JSON.parse(authStorage);
+          return {
+            accessToken: parsed.state?.accessToken,
+            isAuthenticated: parsed.state?.isAuthenticated,
+          };
+        } catch {
+          return null;
+        }
       });
-      expect(tokens.accessToken).toBeTruthy();
-      expect(tokens.refreshToken).toBeTruthy();
+      // Tokens should be null or isAuthenticated should be false
+      expect(tokens?.isAuthenticated).toBeFalsy();
     });
 
     test('should handle duplicate email registration error from backend', async ({
@@ -85,7 +100,7 @@ test.describe('Full-Stack Authentication Integration', () => {
     }) => {
       // First, register a user
       await page.goto('/signup');
-      const testEmail = 'duplicate@example.com';
+      const testEmail = `duplicate-${Date.now()}@example.com`;
 
       await page.fill('input[type="text"]', 'First User');
       await page.fill('input[type="email"]', testEmail);
@@ -95,8 +110,11 @@ test.describe('Full-Stack Authentication Integration', () => {
       await passwordInputs.nth(1).fill('Password123!@#');
       await page.click('button[type="submit"]');
 
-      // Wait for first registration to complete
-      await expect(page).toHaveURL(/.*payments/, { timeout: 10000 });
+      // Wait for first registration to complete - now shows verification pending screen
+      await expect(page.locator('h1, h2, [class*="CardTitle"]').first()).toContainText(
+        /verify your email/i,
+        { timeout: 10000 }
+      );
 
       // Now try to register again with same email
       await page.goto('/signup');
@@ -110,7 +128,9 @@ test.describe('Full-Stack Authentication Integration', () => {
       await page.fill('input[type="text"]', 'Second User');
       await page.fill('input[type="email"]', testEmail);
       await page.fill('input[type="password"]', 'Password123!@#');
-      await passwordInputs.nth(1).fill('Password123!@#');
+      // Need to re-query passwordInputs after navigation
+      const passwordInputs2 = page.locator('input[type="password"]');
+      await passwordInputs2.nth(1).fill('Password123!@#');
       await page.click('button[type="submit"]');
 
       // Verify backend returns 409 Conflict
