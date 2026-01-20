@@ -37,7 +37,7 @@ export const mfaVerifySchema = z.object({
     .string()
     .min(6, 'Code must be at least 6 characters')
     .max(8, 'Code must be at most 8 characters')
-    .transform((val) => val.replace(/\s/g, '').toUpperCase()),
+    .transform((val) => val.replace(/\s/g, '')), // Remove spaces only
 });
 
 export type MfaVerifyInput = z.infer<typeof mfaVerifySchema>;
@@ -91,7 +91,7 @@ export const mfaLoginCompleteSchema = z.object({
     .string()
     .min(6, 'Code must be at least 6 characters')
     .max(8, 'Code must be at most 8 characters')
-    .transform((val) => val.replace(/\s/g, '').toUpperCase()),
+    .transform((val) => val.replace(/\s/g, '')), // Remove spaces only
 });
 
 export type MfaLoginCompleteInput = z.infer<typeof mfaLoginCompleteSchema>;

@@ -93,7 +93,9 @@ function getEncryptionKey(): Buffer {
   }
 
   // Development fallback - derive key from JWT secret with configurable salt
-  const salt = process.env.MFA_ENCRYPTION_SALT || 'mfa-dev-salt';
+  // IMPORTANT: Default salt MUST remain 'mfa-salt' for backwards compatibility
+  // with existing encrypted MFA secrets. Do NOT change this default.
+  const salt = process.env.MFA_ENCRYPTION_SALT || 'mfa-salt';
   const jwtSecret = config.jwtSecret || 'development-secret';
 
   // Only show warning once per process
