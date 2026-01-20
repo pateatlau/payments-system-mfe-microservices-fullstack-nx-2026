@@ -32,6 +32,7 @@ declare module 'authMfe/SignIn' {
   interface SignInProps {
     onSuccess?: () => void;
     onNavigateToSignUp?: () => void;
+    onNavigateToForgotPassword?: () => void;
   }
   const SignIn: React.ComponentType<SignInProps>;
   export default SignIn;
@@ -44,6 +45,14 @@ declare module 'authMfe/SignUp' {
   }
   const SignUp: React.ComponentType<SignUpProps>;
   export default SignUp;
+}
+
+declare module 'authMfe/ForgotPassword' {
+  interface ForgotPasswordProps {
+    onNavigateToSignIn?: () => void;
+  }
+  const ForgotPassword: React.ComponentType<ForgotPasswordProps>;
+  export default ForgotPassword;
 }
 
 declare module 'paymentsMfe/PaymentsPage' {

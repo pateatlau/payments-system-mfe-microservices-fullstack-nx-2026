@@ -9,6 +9,7 @@ import { RemoteErrorBoundary } from '../components/RemoteErrorBoundary';
 export interface SignInComponentProps {
   onSuccess?: () => void;
   onNavigateToSignUp?: () => void;
+  onNavigateToForgotPassword?: () => void;
 }
 
 /**
@@ -62,12 +63,18 @@ export function SignInPage({ SignInComponent }: SignInPageProps) {
     navigate('/signup', { replace: true });
   };
 
+  // Handle navigation to forgot password page
+  const handleNavigateToForgotPassword = () => {
+    navigate('/forgot-password', { replace: true });
+  };
+
   return (
     <RemoteErrorBoundary componentName="SignIn">
       <div className="min-h-full flex flex-col items-center justify-center py-8">
         <SignInComponent
           onSuccess={handleSuccess}
           onNavigateToSignUp={handleNavigateToSignUp}
+          onNavigateToForgotPassword={handleNavigateToForgotPassword}
         />
       </div>
     </RemoteErrorBoundary>

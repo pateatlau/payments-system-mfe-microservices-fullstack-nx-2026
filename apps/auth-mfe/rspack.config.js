@@ -268,6 +268,7 @@ module.exports = {
       exposes: {
         './SignIn': './src/components/SignIn.tsx',
         './SignUp': './src/components/SignUp.tsx',
+        './ForgotPassword': './src/components/ForgotPassword.tsx',
       },
       shared: sharedDependencies,
     }),

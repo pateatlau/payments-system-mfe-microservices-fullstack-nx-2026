@@ -6,6 +6,7 @@ import { useEffect, useRef } from 'react';
 import {
   Button,
   Input,
+  PasswordInput,
   Label,
   Card,
   CardHeader,
@@ -51,12 +52,16 @@ export interface SignInProps {
    * Optional callback when user wants to navigate to sign-up
    */
   onNavigateToSignUp?: () => void;
+  /**
+   * Optional callback when user wants to navigate to forgot password
+   */
+  onNavigateToForgotPassword?: () => void;
 }
 
 /**
  * SignIn component with form validation, MFA support, and auth store integration
  */
-export function SignIn({ onSuccess, onNavigateToSignUp }: SignInProps = {}) {
+export function SignIn({ onSuccess, onNavigateToSignUp, onNavigateToForgotPassword }: SignInProps = {}) {
   const {
     login,
     completeMfaLogin,
@@ -291,10 +296,21 @@ export function SignIn({ onSuccess, onNavigateToSignUp }: SignInProps = {}) {
 
               {/* Password field */}
               <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <Input
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="password">Password</Label>
+                  {onNavigateToForgotPassword && (
+                    <Button
+                      type="button"
+                      variant="link"
+                      onClick={onNavigateToForgotPassword}
+                      className="p-0 h-auto text-xs"
+                    >
+                      Forgot password?
+                    </Button>
+                  )}
+                </div>
+                <PasswordInput
                   id="password"
-                  type="password"
                   {...registerSignIn('password')}
                   placeholder="Enter your password"
                   disabled={isFormLoading}

@@ -4,6 +4,7 @@ import { useAuthStore } from 'shared-auth-store';
 import { UserRole } from 'shared-types';
 import { SignInPage, SignInComponentProps } from '../pages/SignInPage';
 import { SignUpPage, SignUpComponentProps } from '../pages/SignUpPage';
+import { ForgotPasswordPage, ForgotPasswordComponentProps } from '../pages/ForgotPasswordPage';
 import { PaymentsPage, PaymentsComponentProps } from '../pages/PaymentsPage';
 import { ReportsPage, ReportsComponentProps } from '../pages/ReportsPage';
 import { AdminPage, AdminDashboardComponentProps } from '../pages/AdminPage';
@@ -22,6 +23,10 @@ export interface AppRoutesProps {
    * SignUp component to use. Required for proper DI pattern.
    */
   SignUpComponent: ComponentType<SignUpComponentProps>;
+  /**
+   * ForgotPassword component to use. Required for proper DI pattern.
+   */
+  ForgotPasswordComponent: ComponentType<ForgotPasswordComponentProps>;
   /**
    * PaymentsPage component to use. Required for proper DI pattern.
    */
@@ -67,6 +72,7 @@ export interface AppRoutesProps {
 export function AppRoutes({
   SignInComponent,
   SignUpComponent,
+  ForgotPasswordComponent,
   PaymentsComponent,
   ReportsComponent,
   AdminDashboardComponent,
@@ -103,6 +109,10 @@ export function AppRoutes({
       <Route
         path="/signup"
         element={<SignUpPage SignUpComponent={SignUpComponent} />}
+      />
+      <Route
+        path="/forgot-password"
+        element={<ForgotPasswordPage ForgotPasswordComponent={ForgotPasswordComponent} />}
       />
 
       {/* Protected routes - require authentication */}

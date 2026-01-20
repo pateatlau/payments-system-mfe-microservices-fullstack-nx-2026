@@ -25,6 +25,9 @@ export type { ButtonProps } from './lib/components/Button';
 export { Input } from './lib/components/Input';
 export type { InputProps } from './lib/components/Input';
 
+export { PasswordInput } from './lib/components/PasswordInput';
+export type { PasswordInputProps } from './lib/components/PasswordInput';
+
 export {
   Select,
   SelectGroup,
