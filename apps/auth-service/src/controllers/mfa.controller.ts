@@ -7,9 +7,7 @@
  */
 
 import { Request, Response, NextFunction } from 'express';
-import bcrypt from 'bcrypt';
 import * as mfaService from '../services/mfa.service';
-import { prisma } from '../lib/prisma';
 import {
   mfaSetupVerifySchema,
   mfaVerifySchema,
@@ -344,46 +342,12 @@ export const disableMfa = async (
 
     const data = mfaDisableSchema.parse(req.body);
 
-    // Verify password first
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-    });
-
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        error: {
-          code: 'USER_NOT_FOUND',
-          message: 'User not found',
-        },
-      });
-    }
-
-    const passwordValid = await bcrypt.compare(data.password, user.passwordHash);
-    if (!passwordValid) {
-      return res.status(401).json({
-        success: false,
-        error: {
-          code: 'INVALID_PASSWORD',
-          message: 'Invalid password',
-        },
-      });
-    }
-
-    // Verify TOTP code
-    const totpValid = await mfaService.verifyTotpCode(userId, data.totpCode);
-    if (!totpValid) {
-      return res.status(401).json({
-        success: false,
-        error: {
-          code: 'INVALID_TOTP_CODE',
-          message: 'Invalid TOTP code',
-        },
-      });
-    }
-
-    // Disable MFA
-    const result = await mfaService.disableMfa(userId);
+    // Disable MFA with atomic verification (prevents TOCTOU race conditions)
+    const result = await mfaService.disableMfa(
+      userId,
+      data.password,
+      data.totpCode
+    );
 
     res.status(200).json({
       success: true,

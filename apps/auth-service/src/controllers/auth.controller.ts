@@ -81,8 +81,62 @@ export const login = async (
 };
 
 /**
- * POST /auth/mfa/complete
- * Complete login after MFA verification
+ * @swagger
+ * /auth/mfa/complete:
+ *   post:
+ *     summary: Complete login after MFA verification
+ *     description: Completes the two-factor authentication login flow by verifying the TOTP code or backup code. Called after initial login when MFA is required.
+ *     tags:
+ *       - Auth
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - mfaToken
+ *               - code
+ *             properties:
+ *               mfaToken:
+ *                 type: string
+ *                 description: Temporary MFA token received from initial login response
+ *               code:
+ *                 type: string
+ *                 description: 6-digit TOTP code from authenticator app or 8-character backup code
+ *                 minLength: 6
+ *                 maxLength: 8
+ *     responses:
+ *       200:
+ *         description: MFA verification successful, login complete
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     user:
+ *                       $ref: '#/components/schemas/User'
+ *                     accessToken:
+ *                       type: string
+ *                       description: JWT access token
+ *                     refreshToken:
+ *                       type: string
+ *                       description: JWT refresh token
+ *                     expiresIn:
+ *                       type: string
+ *                       description: Access token expiry duration
+ *       400:
+ *         description: Invalid code format
+ *       401:
+ *         description: Invalid MFA token or code
+ *       500:
+ *         description: MFA verification error
  */
 export const completeMfaLogin = async (
   req: Request,

@@ -14,8 +14,16 @@ import speakeasy from 'speakeasy';
 import QRCode from 'qrcode';
 import crypto from 'crypto';
 import { prisma } from '../lib/prisma';
+import type { PrismaClient } from '.prisma/auth-client';
+import { Prisma } from '.prisma/auth-client';
 import { ApiError } from '../middleware/errorHandler';
 import { config } from '../config';
+
+// Type for Prisma transaction client
+type TransactionClient = Omit<
+  PrismaClient,
+  '$connect' | '$disconnect' | '$on' | '$transaction' | '$use' | '$extends'
+>;
 
 // ============================================================================
 // CONFIGURATION
@@ -42,18 +50,48 @@ const MFA_CONFIG = {
 // ============================================================================
 
 /**
+ * Check if running in production environment
+ */
+function isProduction(): boolean {
+  return process.env.NODE_ENV === 'production';
+}
+
+/**
  * Get encryption key from environment or generate one
- * In production, this should be stored securely (e.g., AWS KMS, Vault)
+ * In production, MFA_ENCRYPTION_KEY must be provided.
+ * In development, falls back to deriving key from JWT secret with configurable salt.
  */
 function getEncryptionKey(): Buffer {
   const keyEnv = process.env.MFA_ENCRYPTION_KEY;
   if (keyEnv) {
     // Key should be 32 bytes (256 bits) for AES-256
-    return Buffer.from(keyEnv, 'hex');
+    const key = Buffer.from(keyEnv, 'hex');
+    if (key.length !== 32) {
+      throw new Error(
+        'MFA_ENCRYPTION_KEY must be 32 bytes (64 hex characters) for AES-256'
+      );
+    }
+    return key;
   }
-  // Fallback for development - derive key from JWT secret
+
+  // In production, require explicit key
+  if (isProduction()) {
+    throw new Error(
+      'MFA_ENCRYPTION_KEY environment variable is required in production. ' +
+        'Generate a 32-byte key: openssl rand -hex 32'
+    );
+  }
+
+  // Development fallback - derive key from JWT secret with configurable salt
+  const salt = process.env.MFA_ENCRYPTION_SALT || 'mfa-dev-salt';
   const jwtSecret = config.jwtSecret || 'development-secret';
-  return crypto.scryptSync(jwtSecret, 'mfa-salt', 32);
+
+  console.warn(
+    '[MFA] Using derived encryption key for development. ' +
+      'Set MFA_ENCRYPTION_KEY in production.'
+  );
+
+  return crypto.scryptSync(jwtSecret, salt, 32);
 }
 
 /**
@@ -515,43 +553,90 @@ export async function getMfaStatus(userId: string): Promise<MfaStatusResponse> {
 /**
  * Disable MFA for a user
  *
- * Requires password verification for security.
+ * Performs password and TOTP verification atomically with the disable operation
+ * to prevent TOCTOU race conditions.
  *
  * @param userId - User ID
+ * @param password - Current password for verification
+ * @param totpCode - Current TOTP code for verification
  * @returns Success status
  */
 export async function disableMfa(
-  userId: string
+  userId: string,
+  password: string,
+  totpCode: string
 ): Promise<{ success: boolean; message: string }> {
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
+  // Use a transaction to ensure atomic verification and disable
+  return await prisma.$transaction(async (tx: TransactionClient) => {
+    // Get user with lock (SELECT FOR UPDATE behavior in transaction)
+    const user = await tx.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new ApiError(404, 'USER_NOT_FOUND', 'User not found');
+    }
+
+    if (!user.mfaEnabled) {
+      throw new ApiError(400, 'MFA_NOT_ENABLED', 'MFA is not enabled.');
+    }
+
+    // Verify password
+    const bcrypt = await import('bcrypt');
+    const passwordValid = await bcrypt.compare(password, user.passwordHash);
+    if (!passwordValid) {
+      throw new ApiError(401, 'INVALID_PASSWORD', 'Invalid password');
+    }
+
+    // Verify TOTP code
+    if (!user.mfaSecret) {
+      throw new ApiError(400, 'MFA_NOT_CONFIGURED', 'MFA secret not found.');
+    }
+
+    let secret: string;
+    try {
+      secret = decrypt(user.mfaSecret);
+    } catch (error) {
+      console.error('[MFA] Failed to decrypt secret for user:', userId, error);
+      throw new ApiError(
+        500,
+        'MFA_DECRYPT_ERROR',
+        'Failed to verify MFA. Please try again or contact support.'
+      );
+    }
+
+    const verified = speakeasy.totp.verify({
+      secret,
+      encoding: 'base32',
+      token: totpCode,
+      window: MFA_CONFIG.window,
+      algorithm: MFA_CONFIG.algorithm,
+      digits: MFA_CONFIG.digits,
+      step: MFA_CONFIG.step,
+    });
+
+    if (verified !== true) {
+      throw new ApiError(401, 'INVALID_TOTP_CODE', 'Invalid TOTP code');
+    }
+
+    // Disable MFA and clear secrets atomically
+    await tx.user.update({
+      where: { id: userId },
+      data: {
+        mfaEnabled: false,
+        mfaVerified: false,
+        mfaSecret: null,
+        mfaBackupCodes: Prisma.DbNull,
+      },
+    });
+
+    console.log(`[MFA] Disabled for user ${userId}`);
+
+    return {
+      success: true,
+      message: 'MFA has been disabled.',
+    };
   });
-
-  if (!user) {
-    throw new ApiError(404, 'USER_NOT_FOUND', 'User not found');
-  }
-
-  if (!user.mfaEnabled) {
-    throw new ApiError(400, 'MFA_NOT_ENABLED', 'MFA is not enabled.');
-  }
-
-  // Disable MFA and clear secrets
-  await prisma.user.update({
-    where: { id: userId },
-    data: {
-      mfaEnabled: false,
-      mfaVerified: false,
-      mfaSecret: null,
-      mfaBackupCodes: null,
-    },
-  });
-
-  console.log(`[MFA] Disabled for user ${userId}`);
-
-  return {
-    success: true,
-    message: 'MFA has been disabled.',
-  };
 }
 
 /**
