@@ -11,9 +11,9 @@
 
 ### Phase 1: Backend Infrastructure 🔄 IN PROGRESS
 - ✅ **Priority 1.1:** Verification Token Generation & Storage (Completed 2026-01-20)
-- ⏳ **Priority 1.2:** Email Verification Endpoints
+- ✅ **Priority 1.2:** Email Verification Endpoints (Completed 2026-01-20)
 - ⏳ **Priority 1.3:** Login Flow Modification (Block Unverified Users)
-- ⏳ **Priority 1.4:** Resend Verification Endpoint
+- ⏳ **Priority 1.4:** Resend Verification Endpoint (Moved to 1.2)
 
 ### Phase 2: Event-Driven Email Integration ⏳ PENDING
 - ⏳ **Priority 2.1:** Publish Email Verification Events
@@ -266,33 +266,46 @@ interface VerificationTokenPayload {
 
 ---
 
-### Priority 1.2: Email Verification Endpoints
+### Priority 1.2: Email Verification Endpoints ✅ COMPLETED
 
-**File:** `apps/auth-service/src/controllers/email-verification.controller.ts` (New)
+**Status:** ✅ Completed 2026-01-20
+**File:** `apps/auth-service/src/controllers/email-verification.controller.ts`
 
-**Endpoints:**
+**Endpoints Implemented:**
 
-```typescript
-// POST /auth/verify-email
-// Body: { token: string }
-// Response: { success: true, message: "Email verified successfully" }
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/auth/verify-email` | Verify email with JWT token (API call) |
+| GET | `/auth/verify-email/:token` | Verify via clickable link (supports redirect) |
+| POST | `/auth/resend-verification` | Resend verification email |
 
-// GET /auth/verify-email/:token
-// Query params: ?redirect=true (optional)
-// Response: Redirect to frontend or JSON response
-```
+**Completed Tasks:**
+- [x] Create `email-verification.controller.ts`
+- [x] Add POST `/auth/verify-email` endpoint
+- [x] Add GET `/auth/verify-email/:token` endpoint (for clickable links with ?redirect=true)
+- [x] Add POST `/auth/resend-verification` endpoint
+- [x] Add proper error responses (TOKEN_EXPIRED, INVALID_TOKEN, TOKEN_ALREADY_USED, ALREADY_VERIFIED)
+- [x] Add Swagger/OpenAPI documentation for all endpoints
+- [x] Create `email-verification.validators.ts` with Zod schemas
 
-**Tasks:**
-- [ ] Create `email-verification.controller.ts`
-- [ ] Add POST `/auth/verify-email` endpoint
-- [ ] Add GET `/auth/verify-email/:token` endpoint (for clickable links)
-- [ ] Add proper error responses (expired, invalid, already verified)
-- [ ] Add Swagger/OpenAPI documentation
+**Error Codes:**
+| Code | Description |
+|------|-------------|
+| `TOKEN_EXPIRED` | Verification link has expired (24h TTL) |
+| `INVALID_TOKEN` | Invalid verification link or JWT |
+| `TOKEN_ALREADY_USED` | Token was already consumed |
+| `RATE_LIMITED` | Too many resend requests (max 5/hour) |
 
-**Files to Create/Modify:**
-- `apps/auth-service/src/controllers/email-verification.controller.ts` (New)
-- `apps/auth-service/src/routes/auth.ts` (Add routes)
+**Security Features:**
+- Email enumeration prevention (resend always returns success)
+- Development mode token exposure for testing (`_dev` field)
+- Privacy-safe logging with masked emails
+- Proper cache invalidation on verification
+
+**Files Created/Modified:**
+- `apps/auth-service/src/controllers/email-verification.controller.ts` (New - 300+ lines)
 - `apps/auth-service/src/validators/email-verification.validators.ts` (New)
+- `apps/auth-service/src/routes/auth.ts` (Added 3 routes)
 
 ---
 
