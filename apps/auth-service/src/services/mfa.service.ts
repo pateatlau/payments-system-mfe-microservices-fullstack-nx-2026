@@ -13,9 +13,8 @@
 import speakeasy from 'speakeasy';
 import QRCode from 'qrcode';
 import crypto from 'crypto';
-import { prisma } from '../lib/prisma';
+import { prisma, Prisma } from '../lib/prisma';
 import type { PrismaClient } from '.prisma/auth-client';
-import { Prisma } from '.prisma/auth-client';
 import { ApiError } from '../middleware/errorHandler';
 import { config } from '../config';
 

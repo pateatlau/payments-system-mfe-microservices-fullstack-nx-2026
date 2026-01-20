@@ -37,7 +37,15 @@ const clientPath = path.join(
   'apps/auth-service/node_modules/.prisma/auth-client'
 );
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const { PrismaClient } = require(clientPath);
+const { PrismaClient, Prisma: PrismaNamespace } = require(clientPath);
+
+/**
+ * Prisma namespace export for use in other modules
+ * This provides access to Prisma.DbNull, Prisma.JsonNull, etc.
+ * Use dynamic require to ensure it resolves correctly at runtime
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const Prisma: any = PrismaNamespace;
 
 const SERVICE_NAME = 'auth-service';
 
