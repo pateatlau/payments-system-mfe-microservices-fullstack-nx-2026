@@ -80,6 +80,37 @@ export const login = async (
 };
 
 /**
+ * POST /auth/mfa/complete
+ * Complete login after MFA verification
+ */
+export const completeMfaLogin = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    // Validate request body
+    const { mfaLoginCompleteSchema } = await import('../validators/mfa.validators');
+    const data = mfaLoginCompleteSchema.parse(req.body);
+
+    // Complete MFA login
+    const result = await authService.completeMfaLogin(
+      data.mfaToken,
+      data.code,
+      getRequestMeta(req)
+    );
+
+    // Return response
+    res.status(200).json({
+      success: true,
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
  * POST /auth/refresh
  * Refresh access token (with rotation - returns new refresh token too)
  */

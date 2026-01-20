@@ -6,6 +6,7 @@
 
 import { Router } from 'express';
 import * as authController from '../controllers/auth.controller';
+import * as mfaController from '../controllers/mfa.controller';
 import { authenticate } from '../middleware/auth';
 
 const router = Router();
@@ -23,6 +24,9 @@ router.post('/auth/login', authController.login);
 // POST /auth/refresh - Refresh access token
 router.post('/auth/refresh', authController.refresh);
 
+// POST /auth/mfa/complete - Complete login after MFA verification
+router.post('/auth/mfa/complete', authController.completeMfaLogin);
+
 /**
  * Protected routes (authentication required)
  */
@@ -35,6 +39,32 @@ router.post('/auth/logout', authenticate, authController.logout);
 
 // POST /auth/password - Change password
 router.post('/auth/password', authenticate, authController.changePassword);
+
+/**
+ * MFA routes (POC-3 Backend Hardening - Priority 7.1)
+ */
+
+// POST /auth/mfa/setup - Generate MFA setup (secret + QR code + backup codes)
+router.post('/auth/mfa/setup', authenticate, mfaController.setupMfa);
+
+// POST /auth/mfa/verify-setup - Verify MFA setup with TOTP code
+router.post('/auth/mfa/verify-setup', authenticate, mfaController.verifyMfaSetup);
+
+// POST /auth/mfa/verify - Verify MFA code during login (no auth - uses userId in body)
+router.post('/auth/mfa/verify', mfaController.verifyMfaCode);
+
+// GET /auth/mfa/status - Get MFA status for current user
+router.get('/auth/mfa/status', authenticate, mfaController.getMfaStatus);
+
+// POST /auth/mfa/disable - Disable MFA (requires password + TOTP)
+router.post('/auth/mfa/disable', authenticate, mfaController.disableMfa);
+
+// POST /auth/mfa/backup-codes/regenerate - Regenerate backup codes
+router.post(
+  '/auth/mfa/backup-codes/regenerate',
+  authenticate,
+  mfaController.regenerateBackupCodes
+);
 
 /**
  * Internal user lookup routes (for service-to-service validation)

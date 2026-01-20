@@ -100,6 +100,13 @@ const services: Record<string, ProxyTarget> = {
  *   POST /api/auth/refresh -> http://localhost:3001/auth/refresh
  *   POST /api/auth/logout -> http://localhost:3001/auth/logout
  *   GET /api/auth/me -> http://localhost:3001/auth/me
+ *   POST /api/auth/mfa/setup -> http://localhost:3001/auth/mfa/setup (MFA setup)
+ *   POST /api/auth/mfa/verify-setup -> http://localhost:3001/auth/mfa/verify-setup
+ *   POST /api/auth/mfa/verify -> http://localhost:3001/auth/mfa/verify
+ *   POST /api/auth/mfa/complete -> http://localhost:3001/auth/mfa/complete
+ *   GET /api/auth/mfa/status -> http://localhost:3001/auth/mfa/status
+ *   POST /api/auth/mfa/disable -> http://localhost:3001/auth/mfa/disable
+ *   POST /api/auth/mfa/backup-codes/regenerate -> http://localhost:3001/auth/mfa/backup-codes/regenerate
  *
  * Note: Express strips /api/auth when routing, so we use custom proxy with prepend
  */

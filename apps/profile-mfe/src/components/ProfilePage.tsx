@@ -44,9 +44,10 @@ import { useProfile } from '../hooks/useProfile';
 import { ProfileForm } from './ProfileForm';
 import { PreferencesForm } from './PreferencesForm';
 import { AccountInfo } from './AccountInfo';
+import { MfaSettings } from './MfaSettings';
 
 // Tab identifiers for ProfilePage
-export type ProfileTabKey = 'profile' | 'preferences' | 'account';
+export type ProfileTabKey = 'profile' | 'preferences' | 'account' | 'security';
 
 /**
  * Simple tab configuration used for rendering navigation
@@ -56,6 +57,7 @@ const PROFILE_TABS: Array<{ key: ProfileTabKey; label: string }> = [
   { key: 'profile', label: 'Profile' },
   { key: 'preferences', label: 'Preferences' },
   { key: 'account', label: 'Account' },
+  { key: 'security', label: 'Security' },
 ];
 
 export function ProfilePage() {
@@ -123,6 +125,8 @@ export function ProfilePage() {
             {activeTab === 'preferences' && <PreferencesForm />}
 
             {activeTab === 'account' && <AccountInfo />}
+
+            {activeTab === 'security' && <MfaSettings />}
           </div>
         )}
       </div>

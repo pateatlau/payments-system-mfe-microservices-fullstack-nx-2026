@@ -31,6 +31,12 @@ model User {
   createdAt     DateTime  @default(now()) @map("created_at")
   updatedAt     DateTime  @updatedAt @map("updated_at")
 
+  // MFA fields
+  mfaEnabled      Boolean   @default(false) @map("mfa_enabled")
+  mfaSecret       String?   @map("mfa_secret")       // Encrypted TOTP secret
+  mfaBackupCodes  Json?     @map("mfa_backup_codes") // Encrypted backup codes array
+  mfaVerified     Boolean   @default(false) @map("mfa_verified") // Setup completion flag
+
   refreshTokens RefreshToken[]
   devices       Device[]
 
