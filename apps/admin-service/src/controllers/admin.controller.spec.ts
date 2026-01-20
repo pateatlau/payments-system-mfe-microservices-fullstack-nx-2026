@@ -221,7 +221,8 @@ describe('AdminController', () => {
       });
       expect(adminService.updateUser).toHaveBeenCalledWith(
         '123e4567-e89b-12d3-a456-426614174000',
-        expect.any(Object)
+        expect.any(Object),
+        'admin-1' // adminUserId from request context
       );
     });
 
@@ -284,7 +285,8 @@ describe('AdminController', () => {
       });
       expect(adminService.updateUserRole).toHaveBeenCalledWith(
         '123e4567-e89b-12d3-a456-426614174000',
-        expect.any(Object)
+        expect.any(Object),
+        'admin-1' // adminUserId from request context
       );
     });
 

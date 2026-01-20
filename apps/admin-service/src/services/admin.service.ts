@@ -126,8 +126,11 @@ export const adminService = {
 
   /**
    * Update user details (name, email)
+   * @param userId - The ID of the user to update
+   * @param data - The update data
+   * @param adminUserId - The ID of the admin performing the update (for audit trail)
    */
-  async updateUser(userId: string, data: UpdateUserRequest) {
+  async updateUser(userId: string, data: UpdateUserRequest, adminUserId?: string) {
     // Check if user exists
     const existingUser = await db.user.findUnique({
       where: { id: userId },
@@ -183,7 +186,7 @@ export const adminService = {
       if (Object.keys(changes).length > 0) {
         await publishAdminUserUpdated({
           userId,
-          updatedBy: 'admin', // TODO: Pass actual admin user ID from request context
+          updatedBy: adminUserId || 'system',
           updatedAt: new Date().toISOString(),
           changes,
         });
@@ -198,8 +201,11 @@ export const adminService = {
 
   /**
    * Update user role
+   * @param userId - The ID of the user to update
+   * @param data - The role update data
+   * @param adminUserId - The ID of the admin performing the update (for audit trail)
    */
-  async updateUserRole(userId: string, data: UpdateUserRoleRequest) {
+  async updateUserRole(userId: string, data: UpdateUserRoleRequest, adminUserId?: string) {
     // Check if user exists
     const existingUser = await db.user.findUnique({
       where: { id: userId },
@@ -231,7 +237,7 @@ export const adminService = {
       try {
         await publishAdminUserUpdated({
           userId,
-          updatedBy: 'admin', // TODO: Pass actual admin user ID from request context
+          updatedBy: adminUserId || 'system',
           updatedAt: new Date().toISOString(),
           changes: { role: data.role },
         });
