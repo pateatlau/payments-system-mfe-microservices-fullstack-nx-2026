@@ -940,7 +940,12 @@ export const forgotPassword = async (
 
     // In development/POC, return the token for testing
     // In production, this would be sent via email only
-    const isDevelopment = process.env.NODE_ENV !== 'production';
+    // SECURITY: Use explicit whitelist to prevent accidental token exposure
+    // when NODE_ENV is undefined or set to an unexpected value
+    const isDevelopment =
+      process.env.NODE_ENV === 'development' ||
+      process.env.NODE_ENV === 'local' ||
+      process.env.ALLOW_DEV_TOKENS === 'true';
 
     if (isDevelopment && result.token) {
       // DEV ONLY: Return token for testing

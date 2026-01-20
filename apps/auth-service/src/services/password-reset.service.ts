@@ -6,14 +6,18 @@
  * POC-3: Password Reset Implementation
  * - Secure token generation (crypto.randomBytes)
  * - Redis-based token storage with TTL
- * - Rate limiting to prevent abuse
+ * - Rate limiting to prevent abuse (atomic increment)
  * - OpenTelemetry tracing for observability
+ * - Constant-time token comparison to prevent timing attacks
  *
  * Security considerations:
  * - Tokens are hashed before storage (prevents exposure if Redis is compromised)
  * - Short TTL (15 minutes) to minimize attack window
- * - Rate limiting per email to prevent enumeration
+ * - Rate limiting per email to prevent enumeration (atomic operations)
  * - Always returns success to prevent email enumeration attacks
+ * - Privacy-safe logging (no plain emails in logs)
+ * - Constant-time hash comparison
+ * - Atomic database transactions for password update
  */
 
 import crypto from 'crypto';
@@ -27,6 +31,28 @@ import { blacklistUserTokens } from './token-blacklist.service';
 
 // Get tracer for password reset operations
 const tracer = trace.getTracer('password-reset-service', '1.0.0');
+
+/**
+ * Mask an email address for privacy-safe logging
+ * e.g., "john.doe@example.com" -> "j*****e@example.com"
+ */
+function maskEmail(email: string): string {
+  const [localPart, domain] = email.split('@');
+  if (!localPart || !domain) return '***@***';
+  if (localPart.length <= 2) return `${localPart[0]}*@${domain}`;
+  return `${localPart[0]}${'*'.repeat(Math.min(localPart.length - 2, 5))}${localPart[localPart.length - 1]}@${domain}`;
+}
+
+/**
+ * Constant-time comparison of two strings (for security)
+ * Prevents timing attacks when comparing token hashes
+ */
+function constantTimeCompare(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  const bufA = Buffer.from(a);
+  const bufB = Buffer.from(b);
+  return crypto.timingSafeEqual(bufA, bufB);
+}
 
 /**
  * Redis key prefixes for password reset
@@ -76,45 +102,34 @@ function hashResetToken(token: string): string {
 }
 
 /**
- * Check rate limit for password reset requests
+ * Atomically check and increment rate limit for password reset requests
+ *
+ * Uses Redis INCR for atomic operation to prevent race conditions.
+ * Returns the new count after incrementing.
  *
  * @param email - Email to check rate limit for
- * @returns Object with allowed status and remaining attempts
+ * @returns Object with allowed status, remaining attempts, and new count
  */
-async function checkRateLimit(
+async function checkAndIncrementRateLimit(
   email: string
-): Promise<{ allowed: boolean; remaining: number }> {
+): Promise<{ allowed: boolean; remaining: number; count: number }> {
   const key = `${RESET_RATE_LIMIT_PREFIX}${email.toLowerCase()}`;
-  const current = await cache.get<number>(key);
 
-  if (current === null || current === undefined) {
-    return { allowed: true, remaining: PASSWORD_RESET_CONFIG.maxRequestsPerHour };
-  }
+  // Atomic increment with TTL for new keys
+  const newCount = await cache.increment(
+    key,
+    PASSWORD_RESET_CONFIG.rateLimitTtlSeconds
+  );
 
-  if (current >= PASSWORD_RESET_CONFIG.maxRequestsPerHour) {
-    return { allowed: false, remaining: 0 };
+  if (newCount > PASSWORD_RESET_CONFIG.maxRequestsPerHour) {
+    return { allowed: false, remaining: 0, count: newCount };
   }
 
   return {
     allowed: true,
-    remaining: PASSWORD_RESET_CONFIG.maxRequestsPerHour - current,
+    remaining: PASSWORD_RESET_CONFIG.maxRequestsPerHour - newCount,
+    count: newCount,
   };
-}
-
-/**
- * Increment rate limit counter for email
- */
-async function incrementRateLimit(email: string): Promise<void> {
-  const key = `${RESET_RATE_LIMIT_PREFIX}${email.toLowerCase()}`;
-  const current = await cache.get<number>(key);
-
-  if (current === null || current === undefined) {
-    await cache.set(key, 1, { ttl: PASSWORD_RESET_CONFIG.rateLimitTtlSeconds });
-  } else {
-    await cache.set(key, current + 1, {
-      ttl: PASSWORD_RESET_CONFIG.rateLimitTtlSeconds,
-    });
-  }
 }
 
 /**
@@ -141,18 +156,16 @@ export async function requestPasswordReset(email: string): Promise<{
     try {
       span.setAttribute('email.domain', email.split('@')[1] || 'unknown');
 
-      // Check rate limit first
-      const rateLimit = await checkRateLimit(email);
+      // Atomically check and increment rate limit
+      const rateLimit = await checkAndIncrementRateLimit(email);
       if (!rateLimit.allowed) {
         span.setAttribute('rate_limited', true);
         span.setStatus({ code: SpanStatusCode.OK });
         // Return success to prevent enumeration, but don't generate token
-        console.log(`[Password Reset] Rate limited for email: ${email}`);
+        // Privacy: Use masked email in logs
+        console.log(`[Password Reset] Rate limited for email: ${maskEmail(email)}`);
         return { success: true };
       }
-
-      // Increment rate limit counter
-      await incrementRateLimit(email);
 
       // Look up user by email
       const user = await tracer.startActiveSpan(
@@ -179,12 +192,11 @@ export async function requestPasswordReset(email: string): Promise<{
       );
 
       // If user doesn't exist, return success (prevent enumeration)
+      // Privacy: Don't log email for non-existent accounts
       if (!user) {
         span.setAttribute('user_found', false);
         span.setStatus({ code: SpanStatusCode.OK });
-        console.log(
-          `[Password Reset] Request for non-existent email: ${email}`
-        );
+        console.log('[Password Reset] Request for non-existent account');
         return { success: true };
       }
 
@@ -255,29 +267,10 @@ export async function requestPasswordReset(email: string): Promise<{
   });
 }
 
-/**
- * Validate a password reset token
- *
- * @param token - The reset token to validate
- * @returns User ID if token is valid, null otherwise
- */
-export async function validateResetToken(
-  _token: string
-): Promise<{ userId: string; email: string } | null> {
-  return tracer.startActiveSpan('passwordReset.validate', async (span) => {
-    try {
-      // NOTE: Token lookup by hash is not implemented.
-      // We need to find the token by scanning keys (not ideal, but secure)
-      // In production, consider storing token -> userId mapping separately
-      // For now, we'll need to pass userId in the reset request
-
-      span.setStatus({ code: SpanStatusCode.OK });
-      return null; // Token lookup by hash not implemented - see resetPassword
-    } finally {
-      span.end();
-    }
-  });
-}
+// NOTE: validateResetToken is intentionally not exported.
+// Token validation logic is integrated into resetPassword to avoid
+// exposing a partial API. Use resetPassword directly which handles
+// both validation and password update atomically.
 
 /**
  * Reset password with token
@@ -334,9 +327,10 @@ export async function resetPassword(
         throw error;
       }
 
-      // Verify token hash matches
+      // Verify token hash matches using constant-time comparison
+      // This prevents timing attacks that could leak information about the token
       const tokenHash = hashResetToken(token);
-      if (storedData.tokenHash !== tokenHash) {
+      if (!constantTimeCompare(storedData.tokenHash, tokenHash)) {
         const error = new ApiError(
           400,
           'INVALID_RESET_TOKEN',
@@ -371,15 +365,24 @@ export async function resetPassword(
       // Hash new password
       const passwordHash = await bcrypt.hash(newPassword, config.bcryptRounds);
 
-      // Update password in database
+      // Update password and delete refresh tokens in a single transaction
+      // This ensures atomicity - either both succeed or both fail
       await tracer.startActiveSpan(
         'passwordReset.reset.updatePassword',
         async (updateSpan) => {
           try {
-            await prisma.user.update({
-              where: { id: userId },
-              data: { passwordHash },
-            });
+            // Use batch transaction for atomicity
+            await prisma.$transaction([
+              // Update password
+              prisma.user.update({
+                where: { id: userId },
+                data: { passwordHash },
+              }),
+              // Delete all refresh tokens for this user
+              prisma.refreshToken.deleteMany({
+                where: { userId },
+              }),
+            ]);
             updateSpan.setStatus({ code: SpanStatusCode.OK });
           } catch (error) {
             updateSpan.recordException(error as Error);
@@ -394,16 +397,13 @@ export async function resetPassword(
         }
       );
 
-      // Delete the reset token (single-use)
+      // Delete the reset token from Redis (single-use)
+      // Done after DB transaction succeeds
       await cache.delete(key);
 
-      // SECURITY: Invalidate all existing sessions for this user
+      // SECURITY: Invalidate all existing sessions in Redis
+      // Done after DB transaction succeeds
       await blacklistUserTokens(userId);
-
-      // Delete all refresh tokens
-      await prisma.refreshToken.deleteMany({
-        where: { userId },
-      });
 
       console.log(
         `[Password Reset] Password reset completed for user ${userId}. All sessions invalidated.`

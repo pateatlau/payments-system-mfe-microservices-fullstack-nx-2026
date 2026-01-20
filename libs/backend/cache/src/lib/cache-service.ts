@@ -169,6 +169,27 @@ export class CacheService {
   }
 
   /**
+   * Atomically increment a counter and set TTL if key is new
+   * Returns the new value after incrementing
+   */
+  async increment(key: string, ttlSeconds?: number): Promise<number> {
+    try {
+      const fullKey = this.getFullKey(key);
+      const newValue = await this.redis.incr(fullKey);
+
+      // Set TTL only if this is a new key (value is 1) and ttl is provided
+      if (newValue === 1 && ttlSeconds) {
+        await this.redis.expire(fullKey, ttlSeconds);
+      }
+
+      return newValue;
+    } catch (error) {
+      console.error(`[CacheService] Error incrementing key "${key}":`, error);
+      throw error;
+    }
+  }
+
+  /**
    * Check if a key exists in cache
    */
   async exists(key: string): Promise<boolean> {
