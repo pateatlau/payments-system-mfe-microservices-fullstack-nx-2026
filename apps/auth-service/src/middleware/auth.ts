@@ -16,6 +16,7 @@ declare global {
   namespace Express {
     interface Request {
       user?: JwtPayload;
+      userId?: string;
     }
   }
 }
@@ -51,6 +52,7 @@ export const authenticate = (
 
     // Attach user to request
     req.user = decoded;
+    req.userId = decoded.userId; // Convenience property
 
     next();
   } catch (error) {
@@ -65,3 +67,31 @@ export const authenticate = (
     next(error);
   }
 };
+
+/**
+ * Role-based authorization middleware
+ * Requires a specific role for access
+ *
+ * @param role - Required role
+ */
+export const requireRole = (role: string) => {
+  return (req: Request, _res: Response, next: NextFunction) => {
+    if (!req.user) {
+      return next(new ApiError(401, 'UNAUTHORIZED', 'Authentication required'));
+    }
+
+    if (req.user.role !== role) {
+      return next(
+        new ApiError(403, 'FORBIDDEN', `This action requires ${role} role`)
+      );
+    }
+
+    next();
+  };
+};
+
+/**
+ * Admin authorization middleware
+ * Shortcut for requireRole('ADMIN')
+ */
+export const requireAdmin = requireRole('ADMIN');

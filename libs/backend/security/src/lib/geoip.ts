@@ -12,16 +12,34 @@
 
 import type { GeoLocation } from './types';
 
+// GeoIP lookup result interface (matches geoip-lite's return type)
+interface GeoLookupResult {
+  range: [number, number];
+  country: string;
+  region: string;
+  eu: string;
+  timezone: string;
+  city: string;
+  ll: [number, number];
+  metro: number;
+  area: number;
+}
+
+// GeoIP module interface
+interface GeoIPModule {
+  lookup(ip: string): GeoLookupResult | null;
+}
+
 // Lazy load geoip-lite to handle optional peer dependency
 // Use undefined = not yet attempted, null = attempted but unavailable, or the module
-let geoip: typeof import('geoip-lite') | null | undefined = undefined;
+let geoip: GeoIPModule | null | undefined = undefined;
 
-function getGeoIP(): typeof import('geoip-lite') | null {
+function getGeoIP(): GeoIPModule | null {
   // Only attempt require once - if geoip is undefined, we haven't tried yet
   if (geoip === undefined) {
     try {
       // eslint-disable-next-line @typescript-eslint/no-require-imports
-      geoip = require('geoip-lite');
+      geoip = require('geoip-lite') as GeoIPModule;
     } catch {
       console.warn(
         '[GeoIPService] geoip-lite not installed, GeoIP features disabled'
