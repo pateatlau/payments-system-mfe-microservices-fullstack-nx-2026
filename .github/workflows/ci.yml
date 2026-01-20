@@ -677,12 +677,12 @@ jobs:
           echo "Backend started with PID: $BACKEND_PID"
 
           # Wait for API Gateway health endpoint
-          echo "Waiting for backend services to be ready..."
-          READY=false
+          echo "Waiting for API Gateway to be ready..."
+          GATEWAY_READY=false
           for i in {1..60}; do
             if curl -s http://localhost:3000/health > /dev/null 2>&1; then
               echo "API Gateway is ready!"
-              READY=true
+              GATEWAY_READY=true
               break
             fi
             echo "Waiting for API Gateway... ($i/60)"
@@ -697,13 +697,34 @@ jobs:
             sleep 2
           done
 
-          if [ "$READY" = false ]; then
-            echo "ERROR: Backend services failed to start within timeout!"
+          if [ "$GATEWAY_READY" = false ]; then
+            echo "ERROR: API Gateway failed to start within timeout!"
             echo "=== Backend logs ==="
             cat backend.log
             echo "=== Checking what's listening on ports ==="
             netstat -tlnp 2>/dev/null || ss -tlnp 2>/dev/null || echo "netstat/ss not available"
             exit 1
+          fi
+
+          # Wait for auth-service specifically (critical for E2E tests)
+          echo "Waiting for auth-service to be ready..."
+          AUTH_READY=false
+          for i in {1..30}; do
+            if curl -s http://localhost:3001/health > /dev/null 2>&1; then
+              echo "Auth service is ready!"
+              AUTH_READY=true
+              break
+            fi
+            echo "Waiting for auth-service... ($i/30)"
+            sleep 2
+          done
+
+          if [ "$AUTH_READY" = false ]; then
+            echo "WARNING: Auth service health check failed, but continuing..."
+            echo "=== Checking if port 3001 is listening ==="
+            netstat -tlnp 2>/dev/null | grep ':3001' || ss -tlnp 2>/dev/null | grep ':3001' || echo "Port 3001 not found"
+            echo "=== Recent backend logs ==="
+            tail -100 backend.log
           fi
 
           # Show what ports are actually listening
