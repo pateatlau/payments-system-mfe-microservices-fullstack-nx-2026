@@ -44,12 +44,13 @@ test.describe('Full-Stack Authentication Integration', () => {
       const testEmail = `test-${timestamp}@example.com`;
 
       // Fill in sign-up form
+      // Use a password that meets all requirements: 12+ chars, uppercase, lowercase, number, special char
       await page.fill('input[type="text"]', 'Test User');
       await page.fill('input[type="email"]', testEmail);
-      await page.fill('input[type="password"]', 'TestPassword123!@#');
+      await page.fill('input[type="password"]', 'TestPassword123#');
 
       const passwordInputs = page.locator('input[type="password"]');
-      await passwordInputs.nth(1).fill('TestPassword123!@#');
+      await passwordInputs.nth(1).fill('TestPassword123#');
 
       // Submit form
       await page.click('button[type="submit"]');
@@ -72,10 +73,9 @@ test.describe('Full-Stack Authentication Integration', () => {
       }
 
       // Verify frontend shows email verification pending screen (not redirect to payments)
-      await expect(page.locator('h1, h2, [class*="CardTitle"]').first()).toContainText(
-        /verify your email/i,
-        { timeout: 10000 }
-      );
+      await expect(
+        page.locator('text=/verify your email/i').first()
+      ).toBeVisible({ timeout: 15000 });
 
       // User should NOT be authenticated (no tokens stored)
       const tokens = await page.evaluate(() => {
@@ -102,19 +102,28 @@ test.describe('Full-Stack Authentication Integration', () => {
       await page.goto('/signup');
       const testEmail = `duplicate-${Date.now()}@example.com`;
 
+      // Track first registration API call
+      const firstRegisterPromise = page.waitForResponse(
+        response =>
+          response.url().includes('/api/auth/register') &&
+          response.request().method() === 'POST'
+      );
+
       await page.fill('input[type="text"]', 'First User');
       await page.fill('input[type="email"]', testEmail);
-      await page.fill('input[type="password"]', 'Password123!@#');
+      await page.fill('input[type="password"]', 'TestPassword123#');
 
       const passwordInputs = page.locator('input[type="password"]');
-      await passwordInputs.nth(1).fill('Password123!@#');
+      await passwordInputs.nth(1).fill('TestPassword123#');
       await page.click('button[type="submit"]');
 
+      // Wait for first registration API response
+      await firstRegisterPromise;
+
       // Wait for first registration to complete - now shows verification pending screen
-      await expect(page.locator('h1, h2, [class*="CardTitle"]').first()).toContainText(
-        /verify your email/i,
-        { timeout: 10000 }
-      );
+      await expect(
+        page.locator('text=/verify your email/i').first()
+      ).toBeVisible({ timeout: 15000 });
 
       // Now try to register again with same email
       await page.goto('/signup');
@@ -127,10 +136,10 @@ test.describe('Full-Stack Authentication Integration', () => {
 
       await page.fill('input[type="text"]', 'Second User');
       await page.fill('input[type="email"]', testEmail);
-      await page.fill('input[type="password"]', 'Password123!@#');
+      await page.fill('input[type="password"]', 'TestPassword123#');
       // Need to re-query passwordInputs after navigation
       const passwordInputs2 = page.locator('input[type="password"]');
-      await passwordInputs2.nth(1).fill('Password123!@#');
+      await passwordInputs2.nth(1).fill('TestPassword123#');
       await page.click('button[type="submit"]');
 
       // Verify backend returns 409 Conflict

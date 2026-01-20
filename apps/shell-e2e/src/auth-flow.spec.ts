@@ -120,24 +120,36 @@ test.describe('Authentication Flow', () => {
     });
 
     // Fill in sign-up form with unique email to avoid conflicts
+    // Use a password that meets all requirements: 12+ chars, uppercase, lowercase, number, special char
     const uniqueEmail = `newuser-${Date.now()}@example.com`;
     await page.locator('input#name, input[name="name"]').first().fill('New User');
     await page.fill('input[type="email"]', uniqueEmail);
-    await page.fill('input[type="password"]', 'TestPassword123!');
+    await page.fill('input[type="password"]', 'TestPassword123#');
 
     // Find and fill confirm password field (usually the second password input)
     const passwordInputs = page.locator('input[type="password"]');
-    await passwordInputs.nth(1).fill('TestPassword123!');
+    await passwordInputs.nth(1).fill('TestPassword123#');
+
+    // Track API call to ensure registration completes
+    const registerResponsePromise = page.waitForResponse(
+      response =>
+        response.url().includes('/api/auth/register') &&
+        response.request().method() === 'POST'
+    );
 
     // Submit form
     await page.click('button[type="submit"]');
 
+    // Wait for API response
+    const registerResponse = await registerResponsePromise;
+    expect(registerResponse.status()).toBe(201);
+
     // With email verification enabled, sign-up shows the verification pending screen
     // instead of redirecting to the payments page
-    await expect(page.locator('h1, h2, [class*="CardTitle"]').first()).toContainText(
-      /verify your email/i,
-      { timeout: 10000 }
-    );
+    // Wait for the CardTitle which contains "Verify Your Email"
+    await expect(
+      page.locator('text=/verify your email/i').first()
+    ).toBeVisible({ timeout: 15000 });
 
     // Verify the verification pending UI shows the expected content
     await expect(page.locator('text=/verification link/i')).toBeVisible({
