@@ -1,0 +1,35 @@
+{
+  "name": "security",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/backend/security/src",
+  "projectType": "library",
+  "tags": ["backend", "security"],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/backend/security",
+        "tsConfig": "libs/backend/security/tsconfig.lib.json",
+        "packageJson": "libs/backend/security/package.json",
+        "main": "libs/backend/security/src/index.ts",
+        "assets": ["libs/backend/security/*.md"]
+      }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "libs/backend/security/jest.config.ts",
+        "passWithNoTests": false
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["libs/backend/security/**/*.ts"]
+      }
+    }
+  }
+}
