@@ -49,7 +49,7 @@ import {
   recordFailedAttempt,
   recordSuccessfulLogin,
 } from './login-attempts.service';
-import { isMfaRequired } from './mfa.service';
+import { isMfaRequired, verifyMfaCode } from './mfa.service';
 
 /**
  * User response (without password)
@@ -452,9 +452,27 @@ export const completeMfaLogin = async (
     );
   }
 
-  // Import MFA service and verify the code
-  const { verifyMfaCode } = await import('./mfa.service');
-  const codeValid = await verifyMfaCode(payload.userId, mfaCode);
+  // Verify the MFA code
+  let codeValid: boolean;
+
+  try {
+    codeValid = await verifyMfaCode(payload.userId, mfaCode);
+  } catch (error) {
+    // Log the error for debugging
+    console.error('[Auth] MFA code verification error:', error);
+
+    // If it's an ApiError, re-throw it (e.g., INVALID_CODE_FORMAT)
+    if (error instanceof ApiError) {
+      throw error;
+    }
+
+    // For other errors, throw a generic error
+    throw new ApiError(
+      500,
+      'MFA_VERIFICATION_ERROR',
+      'An error occurred during MFA verification. Please try again.'
+    );
+  }
 
   if (!codeValid) {
     throw new ApiError(

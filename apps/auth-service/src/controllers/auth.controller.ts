@@ -14,6 +14,7 @@ import {
   uuidParamSchema,
   emailParamSchema,
 } from '../validators/auth.validators';
+import { mfaLoginCompleteSchema } from '../validators/mfa.validators';
 
 // Import Prisma via dynamic require to avoid dist path issues
 // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -90,7 +91,6 @@ export const completeMfaLogin = async (
 ) => {
   try {
     // Validate request body
-    const { mfaLoginCompleteSchema } = await import('../validators/mfa.validators');
     const data = mfaLoginCompleteSchema.parse(req.body);
 
     // Complete MFA login

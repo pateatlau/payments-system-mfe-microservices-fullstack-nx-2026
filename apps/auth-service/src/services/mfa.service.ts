@@ -350,9 +350,20 @@ export async function verifyTotpCode(
   }
 
   // Decrypt secret
-  const secret = decrypt(user.mfaSecret);
+  let secret: string;
+  try {
+    secret = decrypt(user.mfaSecret);
+  } catch (error) {
+    console.error('[MFA] Failed to decrypt secret for user:', userId, error);
+    throw new ApiError(
+      500,
+      'MFA_DECRYPT_ERROR',
+      'Failed to verify MFA. Please try again or contact support.'
+    );
+  }
 
   // Verify TOTP code
+  console.log('[MFA] Verifying TOTP code for user:', userId, 'code length:', totpCode.length);
   const verified = speakeasy.totp.verify({
     secret,
     encoding: 'base32',
@@ -363,7 +374,8 @@ export async function verifyTotpCode(
     step: MFA_CONFIG.step,
   });
 
-  return verified;
+  // speakeasy.totp.verify returns boolean | undefined, ensure we return strict boolean
+  return verified === true;
 }
 
 /**

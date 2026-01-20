@@ -7,7 +7,9 @@
  */
 
 import { Request, Response, NextFunction } from 'express';
+import bcrypt from 'bcrypt';
 import * as mfaService from '../services/mfa.service';
+import { prisma } from '../lib/prisma';
 import {
   mfaSetupVerifySchema,
   mfaVerifySchema,
@@ -343,9 +345,6 @@ export const disableMfa = async (
     const data = mfaDisableSchema.parse(req.body);
 
     // Verify password first
-    const bcrypt = await import('bcrypt');
-    const { prisma } = await import('../lib/prisma');
-
     const user = await prisma.user.findUnique({
       where: { id: userId },
     });
