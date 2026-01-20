@@ -32,8 +32,84 @@ const getRequestMeta = (req: Request) => ({
 });
 
 /**
- * POST /auth/register
- * Register a new user
+ * @swagger
+ * /auth/register:
+ *   post:
+ *     summary: Register a new user
+ *     description: |
+ *       Creates a new user account. Email verification is required before login.
+ *
+ *       **Flow:**
+ *       1. Register with email, password, name
+ *       2. Receive verification token (in _dev field during development)
+ *       3. Verify email via POST /auth/verify-email
+ *       4. Login with verified account
+ *     tags:
+ *       - Auth
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - password
+ *               - name
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: User's email address
+ *               password:
+ *                 type: string
+ *                 minLength: 12
+ *                 description: |
+ *                   Password with at least 12 characters including:
+ *                   uppercase, lowercase, number, special character
+ *               name:
+ *                 type: string
+ *                 description: User's display name
+ *               role:
+ *                 type: string
+ *                 enum: [CUSTOMER, VENDOR, ADMIN]
+ *                 default: CUSTOMER
+ *     responses:
+ *       201:
+ *         description: Registration successful, verification required
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Registration successful. Please check your email to verify your account.
+ *                 emailVerificationRequired:
+ *                   type: boolean
+ *                   example: true
+ *                 email:
+ *                   type: string
+ *                   description: Registered email address
+ *                 _dev:
+ *                   type: object
+ *                   description: Development only - verification token for testing
+ *                   properties:
+ *                     verificationToken:
+ *                       type: string
+ *                     userId:
+ *                       type: string
+ *                     expiresAt:
+ *                       type: string
+ *                     verifyUrl:
+ *                       type: string
+ *       409:
+ *         description: Email already in use
+ *       422:
+ *         description: Validation error (password requirements not met)
  */
 export const register = async (
   req: Request,
@@ -44,14 +120,11 @@ export const register = async (
     // Validate request body
     const data = registerSchema.parse(req.body);
 
-    // Register user with request metadata for token fingerprinting
+    // Register user (returns RegistrationResponse with verification info)
     const result = await authService.register(data, getRequestMeta(req));
 
-    // Return response
-    res.status(201).json({
-      success: true,
-      data: result,
-    });
+    // Return response directly (result already has success: true)
+    res.status(201).json(result);
   } catch (error) {
     next(error);
   }

@@ -14,6 +14,7 @@
 - ✅ **Priority 1.2:** Email Verification Endpoints (Completed 2026-01-20)
 - ✅ **Priority 1.3:** Login Flow Modification (Completed 2026-01-20)
 - ✅ **Priority 1.4:** Resend Verification Endpoint (Completed in 1.2)
+- ✅ **Priority 1.5:** Registration Flow Modification (Completed 2026-01-20)
 
 ### Phase 2: Event-Driven Email Integration ⏳ PENDING
 - ⏳ **Priority 2.1:** Publish Email Verification Events
@@ -358,66 +359,70 @@ if (!user.emailVerified) {
 
 ---
 
-### Priority 1.4: Resend Verification Endpoint
+### Priority 1.4: Resend Verification Endpoint ✅ COMPLETED (in 1.2)
 
+**Status:** ✅ Completed 2026-01-20 (implemented as part of Priority 1.2)
 **File:** `apps/auth-service/src/controllers/email-verification.controller.ts`
 
-**Endpoint:**
+**Endpoint:** `POST /auth/resend-verification`
 
-```typescript
-// POST /auth/resend-verification
-// Body: { email: string }
-// Rate limited: 3 requests per hour per email
-// Response: { success: true, message: "If account exists, verification email sent" }
-```
+**Completed Tasks:**
+- [x] Add POST `/auth/resend-verification` endpoint
+- [x] Implement rate limiting (5 per hour per user via token generation)
+- [x] Generate new verification token (invalidates previous)
+- [x] Email enumeration prevention (always returns success)
+- [ ] Publish new verification event (Phase 2)
 
-**Security Considerations:**
-- Always return success (prevent email enumeration)
-- Rate limit by email AND IP
-- Don't reveal if email exists in system
-
-**Tasks:**
-- [ ] Add POST `/auth/resend-verification` endpoint
-- [ ] Implement rate limiting (3 per hour per email)
-- [ ] Generate new verification token
-- [ ] Invalidate old token
-- [ ] Publish new verification event
-
-**Files to Modify:**
-- `apps/auth-service/src/controllers/email-verification.controller.ts`
-- `apps/auth-service/src/routes/auth.ts`
+**Security Features:**
+- Always returns success to prevent email enumeration
+- Rate limited via `generateVerificationToken()` (max 5/hour)
+- Masked email in development response
+- Privacy-safe logging
 
 ---
 
-### Priority 1.5: Registration Flow Modification
+### Priority 1.5: Registration Flow Modification ✅ COMPLETED
 
+**Status:** ✅ Completed 2026-01-20
 **File:** `apps/auth-service/src/services/auth.service.ts`
 
-**Changes to `register()` function:**
+**New Registration Response:**
 
 ```typescript
-// Current: Returns auth tokens immediately
-// New: Returns verification required response
-
 interface RegistrationResponse {
   success: true;
   message: string;
   emailVerificationRequired: true;
-  // Only in development mode:
-  verificationToken?: string;
+  email: string;
+  // Development mode only:
+  _dev?: {
+    verificationToken: string;
+    userId: string;
+    expiresAt: string;
+    verifyUrl: string;
+  };
 }
 ```
 
-**Tasks:**
-- [ ] Modify `register()` to not return auth tokens
-- [ ] Generate verification token on registration
-- [ ] Store token in Redis
-- [ ] Return verification required response
-- [ ] Include token in response for development mode only
+**Completed Tasks:**
+- [x] Modify `register()` to not return auth tokens
+- [x] Generate verification token on registration automatically
+- [x] Store token in Redis (via `generateVerificationToken`)
+- [x] Return verification required response
+- [x] Include token in `_dev` field for development mode only
+- [x] Add comprehensive Swagger documentation for `/auth/register`
+- [x] Update unit tests for new registration flow
 
-**Files to Modify:**
-- `apps/auth-service/src/services/auth.service.ts`
-- `apps/auth-service/src/controllers/auth.controller.ts`
+**Testing Flow:**
+1. `POST /auth/register` → Returns `{ emailVerificationRequired: true, _dev: { verificationToken } }`
+2. `POST /auth/verify-email` with `{ token }` → Returns `{ success: true }`
+3. `POST /auth/login` → Returns auth tokens
+
+**Files Modified:**
+- `apps/auth-service/src/services/auth.service.ts` (New `RegistrationResponse` type, modified `register()`)
+- `apps/auth-service/src/controllers/auth.controller.ts` (New Swagger docs, updated response format)
+- `apps/auth-service/src/services/auth.service.spec.ts` (Updated tests)
+- `apps/auth-service/src/controllers/auth.controller.spec.ts` (Updated tests)
 
 ---
 

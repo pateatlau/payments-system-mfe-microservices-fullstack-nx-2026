@@ -39,6 +39,13 @@ jest.mock('../utils/token', () => ({
   verifyRefreshToken: jest.fn(),
 }));
 
+// Mock email verification service (POC-3 Priority 1.5)
+jest.mock('./email-verification.service', () => ({
+  generateVerificationToken: jest.fn(),
+}));
+
+import { generateVerificationToken } from './email-verification.service';
+
 describe('AuthService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -58,39 +65,36 @@ describe('AuthService', () => {
       name: 'Test User',
       role: UserRole.CUSTOMER,
       passwordHash: 'hashed-password',
+      emailVerified: false, // POC-3: New users are unverified
       createdAt: new Date('2024-01-01'),
       updatedAt: new Date('2024-01-01'),
     };
 
-    const mockTokens = {
-      accessToken: 'access-token',
-      refreshToken: 'refresh-token',
-      expiresIn: '15m',
+    const mockVerificationResult = {
+      success: true,
+      token: 'verification-token-123',
+      expiresAt: '2024-01-02T00:00:00.000Z',
     };
 
-    it('should register a new user successfully', async () => {
+    it('should register a new user and return verification required response', async () => {
       (prisma.user.findUnique as jest.Mock).mockResolvedValue(null);
       (bcrypt.hash as jest.Mock).mockResolvedValue('hashed-password');
       (prisma.user.create as jest.Mock).mockResolvedValue(mockUser);
-      // userProfile.create removed - now in profile service (POC-3)
-      // (prisma.userProfile.create as jest.Mock).mockResolvedValue({});
-      (generateTokenPair as jest.Mock).mockReturnValue(mockTokens);
-      (prisma.refreshToken.deleteMany as jest.Mock).mockResolvedValue({});
-      (prisma.refreshToken.create as jest.Mock).mockResolvedValue({});
+      (generateVerificationToken as jest.Mock).mockResolvedValue(mockVerificationResult);
 
       const result = await authService.register(mockRegisterData);
 
+      // POC-3 Priority 1.5: Registration no longer returns auth tokens
       expect(result).toMatchObject({
-        user: {
-          id: mockUser.id,
-          email: mockUser.email,
-          name: mockUser.name,
-          role: mockUser.role,
-        },
-        accessToken: mockTokens.accessToken,
-        refreshToken: mockTokens.refreshToken,
-        expiresIn: mockTokens.expiresIn,
+        success: true,
+        message: expect.stringContaining('Registration successful'),
+        emailVerificationRequired: true,
+        email: mockRegisterData.email,
       });
+
+      // Should NOT have accessToken or refreshToken
+      expect(result).not.toHaveProperty('accessToken');
+      expect(result).not.toHaveProperty('refreshToken');
 
       expect(prisma.user.findUnique).toHaveBeenCalledWith({
         where: { email: mockRegisterData.email },
@@ -100,9 +104,10 @@ describe('AuthService', () => {
         expect.any(Number)
       );
       expect(prisma.user.create).toHaveBeenCalled();
-      // userProfile.create removed - now in profile service (POC-3)
-      // expect(prisma.userProfile.create).toHaveBeenCalled();
-      expect(generateTokenPair).toHaveBeenCalled();
+      expect(generateVerificationToken).toHaveBeenCalledWith(mockUser.id, mockUser.email);
+
+      // Should NOT generate auth tokens anymore
+      expect(generateTokenPair).not.toHaveBeenCalled();
     });
 
     it('should throw error if email already exists', async () => {
@@ -118,22 +123,18 @@ describe('AuthService', () => {
       expect(prisma.user.create).not.toHaveBeenCalled();
     });
 
-    it('should delete old refresh tokens before creating new one', async () => {
+    it('should generate verification token for new user', async () => {
       (prisma.user.findUnique as jest.Mock).mockResolvedValue(null);
       (bcrypt.hash as jest.Mock).mockResolvedValue('hashed-password');
       (prisma.user.create as jest.Mock).mockResolvedValue(mockUser);
-      // userProfile.create removed - now in profile service (POC-3)
-      // (prisma.userProfile.create as jest.Mock).mockResolvedValue({});
-      (generateTokenPair as jest.Mock).mockReturnValue(mockTokens);
-      (prisma.refreshToken.deleteMany as jest.Mock).mockResolvedValue({});
-      (prisma.refreshToken.create as jest.Mock).mockResolvedValue({});
+      (generateVerificationToken as jest.Mock).mockResolvedValue(mockVerificationResult);
 
       await authService.register(mockRegisterData);
 
-      expect(prisma.refreshToken.deleteMany).toHaveBeenCalledWith({
-        where: { userId: mockUser.id },
-      });
-      expect(prisma.refreshToken.create).toHaveBeenCalled();
+      expect(generateVerificationToken).toHaveBeenCalledWith(
+        mockUser.id,
+        mockUser.email
+      );
     });
   });
 
