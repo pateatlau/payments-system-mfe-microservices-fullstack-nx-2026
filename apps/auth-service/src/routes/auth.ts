@@ -27,6 +27,12 @@ router.post('/auth/refresh', authController.refresh);
 // POST /auth/mfa/complete - Complete login after MFA verification
 router.post('/auth/mfa/complete', authController.completeMfaLogin);
 
+// POST /auth/forgot-password - Request password reset
+router.post('/auth/forgot-password', authController.forgotPassword);
+
+// POST /auth/reset-password - Reset password with token
+router.post('/auth/reset-password', authController.resetPassword);
+
 /**
  * Protected routes (authentication required)
  */

@@ -27,6 +27,18 @@ declare module 'authMfe/SignUp' {
   export default SignUp;
 }
 
+declare module 'authMfe/ForgotPassword' {
+  import { ComponentType } from 'react';
+  const ForgotPassword: ComponentType;
+  export default ForgotPassword;
+}
+
+declare module 'authMfe/ResetPassword' {
+  import { ComponentType } from 'react';
+  const ResetPassword: ComponentType;
+  export default ResetPassword;
+}
+
 declare module 'paymentsMfe/PaymentsPage' {
   import { ComponentType } from 'react';
   const PaymentsPage: ComponentType;
