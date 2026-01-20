@@ -49,6 +49,10 @@ const MFA_CONFIG = {
 // ENCRYPTION UTILITIES
 // ============================================================================
 
+// Cached encryption key to avoid repeated derivation and console warnings
+let cachedEncryptionKey: Buffer | null = null;
+let encryptionKeyWarningShown = false;
+
 /**
  * Check if running in production environment
  */
@@ -60,8 +64,14 @@ function isProduction(): boolean {
  * Get encryption key from environment or generate one
  * In production, MFA_ENCRYPTION_KEY must be provided.
  * In development, falls back to deriving key from JWT secret with configurable salt.
+ * The key is cached after first computation to avoid repeated derivation and warnings.
  */
 function getEncryptionKey(): Buffer {
+  // Return cached key if available
+  if (cachedEncryptionKey) {
+    return cachedEncryptionKey;
+  }
+
   const keyEnv = process.env.MFA_ENCRYPTION_KEY;
   if (keyEnv) {
     // Key should be 32 bytes (256 bits) for AES-256
@@ -71,6 +81,7 @@ function getEncryptionKey(): Buffer {
         'MFA_ENCRYPTION_KEY must be 32 bytes (64 hex characters) for AES-256'
       );
     }
+    cachedEncryptionKey = key;
     return key;
   }
 
@@ -86,12 +97,17 @@ function getEncryptionKey(): Buffer {
   const salt = process.env.MFA_ENCRYPTION_SALT || 'mfa-dev-salt';
   const jwtSecret = config.jwtSecret || 'development-secret';
 
-  console.warn(
-    '[MFA] Using derived encryption key for development. ' +
-      'Set MFA_ENCRYPTION_KEY in production.'
-  );
+  // Only show warning once per process
+  if (!encryptionKeyWarningShown) {
+    console.warn(
+      '[MFA] Using derived encryption key for development. ' +
+        'Set MFA_ENCRYPTION_KEY in production.'
+    );
+    encryptionKeyWarningShown = true;
+  }
 
-  return crypto.scryptSync(jwtSecret, salt, 32);
+  cachedEncryptionKey = crypto.scryptSync(jwtSecret, salt, 32);
+  return cachedEncryptionKey;
 }
 
 /**
@@ -420,6 +436,7 @@ export async function verifyTotpCode(
  * Verify a backup code during login
  *
  * Backup codes are single-use. Once used, they cannot be used again.
+ * Uses atomic conditional update to prevent TOCTOU race conditions.
  *
  * @param userId - User ID
  * @param backupCode - 8-character backup code
@@ -447,8 +464,11 @@ export async function verifyBackupCode(
     );
   }
 
+  // Capture original encrypted value for atomic comparison
+  const originalEncrypted = user.mfaBackupCodes as string;
+
   // Decrypt backup codes
-  const backupCodesJson = decrypt(user.mfaBackupCodes as string);
+  const backupCodesJson = decrypt(originalEncrypted);
   const backupCodes: Array<{ hash: string; used: boolean }> =
     JSON.parse(backupCodesJson);
 
@@ -471,14 +491,25 @@ export async function verifyBackupCode(
   }
   matchedCode.used = true;
 
-  // Update database
+  // Atomic conditional update - only succeeds if mfaBackupCodes hasn't changed
+  // This prevents TOCTOU race where two requests could both use the same backup code
   const encryptedBackupCodes = encrypt(JSON.stringify(backupCodes));
-  await prisma.user.update({
-    where: { id: userId },
+  const updateResult = await prisma.user.updateMany({
+    where: {
+      id: userId,
+      mfaBackupCodes: originalEncrypted,
+    },
     data: {
       mfaBackupCodes: encryptedBackupCodes,
     },
   });
+
+  // If no rows were updated, another request already modified the backup codes
+  if (updateResult.count === 0) {
+    console.log(`[MFA] Backup code race detected for user ${userId}, retrying`);
+    // Retry the verification (recursive call will re-read fresh data)
+    return verifyBackupCode(userId, backupCode);
+  }
 
   console.log(`[MFA] Backup code used for user ${userId}`);
 
