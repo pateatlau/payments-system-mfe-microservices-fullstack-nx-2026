@@ -5,6 +5,7 @@ import { UserRole } from 'shared-types';
 import { SignInPage, SignInComponentProps } from '../pages/SignInPage';
 import { SignUpPage, SignUpComponentProps } from '../pages/SignUpPage';
 import { ForgotPasswordPage, ForgotPasswordComponentProps } from '../pages/ForgotPasswordPage';
+import { ResetPasswordPage, ResetPasswordComponentProps } from '../pages/ResetPasswordPage';
 import { PaymentsPage, PaymentsComponentProps } from '../pages/PaymentsPage';
 import { ReportsPage, ReportsComponentProps } from '../pages/ReportsPage';
 import { AdminPage, AdminDashboardComponentProps } from '../pages/AdminPage';
@@ -27,6 +28,10 @@ export interface AppRoutesProps {
    * ForgotPassword component to use. Required for proper DI pattern.
    */
   ForgotPasswordComponent: ComponentType<ForgotPasswordComponentProps>;
+  /**
+   * ResetPassword component to use. Required for proper DI pattern.
+   */
+  ResetPasswordComponent: ComponentType<ResetPasswordComponentProps>;
   /**
    * PaymentsPage component to use. Required for proper DI pattern.
    */
@@ -73,6 +78,7 @@ export function AppRoutes({
   SignInComponent,
   SignUpComponent,
   ForgotPasswordComponent,
+  ResetPasswordComponent,
   PaymentsComponent,
   ReportsComponent,
   AdminDashboardComponent,
@@ -113,6 +119,10 @@ export function AppRoutes({
       <Route
         path="/forgot-password"
         element={<ForgotPasswordPage ForgotPasswordComponent={ForgotPasswordComponent} />}
+      />
+      <Route
+        path="/reset-password"
+        element={<ResetPasswordPage ResetPasswordComponent={ResetPasswordComponent} />}
       />
 
       {/* Protected routes - require authentication */}

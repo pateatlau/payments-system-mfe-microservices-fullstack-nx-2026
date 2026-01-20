@@ -16,10 +16,11 @@ import { useMemo } from 'react';
 import { Card, Badge } from '@mfe/shared-design-system';
 import { useAuthStore } from 'shared-auth-store';
 
-function formatDate(value: string | undefined | null): string {
-  if (!value) return 'N/A';
+function formatDate(value: unknown): string {
+  // Handle null, undefined, and non-string values
+  if (!value || typeof value !== 'string') return 'N/A';
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
+  if (Number.isNaN(date.getTime())) return 'N/A';
   return date.toLocaleString();
 }
 
@@ -31,14 +32,23 @@ export function AccountInfo() {
       return null;
     }
 
+    // Safely extract values and ensure they are primitives (not objects)
+    const safeString = (value: unknown): string => {
+      if (typeof value === 'string') return value;
+      if (value === null || value === undefined) return 'N/A';
+      // Handle objects that might be passed (e.g., from malformed JSON)
+      if (typeof value === 'object') return 'N/A';
+      return String(value);
+    };
+
     return {
-      id: user.id,
-      email: user.email,
-      name: user.name,
-      role: user.role,
-      emailVerified: user.emailVerified,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
+      id: safeString(user.id),
+      email: safeString(user.email),
+      name: safeString(user.name),
+      role: safeString(user.role),
+      emailVerified: Boolean(user.emailVerified),
+      createdAt: safeString(user.createdAt),
+      updatedAt: safeString(user.updatedAt),
     };
   }, [user]);
 

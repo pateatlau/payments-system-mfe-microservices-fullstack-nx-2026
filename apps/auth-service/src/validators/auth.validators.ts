@@ -166,6 +166,35 @@ export const changePasswordSchema = z.object({
 export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
 
 // ============================================================================
+// SCHEMAS: Forgot Password / Reset Password
+// ============================================================================
+
+/**
+ * Forgot password request schema
+ */
+export const forgotPasswordSchema = z.object({
+  email: z.string().email('Invalid email format').max(255),
+});
+
+export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
+
+/**
+ * Reset password request schema
+ * Requires userId, token, and new password
+ */
+export const resetPasswordSchema = z.object({
+  userId: z.string().uuid('Invalid user ID format'),
+  token: z
+    .string()
+    .min(64, 'Invalid reset token')
+    .max(64, 'Invalid reset token')
+    .regex(/^[a-f0-9]+$/, 'Invalid reset token format'),
+  newPassword: passwordSchema,
+});
+
+export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
+
+// ============================================================================
 // EXPORT: Utilities for reuse
 // ============================================================================
 

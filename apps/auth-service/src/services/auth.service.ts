@@ -59,6 +59,7 @@ export interface UserResponse {
   email: string;
   name: string;
   role: UserRole;
+  emailVerified: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -154,6 +155,7 @@ export const register = async (
     email: user.email,
     name: user.name,
     role: user.role as UserRole,
+    emailVerified: user.emailVerified,
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
   };
@@ -330,6 +332,7 @@ export const login = async (
       email: user.email,
       name: user.name,
       role: user.role as UserRole,
+      emailVerified: user.emailVerified,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     };
@@ -385,6 +388,7 @@ export const login = async (
     email: user.email,
     name: user.name,
     role: user.role as UserRole,
+    emailVerified: user.emailVerified,
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
   };
@@ -529,6 +533,7 @@ export const completeMfaLogin = async (
     email: user.email,
     name: user.name,
     role: user.role as UserRole,
+    emailVerified: user.emailVerified,
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
   };
@@ -860,6 +865,7 @@ export const getUserById = async (userId: string): Promise<UserResponse> => {
     email: user.email,
     name: user.name,
     role: user.role as UserRole,
+    emailVerified: user.emailVerified,
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
   };

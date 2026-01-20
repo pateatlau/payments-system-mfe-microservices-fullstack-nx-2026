@@ -11,10 +11,13 @@ import {
   loginSchema,
   refreshTokenSchema,
   changePasswordSchema,
+  forgotPasswordSchema,
+  resetPasswordSchema,
   uuidParamSchema,
   emailParamSchema,
 } from '../validators/auth.validators';
 import { mfaLoginCompleteSchema } from '../validators/mfa.validators';
+import * as passwordResetService from '../services/password-reset.service';
 
 // Import Prisma via dynamic require to avoid dist path issues
 // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -867,6 +870,196 @@ export const checkExpiringSecrets = async (
             : null,
         })),
       },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// ============================================================================
+// PASSWORD RESET ENDPOINTS
+// ============================================================================
+
+/**
+ * @swagger
+ * /auth/forgot-password:
+ *   post:
+ *     summary: Request password reset
+ *     description: |
+ *       Initiates a password reset flow by generating a reset token.
+ *       For security, always returns success to prevent email enumeration.
+ *       In production, the token would be sent via email.
+ *     tags:
+ *       - Auth
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: Email address to send reset link to
+ *     responses:
+ *       200:
+ *         description: |
+ *           Password reset request processed. Check email for reset link.
+ *           Note: Always returns success to prevent email enumeration.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     message:
+ *                       type: string
+ *                       example: If an account exists with this email, you will receive a password reset link shortly.
+ *       429:
+ *         description: Too many reset requests. Try again later.
+ */
+export const forgotPassword = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    // Validate request body
+    const data = forgotPasswordSchema.parse(req.body);
+
+    // Request password reset
+    const result = await passwordResetService.requestPasswordReset(data.email);
+
+    // In development/POC, return the token for testing
+    // In production, this would be sent via email only
+    // SECURITY: Use explicit whitelist to prevent accidental token exposure
+    // when NODE_ENV is undefined or set to an unexpected value
+    const isDevelopment =
+      process.env.NODE_ENV === 'development' ||
+      process.env.NODE_ENV === 'local' ||
+      process.env.ALLOW_DEV_TOKENS === 'true';
+
+    if (isDevelopment && result.token) {
+      // DEV ONLY: Return token for testing
+      // In production, remove this and send email instead
+      return res.status(200).json({
+        success: true,
+        data: {
+          message:
+            'If an account exists with this email, you will receive a password reset link shortly.',
+          // DEV ONLY: Token info for testing
+          _dev: {
+            token: result.token,
+            userId: result.userId,
+            expiresAt: result.expiresAt,
+            resetUrl: `https://localhost/reset-password?userId=${result.userId}&token=${result.token}`,
+          },
+        },
+      });
+    }
+
+    // Production response - never reveals if email exists
+    return res.status(200).json({
+      success: true,
+      data: {
+        message:
+          'If an account exists with this email, you will receive a password reset link shortly.',
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * @swagger
+ * /auth/reset-password:
+ *   post:
+ *     summary: Reset password with token
+ *     description: |
+ *       Resets the user's password using a valid reset token.
+ *       The token is single-use and expires after 15 minutes.
+ *       All existing sessions are invalidated after password reset.
+ *     tags:
+ *       - Auth
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - userId
+ *               - token
+ *               - newPassword
+ *             properties:
+ *               userId:
+ *                 type: string
+ *                 format: uuid
+ *                 description: User ID from reset link
+ *               token:
+ *                 type: string
+ *                 minLength: 64
+ *                 maxLength: 64
+ *                 description: Reset token from reset link (64 hex characters)
+ *               newPassword:
+ *                 type: string
+ *                 minLength: 12
+ *                 description: |
+ *                   New password. Must be at least 12 characters with:
+ *                   - At least one uppercase letter
+ *                   - At least one lowercase letter
+ *                   - At least one number
+ *                   - At least one special character
+ *     responses:
+ *       200:
+ *         description: Password reset successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     message:
+ *                       type: string
+ *                       example: Password has been reset successfully. Please log in with your new password.
+ *       400:
+ *         description: Invalid or expired reset token
+ *       422:
+ *         description: Password does not meet requirements
+ */
+export const resetPassword = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    // Validate request body
+    const data = resetPasswordSchema.parse(req.body);
+
+    // Reset password
+    const result = await passwordResetService.resetPassword(
+      data.userId,
+      data.token,
+      data.newPassword
+    );
+
+    return res.status(200).json({
+      success: true,
+      data: result,
     });
   } catch (error) {
     next(error);
