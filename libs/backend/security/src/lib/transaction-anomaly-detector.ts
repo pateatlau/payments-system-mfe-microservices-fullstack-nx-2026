@@ -294,8 +294,9 @@ export class TransactionAnomalyDetector {
       const today = new Date().toISOString().split('T')[0];
       const key = REDIS_KEYS.DAILY_TOTAL + event.userId + ':' + today;
 
-      // Increment daily total
-      const newTotal = await this.redis.incrbyfloat(key, event.amount);
+      // Increment daily total (incrbyfloat returns string)
+      const newTotalStr = await this.redis.incrbyfloat(key, event.amount);
+      const newTotal = parseFloat(String(newTotalStr));
       await this.redis.expire(key, 48 * 3600); // Expire after 48 hours
 
       // Calculate typical daily total

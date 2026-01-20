@@ -11,7 +11,9 @@ import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 import healthRoutes from './routes/health';
 import authRoutes from './routes/auth';
 import deviceRoutes from './routes/devices';
+import sessionRoutes from './routes/sessions';
 import { logger } from './utils/logger';
+import { initializeSessionManager } from './services/session.service';
 import cors from 'cors';
 import {
   initSentry,
@@ -195,6 +197,9 @@ app.use(authRoutes);
 // Device routes (protected)
 app.use(deviceRoutes);
 
+// Session management routes (protected)
+app.use(sessionRoutes);
+
 /**
  * Error Handling (must be last!)
  */
@@ -217,6 +222,15 @@ app.listen(port, async () => {
   logger.info(`Auth Service started on port ${port}`, {
     environment: config.nodeEnv,
   });
+
+  // Initialize session manager (Redis-backed session management)
+  try {
+    await initializeSessionManager();
+    logger.info('Auth Service session manager initialized');
+  } catch (error) {
+    logger.warn('Session manager running in degraded mode', { error });
+    // Service continues with in-memory fallback
+  }
 
   // Initialize RabbitMQ subscriber for admin events
   try {

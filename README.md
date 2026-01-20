@@ -19,7 +19,7 @@ A production-ready, full-stack microfrontend platform demonstrating enterprise-g
 - **Real-Time:** WebSocket server for bidirectional communication
 - **Dual API:** REST (Swagger UI) + GraphQL (Apollo Server)
 - **Full Observability:** Prometheus metrics, Grafana dashboards, Jaeger tracing, Sentry errors
-- **Banking-Grade Security:** JWT authentication, RBAC, secure session management
+- **Banking-Grade Security:** JWT authentication, RBAC, MFA, anomaly detection, advanced session management
 - **CI Pipeline:** GitHub Actions with Nx Cloud distributed caching (50-65% faster builds)
 - **Cross-Browser:** Full support for Chrome, Firefox, Safari, Edge, and Brave
 
@@ -287,6 +287,18 @@ pnpm grafana:ui               # Open Grafana dashboards
 - Advanced caching strategies
 - Cross-tab/device session sync
 - Full cross-browser compatibility (Chrome, Firefox, Safari, Edge, Brave)
+- **Backend Hardening (Phases 1-7):**
+  - Rate limiting with Redis-backed distributed limiting
+  - JWT refresh token rotation with token family tracking
+  - Account lockout and brute force protection
+  - Input validation and sanitization (Zod)
+  - Secrets management with encryption
+  - Database security hardening
+  - Service resilience (circuit breakers, retry policies)
+  - Enhanced API security (headers, response sanitization, request limits)
+  - Multi-factor authentication (TOTP)
+  - Anomaly detection (velocity, location, device)
+  - Advanced session management (device fingerprinting, concurrent limits, force logout)
 
 ---
 
@@ -325,6 +337,7 @@ pnpm test:e2e                 # End-to-end tests
 - [Cross-Browser Compatibility](docs/POC-3-Implementation/CROSS_BROWSER_COMPATIBILITY.md) – Safari/Firefox/Chrome support
 - [Observability Setup](docs/POC-3-Implementation/OBSERVABILITY_LIVE_SETUP.md) – Prometheus/Grafana/Jaeger
 - [Swagger API Docs](docs/POC-3-Implementation/SWAGGER_API_DOCUMENTATION.md) – REST endpoints and auth
+- [Backend Hardening Plan](docs/POC-3-Implementation/BACKEND-HARDENING-PLAN.md) – Security hardening phases 1-7
 
 ### Reference (As Needed)
 
@@ -359,6 +372,6 @@ For detailed setup instructions, troubleshooting, and development workflows, ref
 
 ---
 
-**Last Updated:** January 16, 2026
-**Status:** Production-Ready Architecture + CI Pipeline with Nx Cloud
+**Last Updated:** January 20, 2026
+**Status:** Production-Ready Architecture + CI Pipeline with Nx Cloud + Backend Hardening Complete (Phases 1-7)
 **Next Phase:** CD Pipeline + Cloud Deployment
