@@ -239,26 +239,30 @@ const losAngeles = { latitude: 34.0522, longitude: -118.2437 };
 console.log('=== Impossible Travel Detection Test ===');
 
 // Scenario 1: New York to London in 30 minutes (IMPOSSIBLE)
-const impossible1 = geoIP.isImpossibleTravel(newYork, london, 30);
+// Note: timeDiffSeconds parameter expects seconds, so 30 minutes = 1800 seconds
+const impossible1 = geoIP.isImpossibleTravel(newYork, london, 30 * 60); // 1800 seconds
 console.log(`NY -> London in 30 min: ${impossible1 ? 'IMPOSSIBLE' : 'POSSIBLE'}`);
 
 // Scenario 2: New York to London in 8 hours (POSSIBLE - flight time)
-const possible1 = geoIP.isImpossibleTravel(newYork, london, 480);
+// 8 hours = 28800 seconds
+const possible1 = geoIP.isImpossibleTravel(newYork, london, 8 * 60 * 60); // 28800 seconds
 console.log(`NY -> London in 8 hours: ${possible1 ? 'IMPOSSIBLE' : 'POSSIBLE'}`);
 
 // Scenario 3: New York to LA in 1 hour (IMPOSSIBLE)
-const impossible2 = geoIP.isImpossibleTravel(newYork, losAngeles, 60);
+// 1 hour = 3600 seconds
+const impossible2 = geoIP.isImpossibleTravel(newYork, losAngeles, 60 * 60); // 3600 seconds
 console.log(`NY -> LA in 1 hour: ${impossible2 ? 'IMPOSSIBLE' : 'POSSIBLE'}`);
 
 // Scenario 4: New York to LA in 6 hours (POSSIBLE - flight time)
-const possible2 = geoIP.isImpossibleTravel(newYork, losAngeles, 360);
+// 6 hours = 21600 seconds
+const possible2 = geoIP.isImpossibleTravel(newYork, losAngeles, 6 * 60 * 60); // 21600 seconds
 console.log(`NY -> LA in 6 hours: ${possible2 ? 'IMPOSSIBLE' : 'POSSIBLE'}`);
 ```
 
 **Expected Results:**
 - Short time + long distance = IMPOSSIBLE
 - Adequate time for flight = POSSIBLE
-- Default max speed is 900 km/h (commercial flight speed)
+- Default max speed is 1000 km/h (commercial flight speed)
 
 ---
 

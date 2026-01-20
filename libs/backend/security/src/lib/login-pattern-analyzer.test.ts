@@ -337,7 +337,7 @@ describe('LoginPatternAnalyzer', () => {
   });
 
   describe('checkFailedAttempts', () => {
-    it('should track failed login attempts', async () => {
+    it('should increment counter on failed login (no anomaly emitted)', async () => {
       const event: LoginEvent = {
         userId: 'user-123',
         ip: '8.8.8.8',
@@ -354,9 +354,93 @@ describe('LoginPatternAnalyzer', () => {
 
       const result = await analyzer.analyzeLogin(event);
 
+      // On failed login, no FAILED_ATTEMPTS anomaly is emitted - counter is just incremented
+      const failedAnomaly = result.find((a) => a.type === 'FAILED_ATTEMPTS');
+      expect(failedAnomaly).toBeUndefined();
+
+      // Verify incr was called
+      expect(mockRedis.incr).toHaveBeenCalled();
+      expect(mockRedis.expire).toHaveBeenCalled();
+    });
+
+    it('should emit anomaly on successful login after multiple failed attempts', async () => {
+      const event: LoginEvent = {
+        userId: 'user-123',
+        ip: '8.8.8.8',
+        userAgent: 'Mozilla/5.0',
+        timestamp: new Date(),
+        success: true,
+      };
+
+      // Mock 5 prior failed attempts
+      mockRedis.get.mockImplementation((key: string) => {
+        if (key.includes('failed_attempts:')) {
+          return Promise.resolve('5');
+        }
+        return Promise.resolve(null);
+      });
+      mockRedis.zrangebyscore.mockResolvedValue([]);
+      mockRedis.lindex.mockResolvedValue(null);
+      mockGeoIP.lookup.mockReturnValue(null);
+
+      const result = await analyzer.analyzeLogin(event);
+
+      // On successful login after failed attempts, FAILED_ATTEMPTS anomaly is emitted
       const failedAnomaly = result.find((a) => a.type === 'FAILED_ATTEMPTS');
       expect(failedAnomaly).toBeDefined();
       expect(failedAnomaly?.details.failedCount).toBe(5);
+
+      // Verify counter was deleted
+      expect(mockRedis.del).toHaveBeenCalled();
+    });
+
+    it('should not emit anomaly on successful login with no prior failed attempts', async () => {
+      const event: LoginEvent = {
+        userId: 'user-123',
+        ip: '8.8.8.8',
+        userAgent: 'Mozilla/5.0',
+        timestamp: new Date(),
+        success: true,
+      };
+
+      mockRedis.get.mockResolvedValue(null);
+      mockRedis.zrangebyscore.mockResolvedValue([]);
+      mockRedis.lindex.mockResolvedValue(null);
+      mockGeoIP.lookup.mockReturnValue(null);
+
+      const result = await analyzer.analyzeLogin(event);
+
+      const failedAnomaly = result.find((a) => a.type === 'FAILED_ATTEMPTS');
+      expect(failedAnomaly).toBeUndefined();
+    });
+
+    it('should not emit anomaly if failed count is below threshold', async () => {
+      const event: LoginEvent = {
+        userId: 'user-123',
+        ip: '8.8.8.8',
+        userAgent: 'Mozilla/5.0',
+        timestamp: new Date(),
+        success: true,
+      };
+
+      // Only 2 failed attempts (below threshold of 3)
+      mockRedis.get.mockImplementation((key: string) => {
+        if (key.includes('failed_attempts:')) {
+          return Promise.resolve('2');
+        }
+        return Promise.resolve(null);
+      });
+      mockRedis.zrangebyscore.mockResolvedValue([]);
+      mockRedis.lindex.mockResolvedValue(null);
+      mockGeoIP.lookup.mockReturnValue(null);
+
+      const result = await analyzer.analyzeLogin(event);
+
+      const failedAnomaly = result.find((a) => a.type === 'FAILED_ATTEMPTS');
+      expect(failedAnomaly).toBeUndefined();
+
+      // Counter should still be deleted on successful login
+      expect(mockRedis.del).toHaveBeenCalled();
     });
   });
 

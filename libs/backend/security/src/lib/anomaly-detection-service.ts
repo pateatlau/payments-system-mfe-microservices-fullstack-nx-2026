@@ -111,8 +111,12 @@ export class AnomalyDetectionService {
       const shouldNotifyUser =
         totalRiskScore >= this.config.userNotificationRiskThreshold;
 
-      // Generate recommendations
-      const recommendations = this.generateRecommendations(anomalies, 'LOGIN');
+      // Generate recommendations (pass pre-calculated totalRiskScore)
+      const recommendations = this.generateRecommendations(
+        anomalies,
+        'LOGIN',
+        totalRiskScore
+      );
 
       // Get location for alert context
       const location = this.geoIP.lookup(event.ip);
@@ -202,10 +206,11 @@ export class AnomalyDetectionService {
       const shouldNotifyUser =
         totalRiskScore >= this.config.userNotificationRiskThreshold;
 
-      // Generate recommendations
+      // Generate recommendations (pass pre-calculated totalRiskScore)
       const recommendations = this.generateRecommendations(
         anomalies,
-        'TRANSACTION'
+        'TRANSACTION',
+        totalRiskScore
       );
 
       // Send alerts if threshold exceeded
@@ -336,10 +341,15 @@ export class AnomalyDetectionService {
 
   /**
    * Generate recommendations based on detected anomalies
+   *
+   * @param anomalies - Detected anomalies
+   * @param eventType - Type of event being analyzed
+   * @param totalRiskScore - Pre-calculated total risk score (using diminishing returns)
    */
   private generateRecommendations(
     anomalies: Anomaly[],
-    eventType: 'LOGIN' | 'TRANSACTION'
+    eventType: 'LOGIN' | 'TRANSACTION',
+    totalRiskScore?: number
   ): string[] {
     const recommendations: string[] = [];
 
@@ -399,8 +409,11 @@ export class AnomalyDetectionService {
     }
 
     // General recommendations for high-risk situations
-    const totalRisk = anomalies.reduce((sum, a) => sum + a.riskScore, 0);
-    if (totalRisk >= 70) {
+    // Use the pre-calculated totalRiskScore (with diminishing returns) if provided,
+    // otherwise calculate it using the canonical method
+    const effectiveRiskScore =
+      totalRiskScore ?? this.calculateTotalRiskScore(anomalies);
+    if (effectiveRiskScore >= 70) {
       recommendations.push('Consider temporarily restricting account access');
       recommendations.push('Review all recent account activity');
     }
@@ -416,14 +429,21 @@ export function createAnomalyDetectionService(
   redis: Redis | null,
   emailService?: EmailService
 ): AnomalyDetectionService {
+  // Helper to safely parse integers with fallback defaults
+  const parseIntWithDefault = (value: string | undefined, defaultValue: number): number => {
+    if (!value) return defaultValue;
+    const parsed = parseInt(value, 10);
+    return Number.isNaN(parsed) ? defaultValue : parsed;
+  };
+
   const config: Partial<AnomalyDetectionConfig> = {
     geoIPEnabled: process.env.ANOMALY_GEO_ENABLED !== 'false',
     timePatternEnabled: process.env.ANOMALY_TIME_ENABLED !== 'false',
     transactionAnalysisEnabled: process.env.ANOMALY_TRANSACTION_ENABLED !== 'false',
-    alertRiskThreshold: parseInt(process.env.ANOMALY_ALERT_THRESHOLD || '70', 10),
-    userNotificationRiskThreshold: parseInt(
-      process.env.ANOMALY_USER_NOTIFY_THRESHOLD || '50',
-      10
+    alertRiskThreshold: parseIntWithDefault(process.env.ANOMALY_ALERT_THRESHOLD, 70),
+    userNotificationRiskThreshold: parseIntWithDefault(
+      process.env.ANOMALY_USER_NOTIFY_THRESHOLD,
+      50
     ),
   };
 

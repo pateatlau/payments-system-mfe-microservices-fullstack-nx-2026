@@ -352,35 +352,46 @@ export class LoginPatternAnalyzer {
 
   /**
    * Check for suspicious failed attempt patterns
+   *
+   * On failed login: increment the counter
+   * On successful login: check if there were prior failed attempts, emit anomaly if >= 3, then reset
    */
   private async checkFailedAttempts(event: LoginEvent): Promise<Anomaly | null> {
-    if (!this.redis || event.success) {
-      return null; // Only check on successful login after failed attempts
+    if (!this.redis) {
+      return null;
     }
 
     try {
       const key = REDIS_KEYS.FAILED_ATTEMPTS + event.userId;
-      const failedCount = await this.redis.incr(key);
-      await this.redis.expire(key, 900); // 15 minute window
 
-      // Multiple failed attempts followed by success could indicate credential stuffing
-      if (failedCount >= 3) {
-        return {
-          type: 'FAILED_ATTEMPTS',
-          severity: 'MEDIUM',
-          riskScore: this.config.riskScores.FAILED_ATTEMPTS,
-          description: `${failedCount} failed login attempts before successful login`,
-          details: {
-            failedCount,
-            windowMinutes: 15,
-          },
-          timestamp: event.timestamp,
-        };
-      }
-
-      // Reset on successful login
       if (event.success) {
-        await this.redis.del(key);
+        // On successful login, check if there were prior failed attempts
+        const countStr = await this.redis.get(key);
+        const failedCount = countStr ? parseInt(countStr, 10) : 0;
+
+        // Reset the counter on successful login
+        if (failedCount > 0) {
+          await this.redis.del(key);
+        }
+
+        // Multiple failed attempts followed by success could indicate credential stuffing
+        if (failedCount >= 3) {
+          return {
+            type: 'FAILED_ATTEMPTS',
+            severity: 'MEDIUM',
+            riskScore: this.config.riskScores.FAILED_ATTEMPTS,
+            description: `${failedCount} failed login attempts before successful login`,
+            details: {
+              failedCount,
+              windowMinutes: 15,
+            },
+            timestamp: event.timestamp,
+          };
+        }
+      } else {
+        // On failed login, increment the counter
+        await this.redis.incr(key);
+        await this.redis.expire(key, 900); // 15 minute window
       }
     } catch (error) {
       console.error('[LoginPatternAnalyzer] Error checking failed attempts:', error);

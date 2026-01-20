@@ -392,9 +392,30 @@ describe('AnomalyDetectionService', () => {
 
   describe('lookupIP', () => {
     it('should look up IP location', () => {
-      // GeoIP is disabled in tests (no geoip-lite installed)
+      // Result depends on whether geoip-lite is installed
+      // In CI/production it may be installed, in local dev it may not be
       const result = service.lookupIP('8.8.8.8');
-      expect(result).toBeNull();
+      // Either null (geoip-lite not installed) or a valid location object
+      if (result !== null) {
+        expect(result).toHaveProperty('country');
+        expect(result).toHaveProperty('countryCode');
+        expect(result).toHaveProperty('latitude');
+        expect(result).toHaveProperty('longitude');
+      } else {
+        expect(result).toBeNull();
+      }
+    });
+
+    it('should return local location for private IPs', () => {
+      const result = service.lookupIP('127.0.0.1');
+      // Private IPs always return a "Local" location when GeoIP is enabled
+      if (result !== null) {
+        expect(result.country).toBe('Local');
+        expect(result.city).toBe('Localhost');
+      } else {
+        // GeoIP not installed
+        expect(result).toBeNull();
+      }
     });
   });
 });

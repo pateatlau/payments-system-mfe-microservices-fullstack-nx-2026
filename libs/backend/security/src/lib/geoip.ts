@@ -13,10 +13,12 @@
 import type { GeoLocation } from './types';
 
 // Lazy load geoip-lite to handle optional peer dependency
-let geoip: typeof import('geoip-lite') | null = null;
+// Use undefined = not yet attempted, null = attempted but unavailable, or the module
+let geoip: typeof import('geoip-lite') | null | undefined = undefined;
 
 function getGeoIP(): typeof import('geoip-lite') | null {
-  if (geoip === null) {
+  // Only attempt require once - if geoip is undefined, we haven't tried yet
+  if (geoip === undefined) {
     try {
       // eslint-disable-next-line @typescript-eslint/no-require-imports
       geoip = require('geoip-lite');
@@ -24,6 +26,7 @@ function getGeoIP(): typeof import('geoip-lite') | null {
       console.warn(
         '[GeoIPService] geoip-lite not installed, GeoIP features disabled'
       );
+      // Mark as unavailable with null sentinel so we don't retry
       geoip = null;
     }
   }
@@ -217,8 +220,20 @@ export class GeoIPService {
       return false;
     }
 
+    // Guard against division by zero and negative time differences
+    // If timeDiffSeconds is zero or negative, treat as impossible travel
+    // (can't travel any distance in zero or negative time)
+    if (timeDiffSeconds <= 0) {
+      return true;
+    }
+
     const timeDiffHours = timeDiffSeconds / 3600;
     const requiredSpeed = distance / timeDiffHours;
+
+    // Guard against NaN/Infinity results (shouldn't happen with above checks, but defensive)
+    if (!Number.isFinite(requiredSpeed)) {
+      return true;
+    }
 
     return requiredSpeed > maxSpeedKmh;
   }

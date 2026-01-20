@@ -443,17 +443,36 @@ export class AlertService {
         ],
       };
 
-      const response = await fetch(this.config.slackWebhookUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
+      // Use AbortController for timeout to prevent hanging requests
+      const controller = new AbortController();
+      const timeoutMs = 5000; // 5 second timeout
+      const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
-      if (!response.ok) {
-        console.error(
-          '[AlertService] Slack notification failed:',
-          response.status
-        );
+      try {
+        const response = await fetch(this.config.slackWebhookUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+          signal: controller.signal,
+        });
+
+        clearTimeout(timeoutId);
+
+        if (!response.ok) {
+          console.error(
+            '[AlertService] Slack notification failed:',
+            response.status
+          );
+        }
+      } catch (fetchError) {
+        clearTimeout(timeoutId);
+        if (fetchError instanceof Error && fetchError.name === 'AbortError') {
+          console.error(
+            `[AlertService] Slack notification timed out after ${timeoutMs}ms`
+          );
+        } else {
+          throw fetchError;
+        }
       }
     } catch (error) {
       console.error('[AlertService] Error sending Slack notification:', error);
