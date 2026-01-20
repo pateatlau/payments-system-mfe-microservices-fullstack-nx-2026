@@ -152,7 +152,7 @@ test.describe('Authentication Flow', () => {
     ).toBeVisible({ timeout: 15000 });
 
     // Verify the verification pending UI shows the expected content
-    await expect(page.locator('text=/verification link/i')).toBeVisible({
+    await expect(page.locator('text=/verification link/i').first()).toBeVisible({
       timeout: 5000,
     });
 
