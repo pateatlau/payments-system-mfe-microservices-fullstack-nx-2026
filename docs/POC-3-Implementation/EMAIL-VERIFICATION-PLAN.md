@@ -9,8 +9,8 @@
 
 ## 📊 Implementation Progress
 
-### Phase 1: Backend Infrastructure ⏳ PENDING
-- ⏳ **Priority 1.1:** Verification Token Generation & Storage
+### Phase 1: Backend Infrastructure 🔄 IN PROGRESS
+- ✅ **Priority 1.1:** Verification Token Generation & Storage (Completed 2026-01-20)
 - ⏳ **Priority 1.2:** Email Verification Endpoints
 - ⏳ **Priority 1.3:** Login Flow Modification (Block Unverified Users)
 - ⏳ **Priority 1.4:** Resend Verification Endpoint
@@ -214,9 +214,10 @@ model User {
 
 ## Phase 1: Backend Infrastructure
 
-### Priority 1.1: Verification Token Generation & Storage
+### Priority 1.1: Verification Token Generation & Storage ✅ COMPLETED
 
-**File:** `apps/auth-service/src/services/email-verification.service.ts` (New)
+**Status:** ✅ Completed 2026-01-20
+**File:** `apps/auth-service/src/services/email-verification.service.ts`
 
 **Implementation:**
 
@@ -232,20 +233,36 @@ interface VerificationTokenPayload {
 
 // Token stored in Redis with structure:
 // Key: email_verification:{userId}
-// Value: { token, createdAt, attempts }
-// TTL: 24 hours
+// Value: { token, userId, email, createdAt, expiresAt }
+// TTL: 24 hours (86400 seconds)
 ```
 
-**Tasks:**
-- [ ] Create `email-verification.service.ts` with token generation
-- [ ] Add Redis storage for verification tokens (24h TTL)
-- [ ] Add token validation logic
-- [ ] Add single-use token enforcement (delete after use)
-- [ ] Add rate limiting for token generation (max 5 per hour)
+**Completed Tasks:**
+- [x] Create `email-verification.service.ts` with token generation
+- [x] Add Redis storage for verification tokens (24h TTL)
+- [x] Add token validation logic (JWT verify + Redis check)
+- [x] Add single-use token enforcement (delete after use via `consumeVerificationToken`)
+- [x] Add rate limiting for token generation (max 5 per hour using atomic Redis increment)
 
-**Files to Create/Modify:**
-- `apps/auth-service/src/services/email-verification.service.ts` (New)
-- `apps/auth-service/src/lib/cache.ts` (Add verification token methods)
+**Functions Implemented:**
+| Function | Description |
+|----------|-------------|
+| `generateVerificationToken(userId, email)` | Creates JWT token, stores in Redis, enforces rate limit |
+| `validateVerificationToken(token)` | Verifies JWT signature, checks Redis for single-use |
+| `consumeVerificationToken(userId)` | Deletes token from Redis (call after verification) |
+| `getVerificationStatus(userId)` | Check if user has pending verification |
+| `getRateLimitStatus(userId)` | Get remaining rate limit info |
+| `clearVerificationToken(userId)` | Admin: clear token for user |
+| `clearRateLimit(userId)` | Admin: reset rate limit for user |
+
+**Security Features:**
+- JWT signed with application secret (`config.jwtSecret`)
+- Atomic rate limiting via Redis `INCR` with TTL
+- Privacy-safe logging (emails masked as `j*****e@example.com`)
+- OpenTelemetry tracing for observability
+
+**Files Created/Modified:**
+- `apps/auth-service/src/services/email-verification.service.ts` (New - 350+ lines)
 
 ---
 
