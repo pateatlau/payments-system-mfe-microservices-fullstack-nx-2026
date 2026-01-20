@@ -52,6 +52,17 @@ import {
 import { isMfaRequired, verifyMfaCode } from './mfa.service';
 
 /**
+ * Mask an email address for privacy-safe responses/logging
+ * e.g., "john.doe@example.com" -> "j*****e@example.com"
+ */
+function maskEmailForLog(email: string): string {
+  const [localPart, domain] = email.split('@');
+  if (!localPart || !domain) return '***@***';
+  if (localPart.length <= 2) return `${localPart[0]}*@${domain}`;
+  return `${localPart[0]}${'*'.repeat(Math.min(localPart.length - 2, 5))}${localPart[localPart.length - 1]}@${domain}`;
+}
+
+/**
  * User response (without password)
  */
 export interface UserResponse {
@@ -304,6 +315,20 @@ export const login = async (
 
   // SECURITY: Clear failed attempts on successful login
   await recordSuccessfulLogin(data.email);
+
+  // SECURITY: Check if email is verified (POC-3 Priority 1.3)
+  // Block login for unverified users to enforce email verification
+  if (!user.emailVerified) {
+    throw new ApiError(
+      403,
+      'EMAIL_NOT_VERIFIED',
+      'Please verify your email address before logging in. Check your inbox for the verification link.',
+      {
+        canResend: true,
+        email: maskEmailForLog(user.email),
+      }
+    );
+  }
 
   // Check if MFA is required for this user
   const mfaEnabled = await isMfaRequired(user.id);

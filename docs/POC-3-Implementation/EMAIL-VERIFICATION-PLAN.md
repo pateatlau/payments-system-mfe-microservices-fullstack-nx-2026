@@ -9,11 +9,11 @@
 
 ## 📊 Implementation Progress
 
-### Phase 1: Backend Infrastructure 🔄 IN PROGRESS
+### Phase 1: Backend Infrastructure ✅ COMPLETE
 - ✅ **Priority 1.1:** Verification Token Generation & Storage (Completed 2026-01-20)
 - ✅ **Priority 1.2:** Email Verification Endpoints (Completed 2026-01-20)
-- ⏳ **Priority 1.3:** Login Flow Modification (Block Unverified Users)
-- ⏳ **Priority 1.4:** Resend Verification Endpoint (Moved to 1.2)
+- ✅ **Priority 1.3:** Login Flow Modification (Completed 2026-01-20)
+- ✅ **Priority 1.4:** Resend Verification Endpoint (Completed in 1.2)
 
 ### Phase 2: Event-Driven Email Integration ⏳ PENDING
 - ⏳ **Priority 2.1:** Publish Email Verification Events
@@ -309,32 +309,52 @@ interface VerificationTokenPayload {
 
 ---
 
-### Priority 1.3: Login Flow Modification
+### Priority 1.3: Login Flow Modification ✅ COMPLETED
 
+**Status:** ✅ Completed 2026-01-20
 **File:** `apps/auth-service/src/services/auth.service.ts`
 
 **Changes to `login()` function:**
 
 ```typescript
-// After credential validation, before token generation:
+// After credential validation, before MFA check:
 if (!user.emailVerified) {
   throw new ApiError(
     403,
     'EMAIL_NOT_VERIFIED',
     'Please verify your email address before logging in. Check your inbox for the verification link.',
-    { canResend: true, email: user.email }
+    { canResend: true, email: maskEmailForLog(user.email) }
   );
 }
 ```
 
-**Tasks:**
-- [ ] Add `emailVerified` check in login flow
-- [ ] Return appropriate error code and message
-- [ ] Include `canResend` flag in error response
-- [ ] Update Swagger documentation
+**Completed Tasks:**
+- [x] Add `emailVerified` check in login flow (after password validation, before MFA)
+- [x] Return appropriate error code (`EMAIL_NOT_VERIFIED`) and message
+- [x] Include `canResend: true` flag in error response
+- [x] Include masked email for privacy (`j*****e@example.com`)
+- [x] Add comprehensive Swagger documentation for `/auth/login` endpoint
+- [x] Add unit test for unverified user login rejection
 
-**Files to Modify:**
-- `apps/auth-service/src/services/auth.service.ts`
+**Error Response (403 Forbidden):**
+```json
+{
+  "success": false,
+  "error": {
+    "code": "EMAIL_NOT_VERIFIED",
+    "message": "Please verify your email address before logging in.",
+    "data": {
+      "canResend": true,
+      "email": "j*****e@example.com"
+    }
+  }
+}
+```
+
+**Files Modified:**
+- `apps/auth-service/src/services/auth.service.ts` (Added check + helper function)
+- `apps/auth-service/src/controllers/auth.controller.ts` (Added Swagger docs)
+- `apps/auth-service/src/services/auth.service.spec.ts` (Added unit test)
 
 ---
 

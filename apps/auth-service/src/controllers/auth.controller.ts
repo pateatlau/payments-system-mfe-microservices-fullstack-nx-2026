@@ -58,8 +58,117 @@ export const register = async (
 };
 
 /**
- * POST /auth/login
- * Login a user
+ * @swagger
+ * /auth/login:
+ *   post:
+ *     summary: Login a user
+ *     description: |
+ *       Authenticates a user with email and password.
+ *       Returns access and refresh tokens on success.
+ *
+ *       **Security checks performed:**
+ *       - Brute force protection (account lockout after 5 failed attempts)
+ *       - Email verification required (returns 403 if not verified)
+ *       - MFA verification required if enabled (returns mfaRequired: true)
+ *     tags:
+ *       - Auth
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - password
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: User's email address
+ *               password:
+ *                 type: string
+ *                 description: User's password
+ *     responses:
+ *       200:
+ *         description: Login successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     user:
+ *                       $ref: '#/components/schemas/User'
+ *                     accessToken:
+ *                       type: string
+ *                       description: JWT access token (15 min expiry)
+ *                     refreshToken:
+ *                       type: string
+ *                       description: JWT refresh token (7 day expiry)
+ *                     expiresIn:
+ *                       type: string
+ *                       description: Access token expiry duration
+ *                     mfaRequired:
+ *                       type: boolean
+ *                       description: If true, MFA verification needed (tokens will be empty)
+ *                     mfaToken:
+ *                       type: string
+ *                       description: Temporary token for MFA verification (only if mfaRequired)
+ *       401:
+ *         description: Invalid credentials
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 error:
+ *                   type: object
+ *                   properties:
+ *                     code:
+ *                       type: string
+ *                       example: INVALID_CREDENTIALS
+ *                     message:
+ *                       type: string
+ *       403:
+ *         description: Email not verified
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 error:
+ *                   type: object
+ *                   properties:
+ *                     code:
+ *                       type: string
+ *                       example: EMAIL_NOT_VERIFIED
+ *                     message:
+ *                       type: string
+ *                       example: Please verify your email address before logging in.
+ *                     data:
+ *                       type: object
+ *                       properties:
+ *                         canResend:
+ *                           type: boolean
+ *                           example: true
+ *                         email:
+ *                           type: string
+ *                           description: Masked email address
+ *                           example: j*****e@example.com
+ *       429:
+ *         description: Account locked due to too many failed attempts
  */
 export const login = async (
   req: Request,

@@ -149,6 +149,7 @@ describe('AuthService', () => {
       name: 'Test User',
       role: UserRole.CUSTOMER,
       passwordHash: 'hashed-password',
+      emailVerified: true, // POC-3: Email verification required for login
       createdAt: new Date('2024-01-01'),
       updatedAt: new Date('2024-01-01'),
     };
@@ -208,6 +209,21 @@ describe('AuthService', () => {
         'Invalid email or password'
       );
 
+      expect(generateTokenPair).not.toHaveBeenCalled();
+    });
+
+    it('should throw error if email is not verified', async () => {
+      const unverifiedUser = { ...mockUser, emailVerified: false };
+      (prisma.user.findUnique as jest.Mock).mockResolvedValue(unverifiedUser);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+
+      await expect(authService.login(mockLoginData)).rejects.toThrow(ApiError);
+      await expect(authService.login(mockLoginData)).rejects.toThrow(
+        'Please verify your email address before logging in'
+      );
+
+      // Password is correct, but login should fail at email verification check
+      expect(bcrypt.compare).toHaveBeenCalled();
       expect(generateTokenPair).not.toHaveBeenCalled();
     });
   });
