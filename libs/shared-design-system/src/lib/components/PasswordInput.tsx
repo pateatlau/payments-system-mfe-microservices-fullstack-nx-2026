@@ -102,7 +102,8 @@ const PasswordInput = React.forwardRef<HTMLInputElement, PasswordInputProps>(
               'absolute right-0 top-0 h-10 px-3',
               'flex items-center justify-center',
               'text-(--muted-foreground) hover:text-(--foreground)',
-              'focus:outline-none focus:text-(--foreground)',
+              'rounded-md',
+              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--primary) focus-visible:ring-offset-2',
               'disabled:cursor-not-allowed disabled:opacity-50',
               'transition-colors'
             )}

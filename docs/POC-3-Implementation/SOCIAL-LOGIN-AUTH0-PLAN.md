@@ -57,7 +57,7 @@ This document outlines the implementation plan for social login (Google, GitHub,
 
 ### Current State
 
-```
+```text
 Authentication Flow (Current):
 ┌─────────────────────────────────────────────────────────────────┐
 │                    YOUR INFRASTRUCTURE                          │
@@ -75,7 +75,7 @@ Authentication Flow (Current):
 
 ### Proposed State (With Auth0 Federation)
 
-```
+```text
 Authentication Flow (With Social Login):
 ┌─────────────────────────────────────────────────────────────────┐
 │                    YOUR INFRASTRUCTURE                          │
@@ -120,7 +120,7 @@ Authentication Flow (With Social Login):
 
 ### Social Login Flow (Detailed)
 
-```
+```text
 User clicks "Sign in with Google":
 ┌─────────────────────────┐
 │ 1. Frontend redirects   │
@@ -211,7 +211,7 @@ User clicks "Sign in with Google":
 
 ### MFA Flow for Social Login Users
 
-```
+```text
 Returning User with MFA Enabled:
 ┌─────────────────────────┐
 │ User clicks social      │
@@ -327,14 +327,14 @@ Initiates social login flow by redirecting to Auth0.
 
 **Query Parameters:**
 
-- `provider` (required): `google`, `github`, `facebook`, `linkedin`, `twitter`
+- `provider` (required): `google`, `GitHub`, `facebook`, `LinkedIn`, `twitter`
 - `returnUrl` (optional): URL to redirect after login (default: `/`)
 
 **Response:** 302 Redirect to Auth0
 
 **Example:**
 
-```
+```text
 GET /api/auth/oauth/authorize?provider=google&returnUrl=/dashboard
 → Redirects to: https://YOUR_TENANT.auth0.com/authorize?...
 ```
@@ -1021,10 +1021,10 @@ export function SocialLoginButtons({
 
 ---
 
-### Priority 3.2: Sign In Page Integration
+### Priority 3.2: Sign-In Page Integration
 
 **Effort:** 2 hours
-**Impact:** Adds social login to signin
+**Impact:** Adds social login to sign in
 
 **File:** `apps/auth-mfe/src/components/SignIn.tsx`
 
@@ -1037,7 +1037,7 @@ export function SocialLoginButtons({
 
 **Layout:**
 
-```
+```text
 ┌────────────────────────────────────────┐
 │           Sign In                      │
 │                                        │
@@ -1392,7 +1392,7 @@ NX_OAUTH_PROVIDERS=google,github,facebook,linkedin,twitter
 
 ### Redis Key Structure
 
-```
+```text
 # OAuth State (CSRF protection)
 oauth_state:{state_id}
   - returnUrl: string
@@ -1553,7 +1553,7 @@ Log the following events:
 
 ## Appendix A: Auth0 Configuration Screenshots
 
-_To be added during implementation_
+### To be added during implementation
 
 ---
 
@@ -1561,7 +1561,7 @@ _To be added during implementation_
 
 ### Authorization Redirect
 
-```
+```text
 GET /api/auth/oauth/authorize?provider=google&returnUrl=/dashboard
 
 → 302 Redirect to:
@@ -1576,7 +1576,7 @@ https://your-tenant.auth0.com/authorize?
 
 ### Callback Success (No MFA)
 
-```
+```text
 GET /api/auth/oauth/callback?code=AUTH0_CODE&state=STATE
 
 → 302 Redirect to:
@@ -1588,7 +1588,7 @@ https://localhost/oauth-callback#
 
 ### Callback Success (MFA Required)
 
-```
+```text
 GET /api/auth/oauth/callback?code=AUTH0_CODE&state=STATE
 
 → 302 Redirect to:
@@ -1599,7 +1599,7 @@ https://localhost/mfa-verify?
 
 ### Callback Success (MFA Recommended - First Login)
 
-```
+```text
 GET /api/auth/oauth/callback?code=AUTH0_CODE&state=STATE
 
 → 302 Redirect to:

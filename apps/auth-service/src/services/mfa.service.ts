@@ -8,15 +8,20 @@
  * - QR code generation for authenticator app setup
  * - Backup codes for account recovery
  * - Encrypted storage of MFA secrets
+ * - OpenTelemetry tracing for observability
  */
 
 import speakeasy from 'speakeasy';
 import QRCode from 'qrcode';
 import crypto from 'crypto';
+import { trace, SpanStatusCode } from '@opentelemetry/api';
 import { prisma, Prisma } from '../lib/prisma';
 import type { PrismaClient } from '.prisma/auth-client';
 import { ApiError } from '../middleware/errorHandler';
 import { config } from '../config';
+
+// Get tracer for MFA service operations
+const tracer = trace.getTracer('mfa-service', '1.0.0');
 
 // Type for Prisma transaction client
 type TransactionClient = Omit<
@@ -227,73 +232,120 @@ export interface MfaStatusResponse {
  *
  * This creates a new MFA secret and stores it in the database (encrypted).
  * The user must verify with a TOTP code before MFA is fully enabled.
+ * Uses atomic transaction for database updates and OpenTelemetry tracing.
  *
  * @param userId - User ID
  * @returns MFA setup data including QR code and backup codes
  * @throws ApiError if user not found or MFA already enabled
  */
 export async function generateMfaSetup(userId: string): Promise<MfaSetupResponse> {
-  // Get user
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
+  return tracer.startActiveSpan('mfa.generateSetup', async (span) => {
+    try {
+      span.setAttribute('user.id', userId);
+
+      // Get user
+      const user = await tracer.startActiveSpan('mfa.generateSetup.findUser', async (findUserSpan) => {
+        try {
+          const result = await prisma.user.findUnique({
+            where: { id: userId },
+          });
+          findUserSpan.setStatus({ code: SpanStatusCode.OK });
+          return result;
+        } catch (error) {
+          findUserSpan.recordException(error as Error);
+          findUserSpan.setStatus({ code: SpanStatusCode.ERROR, message: 'Failed to find user' });
+          throw error;
+        } finally {
+          findUserSpan.end();
+        }
+      });
+
+      if (!user) {
+        const error = new ApiError(404, 'USER_NOT_FOUND', 'User not found');
+        span.recordException(error);
+        span.setStatus({ code: SpanStatusCode.ERROR, message: 'User not found' });
+        throw error;
+      }
+
+      // Check if MFA is already enabled and verified
+      if (user.mfaEnabled && user.mfaVerified) {
+        const error = new ApiError(
+          409,
+          'MFA_ALREADY_ENABLED',
+          'MFA is already enabled. Disable it first to regenerate.'
+        );
+        span.recordException(error);
+        span.setStatus({ code: SpanStatusCode.ERROR, message: 'MFA already enabled' });
+        throw error;
+      }
+
+      // Generate TOTP secret
+      const secret = speakeasy.generateSecret({
+        name: `${MFA_CONFIG.issuer}:${user.email}`,
+        issuer: MFA_CONFIG.issuer,
+        length: 32,
+      });
+
+      // Generate QR code as data URL
+      const otpauthUrl = secret.otpauth_url || '';
+      const qrCodeDataUrl = await QRCode.toDataURL(otpauthUrl);
+
+      // Generate backup codes
+      const backupCodes = generateBackupCodes();
+
+      // Hash backup codes for storage
+      const hashedBackupCodes = backupCodes.map((code) => ({
+        hash: hashBackupCode(code),
+        used: false,
+      }));
+
+      // Encrypt the secret for storage
+      const encryptedSecret = encrypt(secret.base32);
+      const encryptedBackupCodes = encrypt(JSON.stringify(hashedBackupCodes));
+
+      // Store in database atomically using transaction (not yet verified/enabled)
+      await tracer.startActiveSpan('mfa.generateSetup.updateUser', async (updateSpan) => {
+        try {
+          await prisma.$transaction(async (tx: TransactionClient) => {
+            await tx.user.update({
+              where: { id: userId },
+              data: {
+                mfaSecret: encryptedSecret,
+                mfaBackupCodes: encryptedBackupCodes,
+                mfaEnabled: false,
+                mfaVerified: false,
+              },
+            });
+          });
+          updateSpan.setStatus({ code: SpanStatusCode.OK });
+        } catch (error) {
+          updateSpan.recordException(error as Error);
+          updateSpan.setStatus({ code: SpanStatusCode.ERROR, message: 'Failed to update user MFA data' });
+          throw error;
+        } finally {
+          updateSpan.end();
+        }
+      });
+
+      console.log(`[MFA] Setup initiated for user ${userId}`);
+      span.setStatus({ code: SpanStatusCode.OK });
+
+      return {
+        secret: secret.base32,
+        qrCodeDataUrl,
+        backupCodes,
+        manualEntryKey: secret.base32,
+      };
+    } catch (error) {
+      if (!(error instanceof ApiError)) {
+        span.recordException(error as Error);
+        span.setStatus({ code: SpanStatusCode.ERROR, message: 'MFA setup failed' });
+      }
+      throw error;
+    } finally {
+      span.end();
+    }
   });
-
-  if (!user) {
-    throw new ApiError(404, 'USER_NOT_FOUND', 'User not found');
-  }
-
-  // Check if MFA is already enabled and verified
-  if (user.mfaEnabled && user.mfaVerified) {
-    throw new ApiError(
-      409,
-      'MFA_ALREADY_ENABLED',
-      'MFA is already enabled. Disable it first to regenerate.'
-    );
-  }
-
-  // Generate TOTP secret
-  const secret = speakeasy.generateSecret({
-    name: `${MFA_CONFIG.issuer}:${user.email}`,
-    issuer: MFA_CONFIG.issuer,
-    length: 32,
-  });
-
-  // Generate QR code as data URL
-  const otpauthUrl = secret.otpauth_url || '';
-  const qrCodeDataUrl = await QRCode.toDataURL(otpauthUrl);
-
-  // Generate backup codes
-  const backupCodes = generateBackupCodes();
-
-  // Hash backup codes for storage
-  const hashedBackupCodes = backupCodes.map((code) => ({
-    hash: hashBackupCode(code),
-    used: false,
-  }));
-
-  // Encrypt the secret for storage
-  const encryptedSecret = encrypt(secret.base32);
-  const encryptedBackupCodes = encrypt(JSON.stringify(hashedBackupCodes));
-
-  // Store in database (not yet verified/enabled)
-  await prisma.user.update({
-    where: { id: userId },
-    data: {
-      mfaSecret: encryptedSecret,
-      mfaBackupCodes: encryptedBackupCodes,
-      mfaEnabled: false,
-      mfaVerified: false,
-    },
-  });
-
-  console.log(`[MFA] Setup initiated for user ${userId}`);
-
-  return {
-    secret: secret.base32,
-    qrCodeDataUrl,
-    backupCodes,
-    manualEntryKey: secret.base32,
-  };
 }
 
 /**
@@ -301,6 +353,7 @@ export async function generateMfaSetup(userId: string): Promise<MfaSetupResponse
  *
  * This completes the MFA setup process by verifying the user can generate
  * valid TOTP codes. After verification, MFA is fully enabled.
+ * Uses OpenTelemetry tracing for observability.
  *
  * @param userId - User ID
  * @param totpCode - 6-digit TOTP code from authenticator app
@@ -311,68 +364,118 @@ export async function verifyMfaSetup(
   userId: string,
   totpCode: string
 ): Promise<{ success: boolean; message: string }> {
-  // Get user
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
+  return tracer.startActiveSpan('mfa.verifySetup', async (span) => {
+    try {
+      span.setAttribute('user.id', userId);
+
+      // Get user
+      const user = await tracer.startActiveSpan('mfa.verifySetup.findUser', async (findUserSpan) => {
+        try {
+          const result = await prisma.user.findUnique({
+            where: { id: userId },
+          });
+          findUserSpan.setStatus({ code: SpanStatusCode.OK });
+          return result;
+        } catch (error) {
+          findUserSpan.recordException(error as Error);
+          findUserSpan.setStatus({ code: SpanStatusCode.ERROR, message: 'Failed to find user' });
+          throw error;
+        } finally {
+          findUserSpan.end();
+        }
+      });
+
+      if (!user) {
+        const error = new ApiError(404, 'USER_NOT_FOUND', 'User not found');
+        span.recordException(error);
+        span.setStatus({ code: SpanStatusCode.ERROR, message: 'User not found' });
+        throw error;
+      }
+
+      if (!user.mfaSecret) {
+        const error = new ApiError(
+          400,
+          'MFA_NOT_SETUP',
+          'MFA has not been set up. Call setup endpoint first.'
+        );
+        span.recordException(error);
+        span.setStatus({ code: SpanStatusCode.ERROR, message: 'MFA not set up' });
+        throw error;
+      }
+
+      if (user.mfaVerified) {
+        const error = new ApiError(
+          409,
+          'MFA_ALREADY_VERIFIED',
+          'MFA is already verified and enabled.'
+        );
+        span.recordException(error);
+        span.setStatus({ code: SpanStatusCode.ERROR, message: 'MFA already verified' });
+        throw error;
+      }
+
+      // Decrypt secret
+      const secret = decrypt(user.mfaSecret);
+
+      // Verify TOTP code
+      const verified = speakeasy.totp.verify({
+        secret,
+        encoding: 'base32',
+        token: totpCode,
+        window: MFA_CONFIG.window,
+        algorithm: MFA_CONFIG.algorithm,
+        digits: MFA_CONFIG.digits,
+        step: MFA_CONFIG.step,
+      });
+
+      if (!verified) {
+        const error = new ApiError(
+          401,
+          'INVALID_TOTP_CODE',
+          'Invalid verification code. Please try again.'
+        );
+        span.recordException(error);
+        span.setStatus({ code: SpanStatusCode.ERROR, message: 'Invalid TOTP code' });
+        throw error;
+      }
+
+      // Enable MFA
+      await tracer.startActiveSpan('mfa.verifySetup.enableMfa', async (enableSpan) => {
+        try {
+          await prisma.user.update({
+            where: { id: userId },
+            data: {
+              mfaEnabled: true,
+              mfaVerified: true,
+            },
+          });
+          enableSpan.setStatus({ code: SpanStatusCode.OK });
+        } catch (error) {
+          enableSpan.recordException(error as Error);
+          enableSpan.setStatus({ code: SpanStatusCode.ERROR, message: 'Failed to enable MFA' });
+          throw error;
+        } finally {
+          enableSpan.end();
+        }
+      });
+
+      console.log(`[MFA] Successfully enabled for user ${userId}`);
+      span.setStatus({ code: SpanStatusCode.OK });
+
+      return {
+        success: true,
+        message: 'MFA has been enabled successfully.',
+      };
+    } catch (error) {
+      if (!(error instanceof ApiError)) {
+        span.recordException(error as Error);
+        span.setStatus({ code: SpanStatusCode.ERROR, message: 'MFA verification failed' });
+      }
+      throw error;
+    } finally {
+      span.end();
+    }
   });
-
-  if (!user) {
-    throw new ApiError(404, 'USER_NOT_FOUND', 'User not found');
-  }
-
-  if (!user.mfaSecret) {
-    throw new ApiError(
-      400,
-      'MFA_NOT_SETUP',
-      'MFA has not been set up. Call setup endpoint first.'
-    );
-  }
-
-  if (user.mfaVerified) {
-    throw new ApiError(
-      409,
-      'MFA_ALREADY_VERIFIED',
-      'MFA is already verified and enabled.'
-    );
-  }
-
-  // Decrypt secret
-  const secret = decrypt(user.mfaSecret);
-
-  // Verify TOTP code
-  const verified = speakeasy.totp.verify({
-    secret,
-    encoding: 'base32',
-    token: totpCode,
-    window: MFA_CONFIG.window,
-    algorithm: MFA_CONFIG.algorithm,
-    digits: MFA_CONFIG.digits,
-    step: MFA_CONFIG.step,
-  });
-
-  if (!verified) {
-    throw new ApiError(
-      401,
-      'INVALID_TOTP_CODE',
-      'Invalid verification code. Please try again.'
-    );
-  }
-
-  // Enable MFA
-  await prisma.user.update({
-    where: { id: userId },
-    data: {
-      mfaEnabled: true,
-      mfaVerified: true,
-    },
-  });
-
-  console.log(`[MFA] Successfully enabled for user ${userId}`);
-
-  return {
-    success: true,
-    message: 'MFA has been enabled successfully.',
-  };
 }
 
 /**
@@ -586,7 +689,7 @@ export async function getMfaStatus(userId: string): Promise<MfaStatusResponse> {
  * Disable MFA for a user
  *
  * Performs password and TOTP verification atomically with the disable operation
- * to prevent TOCTOU race conditions.
+ * to prevent TOCTOU race conditions. Uses OpenTelemetry tracing for observability.
  *
  * @param userId - User ID
  * @param password - Current password for verification
@@ -598,76 +701,106 @@ export async function disableMfa(
   password: string,
   totpCode: string
 ): Promise<{ success: boolean; message: string }> {
-  // Use a transaction to ensure atomic verification and disable
-  return await prisma.$transaction(async (tx: TransactionClient) => {
-    // Get user with lock (SELECT FOR UPDATE behavior in transaction)
-    const user = await tx.user.findUnique({
-      where: { id: userId },
-    });
-
-    if (!user) {
-      throw new ApiError(404, 'USER_NOT_FOUND', 'User not found');
-    }
-
-    if (!user.mfaEnabled) {
-      throw new ApiError(400, 'MFA_NOT_ENABLED', 'MFA is not enabled.');
-    }
-
-    // Verify password
-    const bcrypt = await import('bcrypt');
-    const passwordValid = await bcrypt.compare(password, user.passwordHash);
-    if (!passwordValid) {
-      throw new ApiError(401, 'INVALID_PASSWORD', 'Invalid password');
-    }
-
-    // Verify TOTP code
-    if (!user.mfaSecret) {
-      throw new ApiError(400, 'MFA_NOT_CONFIGURED', 'MFA secret not found.');
-    }
-
-    let secret: string;
+  return tracer.startActiveSpan('mfa.disable', async (span) => {
     try {
-      secret = decrypt(user.mfaSecret);
+      span.setAttribute('user.id', userId);
+
+      // Use a transaction to ensure atomic verification and disable
+      const result = await tracer.startActiveSpan('mfa.disable.transaction', async (txSpan) => {
+        try {
+          const txResult = await prisma.$transaction(async (tx: TransactionClient) => {
+            // Get user with lock (SELECT FOR UPDATE behavior in transaction)
+            const user = await tx.user.findUnique({
+              where: { id: userId },
+            });
+
+            if (!user) {
+              throw new ApiError(404, 'USER_NOT_FOUND', 'User not found');
+            }
+
+            if (!user.mfaEnabled) {
+              throw new ApiError(400, 'MFA_NOT_ENABLED', 'MFA is not enabled.');
+            }
+
+            // Verify password
+            const bcrypt = await import('bcrypt');
+            const passwordValid = await bcrypt.compare(password, user.passwordHash);
+            if (!passwordValid) {
+              throw new ApiError(401, 'INVALID_PASSWORD', 'Invalid password');
+            }
+
+            // Verify TOTP code
+            if (!user.mfaSecret) {
+              throw new ApiError(400, 'MFA_NOT_CONFIGURED', 'MFA secret not found.');
+            }
+
+            let secret: string;
+            try {
+              secret = decrypt(user.mfaSecret);
+            } catch (error) {
+              console.error('[MFA] Failed to decrypt secret for user:', userId, error);
+              throw new ApiError(
+                500,
+                'MFA_DECRYPT_ERROR',
+                'Failed to verify MFA. Please try again or contact support.'
+              );
+            }
+
+            const verified = speakeasy.totp.verify({
+              secret,
+              encoding: 'base32',
+              token: totpCode,
+              window: MFA_CONFIG.window,
+              algorithm: MFA_CONFIG.algorithm,
+              digits: MFA_CONFIG.digits,
+              step: MFA_CONFIG.step,
+            });
+
+            if (verified !== true) {
+              throw new ApiError(401, 'INVALID_TOTP_CODE', 'Invalid TOTP code');
+            }
+
+            // Disable MFA and clear secrets atomically
+            await tx.user.update({
+              where: { id: userId },
+              data: {
+                mfaEnabled: false,
+                mfaVerified: false,
+                mfaSecret: null,
+                mfaBackupCodes: Prisma.DbNull,
+              },
+            });
+
+            console.log(`[MFA] Disabled for user ${userId}`);
+
+            return {
+              success: true,
+              message: 'MFA has been disabled.',
+            };
+          });
+
+          txSpan.setStatus({ code: SpanStatusCode.OK });
+          return txResult;
+        } catch (error) {
+          txSpan.recordException(error as Error);
+          txSpan.setStatus({ code: SpanStatusCode.ERROR, message: 'MFA disable transaction failed' });
+          throw error;
+        } finally {
+          txSpan.end();
+        }
+      });
+
+      span.setStatus({ code: SpanStatusCode.OK });
+      return result;
     } catch (error) {
-      console.error('[MFA] Failed to decrypt secret for user:', userId, error);
-      throw new ApiError(
-        500,
-        'MFA_DECRYPT_ERROR',
-        'Failed to verify MFA. Please try again or contact support.'
-      );
+      if (!(error instanceof ApiError)) {
+        span.recordException(error as Error);
+        span.setStatus({ code: SpanStatusCode.ERROR, message: 'MFA disable failed' });
+      }
+      throw error;
+    } finally {
+      span.end();
     }
-
-    const verified = speakeasy.totp.verify({
-      secret,
-      encoding: 'base32',
-      token: totpCode,
-      window: MFA_CONFIG.window,
-      algorithm: MFA_CONFIG.algorithm,
-      digits: MFA_CONFIG.digits,
-      step: MFA_CONFIG.step,
-    });
-
-    if (verified !== true) {
-      throw new ApiError(401, 'INVALID_TOTP_CODE', 'Invalid TOTP code');
-    }
-
-    // Disable MFA and clear secrets atomically
-    await tx.user.update({
-      where: { id: userId },
-      data: {
-        mfaEnabled: false,
-        mfaVerified: false,
-        mfaSecret: null,
-        mfaBackupCodes: Prisma.DbNull,
-      },
-    });
-
-    console.log(`[MFA] Disabled for user ${userId}`);
-
-    return {
-      success: true,
-      message: 'MFA has been disabled.',
-    };
   });
 }
 
