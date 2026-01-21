@@ -722,6 +722,21 @@ export async function disableMfa(
               throw new ApiError(400, 'MFA_NOT_ENABLED', 'MFA is not enabled.');
             }
 
+            // Check if user has a password (social-only users may not)
+            // SECURITY: Social-only users cannot disable MFA via this endpoint
+            // They must either:
+            // 1. Set a password first via profile settings (then use this endpoint)
+            // 2. Contact support for manual MFA reset with identity verification
+            // This prevents attackers who gain social account access from disabling MFA
+            if (!user.passwordHash || !user.hasPassword) {
+              throw new ApiError(
+                400,
+                'PASSWORD_REQUIRED_FOR_MFA_DISABLE',
+                'To disable MFA, please first set a password in your profile settings. ' +
+                'If you cannot access your account, contact support for assistance.'
+              );
+            }
+
             // Verify password
             const bcrypt = await import('bcrypt');
             const passwordValid = await bcrypt.compare(password, user.passwordHash);

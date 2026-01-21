@@ -80,6 +80,19 @@ interface UserLogoutPayload {
   logoutAt: string;
 }
 
+interface OAuthLinkedPayload {
+  userId: string;
+  provider: string;
+  providerAccountId: string;
+  linkedAt: string;
+}
+
+interface OAuthUnlinkedPayload {
+  userId: string;
+  provider: string;
+  unlinkedAt: string;
+}
+
 /**
  * Publish user.created event
  *
@@ -173,6 +186,44 @@ export async function publishUserLogout(
   });
 
   console.log(`[Auth Service] Published user.logout event: ${payload.userId}`);
+}
+
+/**
+ * Publish oauth.linked event
+ *
+ * Triggered when a user links a social account
+ * Subscribers: Admin Service (audit log)
+ */
+export async function publishOAuthLinked(
+  payload: OAuthLinkedPayload
+): Promise<void> {
+  const publisher = getEventPublisher();
+
+  await publisher.publish('oauth.linked', payload, {
+    userId: payload.userId,
+    eventType: 'user_activity',
+  });
+
+  console.log(`[Auth Service] Published oauth.linked event: ${payload.userId} -> ${payload.provider}`);
+}
+
+/**
+ * Publish oauth.unlinked event
+ *
+ * Triggered when a user unlinks a social account
+ * Subscribers: Admin Service (audit log)
+ */
+export async function publishOAuthUnlinked(
+  payload: OAuthUnlinkedPayload
+): Promise<void> {
+  const publisher = getEventPublisher();
+
+  await publisher.publish('oauth.unlinked', payload, {
+    userId: payload.userId,
+    eventType: 'user_activity',
+  });
+
+  console.log(`[Auth Service] Published oauth.unlinked event: ${payload.userId} -> ${payload.provider}`);
 }
 
 /**

@@ -373,10 +373,10 @@ export async function resetPassword(
           try {
             // Use batch transaction for atomicity
             await prisma.$transaction([
-              // Update password
+              // Update password and set hasPassword flag
               prisma.user.update({
                 where: { id: userId },
-                data: { passwordHash },
+                data: { passwordHash, hasPassword: true },
               }),
               // Delete all refresh tokens for this user
               prisma.refreshToken.deleteMany({
