@@ -17,7 +17,7 @@
 | 2026-01-21 | Added Priority 3.2: OAuth Callback Route & Component                       |
 | 2026-01-21 | Clarified frontend redirect flow (via backend, not direct to Auth0)        |
 | 2026-01-21 | Updated icons to inline SVGs (brand-accurate, no external dependencies)    |
-| 2026-01-21 | Added rate limiting specs for OAuth endpoints                              |
+| 2026-01-21 | Added rate-limiting specs for OAuth endpoints                              |
 | 2026-01-21 | Added RabbitMQ audit event publishers for OAuth operations                 |
 | 2026-01-21 | Updated npm dependencies: `openid-client` for secure OIDC flows            |
 | 2026-01-21 | Added validation logic for unlink operation                                |
@@ -942,10 +942,10 @@ export { router as oauthRoutes };
 - [x] Create `libs/auth0.ts` client configuration ✅
 - [x] Add CSRF state management (Redis) ✅
 - [ ] Add Swagger documentation _(deferred to Phase 4)_
-- [ ] Add rate limiting for OAuth endpoints (see below) _(deferred to Phase 4)_
+- [ ] Add rate-limiting for OAuth endpoints (see below) _(deferred to Phase 4)_
 - [x] Add RabbitMQ audit event publishers ✅
 
-**Rate Limiting for OAuth Endpoints:**
+**Rate-Limiting for OAuth Endpoints:**
 
 ```typescript
 // OAuth routes should have separate rate limits (expensive operations)
@@ -1000,7 +1000,7 @@ export async function publishOAuthAccountUnlinked(data: {
 - [x] `/auth/oauth/callback` handles Auth0 response ✅
 - [x] User created/found in database ✅
 - [x] JWT tokens issued ✅
-- [ ] Rate limiting active on OAuth endpoints _(deferred to Phase 4)_
+- [ ] Rate-limiting active on OAuth endpoints _(deferred to Phase 4)_
 - [x] Audit events published to RabbitMQ ✅
 
 ---
@@ -1771,7 +1771,7 @@ export function MfaRecommendation({
 - [ ] Auth0 tokens encrypted before storage
 - [ ] No sensitive data in frontend logs
 - [ ] OAuth callback validates state
-- [ ] Rate limiting on OAuth endpoints
+- [ ] Rate-limiting on OAuth endpoints
 - [ ] Audit logging for OAuth events
 - [ ] Account linking requires email verification
 - [ ] Cannot link account already linked to another user
