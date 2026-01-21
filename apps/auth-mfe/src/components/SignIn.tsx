@@ -15,6 +15,7 @@ import {
   CardContent,
   Alert,
   AlertDescription,
+  SocialLoginButtons,
 } from '@mfe/shared-design-system';
 import { getApiClient } from '@mfe/shared-api-client';
 import hdfcLogo from '../assets/hdfc-logo-03.png';
@@ -82,12 +83,18 @@ export function SignIn({ onSuccess, onNavigateToSignUp, onNavigateToForgotPasswo
   } = useAuthStore();
   const onSuccessCalledRef = useRef(false);
 
+  // OAuth error from URL (when backend redirects with error)
+  const [oauthError, setOauthError] = useState<string | null>(null);
+
   // Email verification resend state
   const [lastAttemptedEmail, setLastAttemptedEmail] = useState<string | null>(null);
   const [isResending, setIsResending] = useState(false);
   const [resendSuccess, setResendSuccess] = useState(false);
   const [resendError, setResendError] = useState<string | null>(null);
   const [cooldownSeconds, setCooldownSeconds] = useState(0);
+
+  // Social login state
+  const [socialLoginLoading, setSocialLoginLoading] = useState<string | null>(null);
 
   // Countdown timer for resend cooldown
   useEffect(() => {
@@ -178,6 +185,46 @@ export function SignIn({ onSuccess, onNavigateToSignUp, onNavigateToForgotPasswo
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Check for OAuth error or MFA token from URL params
+  // Using window.location directly to avoid Router context issues in Module Federation
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const errorParam = urlParams.get('error');
+    const messageParam = urlParams.get('message');
+    const mfaTokenParam = urlParams.get('mfaToken');
+
+    if (errorParam) {
+      // Set the OAuth error to display
+      const errorMessage = messageParam || 'OAuth authentication failed. Please try again.';
+      setOauthError(errorMessage);
+
+      // Clear the error params from URL (so refreshing doesn't show error again)
+      urlParams.delete('error');
+      urlParams.delete('message');
+      const newUrl = urlParams.toString()
+        ? `${window.location.pathname}?${urlParams.toString()}`
+        : window.location.pathname;
+      window.history.replaceState({}, '', newUrl);
+    }
+
+    // Handle OAuth MFA redirect - backend sends /signin?mfaToken=... when MFA is required
+    if (mfaTokenParam) {
+      // Set MFA state in auth store to show MFA verification form
+      useAuthStore.setState({
+        mfaPending: true,
+        mfaToken: mfaTokenParam,
+        error: null,
+      });
+
+      // Clear the token from URL (security - don't leave in browser history)
+      urlParams.delete('mfaToken');
+      const newUrl = urlParams.toString()
+        ? `${window.location.pathname}?${urlParams.toString()}`
+        : window.location.pathname;
+      window.history.replaceState({}, '', newUrl);
+    }
+  }, []);
+
   // Reset MFA form when entering MFA state
   useEffect(() => {
     if (mfaPending) {
@@ -203,9 +250,10 @@ export function SignIn({ onSuccess, onNavigateToSignUp, onNavigateToForgotPasswo
     try {
       // Store email for potential resend verification
       setLastAttemptedEmail(data.email);
-      // Reset resend state
+      // Reset resend state and OAuth error
       setResendSuccess(false);
       setResendError(null);
+      setOauthError(null);
 
       await login(data.email, data.password);
       // After successful login (or MFA pending), the state is updated
@@ -232,6 +280,22 @@ export function SignIn({ onSuccess, onNavigateToSignUp, onNavigateToForgotPasswo
   const handleCancelMfa = () => {
     cancelMfaLogin();
   };
+
+  // Handle social login - redirect to backend OAuth endpoint
+  const handleSocialLogin = useCallback((provider: string) => {
+    setSocialLoginLoading(provider);
+    setOauthError(null); // Clear any previous OAuth error
+
+    // Get API base URL from environment or default to nginx proxy
+    const apiBaseUrl = process.env.NX_API_BASE_URL || 'https://localhost/api';
+
+    // Encode return URL - where to redirect after successful auth
+    const returnUrl = encodeURIComponent('/');
+
+    // Redirect to backend OAuth endpoint: /auth/oauth/:provider?returnUrl=...
+    // Backend handles CSRF state generation and Auth0 redirect
+    window.location.href = `${apiBaseUrl}/auth/oauth/${provider}?returnUrl=${returnUrl}`;
+  }, []);
 
   const isFormLoading = isLoading || isSignInSubmitting || isMfaSubmitting;
 
@@ -343,6 +407,26 @@ export function SignIn({ onSuccess, onNavigateToSignUp, onNavigateToForgotPasswo
             </CardDescription>
           </CardHeader>
           <CardContent>
+            {/* Social Login Buttons */}
+            <SocialLoginButtons
+              onProviderClick={handleSocialLogin}
+              loading={socialLoginLoading}
+              disabled={isFormLoading}
+              enabledProviders={['google', 'github']}
+            />
+
+            {/* Divider */}
+            <div className="relative my-6">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t border-muted" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-card px-2 text-muted-foreground">
+                  Or continue with email
+                </span>
+              </div>
+            </div>
+
             <form
               onSubmit={e => {
                 e.preventDefault();
@@ -397,6 +481,13 @@ export function SignIn({ onSuccess, onNavigateToSignUp, onNavigateToForgotPasswo
                   </p>
                 )}
               </div>
+
+              {/* OAuth error display (from URL redirect) */}
+              {oauthError && (
+                <Alert variant="destructive">
+                  <AlertDescription>{oauthError}</AlertDescription>
+                </Alert>
+              )}
 
               {/* Auth store error display - special handling for EMAIL_NOT_VERIFIED */}
               {error && (

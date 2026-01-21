@@ -71,7 +71,16 @@
   - Extracts tokens from URL hash, fetches user info, updates auth store
   - Added `/oauth-callback` route to shell router
   - Full Module Federation integration (exposed, lazy-loaded, type-declared)
-- **Priority 3.3:** Sign In Page Integration _(was 3.2)_
+- **Priority 3.3:** Sign In Page Integration ✅
+  - Added `SocialLoginButtons` to `apps/auth-mfe/src/components/SignIn.tsx`
+  - Added "Or continue with email" divider
+  - Implemented `handleSocialLogin` redirect to backend OAuth endpoint
+  - Google and GitHub providers enabled
+  - Added OAuth error display from URL params (when backend redirects with error)
+  - Added OAuth MFA handling (detects `mfaToken` URL param, shows MFA form)
+  - Fixed Module Federation Router context issues (use `window.location` instead of `useSearchParams`)
+  - Fixed API client interceptor to skip token refresh for `/auth/mfa/` endpoints
+  - **Tested:** Google + GitHub login working for both MFA and non-MFA users
 - **Priority 3.4:** Sign Up Page Integration _(was 3.3)_
 - **Priority 3.5:** Account Linking UI (Profile Page) _(was 3.4)_
 - **Priority 3.6:** MFA Recommendation Page _(was 3.5)_
@@ -1517,17 +1526,17 @@ const handleSocialLogin = (provider: string) => {
 
 **Tasks:**
 
-- [ ] Add `SocialLoginButtons` to SignIn component
-- [ ] Add divider with "or" text
-- [ ] Implement `handleSocialLogin(provider)` function (redirect to backend)
-- [ ] Handle errors from OAuth callback (via URL params)
+- [x] Add `SocialLoginButtons` to SignIn component ✅
+- [x] Add divider with "or" text ✅
+- [x] Implement `handleSocialLogin(provider)` function (redirect to backend) ✅
+- [x] Handle errors from OAuth callback (via URL params) ✅ (handled by OAuthCallback component)
 
 **Success Criteria:**
 
-- [ ] Social buttons appear on signin page
-- [ ] Clicking button redirects to backend `/api/auth/oauth/authorize`
-- [ ] Successful login returns to app via OAuthCallback
-- [ ] Errors displayed appropriately
+- [x] Social buttons appear on signin page ✅
+- [x] Clicking button redirects to backend `/api/auth/oauth/authorize` ✅
+- [x] Successful login returns to app via OAuthCallback ✅
+- [x] Errors displayed appropriately ✅
 
 ---
 

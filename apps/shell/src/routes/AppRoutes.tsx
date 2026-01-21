@@ -140,9 +140,9 @@ export function AppRoutes({
         path="/verify-email"
         element={<VerifyEmailPage VerifyEmailComponent={VerifyEmailComponent} />}
       />
-      {/* OAuth callback route - handles redirect from OAuth providers */}
+      {/* OAuth success route - handles redirect from backend after OAuth authentication */}
       <Route
-        path="/oauth-callback"
+        path="/oauth/success"
         element={<OAuthCallbackPage OAuthCallbackComponent={OAuthCallbackComponent} />}
       />
 

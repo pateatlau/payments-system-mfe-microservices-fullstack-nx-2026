@@ -5,51 +5,66 @@
  * Extracts tokens from URL hash, fetches user info, and updates auth store.
  *
  * The backend redirects to one of these URLs:
- * - /oauth-callback#access_token=...&refresh_token=...&expires_in=... (success)
- * - /oauth-callback?error=...&message=... (error)
- * - /mfa?mfaToken=...&returnUrl=... (MFA required - handled by backend redirect)
+ * - /oauth/success#accessToken=...&refreshToken=...&expiresIn=... (success)
+ * - /signin?error=oauth_failed&message=... (error - handled by SignIn component)
+ * - /mfa?token=... (MFA required - handled by backend redirect)
  */
 
 import { useEffect, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuthStore } from 'shared-auth-store';
 import { getApiClient } from '@mfe/shared-api-client';
 import { Card, CardContent, CardHeader, CardTitle } from '@mfe/shared-design-system';
 import type { User } from 'shared-types';
 
 export function OAuthCallback() {
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  // Use window.location for navigation to avoid Router context issues in Module Federation
   const setAccessToken = useAuthStore((state) => state.setAccessToken);
   const [error, setError] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(true);
 
   useEffect(() => {
     const processCallback = async () => {
-      // Check for error in query params
-      const errorParam = searchParams.get('error');
+      console.log('[OAuthCallback] Processing callback...');
+      console.log('[OAuthCallback] URL:', window.location.href);
+      console.log('[OAuthCallback] Hash:', window.location.hash);
+      console.log('[OAuthCallback] Search params:', window.location.search);
+
+      // Check for error in query params (use window.location to avoid Router context issues)
+      const urlParams = new URLSearchParams(window.location.search);
+      const errorParam = urlParams.get('error');
       if (errorParam) {
-        const message = searchParams.get('message') || 'OAuth authentication failed';
+        const message = urlParams.get('message') || 'OAuth authentication failed';
+        console.log('[OAuthCallback] Error param found:', errorParam, message);
         setError(message);
         setIsProcessing(false);
         return;
       }
 
       // Extract tokens from URL fragment (hash)
+      // Backend uses camelCase: accessToken, refreshToken, expiresIn
       const hash = window.location.hash.substring(1);
       const params = new URLSearchParams(hash);
 
-      const accessToken = params.get('access_token');
-      const refreshToken = params.get('refresh_token');
-      const returnUrl = params.get('return_url') || '/';
+      const accessToken = params.get('accessToken');
+      const refreshToken = params.get('refreshToken');
+      // Default return URL is '/' which will redirect based on user role
+      const returnUrl = '/';
+
+      console.log('[OAuthCallback] Extracted tokens:', {
+        hasAccessToken: !!accessToken,
+        hasRefreshToken: !!refreshToken,
+        hashLength: hash.length
+      });
 
       if (!accessToken || !refreshToken) {
+        console.log('[OAuthCallback] Missing tokens, showing error');
         setError('Invalid OAuth callback: missing tokens');
         setIsProcessing(false);
         return;
       }
 
       try {
+        console.log('[OAuthCallback] Setting tokens in auth store...');
         // Update auth store with tokens first
         setAccessToken(accessToken, refreshToken);
 
@@ -82,8 +97,8 @@ export function OAuthCallback() {
         // Clear the hash from URL (security - don't leave tokens in browser history)
         window.history.replaceState(null, '', window.location.pathname);
 
-        // Navigate to return URL
-        navigate(returnUrl, { replace: true });
+        // Navigate to return URL using window.location to avoid Router context issues
+        window.location.href = returnUrl;
       } catch (err) {
         console.error('OAuth callback error:', err);
         const errorMessage = err instanceof Error ? err.message : 'Failed to complete authentication';
@@ -93,7 +108,7 @@ export function OAuthCallback() {
     };
 
     processCallback();
-  }, [searchParams, setAccessToken, navigate]);
+  }, [setAccessToken]);
 
   if (error) {
     return (
@@ -105,7 +120,7 @@ export function OAuthCallback() {
           <CardContent className="space-y-4">
             <p className="text-muted-foreground">{error}</p>
             <button
-              onClick={() => navigate('/signin')}
+              onClick={() => { window.location.href = '/signin'; }}
               className="text-primary hover:underline"
             >
               Return to Sign In

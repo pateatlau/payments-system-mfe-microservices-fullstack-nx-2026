@@ -283,6 +283,11 @@ async function findOrCreateOAuthUser(
       if (existingUser) {
         // Email exists - check if we can safely auto-link
         // SECURITY: Only auto-link if BOTH emails are verified to prevent account takeover
+        console.log(`[OAuth] Existing user found for email. Checking verification status:`, {
+          oauthEmailVerified: profile.emailVerified,
+          dbEmailVerified: existingUser.emailVerified,
+          userId: existingUser.id,
+        });
         if (profile.emailVerified && existingUser.emailVerified) {
           // Both emails verified - safe to auto-link
           oauthAccount = await prisma.oAuthAccount.create({
