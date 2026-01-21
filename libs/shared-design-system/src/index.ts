@@ -77,3 +77,18 @@ export type { ToastProps, ToastContainerProps } from './lib/components/Toast';
 
 export { ThemeToggle } from './lib/components/ThemeToggle';
 export type { ThemeToggleProps } from './lib/components/ThemeToggle';
+
+export {
+  SocialLoginButtons,
+  socialProviders,
+  GoogleIcon,
+  GitHubIcon,
+  FacebookIcon,
+  LinkedInIcon,
+  XIcon,
+  LoadingSpinner,
+} from './lib/components/SocialLoginButtons';
+export type {
+  SocialLoginButtonsProps,
+  SocialProvider,
+} from './lib/components/SocialLoginButtons';

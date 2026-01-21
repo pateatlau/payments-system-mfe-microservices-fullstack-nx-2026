@@ -58,14 +58,51 @@
   - MFA check integrated after OAuth profile received
   - Users with MFA enabled are correctly redirected to `/mfa?token=...`
 
-### Phase 3: Frontend Integration - PENDING
+### Phase 3: Frontend Integration - IN PROGRESS
 
-- **Priority 3.1:** Social Login Buttons Component
-- **Priority 3.2:** OAuth Callback Route & Component _(NEW - handles token extraction)_
-- **Priority 3.3:** Sign In Page Integration _(was 3.2)_
-- **Priority 3.4:** Sign Up Page Integration _(was 3.3)_
-- **Priority 3.5:** Account Linking UI (Profile Page) _(was 3.4)_
-- **Priority 3.6:** MFA Recommendation Page _(was 3.5)_
+- **Priority 3.1:** Social Login Buttons Component ✅
+  - Created `libs/shared-design-system/src/lib/components/SocialLoginButtons.tsx`
+  - Inline SVG icons for Google, GitHub, Facebook, LinkedIn, X (brand-accurate colors)
+  - Loading spinner, disabled states, accessible labels
+  - Unit tests in `SocialLoginButtons.test.tsx`
+  - Exported from `libs/shared-design-system/src/index.ts`
+- **Priority 3.2:** OAuth Callback Route & Component ✅
+  - Created `apps/auth-mfe/src/components/OAuthCallback.tsx`
+  - Extracts tokens from URL hash, fetches user info, updates auth store
+  - Added `/oauth-callback` route to shell router
+  - Full Module Federation integration (exposed, lazy-loaded, type-declared)
+- **Priority 3.3:** Sign In Page Integration ✅
+  - Added `SocialLoginButtons` to `apps/auth-mfe/src/components/SignIn.tsx`
+  - Added "Or continue with email" divider
+  - Implemented `handleSocialLogin` redirect to backend OAuth endpoint
+  - Google and GitHub providers enabled
+  - Added OAuth error display from URL params (when backend redirects with error)
+  - Added OAuth MFA handling (detects `mfaToken` URL param, shows MFA form)
+  - Fixed Module Federation Router context issues (use `window.location` instead of `useSearchParams`)
+  - Fixed API client interceptor to skip token refresh for `/auth/mfa/` endpoints
+  - **Tested:** Google + GitHub login working for both MFA and non-MFA users
+- **Priority 3.4:** Sign Up Page Integration ✅
+  - Added `SocialLoginButtons` to `apps/auth-mfe/src/components/SignUp.tsx`
+  - Social buttons at top of form (consistent with Sign-In page, follows industry best practice)
+  - Added "Or continue with email" divider between social buttons and form
+  - Implemented `handleSocialLogin` redirect to backend OAuth endpoint
+  - Google and GitHub providers enabled
+  - Added OAuth error display from URL params
+  - Same OAuth flow as Sign-In (creates account if user doesn't exist)
+- **Priority 3.5:** Account Linking UI (Profile Page) ✅
+  - Created `apps/profile-mfe/src/api/oauth.ts` - API client for OAuth endpoints
+  - Created `apps/profile-mfe/src/hooks/useOAuthAccounts.ts` - TanStack Query hooks
+  - Created `apps/profile-mfe/src/components/LinkedAccounts.tsx` - UI component
+  - Updated `apps/profile-mfe/src/components/ProfilePage.tsx` - Added LinkedAccounts to Security tab
+  - Features: View linked accounts, link new accounts, unlink accounts with confirmation
+  - Provider icons for Google, GitHub, Facebook, LinkedIn, X
+- **Priority 3.6:** MFA Recommendation Page ✅
+  - Created `apps/auth-mfe/src/components/MfaRecommendation.tsx` - Main component
+  - Updated `apps/auth-mfe/src/components/OAuthCallback.tsx` - Redirect new users to MFA recommendation
+  - Created `apps/shell/src/pages/MfaRecommendationPage.tsx` - Page wrapper
+  - Updated shell routes and remotes for Module Federation
+  - Features: Enable MFA button, Skip for now, Don't show again preference (localStorage)
+  - Shown to new social login users (unless previously dismissed)
 
 ### Phase 4: Testing & Security - PENDING
 
@@ -1247,26 +1284,27 @@ export function SocialLoginButtons({
 
 **Tasks:**
 
-- [ ] Create `SocialLoginButtons` component with inline SVG icons (brand-accurate)
-- [ ] Use Lucide `Loader2` for loading state (already available in shadcn/ui)
-- [ ] Add loading states
-- [ ] Add disabled states
-- [ ] Export from shared-design-system
-- [ ] Add unit tests
+- [x] Create `SocialLoginButtons` component with inline SVG icons (brand-accurate) ✅
+- [x] Use custom `LoadingSpinner` SVG for loading state (no external dependency) ✅
+- [x] Add loading states ✅
+- [x] Add disabled states ✅
+- [x] Export from shared-design-system ✅
+- [x] Add unit tests ✅
 
-**Files to Create:**
+**Files Created:**
 
 - `libs/shared-design-system/src/lib/components/SocialLoginButtons.tsx`
+- `libs/shared-design-system/src/lib/components/SocialLoginButtons.test.tsx`
 
 **Note:** Icons are inline SVGs instead of separate files. This ensures brand-accurate colors and avoids extra dependencies.
 
 **Success Criteria:**
 
-- [ ] Component renders all providers
-- [ ] Click events fire correctly
-- [ ] Loading/disabled states work
-- [ ] Styling matches design system
-- [ ] Icons render with correct brand colors
+- [x] Component renders all providers ✅
+- [x] Click events fire correctly ✅
+- [x] Loading/disabled states work ✅
+- [x] Styling matches design system ✅
+- [x] Icons render with correct brand colors ✅
 
 ---
 
@@ -1412,30 +1450,35 @@ exposes: {
 
 **Tasks:**
 
-- [ ] Create `OAuthCallback` component
-- [ ] Handle token extraction from URL fragment
-- [ ] Handle error display
-- [ ] Handle MFA redirect scenarios
-- [ ] Update auth store with tokens
-- [ ] Clear URL hash after processing (security)
-- [ ] Add route to shell router
-- [ ] Export from auth-mfe rspack.config.js
-- [ ] Add unit tests
+- [x] Create `OAuthCallback` component ✅
+- [x] Handle token extraction from URL fragment ✅
+- [x] Handle error display ✅
+- [x] Handle MFA redirect scenarios ✅ (backend handles redirect to /mfa)
+- [x] Update auth store with tokens ✅
+- [x] Clear URL hash after processing (security) ✅
+- [x] Add route to shell router ✅
+- [x] Export from auth-mfe rspack.config.js ✅
+- [ ] Add unit tests (deferred to Phase 4)
 
-**Files to Create/Modify:**
+**Files Created/Modified:**
 
 - `apps/auth-mfe/src/components/OAuthCallback.tsx` (New)
 - `apps/auth-mfe/rspack.config.js` (Add export)
-- `apps/shell/src/app/app.tsx` (Add route)
+- `apps/shell/src/pages/OAuthCallbackPage.tsx` (New)
+- `apps/shell/src/routes/AppRoutes.tsx` (Add route + props)
+- `apps/shell/src/app/app.tsx` (Add props)
+- `apps/shell/src/bootstrap.tsx` (Add remote import)
+- `apps/shell/src/remotes/index.tsx` (Add lazy loader)
+- `apps/shell/src/types/remotes.d.ts` (Add type declaration)
 
 **Success Criteria:**
 
-- [ ] Component extracts tokens from URL fragment
-- [ ] Auth store updated with tokens
-- [ ] User data fetched after token storage
-- [ ] URL hash cleared after processing
-- [ ] Error states handled gracefully
-- [ ] Redirect to return URL works
+- [x] Component extracts tokens from URL fragment ✅
+- [x] Auth store updated with tokens ✅
+- [x] User data fetched after token storage ✅
+- [x] URL hash cleared after processing ✅
+- [x] Error states handled gracefully ✅
+- [x] Redirect to return URL works ✅
 
 ---
 
@@ -1502,17 +1545,17 @@ const handleSocialLogin = (provider: string) => {
 
 **Tasks:**
 
-- [ ] Add `SocialLoginButtons` to SignIn component
-- [ ] Add divider with "or" text
-- [ ] Implement `handleSocialLogin(provider)` function (redirect to backend)
-- [ ] Handle errors from OAuth callback (via URL params)
+- [x] Add `SocialLoginButtons` to SignIn component ✅
+- [x] Add divider with "or" text ✅
+- [x] Implement `handleSocialLogin(provider)` function (redirect to backend) ✅
+- [x] Handle errors from OAuth callback (via URL params) ✅ (handled by OAuthCallback component)
 
 **Success Criteria:**
 
-- [ ] Social buttons appear on signin page
-- [ ] Clicking button redirects to backend `/api/auth/oauth/authorize`
-- [ ] Successful login returns to app via OAuthCallback
-- [ ] Errors displayed appropriately
+- [x] Social buttons appear on signin page ✅
+- [x] Clicking button redirects to backend `/api/auth/oauth/authorize` ✅
+- [x] Successful login returns to app via OAuthCallback ✅
+- [x] Errors displayed appropriately ✅
 
 ---
 
@@ -1531,15 +1574,17 @@ const handleSocialLogin = (provider: string) => {
 
 **Tasks:**
 
-- [ ] Add `SocialLoginButtons` to SignUp component
-- [ ] Add "or" divider
-- [ ] Reuse same OAuth redirect logic (same `handleSocialLogin` function)
+- [x] Add `SocialLoginButtons` to SignUp component ✅
+- [x] Add "Or continue with email" divider ✅
+- [x] Reuse same OAuth redirect logic (same `handleSocialLogin` function) ✅
+- [x] Add OAuth error display from URL params ✅
+- [x] Social buttons positioned at top of form (consistent with Sign-In page) ✅
 
 **Success Criteria:**
 
-- [ ] Social buttons appear on signup page
-- [ ] New user created on first social login
-- [ ] Existing user with same email handled (conflict error or auto-link)
+- [x] Social buttons appear on signup page ✅
+- [x] New user created on first social login ✅
+- [x] Existing user with same email handled (conflict error or auto-link) ✅
 
 ---
 
@@ -1584,25 +1629,27 @@ export function LinkedAccounts() {
 
 **Tasks:**
 
-- [ ] Create `LinkedAccounts` component
-- [ ] Create `useLinkedAccounts` hook (TanStack Query)
-- [ ] Create `useLinkAccount` mutation
-- [ ] Create `useUnlinkAccount` mutation
-- [ ] Add to profile page
-- [ ] Handle link flow (OAuth redirect + callback)
-- [ ] Add confirmation dialog for unlinking
+- [x] Create `LinkedAccounts` component ✅
+- [x] Create `useLinkedAccounts` hook (TanStack Query) ✅
+- [x] Create `useLinkAccount` hook ✅
+- [x] Create `useUnlinkAccount` mutation ✅
+- [x] Add to profile page (Security tab) ✅
+- [x] Handle link flow (OAuth redirect + callback) ✅
+- [x] Add confirmation dialog for unlinking ✅
+- [x] Create `apps/profile-mfe/src/api/oauth.ts` - API client ✅
 
-**Files to Create:**
+**Files Created:**
 
+- `apps/profile-mfe/src/api/oauth.ts`
 - `apps/profile-mfe/src/components/LinkedAccounts.tsx`
 - `apps/profile-mfe/src/hooks/useOAuthAccounts.ts`
 
 **Success Criteria:**
 
-- [ ] Users can see linked accounts
-- [ ] Users can link new accounts
-- [ ] Users can unlink accounts
-- [ ] Cannot unlink if only auth method
+- [x] Users can see linked accounts ✅
+- [x] Users can link new accounts ✅
+- [x] Users can unlink accounts ✅
+- [x] Cannot unlink if only auth method ✅ (backend validates, UI shows warning)
 
 ---
 
@@ -1661,18 +1708,33 @@ export function MfaRecommendation({
 
 **Tasks:**
 
-- [ ] Create `MfaRecommendation` component
-- [ ] Add route in shell app
-- [ ] Handle "Enable MFA" flow
-- [ ] Handle "Skip" flow
-- [ ] Store "Don't show again" preference
+- [x] Create `MfaRecommendation` component ✅
+- [x] Add route in shell app (`/mfa-recommend`) ✅
+- [x] Handle "Enable MFA" flow (redirects to `/profile?tab=security`) ✅
+- [x] Handle "Skip" flow (redirects to `/`) ✅
+- [x] Store "Don't show again" preference (`mfa_recommend_dismissed` in localStorage) ✅
+- [x] Update OAuthCallback to redirect new users to MFA recommendation page ✅
+- [x] Export from auth-mfe rspack config ✅
+- [x] Add type declarations and lazy loading in shell ✅
+
+**Files Created/Modified:**
+
+- `apps/auth-mfe/src/components/MfaRecommendation.tsx` (NEW)
+- `apps/auth-mfe/src/components/OAuthCallback.tsx` (MODIFIED)
+- `apps/auth-mfe/rspack.config.js` (MODIFIED - added expose)
+- `apps/shell/src/pages/MfaRecommendationPage.tsx` (NEW)
+- `apps/shell/src/routes/AppRoutes.tsx` (MODIFIED)
+- `apps/shell/src/remotes/index.tsx` (MODIFIED)
+- `apps/shell/src/types/remotes.d.ts` (MODIFIED)
+- `apps/shell/src/app/app.tsx` (MODIFIED)
+- `apps/shell/src/bootstrap.tsx` (MODIFIED)
 
 **Success Criteria:**
 
-- [ ] Page shown after first social login
-- [ ] Enable MFA works
-- [ ] Skip works
-- [ ] Don't show again preference persisted
+- [x] Page shown after first social login ✅
+- [x] Enable MFA works (redirects to profile security tab) ✅
+- [x] Skip works (redirects to home) ✅
+- [x] Don't show again preference persisted ✅
 
 ---
 

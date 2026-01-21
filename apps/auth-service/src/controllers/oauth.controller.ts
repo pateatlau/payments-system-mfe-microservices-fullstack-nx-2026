@@ -158,8 +158,9 @@ export const handleOAuthCallback = async (
 
     // Build redirect URL based on result
     if (result.mfaRequired) {
-      // MFA required - redirect to MFA page
-      const mfaUrl = `/mfa?token=${result.mfaToken}`;
+      // MFA required - redirect to signin page with MFA token
+      // SignIn component will detect the token and show MFA verification form
+      const mfaUrl = `/signin?mfaToken=${result.mfaToken}`;
       return res.redirect(302, mfaUrl);
     }
 
@@ -181,8 +182,15 @@ export const handleOAuthCallback = async (
   } catch (error) {
     // Log error and redirect to signin with error
     console.error('[OAuth] Callback error:', error);
+    // Log more details for debugging
+    if (error instanceof Error) {
+      console.error('[OAuth] Error name:', error.name);
+      console.error('[OAuth] Error message:', error.message);
+      console.error('[OAuth] Error stack:', error.stack);
+    }
 
     const errorMessage = error instanceof Error ? error.message : 'OAuth authentication failed';
+    console.log('[OAuth] Redirecting to signin with error:', errorMessage);
     const errorUrl = `/signin?error=oauth_failed&message=${encodeURIComponent(errorMessage)}`;
     return res.redirect(302, errorUrl);
   }

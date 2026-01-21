@@ -2,7 +2,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useAuthStore, type SignUpData } from 'shared-auth-store';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import {
   Button,
   Input,
@@ -15,6 +15,7 @@ import {
   CardContent,
   Alert,
   AlertDescription,
+  SocialLoginButtons,
 } from '@mfe/shared-design-system';
 import hdfcLogo from '../assets/hdfc-logo-03.png';
 import { VerificationPending } from './VerificationPending';
@@ -107,6 +108,12 @@ export function SignUp({ onSuccess, onNavigateToSignIn }: SignUpProps = {}) {
   } = useAuthStore();
   const onSuccessCalledRef = useRef(false);
 
+  // Social login state
+  const [socialLoginLoading, setSocialLoginLoading] = useState<string | null>(null);
+
+  // OAuth error from URL (when backend redirects with error)
+  const [oauthError, setOauthError] = useState<string | null>(null);
+
   const {
     register,
     handleSubmit,
@@ -138,6 +145,28 @@ export function SignUp({ onSuccess, onNavigateToSignIn }: SignUpProps = {}) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Check for OAuth error from URL params (when backend redirects to /signup?error=...)
+  // Using window.location directly to avoid Router context issues in Module Federation
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const errorParam = urlParams.get('error');
+    const messageParam = urlParams.get('message');
+
+    if (errorParam) {
+      // Set the OAuth error to display
+      const errorMessage = messageParam || 'OAuth authentication failed. Please try again.';
+      setOauthError(errorMessage);
+
+      // Clear the error params from URL (so refreshing doesn't show error again)
+      urlParams.delete('error');
+      urlParams.delete('message');
+      const newUrl = urlParams.toString()
+        ? `${window.location.pathname}?${urlParams.toString()}`
+        : window.location.pathname;
+      window.history.replaceState({}, '', newUrl);
+    }
+  }, []);
+
   // Call onSuccess when authentication succeeds (only once)
   // Note: Navigation is handled by SignUpPage component via Navigate component
   // to avoid duplicate navigation attempts that cause browser throttling.
@@ -154,6 +183,9 @@ export function SignUp({ onSuccess, onNavigateToSignIn }: SignUpProps = {}) {
 
   const onSubmit = async (data: SignUpFormData) => {
     try {
+      // Clear OAuth error when starting email sign-up
+      setOauthError(null);
+
       const signUpData: SignUpData = {
         email: data.email,
         password: data.password,
@@ -174,6 +206,24 @@ export function SignUp({ onSuccess, onNavigateToSignIn }: SignUpProps = {}) {
       console.error('Sign-up error:', err);
     }
   };
+
+  // Handle social login - redirect to backend OAuth endpoint
+  // Same flow as sign-in: OAuth creates account if user doesn't exist
+  const handleSocialLogin = useCallback((provider: string) => {
+    setSocialLoginLoading(provider);
+    setOauthError(null); // Clear any previous OAuth error
+
+    // Get API base URL from environment or default to nginx proxy
+    const apiBaseUrl = process.env.NX_API_BASE_URL || 'https://localhost/api';
+
+    // Encode return URL - where to redirect after successful auth
+    // For sign-up, we use '/' which will redirect based on user role
+    const returnUrl = encodeURIComponent('/');
+
+    // Redirect to backend OAuth endpoint
+    // The backend handles CSRF protection via state parameter stored in Redis
+    window.location.href = `${apiBaseUrl}/auth/oauth/${provider}?returnUrl=${returnUrl}`;
+  }, []);
 
   const isFormLoading = isLoading || isSubmitting;
 
@@ -237,6 +287,33 @@ export function SignUp({ onSuccess, onNavigateToSignIn }: SignUpProps = {}) {
             </CardDescription>
           </CardHeader>
           <CardContent>
+            {/* OAuth error display (from URL redirect) */}
+            {oauthError && (
+              <Alert variant="destructive" className="mb-6">
+                <AlertDescription>{oauthError}</AlertDescription>
+              </Alert>
+            )}
+
+            {/* Social login buttons */}
+            <SocialLoginButtons
+              onProviderClick={handleSocialLogin}
+              disabled={isFormLoading}
+              loading={socialLoginLoading}
+              enabledProviders={['google', 'github']}
+            />
+
+            {/* Social login divider */}
+            <div className="relative my-6">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-card px-2 text-muted-foreground">
+                  Or continue with email
+                </span>
+              </div>
+            </div>
+
             <form
               onSubmit={e => {
                 e.preventDefault();

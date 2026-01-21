@@ -45,6 +45,21 @@ declare module 'authMfe/VerifyEmail' {
   export default VerifyEmail;
 }
 
+declare module 'authMfe/OAuthCallback' {
+  import { ComponentType } from 'react';
+  const OAuthCallback: ComponentType;
+  export default OAuthCallback;
+}
+
+declare module 'authMfe/MfaRecommendation' {
+  import { ComponentType } from 'react';
+  interface MfaRecommendationProps {
+    returnUrl?: string;
+  }
+  const MfaRecommendation: ComponentType<MfaRecommendationProps>;
+  export default MfaRecommendation;
+}
+
 declare module 'paymentsMfe/PaymentsPage' {
   import { ComponentType } from 'react';
   const PaymentsPage: ComponentType;

@@ -196,13 +196,14 @@ function setupResponseInterceptor(
 
       // Handle 401 Unauthorized (token expired or invalid)
       if (error.response?.status === 401 && originalRequest) {
-        // Skip token refresh for auth endpoints (login, register, refresh)
+        // Skip token refresh for auth endpoints (login, register, refresh, mfa)
         // These endpoints return 401 for invalid credentials, not expired tokens
         const requestUrl = originalRequest.url || '';
         const isAuthEndpoint =
           requestUrl.includes('/auth/login') ||
           requestUrl.includes('/auth/register') ||
-          requestUrl.includes('/auth/refresh');
+          requestUrl.includes('/auth/refresh') ||
+          requestUrl.includes('/auth/mfa/');
 
         if (isAuthEndpoint) {
           // For auth endpoints, pass through the original error
@@ -225,6 +226,8 @@ function setupResponseInterceptor(
               'Registration failed. Please check your details and try again.';
           } else if (requestUrl.includes('/auth/refresh')) {
             fallbackMessage = 'Session expired. Please sign in again.';
+          } else if (requestUrl.includes('/auth/mfa/')) {
+            fallbackMessage = 'Invalid MFA code. Please try again.';
           }
 
           return Promise.reject(new Error(fallbackMessage));
