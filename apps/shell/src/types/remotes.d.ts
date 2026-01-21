@@ -39,6 +39,12 @@ declare module 'authMfe/ResetPassword' {
   export default ResetPassword;
 }
 
+declare module 'authMfe/VerifyEmail' {
+  import { ComponentType } from 'react';
+  const VerifyEmail: ComponentType;
+  export default VerifyEmail;
+}
+
 declare module 'paymentsMfe/PaymentsPage' {
   import { ComponentType } from 'react';
   const PaymentsPage: ComponentType;

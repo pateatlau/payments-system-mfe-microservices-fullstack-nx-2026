@@ -270,6 +270,7 @@ module.exports = {
         './SignUp': './src/components/SignUp.tsx',
         './ForgotPassword': './src/components/ForgotPassword.tsx',
         './ResetPassword': './src/components/ResetPassword.tsx',
+        './VerifyEmail': './src/components/VerifyEmail.tsx',
       },
       shared: sharedDependencies,
     }),
