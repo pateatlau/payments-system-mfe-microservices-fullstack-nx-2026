@@ -6,6 +6,7 @@ import { SignInPage, SignInComponentProps } from '../pages/SignInPage';
 import { SignUpPage, SignUpComponentProps } from '../pages/SignUpPage';
 import { ForgotPasswordPage, ForgotPasswordComponentProps } from '../pages/ForgotPasswordPage';
 import { ResetPasswordPage, ResetPasswordComponentProps } from '../pages/ResetPasswordPage';
+import { VerifyEmailPage, VerifyEmailComponentProps } from '../pages/VerifyEmailPage';
 import { PaymentsPage, PaymentsComponentProps } from '../pages/PaymentsPage';
 import { ReportsPage, ReportsComponentProps } from '../pages/ReportsPage';
 import { AdminPage, AdminDashboardComponentProps } from '../pages/AdminPage';
@@ -32,6 +33,10 @@ export interface AppRoutesProps {
    * ResetPassword component to use. Required for proper DI pattern.
    */
   ResetPasswordComponent: ComponentType<ResetPasswordComponentProps>;
+  /**
+   * VerifyEmail component to use. Required for proper DI pattern.
+   */
+  VerifyEmailComponent: ComponentType<VerifyEmailComponentProps>;
   /**
    * PaymentsPage component to use. Required for proper DI pattern.
    */
@@ -79,6 +84,7 @@ export function AppRoutes({
   SignUpComponent,
   ForgotPasswordComponent,
   ResetPasswordComponent,
+  VerifyEmailComponent,
   PaymentsComponent,
   ReportsComponent,
   AdminDashboardComponent,
@@ -123,6 +129,10 @@ export function AppRoutes({
       <Route
         path="/reset-password"
         element={<ResetPasswordPage ResetPasswordComponent={ResetPasswordComponent} />}
+      />
+      <Route
+        path="/verify-email"
+        element={<VerifyEmailPage VerifyEmailComponent={VerifyEmailComponent} />}
       />
 
       {/* Protected routes - require authentication */}

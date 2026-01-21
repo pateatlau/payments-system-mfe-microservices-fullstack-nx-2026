@@ -1,8 +1,8 @@
 # Email Verification Implementation Plan - POC-3
 
 **Created:** January 20, 2026
-**Last Updated:** January 20, 2026
-**Status:** 📋 **Planning Complete** - Ready for Implementation
+**Last Updated:** January 21, 2026
+**Status:** ✅ **Phase 1 & 3 Complete** - Phase 2 Deferred (Email Service)
 **Priority:** Medium-High
 
 ---
@@ -23,11 +23,15 @@
 
 > **Note:** Phase 2 is deferred until production email infrastructure is in place. The `_dev` token response provides sufficient functionality for development and testing.
 
-### Phase 3: Frontend Integration ⏳ PENDING
-- ⏳ **Priority 3.1:** Post-Registration Verification UI
-- ⏳ **Priority 3.2:** Email Verification Page
-- ⏳ **Priority 3.3:** Resend Verification UI
-- ⏳ **Priority 3.4:** Login Error Handling for Unverified Users
+### Phase 3: Frontend Integration ✅ COMPLETE
+- ✅ **Priority 3.1:** Post-Registration Verification UI (Completed 2026-01-20)
+- ✅ **Priority 3.2:** Email Verification Page (Completed 2026-01-21)
+- ✅ **Priority 3.3:** Resend Verification UI (Completed 2026-01-21 - integrated in 3.1 & 3.2)
+- ✅ **Priority 3.4:** Login Error Handling for Unverified Users (Completed 2026-01-21)
+
+### Bug Fixes ✅ COMPLETE
+- ✅ **Bug Fix 1:** Admin page emailVerified status not syncing (Completed 2026-01-21)
+- ✅ **Bug Fix 2:** Admin page Created date showing as N/A (Completed 2026-01-21)
 
 ---
 
@@ -114,7 +118,7 @@ Registration Flow (With Email Verification):
 │ • Check token not already used          │
 │ • Update user.emailVerified = true      │
 │ • Invalidate token in Redis             │
-│ • Publish user.email.verified event     │
+│ • Publish user.updated event            │
 └───────────┬─────────────────────────────┘
             │
             ▼
@@ -290,6 +294,7 @@ interface VerificationTokenPayload {
 - [x] Add proper error responses (TOKEN_EXPIRED, INVALID_TOKEN, TOKEN_ALREADY_USED, ALREADY_VERIFIED)
 - [x] Add Swagger/OpenAPI documentation for all endpoints
 - [x] Create `email-verification.validators.ts` with Zod schemas
+- [x] Publish `user.updated` event when email is verified (for cross-service sync)
 
 **Error Codes:**
 | Code | Description |
@@ -304,6 +309,7 @@ interface VerificationTokenPayload {
 - Development mode token exposure for testing (`_dev` field)
 - Privacy-safe logging with masked emails
 - Proper cache invalidation on verification
+- Event publishing for cross-service synchronization
 
 **Files Created/Modified:**
 - `apps/auth-service/src/controllers/email-verification.controller.ts` (New - 300+ lines)
@@ -537,64 +543,157 @@ interface EmailVerificationRequestedPayload {
 
 ---
 
-### Priority 3.2: Email Verification Page
+### Priority 3.2: Email Verification Page ✅ COMPLETED
 
-**File:** `apps/auth-mfe/src/components/VerifyEmail.tsx` (New)
+**Status:** ✅ Completed 2026-01-21
+
+**Files Created/Modified:**
+- `apps/auth-mfe/src/components/VerifyEmail.tsx` (NEW)
+- `apps/auth-mfe/rspack.config.js` (Exposed component)
+- `apps/shell/src/pages/VerifyEmailPage.tsx` (NEW)
+- `apps/shell/src/remotes/index.tsx` (Added VerifyEmailRemote)
+- `apps/shell/src/routes/AppRoutes.tsx` (Added `/verify-email` route)
+- `apps/shell/src/app/app.tsx` (Added VerifyEmailComponent prop)
+- `apps/shell/src/bootstrap.tsx` (Pass VerifyEmailRemote)
+- `apps/shell/src/types/remotes.d.ts` (Type declaration)
 
 **Purpose:** Handle verification link clicks from email
 
-**States:**
-1. **Verifying** - Showing spinner while verifying token
-2. **Success** - Email verified, show success message + login button
-3. **Error** - Token expired/invalid, show error + resend option
-4. **Already Verified** - Email already verified, redirect to login
+**States Implemented:**
+1. **Verifying** - Shows spinner while verifying token via API
+2. **Success** - Email verified, shows success message + Sign In button
+3. **Error** - Token expired/invalid, shows error + resend option with email input
+4. **Already Verified** - Email already verified, shows message + Sign In button
+5. **Resend** - Form to request new verification link (when no token provided)
 
-**Tasks:**
-- [ ] Create `VerifyEmail` component
-- [ ] Handle token from URL parameter
-- [ ] Call verification API
-- [ ] Show appropriate state
-- [ ] Expose via Module Federation
-- [ ] Add route in shell app
+**Completed Tasks:**
+- [x] Create `VerifyEmail` component with all states
+- [x] Handle token from URL parameter (`?token=xxx`)
+- [x] Call verification API (`POST /auth/verify-email`)
+- [x] Show appropriate UI state based on API response
+- [x] Resend functionality with email input
+- [x] Expose via Module Federation in `rspack.config.js`
+- [x] Add route in shell app (`/verify-email`)
+- [x] Create `VerifyEmailPage` wrapper with error boundary
+- [x] Add TypeScript type declarations for remote module
 
-**Files to Create/Modify:**
-- `apps/auth-mfe/src/components/VerifyEmail.tsx` (New)
-- `apps/auth-mfe/rspack.config.js` (Expose component)
-- `apps/shell/src/routes/AppRoutes.tsx` (Add route)
+**Route:** `/verify-email?token=xxx`
+
+**Testing Flow:**
+1. Register new user → Get verification token from DEV panel
+2. Navigate to `/verify-email?token=<token>` or use DEV URL
+3. Component automatically verifies token
+4. On success: Shows "Email Verified!" with Sign In button
+5. On error: Shows error message with resend option
 
 ---
 
-### Priority 3.3: Resend Verification UI
+### Priority 3.3: Resend Verification UI ✅ COMPLETED
+
+**Status:** ✅ Completed 2026-01-21 (implemented as part of 3.1 and 3.2)
 
 **Integrated into:**
-- `VerificationPending` component (after registration)
-- `VerifyEmail` component (when token expired)
-- Login error handling (when unverified user tries to login)
+- ✅ `VerificationPending` component (after registration) - Priority 3.1
+- ✅ `VerifyEmail` component (when token expired) - Priority 3.2
+- ✅ `SignIn` component (when unverified user tries to login) - Priority 3.4
 
-**Features:**
-- Rate limit feedback (show cooldown timer)
-- Success/error toast notifications
-- Prevent spam clicking
+**Features Implemented:**
+- ✅ Rate limit feedback (60-second cooldown timer)
+- ✅ Success/error alert notifications
+- ✅ Prevent spam clicking (cooldown + isResending state)
+- ✅ Email input for resend in VerifyEmail (when no email known)
+- ✅ 429 rate limit error handling
 
 ---
 
-### Priority 3.4: Login Error Handling for Unverified Users
+### Priority 3.4: Login Error Handling for Unverified Users ✅ COMPLETED
 
-**File:** `apps/auth-mfe/src/components/SignIn.tsx`
+**Status:** ✅ Completed 2026-01-21
 
-**Changes:**
-- Detect `EMAIL_NOT_VERIFIED` error code
-- Show friendly message with resend option
-- Don't show generic "invalid credentials" error
+**Files Modified:**
+- `libs/shared-auth-store/src/lib/shared-auth-store.ts` - Added `errorCode` to state
+- `apps/auth-mfe/src/components/SignIn.tsx` - Added EMAIL_NOT_VERIFIED handling
 
-**Tasks:**
-- [ ] Add specific handling for EMAIL_NOT_VERIFIED error
-- [ ] Show verification pending UI with resend option
-- [ ] Integrate with resend verification API
+**Changes Implemented:**
+- ✅ Detect `EMAIL_NOT_VERIFIED` error code from auth store
+- ✅ Show friendly amber alert message with resend option
+- ✅ Don't show generic "invalid credentials" error for unverified users
+- ✅ Resend button with 60-second cooldown
+- ✅ Success/error feedback for resend action
 
-**Files to Modify:**
-- `apps/auth-mfe/src/components/SignIn.tsx`
-- `libs/shared-auth-store/src/lib/auth-store.ts` (Handle new error type)
+**Completed Tasks:**
+- [x] Add `errorCode` field to AuthState interface
+- [x] Extract error code from API error in login catch block
+- [x] Update `clearError()` to also clear `errorCode`
+- [x] Add specific handling for EMAIL_NOT_VERIFIED error in SignIn
+- [x] Show verification pending UI with resend option
+- [x] Integrate with resend verification API (`/auth/resend-verification`)
+- [x] Add cooldown timer to prevent spam
+
+**User Flow:**
+1. User attempts to login with unverified email
+2. Backend returns 403 with `EMAIL_NOT_VERIFIED` error code
+3. SignIn component detects error code and shows amber alert
+4. User can click "Resend Verification Email" button
+5. 60-second cooldown prevents spam
+6. Success/error feedback shown for resend action
+
+---
+
+## Bug Fixes
+
+### Bug Fix 1: Admin Page emailVerified Status Not Syncing ✅ FIXED
+
+**Status:** ✅ Fixed 2026-01-21
+
+**Problem:** Admin page showed "Unverified" status for users whose email was already verified. The Profile page correctly showed "Email verified" badge.
+
+**Root Causes:**
+1. Admin service was not selecting `emailVerified` field from database
+2. Email verification controller was not publishing `user.updated` event when email was verified
+
+**Solution:**
+1. Added `emailVerified: true` to select statements in `admin.service.ts` for `listUsers()` and `getUserById()`
+2. Added `publishUserUpdated()` calls in `email-verification.controller.ts` for both `verifyEmail()` and `verifyEmailByLink()` functions
+
+**Files Modified:**
+- `apps/admin-service/src/services/admin.service.ts` - Added emailVerified to selects
+- `apps/auth-service/src/controllers/email-verification.controller.ts` - Added event publishing
+
+---
+
+### Bug Fix 2: Admin Page Created Date Showing N/A ✅ FIXED
+
+**Status:** ✅ Fixed 2026-01-21
+
+**Problem:** Admin page User Management "Created" column showed "Invalid Date" (later "N/A" after adding error handling) for all rows, despite valid dates existing in the database.
+
+**Root Cause:** Prisma's Date objects were not serializing correctly to JSON when using Express's `res.json()`. Instead of being serialized as ISO strings like `"2026-01-19T14:58:16.463Z"`, they were being serialized as empty objects `{}`.
+
+**Investigation:**
+- Database confirmed to have valid `created_at` values for all users
+- Frontend console logging revealed `createdAt: {}` (empty object) in API response
+- The Prisma client returned Date objects, but they weren't serializing properly
+
+**Solution:**
+Added explicit Date-to-ISO string conversion in `admin.service.ts` for all functions that return user data:
+
+```typescript
+// Convert Prisma Date objects to ISO strings for proper JSON serialization
+const users = usersRaw.map((user) => ({
+  ...user,
+  createdAt: user.createdAt instanceof Date ? user.createdAt.toISOString() : user.createdAt,
+  updatedAt: user.updatedAt instanceof Date ? user.updatedAt.toISOString() : user.updatedAt,
+}));
+```
+
+**Files Modified:**
+- `apps/admin-service/src/services/admin.service.ts` - Added Date to ISO string conversion in:
+  - `listUsers()` - Maps all users through date conversion
+  - `getUserById()` - Converts single user dates
+  - `updateUser()` - Converts updated user dates
+  - `updateUserRole()` - Converts updated user dates
+- `apps/admin-mfe/src/components/UserManagement.tsx` - Updated `formatDate()` to handle empty objects gracefully
 
 ---
 
@@ -886,6 +985,24 @@ email_verification_resend:{ip}
   },
   "metadata": {
     "correlationId": "req-123",
+    "source": "auth-service"
+  }
+}
+```
+
+### user.updated (on email verification)
+
+```json
+{
+  "eventType": "user.updated",
+  "timestamp": "2026-01-20T12:05:00.000Z",
+  "payload": {
+    "userId": "550e8400-e29b-41d4-a716-446655440000",
+    "emailVerified": true,
+    "updatedAt": "2026-01-20T12:05:00.000Z"
+  },
+  "metadata": {
+    "correlationId": "req-456",
     "source": "auth-service"
   }
 }

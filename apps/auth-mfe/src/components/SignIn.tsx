@@ -2,7 +2,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useAuthStore } from 'shared-auth-store';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import {
   Button,
   Input,
@@ -16,6 +16,7 @@ import {
   Alert,
   AlertDescription,
 } from '@mfe/shared-design-system';
+import { getApiClient } from '@mfe/shared-api-client';
 import hdfcLogo from '../assets/hdfc-logo-03.png';
 
 /**
@@ -61,6 +62,11 @@ export interface SignInProps {
 /**
  * SignIn component with form validation, MFA support, and auth store integration
  */
+/**
+ * Resend cooldown in seconds
+ */
+const RESEND_COOLDOWN_SECONDS = 60;
+
 export function SignIn({ onSuccess, onNavigateToSignUp, onNavigateToForgotPassword }: SignInProps = {}) {
   const {
     login,
@@ -68,12 +74,75 @@ export function SignIn({ onSuccess, onNavigateToSignUp, onNavigateToForgotPasswo
     cancelMfaLogin,
     isLoading,
     error,
+    errorCode,
     clearError,
     isAuthenticated,
     mfaPending,
     user,
   } = useAuthStore();
   const onSuccessCalledRef = useRef(false);
+
+  // Email verification resend state
+  const [lastAttemptedEmail, setLastAttemptedEmail] = useState<string | null>(null);
+  const [isResending, setIsResending] = useState(false);
+  const [resendSuccess, setResendSuccess] = useState(false);
+  const [resendError, setResendError] = useState<string | null>(null);
+  const [cooldownSeconds, setCooldownSeconds] = useState(0);
+
+  // Countdown timer for resend cooldown
+  useEffect(() => {
+    if (cooldownSeconds <= 0) return;
+
+    const timer = setInterval(() => {
+      setCooldownSeconds(prev => {
+        if (prev <= 1) return 0;
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [cooldownSeconds]);
+
+  // Handle resend verification email
+  const handleResendVerification = useCallback(async () => {
+    if (cooldownSeconds > 0 || isResending || !lastAttemptedEmail) return;
+
+    try {
+      setIsResending(true);
+      setResendError(null);
+      setResendSuccess(false);
+
+      const apiClient = getApiClient();
+      await apiClient.post('/auth/resend-verification', {
+        email: lastAttemptedEmail,
+      });
+
+      setResendSuccess(true);
+      setCooldownSeconds(RESEND_COOLDOWN_SECONDS);
+    } catch (err) {
+      const apiError = err as {
+        response?: { status?: number; data?: { error?: { message?: string } } };
+        message?: string;
+      };
+
+      if (apiError.response?.status === 429) {
+        setResendError('Too many requests. Please try again later.');
+        setCooldownSeconds(RESEND_COOLDOWN_SECONDS);
+      } else if (!apiError.response) {
+        setResendError('Network error. Please check your connection and try again.');
+      } else {
+        setResendError(
+          apiError.response?.data?.error?.message ||
+            'Failed to resend verification email. Please try again.'
+        );
+      }
+    } finally {
+      setIsResending(false);
+    }
+  }, [lastAttemptedEmail, cooldownSeconds, isResending]);
+
+  // Check if error is EMAIL_NOT_VERIFIED
+  const isEmailNotVerified = errorCode === 'EMAIL_NOT_VERIFIED';
 
   // Sign-in form
   const {
@@ -132,6 +201,12 @@ export function SignIn({ onSuccess, onNavigateToSignUp, onNavigateToForgotPasswo
 
   const onSignInSubmit = async (data: SignInFormData) => {
     try {
+      // Store email for potential resend verification
+      setLastAttemptedEmail(data.email);
+      // Reset resend state
+      setResendSuccess(false);
+      setResendError(null);
+
       await login(data.email, data.password);
       // After successful login (or MFA pending), the state is updated
       // Navigation is handled by useEffect when isAuthenticated becomes true
@@ -323,11 +398,57 @@ export function SignIn({ onSuccess, onNavigateToSignUp, onNavigateToForgotPasswo
                 )}
               </div>
 
-              {/* Auth store error display */}
+              {/* Auth store error display - special handling for EMAIL_NOT_VERIFIED */}
               {error && (
-                <Alert variant="destructive">
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
+                isEmailNotVerified ? (
+                  <div className="space-y-3">
+                    <Alert variant="default" className="border-amber-500 bg-amber-50 dark:bg-amber-950/20">
+                      <div className="flex flex-col gap-2">
+                        <AlertDescription className="text-amber-800 dark:text-amber-200">
+                          <strong>Email verification required</strong>
+                          <p className="mt-1 text-sm">
+                            Please check your inbox for a verification link before signing in.
+                          </p>
+                        </AlertDescription>
+                      </div>
+                    </Alert>
+
+                    {/* Resend success message */}
+                    {resendSuccess && (
+                      <Alert variant="default" className="border-green-500 bg-green-50 dark:bg-green-950/20">
+                        <AlertDescription className="text-green-800 dark:text-green-200">
+                          Verification email sent! Please check your inbox.
+                        </AlertDescription>
+                      </Alert>
+                    )}
+
+                    {/* Resend error message */}
+                    {resendError && (
+                      <Alert variant="destructive">
+                        <AlertDescription>{resendError}</AlertDescription>
+                      </Alert>
+                    )}
+
+                    {/* Resend button */}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handleResendVerification}
+                      disabled={isResending || cooldownSeconds > 0}
+                      className="w-full"
+                    >
+                      {isResending
+                        ? 'Sending...'
+                        : cooldownSeconds > 0
+                          ? `Resend available in ${cooldownSeconds}s`
+                          : 'Resend Verification Email'}
+                    </Button>
+                  </div>
+                ) : (
+                  <Alert variant="destructive">
+                    <AlertDescription>{error}</AlertDescription>
+                  </Alert>
+                )
               )}
 
               {/* Submit button */}

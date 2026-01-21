@@ -48,6 +48,7 @@ export interface AuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
+  errorCode: string | null;
   // MFA state
   mfaPending: boolean;
   mfaToken: string | null;
@@ -106,6 +107,7 @@ export const useAuthStore = create<AuthState>()(
         isAuthenticated: false,
         isLoading: false,
         error: null,
+        errorCode: null,
         // MFA initial state
         mfaPending: false,
         mfaToken: null,
@@ -113,7 +115,7 @@ export const useAuthStore = create<AuthState>()(
         emailVerificationPending: null,
 
         login: async (email: string, password: string) => {
-          set({ isLoading: true, error: null, mfaPending: false, mfaToken: null });
+          set({ isLoading: true, error: null, errorCode: null, mfaPending: false, mfaToken: null });
           try {
             const request: LoginRequest = { email, password };
             const response: LoginResponse = await apiClient.post(
@@ -178,6 +180,10 @@ export const useAuthStore = create<AuthState>()(
               error instanceof Error
                 ? error.message
                 : 'Login failed. Please check your credentials.';
+            const errorCode =
+              error instanceof Error && 'code' in error
+                ? (error as Error & { code?: string }).code ?? null
+                : null;
             set({
               user: null,
               accessToken: null,
@@ -185,6 +191,7 @@ export const useAuthStore = create<AuthState>()(
               isAuthenticated: false,
               isLoading: false,
               error: errorMessage,
+              errorCode,
               mfaPending: false,
               mfaToken: null,
             });
@@ -452,7 +459,7 @@ export const useAuthStore = create<AuthState>()(
         },
 
         clearError: () => {
-          set({ error: null });
+          set({ error: null, errorCode: null });
         },
 
         clearEmailVerificationPending: () => {
