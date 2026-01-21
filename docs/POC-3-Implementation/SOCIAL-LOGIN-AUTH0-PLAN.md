@@ -21,6 +21,15 @@
 | 2026-01-21 | Added RabbitMQ audit event publishers for OAuth operations                 |
 | 2026-01-21 | Updated npm dependencies: `openid-client` for secure OIDC flows            |
 | 2026-01-21 | Added validation logic for unlink operation                                |
+| 2026-01-21 | **Security hardening (CodeRabbit review):**                                |
+| 2026-01-21 | - Downgraded openid-client to ^6.7.1 to fix CVE-2025-27370/27371          |
+| 2026-01-21 | - Added AES-256-GCM encryption for OAuth access/refresh tokens            |
+| 2026-01-21 | - Removed sensitive data (state, code) from logs                          |
+| 2026-01-21 | - Fixed account enumeration vulnerability in login (NO_PASSWORD_SET)      |
+| 2026-01-21 | - Added email verification requirement for auto-linking OAuth accounts    |
+| 2026-01-21 | - Added returnUrl validation to prevent open redirect attacks             |
+| 2026-01-21 | - Documented refresh token deletion policy for security                   |
+| 2026-01-21 | - Improved MFA disable flow for social-only users with clear guidance     |
 
 ---
 

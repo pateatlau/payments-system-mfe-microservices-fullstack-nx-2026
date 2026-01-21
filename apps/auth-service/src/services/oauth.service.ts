@@ -45,6 +45,7 @@ import {
 } from '../events/publisher';
 import { isMfaRequired } from './mfa.service';
 import { config } from '../config';
+import { encryptOptional } from '../utils/encryption';
 
 /**
  * OAuth State TTL (10 minutes)
@@ -163,7 +164,7 @@ export async function initiateOAuthFlow(
     returnUrl
   );
 
-  console.log(`[OAuth] Initiated ${provider} flow, state: ${state.substring(0, 8)}...`);
+  console.log(`[OAuth] Initiated ${provider} flow`);
 
   return {
     authorizationUrl,
@@ -257,12 +258,12 @@ async function findOrCreateOAuthUser(
     // Existing OAuth account - return linked user
     user = oauthAccount.user;
 
-    // Update OAuth account with fresh tokens
+    // Update OAuth account with fresh tokens (encrypted)
     await prisma.oAuthAccount.update({
       where: { id: oauthAccount.id },
       data: {
-        accessToken: providerAccessToken,
-        refreshToken: providerRefreshToken,
+        accessToken: encryptOptional(providerAccessToken),
+        refreshToken: encryptOptional(providerRefreshToken),
         tokenExpiresAt,
         email: profile.email,
         name: profile.name,
@@ -279,34 +280,46 @@ async function findOrCreateOAuthUser(
       });
 
       if (existingUser) {
-        // Email exists - link OAuth to existing account
-        oauthAccount = await prisma.oAuthAccount.create({
-          data: {
-            userId: existingUser.id,
-            provider: profile.provider,
-            providerAccountId: profile.providerAccountId,
-            email: profile.email,
-            name: profile.name,
-            avatarUrl: profile.picture,
-            accessToken: providerAccessToken,
-            refreshToken: providerRefreshToken,
-            tokenExpiresAt,
-          },
-        });
-
-        user = existingUser;
-        console.log(`[OAuth] Linked ${profile.provider} to existing user: ${user.id}`);
-
-        // Publish OAuth linked event
-        try {
-          await publishOAuthLinked({
-            userId: user.id,
-            provider: profile.provider,
-            providerAccountId: profile.providerAccountId,
-            linkedAt: new Date().toISOString(),
+        // Email exists - check if we can safely auto-link
+        // SECURITY: Only auto-link if BOTH emails are verified to prevent account takeover
+        if (profile.emailVerified && existingUser.emailVerified) {
+          // Both emails verified - safe to auto-link
+          oauthAccount = await prisma.oAuthAccount.create({
+            data: {
+              userId: existingUser.id,
+              provider: profile.provider,
+              providerAccountId: profile.providerAccountId,
+              email: profile.email,
+              name: profile.name,
+              avatarUrl: profile.picture,
+              accessToken: encryptOptional(providerAccessToken),
+              refreshToken: encryptOptional(providerRefreshToken),
+              tokenExpiresAt,
+            },
           });
-        } catch (_error) {
-          console.error('Failed to publish oauth.linked event:', _error);
+
+          user = existingUser;
+          console.log(`[OAuth] Auto-linked ${profile.provider} to existing user: ${user.id} (both emails verified)`);
+
+          // Publish OAuth linked event
+          try {
+            await publishOAuthLinked({
+              userId: user.id,
+              provider: profile.provider,
+              providerAccountId: profile.providerAccountId,
+              linkedAt: new Date().toISOString(),
+            });
+          } catch (_error) {
+            console.error('Failed to publish oauth.linked event:', _error);
+          }
+        } else {
+          // SECURITY: Email not verified on one or both sides - require manual linking
+          // This prevents account takeover via unverified email addresses
+          throw new ApiError(
+            409,
+            'EMAIL_EXISTS_UNVERIFIED',
+            'An account with this email already exists. Please sign in with your password and link your social account from your profile settings.'
+          );
         }
       } else {
         // Create new user
@@ -358,7 +371,7 @@ async function createOAuthUser(
       },
     });
 
-    // Create OAuth account
+    // Create OAuth account (with encrypted tokens)
     await tx.oAuthAccount.create({
       data: {
         userId: user.id,
@@ -367,8 +380,8 @@ async function createOAuthUser(
         email: profile.email,
         name: profile.name,
         avatarUrl: profile.picture,
-        accessToken: providerAccessToken,
-        refreshToken: providerRefreshToken,
+        accessToken: encryptOptional(providerAccessToken),
+        refreshToken: encryptOptional(providerRefreshToken),
         tokenExpiresAt,
       },
     });
@@ -457,7 +470,7 @@ async function handleAccountLinking(
     );
   }
 
-  // Create OAuth account link
+  // Create OAuth account link (with encrypted tokens)
   await prisma.oAuthAccount.create({
     data: {
       userId,
@@ -466,8 +479,8 @@ async function handleAccountLinking(
       email: profile.email,
       name: profile.name,
       avatarUrl: profile.picture,
-      accessToken: providerAccessToken,
-      refreshToken: providerRefreshToken,
+      accessToken: encryptOptional(providerAccessToken),
+      refreshToken: encryptOptional(providerRefreshToken),
       tokenExpiresAt,
     },
   });
@@ -561,7 +574,12 @@ async function generateAuthResponse(
     ? generateFingerprint(requestMeta.ip, requestMeta.userAgent)
     : null;
 
-  // Delete old refresh tokens
+  // SECURITY POLICY: Delete all existing refresh tokens on OAuth login
+  // This invalidates all other sessions for this user, ensuring:
+  // 1. Only the current OAuth session is active
+  // 2. Any compromised sessions are terminated
+  // 3. Consistent with security best practice for sensitive operations
+  // Note: If concurrent sessions are needed, implement per-client token tracking instead
   await prisma.refreshToken.deleteMany({
     where: { userId: user.id },
   });

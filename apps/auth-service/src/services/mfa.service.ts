@@ -723,11 +723,17 @@ export async function disableMfa(
             }
 
             // Check if user has a password (social-only users may not)
+            // SECURITY: Social-only users cannot disable MFA via this endpoint
+            // They must either:
+            // 1. Set a password first via profile settings (then use this endpoint)
+            // 2. Contact support for manual MFA reset with identity verification
+            // This prevents attackers who gain social account access from disabling MFA
             if (!user.passwordHash || !user.hasPassword) {
               throw new ApiError(
                 400,
-                'NO_PASSWORD_SET',
-                'Cannot disable MFA with password verification. Please use your social login provider.'
+                'PASSWORD_REQUIRED_FOR_MFA_DISABLE',
+                'To disable MFA, please first set a password in your profile settings. ' +
+                'If you cannot access your account, contact support for assistance.'
               );
             }
 

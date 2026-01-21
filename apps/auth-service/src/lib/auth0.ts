@@ -189,7 +189,8 @@ class Auth0Client {
     callbackUrl.searchParams.set('code', code);
     callbackUrl.searchParams.set('state', state);
 
-    console.log(`[Auth0] Exchanging code for tokens, callback URL: ${callbackUrl.toString()}`);
+    // SECURITY: Log without sensitive parameters (code and state)
+    console.log(`[Auth0] Exchanging authorization code for tokens`);
 
     try {
       // Exchange code for tokens

@@ -421,7 +421,7 @@ importers:
   apps/auth-service:
     dependencies:
       openid-client:
-        specifier: ^6.8.1
+        specifier: ^6.7.1
         version: 6.8.1
 
   libs/backend:

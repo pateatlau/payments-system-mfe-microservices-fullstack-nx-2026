@@ -290,11 +290,19 @@ export const login = async (
   }
 
   // Check if user has a password (social-only users don't)
+  // SECURITY: Return same generic error as invalid credentials to prevent account enumeration
+  // An attacker should not be able to determine if an account exists and uses social login
   if (!user.passwordHash || !user.hasPassword) {
+    // Record failed attempt for rate limiting (same as invalid password)
+    const failedResult = await recordFailedAttempt(data.email, ip);
+
     throw new ApiError(
-      400,
-      'NO_PASSWORD_SET',
-      'This account uses social login. Please sign in with your social provider or set a password in your profile settings.'
+      401,
+      'INVALID_CREDENTIALS',
+      'Invalid email or password',
+      failedResult.remainingAttempts <= 2
+        ? { remainingAttempts: failedResult.remainingAttempts }
+        : undefined
     );
   }
 
