@@ -1,4 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import {
   Button,
   Card,
@@ -13,6 +16,15 @@ import {
 } from '@mfe/shared-design-system';
 import { getApiClient } from '@mfe/shared-api-client';
 import hdfcLogo from '../assets/hdfc-logo-03.png';
+
+/**
+ * Resend email form schema using Zod
+ */
+const resendEmailSchema = z.object({
+  email: z.string().email('Please enter a valid email address'),
+});
+
+type ResendEmailFormData = z.infer<typeof resendEmailSchema>;
 
 /**
  * Verification states
@@ -58,11 +70,26 @@ export function VerifyEmail({
   const [errorCode, setErrorCode] = useState<string | null>(null);
 
   // Resend state
-  const [resendEmail, setResendEmail] = useState('');
   const [isResending, setIsResending] = useState(false);
   const [resendSuccess, setResendSuccess] = useState(false);
   const [resendError, setResendError] = useState<string | null>(null);
   const [cooldownSeconds, setCooldownSeconds] = useState(0);
+
+  // React Hook Form for resend email
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    watch,
+  } = useForm<ResendEmailFormData>({
+    resolver: zodResolver(resendEmailSchema),
+    defaultValues: {
+      email: '',
+    },
+  });
+
+  // Watch the email field for button disabled state
+  const resendEmail = watch('email');
 
   /**
    * Verify email with token
@@ -74,12 +101,18 @@ export function VerifyEmail({
       setErrorCode(null);
 
       const apiClient = getApiClient();
-      const response = await apiClient.post('/auth/verify-email', {
+      const response = await apiClient.post<{ alreadyVerified?: boolean }>('/auth/verify-email', {
         token: verificationToken,
       });
 
       if (response.success) {
-        setState('success');
+        // Handle alreadyVerified flag from backend
+        if (response.data?.alreadyVerified) {
+          setState('already_verified');
+          setErrorMessage('Your email has already been verified. You can sign in to your account.');
+        } else {
+          setState('success');
+        }
       }
     } catch (err) {
       const error = err as {
@@ -145,9 +178,8 @@ export function VerifyEmail({
   /**
    * Handle resend verification email
    */
-  const handleResend = useCallback(async (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    if (cooldownSeconds > 0 || isResending || !resendEmail) return;
+  const handleResend = useCallback(async (data: ResendEmailFormData) => {
+    if (cooldownSeconds > 0 || isResending) return;
 
     try {
       setIsResending(true);
@@ -156,7 +188,7 @@ export function VerifyEmail({
 
       const apiClient = getApiClient();
       await apiClient.post('/auth/resend-verification', {
-        email: resendEmail,
+        email: data.email,
       });
 
       setResendSuccess(true);
@@ -185,7 +217,7 @@ export function VerifyEmail({
     } finally {
       setIsResending(false);
     }
-  }, [resendEmail, cooldownSeconds, isResending]);
+  }, [cooldownSeconds, isResending]);
 
   /**
    * Render loading/verifying state
@@ -326,18 +358,20 @@ export function VerifyEmail({
           <p className="text-sm text-center text-muted-foreground">
             Enter your email address to receive a new verification link:
           </p>
-          <form onSubmit={handleResend} className="space-y-4">
+          <form onSubmit={handleSubmit(handleResend)} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="resend-email">Email</Label>
+              <Label htmlFor="resend-email-error">Email</Label>
               <Input
-                id="resend-email"
+                id="resend-email-error"
                 type="email"
-                value={resendEmail}
-                onChange={(e) => setResendEmail(e.target.value)}
+                {...register('email')}
                 placeholder="you@example.com"
                 disabled={isResending || cooldownSeconds > 0}
                 autoComplete="email"
               />
+              {errors.email && (
+                <p className="text-sm text-destructive">{errors.email.message}</p>
+              )}
             </div>
 
             {resendSuccess && (
@@ -420,19 +454,21 @@ export function VerifyEmail({
         </p>
       </div>
 
-      <form onSubmit={handleResend} className="space-y-4">
+      <form onSubmit={handleSubmit(handleResend)} className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="resend-email">Email</Label>
           <Input
             id="resend-email"
             type="email"
-            value={resendEmail}
-            onChange={(e) => setResendEmail(e.target.value)}
+            {...register('email')}
             placeholder="you@example.com"
             disabled={isResending || cooldownSeconds > 0}
             autoComplete="email"
             autoFocus
           />
+          {errors.email && (
+            <p className="text-sm text-destructive">{errors.email.message}</p>
+          )}
         </div>
 
         {resendSuccess && (

@@ -676,7 +676,7 @@ interface EmailVerificationRequestedPayload {
 - The Prisma client returned Date objects, but they weren't serializing properly
 
 **Solution:**
-Added explicit Date to ISO string conversion in `admin.service.ts` for all functions that return user data:
+Added explicit Date-to-ISO string conversion in `admin.service.ts` for all functions that return user data:
 
 ```typescript
 // Convert Prisma Date objects to ISO strings for proper JSON serialization
