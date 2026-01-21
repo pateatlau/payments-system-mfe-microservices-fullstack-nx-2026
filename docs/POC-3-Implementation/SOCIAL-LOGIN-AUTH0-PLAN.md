@@ -536,11 +536,11 @@ Lists all linked social accounts for the current user.
 
 **Tasks:**
 
-- [ ] Create Auth0 account (free tier: 7,500 MAU)
-- [ ] Create new tenant (e.g., `payments-system-dev`)
-- [ ] Note tenant domain: `YOUR_TENANT.auth0.com`
-- [ ] Create Application (Regular Web Application)
-- [ ] Configure application settings:
+- [x] Create Auth0 account (free tier: 7,500 MAU) ✅
+- [x] Create new tenant (e.g., `payments-system-dev`) ✅
+- [x] Note tenant domain: `YOUR_TENANT.auth0.com` ✅
+- [x] Create Application (Regular Web Application) ✅
+- [x] Configure application settings: ✅
   - Allowed Callback URLs: `https://localhost/api/auth/oauth/callback`
   - Allowed Logout URLs: `https://localhost`
   - Allowed Web Origins: `https://localhost`
@@ -630,10 +630,10 @@ AUTH0_AUDIENCE=https://payments-system-api
 - [x] Configure Allowed Callback URLs ✅
 - [x] Configure Allowed Logout URLs ✅
 - [x] Configure Allowed Web Origins ✅
-- [ ] Configure Auth0 Rules/Actions (optional, for customization)
-- [ ] Set up Custom Domain (optional, for branding)
-- [ ] Enable "Require email verification" for social connections
-- [ ] Configure connection-specific settings (scopes, permissions)
+- [ ] Configure Auth0 Rules/Actions (optional, for customization) _(deferred)_
+- [ ] Set up Custom Domain (optional, for branding) _(deferred)_
+- [ ] Enable "Require email verification" for social connections _(deferred)_
+- [ ] Configure connection-specific settings (scopes, permissions) _(deferred)_
 
 **Auth0 Rules (Optional):**
 
@@ -648,7 +648,7 @@ exports.onExecutePostLogin = async (event, api) => {
 **Success Criteria:**
 
 - [x] Auth0 application fully configured ✅
-- [ ] Test end-to-end flow in Auth0 Dashboard (pending backend implementation)
+- [x] Test end-to-end flow verified ✅ (Google OAuth flow tested and working)
 
 ---
 
@@ -926,15 +926,15 @@ export { router as oauthRoutes };
 
 **Tasks:**
 
-- [ ] Create `oauth.service.ts` with core OAuth logic
-- [ ] Create `oauth.controller.ts` with route handlers
-- [ ] Create `oauth.routes.ts` and register in main.ts
-- [ ] Add OAuth dependencies: `pnpm add openid-client` (OIDC-certified client for secure PKCE flow)
-- [ ] Create `libs/auth0.ts` client configuration
-- [ ] Add CSRF state management (Redis)
-- [ ] Add Swagger documentation
-- [ ] Add rate limiting for OAuth endpoints (see below)
-- [ ] Add RabbitMQ audit event publishers
+- [x] Create `oauth.service.ts` with core OAuth logic ✅
+- [x] Create `oauth.controller.ts` with route handlers ✅
+- [x] Create `oauth.routes.ts` and register in main.ts ✅
+- [x] Add OAuth dependencies: `pnpm add openid-client` (OIDC-certified client for secure PKCE flow) ✅
+- [x] Create `libs/auth0.ts` client configuration ✅
+- [x] Add CSRF state management (Redis) ✅
+- [ ] Add Swagger documentation _(deferred to Phase 4)_
+- [ ] Add rate limiting for OAuth endpoints (see below) _(deferred to Phase 4)_
+- [x] Add RabbitMQ audit event publishers ✅
 
 **Rate Limiting for OAuth Endpoints:**
 
@@ -987,16 +987,16 @@ export async function publishOAuthAccountUnlinked(data: {
 
 **Success Criteria:**
 
-- [ ] `/auth/oauth/authorize` redirects to Auth0
-- [ ] `/auth/oauth/callback` handles Auth0 response
-- [ ] User created/found in database
-- [ ] JWT tokens issued
-- [ ] Rate limiting active on OAuth endpoints
-- [ ] Audit events published to RabbitMQ
+- [x] `/auth/oauth/:provider` redirects to Auth0 ✅
+- [x] `/auth/oauth/callback` handles Auth0 response ✅
+- [x] User created/found in database ✅
+- [x] JWT tokens issued ✅
+- [ ] Rate limiting active on OAuth endpoints _(deferred to Phase 4)_
+- [x] Audit events published to RabbitMQ ✅
 
 ---
 
-### Priority 2.3: User Account Linking Service
+### Priority 2.3: User Account Linking Service ✅
 
 **Effort:** 3 hours
 **Impact:** Links social accounts to users
@@ -1039,23 +1039,23 @@ async function handleSocialLogin(
 
 **Tasks:**
 
-- [ ] Implement account lookup by OAuth provider ID
-- [ ] Implement account lookup by email
-- [ ] Implement auto-linking for verified emails
-- [ ] Implement manual linking flow
-- [ ] Add conflict handling (email exists)
-- [ ] Add audit logging for OAuth events
+- [x] Implement account lookup by OAuth provider ID ✅
+- [x] Implement account lookup by email ✅
+- [x] Implement auto-linking for verified emails ✅
+- [x] Implement manual linking flow ✅
+- [x] Add conflict handling (email exists) ✅
+- [x] Add audit logging for OAuth events ✅
 
 **Success Criteria:**
 
-- [ ] Existing OAuth users recognized
-- [ ] Email matching auto-links (if verified)
-- [ ] New users created correctly (with `hasPassword = false`)
-- [ ] Conflicts handled gracefully
+- [x] Existing OAuth users recognized ✅
+- [x] Email matching auto-links (if verified) ✅
+- [x] New users created correctly (with `hasPassword = false`) ✅
+- [x] Conflicts handled gracefully ✅
 
 ---
 
-### Priority 2.4: MFA Integration for Social Users
+### Priority 2.4: MFA Integration for Social Users ✅
 
 **Effort:** 2 hours
 **Impact:** Ensures MFA works with social login
@@ -1071,10 +1071,10 @@ async function handleSocialLogin(
 
 **Tasks:**
 
-- [ ] Add MFA check after OAuth profile received
-- [ ] Create MFA recommendation page/flow
-- [ ] Integrate with existing `/auth/mfa/verify` endpoint
-- [ ] Store MFA preference for social users
+- [x] Add MFA check after OAuth profile received ✅
+- [ ] Create MFA recommendation page/flow _(frontend - Phase 3)_
+- [x] Integrate with existing `/auth/mfa/verify` endpoint ✅
+- [ ] Store MFA preference for social users _(frontend - Phase 3)_
 
 **Implementation:**
 
@@ -1105,10 +1105,10 @@ async function handleCallback(code: string): Promise<SocialLoginResult> {
 
 **Success Criteria:**
 
-- [ ] MFA enforced for users who have it enabled
-- [ ] MFA recommendation shown to new social users
-- [ ] Users can skip MFA recommendation
-- [ ] MFA setup works for social-only users
+- [x] MFA enforced for users who have it enabled ✅ (tested - user redirected to /mfa?token=...)
+- [ ] MFA recommendation shown to new social users _(frontend - Phase 3)_
+- [ ] Users can skip MFA recommendation _(frontend - Phase 3)_
+- [ ] MFA setup works for social-only users _(frontend - Phase 3)_
 
 ---
 
