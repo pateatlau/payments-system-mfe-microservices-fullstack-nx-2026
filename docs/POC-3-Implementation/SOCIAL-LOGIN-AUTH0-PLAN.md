@@ -83,12 +83,19 @@
   - **Tested:** Google + GitHub login working for both MFA and non-MFA users
 - **Priority 3.4:** Sign Up Page Integration ✅
   - Added `SocialLoginButtons` to `apps/auth-mfe/src/components/SignUp.tsx`
-  - Added "Or continue with" divider after form submit button
+  - Social buttons at top of form (consistent with Sign-In page, follows industry best practice)
+  - Added "Or continue with email" divider between social buttons and form
   - Implemented `handleSocialLogin` redirect to backend OAuth endpoint
   - Google and GitHub providers enabled
   - Added OAuth error display from URL params
   - Same OAuth flow as Sign-In (creates account if user doesn't exist)
-- **Priority 3.5:** Account Linking UI (Profile Page)
+- **Priority 3.5:** Account Linking UI (Profile Page) ✅
+  - Created `apps/profile-mfe/src/api/oauth.ts` - API client for OAuth endpoints
+  - Created `apps/profile-mfe/src/hooks/useOAuthAccounts.ts` - TanStack Query hooks
+  - Created `apps/profile-mfe/src/components/LinkedAccounts.tsx` - UI component
+  - Updated `apps/profile-mfe/src/components/ProfilePage.tsx` - Added LinkedAccounts to Security tab
+  - Features: View linked accounts, link new accounts, unlink accounts with confirmation
+  - Provider icons for Google, GitHub, Facebook, LinkedIn, X
 - **Priority 3.6:** MFA Recommendation Page
 
 ### Phase 4: Testing & Security - PENDING
@@ -1561,15 +1568,17 @@ const handleSocialLogin = (provider: string) => {
 
 **Tasks:**
 
-- [ ] Add `SocialLoginButtons` to SignUp component
-- [ ] Add "or" divider
-- [ ] Reuse same OAuth redirect logic (same `handleSocialLogin` function)
+- [x] Add `SocialLoginButtons` to SignUp component ✅
+- [x] Add "Or continue with email" divider ✅
+- [x] Reuse same OAuth redirect logic (same `handleSocialLogin` function) ✅
+- [x] Add OAuth error display from URL params ✅
+- [x] Social buttons positioned at top of form (consistent with Sign-In page) ✅
 
 **Success Criteria:**
 
-- [ ] Social buttons appear on signup page
-- [ ] New user created on first social login
-- [ ] Existing user with same email handled (conflict error or auto-link)
+- [x] Social buttons appear on signup page ✅
+- [x] New user created on first social login ✅
+- [x] Existing user with same email handled (conflict error or auto-link) ✅
 
 ---
 
@@ -1614,25 +1623,27 @@ export function LinkedAccounts() {
 
 **Tasks:**
 
-- [ ] Create `LinkedAccounts` component
-- [ ] Create `useLinkedAccounts` hook (TanStack Query)
-- [ ] Create `useLinkAccount` mutation
-- [ ] Create `useUnlinkAccount` mutation
-- [ ] Add to profile page
-- [ ] Handle link flow (OAuth redirect + callback)
-- [ ] Add confirmation dialog for unlinking
+- [x] Create `LinkedAccounts` component ✅
+- [x] Create `useLinkedAccounts` hook (TanStack Query) ✅
+- [x] Create `useLinkAccount` hook ✅
+- [x] Create `useUnlinkAccount` mutation ✅
+- [x] Add to profile page (Security tab) ✅
+- [x] Handle link flow (OAuth redirect + callback) ✅
+- [x] Add confirmation dialog for unlinking ✅
+- [x] Create `apps/profile-mfe/src/api/oauth.ts` - API client ✅
 
-**Files to Create:**
+**Files Created:**
 
+- `apps/profile-mfe/src/api/oauth.ts`
 - `apps/profile-mfe/src/components/LinkedAccounts.tsx`
 - `apps/profile-mfe/src/hooks/useOAuthAccounts.ts`
 
 **Success Criteria:**
 
-- [ ] Users can see linked accounts
-- [ ] Users can link new accounts
-- [ ] Users can unlink accounts
-- [ ] Cannot unlink if only auth method
+- [x] Users can see linked accounts ✅
+- [x] Users can link new accounts ✅
+- [x] Users can unlink accounts ✅
+- [x] Cannot unlink if only auth method ✅ (backend validates, UI shows warning)
 
 ---
 

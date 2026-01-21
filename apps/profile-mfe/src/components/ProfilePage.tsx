@@ -45,6 +45,7 @@ import { ProfileForm } from './ProfileForm';
 import { PreferencesForm } from './PreferencesForm';
 import { AccountInfo } from './AccountInfo';
 import { MfaSettings } from './MfaSettings';
+import { LinkedAccounts } from './LinkedAccounts';
 
 // Tab identifiers for ProfilePage
 export type ProfileTabKey = 'profile' | 'preferences' | 'account' | 'security';
@@ -126,7 +127,12 @@ export function ProfilePage() {
 
             {activeTab === 'account' && <AccountInfo />}
 
-            {activeTab === 'security' && <MfaSettings />}
+            {activeTab === 'security' && (
+              <>
+                <LinkedAccounts />
+                <MfaSettings />
+              </>
+            )}
           </div>
         )}
       </div>
