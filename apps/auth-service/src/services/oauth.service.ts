@@ -206,7 +206,8 @@ export async function handleOAuthCallback(
   const { profile, accessToken: providerAccessToken, refreshToken: providerRefreshToken, expiresAt } =
     await auth0Client.handleCallback(code, state);
 
-  console.log(`[OAuth] Callback from ${profile.provider}, email: ${profile.email || 'not provided'}`);
+  // SECURITY: Log without PII (no email addresses)
+  console.log(`[OAuth] Callback received from ${profile.provider}`);
 
   // Check if this is account linking or login/registration
   if (stateData.userId) {
@@ -580,19 +581,23 @@ async function generateAuthResponse(
   // 2. Any compromised sessions are terminated
   // 3. Consistent with security best practice for sensitive operations
   // Note: If concurrent sessions are needed, implement per-client token tracking instead
-  await prisma.refreshToken.deleteMany({
-    where: { userId: user.id },
-  });
+  //
+  // Use transaction to ensure atomic delete+create (both succeed or both fail)
+  await prisma.$transaction(async (tx: typeof prisma) => {
+    await tx.refreshToken.deleteMany({
+      where: { userId: user.id },
+    });
 
-  // Store new refresh token
-  await prisma.refreshToken.create({
-    data: {
-      userId: user.id,
-      token: tokens.refreshToken,
-      tokenFamily,
-      fingerprint,
-      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
-    },
+    // Store new refresh token
+    await tx.refreshToken.create({
+      data: {
+        userId: user.id,
+        token: tokens.refreshToken,
+        tokenFamily,
+        fingerprint,
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+      },
+    });
   });
 
   // Publish login event
