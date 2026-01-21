@@ -29,16 +29,40 @@ describe('AdminService', () => {
         email: 'admin@example.com',
         name: 'Admin User',
         role: 'ADMIN',
-        createdAt: new Date('2024-01-01'),
-        updatedAt: new Date('2024-01-01'),
+        emailVerified: true,
+        createdAt: new Date('2024-01-01T00:00:00.000Z'),
+        updatedAt: new Date('2024-01-01T00:00:00.000Z'),
       },
       {
         id: 'user-2',
         email: 'customer@example.com',
         name: 'Customer User',
         role: 'CUSTOMER',
-        createdAt: new Date('2024-01-02'),
-        updatedAt: new Date('2024-01-02'),
+        emailVerified: false,
+        createdAt: new Date('2024-01-02T00:00:00.000Z'),
+        updatedAt: new Date('2024-01-02T00:00:00.000Z'),
+      },
+    ];
+
+    // Expected output with ISO string dates
+    const expectedUsers = [
+      {
+        id: 'user-1',
+        email: 'admin@example.com',
+        name: 'Admin User',
+        role: 'ADMIN',
+        emailVerified: true,
+        createdAt: '2024-01-01T00:00:00.000Z',
+        updatedAt: '2024-01-01T00:00:00.000Z',
+      },
+      {
+        id: 'user-2',
+        email: 'customer@example.com',
+        name: 'Customer User',
+        role: 'CUSTOMER',
+        emailVerified: false,
+        createdAt: '2024-01-02T00:00:00.000Z',
+        updatedAt: '2024-01-02T00:00:00.000Z',
       },
     ];
 
@@ -54,7 +78,7 @@ describe('AdminService', () => {
       });
 
       expect(result).toEqual({
-        users: mockUsers,
+        users: expectedUsers,
         pagination: {
           page: 1,
           limit: 10,
@@ -73,6 +97,7 @@ describe('AdminService', () => {
           email: true,
           name: true,
           role: true,
+          emailVerified: true,
           createdAt: true,
           updatedAt: true,
         },
@@ -155,8 +180,19 @@ describe('AdminService', () => {
       email: 'admin@example.com',
       name: 'Admin User',
       role: 'ADMIN',
-      createdAt: new Date('2024-01-01'),
-      updatedAt: new Date('2024-01-01'),
+      emailVerified: true,
+      createdAt: new Date('2024-01-01T00:00:00.000Z'),
+      updatedAt: new Date('2024-01-01T00:00:00.000Z'),
+    };
+
+    const expectedUser = {
+      id: 'user-1',
+      email: 'admin@example.com',
+      name: 'Admin User',
+      role: 'ADMIN',
+      emailVerified: true,
+      createdAt: '2024-01-01T00:00:00.000Z',
+      updatedAt: '2024-01-01T00:00:00.000Z',
     };
 
     it('should get user by ID', async () => {
@@ -164,7 +200,7 @@ describe('AdminService', () => {
 
       const result = await adminService.getUserById('user-1');
 
-      expect(result).toEqual(mockUser);
+      expect(result).toEqual(expectedUser);
       expect(prisma.user.findUnique).toHaveBeenCalledWith({
         where: { id: 'user-1' },
         select: {
@@ -172,6 +208,7 @@ describe('AdminService', () => {
           email: true,
           name: true,
           role: true,
+          emailVerified: true,
           createdAt: true,
           updatedAt: true,
         },
@@ -193,22 +230,27 @@ describe('AdminService', () => {
       email: 'user@example.com',
       name: 'User Name',
       role: 'CUSTOMER',
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      emailVerified: false,
+      createdAt: new Date('2024-01-01T00:00:00.000Z'),
+      updatedAt: new Date('2024-01-01T00:00:00.000Z'),
     };
 
     it('should update user name', async () => {
-      (prisma.user.findUnique as jest.Mock).mockResolvedValue(mockUser);
-      (prisma.user.update as jest.Mock).mockResolvedValue({
+      const updatedMockUser = {
         ...mockUser,
         name: 'Updated Name',
-      });
+      };
+      (prisma.user.findUnique as jest.Mock).mockResolvedValue(mockUser);
+      (prisma.user.update as jest.Mock).mockResolvedValue(updatedMockUser);
 
       const result = await adminService.updateUser('user-1', {
         name: 'Updated Name',
       });
 
       expect(result.name).toBe('Updated Name');
+      // Dates should be converted to ISO strings
+      expect(result.createdAt).toBe('2024-01-01T00:00:00.000Z');
+      expect(result.updatedAt).toBe('2024-01-01T00:00:00.000Z');
       expect(prisma.user.update).toHaveBeenCalledWith(
         expect.objectContaining({
           where: { id: 'user-1' },
@@ -220,13 +262,14 @@ describe('AdminService', () => {
     });
 
     it('should update user email if unique', async () => {
+      const updatedMockUser = {
+        ...mockUser,
+        email: 'newemail@example.com',
+      };
       (prisma.user.findUnique as jest.Mock)
         .mockResolvedValueOnce(mockUser) // First call - get user
         .mockResolvedValueOnce(null); // Second call - check email uniqueness
-      (prisma.user.update as jest.Mock).mockResolvedValue({
-        ...mockUser,
-        email: 'newemail@example.com',
-      });
+      (prisma.user.update as jest.Mock).mockResolvedValue(updatedMockUser);
 
       const result = await adminService.updateUser('user-1', {
         email: 'newemail@example.com',
@@ -258,21 +301,29 @@ describe('AdminService', () => {
     const mockUser = {
       id: 'user-1',
       email: 'user@example.com',
+      name: 'User Name',
       role: 'CUSTOMER',
+      emailVerified: false,
+      createdAt: new Date('2024-01-01T00:00:00.000Z'),
+      updatedAt: new Date('2024-01-01T00:00:00.000Z'),
     };
 
     it('should update user role', async () => {
-      (prisma.user.findUnique as jest.Mock).mockResolvedValue(mockUser);
-      (prisma.user.update as jest.Mock).mockResolvedValue({
+      const updatedMockUser = {
         ...mockUser,
         role: 'VENDOR',
-      });
+      };
+      (prisma.user.findUnique as jest.Mock).mockResolvedValue(mockUser);
+      (prisma.user.update as jest.Mock).mockResolvedValue(updatedMockUser);
 
       const result = await adminService.updateUserRole('user-1', {
         role: 'VENDOR',
       });
 
       expect(result.role).toBe('VENDOR');
+      // Dates should be converted to ISO strings
+      expect(result.createdAt).toBe('2024-01-01T00:00:00.000Z');
+      expect(result.updatedAt).toBe('2024-01-01T00:00:00.000Z');
       expect(prisma.user.update).toHaveBeenCalledWith(
         expect.objectContaining({
           where: { id: 'user-1' },
