@@ -81,9 +81,15 @@
   - Fixed Module Federation Router context issues (use `window.location` instead of `useSearchParams`)
   - Fixed API client interceptor to skip token refresh for `/auth/mfa/` endpoints
   - **Tested:** Google + GitHub login working for both MFA and non-MFA users
-- **Priority 3.4:** Sign Up Page Integration _(was 3.3)_
-- **Priority 3.5:** Account Linking UI (Profile Page) _(was 3.4)_
-- **Priority 3.6:** MFA Recommendation Page _(was 3.5)_
+- **Priority 3.4:** Sign Up Page Integration ✅
+  - Added `SocialLoginButtons` to `apps/auth-mfe/src/components/SignUp.tsx`
+  - Added "Or continue with" divider after form submit button
+  - Implemented `handleSocialLogin` redirect to backend OAuth endpoint
+  - Google and GitHub providers enabled
+  - Added OAuth error display from URL params
+  - Same OAuth flow as Sign-In (creates account if user doesn't exist)
+- **Priority 3.5:** Account Linking UI (Profile Page)
+- **Priority 3.6:** MFA Recommendation Page
 
 ### Phase 4: Testing & Security - PENDING
 
