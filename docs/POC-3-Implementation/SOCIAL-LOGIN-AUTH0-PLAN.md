@@ -96,7 +96,13 @@
   - Updated `apps/profile-mfe/src/components/ProfilePage.tsx` - Added LinkedAccounts to Security tab
   - Features: View linked accounts, link new accounts, unlink accounts with confirmation
   - Provider icons for Google, GitHub, Facebook, LinkedIn, X
-- **Priority 3.6:** MFA Recommendation Page
+- **Priority 3.6:** MFA Recommendation Page ✅
+  - Created `apps/auth-mfe/src/components/MfaRecommendation.tsx` - Main component
+  - Updated `apps/auth-mfe/src/components/OAuthCallback.tsx` - Redirect new users to MFA recommendation
+  - Created `apps/shell/src/pages/MfaRecommendationPage.tsx` - Page wrapper
+  - Updated shell routes and remotes for Module Federation
+  - Features: Enable MFA button, Skip for now, Don't show again preference (localStorage)
+  - Shown to new social login users (unless previously dismissed)
 
 ### Phase 4: Testing & Security - PENDING
 
@@ -1702,18 +1708,33 @@ export function MfaRecommendation({
 
 **Tasks:**
 
-- [ ] Create `MfaRecommendation` component
-- [ ] Add route in shell app
-- [ ] Handle "Enable MFA" flow
-- [ ] Handle "Skip" flow
-- [ ] Store "Don't show again" preference
+- [x] Create `MfaRecommendation` component ✅
+- [x] Add route in shell app (`/mfa-recommend`) ✅
+- [x] Handle "Enable MFA" flow (redirects to `/profile?tab=security`) ✅
+- [x] Handle "Skip" flow (redirects to `/`) ✅
+- [x] Store "Don't show again" preference (`mfa_recommend_dismissed` in localStorage) ✅
+- [x] Update OAuthCallback to redirect new users to MFA recommendation page ✅
+- [x] Export from auth-mfe rspack config ✅
+- [x] Add type declarations and lazy loading in shell ✅
+
+**Files Created/Modified:**
+
+- `apps/auth-mfe/src/components/MfaRecommendation.tsx` (NEW)
+- `apps/auth-mfe/src/components/OAuthCallback.tsx` (MODIFIED)
+- `apps/auth-mfe/rspack.config.js` (MODIFIED - added expose)
+- `apps/shell/src/pages/MfaRecommendationPage.tsx` (NEW)
+- `apps/shell/src/routes/AppRoutes.tsx` (MODIFIED)
+- `apps/shell/src/remotes/index.tsx` (MODIFIED)
+- `apps/shell/src/types/remotes.d.ts` (MODIFIED)
+- `apps/shell/src/app/app.tsx` (MODIFIED)
+- `apps/shell/src/bootstrap.tsx` (MODIFIED)
 
 **Success Criteria:**
 
-- [ ] Page shown after first social login
-- [ ] Enable MFA works
-- [ ] Skip works
-- [ ] Don't show again preference persisted
+- [x] Page shown after first social login ✅
+- [x] Enable MFA works (redirects to profile security tab) ✅
+- [x] Skip works (redirects to home) ✅
+- [x] Don't show again preference persisted ✅
 
 ---
 

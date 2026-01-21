@@ -8,6 +8,7 @@ import { ForgotPasswordPage, ForgotPasswordComponentProps } from '../pages/Forgo
 import { ResetPasswordPage, ResetPasswordComponentProps } from '../pages/ResetPasswordPage';
 import { VerifyEmailPage, VerifyEmailComponentProps } from '../pages/VerifyEmailPage';
 import { OAuthCallbackPage, OAuthCallbackComponentProps } from '../pages/OAuthCallbackPage';
+import { MfaRecommendationPage, MfaRecommendationComponentProps } from '../pages/MfaRecommendationPage';
 import { PaymentsPage, PaymentsComponentProps } from '../pages/PaymentsPage';
 import { ReportsPage, ReportsComponentProps } from '../pages/ReportsPage';
 import { AdminPage, AdminDashboardComponentProps } from '../pages/AdminPage';
@@ -42,6 +43,10 @@ export interface AppRoutesProps {
    * OAuthCallback component to use. Required for proper DI pattern.
    */
   OAuthCallbackComponent: ComponentType<OAuthCallbackComponentProps>;
+  /**
+   * MfaRecommendation component to use. Required for proper DI pattern.
+   */
+  MfaRecommendationComponent: ComponentType<MfaRecommendationComponentProps>;
   /**
    * PaymentsPage component to use. Required for proper DI pattern.
    */
@@ -91,6 +96,7 @@ export function AppRoutes({
   ResetPasswordComponent,
   VerifyEmailComponent,
   OAuthCallbackComponent,
+  MfaRecommendationComponent,
   PaymentsComponent,
   ReportsComponent,
   AdminDashboardComponent,
@@ -144,6 +150,15 @@ export function AppRoutes({
       <Route
         path="/oauth/success"
         element={<OAuthCallbackPage OAuthCallbackComponent={OAuthCallbackComponent} />}
+      />
+      {/* MFA recommendation route - shown to new social login users */}
+      <Route
+        path="/mfa-recommend"
+        element={
+          <ProtectedRoute>
+            <MfaRecommendationPage MfaRecommendationComponent={MfaRecommendationComponent} />
+          </ProtectedRoute>
+        }
       />
 
       {/* Protected routes - require authentication */}

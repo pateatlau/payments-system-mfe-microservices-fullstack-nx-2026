@@ -18,6 +18,7 @@ export interface AppProps {
     ResetPasswordComponent: AppRoutesProps['ResetPasswordComponent'];
     VerifyEmailComponent: AppRoutesProps['VerifyEmailComponent'];
     OAuthCallbackComponent: AppRoutesProps['OAuthCallbackComponent'];
+    MfaRecommendationComponent: AppRoutesProps['MfaRecommendationComponent'];
     PaymentsComponent: AppRoutesProps['PaymentsComponent'];
     ReportsComponent: AppRoutesProps['ReportsComponent'];
     AdminDashboardComponent: AppRoutesProps['AdminDashboardComponent'];
@@ -57,6 +58,7 @@ export function App({ remotes }: AppProps = {}) {
           ResetPasswordComponent={remotes.ResetPasswordComponent}
           VerifyEmailComponent={remotes.VerifyEmailComponent}
           OAuthCallbackComponent={remotes.OAuthCallbackComponent}
+          MfaRecommendationComponent={remotes.MfaRecommendationComponent}
           PaymentsComponent={remotes.PaymentsComponent}
           ReportsComponent={remotes.ReportsComponent}
           AdminDashboardComponent={remotes.AdminDashboardComponent}

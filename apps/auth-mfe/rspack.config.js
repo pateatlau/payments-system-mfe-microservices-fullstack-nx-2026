@@ -272,6 +272,7 @@ module.exports = {
         './ResetPassword': './src/components/ResetPassword.tsx',
         './VerifyEmail': './src/components/VerifyEmail.tsx',
         './OAuthCallback': './src/components/OAuthCallback.tsx',
+        './MfaRecommendation': './src/components/MfaRecommendation.tsx',
       },
       shared: sharedDependencies,
     }),

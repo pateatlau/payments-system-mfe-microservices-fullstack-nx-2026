@@ -5,9 +5,12 @@
  * Extracts tokens from URL hash, fetches user info, and updates auth store.
  *
  * The backend redirects to one of these URLs:
- * - /oauth/success#accessToken=...&refreshToken=...&expiresIn=... (success)
+ * - /oauth/success#accessToken=...&refreshToken=...&expiresIn=...&isNewUser=true (success)
  * - /signin?error=oauth_failed&message=... (error - handled by SignIn component)
- * - /mfa?token=... (MFA required - handled by backend redirect)
+ * - /signin?mfaToken=... (MFA required - handled by SignIn component)
+ *
+ * For new users (isNewUser=true), redirects to MFA recommendation page
+ * unless user has previously dismissed the recommendation.
  */
 
 import { useEffect, useState } from 'react';
@@ -15,6 +18,7 @@ import { useAuthStore } from 'shared-auth-store';
 import { getApiClient } from '@mfe/shared-api-client';
 import { Card, CardContent, CardHeader, CardTitle } from '@mfe/shared-design-system';
 import type { User } from 'shared-types';
+import { isMfaRecommendDismissed } from './MfaRecommendation';
 
 export function OAuthCallback() {
   // Use window.location for navigation to avoid Router context issues in Module Federation
@@ -47,12 +51,14 @@ export function OAuthCallback() {
 
       const accessToken = params.get('accessToken');
       const refreshToken = params.get('refreshToken');
+      const isNewUser = params.get('isNewUser') === 'true';
       // Default return URL is '/' which will redirect based on user role
       const returnUrl = '/';
 
       console.log('[OAuthCallback] Extracted tokens:', {
         hasAccessToken: !!accessToken,
         hasRefreshToken: !!refreshToken,
+        isNewUser,
         hashLength: hash.length
       });
 
@@ -97,8 +103,17 @@ export function OAuthCallback() {
         // Clear the hash from URL (security - don't leave tokens in browser history)
         window.history.replaceState(null, '', window.location.pathname);
 
-        // Navigate to return URL using window.location to avoid Router context issues
-        window.location.href = returnUrl;
+        // For new users, show MFA recommendation page (unless previously dismissed)
+        // The user can skip or enable MFA from the recommendation page
+        const shouldShowMfaRecommend = isNewUser && !isMfaRecommendDismissed();
+
+        if (shouldShowMfaRecommend) {
+          console.log('[OAuthCallback] New user, redirecting to MFA recommendation');
+          window.location.href = '/mfa-recommend';
+        } else {
+          // Navigate to return URL using window.location to avoid Router context issues
+          window.location.href = returnUrl;
+        }
       } catch (err) {
         console.error('OAuth callback error:', err);
         const errorMessage = err instanceof Error ? err.message : 'Failed to complete authentication';
