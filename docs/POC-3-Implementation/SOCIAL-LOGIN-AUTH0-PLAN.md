@@ -1,9 +1,26 @@
 # Social Login Implementation Plan (Auth0 Federation) - POC-3
 
 **Created:** January 20, 2026
-**Last Updated:** January 20, 2026
+**Last Updated:** January 21, 2026
 **Status:** Planning Complete - Ready for Implementation
 **Priority:** Medium
+
+---
+
+## Revision History
+
+| Date       | Changes                                                                    |
+| ---------- | -------------------------------------------------------------------------- |
+| 2026-01-21 | Reordered Phase 2: Database schema now Priority 2.1 (prerequisite)         |
+| 2026-01-21 | Added `hasPassword` flag to User model for unlink validation               |
+| 2026-01-21 | Made `passwordHash` nullable for social-only users                         |
+| 2026-01-21 | Added Priority 3.2: OAuth Callback Route & Component                       |
+| 2026-01-21 | Clarified frontend redirect flow (via backend, not direct to Auth0)        |
+| 2026-01-21 | Updated icons to inline SVGs (brand-accurate, no external dependencies)    |
+| 2026-01-21 | Added rate limiting specs for OAuth endpoints                              |
+| 2026-01-21 | Added RabbitMQ audit event publishers for OAuth operations                 |
+| 2026-01-21 | Updated npm dependencies: `openid-client` for secure OIDC flows            |
+| 2026-01-21 | Added validation logic for unlink operation                                |
 
 ---
 
@@ -17,17 +34,19 @@
 
 ### Phase 2: Backend Integration - PENDING
 
-- **Priority 2.1:** OAuth Callback Endpoints
-- **Priority 2.2:** User Account Linking Service
-- **Priority 2.3:** Database Schema Updates
+- **Priority 2.1:** Database Schema Updates _(moved from 2.3 - must be first)_
+- **Priority 2.2:** OAuth Callback Endpoints _(was 2.1)_
+- **Priority 2.3:** User Account Linking Service _(was 2.2)_
 - **Priority 2.4:** MFA Integration for Social Users
 
 ### Phase 3: Frontend Integration - PENDING
 
 - **Priority 3.1:** Social Login Buttons Component
-- **Priority 3.2:** Sign In Page Integration
-- **Priority 3.3:** Sign Up Page Integration
-- **Priority 3.4:** Account Linking UI (Profile Page)
+- **Priority 3.2:** OAuth Callback Route & Component _(NEW - handles token extraction)_
+- **Priority 3.3:** Sign In Page Integration _(was 3.2)_
+- **Priority 3.4:** Sign Up Page Integration _(was 3.3)_
+- **Priority 3.5:** Account Linking UI (Profile Page) _(was 3.4)_
+- **Priority 3.6:** MFA Recommendation Page _(was 3.5)_
 
 ### Phase 4: Testing & Security - PENDING
 
@@ -289,21 +308,58 @@ model OAuthAccount {
   @@index([userId])
   @@map("oauth_accounts")
 }
+```
 
-// Update existing User model
+### User Model Updates (CRITICAL)
+
+**File:** `apps/auth-service/prisma/schema.prisma`
+
+The existing User model requires updates to support social-only users:
+
+```prisma
 model User {
-  // ... existing fields ...
+  id            String    @id @default(uuid())
+  email         String    @unique
+  passwordHash  String?   @map("password_hash")  // CHANGED: Nullable for social-only users
+  name          String
+  role          UserRole
+  emailVerified Boolean   @default(false) @map("email_verified")
+  hasPassword   Boolean   @default(true) @map("has_password")  // NEW: Track if user has password
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
 
-  // Add relation
-  oauthAccounts     OAuthAccount[]
+  // MFA fields (existing)
+  mfaEnabled      Boolean   @default(false) @map("mfa_enabled")
+  mfaSecret       String?   @map("mfa_secret")
+  mfaBackupCodes  Json?     @map("mfa_backup_codes")
+  mfaVerified     Boolean   @default(false) @map("mfa_verified")
+
+  // Relations (existing)
+  refreshTokens RefreshToken[]
+  devices       Device[]
+
+  // NEW: OAuth accounts relation
+  oauthAccounts OAuthAccount[]
+
+  @@index([email])
+  @@index([role])
+  @@map("users")
 }
 ```
+
+**Why these changes are needed:**
+- `passwordHash` nullable: Social-only users don't have a password
+- `hasPassword` flag: Required to prevent unlinking the only auth method
+- `oauthAccounts` relation: Links OAuth providers to users
 
 ### Migration Strategy
 
 1. Create migration: `pnpm db:auth:migrate --name add_oauth_accounts`
-2. No breaking changes to existing users
-3. Existing email/password users unaffected
+2. Migration must handle existing users:
+   - Set `hasPassword = true` for all existing users (they all have passwords)
+   - `passwordHash` already has values, so nullable change is safe
+3. No breaking changes to existing users
+4. Existing email/password users unaffected
 
 ---
 
@@ -401,8 +457,28 @@ Unlinks a social account from the user.
 
 **Validation:**
 
-- Cannot unlink if it's the only auth method (no password set)
-- At least one auth method must remain
+- Cannot unlink if it's the only auth method (uses `hasPassword` flag to check)
+- At least one auth method must remain (password OR another OAuth account)
+
+**Validation Logic:**
+
+```typescript
+async function canUnlinkOAuth(userId: string, provider: string): Promise<boolean> {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    include: { oauthAccounts: true },
+  });
+
+  if (!user) return false;
+
+  // If user has password, they can always unlink
+  if (user.hasPassword) return true;
+
+  // If no password, check if they have other OAuth accounts
+  const otherAccounts = user.oauthAccounts.filter(a => a.provider !== provider);
+  return otherAccounts.length > 0;
+}
+```
 
 **Response:**
 
@@ -563,7 +639,76 @@ exports.onExecutePostLogin = async (event, api) => {
 
 ## Phase 2: Backend Integration
 
-### Priority 2.1: OAuth Callback Endpoints
+### Priority 2.1: Database Schema Updates
+
+**Effort:** 1 hour
+**Impact:** Foundation for OAuth data storage
+
+> **Note:** This priority was moved from 2.3 because the Prisma schema must be in place before implementing the OAuth endpoints.
+
+**Tasks:**
+
+- [ ] Update `User` model: Make `passwordHash` nullable
+- [ ] Add `hasPassword` boolean to `User` model (default: true)
+- [ ] Add `OAuthAccount` model
+- [ ] Add relation from `User` to `OAuthAccount`
+- [ ] Create and run migration
+- [ ] Generate Prisma client
+- [ ] Update `auth.service.ts` to handle nullable `passwordHash`
+
+**Commands:**
+
+```bash
+# After updating schema.prisma
+pnpm db:auth:generate
+pnpm db:auth:migrate --name add_oauth_accounts
+```
+
+**Migration SQL (for reference):**
+
+```sql
+-- Make passwordHash nullable
+ALTER TABLE "users" ALTER COLUMN "password_hash" DROP NOT NULL;
+
+-- Add hasPassword flag (default true for existing users)
+ALTER TABLE "users" ADD COLUMN "has_password" BOOLEAN NOT NULL DEFAULT true;
+
+-- Create oauth_accounts table
+CREATE TABLE "oauth_accounts" (
+  "id" TEXT NOT NULL PRIMARY KEY,
+  "user_id" TEXT NOT NULL,
+  "provider" TEXT NOT NULL,
+  "provider_account_id" TEXT NOT NULL,
+  "email" TEXT,
+  "name" TEXT,
+  "avatar_url" TEXT,
+  "access_token" TEXT,
+  "refresh_token" TEXT,
+  "token_expires_at" TIMESTAMP(3),
+  "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "updated_at" TIMESTAMP(3) NOT NULL,
+  CONSTRAINT "oauth_accounts_user_id_fkey" FOREIGN KEY ("user_id")
+    REFERENCES "users" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+-- Unique constraint: one provider account per provider
+CREATE UNIQUE INDEX "oauth_accounts_provider_provider_account_id_key"
+  ON "oauth_accounts"("provider", "provider_account_id");
+
+-- Index for user lookups
+CREATE INDEX "oauth_accounts_user_id_idx" ON "oauth_accounts"("user_id");
+```
+
+**Success Criteria:**
+
+- [ ] Migration runs successfully
+- [ ] Prisma client updated with new types
+- [ ] Existing users unaffected (all have `hasPassword = true`)
+- [ ] Can create users without passwords (for social login)
+
+---
+
+### Priority 2.2: OAuth Callback Endpoints
 
 **Effort:** 4 hours
 **Impact:** Core social login functionality
@@ -765,10 +910,52 @@ export { router as oauthRoutes };
 - [ ] Create `oauth.service.ts` with core OAuth logic
 - [ ] Create `oauth.controller.ts` with route handlers
 - [ ] Create `oauth.routes.ts` and register in main.ts
-- [ ] Add Auth0 SDK: `pnpm add auth0`
+- [ ] Add OAuth dependencies: `pnpm add openid-client` (OIDC-certified client for secure PKCE flow)
 - [ ] Create `libs/auth0.ts` client configuration
 - [ ] Add CSRF state management (Redis)
 - [ ] Add Swagger documentation
+- [ ] Add rate limiting for OAuth endpoints (see below)
+- [ ] Add RabbitMQ audit event publishers
+
+**Rate Limiting for OAuth Endpoints:**
+
+```typescript
+// OAuth routes should have separate rate limits (expensive operations)
+// Add to API Gateway or auth-service middleware
+const oauthRateLimits = {
+  '/auth/oauth/authorize': { windowMs: 60000, max: 10 },  // 10 req/min per IP
+  '/auth/oauth/callback': { windowMs: 60000, max: 20 },   // 20 req/min per IP
+  '/auth/oauth/link': { windowMs: 60000, max: 5 },        // 5 req/min per user
+  '/auth/oauth/unlink': { windowMs: 60000, max: 5 },      // 5 req/min per user
+};
+```
+
+**RabbitMQ Audit Events to Add:**
+
+```typescript
+// Add to apps/auth-service/src/events/publisher.ts
+export async function publishOAuthLoginAttempt(data: {
+  provider: string;
+  email?: string;
+  success: boolean;
+  error?: string;
+  ipAddress: string;
+  timestamp: string;
+}): Promise<void>;
+
+export async function publishOAuthAccountLinked(data: {
+  userId: string;
+  provider: string;
+  providerEmail: string;
+  timestamp: string;
+}): Promise<void>;
+
+export async function publishOAuthAccountUnlinked(data: {
+  userId: string;
+  provider: string;
+  timestamp: string;
+}): Promise<void>;
+```
 
 **Files to Create/Modify:**
 
@@ -776,6 +963,7 @@ export { router as oauthRoutes };
 - `apps/auth-service/src/controllers/oauth.controller.ts` (New)
 - `apps/auth-service/src/routes/oauth.routes.ts` (New)
 - `apps/auth-service/src/lib/auth0.ts` (New)
+- `apps/auth-service/src/events/publisher.ts` (Add OAuth events)
 - `apps/auth-service/src/main.ts` (Register routes)
 
 **Success Criteria:**
@@ -784,10 +972,12 @@ export { router as oauthRoutes };
 - [ ] `/auth/oauth/callback` handles Auth0 response
 - [ ] User created/found in database
 - [ ] JWT tokens issued
+- [ ] Rate limiting active on OAuth endpoints
+- [ ] Audit events published to RabbitMQ
 
 ---
 
-### Priority 2.2: User Account Linking Service
+### Priority 2.3: User Account Linking Service
 
 **Effort:** 3 hours
 **Impact:** Links social accounts to users
@@ -841,36 +1031,8 @@ async function handleSocialLogin(
 
 - [ ] Existing OAuth users recognized
 - [ ] Email matching auto-links (if verified)
-- [ ] New users created correctly
+- [ ] New users created correctly (with `hasPassword = false`)
 - [ ] Conflicts handled gracefully
-
----
-
-### Priority 2.3: Database Schema Updates
-
-**Effort:** 1 hour
-**Impact:** Stores OAuth account data
-
-**Tasks:**
-
-- [ ] Add `OAuthAccount` model to schema.prisma
-- [ ] Add relation to `User` model
-- [ ] Create and run migration
-- [ ] Generate Prisma client
-
-**Commands:**
-
-```bash
-# After updating schema.prisma
-pnpm db:auth:generate
-pnpm db:auth:migrate --name add_oauth_accounts
-```
-
-**Success Criteria:**
-
-- [ ] Migration runs successfully
-- [ ] Prisma client updated
-- [ ] No breaking changes to existing data
 
 ---
 
@@ -933,6 +1095,34 @@ async function handleCallback(code: string): Promise<SocialLoginResult> {
 
 ## Phase 3: Frontend Integration
 
+### Frontend OAuth Redirect Flow (IMPORTANT)
+
+The frontend **does NOT** redirect directly to Auth0. Instead, it uses the backend as a proxy to generate CSRF state:
+
+```text
+Correct Flow:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 1. User clicks "Continue with Google"                                       │
+│    ↓                                                                        │
+│ 2. Frontend redirects to YOUR backend:                                      │
+│    https://localhost/api/auth/oauth/authorize?provider=google&returnUrl=/   │
+│    ↓                                                                        │
+│ 3. Backend generates CSRF state, stores in Redis, redirects to Auth0        │
+│    ↓                                                                        │
+│ 4. Auth0 → Google → Auth0 → YOUR /api/auth/oauth/callback                   │
+│    ↓                                                                        │
+│ 5. Backend validates state, creates/finds user, issues JWT                  │
+│    ↓                                                                        │
+│ 6. Backend redirects to frontend: /oauth-callback#access_token=...          │
+│    ↓                                                                        │
+│ 7. Frontend OAuthCallback component extracts tokens, updates auth store     │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+**Why this matters:** The CSRF state parameter MUST be generated server-side and stored in Redis. Never generate OAuth state client-side.
+
+---
+
 ### Priority 3.1: Social Login Buttons Component
 
 **Effort:** 2 hours
@@ -943,13 +1133,8 @@ async function handleCallback(code: string): Promise<SocialLoginResult> {
 ```typescript
 import * as React from 'react';
 import { Button } from './Button';
-import {
-  GoogleIcon,
-  GitHubIcon,
-  FacebookIcon,
-  LinkedInIcon,
-  TwitterIcon
-} from './icons/social';
+// Use Lucide icons (already in shadcn/ui) - no need for custom icon files
+import { Loader2 } from 'lucide-react';
 
 export interface SocialLoginButtonsProps {
   onProviderClick: (provider: string) => void;
@@ -958,12 +1143,46 @@ export interface SocialLoginButtonsProps {
   enabledProviders?: string[]; // Subset of providers to show
 }
 
+// SVG icons as inline components (brand-accurate colors)
+const GoogleIcon = () => (
+  <svg className="h-4 w-4 mr-2" viewBox="0 0 24 24">
+    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+  </svg>
+);
+
+const GitHubIcon = () => (
+  <svg className="h-4 w-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
+    <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+  </svg>
+);
+
+const FacebookIcon = () => (
+  <svg className="h-4 w-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
+    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+  </svg>
+);
+
+const LinkedInIcon = () => (
+  <svg className="h-4 w-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
+    <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+  </svg>
+);
+
+const XIcon = () => (
+  <svg className="h-4 w-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
+    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+  </svg>
+);
+
 const providers = [
-  { id: 'google', name: 'Google', icon: GoogleIcon, bgColor: 'bg-white', textColor: 'text-gray-700', borderColor: 'border-gray-300' },
-  { id: 'github', name: 'GitHub', icon: GitHubIcon, bgColor: 'bg-gray-900', textColor: 'text-white', borderColor: 'border-gray-900' },
-  { id: 'facebook', name: 'Facebook', icon: FacebookIcon, bgColor: 'bg-blue-600', textColor: 'text-white', borderColor: 'border-blue-600' },
-  { id: 'linkedin', name: 'LinkedIn', icon: LinkedInIcon, bgColor: 'bg-blue-700', textColor: 'text-white', borderColor: 'border-blue-700' },
-  { id: 'twitter', name: 'X', icon: TwitterIcon, bgColor: 'bg-black', textColor: 'text-white', borderColor: 'border-black' },
+  { id: 'google', name: 'Google', icon: GoogleIcon, className: 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50' },
+  { id: 'github', name: 'GitHub', icon: GitHubIcon, className: 'bg-gray-900 text-white border-gray-900 hover:bg-gray-800' },
+  { id: 'facebook', name: 'Facebook', icon: FacebookIcon, className: 'bg-[#1877F2] text-white border-[#1877F2] hover:bg-[#166FE5]' },
+  { id: 'linkedin', name: 'LinkedIn', icon: LinkedInIcon, className: 'bg-[#0A66C2] text-white border-[#0A66C2] hover:bg-[#004182]' },
+  { id: 'twitter', name: 'X', icon: XIcon, className: 'bg-black text-white border-black hover:bg-gray-900' },
 ];
 
 export function SocialLoginButtons({
@@ -981,14 +1200,14 @@ export function SocialLoginButtons({
           key={provider.id}
           type="button"
           variant="outline"
-          className={`w-full ${provider.bgColor} ${provider.textColor} border ${provider.borderColor} hover:opacity-90`}
+          className={`w-full border ${provider.className}`}
           onClick={() => onProviderClick(provider.id)}
           disabled={disabled || loading !== null}
         >
           {loading === provider.id ? (
-            <Spinner className="mr-2 h-4 w-4" />
+            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
           ) : (
-            <provider.icon className="mr-2 h-4 w-4" />
+            <provider.icon />
           )}
           Continue with {provider.name}
         </Button>
@@ -1000,8 +1219,8 @@ export function SocialLoginButtons({
 
 **Tasks:**
 
-- [ ] Create `SocialLoginButtons` component
-- [ ] Create social provider icons (Google, GitHub, Facebook, LinkedIn, X)
+- [ ] Create `SocialLoginButtons` component with inline SVG icons (brand-accurate)
+- [ ] Use Lucide `Loader2` for loading state (already available in shadcn/ui)
 - [ ] Add loading states
 - [ ] Add disabled states
 - [ ] Export from shared-design-system
@@ -1010,7 +1229,8 @@ export function SocialLoginButtons({
 **Files to Create:**
 
 - `libs/shared-design-system/src/lib/components/SocialLoginButtons.tsx`
-- `libs/shared-design-system/src/lib/components/icons/social/` (icon components)
+
+**Note:** Icons are inline SVGs instead of separate files. This ensures brand-accurate colors and avoids extra dependencies.
 
 **Success Criteria:**
 
@@ -1018,10 +1238,180 @@ export function SocialLoginButtons({
 - [ ] Click events fire correctly
 - [ ] Loading/disabled states work
 - [ ] Styling matches design system
+- [ ] Icons render with correct brand colors
 
 ---
 
-### Priority 3.2: Sign-In Page Integration
+### Priority 3.2: OAuth Callback Route & Component (NEW)
+
+**Effort:** 2 hours
+**Impact:** Handles token extraction after OAuth redirect
+
+This component handles the redirect from the backend after successful OAuth authentication.
+
+**File:** `apps/auth-mfe/src/components/OAuthCallback.tsx`
+
+```typescript
+import { useEffect, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useAuthStore } from 'shared-auth-store';
+import { Loader2 } from 'lucide-react';
+
+/**
+ * OAuthCallback handles the redirect from the backend OAuth flow.
+ *
+ * The backend redirects to one of these URLs:
+ * - /oauth-callback#access_token=...&refresh_token=...&expires_in=... (success)
+ * - /oauth-callback?error=...&message=... (error)
+ * - /mfa-verify?mfaToken=...&returnUrl=... (MFA required)
+ * - /mfa-recommend?mfaToken=...&returnUrl=... (MFA recommendation)
+ */
+export function OAuthCallback() {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const { setTokens, setUser, fetchCurrentUser } = useAuthStore();
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const processCallback = async () => {
+      // Check for error in query params
+      const errorParam = searchParams.get('error');
+      if (errorParam) {
+        const message = searchParams.get('message') || 'OAuth authentication failed';
+        setError(message);
+        return;
+      }
+
+      // Extract tokens from URL fragment (hash)
+      const hash = window.location.hash.substring(1);
+      const params = new URLSearchParams(hash);
+
+      const accessToken = params.get('access_token');
+      const refreshToken = params.get('refresh_token');
+      const expiresIn = params.get('expires_in');
+      const returnUrl = params.get('return_url') || '/';
+
+      if (!accessToken || !refreshToken) {
+        setError('Invalid OAuth callback: missing tokens');
+        return;
+      }
+
+      try {
+        // Update auth store with tokens
+        setTokens(accessToken, refreshToken);
+
+        // Fetch user data
+        await fetchCurrentUser();
+
+        // Clear the hash from URL (security)
+        window.history.replaceState(null, '', window.location.pathname);
+
+        // Navigate to return URL
+        navigate(returnUrl, { replace: true });
+      } catch (err) {
+        console.error('OAuth callback error:', err);
+        setError('Failed to complete authentication');
+      }
+    };
+
+    processCallback();
+  }, [searchParams, setTokens, fetchCurrentUser, navigate]);
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
+        <div className="text-destructive text-lg font-medium">
+          Authentication Failed
+        </div>
+        <p className="text-muted-foreground text-center max-w-md">{error}</p>
+        <button
+          onClick={() => navigate('/signin')}
+          className="text-primary hover:underline"
+        >
+          Return to Sign In
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
+      <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <p className="text-muted-foreground">Completing sign in...</p>
+    </div>
+  );
+}
+```
+
+**Shell Router Update:**
+
+**File:** `apps/shell/src/app/app.tsx` (or routes file)
+
+```typescript
+// Add these routes to the shell router
+import { lazy } from 'react';
+
+const OAuthCallback = lazy(() =>
+  import('authMfe/OAuthCallback').then(m => ({ default: m.OAuthCallback }))
+);
+const MfaVerify = lazy(() =>
+  import('authMfe/MfaVerify').then(m => ({ default: m.MfaVerify }))
+);
+const MfaRecommend = lazy(() =>
+  import('authMfe/MfaRecommendation').then(m => ({ default: m.MfaRecommendation }))
+);
+
+// Add to routes:
+<Route path="/oauth-callback" element={<OAuthCallback />} />
+<Route path="/mfa-verify" element={<MfaVerify />} />
+<Route path="/mfa-recommend" element={<MfaRecommend />} />
+```
+
+**Auth MFE Exports:**
+
+**File:** `apps/auth-mfe/rspack.config.js`
+
+```javascript
+// Add to exposes section:
+exposes: {
+  './SignIn': './src/components/SignIn.tsx',
+  './SignUp': './src/components/SignUp.tsx',
+  './VerifyEmail': './src/components/VerifyEmail.tsx',
+  './OAuthCallback': './src/components/OAuthCallback.tsx',  // NEW
+  './MfaRecommendation': './src/components/MfaRecommendation.tsx',  // NEW (Phase 3.6)
+},
+```
+
+**Tasks:**
+
+- [ ] Create `OAuthCallback` component
+- [ ] Handle token extraction from URL fragment
+- [ ] Handle error display
+- [ ] Handle MFA redirect scenarios
+- [ ] Update auth store with tokens
+- [ ] Clear URL hash after processing (security)
+- [ ] Add route to shell router
+- [ ] Export from auth-mfe rspack.config.js
+- [ ] Add unit tests
+
+**Files to Create/Modify:**
+
+- `apps/auth-mfe/src/components/OAuthCallback.tsx` (New)
+- `apps/auth-mfe/rspack.config.js` (Add export)
+- `apps/shell/src/app/app.tsx` (Add route)
+
+**Success Criteria:**
+
+- [ ] Component extracts tokens from URL fragment
+- [ ] Auth store updated with tokens
+- [ ] User data fetched after token storage
+- [ ] URL hash cleared after processing
+- [ ] Error states handled gracefully
+- [ ] Redirect to return URL works
+
+---
+
+### Priority 3.3: Sign-In Page Integration
 
 **Effort:** 2 hours
 **Impact:** Adds social login to sign in
@@ -1032,8 +1422,7 @@ export function SocialLoginButtons({
 
 - Add `SocialLoginButtons` component
 - Add "or" divider between social and email login
-- Handle social login redirect
-- Handle OAuth callback redirect
+- Handle social login redirect (to backend, NOT directly to Auth0)
 
 **Layout:**
 
@@ -1069,24 +1458,37 @@ export function SocialLoginButtons({
 └────────────────────────────────────────┘
 ```
 
+**Social Login Handler:**
+
+```typescript
+// IMPORTANT: Redirect to YOUR backend, not directly to Auth0
+const handleSocialLogin = (provider: string) => {
+  const apiBaseUrl = process.env.NX_API_BASE_URL || 'https://localhost/api';
+  const returnUrl = encodeURIComponent(window.location.pathname || '/');
+
+  // Redirect to YOUR backend OAuth endpoint
+  // The backend will generate CSRF state and redirect to Auth0
+  window.location.href = `${apiBaseUrl}/auth/oauth/authorize?provider=${provider}&returnUrl=${returnUrl}`;
+};
+```
+
 **Tasks:**
 
 - [ ] Add `SocialLoginButtons` to SignIn component
 - [ ] Add divider with "or" text
-- [ ] Implement `handleSocialLogin(provider)` function
-- [ ] Add API base URL configuration for OAuth redirect
-- [ ] Handle errors from OAuth callback
+- [ ] Implement `handleSocialLogin(provider)` function (redirect to backend)
+- [ ] Handle errors from OAuth callback (via URL params)
 
 **Success Criteria:**
 
 - [ ] Social buttons appear on signin page
-- [ ] Clicking button redirects to Auth0
-- [ ] Successful login returns to app
+- [ ] Clicking button redirects to backend `/api/auth/oauth/authorize`
+- [ ] Successful login returns to app via OAuthCallback
 - [ ] Errors displayed appropriately
 
 ---
 
-### Priority 3.3: Sign Up Page Integration
+### Priority 3.4: Sign Up Page Integration
 
 **Effort:** 1 hour
 **Impact:** Adds social signup option
@@ -1103,17 +1505,17 @@ export function SocialLoginButtons({
 
 - [ ] Add `SocialLoginButtons` to SignUp component
 - [ ] Add "or" divider
-- [ ] Reuse same OAuth redirect logic
+- [ ] Reuse same OAuth redirect logic (same `handleSocialLogin` function)
 
 **Success Criteria:**
 
 - [ ] Social buttons appear on signup page
 - [ ] New user created on first social login
-- [ ] Existing user with same email handled
+- [ ] Existing user with same email handled (conflict error or auto-link)
 
 ---
 
-### Priority 3.4: Account Linking UI (Profile Page)
+### Priority 3.5: Account Linking UI (Profile Page)
 
 **Effort:** 3 hours
 **Impact:** Users can manage linked accounts
@@ -1176,7 +1578,7 @@ export function LinkedAccounts() {
 
 ---
 
-### Priority 3.5: MFA Recommendation Page
+### Priority 3.6: MFA Recommendation Page
 
 **Effort:** 2 hours
 **Impact:** Encourages MFA adoption
@@ -1277,6 +1679,7 @@ export function MfaRecommendation({
 #### Frontend Tests
 
 - `libs/shared-design-system/src/lib/components/SocialLoginButtons.spec.tsx`
+- `apps/auth-mfe/src/components/OAuthCallback.spec.tsx`
 - `apps/auth-mfe/src/components/MfaRecommendation.spec.tsx`
 - `apps/profile-mfe/src/components/LinkedAccounts.spec.tsx`
 
@@ -1285,6 +1688,9 @@ export function MfaRecommendation({
 - [ ] Social buttons render correctly
 - [ ] Click handlers fire
 - [ ] Loading states display
+- [ ] OAuthCallback extracts tokens from hash
+- [ ] OAuthCallback handles errors
+- [ ] OAuthCallback clears URL hash after processing
 - [ ] MFA recommendation renders
 - [ ] Linked accounts list renders
 - [ ] Link/unlink flows work
@@ -1521,8 +1927,26 @@ Log the following events:
 
 ### npm Packages
 
-- `auth0` - Auth0 SDK for Node.js
-- No frontend SDK needed (redirect-based flow)
+**Backend (auth-service):**
+
+- `openid-client` - OpenID Connect certified client for secure OAuth/OIDC flows with PKCE support (recommended over raw HTTP calls)
+- `auth0` - Auth0 Management API SDK (optional, for user management operations)
+
+**Frontend:**
+
+- No additional SDK needed (redirect-based flow)
+- Uses existing `lucide-react` for loading spinner (already in shadcn/ui)
+
+**Installation:**
+
+```bash
+# Backend
+cd apps/auth-service
+pnpm add openid-client
+
+# Optional: Auth0 Management API
+pnpm add auth0
+```
 
 ---
 
