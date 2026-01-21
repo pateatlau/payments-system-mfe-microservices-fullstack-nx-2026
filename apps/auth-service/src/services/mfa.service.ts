@@ -722,6 +722,15 @@ export async function disableMfa(
               throw new ApiError(400, 'MFA_NOT_ENABLED', 'MFA is not enabled.');
             }
 
+            // Check if user has a password (social-only users may not)
+            if (!user.passwordHash || !user.hasPassword) {
+              throw new ApiError(
+                400,
+                'NO_PASSWORD_SET',
+                'Cannot disable MFA with password verification. Please use your social login provider.'
+              );
+            }
+
             // Verify password
             const bcrypt = await import('bcrypt');
             const passwordValid = await bcrypt.compare(password, user.passwordHash);

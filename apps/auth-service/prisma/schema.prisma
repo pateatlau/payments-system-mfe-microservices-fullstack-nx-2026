@@ -24,10 +24,11 @@ enum UserRole {
 model User {
   id            String    @id @default(uuid())
   email         String    @unique
-  passwordHash  String    @map("password_hash")
+  passwordHash  String?   @map("password_hash")  // Nullable for social-only users
   name          String
   role          UserRole
   emailVerified Boolean   @default(false) @map("email_verified")
+  hasPassword   Boolean   @default(true) @map("has_password")  // Track if user has password set
   createdAt     DateTime  @default(now()) @map("created_at")
   updatedAt     DateTime  @updatedAt @map("updated_at")
 
@@ -37,8 +38,9 @@ model User {
   mfaBackupCodes  Json?     @map("mfa_backup_codes") // Encrypted backup codes array
   mfaVerified     Boolean   @default(false) @map("mfa_verified") // Setup completion flag
 
-  refreshTokens RefreshToken[]
-  devices       Device[]
+  refreshTokens  RefreshToken[]
+  devices        Device[]
+  oauthAccounts  OAuthAccount[]
 
   @@index([email])
   @@index([role])
@@ -79,4 +81,26 @@ model Device {
   @@index([userId])
   @@index([deviceId])
   @@map("devices")
+}
+
+// OAuth/Social Login accounts linked to users
+model OAuthAccount {
+  id                String    @id @default(uuid())
+  userId            String    @map("user_id")
+  provider          String    // 'google', 'github', 'facebook', 'linkedin', 'twitter'
+  providerAccountId String    @map("provider_account_id")  // User ID from the provider
+  email             String?   // Email from provider (may differ from user's primary email)
+  name              String?   // Name from provider
+  avatarUrl         String?   @map("avatar_url")
+  accessToken       String?   @map("access_token")   // Encrypted, for future API access
+  refreshToken      String?   @map("refresh_token")  // Encrypted, for future API access
+  tokenExpiresAt    DateTime? @map("token_expires_at")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])  // One provider account can only link to one user
+  @@index([userId])
+  @@map("oauth_accounts")
 }

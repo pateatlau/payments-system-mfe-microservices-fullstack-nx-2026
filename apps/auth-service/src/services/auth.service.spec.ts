@@ -65,6 +65,7 @@ describe('AuthService', () => {
       name: 'Test User',
       role: UserRole.CUSTOMER,
       passwordHash: 'hashed-password',
+      hasPassword: true,  // User has password set
       emailVerified: false, // POC-3: New users are unverified
       createdAt: new Date('2024-01-01'),
       updatedAt: new Date('2024-01-01'),
@@ -150,6 +151,7 @@ describe('AuthService', () => {
       name: 'Test User',
       role: UserRole.CUSTOMER,
       passwordHash: 'hashed-password',
+      hasPassword: true,  // User has password set
       emailVerified: true, // POC-3: Email verification required for login
       createdAt: new Date('2024-01-01'),
       updatedAt: new Date('2024-01-01'),
@@ -379,6 +381,7 @@ describe('AuthService', () => {
       name: 'Test User',
       role: UserRole.CUSTOMER,
       passwordHash: 'hashed-password',
+      hasPassword: true,  // User has password set
       createdAt: new Date('2024-01-01'),
       updatedAt: new Date('2024-01-01'),
     };
@@ -422,6 +425,7 @@ describe('AuthService', () => {
       name: 'Test User',
       role: UserRole.CUSTOMER,
       passwordHash: 'hashed-current-password',
+      hasPassword: true,  // User has password set
       createdAt: new Date('2024-01-01'),
       updatedAt: new Date('2024-01-01'),
     };

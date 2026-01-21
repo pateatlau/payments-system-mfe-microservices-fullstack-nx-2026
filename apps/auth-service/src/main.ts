@@ -10,6 +10,7 @@ import { config } from './config';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 import healthRoutes from './routes/health';
 import authRoutes from './routes/auth';
+import oauthRoutes from './routes/oauth';
 import deviceRoutes from './routes/devices';
 import sessionRoutes from './routes/sessions';
 import { logger } from './utils/logger';
@@ -193,6 +194,9 @@ app.get('/metrics', async (_req, res) => {
 
 // Auth routes
 app.use(authRoutes);
+
+// OAuth routes (social login)
+app.use(oauthRoutes);
 
 // Device routes (protected)
 app.use(deviceRoutes);
