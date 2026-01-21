@@ -2,11 +2,10 @@ import { ComponentType } from 'react';
 import { RemoteErrorBoundary } from '../components/RemoteErrorBoundary';
 
 /**
- * Props interface for the OAuthCallback component from auth-mfe
+ * Props type for the OAuthCallback component from auth-mfe.
+ * OAuthCallback handles everything internally via URL hash/params.
  */
-export interface OAuthCallbackComponentProps {
-  // OAuthCallback handles everything internally via URL hash/params
-}
+export type OAuthCallbackComponentProps = Record<string, never>;
 
 /**
  * Props for OAuthCallbackPage - allows dependency injection for testing
