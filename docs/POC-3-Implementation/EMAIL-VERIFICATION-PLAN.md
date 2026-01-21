@@ -23,11 +23,11 @@
 
 > **Note:** Phase 2 is deferred until production email infrastructure is in place. The `_dev` token response provides sufficient functionality for development and testing.
 
-### Phase 3: Frontend Integration ⏳ IN PROGRESS
+### Phase 3: Frontend Integration ✅ COMPLETE
 - ✅ **Priority 3.1:** Post-Registration Verification UI (Completed 2026-01-20)
 - ✅ **Priority 3.2:** Email Verification Page (Completed 2026-01-21)
-- ⏳ **Priority 3.3:** Resend Verification UI
-- ⏳ **Priority 3.4:** Login Error Handling for Unverified Users
+- ✅ **Priority 3.3:** Resend Verification UI (Completed 2026-01-21 - integrated in 3.1 & 3.2)
+- ✅ **Priority 3.4:** Login Error Handling for Unverified Users (Completed 2026-01-21)
 
 ---
 
@@ -582,37 +582,55 @@ interface EmailVerificationRequestedPayload {
 
 ---
 
-### Priority 3.3: Resend Verification UI
+### Priority 3.3: Resend Verification UI ✅ COMPLETED
+
+**Status:** ✅ Completed 2026-01-21 (implemented as part of 3.1 and 3.2)
 
 **Integrated into:**
-- `VerificationPending` component (after registration)
-- `VerifyEmail` component (when token expired)
-- Login error handling (when unverified user tries to login)
+- ✅ `VerificationPending` component (after registration) - Priority 3.1
+- ✅ `VerifyEmail` component (when token expired) - Priority 3.2
+- ⏳ Login error handling (when unverified user tries to login) - Priority 3.4
 
-**Features:**
-- Rate limit feedback (show cooldown timer)
-- Success/error toast notifications
-- Prevent spam clicking
+**Features Implemented:**
+- ✅ Rate limit feedback (60-second cooldown timer)
+- ✅ Success/error alert notifications
+- ✅ Prevent spam clicking (cooldown + isResending state)
+- ✅ Email input for resend in VerifyEmail (when no email known)
+- ✅ 429 rate limit error handling
 
 ---
 
-### Priority 3.4: Login Error Handling for Unverified Users
+### Priority 3.4: Login Error Handling for Unverified Users ✅ COMPLETED
 
-**File:** `apps/auth-mfe/src/components/SignIn.tsx`
+**Status:** ✅ Completed 2026-01-21
 
-**Changes:**
-- Detect `EMAIL_NOT_VERIFIED` error code
-- Show friendly message with resend option
-- Don't show generic "invalid credentials" error
+**Files Modified:**
+- `libs/shared-auth-store/src/lib/shared-auth-store.ts` - Added `errorCode` to state
+- `apps/auth-mfe/src/components/SignIn.tsx` - Added EMAIL_NOT_VERIFIED handling
 
-**Tasks:**
-- [ ] Add specific handling for EMAIL_NOT_VERIFIED error
-- [ ] Show verification pending UI with resend option
-- [ ] Integrate with resend verification API
+**Changes Implemented:**
+- ✅ Detect `EMAIL_NOT_VERIFIED` error code from auth store
+- ✅ Show friendly amber alert message with resend option
+- ✅ Don't show generic "invalid credentials" error for unverified users
+- ✅ Resend button with 60-second cooldown
+- ✅ Success/error feedback for resend action
 
-**Files to Modify:**
-- `apps/auth-mfe/src/components/SignIn.tsx`
-- `libs/shared-auth-store/src/lib/auth-store.ts` (Handle new error type)
+**Completed Tasks:**
+- [x] Add `errorCode` field to AuthState interface
+- [x] Extract error code from API error in login catch block
+- [x] Update `clearError()` to also clear `errorCode`
+- [x] Add specific handling for EMAIL_NOT_VERIFIED error in SignIn
+- [x] Show verification pending UI with resend option
+- [x] Integrate with resend verification API (`/auth/resend-verification`)
+- [x] Add cooldown timer to prevent spam
+
+**User Flow:**
+1. User attempts to login with unverified email
+2. Backend returns 403 with `EMAIL_NOT_VERIFIED` error code
+3. SignIn component detects error code and shows amber alert
+4. User can click "Resend Verification Email" button
+5. 60-second cooldown prevents spam
+6. Success/error feedback shown for resend action
 
 ---
 
