@@ -71,7 +71,7 @@ export const adminService = {
     const total = await db.user.count({ where });
 
     // Get users
-    const users = await db.user.findMany({
+    const usersRaw = await db.user.findMany({
       where,
       skip,
       take: limit,
@@ -81,12 +81,21 @@ export const adminService = {
         email: true,
         name: true,
         role: true,
+        emailVerified: true,
         createdAt: true,
         updatedAt: true,
         // Note: isActive field not yet in schema
         // Exclude password hash
       },
     });
+
+    // Convert Prisma Date objects to ISO strings for proper JSON serialization
+    // Prisma's Date objects don't serialize correctly with JSON.stringify()
+    const users = usersRaw.map((user: { id: string; email: string; name: string; role: string; emailVerified: boolean; createdAt: Date; updatedAt: Date }) => ({
+      ...user,
+      createdAt: user.createdAt instanceof Date ? user.createdAt.toISOString() : user.createdAt,
+      updatedAt: user.updatedAt instanceof Date ? user.updatedAt.toISOString() : user.updatedAt,
+    }));
 
     return {
       users,
@@ -110,6 +119,7 @@ export const adminService = {
         email: true,
         name: true,
         role: true,
+        emailVerified: true,
         createdAt: true,
         updatedAt: true,
         // Note: isActive field not yet in schema
@@ -121,7 +131,12 @@ export const adminService = {
       throw new ApiError(404, 'USER_NOT_FOUND', 'User not found');
     }
 
-    return user;
+    // Convert Prisma Date objects to ISO strings for proper JSON serialization
+    return {
+      ...user,
+      createdAt: user.createdAt instanceof Date ? user.createdAt.toISOString() : user.createdAt,
+      updatedAt: user.updatedAt instanceof Date ? user.updatedAt.toISOString() : user.updatedAt,
+    };
   },
 
   /**
@@ -196,7 +211,12 @@ export const adminService = {
       console.error('[Admin Service] Failed to publish admin.user.updated event:', error);
     }
 
-    return updatedUser;
+    // Convert Prisma Date objects to ISO strings for proper JSON serialization
+    return {
+      ...updatedUser,
+      createdAt: updatedUser.createdAt instanceof Date ? updatedUser.createdAt.toISOString() : updatedUser.createdAt,
+      updatedAt: updatedUser.updatedAt instanceof Date ? updatedUser.updatedAt.toISOString() : updatedUser.updatedAt,
+    };
   },
 
   /**
@@ -247,7 +267,12 @@ export const adminService = {
       }
     }
 
-    return updatedUser;
+    // Convert Prisma Date objects to ISO strings for proper JSON serialization
+    return {
+      ...updatedUser,
+      createdAt: updatedUser.createdAt instanceof Date ? updatedUser.createdAt.toISOString() : updatedUser.createdAt,
+      updatedAt: updatedUser.updatedAt instanceof Date ? updatedUser.updatedAt.toISOString() : updatedUser.updatedAt,
+    };
   },
 
   /**

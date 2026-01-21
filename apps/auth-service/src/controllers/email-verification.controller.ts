@@ -24,6 +24,7 @@ import {
   consumeVerificationToken,
   generateVerificationToken,
 } from '../services/email-verification.service';
+import { publishUserUpdated } from '../events/publisher';
 import { ApiError } from '../middleware/errorHandler';
 
 /**
@@ -151,6 +152,18 @@ export const verifyEmail = async (
     // Invalidate user cache
     await cache.invalidateByTag(CacheTags.user(payload.userId));
 
+    // Publish user.updated event to sync emailVerified status to other services
+    try {
+      await publishUserUpdated({
+        userId: payload.userId,
+        emailVerified: true,
+        updatedAt: new Date().toISOString(),
+      });
+    } catch (eventError) {
+      // Log but don't fail - verification succeeded
+      console.error('[Email Verification] Failed to publish user.updated event:', eventError);
+    }
+
     console.log(`[Email Verification] Email verified for user ${payload.userId}`);
 
     return res.status(200).json({
@@ -273,6 +286,18 @@ export const verifyEmailByLink = async (
 
     // Invalidate user cache
     await cache.invalidateByTag(CacheTags.user(payload.userId));
+
+    // Publish user.updated event to sync emailVerified status to other services
+    try {
+      await publishUserUpdated({
+        userId: payload.userId,
+        emailVerified: true,
+        updatedAt: new Date().toISOString(),
+      });
+    } catch (eventError) {
+      // Log but don't fail - verification succeeded
+      console.error('[Email Verification] Failed to publish user.updated event:', eventError);
+    }
 
     console.log(
       `[Email Verification] Email verified via link for user ${payload.userId}`

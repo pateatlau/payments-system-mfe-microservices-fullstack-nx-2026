@@ -179,14 +179,27 @@ export function UserManagement() {
   };
 
   /**
-   * Format date
+   * Format date safely
    */
-  const formatDate = (dateString: string): string => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
+  const formatDate = (dateValue: string | Date | null | undefined): string => {
+    // Handle null, undefined, or empty object (from bad Prisma serialization)
+    if (!dateValue || (typeof dateValue === 'object' && !(dateValue instanceof Date) && Object.keys(dateValue).length === 0)) {
+      return 'N/A';
+    }
+
+    try {
+      const date = dateValue instanceof Date ? dateValue : new Date(dateValue);
+      if (Number.isNaN(date.getTime())) {
+        return 'N/A';
+      }
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+      });
+    } catch {
+      return 'N/A';
+    }
   };
 
   return (
