@@ -271,6 +271,7 @@ module.exports = {
         './ForgotPassword': './src/components/ForgotPassword.tsx',
         './ResetPassword': './src/components/ResetPassword.tsx',
         './VerifyEmail': './src/components/VerifyEmail.tsx',
+        './OAuthCallback': './src/components/OAuthCallback.tsx',
       },
       shared: sharedDependencies,
     }),

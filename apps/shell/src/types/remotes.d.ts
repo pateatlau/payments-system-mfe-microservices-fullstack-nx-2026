@@ -45,6 +45,12 @@ declare module 'authMfe/VerifyEmail' {
   export default VerifyEmail;
 }
 
+declare module 'authMfe/OAuthCallback' {
+  import { ComponentType } from 'react';
+  const OAuthCallback: ComponentType;
+  export default OAuthCallback;
+}
+
 declare module 'paymentsMfe/PaymentsPage' {
   import { ComponentType } from 'react';
   const PaymentsPage: ComponentType;

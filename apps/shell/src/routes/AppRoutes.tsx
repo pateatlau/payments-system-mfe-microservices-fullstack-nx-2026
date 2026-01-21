@@ -7,6 +7,7 @@ import { SignUpPage, SignUpComponentProps } from '../pages/SignUpPage';
 import { ForgotPasswordPage, ForgotPasswordComponentProps } from '../pages/ForgotPasswordPage';
 import { ResetPasswordPage, ResetPasswordComponentProps } from '../pages/ResetPasswordPage';
 import { VerifyEmailPage, VerifyEmailComponentProps } from '../pages/VerifyEmailPage';
+import { OAuthCallbackPage, OAuthCallbackComponentProps } from '../pages/OAuthCallbackPage';
 import { PaymentsPage, PaymentsComponentProps } from '../pages/PaymentsPage';
 import { ReportsPage, ReportsComponentProps } from '../pages/ReportsPage';
 import { AdminPage, AdminDashboardComponentProps } from '../pages/AdminPage';
@@ -37,6 +38,10 @@ export interface AppRoutesProps {
    * VerifyEmail component to use. Required for proper DI pattern.
    */
   VerifyEmailComponent: ComponentType<VerifyEmailComponentProps>;
+  /**
+   * OAuthCallback component to use. Required for proper DI pattern.
+   */
+  OAuthCallbackComponent: ComponentType<OAuthCallbackComponentProps>;
   /**
    * PaymentsPage component to use. Required for proper DI pattern.
    */
@@ -85,6 +90,7 @@ export function AppRoutes({
   ForgotPasswordComponent,
   ResetPasswordComponent,
   VerifyEmailComponent,
+  OAuthCallbackComponent,
   PaymentsComponent,
   ReportsComponent,
   AdminDashboardComponent,
@@ -133,6 +139,11 @@ export function AppRoutes({
       <Route
         path="/verify-email"
         element={<VerifyEmailPage VerifyEmailComponent={VerifyEmailComponent} />}
+      />
+      {/* OAuth callback route - handles redirect from OAuth providers */}
+      <Route
+        path="/oauth-callback"
+        element={<OAuthCallbackPage OAuthCallbackComponent={OAuthCallbackComponent} />}
       />
 
       {/* Protected routes - require authentication */}

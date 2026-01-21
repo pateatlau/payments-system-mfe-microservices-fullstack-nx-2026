@@ -66,7 +66,11 @@
   - Loading spinner, disabled states, accessible labels
   - Unit tests in `SocialLoginButtons.test.tsx`
   - Exported from `libs/shared-design-system/src/index.ts`
-- **Priority 3.2:** OAuth Callback Route & Component _(NEW - handles token extraction)_
+- **Priority 3.2:** OAuth Callback Route & Component ✅
+  - Created `apps/auth-mfe/src/components/OAuthCallback.tsx`
+  - Extracts tokens from URL hash, fetches user info, updates auth store
+  - Added `/oauth-callback` route to shell router
+  - Full Module Federation integration (exposed, lazy-loaded, type-declared)
 - **Priority 3.3:** Sign In Page Integration _(was 3.2)_
 - **Priority 3.4:** Sign Up Page Integration _(was 3.3)_
 - **Priority 3.5:** Account Linking UI (Profile Page) _(was 3.4)_
@@ -1418,30 +1422,35 @@ exposes: {
 
 **Tasks:**
 
-- [ ] Create `OAuthCallback` component
-- [ ] Handle token extraction from URL fragment
-- [ ] Handle error display
-- [ ] Handle MFA redirect scenarios
-- [ ] Update auth store with tokens
-- [ ] Clear URL hash after processing (security)
-- [ ] Add route to shell router
-- [ ] Export from auth-mfe rspack.config.js
-- [ ] Add unit tests
+- [x] Create `OAuthCallback` component ✅
+- [x] Handle token extraction from URL fragment ✅
+- [x] Handle error display ✅
+- [x] Handle MFA redirect scenarios ✅ (backend handles redirect to /mfa)
+- [x] Update auth store with tokens ✅
+- [x] Clear URL hash after processing (security) ✅
+- [x] Add route to shell router ✅
+- [x] Export from auth-mfe rspack.config.js ✅
+- [ ] Add unit tests (deferred to Phase 4)
 
-**Files to Create/Modify:**
+**Files Created/Modified:**
 
 - `apps/auth-mfe/src/components/OAuthCallback.tsx` (New)
 - `apps/auth-mfe/rspack.config.js` (Add export)
-- `apps/shell/src/app/app.tsx` (Add route)
+- `apps/shell/src/pages/OAuthCallbackPage.tsx` (New)
+- `apps/shell/src/routes/AppRoutes.tsx` (Add route + props)
+- `apps/shell/src/app/app.tsx` (Add props)
+- `apps/shell/src/bootstrap.tsx` (Add remote import)
+- `apps/shell/src/remotes/index.tsx` (Add lazy loader)
+- `apps/shell/src/types/remotes.d.ts` (Add type declaration)
 
 **Success Criteria:**
 
-- [ ] Component extracts tokens from URL fragment
-- [ ] Auth store updated with tokens
-- [ ] User data fetched after token storage
-- [ ] URL hash cleared after processing
-- [ ] Error states handled gracefully
-- [ ] Redirect to return URL works
+- [x] Component extracts tokens from URL fragment ✅
+- [x] Auth store updated with tokens ✅
+- [x] User data fetched after token storage ✅
+- [x] URL hash cleared after processing ✅
+- [x] Error states handled gracefully ✅
+- [x] Redirect to return URL works ✅
 
 ---
 

@@ -83,6 +83,12 @@ const LazyVerifyEmail = lazy(() =>
   }))
 );
 
+const LazyOAuthCallback = lazy(() =>
+  import('authMfe/OAuthCallback').catch(() => ({
+    default: () => <ErrorFallback componentName="OAuthCallback" />,
+  }))
+);
+
 const LazyPaymentsPage = lazy(() =>
   import('paymentsMfe/PaymentsPage').catch(() => ({
     default: () => <ErrorFallback componentName="PaymentsPage" />,
@@ -121,6 +127,10 @@ export const ResetPasswordRemote = withSuspense(
 export const VerifyEmailRemote = withSuspense(
   LazyVerifyEmail,
   'Loading email verification...'
+);
+export const OAuthCallbackRemote = withSuspense(
+  LazyOAuthCallback,
+  'Completing sign in...'
 );
 export const PaymentsPageRemote = withSuspense(
   LazyPaymentsPage,
