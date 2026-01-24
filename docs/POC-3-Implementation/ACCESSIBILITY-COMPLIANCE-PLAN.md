@@ -179,7 +179,10 @@ This document outlines the implementation plan for achieving full WCAG 2.1 AA co
 # Install dependencies
 pnpm add -D jest-axe @axe-core/playwright
 
-# Files to create
+# Create new shared library for test utilities (does not exist yet)
+pnpm nx g @nx/js:library shared-test-utils --directory=libs --unitTestRunner=jest
+
+# Files to create in the new library
 libs/shared-test-utils/src/lib/a11y-test-utils.ts
 libs/shared-test-utils/src/lib/a11y-test-utils.spec.ts
 ```
@@ -638,28 +641,32 @@ function PaymentCreateForm() {
 
 **Tasks:**
 
-- [ ] Add lang attribute to HTML element
+- [x] Add lang attribute to HTML element (already present in `apps/shell/index.html`)
 - [ ] Create hook for dynamic language changes (future i18n)
 - [ ] Update document title pattern
 
-**Files to Modify:**
+**Current State:**
+
+The `lang="en"` attribute is already set in `apps/shell/index.html`. No changes needed for basic compliance.
 
 ```html
-<!-- apps/shell/src/index.html -->
-<!DOCTYPE html>
+<!-- apps/shell/index.html (current state - already compliant) -->
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
+    <title>Shell</title>
+    <base href="/" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>MFE Payments System</title>
-    <!-- Accessibility meta tags -->
-    <meta name="description" content="Secure payment processing platform" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
   </head>
   <body>
     <div id="root"></div>
   </body>
 </html>
 ```
+
+**Optional Enhancement:**
 
 ```typescript
 // libs/shared-utils/src/lib/hooks/useDocumentTitle.ts
@@ -833,6 +840,8 @@ export function FormField({
   );
 }
 ```
+
+> **Implementation Note:** The `React.cloneElement` pattern above is simple but can be fragile with certain input types or if the child already defines conflicting props. For more robust implementations, consider a compound component pattern using React Context where the input explicitly retrieves accessibility props via a `useFormField()` hook. This approach is more explicit and avoids prop conflicts.
 
 **Usage Example:**
 
@@ -1229,6 +1238,11 @@ export function Dialog({
     </div>
   );
 
+  // Handle SSR and test environments where document.body may not exist
+  if (typeof document === 'undefined' || !document.body) {
+    return dialog;
+  }
+
   return createPortal(dialog, document.body);
 }
 
@@ -1302,7 +1316,6 @@ export function Table({
       <div className="relative w-full overflow-auto" role="region" aria-labelledby={captionId}>
         <table
           className={cn('w-full caption-bottom text-sm', className)}
-          aria-describedby={captionId}
           {...props}
         >
           <caption
@@ -1368,38 +1381,34 @@ export function TableHead({
   children,
   ...props
 }: TableHeadProps) {
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (sortable && onSort && (e.key === 'Enter' || e.key === ' ')) {
-      e.preventDefault();
-      onSort();
-    }
-  };
-
   return (
     <th
       scope="col"
       className={cn(
         'h-12 px-4 text-left align-middle font-medium text-muted-foreground',
         '[&:has([role=checkbox])]:pr-0',
-        sortable && 'cursor-pointer select-none hover:bg-muted/50',
         className
       )}
       aria-sort={sortable ? sortDirection : undefined}
-      tabIndex={sortable ? 0 : undefined}
-      onClick={sortable ? onSort : undefined}
-      onKeyDown={sortable ? handleKeyDown : undefined}
       {...props}
     >
-      <span className="flex items-center gap-2">
-        {children}
-        {sortable && (
+      {sortable ? (
+        <button
+          type="button"
+          className="flex items-center gap-2 w-full h-full cursor-pointer select-none hover:bg-muted/50 -mx-4 px-4 -my-3 py-3"
+          onClick={onSort}
+          aria-label={`Sort by ${children}${sortDirection !== 'none' ? `, currently ${sortDirection}` : ''}`}
+        >
+          {children}
           <span aria-hidden="true" className="text-xs">
             {sortDirection === 'ascending' && '↑'}
             {sortDirection === 'descending' && '↓'}
             {sortDirection === 'none' && '↕'}
           </span>
-        )}
-      </span>
+        </button>
+      ) : (
+        children
+      )}
     </th>
   );
 }
@@ -1615,7 +1624,6 @@ export function Loading({
       {showText && (
         <span className="text-muted-foreground">{message}</span>
       )}
-      <span className="sr-only">{message}</span>
     </div>
   );
 }
@@ -1646,9 +1654,7 @@ export function Skeleton({
       aria-label={label}
       className={cn('animate-pulse rounded-md bg-muted', className)}
       {...props}
-    >
-      <span className="sr-only">{label}</span>
-    </div>
+    />
   );
 }
 ```
@@ -1770,7 +1776,10 @@ test.describe('Payments MFE Accessibility', () => {
     await page.keyboard.press('Enter'); // Submit
 
     // Verify success message is announced
-    await expect(page.locator('[role="alert"]')).toContainText(/success/i);
+    // Using specific data-testid for reliable assertions (avoids matching unintended elements)
+    await expect(page.locator('[data-testid="payment-success-message"]')).toBeVisible();
+    // Alternative: Use role="alert" with more specific text
+    // await expect(page.locator('[role="alert"]')).toContainText('Payment created successfully');
   });
 
   test('error messages are accessible', async ({ page }) => {
@@ -2051,7 +2060,9 @@ jobs:
         run: pnpm start &
 
       - name: Run Lighthouse CI
-        uses: treosh/lighthouse-ci-action@v10
+        # Pin to specific commit SHA to mitigate supply chain risk
+        # Check for updates periodically: https://github.com/treosh/lighthouse-ci-action/releases
+        uses: treosh/lighthouse-ci-action@1b0e7c33270f4c1e17d8acd68b0a23a4a110fb61  # v10.1.0
         with:
           configPath: './lighthouserc.json'
           uploadArtifacts: true
@@ -2059,6 +2070,11 @@ jobs:
       - name: Run E2E accessibility tests
         run: pnpm test:e2e:a11y
 ```
+
+> **Note on Lighthouse CI coverage:** The configuration above only tests unauthenticated pages (signin, signup) because Lighthouse doesn't support session-based authentication natively. For authenticated page testing, use the E2E accessibility tests with @axe-core/playwright which can maintain authentication state across tests. To add authenticated Lighthouse testing, implement a separate workflow that:
+> 1. Uses Puppeteer to authenticate and generate cookies
+> 2. Passes authentication cookies to Lighthouse via `--extra-headers` or a custom Puppeteer script
+> 3. Tests authenticated routes like `/dashboard`, `/profile`, `/payments`
 
 ```json
 // lighthouserc.json
@@ -2096,6 +2112,9 @@ jobs:
 ```bash
 # Testing dependencies
 pnpm add -D jest-axe @axe-core/playwright @types/jest-axe
+
+# Color contrast auditing (used by Priority 2.3 contrast audit script)
+pnpm add -D color-contrast-calc
 
 # Optional: Additional a11y tools
 pnpm add -D lighthouse
