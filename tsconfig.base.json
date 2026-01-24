@@ -63,7 +63,8 @@
       "@payments-system/db": ["libs/backend/db/src/index.ts"],
       "@payments-system/resilience": ["libs/backend/resilience/src/index.ts"],
       "@payments-system/middleware": ["libs/backend/middleware/src/index.ts"],
-      "@payments-system/security": ["libs/backend/security/src/index.ts"]
+      "@payments-system/security": ["libs/backend/security/src/index.ts"],
+      "@mfe/shared-test-utils": ["libs/shared-test-utils/src/index.ts"]
     }
   },
   "files": [],

@@ -2,14 +2,14 @@
 
 **Created:** January 24, 2026
 **Last Updated:** January 24, 2026
-**Status:** PLANNING
+**Status:** IN PROGRESS
 **Priority:** High
 
 ## Implementation Summary
 
 | Component | Status |
 |-----------|--------|
-| Automated Accessibility Testing (jest-axe) | ⏳ Pending |
+| Automated Accessibility Testing (jest-axe) | ✅ Complete |
 | Skip Navigation Links | ⏳ Pending |
 | Landmark Structure | ⏳ Pending |
 | Focus Management & Trapping | ⏳ Pending |
@@ -31,6 +31,7 @@
 | Date       | Changes                                                                    |
 | ---------- | -------------------------------------------------------------------------- |
 | 2026-01-24 | Initial plan created based on codebase accessibility audit                 |
+| 2026-01-24 | Priority 1.1 completed: Automated accessibility testing infrastructure     |
 
 ---
 
@@ -160,18 +161,56 @@ This document outlines the implementation plan for achieving full WCAG 2.1 AA co
 
 ## Phase 1: Foundation & Critical Fixes
 
-### Priority 1.1: Automated Accessibility Testing Infrastructure
+### Priority 1.1: Automated Accessibility Testing Infrastructure ✅ COMPLETE
 
 **Effort:** 4 hours
 **Impact:** Prevents accessibility regressions, enables CI enforcement
+**Completed:** January 24, 2026
 
 **Tasks:**
 
-- [ ] Install jest-axe for unit test accessibility audits
-- [ ] Create shared accessibility test utilities
-- [ ] Add axe-core rules to component tests
-- [ ] Configure Playwright accessibility audits for E2E
-- [ ] Add accessibility checks to CI pipeline
+- [x] Install jest-axe for unit test accessibility audits
+- [x] Create shared accessibility test utilities
+- [x] Add axe-core rules to component tests
+- [x] Configure Playwright accessibility audits for E2E
+- [ ] Add accessibility checks to CI pipeline (deferred - requires CI configuration)
+
+**Implementation Notes:**
+
+The following was implemented:
+
+1. **Dependencies installed:**
+   - `jest-axe` - Unit test accessibility audits
+   - `@axe-core/playwright` - E2E accessibility audits
+   - `@types/jest-axe` - TypeScript definitions
+
+2. **New `@mfe/shared-test-utils` library created:**
+   - Path: `libs/shared-test-utils/`
+   - Exports: `renderWithA11yAudit()`, `expectNoA11yViolations()`, `runA11yAudit()`, `createAxeConfig()`, `axePresets`
+   - Utility functions: `isFocusable()`, `getFocusableElements()`, `calculateContrastRatio()`
+   - 29 passing tests
+
+3. **Design System accessibility tests added:**
+   - Path: `libs/shared-design-system/src/lib/components/accessibility.spec.tsx`
+   - Tests all design system components: Button, Input, PasswordInput, Alert, Badge, Card, Loading, Skeleton, Select, StatusBadge, ThemeToggle, Toast, SocialLoginButtons, Label
+   - Tests form patterns with proper ARIA attributes
+   - 126 passing tests total for shared-design-system
+
+4. **Playwright E2E accessibility audit tests created:**
+   - Path: `apps/shell-e2e/src/a11y-audit.spec.ts`
+   - Tests unauthenticated pages (Sign In, Sign Up)
+   - Tests authenticated pages (Payments, Profile, Admin)
+   - Tests keyboard navigation
+   - Tests focus management
+   - Tests ARIA attributes and landmarks
+   - Tests color contrast
+
+5. **NPM scripts added:**
+   - `test:a11y` - Run all accessibility tests
+   - `test:a11y:design-system` - Run design system accessibility tests
+   - `test:a11y:test-utils` - Run shared-test-utils tests
+   - `test:e2e:a11y` - Run E2E accessibility tests
+   - `test:e2e:a11y:audit` - Run E2E accessibility audit spec
 
 **Files to Create/Modify:**
 
