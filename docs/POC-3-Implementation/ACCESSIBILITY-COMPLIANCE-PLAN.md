@@ -34,6 +34,7 @@
 | 2026-01-24 | Priority 1.1 completed: Automated accessibility testing infrastructure     |
 | 2026-01-24 | Priority 1.2 completed: Skip navigation links (SkipLink component)         |
 | 2026-01-24 | Priority 1.3 completed: ARIA live regions & announcements                  |
+| 2026-01-24 | Priority 1.4 completed: Language declaration & document titles             |
 
 ---
 
@@ -692,20 +693,30 @@ function PaymentCreateForm() {
 
 ---
 
-### Priority 1.4: Language Declaration
+### Priority 1.4: Language Declaration ✅ COMPLETE
 
 **Effort:** 1 hour
 **Impact:** WCAG 3.1.1 Language of Page - Required for screen readers
+**Status:** Completed January 24, 2026
 
 **Tasks:**
 
 - [x] Add lang attribute to HTML element (already present in `apps/shell/index.html`)
-- [ ] Create hook for dynamic language changes (future i18n)
-- [ ] Update document title pattern
+- [x] Create useDocumentTitle hook for individual page titles
+- [x] Create useDocumentTitleFromRoute hook for automatic route-based titles
+- [x] Integrate route-based title management in Shell app
+- [x] Add 22 unit tests for document title hooks
+
+**Implementation Notes:**
+- `lang="en"` attribute already present in `apps/shell/index.html`
+- `useDocumentTitle` hook at `libs/shared-utils/src/lib/hooks/useDocumentTitle.ts` for manual title control
+- `useDocumentTitleFromRoute` hook at `libs/shared-utils/src/lib/hooks/useDocumentTitleFromRoute.ts` for automatic route-based titles
+- Title format: `{Page Title} | MFE Payments`
+- Integrated in `apps/shell/src/app/app.tsx` for automatic title updates on navigation
 
 **Current State:**
 
-The `lang="en"` attribute is already set in `apps/shell/index.html`. No changes needed for basic compliance.
+The `lang="en"` attribute is already set in `apps/shell/index.html`. Document titles are now automatically updated based on the current route.
 
 ```html
 <!-- apps/shell/index.html (current state - already compliant) -->
@@ -759,9 +770,9 @@ export function useDocumentTitle(title: string, announceChange = true) {
 
 **Success Criteria:**
 
-- [ ] HTML element has lang="en" attribute
-- [ ] Document title updated on route changes
-- [ ] Page changes announced to screen readers
+- [x] HTML element has lang="en" attribute
+- [x] Document title updated on route changes
+- [x] Page changes announced to screen readers (via useRouteAnnouncer in Priority 1.3)
 
 ---
 

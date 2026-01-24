@@ -3,3 +3,15 @@ export type { AnnounceOptions, AnnounceFunction } from './useAnnounce';
 
 export { useRouteAnnouncer } from './useRouteAnnouncer';
 export type { UseRouteAnnouncerOptions } from './useRouteAnnouncer';
+
+export { useDocumentTitle } from './useDocumentTitle';
+export type { UseDocumentTitleOptions } from './useDocumentTitle';
+
+export {
+  useDocumentTitleFromRoute,
+  DEFAULT_ROUTE_TITLES,
+} from './useDocumentTitleFromRoute';
+export type {
+  UseDocumentTitleFromRouteOptions,
+  RouteTitle,
+} from './useDocumentTitleFromRoute';

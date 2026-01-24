@@ -2,7 +2,7 @@ import { useLocation } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { AppRoutes, AppRoutesProps } from '../routes/AppRoutes';
 import { useEventBusIntegration } from '../hooks';
-import { useRouteAnnouncer } from 'shared-utils';
+import { useRouteAnnouncer, useDocumentTitleFromRoute } from 'shared-utils';
 
 /**
  * Props for App component - allows dependency injection for testing
@@ -39,8 +39,11 @@ export interface AppProps {
  * In tests, pass mock components or let AppRoutes use its own mocks.
  */
 export function App({ remotes }: AppProps = {}) {
-  // Get current location for route announcements
+  // Get current location for route announcements and document title
   const location = useLocation();
+
+  // Set document title based on current route (WCAG 2.4.2 Page Titled)
+  useDocumentTitleFromRoute(location.pathname);
 
   // Announce route changes to screen readers for accessibility (WCAG 4.1.3)
   useRouteAnnouncer(location.pathname);
