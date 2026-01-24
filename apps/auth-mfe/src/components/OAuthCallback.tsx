@@ -28,10 +28,11 @@ export function OAuthCallback() {
 
   useEffect(() => {
     const processCallback = async () => {
+      // SECURITY: Log only non-sensitive info (hash contains tokens)
       console.log('[OAuthCallback] Processing callback...');
-      console.log('[OAuthCallback] URL:', window.location.href);
-      console.log('[OAuthCallback] Hash:', window.location.hash);
-      console.log('[OAuthCallback] Search params:', window.location.search);
+      console.log('[OAuthCallback] Pathname:', window.location.pathname);
+      console.log('[OAuthCallback] Has hash:', window.location.hash.length > 0);
+      console.log('[OAuthCallback] Has search params:', window.location.search.length > 0);
 
       // Check for error in query params (use window.location to avoid Router context issues)
       const urlParams = new URLSearchParams(window.location.search);

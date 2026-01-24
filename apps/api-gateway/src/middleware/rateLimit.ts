@@ -147,6 +147,40 @@ export const authRateLimiter = rateLimit({
 });
 
 /**
+ * OAuth rate limiter for social login endpoints
+ * Prevents OAuth abuse while allowing legitimate use
+ * Limit: 10 OAuth initiations per 15 minutes per IP
+ *
+ * Applied to:
+ * - GET /api/auth/oauth/:provider (initiate OAuth flow)
+ * - POST /api/auth/oauth/link/:provider (link OAuth account)
+ *
+ * Not applied to:
+ * - GET /api/auth/oauth/callback (handled by provider, not user-initiated)
+ * - GET /api/auth/oauth/providers (public info endpoint)
+ * - GET /api/auth/oauth/accounts (authenticated, get linked accounts)
+ * - DELETE /api/auth/oauth/:provider (authenticated, unlink)
+ */
+export const oauthRateLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 10, // 10 OAuth initiations per 15 minutes
+  message: {
+    success: false,
+    error: {
+      code: 'RATE_LIMIT_EXCEEDED',
+      message: 'Too many OAuth requests, please try again later',
+    },
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+  // Track by IP address
+  keyGenerator: (req) => {
+    const ip = req.ip || req.socket.remoteAddress || 'unknown';
+    return `oauth:${ip}`;
+  },
+});
+
+/**
  * Get Redis client for cleanup on shutdown
  * Returns null if Redis is not being used
  */

@@ -21,6 +21,7 @@ import {
   setVersionConfig,
   getVersionConfig,
 } from '../middleware/apiVersion';
+import { oauthRateLimiter } from '../middleware/rateLimit';
 
 /**
  * Circuit breaker configuration (shared across services)
@@ -92,6 +93,54 @@ const services: Record<string, ProxyTarget> = {
 };
 
 /**
+ * OAuth Rate Limiting
+ *
+ * Apply stricter rate limiting to OAuth initiation endpoints to prevent abuse.
+ * Limit: 10 OAuth initiations per 15 minutes per IP
+ *
+ * Note: These routes MUST be defined before the general /api/auth proxy
+ * so they can apply the rate limiter before proxying.
+ */
+
+// OAuth initiate flow - GET /api/auth/oauth/:provider (but not callback, providers, or accounts)
+router.get(
+  '/api/auth/oauth/:provider',
+  (req, _res, next) => {
+    // Skip rate limiting for special routes that shouldn't be limited
+    const provider = req.params.provider;
+    if (provider === 'callback' || provider === 'providers' || provider === 'accounts') {
+      return next('route'); // Skip to next matching route (the general proxy)
+    }
+    next();
+  },
+  oauthRateLimiter,
+  createStreamingProxy({
+    target: services['auth']!,
+    serviceName: 'auth-service',
+    pathRewrite: {
+      '^': '/auth', // Prepend /auth to the path
+    },
+    timeout: 30000,
+    circuitBreaker: circuitBreakerConfig,
+  })
+);
+
+// OAuth link account - POST /api/auth/oauth/link/:provider
+router.post(
+  '/api/auth/oauth/link/:provider',
+  oauthRateLimiter,
+  createStreamingProxy({
+    target: services['auth']!,
+    serviceName: 'auth-service',
+    pathRewrite: {
+      '^': '/auth', // Prepend /auth to the path
+    },
+    timeout: 30000,
+    circuitBreaker: circuitBreakerConfig,
+  })
+);
+
+/**
  * Auth Service Proxy
  *
  * Routes:
@@ -107,8 +156,14 @@ const services: Record<string, ProxyTarget> = {
  *   GET /api/auth/mfa/status -> http://localhost:3001/auth/mfa/status
  *   POST /api/auth/mfa/disable -> http://localhost:3001/auth/mfa/disable
  *   POST /api/auth/mfa/backup-codes/regenerate -> http://localhost:3001/auth/mfa/backup-codes/regenerate
+ *   GET /api/auth/oauth/callback -> http://localhost:3001/auth/oauth/callback
+ *   GET /api/auth/oauth/providers -> http://localhost:3001/auth/oauth/providers
+ *   GET /api/auth/oauth/accounts -> http://localhost:3001/auth/oauth/accounts
+ *   DELETE /api/auth/oauth/:provider -> http://localhost:3001/auth/oauth/:provider
  *
  * Note: Express strips /api/auth when routing, so we use custom proxy with prepend
+ * OAuth initiation routes (GET /oauth/:provider, POST /oauth/link/:provider) are
+ * handled above with stricter rate limiting.
  */
 router.use(
   '/api/auth',
