@@ -99,3 +99,7 @@ export type { SkipLinkProps } from './lib/components/SkipLink';
 
 export { LiveRegion } from './lib/components/LiveRegion';
 export type { LiveRegionProps } from './lib/components/LiveRegion';
+
+// Form Accessibility
+export { FormField, useFormField } from './lib/components/FormField';
+export type { FormFieldProps } from './lib/components/FormField';

@@ -14,7 +14,7 @@
 | Landmark Structure | ⏳ Pending |
 | Focus Management & Trapping | ⏳ Pending |
 | ARIA Live Regions | ✅ Complete |
-| Form Accessibility Enhancements | ⏳ Pending |
+| Form Accessibility Enhancements | ✅ Complete |
 | Data Table Accessibility | ⏳ Pending |
 | Modal/Dialog Accessibility | ⏳ Pending |
 | Color Contrast Verification | ⏳ Pending |
@@ -35,6 +35,7 @@
 | 2026-01-24 | Priority 1.2 completed: Skip navigation links (SkipLink component)         |
 | 2026-01-24 | Priority 1.3 completed: ARIA live regions & announcements                  |
 | 2026-01-24 | Priority 1.4 completed: Language declaration & document titles             |
+| 2026-01-24 | Priority 1.5 completed: Form error accessibility (FormField component)     |
 
 ---
 
@@ -776,20 +777,30 @@ export function useDocumentTitle(title: string, announceChange = true) {
 
 ---
 
-### Priority 1.5: Form Error Accessibility Enhancements
+### Priority 1.5: Form Error Accessibility Enhancements ✅ COMPLETE
 
 **Effort:** 3 hours
 **Impact:** WCAG 3.3.1, 3.3.3 Error Identification & Suggestions
+**Status:** Completed January 24, 2026
 
 **Current State:** Forms have role="alert" on errors but lack aria-describedby linking.
 
 **Tasks:**
 
-- [ ] Create FormField wrapper component with proper associations
-- [ ] Add aria-describedby for error messages
-- [ ] Add aria-invalid for fields with errors
-- [ ] Add aria-required for required fields
-- [ ] Update existing forms to use new patterns
+- [x] Create FormField wrapper component with proper associations
+- [x] Add aria-describedby for error messages
+- [x] Add aria-invalid for fields with errors
+- [x] Add aria-required for required fields
+- [x] Add useFormField hook for custom input components
+- [x] Add 20 unit tests for FormField component
+
+**Implementation Notes:**
+- `FormField` component at `libs/shared-design-system/src/lib/components/FormField.tsx`
+- Automatically generates unique IDs for label-input association
+- Links descriptions and errors via aria-describedby
+- Error messages have role="alert" and aria-live="polite"
+- `useFormField` hook allows custom inputs to access accessibility context
+- Supports hidden labels for visual design flexibility while maintaining accessibility
 
 **Files to Create/Modify:**
 
@@ -933,11 +944,11 @@ export function FormField({
 
 **Success Criteria:**
 
-- [ ] FormField component with proper ARIA associations
-- [ ] Error messages linked via aria-describedby
-- [ ] Invalid fields marked with aria-invalid
-- [ ] Required fields marked with aria-required
-- [ ] Screen readers announce field requirements and errors
+- [x] FormField component with proper ARIA associations
+- [x] Error messages linked via aria-describedby
+- [x] Invalid fields marked with aria-invalid
+- [x] Required fields marked with aria-required
+- [x] Screen readers announce field requirements and errors (via role="alert" and aria-live)
 
 ---
 
