@@ -8,6 +8,7 @@ module.exports = {
   testEnvironment: 'jsdom',
   rootDir: '.',
   setupFilesAfterEnv: ['<rootDir>/src/test/setup.ts'],
+  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
     // Map shared libraries

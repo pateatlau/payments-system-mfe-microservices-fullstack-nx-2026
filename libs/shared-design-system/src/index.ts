@@ -92,3 +92,7 @@ export type {
   SocialLoginButtonsProps,
   SocialProvider,
 } from './lib/components/SocialLoginButtons';
+
+// Accessibility Components
+export { SkipLink } from './lib/components/SkipLink';
+export type { SkipLinkProps } from './lib/components/SkipLink';
