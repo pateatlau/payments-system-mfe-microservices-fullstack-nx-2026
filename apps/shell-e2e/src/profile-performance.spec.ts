@@ -79,7 +79,7 @@ test.describe('Profile Performance', () => {
     // Measure form input responsiveness
     const inputStartTime = Date.now();
 
-    await page.fill('input[placeholder*="phone"]', '+91 98765 43210');
+    await page.fill('input[placeholder*="phone"]', '+919876543210');
     await page.fill(
       'input[placeholder*="address"]',
       '123, MG Road, Mumbai'
@@ -140,7 +140,7 @@ test.describe('Profile Performance', () => {
     });
 
     // Fill form
-    await page.fill('input[placeholder*="phone"]', '+91 98765 43210');
+    await page.fill('input[placeholder*="phone"]', '+919876543210');
     await page.fill(
       'input[placeholder*="address"]',
       '123, Koramangala, Bengaluru'

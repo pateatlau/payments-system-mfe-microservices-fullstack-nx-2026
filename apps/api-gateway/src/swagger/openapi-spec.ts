@@ -281,7 +281,7 @@ Obtain a token via \`POST /api/auth/login\`.
           type: 'object',
           properties: {
             phone: { type: 'string', example: '+919876543211' },
-            address: { type: 'string', example: '456 Brigade Road, Bangalore, India' },
+            address: { type: 'string', example: '456 Brigade Road, Bengaluru, India' },
             bio: { type: 'string', example: 'Full-stack developer' },
           },
         },

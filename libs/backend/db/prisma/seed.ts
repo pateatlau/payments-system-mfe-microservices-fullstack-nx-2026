@@ -97,7 +97,7 @@ async function main() {
     data: {
       userId: vendorUser.id,
       phone: '+919876543212',
-      address: '456 Brigade Road, Bangalore',
+      address: '456 Brigade Road, Bengaluru',
       preferences: {
         theme: 'light',
         notifications: false,

@@ -501,7 +501,7 @@ createPayment.mutate(data, {
 1. **Real PSP Integration (Razorpay)**
    - Actual payment processing with Razorpay
    - India-specific payment methods: UPI, Netbanking, Wallets (Paytm, PhonePe), EMI, Pay Later
-   - INR currency support with automatic conversion
+   - INR currency support; multi-currency conversion occurs at settlement (bank rates)
    - Transaction history and reconciliation
 
 2. **Payment Filtering**

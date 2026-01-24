@@ -56,7 +56,8 @@ interface PaymentDetailsProps {
  */
 function formatCurrency(amount: number, currency: string): string {
   const currencyCode = currency || 'INR';
-  const locale = currencyCode === 'INR' ? 'en-IN' : 'en-IN';
+  // Use en-IN locale for INR, otherwise use en-US for other currencies
+  const locale = currencyCode === 'INR' ? 'en-IN' : 'en-US';
   const formatter = new Intl.NumberFormat(locale, {
     style: 'currency',
     currency: currencyCode,

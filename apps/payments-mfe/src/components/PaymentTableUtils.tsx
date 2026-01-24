@@ -22,8 +22,8 @@ export interface PaymentWithParties extends Payment {
 }
 
 function formatCurrency(amount: number, currency: string): string {
-  // Use en-IN locale for INR, otherwise use appropriate locale
-  const locale = currency === 'INR' ? 'en-IN' : 'en-IN';
+  // Use en-IN locale for INR, otherwise use en-US for other currencies
+  const locale = currency === 'INR' ? 'en-IN' : 'en-US';
   return new Intl.NumberFormat(locale, {
     style: 'currency',
     currency,
