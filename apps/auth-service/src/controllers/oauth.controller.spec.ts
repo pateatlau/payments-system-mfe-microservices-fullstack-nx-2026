@@ -11,10 +11,16 @@
  */
 
 import { Request, Response, NextFunction } from 'express';
+import { Socket } from 'net';
 import * as oauthController from './oauth.controller';
 import * as oauthService from '../services/oauth.service';
 import { ApiError } from '../middleware/errorHandler';
 import { UserRole } from 'shared-types';
+
+// Type for user object in request
+interface RequestUser {
+  userId: string;
+}
 
 // Mock the OAuth service
 jest.mock('../services/oauth.service', () => ({
@@ -55,7 +61,7 @@ describe('OAuthController', () => {
       body: {},
       user: undefined,
       ip: '127.0.0.1',
-      socket: { remoteAddress: '127.0.0.1' } as any,
+      socket: { remoteAddress: '127.0.0.1' } as unknown as Socket,
       get: jest.fn().mockReturnValue('Test Browser/1.0'),
     };
 
@@ -302,7 +308,7 @@ describe('OAuthController', () => {
     });
 
     it('should return linked accounts for authenticated user', async () => {
-      mockReq.user = { userId: 'user-123' } as any;
+      mockReq.user = { userId: 'user-123' } as RequestUser;
 
       await oauthController.getLinkedAccounts(
         mockReq as Request,
@@ -338,7 +344,7 @@ describe('OAuthController', () => {
     });
 
     it('should call next with error on failure', async () => {
-      mockReq.user = { userId: 'user-123' } as any;
+      mockReq.user = { userId: 'user-123' } as RequestUser;
       const error = new Error('Database error');
       (oauthService.getLinkedOAuthAccounts as jest.Mock).mockRejectedValue(error);
 
@@ -363,7 +369,7 @@ describe('OAuthController', () => {
     });
 
     it('should redirect to OAuth provider for authenticated user', async () => {
-      mockReq.user = { userId: 'user-123' } as any;
+      mockReq.user = { userId: 'user-123' } as RequestUser;
       mockReq.params = { provider: 'github' };
 
       await oauthController.linkOAuthAccount(
@@ -401,7 +407,7 @@ describe('OAuthController', () => {
     });
 
     it('should call next with error on failure', async () => {
-      mockReq.user = { userId: 'user-123' } as any;
+      mockReq.user = { userId: 'user-123' } as RequestUser;
       mockReq.params = { provider: 'invalid' };
       const error = new ApiError(400, 'INVALID_PROVIDER', 'Unsupported provider');
       (oauthService.initiateOAuthFlow as jest.Mock).mockRejectedValue(error);
@@ -422,7 +428,7 @@ describe('OAuthController', () => {
     });
 
     it('should unlink OAuth account for authenticated user', async () => {
-      mockReq.user = { userId: 'user-123' } as any;
+      mockReq.user = { userId: 'user-123' } as RequestUser;
       mockReq.params = { provider: 'google' };
 
       await oauthController.unlinkOAuthAccount(
@@ -456,7 +462,7 @@ describe('OAuthController', () => {
     });
 
     it('should call next with error when unlinking fails', async () => {
-      mockReq.user = { userId: 'user-123' } as any;
+      mockReq.user = { userId: 'user-123' } as RequestUser;
       mockReq.params = { provider: 'google' };
       const error = new ApiError(400, 'CANNOT_UNLINK', 'Cannot unlink last auth method');
       (oauthService.unlinkOAuthAccount as jest.Mock).mockRejectedValue(error);
