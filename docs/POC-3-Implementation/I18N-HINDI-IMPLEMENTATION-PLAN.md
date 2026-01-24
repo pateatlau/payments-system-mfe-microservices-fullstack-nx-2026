@@ -25,7 +25,9 @@
 | E2E Testing for Locales | ⏳ Pending |
 | CI/CD Translation Validation | ⏳ Pending |
 
-**Supported Languages:** English (en-IN) [default], Hindi (hi-IN)
+**Supported Languages:** English (en) [default], Hindi (hi)
+
+> **Note on Locale Tags:** i18next uses language-only tags (`en`, `hi`) for translation file organization and `supportedLngs` configuration. The regional variants (`en-IN`, `hi-IN`) are used exclusively with Intl APIs (NumberFormat, DateTimeFormat) for India-specific formatting of dates, numbers, and currency.
 
 ---
 
@@ -156,7 +158,7 @@ const sharedDependencies = {
   // ... existing shared deps
   'i18next': { singleton: true, requiredVersion: '^23.0.0', eager: false },
   'react-i18next': { singleton: true, requiredVersion: '^14.0.0', eager: false },
-  'shared-i18n': { singleton: true, eager: false }, // Our i18n library
+  'shared-i18n': { singleton: true, eager: true }, // Eager for singleton initialization
 };
 ```
 
@@ -203,7 +205,9 @@ pnpm add -D i18next-parser @types/i18next
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
-import HttpBackend from 'i18next-http-backend';
+// Note: i18next-http-backend is NOT used here because we bundle translations
+// directly for Module Federation reliability. Use HttpBackend only if you need
+// to load translations dynamically from a server.
 
 // Import translations (bundled for reliability in Module Federation)
 import enCommon from '../translations/en/common.json';
@@ -359,6 +363,8 @@ export function useLocale() {
     await i18n.changeLanguage(locale);
     // Update HTML lang attribute
     document.documentElement.lang = locale;
+    // Update HTML dir attribute for RTL support (future-proofing)
+    document.documentElement.dir = LOCALE_METADATA[locale].dir;
     // Store preference
     localStorage.setItem('i18nextLng', locale);
   }, [i18n]);
@@ -467,7 +473,7 @@ export { useTranslation, I18nextProvider } from 'react-i18next';
 
 **Translation File Structure:**
 
-```
+```text
 libs/shared-i18n/src/translations/
 ├── en/
 │   ├── common.json      # Shared UI strings (buttons, navigation, errors)
@@ -1056,7 +1062,7 @@ const sharedDependencies = {
 ```typescript
 // libs/shared-design-system/src/lib/components/LanguageSwitcher.tsx
 import * as React from 'react';
-import { useLocale, SUPPORTED_LOCALES, LOCALE_METADATA, SupportedLocale } from '@mfe/shared-i18n';
+import { useLocale, LOCALE_METADATA, SupportedLocale } from '@mfe/shared-i18n';
 import {
   Select,
   SelectContent,
@@ -1094,7 +1100,7 @@ export function LanguageSwitcher({
 
   if (variant === 'inline') {
     return (
-      <div className={cn('flex items-center gap-2', className)}>
+      <div className={cn('flex items-center gap-2', className)} data-testid="language-switcher">
         {supportedLocales.map((loc) => (
           <button
             key={loc}
@@ -1107,6 +1113,7 @@ export function LanguageSwitcher({
             )}
             aria-current={locale === loc ? 'true' : undefined}
             aria-label={`Switch to ${LOCALE_METADATA[loc].name}`}
+            data-testid={`language-option-${loc}`}
           >
             {LOCALE_METADATA[loc].nativeName}
           </button>
@@ -1120,6 +1127,7 @@ export function LanguageSwitcher({
       <SelectTrigger
         className={cn('w-[140px]', className)}
         aria-label="Select language"
+        data-testid="language-switcher"
       >
         <SelectValue>
           <span className="flex items-center gap-2">
@@ -1130,7 +1138,7 @@ export function LanguageSwitcher({
       </SelectTrigger>
       <SelectContent>
         {supportedLocales.map((loc) => (
-          <SelectItem key={loc} value={loc}>
+          <SelectItem key={loc} value={loc} data-testid={`language-option-${loc}`}>
             <span className="flex items-center justify-between w-full">
               <span>{LOCALE_METADATA[loc].nativeName}</span>
               <span className="text-muted-foreground text-xs ml-2">
@@ -1372,7 +1380,7 @@ export function SignIn() {
     "totalBalance": "कुल शेष राशि",
     "pendingPayments": "लंबित भुगतान",
     "completedToday": "आज पूर्ण हुए",
-    "recentTransactions": "हाल के लेनदे���"
+    "recentTransactions": "हाल के लेनदेन"
   },
   "list": {
     "title": "भुगतान",
@@ -2179,7 +2187,7 @@ test.describe('Internationalization', () => {
 
       // Check date format (e.g., "24 January 2026")
       const dateElement = page.locator('[data-testid="payment-date"]').first();
-      await expect(dateElement).toMatch(/\d{1,2} [A-Z][a-z]+ \d{4}/);
+      await expect(dateElement).toHaveText(/\d{1,2} [A-Z][a-z]+ \d{4}/);
     });
 
     test('should format dates in Hindi locale', async ({ page, setLocale }) => {
@@ -2201,7 +2209,7 @@ test.describe('Internationalization', () => {
 
       // Check currency format (₹1,000.00)
       const amountElement = page.locator('[data-testid="payment-amount"]').first();
-      await expect(amountElement).toMatch(/₹[\d,]+\.\d{2}/);
+      await expect(amountElement).toHaveText(/₹[\d,]+\.\d{2}/);
     });
   });
 
@@ -2321,11 +2329,13 @@ jobs:
 
       - name: Check translation coverage
         run: |
-          COVERAGE=$(node scripts/i18n-coverage.js)
-          if [ "$COVERAGE" -lt 95 ]; then
+          # Extract coverage percentage from i18n-report.js output
+          COVERAGE=$(node scripts/i18n-report.js | grep -oP 'Coverage: \K[\d.]+')
+          if (( $(echo "$COVERAGE < 95" | bc -l) )); then
             echo "Translation coverage is below 95%: $COVERAGE%"
             exit 1
           fi
+          echo "Translation coverage: $COVERAGE%"
 ```
 
 **Success Criteria:**
@@ -2551,10 +2561,11 @@ While Hindi is LTR (left-to-right), the architecture is designed to support futu
    ```
 
 2. **Direction Attribute:**
-   The `useLocale` hook already provides `dir` property:
+   The `useLocale` hook provides `dir` property and `changeLocale` updates the HTML dir attribute:
    ```typescript
-   const { dir } = useLocale();
-   // Updates <html dir="ltr"> or <html dir="rtl">
+   const { dir, changeLocale } = useLocale();
+   // dir is 'ltr' or 'rtl' based on current locale
+   // changeLocale() automatically updates document.documentElement.dir
    ```
 
 3. **Icon Mirroring:**
