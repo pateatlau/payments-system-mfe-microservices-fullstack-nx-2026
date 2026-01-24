@@ -96,3 +96,6 @@ export type {
 // Accessibility Components
 export { SkipLink } from './lib/components/SkipLink';
 export type { SkipLinkProps } from './lib/components/SkipLink';
+
+export { LiveRegion } from './lib/components/LiveRegion';
+export type { LiveRegionProps } from './lib/components/LiveRegion';

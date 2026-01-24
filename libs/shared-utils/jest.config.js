@@ -4,7 +4,9 @@ module.exports = {
   ...nxPreset,
   displayName: 'shared-utils',
   preset: 'ts-jest',
-  testEnvironment: 'node',
+  testEnvironment: 'jsdom',
+  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
+  setupFilesAfterEnv: ['@testing-library/jest-dom'],
   transform: {
     '^.+\\.[tj]sx?$': [
       'ts-jest',

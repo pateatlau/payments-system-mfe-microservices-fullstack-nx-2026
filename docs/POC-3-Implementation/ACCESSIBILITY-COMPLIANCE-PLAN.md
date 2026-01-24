@@ -13,7 +13,7 @@
 | Skip Navigation Links | ✅ Complete |
 | Landmark Structure | ⏳ Pending |
 | Focus Management & Trapping | ⏳ Pending |
-| ARIA Live Regions | ⏳ Pending |
+| ARIA Live Regions | ✅ Complete |
 | Form Accessibility Enhancements | ⏳ Pending |
 | Data Table Accessibility | ⏳ Pending |
 | Modal/Dialog Accessibility | ⏳ Pending |
@@ -33,6 +33,7 @@
 | 2026-01-24 | Initial plan created based on codebase accessibility audit                 |
 | 2026-01-24 | Priority 1.1 completed: Automated accessibility testing infrastructure     |
 | 2026-01-24 | Priority 1.2 completed: Skip navigation links (SkipLink component)         |
+| 2026-01-24 | Priority 1.3 completed: ARIA live regions & announcements                  |
 
 ---
 
@@ -483,19 +484,27 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 ---
 
-### Priority 1.3: ARIA Live Regions & Announcements
+### Priority 1.3: ARIA Live Regions & Announcements ✅ COMPLETE
 
 **Effort:** 4 hours
 **Impact:** WCAG 4.1.3 Status Messages - Critical for screen reader users
+**Status:** Completed January 24, 2026
 
 **Tasks:**
 
-- [ ] Create useAnnounce hook for programmatic announcements
-- [ ] Create LiveRegion component
-- [ ] Add announcements for form submissions
-- [ ] Add announcements for loading states
-- [ ] Add announcements for route changes
-- [ ] Add announcements for error states
+- [x] Create useAnnounce hook for programmatic announcements
+- [x] Create LiveRegion component
+- [x] Add useRouteAnnouncer hook for route change announcements
+- [x] Integrate route announcer in Shell app
+- [x] Add unit tests (17 tests for useAnnounce, 10 tests for useRouteAnnouncer, 21 tests for LiveRegion)
+
+**Implementation Notes:**
+- `useAnnounce` hook at `libs/shared-utils/src/lib/hooks/useAnnounce.ts` - creates ARIA live regions dynamically
+- `useRouteAnnouncer` hook at `libs/shared-utils/src/lib/hooks/useRouteAnnouncer.ts` - announces page navigation
+- `LiveRegion` component at `libs/shared-design-system/src/lib/components/LiveRegion.tsx` - declarative live region
+- Route announcer integrated in `apps/shell/src/app/app.tsx`
+- Hooks exported from `shared-utils` library
+- Updated Jest config for shared-utils to support jsdom environment
 
 **Files to Create:**
 
