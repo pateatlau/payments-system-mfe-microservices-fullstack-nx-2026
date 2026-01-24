@@ -22,6 +22,7 @@ import {
   getVersionConfig,
 } from '../middleware/apiVersion';
 import { oauthRateLimiter } from '../middleware/rateLimit';
+import { authenticate } from '../middleware/auth';
 
 /**
  * Circuit breaker configuration (shared across services)
@@ -118,22 +119,23 @@ router.get(
     target: services['auth']!,
     serviceName: 'auth-service',
     pathRewrite: {
-      '^': '/auth', // Prepend /auth to the path
+      '^/api/auth': '/auth', // Rewrite /api/auth/oauth/:provider to /auth/oauth/:provider
     },
     timeout: 30000,
     circuitBreaker: circuitBreakerConfig,
   })
 );
 
-// OAuth link account - POST /api/auth/oauth/link/:provider
+// OAuth link account - POST /api/auth/oauth/link/:provider (requires authentication)
 router.post(
   '/api/auth/oauth/link/:provider',
+  authenticate,
   oauthRateLimiter,
   createStreamingProxy({
     target: services['auth']!,
     serviceName: 'auth-service',
     pathRewrite: {
-      '^': '/auth', // Prepend /auth to the path
+      '^/api/auth': '/auth', // Rewrite /api/auth/oauth/link/:provider to /auth/oauth/link/:provider
     },
     timeout: 30000,
     circuitBreaker: circuitBreakerConfig,

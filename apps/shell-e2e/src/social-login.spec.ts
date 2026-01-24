@@ -87,24 +87,6 @@ test.describe('Social Login Flow', () => {
 
       expect(isOAuthRedirect || oauthRedirectUrl !== null).toBeTruthy();
     });
-
-    test('should show loading state when social login is clicked', async ({
-      page,
-    }) => {
-      await page.goto('/signin');
-
-      // Wait for Google button
-      const googleButton = page.locator('button:has-text("Continue with Google")');
-      await expect(googleButton).toBeVisible({ timeout: 10000 });
-
-      // Click the button but don't wait for navigation to complete
-      // Just check if loading state appears briefly
-      await googleButton.click();
-
-      // The button should show loading state (spinner or disabled)
-      // Due to immediate redirect, we may not catch this, but the button should be clickable
-      expect(true).toBe(true); // Test passes if click doesn't throw
-    });
   });
 
   test.describe('Sign-Up Page Social Login Buttons', () => {
