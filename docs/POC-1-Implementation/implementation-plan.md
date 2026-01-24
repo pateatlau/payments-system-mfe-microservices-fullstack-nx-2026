@@ -670,7 +670,7 @@ Created stubbed payment APIs at `apps/payments-mfe/src/api/` with the following:
      - Generates unique payment ID
      - Sets status based on type: 'initiate' → 'initiated', 'payment' → 'processing'
      - For 'payment' type, automatically transitions to 'completed' after 2 seconds (simulated processing)
-     - Defaults currency to 'USD' if not provided
+     - Defaults currency to 'INR' if not provided
      - Simulated delay: 400-600ms
    - `updatePayment(id: string, data: UpdatePaymentDto)` - Updates payment fields:
      - Only updates provided fields (partial update)

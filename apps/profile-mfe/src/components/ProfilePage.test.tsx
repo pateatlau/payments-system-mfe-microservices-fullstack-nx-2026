@@ -75,8 +75,8 @@ describe('ProfilePage', () => {
     const mockPreferences: UserPreferences = {
       theme: 'dark',
       language: 'en',
-      currency: 'USD',
-      timezone: 'America/New_York',
+      currency: 'INR',
+      timezone: 'Asia/Kolkata',
       notifications: {
         email: true,
         push: false,

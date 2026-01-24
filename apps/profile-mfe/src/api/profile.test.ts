@@ -111,8 +111,8 @@ describe('profile API client', () => {
       const mockPreferences: UserPreferences = {
         theme: 'dark',
         language: 'en',
-        currency: 'USD',
-        timezone: 'America/New_York',
+        currency: 'INR',
+        timezone: 'Asia/Kolkata',
         notifications: {
           email: true,
           push: false,
@@ -143,9 +143,9 @@ describe('profile API client', () => {
     it('returns updated preferences on success', async () => {
       const payload: UpdatePreferencesData = {
         theme: 'light',
-        language: 'en-US',
-        currency: 'EUR',
-        timezone: 'Europe/Berlin',
+        language: 'en-IN',
+        currency: 'INR',
+        timezone: 'Asia/Kolkata',
         notifications: {
           email: true,
           push: true,
@@ -155,9 +155,9 @@ describe('profile API client', () => {
 
       const mockPreferences: UserPreferences = {
         theme: 'light',
-        language: 'en-US',
-        currency: 'EUR',
-        timezone: 'Europe/Berlin',
+        language: 'en-IN',
+        currency: 'INR',
+        timezone: 'Asia/Kolkata',
         notifications: {
           email: true,
           push: true,

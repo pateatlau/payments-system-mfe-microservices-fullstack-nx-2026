@@ -198,7 +198,7 @@ model Payment {
   id          String        @id @default(uuid())
   userId      String        @map("user_id")
   amount      Decimal       @db.Decimal(10, 2)
-  currency    String        @default("USD")
+  currency    String        @default("INR")
   status      PaymentStatus
   type        PaymentType
   description String?

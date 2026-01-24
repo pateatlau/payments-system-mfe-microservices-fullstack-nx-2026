@@ -52,8 +52,8 @@ describe('ProfileController', () => {
       const mockProfile = {
         id: 'profile-1',
         userId: 'user-1',
-        phone: '+1234567890',
-        address: '123 Main St',
+        phone: '+919876543210',
+        address: '123 MG Road, Mumbai',
         user: {},
       };
 
@@ -160,8 +160,8 @@ describe('ProfileController', () => {
     it('should return user preferences', async () => {
       const mockPreferences = {
         theme: 'dark',
-        language: 'en-US',
-        currency: 'USD',
+        language: 'en-IN',
+        currency: 'INR',
       };
 
       (profileService.getPreferences as jest.Mock).mockResolvedValue(
@@ -198,8 +198,8 @@ describe('ProfileController', () => {
     it('should update preferences', async () => {
       const mockUpdatedPreferences = {
         theme: 'dark',
-        language: 'en-US',
-        currency: 'USD',
+        language: 'en-IN',
+        currency: 'INR',
       };
 
       (profileService.updatePreferences as jest.Mock).mockResolvedValue(

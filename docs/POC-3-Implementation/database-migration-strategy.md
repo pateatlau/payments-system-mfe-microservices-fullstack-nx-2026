@@ -188,7 +188,7 @@ model Payment {
   senderId          String        @map("sender_id")        // Reference to User ID (no FK)
   recipientId       String?       @map("recipient_id")     // Reference to User ID (no FK)
   amount            Decimal       @db.Decimal(10, 2)
-  currency          String        @default("USD")
+  currency          String        @default("INR")
   status            PaymentStatus
   type              PaymentType
   description       String?

@@ -46,10 +46,10 @@ test.describe('Profile Management Flow', () => {
     });
 
     // Step 4: Update profile information
-    await page.fill('input[placeholder*="phone"]', '+1-555-123-4567');
+    await page.fill('input[placeholder*="phone"]', '+91 98765 43210');
     await page.fill(
       'input[placeholder*="address"]',
-      '123 Updated Street, Test City, TC 12345'
+      '123, MG Road, Mumbai, Maharashtra 400001'
     );
     await page.fill(
       'textarea[placeholder*="bio"]',
@@ -74,10 +74,10 @@ test.describe('Profile Management Flow', () => {
 
     // Step 7: Update preferences
     await page.selectOption('select[aria-label*="language"]', 'en');
-    await page.selectOption('select[aria-label*="currency"]', 'USD');
+    await page.selectOption('select[aria-label*="currency"]', 'INR');
     await page.selectOption(
       'select[aria-label*="timezone"]',
-      'America/New_York'
+      'Asia/Kolkata'
     );
 
     // Check some notification preferences
@@ -167,8 +167,8 @@ test.describe('Profile Management Flow', () => {
     await expect(page).toHaveURL(/.*profile/, { timeout: 10000 });
 
     // Fill in profile form
-    await page.fill('input[placeholder*="phone"]', '+1-555-123-4567');
-    await page.fill('input[placeholder*="address"]', '123 Test Street');
+    await page.fill('input[placeholder*="phone"]', '+91 98765 43210');
+    await page.fill('input[placeholder*="address"]', '123, Brigade Road, Bengaluru');
 
     // Switch to preferences tab
     await page.click('button:has-text("Preferences")');
@@ -178,10 +178,10 @@ test.describe('Profile Management Flow', () => {
 
     // Verify form values are maintained
     await expect(page.locator('input[placeholder*="phone"]')).toHaveValue(
-      '+1-555-123-4567'
+      '+91 98765 43210'
     );
     await expect(page.locator('input[placeholder*="address"]')).toHaveValue(
-      '123 Test Street'
+      '123, Brigade Road, Bengaluru'
     );
   });
 });

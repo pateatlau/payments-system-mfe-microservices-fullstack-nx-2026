@@ -22,7 +22,9 @@ export interface PaymentWithParties extends Payment {
 }
 
 function formatCurrency(amount: number, currency: string): string {
-  return new Intl.NumberFormat('en-US', {
+  // Use en-IN locale for INR, otherwise use en-US for other currencies
+  const locale = currency === 'INR' ? 'en-IN' : 'en-US';
+  return new Intl.NumberFormat(locale, {
     style: 'currency',
     currency,
   }).format(amount);
@@ -31,9 +33,9 @@ function formatCurrency(amount: number, currency: string): string {
 function formatDate(dateString: string): string {
   const date = new Date(dateString);
   const day = date.getDate().toString().padStart(2, '0');
-  const month = date.toLocaleDateString('en-US', { month: 'short' });
+  const month = date.toLocaleDateString('en-IN', { month: 'short' });
   const year = date.getFullYear();
-  const time = date.toLocaleTimeString('en-US', {
+  const time = date.toLocaleTimeString('en-IN', {
     hour: '2-digit',
     minute: '2-digit',
     hour12: true,

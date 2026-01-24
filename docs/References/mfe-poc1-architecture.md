@@ -236,7 +236,7 @@ web-mfe-workspace/
   - **CUSTOMER:** Can make payments (stubbed), view own history
   - **ADMIN:** Full access (POC-2)
 
-**Note:** All payment flows are stubbed (no actual Payment Service Provider/PSP integration). Payment operations simulate the flow but do not process real payments. This applies to all POC phases (POC-1, POC-2, POC-3). Real PSP integration will be implemented in MVP/Production phases.
+**Note:** All payment flows are stubbed (no actual Payment Service Provider/PSP integration). Payment operations simulate the flow but do not process real payments. This applies to all POC phases (POC-1, POC-2, POC-3). Real PSP integration with **Razorpay** will be implemented in MVP/Production phases. Razorpay is chosen for its comprehensive support for India-specific payment methods (UPI, Netbanking, Wallets like Paytm/PhonePe, EMI, Pay Later) and INR transactions.
 
 **Exposed Components:**
 

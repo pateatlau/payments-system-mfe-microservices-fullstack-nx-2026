@@ -79,10 +79,10 @@ test.describe('Profile Performance', () => {
     // Measure form input responsiveness
     const inputStartTime = Date.now();
 
-    await page.fill('input[placeholder*="phone"]', '+1-555-123-4567');
+    await page.fill('input[placeholder*="phone"]', '+919876543210');
     await page.fill(
       'input[placeholder*="address"]',
-      '123 Performance Test Street'
+      '123, MG Road, Mumbai'
     );
     await page.fill(
       'textarea[placeholder*="bio"]',
@@ -140,10 +140,10 @@ test.describe('Profile Performance', () => {
     });
 
     // Fill form
-    await page.fill('input[placeholder*="phone"]', '+1-555-123-4567');
+    await page.fill('input[placeholder*="phone"]', '+919876543210');
     await page.fill(
       'input[placeholder*="address"]',
-      '123 Performance Test Street'
+      '123, Koramangala, Bengaluru'
     );
 
     const submitStartTime = Date.now();
@@ -181,7 +181,7 @@ test.describe('Profile Performance', () => {
       await page.click('button:has-text("Profile")');
 
       // Fill and clear form multiple times
-      await page.fill('input[placeholder*="phone"]', `+1-555-123-456${i}`);
+      await page.fill('input[placeholder*="phone"]', `+91 98765 4321${i}`);
       await page.fill('input[placeholder*="phone"]', '');
     }
 

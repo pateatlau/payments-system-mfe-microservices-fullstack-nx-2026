@@ -1944,7 +1944,7 @@ Implemented create payment endpoint:
 
 - Type: instant, scheduled, recurring
 - Amount: positive number
-- Currency: 3-character code (default: USD)
+- Currency: 3-character code (default: INR)
 - Description: 1-500 characters
 - Recipient: ID (UUID) or email (valid format)
 - Metadata: optional JSON object

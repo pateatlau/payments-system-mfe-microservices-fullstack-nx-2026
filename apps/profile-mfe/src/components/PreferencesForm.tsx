@@ -293,18 +293,18 @@ export function PreferencesForm({ onSuccess }: PreferencesFormProps) {
                   <SelectValue placeholder="Select timezone" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="Asia/Kolkata">Asia/Kolkata (IST) - India</SelectItem>
                   <SelectItem value="UTC">UTC - Coordinated Universal Time</SelectItem>
-                  <SelectItem value="America/New_York">America/New_York (EST/EDT)</SelectItem>
-                  <SelectItem value="America/Los_Angeles">America/Los_Angeles (PST/PDT)</SelectItem>
-                  <SelectItem value="America/Chicago">America/Chicago (CST/CDT)</SelectItem>
+                  <SelectItem value="Asia/Dubai">Asia/Dubai (GST)</SelectItem>
+                  <SelectItem value="Asia/Singapore">Asia/Singapore (SGT)</SelectItem>
+                  <SelectItem value="Asia/Tokyo">Asia/Tokyo (JST)</SelectItem>
+                  <SelectItem value="Asia/Shanghai">Asia/Shanghai (CST)</SelectItem>
                   <SelectItem value="Europe/London">Europe/London (GMT/BST)</SelectItem>
                   <SelectItem value="Europe/Paris">Europe/Paris (CET/CEST)</SelectItem>
                   <SelectItem value="Europe/Berlin">Europe/Berlin (CET/CEST)</SelectItem>
-                  <SelectItem value="Asia/Kolkata">Asia/Kolkata (IST)</SelectItem>
-                  <SelectItem value="Asia/Tokyo">Asia/Tokyo (JST)</SelectItem>
-                  <SelectItem value="Asia/Shanghai">Asia/Shanghai (CST)</SelectItem>
-                  <SelectItem value="Asia/Dubai">Asia/Dubai (GST)</SelectItem>
-                  <SelectItem value="Asia/Singapore">Asia/Singapore (SGT)</SelectItem>
+                  <SelectItem value="America/New_York">America/New_York (EST/EDT)</SelectItem>
+                  <SelectItem value="America/Los_Angeles">America/Los_Angeles (PST/PDT)</SelectItem>
+                  <SelectItem value="America/Chicago">America/Chicago (CST/CDT)</SelectItem>
                   <SelectItem value="Australia/Sydney">Australia/Sydney (AEST/AEDT)</SelectItem>
                   <SelectItem value="Pacific/Auckland">Pacific/Auckland (NZST/NZDT)</SelectItem>
                 </SelectContent>

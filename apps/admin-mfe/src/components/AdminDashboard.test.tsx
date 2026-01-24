@@ -167,11 +167,12 @@ describe('AdminDashboard', () => {
     render(<AdminDashboard />);
 
     // Wait for loading to complete and stats to appear
+    // Currency is formatted using en-IN locale with INR: "₹45,231"
     await waitFor(
       () => {
         expect(screen.getByText('1247')).toBeInTheDocument();
         expect(screen.getByText('89')).toBeInTheDocument();
-        expect(screen.getByText('$45,231')).toBeInTheDocument();
+        expect(screen.getByText('₹45,231')).toBeInTheDocument();
       },
       { timeout: 2000 }
     );

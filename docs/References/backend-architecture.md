@@ -247,7 +247,7 @@ CREATE TABLE payments (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID REFERENCES users(id) NOT NULL,
   amount DECIMAL(10, 2) NOT NULL,
-  currency VARCHAR(3) DEFAULT 'USD',
+  currency VARCHAR(3) DEFAULT 'INR',
   status VARCHAR(50) NOT NULL CHECK (status IN ('pending', 'initiated', 'processing', 'completed', 'failed', 'cancelled')),
   type VARCHAR(50) NOT NULL CHECK (type IN ('initiate', 'payment')),
   description TEXT,

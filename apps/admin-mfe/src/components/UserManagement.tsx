@@ -192,7 +192,7 @@ export function UserManagement() {
       if (Number.isNaN(date.getTime())) {
         return 'N/A';
       }
-      return date.toLocaleDateString('en-US', {
+      return date.toLocaleDateString('en-IN', {
         year: 'numeric',
         month: 'short',
         day: 'numeric',

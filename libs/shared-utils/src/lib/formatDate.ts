@@ -1,5 +1,6 @@
 /**
  * Formats a date to a readable string format
+ * Uses en-IN locale for India-focused user base
  * @param date - The date to format (Date object or timestamp)
  * @param options - Intl.DateTimeFormatOptions for customization
  * @returns Formatted date string
@@ -15,7 +16,7 @@ export function formatDate(
     day: 'numeric',
   };
 
-  return new Intl.DateTimeFormat('en-US', {
+  return new Intl.DateTimeFormat('en-IN', {
     ...defaultOptions,
     ...options,
   }).format(dateObj);

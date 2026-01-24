@@ -27,8 +27,8 @@
  *
  * // Update profile
  * const updated = await updateProfile({
- *   phoneNumber: '+1234567890',
- *   address: '123 Main St'
+ *   phoneNumber: '+919876543210',
+ *   address: '123 MG Road, Mumbai'
  * });
  * ```
  */
@@ -134,8 +134,8 @@ export async function getProfile(): Promise<Profile> {
  * ```typescript
  * try {
  *   const updatedProfile = await updateProfile({
- *     phoneNumber: '+1234567890',
- *     address: '123 Updated Street',
+ *     phoneNumber: '+919876543210',
+ *     address: '123 MG Road, Mumbai',
  *     bio: 'Updated bio information'
  *   });
  *   console.log('Profile updated:', updatedProfile);

@@ -703,8 +703,8 @@ Get user by ID.
     "profile": {
       "id": "880e8400-e29b-41d4-a716-446655440000",
       "avatarUrl": null,
-      "phone": "+1234567890",
-      "address": "123 Main St",
+      "phone": "+919876543210",
+      "address": "123 MG Road, Mumbai",
       "bio": "Software developer"
     }
   }
@@ -972,8 +972,8 @@ Get current user's profile.
     "id": "880e8400-e29b-41d4-a716-446655440000",
     "userId": "550e8400-e29b-41d4-a716-446655440000",
     "avatarUrl": "https://example.com/avatar.jpg",
-    "phone": "+1234567890",
-    "address": "123 Main St, City, Country",
+    "phone": "+919876543210",
+    "address": "123 MG Road, Mumbai, India",
     "bio": "Software developer",
     "preferences": {
       "theme": "dark",
@@ -1001,8 +1001,8 @@ Update current user's profile.
 
 ```json
 {
-  "phone": "+1987654321",
-  "address": "456 Oak Ave, Town, Country",
+  "phone": "+919876543211",
+  "address": "456 Brigade Road, Bangalore, India",
   "bio": "Full-stack developer"
 }
 ```
@@ -1016,8 +1016,8 @@ Update current user's profile.
     "id": "880e8400-e29b-41d4-a716-446655440000",
     "userId": "550e8400-e29b-41d4-a716-446655440000",
     "avatarUrl": "https://example.com/avatar.jpg",
-    "phone": "+1987654321",
-    "address": "456 Oak Ave, Town, Country",
+    "phone": "+919876543211",
+    "address": "456 Brigade Road, Bangalore, India",
     "bio": "Full-stack developer",
     "preferences": {
       "theme": "dark",

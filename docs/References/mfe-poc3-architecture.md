@@ -33,7 +33,7 @@ The POC phases are designed to **validate the viability, practicality, and effor
 
 This explains why payment operations remain **stubbed** (no actual PSP integration) - the focus is on validating the architecture and patterns with production-ready infrastructure, not delivering complete payment processing (which will come in MVP/Production phases). Additional POC phases beyond POC-3 may be added as needed to continue architecture validation.
 
-**Scope:** POC-3 focuses on production readiness, performance optimization, infrastructure improvements, advanced features for scalability and reliability, and basic session synchronization across tabs and devices. Payment operations remain stubbed (no actual PSP integration - will be implemented in MVP/Production).
+**Scope:** POC-3 focuses on production readiness, performance optimization, infrastructure improvements, advanced features for scalability and reliability, and basic session synchronization across tabs and devices. Payment operations remain stubbed (no actual PSP integration - Razorpay integration planned for MVP/Production with support for India-specific payment methods: UPI, Netbanking, Wallets, EMI, Pay Later).
 
 ---
 

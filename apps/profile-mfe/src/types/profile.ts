@@ -50,11 +50,11 @@ export interface Profile {
 export interface UserPreferences {
   /** UI theme preference */
   theme?: 'light' | 'dark' | 'system';
-  /** Language code (ISO 639-1, e.g., 'en', 'es', 'en-US') */
+  /** Language code (ISO 639-1, e.g., 'en', 'hi', 'en-IN') */
   language?: string;
-  /** Currency code (ISO 4217, e.g., 'USD', 'EUR') */
+  /** Currency code (ISO 4217, e.g., 'INR', 'USD') */
   currency?: string;
-  /** Timezone (IANA timezone, e.g., 'America/New_York') */
+  /** Timezone (IANA timezone, e.g., 'Asia/Kolkata') */
   timezone?: string;
   /** Notification preferences */
   notifications?: {
@@ -103,11 +103,11 @@ export interface UpdateProfileData {
 export interface UpdatePreferencesData {
   /** UI theme preference */
   theme?: 'light' | 'dark' | 'system';
-  /** Language code (2-5 characters, e.g., 'en', 'es', 'en-US') */
+  /** Language code (2-5 characters, e.g., 'en', 'hi', 'en-IN') */
   language?: string;
   /** Currency code (3 characters, ISO 4217) */
   currency?: string;
-  /** Timezone (IANA timezone, e.g., 'America/New_York') */
+  /** Timezone (IANA timezone, e.g., 'Asia/Kolkata') */
   timezone?: string;
   /** Notification preferences */
   notifications?: {

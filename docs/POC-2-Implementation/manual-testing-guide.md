@@ -1233,8 +1233,8 @@ curl -X PUT http://localhost:3004/api/profile \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
-    "phoneNumber": "+1234567890",
-    "address": "123 Main St",
+    "phoneNumber": "+919876543210",
+    "address": "123 MG Road, Mumbai",
     "bio": "Test bio",
     "avatarUrl": "https://example.com/avatar.jpg"
   }' | jq .
@@ -1267,14 +1267,14 @@ curl -X PUT http://localhost:3004/api/profile/preferences \
   -H "Content-Type: application/json" \
   -d '{
     "theme": "dark",
-    "language": "en-US",
-    "currency": "USD",
+    "language": "en-IN",
+    "currency": "INR",
     "notifications": {
       "email": true,
       "push": false,
       "sms": true
     },
-    "timezone": "America/New_York"
+    "timezone": "Asia/Kolkata"
   }' | jq .
 
 # Verify update:
