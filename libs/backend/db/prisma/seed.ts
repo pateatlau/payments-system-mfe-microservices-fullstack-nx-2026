@@ -72,8 +72,8 @@ async function main() {
   await prisma.userProfile.create({
     data: {
       userId: adminUser.id,
-      phone: '+1234567890',
-      address: '123 Admin Street',
+      phone: '+919876543210',
+      address: '123 MG Road, Mumbai',
       bio: 'System Administrator',
       preferences: {
         theme: 'dark',
@@ -85,7 +85,7 @@ async function main() {
   await prisma.userProfile.create({
     data: {
       userId: customerUser.id,
-      phone: '+1234567891',
+      phone: '+919876543211',
       preferences: {
         theme: 'light',
         notifications: true,
@@ -96,8 +96,8 @@ async function main() {
   await prisma.userProfile.create({
     data: {
       userId: vendorUser.id,
-      phone: '+1234567892',
-      address: '456 Vendor Avenue',
+      phone: '+919876543212',
+      address: '456 Brigade Road, Bangalore',
       preferences: {
         theme: 'light',
         notifications: false,

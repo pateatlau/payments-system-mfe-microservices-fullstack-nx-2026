@@ -155,10 +155,10 @@ test.describe('Full-Stack Profile Integration', () => {
 
       // Update preferences
       await page.selectOption('select[aria-label*="language"]', 'en');
-      await page.selectOption('select[aria-label*="currency"]', 'USD');
+      await page.selectOption('select[aria-label*="currency"]', 'INR');
       await page.selectOption(
         'select[aria-label*="timezone"]',
-        'America/New_York'
+        'Asia/Kolkata'
       );
       await page.check('input[type="checkbox"][value="email"]');
 

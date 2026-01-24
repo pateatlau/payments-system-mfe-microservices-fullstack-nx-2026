@@ -485,7 +485,7 @@ export function SignInForm() {
 - CUSTOMER role can make payments via `POST /api/payments` with `type: 'payment'` (stubbed - backend simulates)
 - Real-time updates via polling or WebSocket (POC-3)
 
-**Important:** All payment flows are stubbed (no actual Payment Service Provider/PSP integration). The backend API simulates payment processing but does not integrate with real PSPs (Stripe, PayPal, etc.). This applies to all POC phases (POC-1, POC-2, POC-3). Real PSP integration will be implemented in MVP/Production phases.
+**Important:** All payment flows are stubbed (no actual Payment Service Provider/PSP integration). The backend API simulates payment processing but does not integrate with real PSPs (Razorpay, etc.). This applies to all POC phases (POC-1, POC-2, POC-3). Real PSP integration with Razorpay will be implemented in MVP/Production phases. Razorpay is chosen as the primary payment gateway due to its comprehensive support for India-specific payment methods (UPI, Netbanking, Wallets like Paytm/PhonePe, EMI, Pay Later) and INR transactions.
 
 ---
 

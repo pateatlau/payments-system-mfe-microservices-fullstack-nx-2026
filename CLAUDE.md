@@ -455,6 +455,97 @@ docs/
 - **Nx Caching:** Enabled for build, test, lint targets. Clear with `pnpm nx reset`.
 - **CORS:** API Gateway configured for frontend origins. Update `CORS_ORIGINS` env var if needed.
 
+## India-First Locale & Razorpay PSP
+
+**CRITICAL:** This application is designed for the **India market**. All defaults, examples, and placeholders must be India-centric.
+
+### Payment Service Provider (PSP)
+
+**Razorpay** is the designated PSP for this application (NOT Stripe or PayPal).
+
+Razorpay-specific concepts:
+- **Orders** (not PaymentIntents) - Created before payment
+- **Payments** - Actual payment transactions
+- **Refunds** - Partial or full refunds
+- **Settlements** - Bank settlements
+
+India-specific payment methods supported by Razorpay:
+- **UPI** - Unified Payments Interface (most popular)
+- **Netbanking** - Direct bank transfers
+- **Cards** - Credit/Debit cards (Visa, Mastercard, RuPay)
+- **Wallets** - Paytm, PhonePe, Amazon Pay, etc.
+- **EMI** - Equated Monthly Installments
+- **Pay Later** - BNPL options
+
+### Locale Defaults
+
+| Setting | Default Value | Notes |
+|---------|---------------|-------|
+| Currency | **INR** | Indian Rupees (ISO 4217) |
+| Locale | **en-IN** | For `Intl.NumberFormat`, `Intl.DateTimeFormat` |
+| Timezone | **Asia/Kolkata** | IST (Indian Standard Time, UTC+5:30) |
+| Phone Format | **+91 XXXXX XXXXX** | 10-digit Indian mobile numbers |
+| Language | **en** or **en-IN** | English (India) |
+
+### Code Examples
+
+**Currency formatting:**
+```typescript
+// Always use en-IN locale for INR
+const formatter = new Intl.NumberFormat('en-IN', {
+  style: 'currency',
+  currency: 'INR',
+});
+formatter.format(1000); // "₹1,000.00"
+```
+
+**Date formatting:**
+```typescript
+const formatter = new Intl.DateTimeFormat('en-IN', {
+  year: 'numeric',
+  month: 'short',
+  day: 'numeric',
+});
+```
+
+**Prisma schema defaults:**
+```prisma
+model Payment {
+  currency String @default("INR")
+  // ...
+}
+```
+
+**Phone number placeholders:**
+```tsx
+<input placeholder="+91 98765 43210" />
+```
+
+**Address placeholders:**
+```tsx
+<input placeholder="123, MG Road, Bengaluru, Karnataka 560001" />
+```
+
+### When Adding New Features
+
+1. **Currency fields** - Default to `INR`, use `en-IN` locale for formatting
+2. **Phone inputs** - Use `+91` format in placeholders and examples
+3. **Address fields** - Use Indian city/state names in examples
+4. **Timezone dropdowns** - Place `Asia/Kolkata (IST)` first in the list
+5. **Date/time formatting** - Use `en-IN` locale
+6. **API examples** - Use INR amounts, Indian phone numbers, Indian addresses
+7. **Seed data** - Use Indian user data (names, addresses, phone numbers)
+8. **Test fixtures** - Default to India locale values
+
+### Multi-Currency Support
+
+While INR is the default, the system supports multiple currencies for international transactions:
+- Currency dropdowns include: INR, USD, EUR, GBP
+- Validators accept ISO 4217 currency codes
+- Formatting adapts based on currency (e.g., USD uses `en-US` locale)
+
+**Note:** Test files may intentionally use various currencies (USD, EUR) to verify multi-currency support, but all default values and primary examples should use INR.
+
 ## Implementation Examples
 
 ### Example 1: Using Auth Store in a Component
@@ -777,7 +868,7 @@ model Payment {
   id          String   @id @default(uuid())
   userId      String
   amount      Decimal  @db.Decimal(10, 2)
-  currency    String   @default("USD")
+  currency    String   @default("INR")
   status      PaymentStatus @default(PENDING)
   description String?
   createdAt   DateTime @default(now())

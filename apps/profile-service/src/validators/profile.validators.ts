@@ -65,7 +65,7 @@ const sanitizedString = (minLength = 0, maxLength?: number) => {
 
 /**
  * Phone number validation pattern
- * Allows: +1234567890, (123) 456-7890, 123-456-7890, +1 (555) 123-4567, etc.
+ * Allows: +919876543210, +91 98765 43210, (022) 2345-6789, etc.
  * Validates that string contains mostly digits with allowed separators
  */
 const PHONE_PATTERN = /^[+]?[\d\s().\-/]+$/;
@@ -73,7 +73,7 @@ const PHONE_PATTERN = /^[+]?[\d\s().\-/]+$/;
 /**
  * Timezone validation pattern
  * Matches IANA timezone format including multi-part zones:
- * - America/New_York, Europe/London (two-part)
+ * - Asia/Kolkata, Europe/London (two-part)
  * - America/Indiana/Indianapolis, America/Argentina/Buenos_Aires (multi-part)
  * - UTC (special case)
  */
@@ -81,7 +81,7 @@ const TIMEZONE_PATTERN = /^[A-Za-z_]+(?:\/[A-Za-z_]+)+$|^UTC$/;
 
 /**
  * Language code pattern (ISO 639-1 / BCP 47)
- * Matches: en, es, en-US, zh-CN, etc.
+ * Matches: en, hi, en-IN, zh-CN, etc.
  */
 const LANGUAGE_PATTERN = /^[a-z]{2}(-[A-Z]{2})?$/;
 
@@ -169,7 +169,7 @@ export const updatePreferencesSchema = z.object({
     .string()
     .min(2)
     .max(5)
-    .regex(LANGUAGE_PATTERN, 'Invalid language code format (e.g., en, en-US)')
+    .regex(LANGUAGE_PATTERN, 'Invalid language code format (e.g., en, en-IN)')
     .optional(),
 
   // Enhanced: Currency code validation with uppercase transform
@@ -180,7 +180,7 @@ export const updatePreferencesSchema = z.object({
     .pipe(
       z
         .string()
-        .regex(CURRENCY_PATTERN, 'Invalid currency code format (e.g., USD)')
+        .regex(CURRENCY_PATTERN, 'Invalid currency code format (e.g., INR)')
     )
     .optional(),
 
@@ -198,7 +198,7 @@ export const updatePreferencesSchema = z.object({
     .max(50)
     .regex(
       TIMEZONE_PATTERN,
-      'Invalid timezone format (e.g., America/New_York, UTC)'
+      'Invalid timezone format (e.g., Asia/Kolkata, UTC)'
     )
     .optional(),
 });

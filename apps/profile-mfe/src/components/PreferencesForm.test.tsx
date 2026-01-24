@@ -20,8 +20,8 @@ describe('PreferencesForm', () => {
   const basePrefs: UserPreferences = {
     theme: 'dark',
     language: 'en',
-    currency: 'USD',
-    timezone: 'America/New_York',
+    currency: 'INR',
+    timezone: 'Asia/Kolkata',
     notifications: {
       email: true,
       push: false,
@@ -52,8 +52,8 @@ describe('PreferencesForm', () => {
     // Select components display the selected value text in the trigger button
     // Use getAllByText since Radix renders both visible span and hidden option
     expect(screen.getAllByText('English').length).toBeGreaterThan(0);
-    expect(screen.getAllByText('USD - US Dollar').length).toBeGreaterThan(0);
-    expect(screen.getAllByText('America/New_York (EST/EDT)').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('INR - Indian Rupee').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Asia/Kolkata (IST) - India').length).toBeGreaterThan(0);
   });
 
   it('submits updated preferences via useUpdatePreferences', async () => {

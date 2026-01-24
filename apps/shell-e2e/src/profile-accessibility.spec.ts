@@ -89,11 +89,11 @@ test.describe('Profile Accessibility', () => {
     // Fill form using keyboard
     const phoneInput = page.locator('input[placeholder*="phone"]');
     await phoneInput.focus();
-    await page.keyboard.type('+1-555-123-4567');
+    await page.keyboard.type('+91 98765 43210');
 
     // Tab to address field
     await page.keyboard.press('Tab');
-    await page.keyboard.type('123 Keyboard Test Street');
+    await page.keyboard.type('123, MG Road, Mumbai');
 
     // Tab to submit button and submit
     // Skip bio field for this test
@@ -238,12 +238,12 @@ test.describe('Profile Accessibility', () => {
     });
 
     // Fill form and tab through all fields
-    await page.fill('input[placeholder*="phone"]', '+1-555-123-4567');
+    await page.fill('input[placeholder*="phone"]', '+91 98765 43210');
     await page.keyboard.press('Tab');
 
     await page.fill(
       'input[placeholder*="address"]',
-      '123 Accessibility Test Street'
+      '123, Koramangala, Bengaluru'
     );
     await page.keyboard.press('Tab');
 

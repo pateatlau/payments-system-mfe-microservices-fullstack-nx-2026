@@ -11,7 +11,7 @@
 
 This document provides a detailed implementation guide for the Payments Service, covering payment processing (stubbed), transaction management, role-based access, and event publishing.
 
-**Important Note:** All payment operations are **stubbed** - the backend simulates payment processing but does not integrate with actual Payment Service Providers (PSPs). Real PSP integration will be implemented in MVP/Production phases.
+**Important Note:** All payment operations are **stubbed** - the backend simulates payment processing but does not integrate with actual Payment Service Providers (PSPs). Real PSP integration with **Razorpay** will be implemented in MVP/Production phases. Razorpay is chosen as the primary payment gateway due to its comprehensive support for India-specific payment methods (UPI, Netbanking, Wallets like Paytm/PhonePe, EMI, Pay Later) and INR transactions.
 
 ---
 

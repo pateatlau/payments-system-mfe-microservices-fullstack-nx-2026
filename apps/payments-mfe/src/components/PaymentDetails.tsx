@@ -52,11 +52,14 @@ interface PaymentDetailsProps {
 
 /**
  * Format currency value with symbol
+ * Uses en-IN locale for India-focused user base
  */
 function formatCurrency(amount: number, currency: string): string {
-  const formatter = new Intl.NumberFormat('en-US', {
+  const currencyCode = currency || 'INR';
+  const locale = currencyCode === 'INR' ? 'en-IN' : 'en-IN';
+  const formatter = new Intl.NumberFormat(locale, {
     style: 'currency',
-    currency: currency || 'USD',
+    currency: currencyCode,
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });
@@ -65,11 +68,12 @@ function formatCurrency(amount: number, currency: string): string {
 
 /**
  * Format date to readable string
+ * Uses en-IN locale for India-focused user base
  */
 function formatDate(dateString: string | Date): string {
   const date =
     typeof dateString === 'string' ? new Date(dateString) : dateString;
-  const formatter = new Intl.DateTimeFormat('en-US', {
+  const formatter = new Intl.DateTimeFormat('en-IN', {
     year: 'numeric',
     month: 'short',
     day: 'numeric',

@@ -498,10 +498,11 @@ createPayment.mutate(data, {
 
 ### Planned Features
 
-1. **Real PSP Integration**
-   - Actual payment processing
-   - Payment gateway integration
-   - Transaction history
+1. **Real PSP Integration (Razorpay)**
+   - Actual payment processing with Razorpay
+   - India-specific payment methods: UPI, Netbanking, Wallets (Paytm, PhonePe), EMI, Pay Later
+   - INR currency support with automatic conversion
+   - Transaction history and reconciliation
 
 2. **Payment Filtering**
    - Filter by status

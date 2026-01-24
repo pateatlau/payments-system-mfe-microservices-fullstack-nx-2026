@@ -73,8 +73,8 @@ describe('ProfileService', () => {
       id: 'profile-1',
       userId: 'user-1',
       avatarUrl: null,
-      phone: '+1234567890',
-      address: '123 Main St',
+      phone: '+919876543210',
+      address: '123 MG Road, Mumbai',
       bio: 'Test bio',
       preferences: {},
       createdAt: new Date(),
@@ -111,7 +111,7 @@ describe('ProfileService', () => {
       (prisma.userProfile.update as jest.Mock).mockResolvedValue(mockProfile);
 
       await profileService.updateProfile('user-1', {
-        phoneNumber: '+1234567890',
+        phoneNumber: '+919876543210',
       });
 
       expect(prisma.userProfile.create).toHaveBeenCalled();
@@ -126,7 +126,7 @@ describe('ProfileService', () => {
         userId: 'user-1',
         preferences: {
           theme: 'dark',
-          language: 'en-US',
+          language: 'en-IN',
         },
       };
 
@@ -138,7 +138,7 @@ describe('ProfileService', () => {
 
       expect(result).toEqual({
         theme: 'dark',
-        language: 'en-US',
+        language: 'en-IN',
       });
     });
 
@@ -166,7 +166,7 @@ describe('ProfileService', () => {
         userId: 'user-1',
         preferences: {
           theme: 'light',
-          language: 'en-US',
+          language: 'en-IN',
         },
       };
 
@@ -177,13 +177,13 @@ describe('ProfileService', () => {
 
       const result = await profileService.updatePreferences('user-1', {
         theme: 'dark',
-        currency: 'USD',
+        currency: 'INR',
       });
 
       expect(result).toEqual({
         theme: 'dark',
-        language: 'en-US',
-        currency: 'USD',
+        language: 'en-IN',
+        currency: 'INR',
       });
 
       expect(prisma.userProfile.update).toHaveBeenCalledWith({
@@ -191,8 +191,8 @@ describe('ProfileService', () => {
         data: {
           preferences: {
             theme: 'dark',
-            language: 'en-US',
-            currency: 'USD',
+            language: 'en-IN',
+            currency: 'INR',
           },
         },
       });

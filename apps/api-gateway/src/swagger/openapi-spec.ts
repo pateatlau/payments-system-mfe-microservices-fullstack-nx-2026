@@ -219,8 +219,8 @@ Obtain a token via \`POST /api/auth/login\`.
           properties: {
             id: { type: 'string', format: 'uuid' },
             userId: { type: 'string', format: 'uuid' },
-            amount: { type: 'number', example: 100.0 },
-            currency: { type: 'string', example: 'USD' },
+            amount: { type: 'number', example: 1000.0 },
+            currency: { type: 'string', example: 'INR', description: 'ISO 4217 currency code. Default: INR (Indian Rupees)' },
             status: { $ref: '#/components/schemas/PaymentStatus' },
             type: { $ref: '#/components/schemas/PaymentType' },
             description: { type: 'string', example: 'Invoice #12345' },
@@ -233,8 +233,8 @@ Obtain a token via \`POST /api/auth/login\`.
           type: 'object',
           required: ['amount', 'currency'],
           properties: {
-            amount: { type: 'number', minimum: 0.01, example: 100.0 },
-            currency: { type: 'string', example: 'USD' },
+            amount: { type: 'number', minimum: 0.01, example: 1000.0 },
+            currency: { type: 'string', example: 'INR', description: 'ISO 4217 currency code. Default: INR (Indian Rupees)' },
             description: { type: 'string', example: 'Invoice #12345' },
             type: { $ref: '#/components/schemas/PaymentType' },
             metadata: { type: 'object', example: { invoiceId: '12345' } },
@@ -255,8 +255,8 @@ Obtain a token via \`POST /api/auth/login\`.
             id: { type: 'string', format: 'uuid' },
             userId: { type: 'string', format: 'uuid' },
             avatarUrl: { type: 'string', nullable: true },
-            phone: { type: 'string', example: '+1234567890' },
-            address: { type: 'string', example: '123 Main St, City, Country' },
+            phone: { type: 'string', example: '+919876543210' },
+            address: { type: 'string', example: '123 MG Road, Mumbai, India' },
             bio: { type: 'string', example: 'Software developer' },
             preferences: { $ref: '#/components/schemas/Preferences' },
             createdAt: { type: 'string', format: 'date-time' },
@@ -280,8 +280,8 @@ Obtain a token via \`POST /api/auth/login\`.
         UpdateProfileRequest: {
           type: 'object',
           properties: {
-            phone: { type: 'string', example: '+1987654321' },
-            address: { type: 'string', example: '456 Oak Ave, Town, Country' },
+            phone: { type: 'string', example: '+919876543211' },
+            address: { type: 'string', example: '456 Brigade Road, Bangalore, India' },
             bio: { type: 'string', example: 'Full-stack developer' },
           },
         },

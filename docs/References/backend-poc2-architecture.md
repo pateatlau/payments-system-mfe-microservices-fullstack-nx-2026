@@ -34,7 +34,7 @@ The POC phases are designed to **validate the viability, practicality, and effor
 
 This explains why payment operations remain **stubbed** (no actual PSP integration) - the focus is on validating the architecture and patterns with backend integration, not delivering complete payment processing (which will come in MVP/Production phases).
 
-**Scope:** POC-2 backend implements a microservices architecture with REST API, real JWT authentication, role-based access control, basic event hub for inter-service communication, and comprehensive API security. Payment operations are stubbed (no actual PSP integration). POC-2 backend builds the foundation for POC-3 infrastructure improvements (nginx, enhanced event hub, advanced observability).
+**Scope:** POC-2 backend implements a microservices architecture with REST API, real JWT authentication, role-based access control, basic event hub for inter-service communication, and comprehensive API security. Payment operations are stubbed (no actual PSP integration - Razorpay integration planned for MVP/Production with INR transactions and India-specific payment methods). POC-2 backend builds the foundation for POC-3 infrastructure improvements (nginx, enhanced event hub, advanced observability).
 
 ---
 
@@ -207,7 +207,7 @@ CREATE TABLE payments (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID REFERENCES users(id) NOT NULL,
   amount DECIMAL(10, 2) NOT NULL,
-  currency VARCHAR(3) DEFAULT 'USD',
+  currency VARCHAR(3) DEFAULT 'INR',
   status VARCHAR(50) NOT NULL CHECK (status IN ('pending', 'initiated', 'processing', 'completed', 'failed', 'cancelled')),
   type VARCHAR(50) NOT NULL CHECK (type IN ('initiate', 'payment')),
   description TEXT,
@@ -611,7 +611,7 @@ model Payment {
   id          String        @id @default(uuid())
   userId      String        @map("user_id")
   amount      Decimal       @db.Decimal(10, 2)
-  currency    String        @default("USD")
+  currency    String        @default("INR")
   status      PaymentStatus
   type        PaymentType
   description String?

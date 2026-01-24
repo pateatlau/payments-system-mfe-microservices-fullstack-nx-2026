@@ -5,7 +5,7 @@ import { z } from 'zod';
  *
  * Rules:
  * - Amount must be positive if provided
- * - Currency must be 3 uppercase letters if provided (e.g., USD, EUR, GBP)
+ * - Currency must be 3 uppercase letters if provided (e.g., INR, USD, EUR)
  * - Recipient email must be valid format if provided
  * - Description can be any string if provided
  * - Metadata can be any object if provided
@@ -21,7 +21,7 @@ export const updatePaymentSchema = z.object({
     .optional(),
   currency: z
     .string()
-    .regex(/^[A-Z]{3}$/, 'Currency must be 3 uppercase letters (e.g., USD)')
+    .regex(/^[A-Z]{3}$/, 'Currency must be 3 uppercase letters (e.g., INR)')
     .optional(),
   description: z.string().optional(),
   recipientEmail: z

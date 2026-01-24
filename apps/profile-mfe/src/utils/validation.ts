@@ -70,9 +70,9 @@ export const updateProfileSchema = z.object({
  *
  * Validation rules:
  * - theme: Must be 'light', 'dark', or 'system' (if provided)
- * - language: 2-5 characters, e.g., 'en', 'es', 'en-US' (if provided)
+ * - language: 2-5 characters, e.g., 'en', 'hi', 'en-IN' (if provided)
  * - currency: Exactly 3 characters (ISO 4217 currency code) (if provided)
- * - timezone: IANA timezone string, e.g., 'America/New_York' (if provided)
+ * - timezone: IANA timezone string, e.g., 'Asia/Kolkata' (if provided)
  * - notifications: Object with email, push, sms booleans (if provided)
  *
  * @see apps/profile-service/src/validators/profile.validators.ts - updatePreferencesSchema
@@ -88,7 +88,7 @@ export const updatePreferencesSchema = z.object({
     .string()
     .length(3, 'Currency code must be exactly 3 characters (ISO 4217)')
     .optional(),
-  timezone: z.string().optional(), // IANA timezone, e.g., 'America/New_York'
+  timezone: z.string().optional(), // IANA timezone, e.g., 'Asia/Kolkata'
   notifications: z
     .object({
       email: z.boolean().optional(),

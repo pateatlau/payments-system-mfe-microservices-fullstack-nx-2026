@@ -34,7 +34,7 @@ The POC phases are designed to **validate the viability, practicality, and effor
 
 This explains why payment operations remain **stubbed** (no actual PSP integration) - the focus is on validating the architecture and patterns with production-ready infrastructure, not delivering complete payment processing (which will come in MVP/Production phases).
 
-**Scope:** POC-3 backend implements production-ready infrastructure with separate databases per service, nginx reverse proxy, RabbitMQ event hub, optional GraphQL API, WebSocket support, advanced caching, enhanced observability, and session management. Payment operations remain stubbed (no actual PSP integration). POC-3 backend builds on POC-2 and sets the foundation for MVP/Production scaling.
+**Scope:** POC-3 backend implements production-ready infrastructure with separate databases per service, nginx reverse proxy, RabbitMQ event hub, optional GraphQL API, WebSocket support, advanced caching, enhanced observability, and session management. Payment operations remain stubbed (no actual PSP integration - Razorpay integration planned for MVP/Production with INR transactions and India-specific payment methods). POC-3 backend builds on POC-2 and sets the foundation for MVP/Production scaling.
 
 ---
 
@@ -627,7 +627,7 @@ model Payment {
   id          String   @id @default(uuid())
   userId      String   @map("user_id") // Reference to user ID (not FK)
   amount      Decimal
-  currency    String   @default("USD")
+  currency    String   @default("INR")
   status      PaymentStatus
   type        PaymentType
   description String?

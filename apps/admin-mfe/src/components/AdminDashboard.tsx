@@ -108,10 +108,10 @@ export function AdminDashboard() {
       ];
     }
 
-    // Format total volume as currency
-    const formattedVolume = new Intl.NumberFormat('en-US', {
+    // Format total volume as currency (INR for India-focused user base)
+    const formattedVolume = new Intl.NumberFormat('en-IN', {
       style: 'currency',
-      currency: 'USD',
+      currency: 'INR',
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(dashboardStats.totalVolume);
