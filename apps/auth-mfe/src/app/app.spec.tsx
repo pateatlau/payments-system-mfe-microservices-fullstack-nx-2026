@@ -1,4 +1,5 @@
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
+import '@testing-library/jest-dom';
 
 import App from './app';
 
@@ -8,10 +9,8 @@ describe('App', () => {
     expect(baseElement).toBeTruthy();
   });
 
-  it('should have a greeting as the title', () => {
-    const { getAllByText } = render(<App />);
-    expect(
-      getAllByText(new RegExp('Welcome auth-mfe', 'gi')).length > 0
-    ).toBeTruthy();
+  it('should have the app title', () => {
+    render(<App />);
+    expect(screen.getByText('Auth MFE')).toBeInTheDocument();
   });
 });

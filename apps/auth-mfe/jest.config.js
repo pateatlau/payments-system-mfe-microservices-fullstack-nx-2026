@@ -1,12 +1,13 @@
-const { nxPreset } = require('@nx/jest/preset');
-
 module.exports = {
-  ...nxPreset,
   displayName: 'auth-mfe',
-  preset: 'ts-jest',
+  preset: '../../jest.preset.js',
   testEnvironment: 'jsdom',
-  rootDir: '.',
   setupFilesAfterEnv: ['<rootDir>/src/test/setup.ts'],
+  transform: {
+    '^(?!.*\\.(js|jsx|ts|tsx|css|json)$)': '@nx/react/plugins/jest',
+    '^.+\\.[tj]sx?$': ['babel-jest', { presets: ['@nx/react/babel'] }],
+  },
+  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx'],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
     // Map shared libraries
@@ -18,15 +19,10 @@ module.exports = {
     '^shared-header-ui$': '<rootDir>/../../libs/shared-header-ui/src/index.ts',
     '^@mfe/shared-design-system$':
       '<rootDir>/../../libs/shared-design-system/src/index.ts',
-  },
-  transform: {
-    '^.+\\.[tj]sx?$': [
-      'ts-jest',
-      {
-        tsconfig: '<rootDir>/tsconfig.spec.json',
-        isolatedModules: true,
-      },
-    ],
+    '^@mfe/shared-api-client$':
+      '<rootDir>/../../libs/shared-api-client/src/index.ts',
+    // Handle asset imports
+    '\\.(png|jpg|jpeg|gif|svg)$': '<rootDir>/src/test/__mocks__/fileMock.js',
   },
   collectCoverageFrom: [
     'src/**/*.{ts,tsx}',
