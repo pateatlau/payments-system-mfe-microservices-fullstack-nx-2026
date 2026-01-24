@@ -100,7 +100,9 @@ export function PaymentCreateForm({
         <form onSubmit={handleSubmit(onSubmitHandler)} className="space-y-4">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
-              <Label htmlFor="amount">Amount *</Label>
+              <Label htmlFor="amount">
+                Amount <span className="text-red-500">*</span>
+              </Label>
               <Input
                 id="amount"
                 type="number"
@@ -122,7 +124,9 @@ export function PaymentCreateForm({
             </div>
 
             <div>
-              <Label htmlFor="currency">Currency *</Label>
+              <Label htmlFor="currency">
+                Currency <span className="text-red-500">*</span>
+              </Label>
               <Controller
                 control={control}
                 name="currency"
@@ -152,7 +156,9 @@ export function PaymentCreateForm({
           </div>
 
           <div>
-            <Label htmlFor="type">Payment Type *</Label>
+            <Label htmlFor="type">
+              Payment Type <span className="text-red-500">*</span>
+            </Label>
             <Controller
               control={control}
               name="type"
@@ -180,7 +186,9 @@ export function PaymentCreateForm({
           </div>
 
           <div>
-            <Label htmlFor="description">Description *</Label>
+            <Label htmlFor="description">
+              Description <span className="text-red-500">*</span>
+            </Label>
             <Input
               id="description"
               type="text"
@@ -199,7 +207,9 @@ export function PaymentCreateForm({
           </div>
 
           <div>
-            <Label htmlFor="recipientEmail">Recipient *</Label>
+            <Label htmlFor="recipientEmail">
+              Recipient <span className="text-red-500">*</span>
+            </Label>
             {isLoadingRecipients ? (
               <Skeleton className="h-10 mt-2" />
             ) : (

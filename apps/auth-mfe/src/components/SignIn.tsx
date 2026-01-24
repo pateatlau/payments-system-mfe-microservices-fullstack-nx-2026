@@ -437,7 +437,9 @@ export function SignIn({ onSuccess, onNavigateToSignUp, onNavigateToForgotPasswo
             >
               {/* Email field */}
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">
+                  Email <span className="text-red-500">*</span>
+                </Label>
                 <Input
                   id="email"
                   type="email"
@@ -456,7 +458,9 @@ export function SignIn({ onSuccess, onNavigateToSignUp, onNavigateToForgotPasswo
               {/* Password field */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="password">Password</Label>
+                  <Label htmlFor="password">
+                    Password <span className="text-red-500">*</span>
+                  </Label>
                   {onNavigateToForgotPassword && (
                     <Button
                       type="button"

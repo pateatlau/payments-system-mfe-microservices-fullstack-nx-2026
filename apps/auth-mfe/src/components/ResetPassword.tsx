@@ -299,7 +299,9 @@ export function ResetPassword({
             >
               {/* New Password field */}
               <div className="space-y-2">
-                <Label htmlFor="newPassword">New Password</Label>
+                <Label htmlFor="newPassword">
+                  New Password <span className="text-red-500">*</span>
+                </Label>
                 <PasswordInput
                   id="newPassword"
                   {...register('newPassword')}
@@ -317,7 +319,9 @@ export function ResetPassword({
 
               {/* Confirm Password field */}
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirm Password</Label>
+                <Label htmlFor="confirmPassword">
+                  Confirm Password <span className="text-red-500">*</span>
+                </Label>
                 <PasswordInput
                   id="confirmPassword"
                   {...register('confirmPassword')}

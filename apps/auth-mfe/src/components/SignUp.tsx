@@ -324,7 +324,9 @@ export function SignUp({ onSuccess, onNavigateToSignIn }: SignUpProps = {}) {
             >
               {/* Name field */}
               <div className="space-y-2">
-                <Label htmlFor="name">Full Name</Label>
+                <Label htmlFor="name">
+                  Full Name <span className="text-red-500">*</span>
+                </Label>
                 <Input
                   id="name"
                   type="text"
@@ -342,7 +344,9 @@ export function SignUp({ onSuccess, onNavigateToSignIn }: SignUpProps = {}) {
 
               {/* Email field */}
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">
+                  Email <span className="text-red-500">*</span>
+                </Label>
                 <Input
                   id="email"
                   type="email"
@@ -396,7 +400,9 @@ export function SignUp({ onSuccess, onNavigateToSignIn }: SignUpProps = {}) {
 
               {/* Password field */}
               <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password">
+                  Password <span className="text-red-500">*</span>
+                </Label>
                 <PasswordInput
                   id="password"
                   {...register('password')}
@@ -422,7 +428,9 @@ export function SignUp({ onSuccess, onNavigateToSignIn }: SignUpProps = {}) {
 
               {/* Confirm Password field */}
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirm Password</Label>
+                <Label htmlFor="confirmPassword">
+                  Confirm Password <span className="text-red-500">*</span>
+                </Label>
                 <PasswordInput
                   id="confirmPassword"
                   {...register('confirmPassword')}

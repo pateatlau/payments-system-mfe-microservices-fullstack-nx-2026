@@ -205,7 +205,9 @@ export function ForgotPassword({ onNavigateToSignIn }: ForgotPasswordProps = {})
             >
               {/* Email field */}
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">
+                  Email <span className="text-red-500">*</span>
+                </Label>
                 <Input
                   id="email"
                   type="email"
