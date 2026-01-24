@@ -458,9 +458,9 @@ describe('UserManagement', () => {
     render(<UserManagement />);
 
     await waitFor(() => {
-      // Date should be formatted as "Jan 1, 2026"
-      expect(screen.getByText('Jan 1, 2026')).toBeInTheDocument();
-      expect(screen.getByText('Jan 2, 2026')).toBeInTheDocument();
+      // Date should be formatted using en-IN locale: "1 Jan 2026"
+      expect(screen.getByText('1 Jan 2026')).toBeInTheDocument();
+      expect(screen.getByText('2 Jan 2026')).toBeInTheDocument();
     });
   });
 });
