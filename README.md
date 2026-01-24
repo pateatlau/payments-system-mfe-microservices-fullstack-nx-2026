@@ -1,7 +1,7 @@
 # MFE Payments System - Production-Ready Microfrontend Platform
 
-**Version:** 0.3.1
-**Status:** POC-3 Complete – Production-Ready Infrastructure + Nx Cloud CI
+**Version:** 0.3.2
+**Status:** POC-3 Complete – Production-Ready Infrastructure + Social Login
 **Tech Stack:** React + Nx + Rspack + Module Federation v2 + Node.js + PostgreSQL + RabbitMQ + nginx
 
 ---
@@ -19,7 +19,7 @@ A production-ready, full-stack microfrontend platform demonstrating enterprise-g
 - **Real-Time:** WebSocket server for bidirectional communication
 - **Dual API:** REST (Swagger UI) + GraphQL (Apollo Server)
 - **Full Observability:** Prometheus metrics, Grafana dashboards, Jaeger tracing, Sentry errors
-- **Banking-Grade Security:** JWT authentication, RBAC, MFA, anomaly detection, advanced session management
+- **Banking-Grade Security:** JWT authentication, RBAC, MFA, anomaly detection, advanced session management, social login (OAuth via Auth0)
 - **CI Pipeline:** GitHub Actions with Nx Cloud distributed caching (50-65% faster builds)
 - **Cross-Browser:** Full support for Chrome, Firefox, Safari, Edge, and Brave
 
@@ -299,6 +299,14 @@ pnpm grafana:ui               # Open Grafana dashboards
   - Multi-factor authentication (TOTP)
   - Anomaly detection (velocity, location, device)
   - Advanced session management (device fingerprinting, concurrent limits, force logout)
+- **Social Login (OAuth via Auth0):**
+  - Google and GitHub OAuth providers (Facebook, LinkedIn, X deferred)
+  - Auth0 federation layer (handles OAuth, your infrastructure manages users/sessions)
+  - Automatic account linking with email verification
+  - MFA integration for social login users
+  - Account linking/unlinking in profile settings
+  - OAuth-specific rate limiting (10 req/15 min)
+  - Security audit completed (CSRF protection, token encryption, audit logging)
 
 ---
 
@@ -338,6 +346,8 @@ pnpm test:e2e                 # End-to-end tests
 - [Observability Setup](docs/POC-3-Implementation/OBSERVABILITY_LIVE_SETUP.md) – Prometheus/Grafana/Jaeger
 - [Swagger API Docs](docs/POC-3-Implementation/SWAGGER_API_DOCUMENTATION.md) – REST endpoints and auth
 - [Backend Hardening Plan](docs/POC-3-Implementation/BACKEND-HARDENING-PLAN.md) – Security hardening phases 1-7
+- [Social Login Plan](docs/POC-3-Implementation/SOCIAL-LOGIN-AUTH0-PLAN.md) – OAuth via Auth0 (Google, GitHub)
+- [OAuth Security Audit](docs/POC-3-Implementation/OAUTH-SECURITY-AUDIT.md) – Security review and recommendations
 
 ### Reference (As Needed)
 
@@ -372,6 +382,6 @@ For detailed setup instructions, troubleshooting, and development workflows, ref
 
 ---
 
-**Last Updated:** January 20, 2026
-**Status:** Production-Ready Architecture + CI Pipeline with Nx Cloud + Backend Hardening Complete (Phases 1-7)
-**Next Phase:** CD Pipeline + Cloud Deployment
+**Last Updated:** January 24, 2026
+**Status:** Production-Ready Architecture + CI Pipeline + Backend Hardening + Social Login (Google & GitHub)
+**Next Phase:** CD Pipeline + Cloud Deployment + Additional OAuth Providers (Facebook, LinkedIn, X)
