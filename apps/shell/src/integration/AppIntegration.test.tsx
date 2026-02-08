@@ -91,6 +91,12 @@ const MockPaymentsPage = jest.fn(() => (
   </div>
 ));
 
+const MockProfilePage = jest.fn(() => (
+  <div data-testid="mock-profile">
+    <h1>Profile Page</h1>
+  </div>
+));
+
 // Mock ProtectedRoute
 jest.mock('../components/ProtectedRoute', () => ({
   ProtectedRoute: ({ children }: { children: React.ReactNode }) => {
@@ -130,6 +136,7 @@ describe('App Integration Tests', () => {
             SignInComponent={MockSignIn}
             SignUpComponent={MockSignUp}
             PaymentsComponent={MockPaymentsPage}
+            ProfileComponent={MockProfilePage}
           />
         </MemoryRouter>
       );
@@ -145,6 +152,7 @@ describe('App Integration Tests', () => {
             SignInComponent={MockSignIn}
             SignUpComponent={MockSignUp}
             PaymentsComponent={MockPaymentsPage}
+            ProfileComponent={MockProfilePage}
           />
         </MemoryRouter>
       );
@@ -161,6 +169,7 @@ describe('App Integration Tests', () => {
             SignInComponent={MockSignIn}
             SignUpComponent={MockSignUp}
             PaymentsComponent={MockPaymentsPage}
+            ProfileComponent={MockProfilePage}
           />
         </MemoryRouter>
       );
@@ -186,6 +195,7 @@ describe('App Integration Tests', () => {
             SignInComponent={MockSignIn}
             SignUpComponent={MockSignUp}
             PaymentsComponent={MockPaymentsPage}
+            ProfileComponent={MockProfilePage}
           />
         </MemoryRouter>
       );
@@ -212,6 +222,7 @@ describe('App Integration Tests', () => {
             SignInComponent={MockSignIn}
             SignUpComponent={MockSignUp}
             PaymentsComponent={MockPaymentsPage}
+            ProfileComponent={MockProfilePage}
           />
         </MemoryRouter>
       );
@@ -246,6 +257,7 @@ describe('App Integration Tests', () => {
             SignInComponent={MockSignIn}
             SignUpComponent={MockSignUp}
             PaymentsComponent={MockPaymentsPage}
+            ProfileComponent={MockProfilePage}
           />
         </MemoryRouter>
       );
@@ -261,6 +273,7 @@ describe('App Integration Tests', () => {
             SignInComponent={MockSignIn}
             SignUpComponent={MockSignUp}
             PaymentsComponent={MockPaymentsPage}
+            ProfileComponent={MockProfilePage}
           />
         </MemoryRouter>
       );
@@ -276,6 +289,7 @@ describe('App Integration Tests', () => {
             SignInComponent={MockSignIn}
             SignUpComponent={MockSignUp}
             PaymentsComponent={MockPaymentsPage}
+            ProfileComponent={MockProfilePage}
           />
         </MemoryRouter>
       );
@@ -300,6 +314,7 @@ describe('App Integration Tests', () => {
             SignInComponent={MockSignIn}
             SignUpComponent={MockSignUp}
             PaymentsComponent={MockPaymentsPage}
+            ProfileComponent={MockProfilePage}
           />
         </MemoryRouter>
       );
@@ -327,6 +342,7 @@ describe('App Integration Tests', () => {
             SignInComponent={MockSignIn}
             SignUpComponent={MockSignUp}
             PaymentsComponent={MockPaymentsPage}
+            ProfileComponent={MockProfilePage}
           />
         </MemoryRouter>
       );
@@ -355,6 +371,7 @@ describe('App Integration Tests', () => {
             SignInComponent={MockSignIn}
             SignUpComponent={MockSignUp}
             PaymentsComponent={MockPaymentsPage}
+            ProfileComponent={MockProfilePage}
           />
         </MemoryRouter>
       );
@@ -379,6 +396,7 @@ describe('App Integration Tests', () => {
             SignInComponent={MockSignIn}
             SignUpComponent={MockSignUp}
             PaymentsComponent={MockPaymentsPage}
+            ProfileComponent={MockProfilePage}
           />
         </MemoryRouter>
       );
@@ -403,6 +421,7 @@ describe('App Integration Tests', () => {
             SignInComponent={MockSignIn}
             SignUpComponent={MockSignUp}
             PaymentsComponent={MockPaymentsPage}
+            ProfileComponent={MockProfilePage}
           />
         </MemoryRouter>
       );
@@ -424,6 +443,7 @@ describe('App Integration Tests', () => {
             SignInComponent={MockSignIn}
             SignUpComponent={MockSignUp}
             PaymentsComponent={MockPaymentsPage}
+            ProfileComponent={MockProfilePage}
           />
         </MemoryRouter>
       );
@@ -451,6 +471,7 @@ describe('App Integration Tests', () => {
             SignInComponent={MockSignIn}
             SignUpComponent={MockSignUp}
             PaymentsComponent={MockPaymentsPage}
+            ProfileComponent={MockProfilePage}
           />
         </MemoryRouter>
       );
