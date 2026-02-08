@@ -115,6 +115,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
+    env:
+      # Increase Node.js heap size for test + coverage collection
+      # This must be set at job level to propagate to Nx child processes
+      NODE_OPTIONS: '--max-old-space-size=8192'
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -161,7 +166,6 @@ jobs:
       - name: Run frontend unit tests (all on main/develop)
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
         run: |
-          NODE_OPTIONS="--max-old-space-size=4096" \
           NX_NO_CLOUD=true pnpm nx run-many --target=test \
             --projects=shell,auth-mfe,payments-mfe,admin-mfe,profile-mfe,shared-auth-store,shared-utils,shared-types \
             --coverage \
@@ -170,7 +174,6 @@ jobs:
       - name: Run frontend unit tests (affected on feature branches)
         if: github.ref != 'refs/heads/main' && github.ref != 'refs/heads/develop'
         run: |
-          NODE_OPTIONS="--max-old-space-size=4096" \
           NX_NO_CLOUD=true pnpm nx affected --target=test \
             --base=${{ steps.set-shas.outputs.base }} \
             --head=${{ steps.set-shas.outputs.head }} \
@@ -275,6 +278,9 @@ jobs:
           --health-retries 3
 
     env:
+      # Increase Node.js heap size for test + coverage collection
+      # This must be set at job level to propagate to Nx child processes
+      NODE_OPTIONS: '--max-old-space-size=8192'
       # Database URLs for testing
       AUTH_DATABASE_URL: postgresql://testuser:testpass@localhost:5432/auth_db_test
       PAYMENTS_DATABASE_URL: postgresql://testuser:testpass@localhost:5433/payments_db_test
@@ -345,7 +351,6 @@ jobs:
       - name: Run backend unit tests (all on main/develop)
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
         run: |
-          NODE_OPTIONS="--max-old-space-size=4096" \
           NX_NO_CLOUD=true pnpm nx run-many --target=test \
             --projects=api-gateway,auth-service,payments-service,admin-service,profile-service \
             --coverage \
@@ -354,7 +359,6 @@ jobs:
       - name: Run backend unit tests (affected on feature branches)
         if: github.ref != 'refs/heads/main' && github.ref != 'refs/heads/develop'
         run: |
-          NODE_OPTIONS="--max-old-space-size=4096" \
           NX_NO_CLOUD=true pnpm nx affected --target=test \
             --base=${{ steps.set-shas.outputs.base }} \
             --head=${{ steps.set-shas.outputs.head }} \
