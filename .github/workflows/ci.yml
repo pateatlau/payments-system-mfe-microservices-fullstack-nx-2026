@@ -485,12 +485,13 @@ jobs:
           if-no-files-found: warn
 
   # Job 5: E2E Tests (Optional, runs on main/develop only)
+  # E2E tests are expensive - only run after unit tests pass
   e2e-tests:
     name: E2E Tests
     runs-on: ubuntu-latest
     timeout-minutes: 30
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
-    needs: [build]
+    needs: [build, test-frontend, test-backend]
 
     services:
       postgres-auth:

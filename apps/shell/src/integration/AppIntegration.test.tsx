@@ -97,6 +97,49 @@ const MockProfilePage = jest.fn(() => (
   </div>
 ));
 
+const MockForgotPassword = jest.fn(() => (
+  <div data-testid="mock-forgot-password">Forgot Password</div>
+));
+
+const MockResetPassword = jest.fn(() => (
+  <div data-testid="mock-reset-password">Reset Password</div>
+));
+
+const MockVerifyEmail = jest.fn(() => (
+  <div data-testid="mock-verify-email">Verify Email</div>
+));
+
+const MockOAuthCallback = jest.fn(() => (
+  <div data-testid="mock-oauth-callback">OAuth Callback</div>
+));
+
+const MockMfaRecommendation = jest.fn(() => (
+  <div data-testid="mock-mfa-recommendation">MFA Recommendation</div>
+));
+
+const MockReportsPage = jest.fn(() => (
+  <div data-testid="mock-reports">Reports Page</div>
+));
+
+const MockAdminDashboard = jest.fn(() => (
+  <div data-testid="mock-admin">Admin Dashboard</div>
+));
+
+// Default props for AppRoutes - all required components
+const defaultAppRoutesProps = {
+  SignInComponent: MockSignIn,
+  SignUpComponent: MockSignUp,
+  ForgotPasswordComponent: MockForgotPassword,
+  ResetPasswordComponent: MockResetPassword,
+  VerifyEmailComponent: MockVerifyEmail,
+  OAuthCallbackComponent: MockOAuthCallback,
+  MfaRecommendationComponent: MockMfaRecommendation,
+  PaymentsComponent: MockPaymentsPage,
+  ReportsComponent: MockReportsPage,
+  AdminDashboardComponent: MockAdminDashboard,
+  ProfilePageComponent: MockProfilePage,
+};
+
 // Mock ProtectedRoute
 jest.mock('../components/ProtectedRoute', () => ({
   ProtectedRoute: ({ children }: { children: React.ReactNode }) => {
@@ -132,12 +175,7 @@ describe('App Integration Tests', () => {
     it('should redirect from root (/) to /signin when not authenticated', () => {
       render(
         <MemoryRouter initialEntries={['/']}>
-          <AppRoutes
-            SignInComponent={MockSignIn}
-            SignUpComponent={MockSignUp}
-            PaymentsComponent={MockPaymentsPage}
-            ProfileComponent={MockProfilePage}
-          />
+          <AppRoutes {...defaultAppRoutesProps} />
         </MemoryRouter>
       );
 
@@ -148,12 +186,7 @@ describe('App Integration Tests', () => {
     it('should show SignIn page at /signin', () => {
       render(
         <MemoryRouter initialEntries={['/signin']}>
-          <AppRoutes
-            SignInComponent={MockSignIn}
-            SignUpComponent={MockSignUp}
-            PaymentsComponent={MockPaymentsPage}
-            ProfileComponent={MockProfilePage}
-          />
+          <AppRoutes {...defaultAppRoutesProps} />
         </MemoryRouter>
       );
 
@@ -165,12 +198,7 @@ describe('App Integration Tests', () => {
       const user = userEvent.setup();
       render(
         <MemoryRouter initialEntries={['/signin']}>
-          <AppRoutes
-            SignInComponent={MockSignIn}
-            SignUpComponent={MockSignUp}
-            PaymentsComponent={MockPaymentsPage}
-            ProfileComponent={MockProfilePage}
-          />
+          <AppRoutes {...defaultAppRoutesProps} />
         </MemoryRouter>
       );
 
@@ -191,12 +219,7 @@ describe('App Integration Tests', () => {
 
       render(
         <MemoryRouter initialEntries={['/signin']}>
-          <AppRoutes
-            SignInComponent={MockSignIn}
-            SignUpComponent={MockSignUp}
-            PaymentsComponent={MockPaymentsPage}
-            ProfileComponent={MockProfilePage}
-          />
+          <AppRoutes {...defaultAppRoutesProps} />
         </MemoryRouter>
       );
 
@@ -218,12 +241,7 @@ describe('App Integration Tests', () => {
 
       render(
         <MemoryRouter initialEntries={['/signup']}>
-          <AppRoutes
-            SignInComponent={MockSignIn}
-            SignUpComponent={MockSignUp}
-            PaymentsComponent={MockPaymentsPage}
-            ProfileComponent={MockProfilePage}
-          />
+          <AppRoutes {...defaultAppRoutesProps} />
         </MemoryRouter>
       );
 
@@ -253,12 +271,7 @@ describe('App Integration Tests', () => {
     it('should redirect from root (/) to /payments when authenticated', () => {
       render(
         <MemoryRouter initialEntries={['/']}>
-          <AppRoutes
-            SignInComponent={MockSignIn}
-            SignUpComponent={MockSignUp}
-            PaymentsComponent={MockPaymentsPage}
-            ProfileComponent={MockProfilePage}
-          />
+          <AppRoutes {...defaultAppRoutesProps} />
         </MemoryRouter>
       );
 
@@ -269,12 +282,7 @@ describe('App Integration Tests', () => {
     it('should show PaymentsPage at /payments when authenticated', () => {
       render(
         <MemoryRouter initialEntries={['/payments']}>
-          <AppRoutes
-            SignInComponent={MockSignIn}
-            SignUpComponent={MockSignUp}
-            PaymentsComponent={MockPaymentsPage}
-            ProfileComponent={MockProfilePage}
-          />
+          <AppRoutes {...defaultAppRoutesProps} />
         </MemoryRouter>
       );
 
@@ -285,12 +293,7 @@ describe('App Integration Tests', () => {
     it('should redirect from /signin to /payments when already authenticated', () => {
       render(
         <MemoryRouter initialEntries={['/signin']}>
-          <AppRoutes
-            SignInComponent={MockSignIn}
-            SignUpComponent={MockSignUp}
-            PaymentsComponent={MockPaymentsPage}
-            ProfileComponent={MockProfilePage}
-          />
+          <AppRoutes {...defaultAppRoutesProps} />
         </MemoryRouter>
       );
 
@@ -310,12 +313,7 @@ describe('App Integration Tests', () => {
 
       render(
         <MemoryRouter initialEntries={['/payments']}>
-          <AppRoutes
-            SignInComponent={MockSignIn}
-            SignUpComponent={MockSignUp}
-            PaymentsComponent={MockPaymentsPage}
-            ProfileComponent={MockProfilePage}
-          />
+          <AppRoutes {...defaultAppRoutesProps} />
         </MemoryRouter>
       );
 
@@ -338,12 +336,7 @@ describe('App Integration Tests', () => {
 
       render(
         <MemoryRouter initialEntries={['/payments']}>
-          <AppRoutes
-            SignInComponent={MockSignIn}
-            SignUpComponent={MockSignUp}
-            PaymentsComponent={MockPaymentsPage}
-            ProfileComponent={MockProfilePage}
-          />
+          <AppRoutes {...defaultAppRoutesProps} />
         </MemoryRouter>
       );
 
@@ -367,12 +360,7 @@ describe('App Integration Tests', () => {
 
       render(
         <MemoryRouter initialEntries={['/signin']}>
-          <AppRoutes
-            SignInComponent={MockSignIn}
-            SignUpComponent={MockSignUp}
-            PaymentsComponent={MockPaymentsPage}
-            ProfileComponent={MockProfilePage}
-          />
+          <AppRoutes {...defaultAppRoutesProps} />
         </MemoryRouter>
       );
 
@@ -392,12 +380,7 @@ describe('App Integration Tests', () => {
 
       const { rerender } = render(
         <MemoryRouter initialEntries={['/']}>
-          <AppRoutes
-            SignInComponent={MockSignIn}
-            SignUpComponent={MockSignUp}
-            PaymentsComponent={MockPaymentsPage}
-            ProfileComponent={MockProfilePage}
-          />
+          <AppRoutes {...defaultAppRoutesProps} />
         </MemoryRouter>
       );
 
@@ -417,12 +400,7 @@ describe('App Integration Tests', () => {
 
       rerender(
         <MemoryRouter initialEntries={['/']}>
-          <AppRoutes
-            SignInComponent={MockSignIn}
-            SignUpComponent={MockSignUp}
-            PaymentsComponent={MockPaymentsPage}
-            ProfileComponent={MockProfilePage}
-          />
+          <AppRoutes {...defaultAppRoutesProps} />
         </MemoryRouter>
       );
 
@@ -439,12 +417,7 @@ describe('App Integration Tests', () => {
 
       render(
         <MemoryRouter initialEntries={['/payments']}>
-          <AppRoutes
-            SignInComponent={MockSignIn}
-            SignUpComponent={MockSignUp}
-            PaymentsComponent={MockPaymentsPage}
-            ProfileComponent={MockProfilePage}
-          />
+          <AppRoutes {...defaultAppRoutesProps} />
         </MemoryRouter>
       );
 
@@ -467,12 +440,7 @@ describe('App Integration Tests', () => {
 
       render(
         <MemoryRouter initialEntries={['/signin']}>
-          <AppRoutes
-            SignInComponent={MockSignIn}
-            SignUpComponent={MockSignUp}
-            PaymentsComponent={MockPaymentsPage}
-            ProfileComponent={MockProfilePage}
-          />
+          <AppRoutes {...defaultAppRoutesProps} />
         </MemoryRouter>
       );
 
