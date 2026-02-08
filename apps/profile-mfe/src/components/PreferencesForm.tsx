@@ -155,7 +155,7 @@ export function PreferencesForm({ onSuccess }: PreferencesFormProps) {
       </ToastContainer>
 
       <div className="space-y-1">
-        <h2 className="text-lg font-semibold text-foreground">Preferences</h2>
+        <h2 className="text-2xl font-semibold text-foreground">Preferences</h2>
         <p className="text-sm text-muted-foreground">
           Customize your application preferences and notification settings.
         </p>

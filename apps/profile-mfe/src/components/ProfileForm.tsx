@@ -154,7 +154,7 @@ export function ProfileForm({ onSuccess }: ProfileFormProps) {
       </ToastContainer>
 
       <div className="space-y-1">
-        <h2 className="text-lg font-semibold text-foreground">Profile</h2>
+        <h2 className="text-2xl font-semibold text-foreground">Profile</h2>
         <p className="text-sm text-muted-foreground">
           Update your contact information and profile details.
         </p>

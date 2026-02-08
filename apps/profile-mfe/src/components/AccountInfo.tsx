@@ -66,7 +66,7 @@ export function AccountInfo() {
     <Card className="p-6 space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-semibold text-foreground">Account</h2>
+          <h2 className="text-2xl font-semibold text-foreground">Account</h2>
           <p className="text-sm text-muted-foreground">
             Read-only overview of your account details.
           </p>

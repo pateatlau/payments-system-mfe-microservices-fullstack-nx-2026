@@ -155,7 +155,7 @@ export function PaymentUpdateForm({
 
   return (
     <Card className="p-6">
-      <h3 className="mb-4 text-lg font-semibold">Update Payment</h3>
+      <h2 className="mb-4 text-lg font-semibold">Update Payment</h2>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         {/* Amount */}
