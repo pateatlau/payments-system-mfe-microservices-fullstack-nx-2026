@@ -14,6 +14,7 @@ const defaultMockState = {
   login: jest.fn(),
   logout: jest.fn(),
   signup: jest.fn(),
+  hasRole: jest.fn(() => false),
 };
 
 // Current mock state (mutable for tests)

@@ -228,7 +228,7 @@ test.describe('Focus Management', () => {
     for (let i = 0; i < Math.min(5, interactiveElements.length); i++) {
       await page.keyboard.press('Tab');
 
-      const hasFocusStyles = await page.evaluate(() => {
+      const _hasFocusStyles = await page.evaluate(() => {
         const el = document.activeElement;
         if (!el) return false;
 
@@ -257,7 +257,7 @@ test.describe('Focus Management', () => {
     // Tab to first tab button
     await page.keyboard.press('Tab');
 
-    const firstTabFocused = await page.evaluate(() => {
+    const _firstTabFocused = await page.evaluate(() => {
       return document.activeElement?.textContent?.toLowerCase().includes('profile');
     });
 
@@ -324,7 +324,7 @@ test.describe('ARIA Attributes', () => {
       // Error messages should have role="alert" or aria-live
       if (role !== 'alert' && ariaLive !== 'assertive' && ariaLive !== 'polite') {
         // Check if parent has role="alert"
-        const parentRole = await error.evaluate((el) =>
+        const _parentRole = await error.evaluate((el) =>
           el.closest('[role="alert"]') !== null
         );
         // Allow form error patterns that may not need explicit role
