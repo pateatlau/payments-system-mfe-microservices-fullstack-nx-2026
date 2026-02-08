@@ -161,6 +161,7 @@ jobs:
       - name: Run frontend unit tests (all on main/develop)
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
         run: |
+          NODE_OPTIONS="--max-old-space-size=4096" \
           NX_NO_CLOUD=true pnpm nx run-many --target=test \
             --projects=shell,auth-mfe,payments-mfe,admin-mfe,profile-mfe,shared-auth-store,shared-utils,shared-types \
             --coverage \
@@ -169,6 +170,7 @@ jobs:
       - name: Run frontend unit tests (affected on feature branches)
         if: github.ref != 'refs/heads/main' && github.ref != 'refs/heads/develop'
         run: |
+          NODE_OPTIONS="--max-old-space-size=4096" \
           NX_NO_CLOUD=true pnpm nx affected --target=test \
             --base=${{ steps.set-shas.outputs.base }} \
             --head=${{ steps.set-shas.outputs.head }} \
@@ -343,6 +345,7 @@ jobs:
       - name: Run backend unit tests (all on main/develop)
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
         run: |
+          NODE_OPTIONS="--max-old-space-size=4096" \
           NX_NO_CLOUD=true pnpm nx run-many --target=test \
             --projects=api-gateway,auth-service,payments-service,admin-service,profile-service \
             --coverage \
@@ -351,6 +354,7 @@ jobs:
       - name: Run backend unit tests (affected on feature branches)
         if: github.ref != 'refs/heads/main' && github.ref != 'refs/heads/develop'
         run: |
+          NODE_OPTIONS="--max-old-space-size=4096" \
           NX_NO_CLOUD=true pnpm nx affected --target=test \
             --base=${{ steps.set-shas.outputs.base }} \
             --head=${{ steps.set-shas.outputs.head }} \
