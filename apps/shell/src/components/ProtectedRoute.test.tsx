@@ -72,7 +72,7 @@ describe('ProtectedRoute', () => {
       );
 
       expect(
-        screen.queryByText('Checking authentication...')
+        screen.queryByRole('status', { name: 'Checking authentication...' })
       ).not.toBeInTheDocument();
     });
 
@@ -145,7 +145,7 @@ describe('ProtectedRoute', () => {
       );
 
       expect(
-        screen.getByText('Checking authentication...')
+        screen.getByRole('status', { name: 'Checking authentication...' })
       ).toBeInTheDocument();
       expect(screen.queryByTestId('protected-content')).not.toBeInTheDocument();
     });
@@ -164,7 +164,7 @@ describe('ProtectedRoute', () => {
       expect(screen.getByTestId('custom-loader')).toBeInTheDocument();
       expect(screen.getByText('Custom Loading...')).toBeInTheDocument();
       expect(
-        screen.queryByText('Checking authentication...')
+        screen.queryByRole('status', { name: 'Checking authentication...' })
       ).not.toBeInTheDocument();
     });
 
@@ -204,7 +204,7 @@ describe('ProtectedRoute', () => {
 
       // Check loading text is present for screen readers
       expect(
-        screen.getByText('Checking authentication...')
+        screen.getByRole('status', { name: 'Checking authentication...' })
       ).toBeInTheDocument();
     });
   });
@@ -224,7 +224,7 @@ describe('ProtectedRoute', () => {
       );
 
       expect(
-        screen.getByText('Checking authentication...')
+        screen.getByRole('status', { name: 'Checking authentication...' })
       ).toBeInTheDocument();
 
       // Transition to authenticated
@@ -269,7 +269,7 @@ describe('ProtectedRoute', () => {
       );
 
       expect(
-        screen.getByText('Checking authentication...')
+        screen.getByRole('status', { name: 'Checking authentication...' })
       ).toBeInTheDocument();
 
       // Transition to not authenticated
