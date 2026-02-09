@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import { AdminPage } from './AdminPage';
 
 /**
@@ -8,9 +9,16 @@ const MockAdminDashboard = () => {
   return <div data-testid="mock-admin-dashboard">Mock Admin Dashboard</div>;
 };
 
+/**
+ * Helper wrapper with router context for tests
+ */
+const renderWithRouter = (ui: React.ReactElement) => {
+  return render(<MemoryRouter>{ui}</MemoryRouter>);
+};
+
 describe('AdminPage', () => {
   it('should render the AdminDashboard component', () => {
-    render(<AdminPage AdminDashboardComponent={MockAdminDashboard} />);
+    renderWithRouter(<AdminPage AdminDashboardComponent={MockAdminDashboard} />);
 
     expect(screen.getByTestId('mock-admin-dashboard')).toBeInTheDocument();
     expect(screen.getByText('Mock Admin Dashboard')).toBeInTheDocument();
@@ -26,11 +34,11 @@ describe('AdminPage', () => {
     const originalError = console.error;
     console.error = jest.fn();
 
-    render(<AdminPage AdminDashboardComponent={ErrorComponent} />);
+    renderWithRouter(<AdminPage AdminDashboardComponent={ErrorComponent} />);
 
-    // Should show error boundary message
+    // Should show error boundary message (uses generic "Failed to Load Component" title)
     expect(
-      screen.getByText(/Failed to load Admin Dashboard/i)
+      screen.getByText(/Failed to Load Component/i)
     ).toBeInTheDocument();
 
     // Restore console.error
@@ -38,7 +46,7 @@ describe('AdminPage', () => {
   });
 
   it('should have correct structure with Suspense fallback', () => {
-    const { container } = render(
+    const { container } = renderWithRouter(
       <AdminPage AdminDashboardComponent={MockAdminDashboard} />
     );
 
