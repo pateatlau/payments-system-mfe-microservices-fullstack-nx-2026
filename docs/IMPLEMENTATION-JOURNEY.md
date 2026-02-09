@@ -23,7 +23,7 @@
 
 ## 1. Overview
 
-This document chronicles the complete implementation journey of the MFE Payments System from initial foundation (POC-0) through production-ready infrastructure (POC-3). Each phase built upon the previous, incrementally adding complexity and production-grade features.
+This document chronicles the implementation journey of the MFE Payments System from initial foundation (POC-0) through infrastructure completion (POC-3). Each phase built upon the previous, incrementally adding complexity and features.
 
 ### Journey Map
 
