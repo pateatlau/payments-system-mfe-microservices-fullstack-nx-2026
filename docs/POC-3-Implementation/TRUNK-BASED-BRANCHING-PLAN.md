@@ -244,8 +244,8 @@ If staging smoke tests fail:
 git revert <commit-hash>
 git push origin main
 
-# Or revert multiple commits
-git revert <oldest-hash>..<newest-hash>
+# Or revert multiple commits (use ^ to exclude the oldest commit itself)
+git revert <oldest-hash>^..<newest-hash>
 git push origin main
 ```
 
@@ -367,7 +367,7 @@ Modify `.github/workflows/ci.yml` to:
 3. Update `main` protection rule:
    - ✅ Require pull request reviews (1 reviewer minimum)
    - ✅ Dismiss stale reviews on new commits
-   - ✅ Require status checks (ci-status)
+   - ✅ Require status checks ("CI Status Check", "E2E Tests")
    - ✅ Require branches to be up to date
    - ✅ Require linear history (squash merges)
 
