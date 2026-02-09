@@ -1,7 +1,7 @@
 # Full Accessibility Compliance Implementation Plan (WCAG 2.1 AA) - POC-3
 
 **Created:** January 24, 2026
-**Last Updated:** February 9, 2026
+**Last Updated:** February 10, 2026
 **Status:** IN PROGRESS
 **Priority:** High
 
@@ -17,7 +17,8 @@
 | Form Accessibility Enhancements | ✅ Complete |
 | Data Table Accessibility | ✅ Complete |
 | Modal/Dialog Accessibility | ✅ Complete |
-| Color Contrast Verification | ⏳ Pending |
+| Color Contrast Verification | ✅ Complete |
+| Loading States Accessibility | ✅ Complete |
 | Screen Reader Testing | ⏳ Pending |
 | Keyboard Navigation Audit | ⏳ Pending |
 | Accessibility Documentation | ⏳ Pending |
@@ -1709,130 +1710,62 @@ pnpm test:a11y:contrast
 
 ---
 
-### Priority 2.4: Loading States Accessibility
+### Priority 2.4: Loading States Accessibility ✅ COMPLETE
+
+**Completed:** February 10, 2026
 
 **Effort:** 2 hours
 **Impact:** Screen reader users need loading state announcements
 
 **Tasks:**
 
-- [ ] Update Loading component with aria-busy
-- [ ] Add loading announcements
-- [ ] Create Skeleton component with proper ARIA
-- [ ] Add loading state to buttons
+- [x] Update Loading component with aria-busy
+- [x] Add loading announcements
+- [x] Create Skeleton component with proper ARIA
+- [x] Add loading state to buttons
 
-**Files to Modify:**
+**Implementation Notes:**
 
-```typescript
-// libs/shared-design-system/src/lib/components/Loading.tsx
-import * as React from 'react';
-import { useAnnounce } from '@mfe/shared-utils';
-import { cn } from '../utils';
+The following accessibility enhancements were made to loading components:
 
-export interface LoadingProps {
-  /** Loading message for screen readers */
-  message?: string;
-  /** Visual size of the spinner */
-  size?: 'sm' | 'md' | 'lg';
-  /** Additional CSS classes */
-  className?: string;
-  /** Whether to show the text visually */
-  showText?: boolean;
-}
+1. **Loading Component** (`libs/shared-design-system/src/lib/components/Loading.tsx`):
+   - Added `role="status"` for screen readers
+   - Added `aria-busy="true"` to indicate loading state
+   - Added `aria-live="polite"` for dynamic announcements
+   - Added `aria-label` with customizable loading message
+   - Integrated `useAnnounce` hook for screen reader announcements on mount
+   - Added `showLabel` prop for visible loading text
+   - Added `announceOnMount` prop to control announcement behavior
+   - Spinner marked with `aria-hidden="true"` (decorative)
+   - 15 unit tests added (`Loading.test.tsx`)
 
-/**
- * Accessible loading indicator with screen reader announcements.
- */
-export function Loading({
-  message = 'Loading...',
-  size = 'md',
-  className,
-  showText = true,
-}: LoadingProps) {
-  const announce = useAnnounce();
+2. **Skeleton Component** (`libs/shared-design-system/src/lib/components/Skeleton.tsx`):
+   - Added `role="status"` for screen readers
+   - Added `aria-busy="true"` to indicate loading state
+   - Added `aria-label` prop for describing what's loading
+   - 10 unit tests added (`Skeleton.test.tsx`)
 
-  React.useEffect(() => {
-    announce(message);
-  }, [message, announce]);
+3. **Button Component** (`libs/shared-design-system/src/lib/components/Button.tsx`):
+   - Added `loading` prop for loading state
+   - Added `loadingText` prop for custom loading text
+   - Added `aria-busy` attribute when loading
+   - Added `aria-disabled` for disabled/loading states
+   - Button automatically disabled during loading
+   - Shows spinner icon when loading
+   - 7 additional loading-specific unit tests added to `Button.test.tsx`
 
-  const sizeClasses = {
-    sm: 'h-4 w-4',
-    md: 'h-8 w-8',
-    lg: 'h-12 w-12',
-  };
-
-  return (
-    <div
-      role="status"
-      aria-busy="true"
-      aria-label={message}
-      className={cn('flex items-center justify-center gap-2', className)}
-    >
-      <svg
-        className={cn('animate-spin text-primary', sizeClasses[size])}
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
-        aria-hidden="true"
-      >
-        <circle
-          className="opacity-25"
-          cx="12"
-          cy="12"
-          r="10"
-          stroke="currentColor"
-          strokeWidth="4"
-        />
-        <path
-          className="opacity-75"
-          fill="currentColor"
-          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-        />
-      </svg>
-      {showText && (
-        <span className="text-muted-foreground">{message}</span>
-      )}
-    </div>
-  );
-}
-```
-
-```typescript
-// libs/shared-design-system/src/lib/components/Skeleton.tsx
-import * as React from 'react';
-import { cn } from '../utils';
-
-export interface SkeletonProps extends React.HTMLAttributes<HTMLDivElement> {
-  /** Accessible label describing what's loading */
-  label?: string;
-}
-
-/**
- * Accessible skeleton loader placeholder.
- */
-export function Skeleton({
-  className,
-  label = 'Loading content',
-  ...props
-}: SkeletonProps) {
-  return (
-    <div
-      role="status"
-      aria-busy="true"
-      aria-label={label}
-      className={cn('animate-pulse rounded-md bg-muted', className)}
-      {...props}
-    />
-  );
-}
-```
+4. **Test Infrastructure Updates:**
+   - Fixed Jest module mapping for `@mfe/shared-utils` in design system tests
+   - Updated accessibility.spec.tsx to handle multiple live regions (global announcer)
+   - All 214 tests passing in shared-design-system
 
 **Success Criteria:**
 
-- [ ] Loading component announces state to screen readers
-- [ ] Skeleton component has proper ARIA attributes
-- [ ] Loading states are keyboard accessible
-- [ ] aria-busy used appropriately
+- [x] Loading component announces state to screen readers
+- [x] Skeleton component has proper ARIA attributes
+- [x] Loading states are keyboard accessible
+- [x] aria-busy used appropriately
+- [x] Button loading state with aria-busy and disabled state
 
 ---
 

@@ -65,4 +65,36 @@ describe('Button', () => {
     screen.getByRole('button').click();
     expect(clicked).toBe(true);
   });
+
+  describe('loading state', () => {
+    it('should show loading spinner when loading is true', () => {
+      render(<Button loading>Submit</Button>);
+      const button = screen.getByRole('button');
+      // Check for SVG spinner (aria-hidden)
+      const spinner = button.querySelector('svg');
+      expect(spinner).toBeInTheDocument();
+      expect(spinner).toHaveAttribute('aria-hidden', 'true');
+    });
+
+    it('should be disabled when loading', () => {
+      render(<Button loading>Submit</Button>);
+      expect(screen.getByRole('button')).toBeDisabled();
+    });
+
+    it('should have aria-busy when loading', () => {
+      render(<Button loading>Submit</Button>);
+      expect(screen.getByRole('button')).toHaveAttribute('aria-busy', 'true');
+    });
+
+    it('should show loadingText when provided', () => {
+      render(<Button loading loadingText="Saving...">Save</Button>);
+      expect(screen.getByText('Saving...')).toBeInTheDocument();
+    });
+
+    it('should show original children when not loading', () => {
+      render(<Button loadingText="Saving...">Save</Button>);
+      expect(screen.getByText('Save')).toBeInTheDocument();
+      expect(screen.queryByText('Saving...')).not.toBeInTheDocument();
+    });
+  });
 });

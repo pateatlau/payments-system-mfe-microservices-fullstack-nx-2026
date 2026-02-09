@@ -9,4 +9,7 @@ module.exports = {
   coverageDirectory: '../../coverage/libs/shared-design-system',
   setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts'],
   testEnvironment: 'jsdom',
+  moduleNameMapper: {
+    '@mfe/shared-utils': '<rootDir>/../shared-utils/src/index.ts',
+  },
 };
