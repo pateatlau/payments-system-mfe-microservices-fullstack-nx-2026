@@ -26,6 +26,21 @@ export type {
   RenderWithA11yAuditOptions,
 } from './lib/a11y-test-utils';
 
+// Color contrast testing utilities
+export {
+  parseColor,
+  calculateContrastRatio as calculateColorContrastRatio,
+  passesNormalTextContrast,
+  passesLargeTextContrast,
+  passesUIComponentContrast,
+  validateColorContrast,
+  lightModeColors,
+  darkModeColors,
+  WCAG_AA_REQUIREMENTS,
+} from './lib/contrast-test-utils';
+
+export type { ColorPair } from './lib/contrast-test-utils';
+
 // Re-export commonly used testing library utilities for convenience
 export { axe, toHaveNoViolations } from 'jest-axe';
 export type { JestAxeConfigureOptions } from 'jest-axe';

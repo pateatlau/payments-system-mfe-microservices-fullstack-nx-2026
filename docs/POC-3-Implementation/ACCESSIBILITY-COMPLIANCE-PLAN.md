@@ -1635,71 +1635,77 @@ export function TableCell({ className, ...props }: TableCellProps) {
 
 ---
 
-### Priority 2.3: Color Contrast Audit & Fixes
+### Priority 2.3: Color Contrast Audit & Fixes ✅ COMPLETE
+
+**Completed:** February 10, 2026
 
 **Effort:** 4 hours
 **Impact:** WCAG 1.4.3, 1.4.11 Contrast Requirements
 
 **Tasks:**
 
-- [ ] Audit all color combinations with contrast checker
-- [ ] Fix text contrast issues (min 4.5:1)
-- [ ] Fix UI component contrast (min 3:1)
-- [ ] Test in both light and dark modes
-- [ ] Document color usage guidelines
-- [ ] Add automated contrast testing
+- [x] Audit all color combinations with contrast checker
+- [x] Fix text contrast issues (min 4.5:1)
+- [x] Fix UI component contrast (min 3:1)
+- [x] Test in both light and dark modes
+- [x] Document color usage guidelines
+- [x] Add automated contrast testing
 
-**Current Color Analysis:**
+**Implementation Notes:**
 
-```css
-/* From apps/shell/src/styles.css */
+The color contrast audit identified and fixed several issues:
 
-/* Light Mode - To Verify */
---background: 0 0% 100%;           /* #FFFFFF */
---foreground: 222.2 84% 4.9%;      /* #020817 - High contrast ✓ */
---muted-foreground: 215.4 16.3% 46.9%;  /* ~#6B7280 - Need to verify */
---primary: 222.2 47.4% 11.2%;      /* #1E293B */
+1. **Destructive Button Text (Light Mode)**
+   - Issue: White text on red-500 (#EF4444) = 3.76:1 (failed 4.5:1)
+   - Fix: Changed to red-700 (#B91C1C) = 6.47:1 ✓
 
-/* Dark Mode - To Verify */
---background: 222.2 84% 4.9%;      /* #020817 */
---foreground: 210 40% 98%;         /* #F8FAFC - High contrast ✓ */
---muted-foreground: 215 20.2% 65.1%;  /* ~#94A3B8 - Need to verify */
+2. **Destructive Button Text (Dark Mode)**
+   - Issue: White text on red-500 = 3.76:1 (failed 4.5:1)
+   - Fix: Changed to red-600 (#DC2626) = 4.83:1 ✓
+
+3. **Border/Input Colors (Light Mode)**
+   - Issue: gray-200 on white = 1.24:1 (failed 3:1)
+   - Fix: Changed to gray-500 (#6B7280) = 4.83:1 ✓
+
+4. **Border/Input Colors (Dark Mode)**
+   - Issue: gray-700 on gray-900 = 1.72:1 (failed 3:1)
+   - Fix: Changed to gray-400 (#9CA3AF) = 6.99:1 ✓
+
+**Files Modified:**
+- `apps/shell/src/styles.css`
+- `apps/admin-mfe/src/styles.css`
+- `apps/auth-mfe/src/styles.css`
+- `apps/payments-mfe/src/styles.css`
+- `apps/profile-mfe/src/styles.css`
+
+**New Files Created:**
+- `scripts/contrast-audit.ts` - Automated contrast checker
+- `docs/COLOR-CONTRAST-GUIDELINES.md` - Color usage guidelines
+- `libs/shared-test-utils/src/lib/contrast-test-utils.ts` - Contrast testing utilities
+- `libs/shared-test-utils/src/lib/contrast-test-utils.spec.ts` - 78 unit tests
+
+**Run Contrast Audit:**
+```bash
+pnpm test:a11y:contrast
 ```
 
-**Contrast Testing Script:**
+**Final Color Palette (WCAG 2.1 AA Compliant):**
 
-```typescript
-// scripts/contrast-audit.ts
-import { getContrastRatio } from 'color-contrast-calc';
-
-const colorPairs = [
-  // Light mode
-  { bg: '#FFFFFF', fg: '#020817', context: 'light: foreground on background' },
-  { bg: '#FFFFFF', fg: '#6B7280', context: 'light: muted-foreground on background' },
-  { bg: '#F1F5F9', fg: '#020817', context: 'light: foreground on muted' },
-  { bg: '#1E293B', fg: '#FFFFFF', context: 'light: primary-foreground on primary' },
-
-  // Dark mode
-  { bg: '#020817', fg: '#F8FAFC', context: 'dark: foreground on background' },
-  { bg: '#020817', fg: '#94A3B8', context: 'dark: muted-foreground on background' },
-  { bg: '#1E293B', fg: '#F8FAFC', context: 'dark: foreground on muted' },
-];
-
-colorPairs.forEach(({ bg, fg, context }) => {
-  const ratio = getContrastRatio(bg, fg);
-  const passAA = ratio >= 4.5 ? '✓' : '✗';
-  const passAAA = ratio >= 7 ? '✓' : '✗';
-  console.log(`${context}: ${ratio.toFixed(2)}:1 (AA: ${passAA}, AAA: ${passAAA})`);
-});
-```
+| Token | Light Mode | Dark Mode | Contrast |
+|-------|-----------|-----------|----------|
+| foreground | #111827 | #F9FAFB | 17.74:1 / 16.98:1 |
+| muted-foreground | #4B5563 | #9CA3AF | 7.56:1 / 6.99:1 |
+| primary | #084683 | #1A74B8 | 9.48:1 / 4.96:1 |
+| destructive | #B91C1C | #DC2626 | 6.47:1 / 4.83:1 |
+| border | #6B7280 | #9CA3AF | 4.83:1 / 6.99:1 |
 
 **Success Criteria:**
 
-- [ ] All text meets 4.5:1 contrast ratio (or 3:1 for large text)
-- [ ] All UI components meet 3:1 contrast ratio
-- [ ] Both light and dark modes pass contrast checks
-- [ ] Automated contrast test in CI
-- [ ] Color usage guidelines documented
+- [x] All text meets 4.5:1 contrast ratio (or 3:1 for large text)
+- [x] All UI components meet 3:1 contrast ratio
+- [x] Both light and dark modes pass contrast checks
+- [x] Automated contrast test in CI (`pnpm test:a11y:contrast`)
+- [x] Color usage guidelines documented (`docs/COLOR-CONTRAST-GUIDELINES.md`)
 
 ---
 
