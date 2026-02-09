@@ -116,9 +116,11 @@ describe('SignUpPage', () => {
 
     // Check that the wrapper div has the correct classes
     const wrapper = screen.getByTestId('mock-signup').parentElement;
-    expect(wrapper).toHaveClass('min-h-screen');
+    expect(wrapper).toHaveClass('min-h-full');
     expect(wrapper).toHaveClass('flex');
+    expect(wrapper).toHaveClass('flex-col');
     expect(wrapper).toHaveClass('items-center');
     expect(wrapper).toHaveClass('justify-center');
+    expect(wrapper).toHaveClass('py-8');
   });
 });

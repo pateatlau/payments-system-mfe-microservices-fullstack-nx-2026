@@ -34,10 +34,10 @@ describe('SignUp', () => {
     expect(
       screen.getByRole('heading', { name: /sign up/i })
     ).toBeInTheDocument();
-    expect(screen.getByLabelText('Full Name')).toBeInTheDocument();
-    expect(screen.getByLabelText('Email')).toBeInTheDocument();
-    expect(screen.getByLabelText('Password')).toBeInTheDocument();
-    expect(screen.getByLabelText('Confirm Password')).toBeInTheDocument();
+    expect(screen.getByLabelText(/^Full Name/)).toBeInTheDocument();
+    expect(screen.getByLabelText(/^Email/)).toBeInTheDocument();
+    expect(screen.getByLabelText(/^Password/)).toBeInTheDocument();
+    expect(screen.getByLabelText(/^Confirm Password/)).toBeInTheDocument();
     expect(
       screen.getByRole('button', { name: /sign up/i })
     ).toBeInTheDocument();
@@ -55,9 +55,9 @@ describe('SignUp', () => {
     const user = userEvent.setup();
     render(<SignUp />);
 
-    const emailInput = screen.getByLabelText('Email');
-    const passwordInput = screen.getByLabelText('Password');
-    const confirmPasswordInput = screen.getByLabelText('Confirm Password');
+    const emailInput = screen.getByLabelText(/^Email/);
+    const passwordInput = screen.getByLabelText(/^Password/);
+    const confirmPasswordInput = screen.getByLabelText(/^Confirm Password/);
     const submitButton = screen.getByRole('button', { name: /sign up/i });
 
     await user.type(emailInput, 'test@example.com');
@@ -74,10 +74,10 @@ describe('SignUp', () => {
     const user = userEvent.setup();
     render(<SignUp />);
 
-    const nameInput = screen.getByLabelText('Full Name');
-    const emailInput = screen.getByLabelText('Email');
-    const passwordInput = screen.getByLabelText('Password');
-    const confirmPasswordInput = screen.getByLabelText('Confirm Password');
+    const nameInput = screen.getByLabelText(/^Full Name/);
+    const emailInput = screen.getByLabelText(/^Email/);
+    const passwordInput = screen.getByLabelText(/^Password/);
+    const confirmPasswordInput = screen.getByLabelText(/^Confirm Password/);
     const submitButton = screen.getByRole('button', { name: /sign up/i });
 
     await user.type(nameInput, 'A');
@@ -97,10 +97,10 @@ describe('SignUp', () => {
     const user = userEvent.setup();
     render(<SignUp />);
 
-    const nameInput = screen.getByLabelText('Full Name');
-    const emailInput = screen.getByLabelText('Email');
-    const passwordInput = screen.getByLabelText('Password');
-    const confirmPasswordInput = screen.getByLabelText('Confirm Password');
+    const nameInput = screen.getByLabelText(/^Full Name/);
+    const emailInput = screen.getByLabelText(/^Email/);
+    const passwordInput = screen.getByLabelText(/^Password/);
+    const confirmPasswordInput = screen.getByLabelText(/^Confirm Password/);
     const submitButton = screen.getByRole('button', { name: /sign up/i });
 
     await user.type(nameInput, 'John Doe');
@@ -120,10 +120,10 @@ describe('SignUp', () => {
     const user = userEvent.setup();
     render(<SignUp />);
 
-    const nameInput = screen.getByLabelText('Full Name');
-    const emailInput = screen.getByLabelText('Email');
-    const passwordInput = screen.getByLabelText('Password');
-    const confirmPasswordInput = screen.getByLabelText('Confirm Password');
+    const nameInput = screen.getByLabelText(/^Full Name/);
+    const emailInput = screen.getByLabelText(/^Email/);
+    const passwordInput = screen.getByLabelText(/^Password/);
+    const confirmPasswordInput = screen.getByLabelText(/^Confirm Password/);
     const submitButton = screen.getByRole('button', { name: /sign up/i });
 
     await user.type(nameInput, 'John Doe');
@@ -143,10 +143,10 @@ describe('SignUp', () => {
     const user = userEvent.setup();
     render(<SignUp />);
 
-    const nameInput = screen.getByLabelText('Full Name');
-    const emailInput = screen.getByLabelText('Email');
-    const passwordInput = screen.getByLabelText('Password');
-    const confirmPasswordInput = screen.getByLabelText('Confirm Password');
+    const nameInput = screen.getByLabelText(/^Full Name/);
+    const emailInput = screen.getByLabelText(/^Email/);
+    const passwordInput = screen.getByLabelText(/^Password/);
+    const confirmPasswordInput = screen.getByLabelText(/^Confirm Password/);
     const submitButton = screen.getByRole('button', { name: /sign up/i });
 
     await user.type(nameInput, 'John Doe');
@@ -166,10 +166,10 @@ describe('SignUp', () => {
     const user = userEvent.setup();
     render(<SignUp />);
 
-    const nameInput = screen.getByLabelText('Full Name');
-    const emailInput = screen.getByLabelText('Email');
-    const passwordInput = screen.getByLabelText('Password');
-    const confirmPasswordInput = screen.getByLabelText('Confirm Password');
+    const nameInput = screen.getByLabelText(/^Full Name/);
+    const emailInput = screen.getByLabelText(/^Email/);
+    const passwordInput = screen.getByLabelText(/^Password/);
+    const confirmPasswordInput = screen.getByLabelText(/^Confirm Password/);
     const submitButton = screen.getByRole('button', { name: /sign up/i });
 
     await user.type(nameInput, 'John Doe');
@@ -189,10 +189,10 @@ describe('SignUp', () => {
 
     render(<SignUp onSuccess={mockOnSuccess} />);
 
-    const nameInput = screen.getByLabelText('Full Name');
-    const emailInput = screen.getByLabelText('Email');
-    const passwordInput = screen.getByLabelText('Password');
-    const confirmPasswordInput = screen.getByLabelText('Confirm Password');
+    const nameInput = screen.getByLabelText(/^Full Name/);
+    const emailInput = screen.getByLabelText(/^Email/);
+    const passwordInput = screen.getByLabelText(/^Password/);
+    const confirmPasswordInput = screen.getByLabelText(/^Confirm Password/);
     const submitButton = screen.getByRole('button', { name: /sign up/i });
 
     await user.type(nameInput, 'John Doe');
@@ -225,10 +225,10 @@ describe('SignUp', () => {
 
     const { rerender } = render(<SignUp onSuccess={mockOnSuccess} />);
 
-    const nameInput = screen.getByLabelText('Full Name');
-    const emailInput = screen.getByLabelText('Email');
-    const passwordInput = screen.getByLabelText('Password');
-    const confirmPasswordInput = screen.getByLabelText('Confirm Password');
+    const nameInput = screen.getByLabelText(/^Full Name/);
+    const emailInput = screen.getByLabelText(/^Email/);
+    const passwordInput = screen.getByLabelText(/^Password/);
+    const confirmPasswordInput = screen.getByLabelText(/^Confirm Password/);
     const submitButton = screen.getByRole('button', { name: /sign up/i });
 
     await user.type(nameInput, 'John Doe');
@@ -269,10 +269,10 @@ describe('SignUp', () => {
 
     render(<SignUp />);
 
-    const nameInput = screen.getByLabelText('Full Name');
-    const emailInput = screen.getByLabelText('Email');
-    const passwordInput = screen.getByLabelText('Password');
-    const confirmPasswordInput = screen.getByLabelText('Confirm Password');
+    const nameInput = screen.getByLabelText(/^Full Name/);
+    const emailInput = screen.getByLabelText(/^Email/);
+    const passwordInput = screen.getByLabelText(/^Password/);
+    const confirmPasswordInput = screen.getByLabelText(/^Confirm Password/);
     const submitButton = screen.getByRole('button', { name: /sign up/i });
 
     await user.type(nameInput, 'John Doe');
@@ -321,10 +321,10 @@ describe('SignUp', () => {
 
     render(<SignUp />);
 
-    expect(screen.getByLabelText('Full Name')).toBeDisabled();
-    expect(screen.getByLabelText('Email')).toBeDisabled();
-    expect(screen.getByLabelText('Password')).toBeDisabled();
-    expect(screen.getByLabelText('Confirm Password')).toBeDisabled();
+    expect(screen.getByLabelText(/^Full Name/)).toBeDisabled();
+    expect(screen.getByLabelText(/^Email/)).toBeDisabled();
+    expect(screen.getByLabelText(/^Password/)).toBeDisabled();
+    expect(screen.getByLabelText(/^Confirm Password/)).toBeDisabled();
     expect(
       screen.getByRole('button', { name: /creating account/i })
     ).toBeDisabled();
@@ -361,7 +361,7 @@ describe('SignUp', () => {
     const user = userEvent.setup();
     render(<SignUp />);
 
-    const passwordInput = screen.getByLabelText('Password');
+    const passwordInput = screen.getByLabelText(/^Password/);
 
     // Type a weak password
     await user.type(passwordInput, 'weak');
@@ -383,10 +383,10 @@ describe('SignUp', () => {
   it('has correct accessibility attributes', () => {
     render(<SignUp />);
 
-    const nameInput = screen.getByLabelText('Full Name');
-    const emailInput = screen.getByLabelText('Email');
-    const passwordInput = screen.getByLabelText('Password');
-    const confirmPasswordInput = screen.getByLabelText('Confirm Password');
+    const nameInput = screen.getByLabelText(/^Full Name/);
+    const emailInput = screen.getByLabelText(/^Email/);
+    const passwordInput = screen.getByLabelText(/^Password/);
+    const confirmPasswordInput = screen.getByLabelText(/^Confirm Password/);
 
     expect(nameInput).toHaveAttribute('type', 'text');
     expect(nameInput).toHaveAttribute('autoComplete', 'name');

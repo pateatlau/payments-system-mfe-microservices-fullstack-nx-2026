@@ -100,7 +100,10 @@ export function PaymentCreateForm({
         <form onSubmit={handleSubmit(onSubmitHandler)} className="space-y-4">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
-              <Label htmlFor="amount">Amount *</Label>
+              <Label htmlFor="amount">
+                Amount <span className="text-destructive" aria-hidden="true">*</span>
+                <span className="sr-only"> (required)</span>
+              </Label>
               <Input
                 id="amount"
                 type="number"
@@ -110,6 +113,7 @@ export function PaymentCreateForm({
                 })}
                 placeholder="0.00"
                 className="mt-2"
+                aria-required="true"
               />
               {errors.amount && (
                 <p
@@ -122,7 +126,10 @@ export function PaymentCreateForm({
             </div>
 
             <div>
-              <Label htmlFor="currency">Currency *</Label>
+              <Label htmlFor="currency">
+                Currency <span className="text-destructive" aria-hidden="true">*</span>
+                <span className="sr-only"> (required)</span>
+              </Label>
               <Controller
                 control={control}
                 name="currency"
@@ -152,7 +159,10 @@ export function PaymentCreateForm({
           </div>
 
           <div>
-            <Label htmlFor="type">Payment Type *</Label>
+            <Label htmlFor="type">
+              Payment Type <span className="text-destructive" aria-hidden="true">*</span>
+              <span className="sr-only"> (required)</span>
+            </Label>
             <Controller
               control={control}
               name="type"
@@ -180,13 +190,17 @@ export function PaymentCreateForm({
           </div>
 
           <div>
-            <Label htmlFor="description">Description *</Label>
+            <Label htmlFor="description">
+              Description <span className="text-destructive" aria-hidden="true">*</span>
+              <span className="sr-only"> (required)</span>
+            </Label>
             <Input
               id="description"
               type="text"
               {...register('description')}
               placeholder="Payment description"
               className="mt-2"
+              aria-required="true"
             />
             {errors.description && (
               <p
@@ -199,7 +213,10 @@ export function PaymentCreateForm({
           </div>
 
           <div>
-            <Label htmlFor="recipientEmail">Recipient *</Label>
+            <Label htmlFor="recipientEmail">
+              Recipient <span className="text-destructive" aria-hidden="true">*</span>
+              <span className="sr-only"> (required)</span>
+            </Label>
             {isLoadingRecipients ? (
               <Skeleton className="h-10 mt-2" />
             ) : (

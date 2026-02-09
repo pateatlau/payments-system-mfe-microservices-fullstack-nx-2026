@@ -324,7 +324,10 @@ export function SignUp({ onSuccess, onNavigateToSignIn }: SignUpProps = {}) {
             >
               {/* Name field */}
               <div className="space-y-2">
-                <Label htmlFor="name">Full Name</Label>
+                <Label htmlFor="name">
+                  Full Name <span className="text-destructive" aria-hidden="true">*</span>
+                  <span className="sr-only"> (required)</span>
+                </Label>
                 <Input
                   id="name"
                   type="text"
@@ -332,6 +335,7 @@ export function SignUp({ onSuccess, onNavigateToSignIn }: SignUpProps = {}) {
                   placeholder="John Doe"
                   disabled={isFormLoading}
                   autoComplete="name"
+                  aria-required="true"
                 />
                 {errors.name && (
                   <p className="text-sm text-destructive" role="alert">
@@ -342,7 +346,10 @@ export function SignUp({ onSuccess, onNavigateToSignIn }: SignUpProps = {}) {
 
               {/* Email field */}
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">
+                  Email <span className="text-destructive" aria-hidden="true">*</span>
+                  <span className="sr-only"> (required)</span>
+                </Label>
                 <Input
                   id="email"
                   type="email"
@@ -350,6 +357,7 @@ export function SignUp({ onSuccess, onNavigateToSignIn }: SignUpProps = {}) {
                   placeholder="you@example.com"
                   disabled={isFormLoading}
                   autoComplete="email"
+                  aria-required="true"
                 />
                 {errors.email && (
                   <p className="text-sm text-destructive" role="alert">
@@ -396,13 +404,17 @@ export function SignUp({ onSuccess, onNavigateToSignIn }: SignUpProps = {}) {
 
               {/* Password field */}
               <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password">
+                  Password <span className="text-destructive" aria-hidden="true">*</span>
+                  <span className="sr-only"> (required)</span>
+                </Label>
                 <PasswordInput
                   id="password"
                   {...register('password')}
                   placeholder="Enter your password"
                   disabled={isFormLoading}
                   autoComplete="new-password"
+                  aria-required="true"
                 />
                 {password && password.length > 0 && (
                   <p className={`text-sm ${passwordStrength.color}`}>
@@ -422,13 +434,17 @@ export function SignUp({ onSuccess, onNavigateToSignIn }: SignUpProps = {}) {
 
               {/* Confirm Password field */}
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirm Password</Label>
+                <Label htmlFor="confirmPassword">
+                  Confirm Password <span className="text-destructive" aria-hidden="true">*</span>
+                  <span className="sr-only"> (required)</span>
+                </Label>
                 <PasswordInput
                   id="confirmPassword"
                   {...register('confirmPassword')}
                   placeholder="Confirm your password"
                   disabled={isFormLoading}
                   autoComplete="new-password"
+                  aria-required="true"
                 />
                 {errors.confirmPassword && (
                   <p className="text-sm text-destructive" role="alert">

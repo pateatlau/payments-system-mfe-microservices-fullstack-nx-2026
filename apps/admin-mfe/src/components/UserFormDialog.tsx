@@ -216,9 +216,9 @@ export function UserFormDialog({
       <div className="w-full max-w-md mx-4 rounded-lg shadow-xl bg-background">
         {/* Header */}
         <div className="px-6 py-4 border-b border-border">
-          <h3 className="text-lg font-semibold text-foreground">
+          <h2 className="text-lg font-semibold text-foreground">
             {isEditMode ? 'Edit User' : 'Create New User'}
-          </h3>
+          </h2>
           <p className="mt-1 text-sm text-muted-foreground">
             {isEditMode
               ? 'Update user information'

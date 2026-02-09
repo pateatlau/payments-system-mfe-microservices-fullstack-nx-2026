@@ -73,28 +73,50 @@ test.describe('Authentication Flow', () => {
     // Submit form
     await page.click('button[type="submit"]');
 
-    // Wait for either successful redirect OR error message
-    // This helps diagnose failures in CI
-    await Promise.race([
-      page.waitForURL(/.*payments/, { timeout: 30000 }),
-      page.waitForSelector('[role="alert"], .error, [class*="error"]', { timeout: 30000 })
-        .then(async () => {
-          // Capture the actual error message for debugging
-          const errorText = await page.locator('[role="alert"]').first().textContent();
-          // Include API requests in error message for debugging
-          const apiInfo = apiRequests.length > 0
-            ? `\nAPI requests made: ${apiRequests.join(', ')}`
-            : '\nNo API requests intercepted';
-          const failedInfo = failedRequests.length > 0
-            ? `\nFailed requests: ${failedRequests.join(', ')}`
-            : '';
-          const envInfo = `\nwindow.__ENV__: ${JSON.stringify(envConfig)}`;
-          const consoleInfo = consoleLogs.length > 0
-            ? `\nBrowser console (ApiClient logs): ${consoleLogs.filter(l => l.includes('ApiClient')).join('; ')}`
-            : '';
-          throw new Error(`Login failed - error displayed: "${errorText}"${apiInfo}${failedInfo}${envInfo}${consoleInfo}`);
-        }),
-    ]);
+    // Wait for the API response to complete first
+    // This ensures we know what the backend returned before checking UI state
+    const loginResponsePromise = page.waitForResponse(
+      response =>
+        response.url().includes('/api/auth/login') &&
+        response.request().method() === 'POST',
+      { timeout: 30000 }
+    );
+
+    // Wait for API response
+    const loginResponse = await loginResponsePromise;
+    const loginStatus = loginResponse.status();
+    let loginBody: unknown = null;
+    try {
+      loginBody = await loginResponse.json();
+    } catch {
+      // Response might not be JSON
+    }
+
+    console.log(`[Login Response] Status: ${loginStatus}, Body: ${JSON.stringify(loginBody)}`);
+
+    // If login succeeded (200), wait for navigation
+    if (loginStatus === 200) {
+      // Wait for navigation to complete (sign-in -> / -> /payments for non-admin)
+      await page.waitForURL(/.*payments/, { timeout: 15000 });
+    } else {
+      // Login failed - build diagnostic info
+      const alertTexts: string[] = [];
+      const alertElements = await page.locator('[role="alert"]').all();
+      for (const alert of alertElements) {
+        const text = await alert.textContent();
+        if (text && text.trim()) {
+          alertTexts.push(text.trim());
+        }
+      }
+
+      throw new Error(
+        `Login failed with status ${loginStatus}.\n` +
+        `Response: ${JSON.stringify(loginBody)}\n` +
+        `Alert texts in UI: ${JSON.stringify(alertTexts)}\n` +
+        `API requests: ${apiRequests.join(', ') || 'none'}\n` +
+        `Console errors: ${consoleLogs.filter(l => l.includes('error') || l.includes('Error')).join('; ') || 'none'}`
+      );
+    }
 
     // Verify payments page is loaded (use .first() as there may be multiple headings)
     await expect(page.locator('h1, h2').first()).toContainText(/payment/i, {

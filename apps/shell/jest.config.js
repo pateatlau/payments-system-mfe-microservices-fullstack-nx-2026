@@ -8,6 +8,7 @@ module.exports = {
   testEnvironment: 'jsdom',
   rootDir: '.',
   setupFilesAfterEnv: ['<rootDir>/src/test/setup.ts'],
+  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
     // Map shared libraries
@@ -17,6 +18,9 @@ module.exports = {
     '^shared-auth-store$':
       '<rootDir>/../../libs/shared-auth-store/src/index.ts',
     '^shared-header-ui$': '<rootDir>/../../libs/shared-header-ui/src/index.ts',
+    // Mock static assets (images, styles, etc.)
+    '\\.(jpg|jpeg|png|gif|svg|webp)$': '<rootDir>/src/test/__mocks__/fileMock.js',
+    '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
   },
   transform: {
     '^.+\\.[tj]sx?$': [
@@ -41,4 +45,9 @@ module.exports = {
     '!src/bootstrap.tsx',
   ],
   coverageDirectory: '../../coverage/apps/shell',
+  // Reduce memory usage - shell app has many Module Federation dependencies
+  // which can cause memory bloat during test runs
+  maxWorkers: 1,
+  // Use workerIdleMemoryLimit to restart workers that consume too much memory
+  workerIdleMemoryLimit: '512MB',
 };

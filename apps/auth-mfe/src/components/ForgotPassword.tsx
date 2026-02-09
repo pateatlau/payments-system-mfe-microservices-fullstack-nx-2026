@@ -205,7 +205,10 @@ export function ForgotPassword({ onNavigateToSignIn }: ForgotPasswordProps = {})
             >
               {/* Email field */}
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">
+                  Email <span className="text-destructive" aria-hidden="true">*</span>
+                  <span className="sr-only"> (required)</span>
+                </Label>
                 <Input
                   id="email"
                   type="email"
@@ -214,6 +217,7 @@ export function ForgotPassword({ onNavigateToSignIn }: ForgotPasswordProps = {})
                   disabled={isFormLoading}
                   autoComplete="email"
                   autoFocus
+                  aria-required="true"
                 />
                 {errors.email && (
                   <p className="text-sm text-destructive" role="alert">

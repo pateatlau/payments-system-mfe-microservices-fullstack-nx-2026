@@ -30,15 +30,21 @@ jest.mock('shared-header-ui', () => ({
   ),
 }));
 
+// Mock the SkipLink component
+jest.mock('@mfe/shared-design-system', () => ({
+  SkipLink: ({ targetId, children }: { targetId: string; children?: React.ReactNode }) => (
+    <a href={`#${targetId}`} data-testid="skip-link">
+      {children || 'Skip to main content'}
+    </a>
+  ),
+}));
+
 // Mock useNavigate
 const mockNavigate = jest.fn();
-jest.mock('react-router-dom', async () => {
-  const actual = await jest.importActual('react-router-dom');
-  return {
-    ...actual,
-    useNavigate: () => mockNavigate,
-  };
-});
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useNavigate: () => mockNavigate,
+}));
 
 describe('Layout', () => {
   beforeEach(() => {
@@ -142,11 +148,49 @@ describe('Layout', () => {
 
     // Check for layout structure
     const layoutDiv = container.firstChild;
-    expect(layoutDiv).toHaveClass('min-h-screen', 'flex', 'flex-col');
+    expect(layoutDiv).toHaveClass('flex', 'flex-col');
 
-    // Check for main element
+    // Check for main element with id for skip link target
     const mainElement = container.querySelector('main');
-    expect(mainElement).toHaveClass('flex-1', 'p-8', 'bg-muted');
+    expect(mainElement).toHaveClass('flex-1', 'bg-muted');
+    expect(mainElement).toHaveAttribute('id', 'main-content');
+  });
+
+  it('renders skip link for accessibility', () => {
+    (useAuthStore as unknown as ReturnType<typeof jest.fn>).mockReturnValue({
+      logout: jest.fn(),
+    });
+
+    render(
+      <MemoryRouter>
+        <Layout>
+          <div>Test Content</div>
+        </Layout>
+      </MemoryRouter>
+    );
+
+    // Check for skip link
+    const skipLink = screen.getByTestId('skip-link');
+    expect(skipLink).toBeInTheDocument();
+    expect(skipLink).toHaveAttribute('href', '#main-content');
+    expect(skipLink).toHaveTextContent('Skip to main content');
+  });
+
+  it('has main element with aria-label', () => {
+    (useAuthStore as unknown as ReturnType<typeof jest.fn>).mockReturnValue({
+      logout: jest.fn(),
+    });
+
+    const { container } = render(
+      <MemoryRouter>
+        <Layout>
+          <div>Test Content</div>
+        </Layout>
+      </MemoryRouter>
+    );
+
+    const mainElement = container.querySelector('main');
+    expect(mainElement).toHaveAttribute('aria-label', 'Main content');
   });
 
   it('renders Header with default branding', () => {

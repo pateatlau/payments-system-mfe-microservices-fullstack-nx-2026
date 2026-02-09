@@ -34,8 +34,8 @@ describe('SignIn', () => {
     expect(
       screen.getByRole('heading', { name: /sign in/i })
     ).toBeInTheDocument();
-    expect(screen.getByLabelText('Email')).toBeInTheDocument();
-    expect(screen.getByLabelText('Password')).toBeInTheDocument();
+    expect(screen.getByLabelText(/^Email/)).toBeInTheDocument();
+    expect(screen.getByLabelText(/^Password/)).toBeInTheDocument();
     expect(
       screen.getByRole('button', { name: /sign in/i })
     ).toBeInTheDocument();
@@ -53,8 +53,8 @@ describe('SignIn', () => {
     const user = userEvent.setup();
     render(<SignIn />);
 
-    const emailInput = screen.getByLabelText('Email');
-    const passwordInput = screen.getByLabelText('Password');
+    const emailInput = screen.getByLabelText(/^Email/);
+    const passwordInput = screen.getByLabelText(/^Password/);
     const submitButton = screen.getByRole('button', { name: /sign in/i });
 
     await user.clear(emailInput);
@@ -83,7 +83,7 @@ describe('SignIn', () => {
     const user = userEvent.setup();
     render(<SignIn />);
 
-    const emailInput = screen.getByLabelText('Email');
+    const emailInput = screen.getByLabelText(/^Email/);
     const submitButton = screen.getByRole('button', { name: /sign in/i });
 
     await user.type(emailInput, 'test@example.com');
@@ -100,8 +100,8 @@ describe('SignIn', () => {
 
     render(<SignIn onSuccess={mockOnSuccess} />);
 
-    const emailInput = screen.getByLabelText('Email');
-    const passwordInput = screen.getByLabelText('Password');
+    const emailInput = screen.getByLabelText(/^Email/);
+    const passwordInput = screen.getByLabelText(/^Password/);
     const submitButton = screen.getByRole('button', { name: /sign in/i });
 
     await user.type(emailInput, 'test@example.com');
@@ -128,8 +128,8 @@ describe('SignIn', () => {
 
     const { rerender } = render(<SignIn onSuccess={mockOnSuccess} />);
 
-    const emailInput = screen.getByLabelText('Email');
-    const passwordInput = screen.getByLabelText('Password');
+    const emailInput = screen.getByLabelText(/^Email/);
+    const passwordInput = screen.getByLabelText(/^Password/);
     const submitButton = screen.getByRole('button', { name: /sign in/i });
 
     await user.type(emailInput, 'test@example.com');
@@ -168,8 +168,8 @@ describe('SignIn', () => {
 
     render(<SignIn />);
 
-    const emailInput = screen.getByLabelText('Email');
-    const passwordInput = screen.getByLabelText('Password');
+    const emailInput = screen.getByLabelText(/^Email/);
+    const passwordInput = screen.getByLabelText(/^Password/);
     const submitButton = screen.getByRole('button', { name: /sign in/i });
 
     await user.type(emailInput, 'test@example.com');
@@ -216,8 +216,8 @@ describe('SignIn', () => {
 
     render(<SignIn />);
 
-    expect(screen.getByLabelText('Email')).toBeDisabled();
-    expect(screen.getByLabelText('Password')).toBeDisabled();
+    expect(screen.getByLabelText(/^Email/)).toBeDisabled();
+    expect(screen.getByLabelText(/^Password/)).toBeDisabled();
     expect(screen.getByRole('button', { name: /signing in/i })).toBeDisabled();
   });
 
@@ -251,8 +251,8 @@ describe('SignIn', () => {
   it('has correct accessibility attributes', () => {
     render(<SignIn />);
 
-    const emailInput = screen.getByLabelText('Email');
-    const passwordInput = screen.getByLabelText('Password');
+    const emailInput = screen.getByLabelText(/^Email/);
+    const passwordInput = screen.getByLabelText(/^Password/);
 
     expect(emailInput).toHaveAttribute('type', 'email');
     expect(emailInput).toHaveAttribute('autoComplete', 'email');
@@ -264,8 +264,8 @@ describe('SignIn', () => {
     const user = userEvent.setup();
     render(<SignIn />);
 
-    const emailInput = screen.getByLabelText('Email');
-    const passwordInput = screen.getByLabelText('Password');
+    const emailInput = screen.getByLabelText(/^Email/);
+    const passwordInput = screen.getByLabelText(/^Password/);
     const submitButton = screen.getByRole('button', { name: /sign in/i });
 
     await user.clear(emailInput);

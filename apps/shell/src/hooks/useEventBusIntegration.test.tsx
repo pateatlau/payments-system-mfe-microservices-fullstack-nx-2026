@@ -18,13 +18,14 @@ jest.mock('shared-auth-store', () => ({
   useAuthStore: jest.fn(),
 }));
 
+const mockNavigate = jest.fn();
+let mockPathname = '/test';
+
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useNavigate: () => mockNavigate,
-  useLocation: () => ({ pathname: '/test' }),
+  useLocation: () => ({ pathname: mockPathname }),
 }));
-
-const mockNavigate = jest.fn();
 
 // Test wrapper with Router
 const wrapper = ({ children }: { children: React.ReactNode }) => {
@@ -36,6 +37,7 @@ describe('useEventBusIntegration', () => {
     jest.clearAllMocks();
     mockNavigate.mockClear();
     eventBus.clearHistory();
+    mockPathname = '/test'; // Reset to default
 
     // Default auth store mock
     (useAuthStore as unknown as jest.Mock).mockReturnValue({
@@ -45,6 +47,8 @@ describe('useEventBusIntegration', () => {
 
   describe('auth events', () => {
     it('handles auth:login event and navigates to payments', async () => {
+      // Set location to /signin so navigation is triggered
+      mockPathname = '/signin';
       renderHook(() => useEventBusIntegration(), { wrapper });
 
       // Simulate login event from auth-mfe

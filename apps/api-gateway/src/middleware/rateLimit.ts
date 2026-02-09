@@ -9,6 +9,7 @@
 import rateLimit from 'express-rate-limit';
 import Redis from 'ioredis';
 import { config } from '../config';
+import type { RequestHandler } from 'express';
 
 /**
  * Track Redis connection state
@@ -95,6 +96,9 @@ initializeRedis().catch((err) => {
  * General rate limiter
  * Applies to all routes by default
  * Limit: 100 requests per 15 minutes per IP
+ *
+ * Note: Cast to RequestHandler for Express 5 compatibility.
+ * express-rate-limit v7 types are not fully compatible with Express 5.
  */
 export const generalRateLimiter = rateLimit({
   windowMs: config.rateLimit.windowMs,
@@ -114,13 +118,15 @@ export const generalRateLimiter = rateLimit({
   skip: (req) => {
     return req.path === '/health' || req.path === '/metrics';
   },
-});
+}) as unknown as RequestHandler;
 
 /**
  * Strict rate limiter for auth endpoints
  * More restrictive to prevent brute force attacks
  * Limit: 5 attempts per 15 minutes per IP
  * Successful requests don't count toward the limit
+ *
+ * Note: Cast to RequestHandler for Express 5 compatibility.
  */
 export const authRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -144,7 +150,7 @@ export const authRateLimiter = rateLimit({
     const uaHash = Buffer.from(userAgent).toString('base64').slice(0, 16);
     return `${ip}:${uaHash}`;
   },
-});
+}) as unknown as RequestHandler;
 
 /**
  * OAuth rate limiter for social login endpoints
@@ -160,6 +166,8 @@ export const authRateLimiter = rateLimit({
  * - GET /api/auth/oauth/providers (public info endpoint)
  * - GET /api/auth/oauth/accounts (authenticated, get linked accounts)
  * - DELETE /api/auth/oauth/:provider (authenticated, unlink)
+ *
+ * Note: Cast to RequestHandler for Express 5 compatibility.
  */
 export const oauthRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -178,7 +186,7 @@ export const oauthRateLimiter = rateLimit({
     const ip = req.ip || req.socket.remoteAddress || 'unknown';
     return `oauth:${ip}`;
   },
-});
+}) as unknown as RequestHandler;
 
 /**
  * Get Redis client for cleanup on shutdown

@@ -368,9 +368,9 @@ export function AuditLogs() {
           <div className="bg-background rounded-lg shadow-xl w-full max-w-2xl mx-4">
             {/* Header */}
             <div className="px-6 py-4 border-b border-border">
-              <h3 className="text-lg font-semibold text-foreground">
+              <h2 className="text-lg font-semibold text-foreground">
                 Audit Log Details
-              </h3>
+              </h2>
             </div>
 
             {/* Content */}

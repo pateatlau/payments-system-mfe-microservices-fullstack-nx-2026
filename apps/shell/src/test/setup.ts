@@ -3,6 +3,11 @@
  * This file runs before each test file
  */
 import '@testing-library/jest-dom';
+import { TextEncoder, TextDecoder } from 'util';
+
+// Polyfill TextEncoder/TextDecoder for jsdom (required by react-router-dom v7)
+global.TextEncoder = TextEncoder;
+global.TextDecoder = TextDecoder as typeof global.TextDecoder;
 
 /**
  * Testing Strategy for Module Federation:
