@@ -238,11 +238,15 @@ function PaymentsPageInner({ onPaymentSuccess }: PaymentsPageProps = {}) {
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
           onClick={() => setSelectedPaymentId(null)}
+          onKeyDown={e => e.key === 'Escape' && setSelectedPaymentId(null)}
+          role="presentation"
         >
+          {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
           <div
             ref={dialogRef}
             className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-background rounded-lg shadow-xl"
             onClick={e => e.stopPropagation()}
+            onKeyDown={e => e.stopPropagation()}
             role="dialog"
             aria-modal="true"
             aria-labelledby="payment-details-title"

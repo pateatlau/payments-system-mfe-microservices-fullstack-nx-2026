@@ -285,7 +285,7 @@ export function SystemHealth() {
         </CardHeader>
         <CardContent>
           <div className="flex items-center gap-4">
-            <label className="text-sm font-medium text-foreground">
+            <label htmlFor="refresh-interval" className="text-sm font-medium text-foreground">
               Refresh Interval:
             </label>
             <Select
@@ -293,7 +293,7 @@ export function SystemHealth() {
               onValueChange={value => setRefreshInterval(Number(value))}
               disabled={!autoRefresh}
             >
-              <SelectTrigger className="w-48">
+              <SelectTrigger id="refresh-interval" className="w-48">
                 <SelectValue placeholder="Select interval" />
               </SelectTrigger>
               <SelectContent>

@@ -48,7 +48,15 @@ export default tseslint.config(
       'jsx-a11y/html-has-lang': 'error',
       'jsx-a11y/img-redundant-alt': 'error',
       'jsx-a11y/interactive-supports-focus': 'warn',
-      'jsx-a11y/label-has-associated-control': 'warn',
+      'jsx-a11y/label-has-associated-control': [
+        'warn',
+        {
+          labelComponents: ['Label'],
+          labelAttributes: ['htmlFor'],
+          controlComponents: ['Input', 'PasswordInput', 'Select', 'Textarea'],
+          depth: 3,
+        },
+      ],
       'jsx-a11y/mouse-events-have-key-events': 'warn',
       'jsx-a11y/no-access-key': 'error',
       'jsx-a11y/no-autofocus': 'warn',

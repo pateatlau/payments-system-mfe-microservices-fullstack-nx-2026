@@ -375,66 +375,67 @@ export function AuditLogs() {
 
             {/* Content */}
             <div className="px-6 py-4 space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <dl className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label>Action</Label>
-                  <Badge
-                    variant={getActionBadgeVariant(selectedLog.action)}
-                    className="mt-1"
-                  >
-                    {selectedLog.action.replace(/_/g, ' ')}
-                  </Badge>
+                  <dt className="text-sm font-medium leading-none">Action</dt>
+                  <dd className="mt-1">
+                    <Badge variant={getActionBadgeVariant(selectedLog.action)}>
+                      {selectedLog.action.replace(/_/g, ' ')}
+                    </Badge>
+                  </dd>
                 </div>
                 <div>
-                  <Label>Timestamp</Label>
-                  <p className="text-sm text-foreground mt-1">
+                  <dt className="text-sm font-medium leading-none">Timestamp</dt>
+                  <dd className="text-sm text-foreground mt-1">
                     {new Date(selectedLog.timestamp).toLocaleString()}
-                  </p>
+                  </dd>
                 </div>
                 <div>
-                  <Label>User</Label>
-                  <p className="text-sm text-foreground mt-1">
+                  <dt className="text-sm font-medium leading-none">User</dt>
+                  <dd className="text-sm text-foreground mt-1">
                     {selectedLog.userName || 'Unknown'}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
+                  </dd>
+                  <dd className="text-xs text-muted-foreground">
                     {selectedLog.userEmail}
-                  </p>
+                  </dd>
                 </div>
                 <div>
-                  <Label>IP Address</Label>
-                  <p className="text-sm text-foreground mt-1">
+                  <dt className="text-sm font-medium leading-none">IP Address</dt>
+                  <dd className="text-sm text-foreground mt-1">
                     {selectedLog.ipAddress || 'N/A'}
-                  </p>
+                  </dd>
                 </div>
                 <div>
-                  <Label>Resource Type</Label>
-                  <p className="text-sm text-foreground mt-1">
+                  <dt className="text-sm font-medium leading-none">Resource Type</dt>
+                  <dd className="text-sm text-foreground mt-1">
                     {selectedLog.resourceType}
-                  </p>
+                  </dd>
                 </div>
                 <div>
-                  <Label>Resource ID</Label>
-                  <p className="text-sm text-foreground mt-1 break-all">
+                  <dt className="text-sm font-medium leading-none">Resource ID</dt>
+                  <dd className="text-sm text-foreground mt-1 break-all">
                     {selectedLog.resourceId}
-                  </p>
+                  </dd>
                 </div>
-              </div>
+              </dl>
 
               {selectedLog.details && (
                 <div>
-                  <Label>Details</Label>
-                  <pre className="mt-1 p-3 bg-muted border border-border rounded text-xs overflow-auto">
-                    {JSON.stringify(selectedLog.details, null, 2)}
-                  </pre>
+                  <dt className="text-sm font-medium leading-none">Details</dt>
+                  <dd className="mt-1">
+                    <pre className="p-3 bg-muted border border-border rounded text-xs overflow-auto">
+                      {JSON.stringify(selectedLog.details, null, 2)}
+                    </pre>
+                  </dd>
                 </div>
               )}
 
               {selectedLog.userAgent && (
                 <div>
-                  <Label>User Agent</Label>
-                  <p className="text-xs text-muted-foreground mt-1 break-all">
+                  <dt className="text-sm font-medium leading-none">User Agent</dt>
+                  <dd className="text-xs text-muted-foreground mt-1 break-all">
                     {selectedLog.userAgent}
-                  </p>
+                  </dd>
                 </div>
               )}
             </div>

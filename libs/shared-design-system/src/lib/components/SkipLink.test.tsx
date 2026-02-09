@@ -2,6 +2,8 @@
  * SkipLink Component Tests
  */
 
+/* eslint-disable jsx-a11y/no-noninteractive-tabindex */
+
 import { describe, it, expect, beforeEach } from '@jest/globals';
 import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';

@@ -203,7 +203,7 @@ export function PreferencesForm({ onSuccess }: PreferencesFormProps) {
             )}
           />
           {errors.theme && (
-            <p className="text-xs text-red-600">
+            <p className="text-xs text-destructive">
               {errors.theme.message as string}
             </p>
           )}
@@ -240,7 +240,7 @@ export function PreferencesForm({ onSuccess }: PreferencesFormProps) {
             )}
           />
           {errors.language && (
-            <p className="text-xs text-red-600">
+            <p className="text-xs text-destructive">
               {errors.language.message as string}
             </p>
           )}
@@ -271,7 +271,7 @@ export function PreferencesForm({ onSuccess }: PreferencesFormProps) {
             )}
           />
           {errors.currency && (
-            <p className="text-xs text-red-600">
+            <p className="text-xs text-destructive">
               {errors.currency.message as string}
             </p>
           )}
@@ -312,15 +312,15 @@ export function PreferencesForm({ onSuccess }: PreferencesFormProps) {
             )}
           />
           {errors.timezone && (
-            <p className="text-xs text-red-600">
+            <p className="text-xs text-destructive">
               {errors.timezone.message as string}
             </p>
           )}
         </div>
 
         {/* Notifications */}
-        <div className="space-y-1.5">
-          <Label>Notifications</Label>
+        <fieldset className="space-y-1.5">
+          <legend className="text-sm font-medium leading-none">Notifications</legend>
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
@@ -385,7 +385,7 @@ export function PreferencesForm({ onSuccess }: PreferencesFormProps) {
               />
             </div>
           </div>
-        </div>
+        </fieldset>
 
         <div className="flex justify-end pt-2">
           <Button
