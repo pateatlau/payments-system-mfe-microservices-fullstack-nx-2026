@@ -952,18 +952,19 @@ export function FormField({
 
 ---
 
-### Priority 1.6: Heading Hierarchy Audit
+### Priority 1.6: Heading Hierarchy Audit ✅ COMPLETE
 
 **Effort:** 2 hours
 **Impact:** WCAG 2.4.6 Headings and Labels
+**Completed:** February 10, 2026
 
 **Tasks:**
 
-- [ ] Audit all pages for proper h1-h6 sequence
-- [ ] Ensure each page has exactly one h1
-- [ ] Fix heading level skips
-- [ ] Add ESLint rule for heading hierarchy
-- [ ] Document heading conventions
+- [x] Audit all pages for proper h1-h6 sequence
+- [x] Ensure each page has exactly one h1
+- [x] Fix heading level skips
+- [x] Add ESLint rule for heading hierarchy
+- [x] Document heading conventions
 
 **Files to Create:**
 
@@ -1022,10 +1023,41 @@ module.exports = {
 
 **Success Criteria:**
 
-- [ ] All pages have exactly one h1
-- [ ] No heading level skips
-- [ ] ESLint jsx-a11y plugin configured
-- [ ] Heading conventions documented
+- [x] All pages have exactly one h1
+- [x] No heading level skips
+- [x] ESLint jsx-a11y plugin configured
+- [x] Heading conventions documented
+
+**Implementation Notes:**
+
+The following changes were made to fix heading hierarchy issues:
+
+1. **Header Component (`libs/shared-header-ui/src/lib/shared-header-ui.tsx`):**
+   - Changed branding from `<h1>` to `<span>` to prevent multiple h1s on pages
+
+2. **Auth MFE Components:**
+   - SignIn.tsx: CardTitle updated to use `as="h1"` for page title
+   - SignUp.tsx: CardTitle updated to use `as="h1"` for page title
+   - ForgotPassword.tsx: CardTitle updated to use `as="h1"` for page title
+   - ResetPassword.tsx: CardTitle updated to use `as="h1"` for all page states
+   - VerificationPending.tsx: CardTitle updated to use `as="h1"` for page title
+
+3. **Profile MFE Components:**
+   - LinkedAccounts.tsx: CardTitle updated to use `as="h2"` (under page h1), h4→h3 for sub-sections
+   - MfaSettings.tsx: All CardTitle elements updated to use `as="h2"`, h4→h3 for sub-sections
+
+4. **ESLint Configuration (`eslint.config.mjs`):**
+   - Installed `eslint-plugin-jsx-a11y` package
+   - Added 23 jsx-a11y rules for compile-time accessibility checking
+   - Key rules: alt-text, heading-has-content, aria-* validation, label-has-associated-control
+
+**Heading Hierarchy per Page:**
+- Sign In: h1 (Sign In card title)
+- Sign Up: h1 (Sign Up card title)
+- Payments: h1 (Payments) → h2 (Payment Details modal)
+- Profile: h1 (Profile) → h2 (section cards) → h3 (sub-sections)
+- Admin: h1 (Admin Dashboard) → h2 (sections)
+- Reports: h1 (Reports) → h2 (card titles)
 
 ---
 

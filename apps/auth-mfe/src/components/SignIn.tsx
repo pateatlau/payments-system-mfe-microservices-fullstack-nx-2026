@@ -314,7 +314,7 @@ export function SignIn({ onSuccess, onNavigateToSignUp, onNavigateToForgotPasswo
           </div>
           <Card>
             <CardHeader>
-              <CardTitle>Two-Factor Authentication</CardTitle>
+              <CardTitle as="h1">Two-Factor Authentication</CardTitle>
               <CardDescription>
                 Enter the 6-digit code from your authenticator app
                 {user?.email && (
@@ -401,7 +401,7 @@ export function SignIn({ onSuccess, onNavigateToSignUp, onNavigateToForgotPasswo
         </div>
         <Card>
           <CardHeader>
-            <CardTitle>Sign In</CardTitle>
+            <CardTitle as="h1">Sign In</CardTitle>
             <CardDescription>
               Enter your credentials to access your account
             </CardDescription>

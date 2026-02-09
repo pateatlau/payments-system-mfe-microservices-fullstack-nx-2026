@@ -128,7 +128,7 @@ export function VerificationPending({
         </div>
         <Card>
           <CardHeader>
-            <CardTitle>Verify Your Email</CardTitle>
+            <CardTitle as="h1">Verify Your Email</CardTitle>
             <CardDescription>
               We've sent a verification link to your email
             </CardDescription>
