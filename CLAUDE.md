@@ -1100,12 +1100,79 @@ When implementing backend hardening tasks from `docs/POC-3-Implementation/BACKEN
 5. Report to user and wait for their manual verification
 6. Only proceed to next priority after user confirms
 
+## Trunk-Based Development Workflow
+
+This project uses **trunk-based development** - all work merges directly to `main` via short-lived feature branches.
+
+### Branch Workflow
+
+```
+1. Create feature branch from main:
+   git checkout main && git pull
+   git checkout -b feature/short-description
+
+2. Work on feature (keep branch short-lived, < 2 days)
+   git add . && git commit -m "feat(scope): description"
+
+3. Push and create PR to main:
+   git push -u origin feature/short-description
+
+4. PR runs full CI including E2E tests
+
+5. After review and CI pass, squash merge to main
+
+6. Main triggers staging deployment (when CD is implemented)
+```
+
+### Branch Naming Conventions
+
+| Type | Pattern | Example |
+|------|---------|---------|
+| Feature | `feature/<description>` | `feature/add-payment-export` |
+| Bug fix | `fix/<description>` | `fix/login-redirect` |
+| Hotfix | `hotfix/<description>` | `hotfix/critical-bug` |
+| Chore | `chore/<description>` | `chore/update-deps` |
+
+### Commit Message Conventions (Conventional Commits)
+
+```
+<type>(<scope>): <description>
+
+Types: feat, fix, docs, style, refactor, test, chore
+
+Examples:
+- feat(payments): add export to CSV
+- fix(auth): resolve token refresh race condition
+- docs(api): update authentication examples
+- chore(deps): upgrade React to 18.3.1
+```
+
+### Feature Flags for Incomplete Work
+
+When merging incomplete features to main, use feature flags:
+
+```typescript
+// Environment variable approach
+const FEATURE_FLAGS = {
+  ENABLE_NEW_FEATURE: process.env.NX_ENABLE_NEW_FEATURE === 'true',
+};
+
+// In component
+if (FEATURE_FLAGS.ENABLE_NEW_FEATURE) {
+  return <NewFeature />;
+}
+return <ExistingFeature />;
+```
+
+See `docs/POC-3-Implementation/TRUNK-BASED-BRANCHING-PLAN.md` for full details.
+
 ## Documentation
 
 Key resources in `docs/`:
 - `EXECUTIVE_SUMMARY.md` - Architecture overview for stakeholders
 - `IMPLEMENTATION-JOURNEY.md` - Evolution from POC-0 to POC-3
 - `POC-3-Implementation/implementation-plan.md` - Current phase plan
+- `POC-3-Implementation/TRUNK-BASED-BRANCHING-PLAN.md` - Branching strategy details
 - `POC-3-Implementation/DARK-MODE-FULL-IMPLEMENTATION-PLAN.md` - Theme system details
 - `POC-3-Implementation/ssl-tls-setup-guide.md` - HTTPS setup and troubleshooting
 - `POC-3-Implementation/OBSERVABILITY_LIVE_SETUP.md` - Metrics/tracing setup

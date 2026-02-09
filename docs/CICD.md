@@ -1,7 +1,8 @@
 # CI/CD Documentation
 
-**Last Updated:** January 16, 2026
+**Last Updated:** February 9, 2026
 **Status:** CI Complete, CD Pending
+**Branching Strategy:** Trunk-Based Development
 
 ---
 
@@ -9,7 +10,13 @@
 
 ### CI Status: COMPLETE ✅
 
-The CI pipeline runs automatically on push/PR to main, develop, feature/*, fix/* branches.
+The CI pipeline runs automatically on push to `main` and on pull requests to `main`.
+
+**Branching Strategy:** Trunk-Based Development
+- All work merges directly to `main` via short-lived feature branches
+- PRs run full CI including E2E tests
+- Main branch deploys to staging automatically (when CD is implemented)
+- Production deployment requires manual approval
 
 ```bash
 # Run CI locally before pushing
@@ -59,7 +66,7 @@ Requires: Dockerfiles (0/11 complete), AWS infrastructure, CD workflows.
            ▼
 ┌─────────────────────┐     ┌─────────────────────┐
 │     e2e-tests       │     │   security-scan     │
-│ (main/develop only) │     │     (parallel)      │
+│   (main + PRs)      │     │     (parallel)      │
 └─────────────────────┘     └─────────────────────┘
            │
            ▼
@@ -77,7 +84,7 @@ Requires: Dockerfiles (0/11 complete), AWS infrastructure, CD workflows.
 | **Frontend Tests** | ~5-8 min | Jest tests for MFEs and shared libs |
 | **Backend Tests** | ~8-12 min | Jest tests with PostgreSQL, Redis, RabbitMQ containers |
 | **Build** | ~8-12 min | Production builds for all 27 projects |
-| **E2E Tests** | ~8-15 min | Playwright tests (main/develop only) |
+| **E2E Tests** | ~8-15 min | Playwright tests (main + PRs) |
 | **Security Scan** | ~5 min | Trivy + npm audit |
 | **CI Status** | ~1 min | Final aggregation check |
 
@@ -93,9 +100,11 @@ Requires: Dockerfiles (0/11 complete), AWS infrastructure, CD workflows.
 
 Location: `.github/workflows/ci.yml`
 
-**Triggers:**
-- Push to: main, develop, feature/*, fix/*
-- Pull requests to: main, develop
+**Triggers (Trunk-Based Development):**
+- Push to: `main`
+- Pull requests to: `main`
+
+**Note:** We use trunk-based development where all work merges directly to `main` via short-lived feature branches. See `docs/POC-3-Implementation/TRUNK-BASED-BRANCHING-PLAN.md` for details.
 
 ---
 
@@ -117,12 +126,14 @@ CI Pass → Docker Build → Push to ECR → Deploy Staging → Smoke Tests
 Done ← Rollback (if fail) ← Monitor (15m) ← Canary Deploy ← Approve
 ```
 
-### Environments
+### Environments (Trunk-Based Development)
 
 | Environment | Trigger | Approval |
 |-------------|---------|----------|
-| **Staging** | Push to `develop` | Automatic |
-| **Production** | Push to `main` | Manual approval required |
+| **Staging** | Push to `main` | Automatic |
+| **Production** | Manual promotion | Manual approval required |
+
+**Note:** With trunk-based development, every merge to `main` triggers staging deployment. Production requires explicit manual approval after staging verification.
 
 ---
 
