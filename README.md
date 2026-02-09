@@ -21,6 +21,7 @@ A production-ready, full-stack microfrontend platform demonstrating enterprise-g
 - **Full Observability:** Prometheus metrics, Grafana dashboards, Jaeger tracing, Sentry errors
 - **Banking-Grade Security:** JWT authentication, RBAC, MFA, anomaly detection, advanced session management, social login (OAuth via Auth0)
 - **CI Pipeline:** GitHub Actions with Nx Cloud distributed caching (50-65% faster builds)
+- **Trunk-Based Development:** Short-lived feature branches, squash merges to main
 - **Cross-Browser:** Full support for Chrome, Firefox, Safari, Edge, and Brave
 
 ### Architecture
@@ -337,6 +338,7 @@ pnpm test:e2e                 # End-to-end tests
 - [Executive Summary](docs/EXECUTIVE_SUMMARY.md) – High-level overview for stakeholders
 - [Implementation Journey](docs/IMPLEMENTATION-JOURNEY.md) – Evolution from POC-0 → POC-3
 - **[CI/CD Documentation](docs/CICD.md) – Complete CI/CD guide (CI complete, CD planned)**
+- [Trunk-Based Branching Plan](docs/POC-3-Implementation/TRUNK-BASED-BRANCHING-PLAN.md) – Branching strategy and workflow
 - [POC-3 Implementation Plan](docs/POC-3-Implementation/implementation-plan.md) – Phases 1–9, current status
 - [POC-3 Task List](docs/POC-3-Implementation/task-list.md) – Progress tracking checklist
 - [Dark Mode – Full Plan](docs/POC-3-Implementation/DARK-MODE-FULL-IMPLEMENTATION-PLAN.md) – Steps A–I, tests, guardrails
@@ -366,11 +368,57 @@ pnpm test:e2e                 # End-to-end tests
 
 ---
 
+## Contributing
+
+This project uses **trunk-based development**. All work merges directly to `main` via short-lived feature branches.
+
+### Workflow
+
+```bash
+# 1. Create feature branch from main
+git checkout main && git pull
+git checkout -b feature/your-feature
+
+# 2. Make changes, commit (use conventional commits)
+git add . && git commit -m "feat(scope): description"
+
+# 3. Push and create PR to main
+git push -u origin feature/your-feature
+
+# 4. PR runs full CI including E2E tests
+# 5. After review and CI pass, squash merge to main
+```
+
+### Branch Naming
+
+| Type | Pattern | Example |
+|------|---------|---------|
+| Feature | `feature/<description>` | `feature/add-payment-export` |
+| Bug fix | `fix/<description>` | `fix/login-redirect` |
+| Hotfix | `hotfix/<description>` | `hotfix/critical-bug` |
+| Chore | `chore/<description>` | `chore/update-deps` |
+
+### Commit Convention
+
+Use [Conventional Commits](https://www.conventionalcommits.org/):
+
+```text
+feat(payments): add export to CSV
+fix(auth): resolve token refresh race condition
+docs(api): update authentication examples
+chore(deps): upgrade React to 18.3.1
+```
+
+For details, see [Trunk-Based Branching Plan](docs/POC-3-Implementation/TRUNK-BASED-BRANCHING-PLAN.md).
+
+---
+
 ## Current Status
 
 - **Development Environment:** Fully functional with HTTPS/TLS, observability stack, and production-ready infrastructure
 - **Live Demo:** Available locally at https://localhost with complete feature set
 - **CI Pipeline:** ✅ Complete with GitHub Actions + Nx Cloud distributed caching
+- **Branching Strategy:** ✅ Trunk-based development (main branch only)
 - **CD & Deployment:** Pending implementation (planned for next phase)
 - **Internet Live Demo:** Will be available once deployment pipeline is implemented
 
@@ -382,6 +430,6 @@ For detailed setup instructions, troubleshooting, and development workflows, ref
 
 ---
 
-**Last Updated:** January 24, 2026
-**Status:** Production-Ready Architecture + CI Pipeline + Backend Hardening + Social Login (Google & GitHub)
-**Next Phase:** CD Pipeline + Cloud Deployment + Additional OAuth Providers (Facebook, LinkedIn, X)
+**Last Updated:** February 9, 2026
+**Status:** Production-Ready Architecture + CI Pipeline + Trunk-Based Development + Backend Hardening + Social Login
+**Next Phase:** CD Pipeline + Cloud Deployment + Accessibility Compliance
