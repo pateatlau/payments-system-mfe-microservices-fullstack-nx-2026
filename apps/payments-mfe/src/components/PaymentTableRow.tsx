@@ -131,20 +131,25 @@ export function PaymentTableRow({
             {formatDate(payment.createdAt)}
           </td>
           <td className="px-3 py-2 text-xs font-medium whitespace-nowrap">
-            <div className="flex gap-2">
+            <div
+              className="flex gap-2"
+              role="group"
+              aria-label={`Actions for payment ${formatCurrency(payment.amount, payment.currency)} to ${getPartyDisplay(payment.recipient).name}`}
+            >
               <Button
                 variant="ghost"
                 size="sm"
                 className="p-0 text-primary hover:text-primary hover:bg-primary/10 focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 h-7 w-7"
                 onClick={() => onView(payment.id)}
                 title="View Details"
-                aria-label="View Details"
+                aria-label={`View details for payment of ${formatCurrency(payment.amount, payment.currency)}`}
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 20 20"
                   fill="currentColor"
                   className="w-4 h-4"
+                  aria-hidden="true"
                 >
                   <path d="M10 3.5c4.5 0 8 4.5 8 6.5s-3.5 6.5-8 6.5-8-4.5-8-6.5 3.5-6.5 8-6.5Zm0 3a4.5 4.5 0 1 0 0 9 4.5 4.5 0 0 0 0-9Z" />
                 </svg>
@@ -157,33 +162,39 @@ export function PaymentTableRow({
                     className="p-0 text-primary hover:text-primary hover:bg-primary/10 focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 h-7 w-7"
                     onClick={() => onEdit(payment)}
                     title="Edit"
-                    aria-label="Edit"
+                    aria-label={`Edit payment of ${formatCurrency(payment.amount, payment.currency)}`}
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       viewBox="0 0 20 20"
                       fill="currentColor"
                       className="w-4 h-4"
+                      aria-hidden="true"
                     >
                       <path d="M13.586 3.586a2 2 0 0 1 2.828 2.828l-8.5 8.5a2 2 0 0 1-1.061.561l-3.15.525a.75.75 0 0 1-.87-.87l.525-3.15a2 2 0 0 1 .561-1.061l8.5-8.5Z" />
                       <path d="M12 5l3 3" />
                     </svg>
                   </Button>
                   {deleteConfirmId === payment.id ? (
-                    <div className="flex gap-2">
+                    <div
+                      className="flex gap-2"
+                      role="group"
+                      aria-label="Confirm or cancel deletion"
+                    >
                       <Button
                         variant="destructive"
                         size="sm"
                         className="p-0 hover:bg-destructive/80 h-7 w-7"
                         onClick={onConfirmDelete}
                         title="Confirm Delete"
-                        aria-label="Confirm Delete"
+                        aria-label="Confirm delete payment"
                       >
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           viewBox="0 0 20 20"
                           fill="currentColor"
                           className="w-4 h-4"
+                          aria-hidden="true"
                         >
                           <path
                             fillRule="evenodd"
@@ -198,13 +209,14 @@ export function PaymentTableRow({
                         className="p-0 text-muted-foreground hover:text-foreground hover:bg-accent h-7 w-7"
                         onClick={onCancelDelete}
                         title="Cancel"
-                        aria-label="Cancel"
+                        aria-label="Cancel delete"
                       >
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           viewBox="0 0 20 20"
                           fill="currentColor"
                           className="w-4 h-4"
+                          aria-hidden="true"
                         >
                           <path
                             fillRule="evenodd"
@@ -221,13 +233,14 @@ export function PaymentTableRow({
                       className="p-0 hover:bg-destructive/80 h-7 w-7"
                       onClick={() => onDelete(payment.id)}
                       title="Delete"
-                      aria-label="Delete"
+                      aria-label={`Delete payment of ${formatCurrency(payment.amount, payment.currency)}`}
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         viewBox="0 0 20 20"
                         fill="currentColor"
                         className="w-4 h-4"
+                        aria-hidden="true"
                       >
                         <path d="M8 2a2 2 0 0 1 2-2h0a2 2 0 0 1 2 2h4a1 1 0 1 1 0 2h-1v11a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3V4H4a1 1 0 1 1 0-2h4Zm-1 4a1 1 0 1 0-2 0v9a1 1 0 1 0 2 0V6Zm3 0a1 1 0 1 0-2 0v9a1 1 0 1 0 2 0V6Zm3 0a1 1 0 1 0-2 0v9a1 1 0 1 0 2 0V6Z" />
                       </svg>

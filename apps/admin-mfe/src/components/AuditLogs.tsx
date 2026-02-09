@@ -249,31 +249,38 @@ export function AuditLogs() {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full">
+              <table
+                className="w-full"
+                aria-label="Audit logs"
+                aria-describedby="audit-logs-caption"
+              >
+                <caption id="audit-logs-caption" className="sr-only">
+                  System audit logs showing user actions, timestamps, and resources affected
+                </caption>
                 <thead className="bg-muted border-b border-border">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                    <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                       Timestamp
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                    <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                       User
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                    <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                       Action
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                    <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                       Resource
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                    <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                       IP Address
                     </th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                    <th scope="col" className="px-4 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">
                       Actions
                     </th>
                   </tr>
                 </thead>
                 <tbody className="bg-card divide-y divide-border">
-                  {logs.map(log => (
+                  {logs.map((log, index) => (
                     <tr key={log.id} className="hover:bg-muted/50">
                       <td className="px-4 py-4 whitespace-nowrap">
                         <div className="text-sm text-foreground">
@@ -311,6 +318,7 @@ export function AuditLogs() {
                           variant="outline"
                           size="sm"
                           onClick={() => handleViewDetails(log)}
+                          aria-label={`View details for ${log.action.replace(/_/g, ' ')} by ${log.userName || 'Unknown'}`}
                         >
                           Details
                         </Button>
@@ -324,18 +332,26 @@ export function AuditLogs() {
 
           {/* Pagination */}
           {!isLoading && pagination.totalPages > 1 && (
-            <div className="flex items-center justify-between mt-6 pt-4 border-t border-border">
-              <div className="text-sm text-muted-foreground">
+            <nav
+              className="flex items-center justify-between mt-6 pt-4 border-t border-border"
+              aria-label="Audit logs pagination"
+            >
+              <div
+                className="text-sm text-muted-foreground"
+                aria-live="polite"
+                aria-atomic="true"
+              >
                 Showing {(pagination.page - 1) * pagination.limit + 1} to{' '}
                 {Math.min(pagination.page * pagination.limit, pagination.total)}{' '}
                 of {pagination.total} results
               </div>
-              <div className="flex space-x-2">
+              <div className="flex space-x-2" role="group" aria-label="Pagination controls">
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => handlePageChange(1)}
                   disabled={pagination.page === 1}
+                  aria-label="Go to first page"
                 >
                   First
                 </Button>
@@ -344,6 +360,7 @@ export function AuditLogs() {
                   size="sm"
                   onClick={() => handlePageChange(pagination.page - 1)}
                   disabled={pagination.page === 1}
+                  aria-label="Go to previous page"
                 >
                   Previous
                 </Button>
@@ -352,6 +369,7 @@ export function AuditLogs() {
                   size="sm"
                   onClick={() => handlePageChange(pagination.page + 1)}
                   disabled={pagination.page === pagination.totalPages}
+                  aria-label="Go to next page"
                 >
                   Next
                 </Button>
@@ -360,6 +378,7 @@ export function AuditLogs() {
                   size="sm"
                   onClick={() => handlePageChange(pagination.totalPages)}
                   disabled={pagination.page === pagination.totalPages}
+                  aria-label="Go to last page"
                 >
                   Last
                 </Button>
