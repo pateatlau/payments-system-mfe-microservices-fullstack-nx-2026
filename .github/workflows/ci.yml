@@ -1,16 +1,17 @@
 name: CI Pipeline
 
+# Trunk-Based Development: All work merges directly to main
+# - Feature branches are short-lived (< 2 days)
+# - PRs run full CI including E2E tests
+# - Main branch deploys to staging automatically
+# - Production deployment requires manual approval
 on:
   push:
     branches:
       - main
-      - develop
-      - 'feature/**'
-      - 'fix/**'
   pull_request:
     branches:
       - main
-      - develop
 
 # Cancel in-progress runs when a new workflow with the same group is triggered
 concurrency:
@@ -174,30 +175,17 @@ jobs:
       #   3. Refactor shell tests to reduce memory footprint
       # Tracking issue: Shell tests pass locally but OOM in CI
       - name: Skip shell tests (OOM in CI - see comment above)
-        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+        if: github.ref == 'refs/heads/main' || github.event_name == 'pull_request'
         run: |
           echo "⚠️ Shell tests are temporarily disabled due to OOM issues in CI"
           echo "Shell tests pass locally - run 'pnpm test:shell' to verify"
           echo "See .github/workflows/ci.yml for details and tracking"
 
-      - name: Run MFE and library tests with coverage (all on main/develop)
-        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+      - name: Run MFE and library tests with coverage (all on main/PRs)
+        if: github.ref == 'refs/heads/main' || github.event_name == 'pull_request'
         run: |
           NX_NO_CLOUD=true pnpm nx run-many --target=test \
             --projects=auth-mfe,payments-mfe,admin-mfe,profile-mfe,shared-auth-store,shared-utils,shared-types \
-            --coverage \
-            --runInBand \
-            --forceExit
-
-      - name: Run frontend unit tests (affected on feature branches)
-        if: github.ref != 'refs/heads/main' && github.ref != 'refs/heads/develop'
-        run: |
-          # Shell tests are skipped due to OOM - see comment above
-          # Run other frontend projects with coverage (excluding shell)
-          NX_NO_CLOUD=true pnpm nx affected --target=test \
-            --base=${{ steps.set-shas.outputs.base }} \
-            --head=${{ steps.set-shas.outputs.head }} \
-            --exclude=shell,*-service,api-gateway \
             --coverage \
             --runInBand \
             --forceExit
@@ -371,21 +359,11 @@ jobs:
         id: set-shas
         uses: nrwl/nx-set-shas@v4
 
-      - name: Run backend unit tests (all on main/develop)
-        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+      - name: Run backend unit tests (all on main/PRs)
+        if: github.ref == 'refs/heads/main' || github.event_name == 'pull_request'
         run: |
           NX_NO_CLOUD=true pnpm nx run-many --target=test \
             --projects=api-gateway,auth-service,payments-service,admin-service,profile-service \
-            --coverage \
-            --maxWorkers=2
-
-      - name: Run backend unit tests (affected on feature branches)
-        if: github.ref != 'refs/heads/main' && github.ref != 'refs/heads/develop'
-        run: |
-          NX_NO_CLOUD=true pnpm nx affected --target=test \
-            --base=${{ steps.set-shas.outputs.base }} \
-            --head=${{ steps.set-shas.outputs.head }} \
-            --exclude=auth-mfe,payments-mfe,admin-mfe,profile-mfe,shell \
             --coverage \
             --maxWorkers=2
 
@@ -456,8 +434,8 @@ jobs:
         id: set-shas
         uses: nrwl/nx-set-shas@v4
 
-      - name: Build all projects (main/develop)
-        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+      - name: Build all projects (main/PRs)
+        if: github.ref == 'refs/heads/main' || github.event_name == 'pull_request'
         run: |
           echo "=== Build Environment ==="
           echo "NX_API_BASE_URL=$NX_API_BASE_URL"
@@ -491,20 +469,6 @@ jobs:
           # the runtime URL resolution picks up window.__ENV__ or the DefinePlugin value first.
           echo "=== Bundle verification complete ==="
 
-      - name: Build affected projects (feature branches)
-        if: github.ref != 'refs/heads/main' && github.ref != 'refs/heads/develop'
-        run: |
-          rm -rf dist/
-          NX_API_BASE_URL="http://localhost:3000/api" \
-          NX_NO_CLOUD=true \
-          NX_CLOUD_DISTRIBUTED_EXECUTION=false \
-          NX_SKIP_NX_CACHE=true \
-          pnpm nx affected --target=build \
-            --base=${{ steps.set-shas.outputs.base }} \
-            --head=${{ steps.set-shas.outputs.head }} \
-            --configuration=production \
-            --skip-nx-cache
-
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -515,13 +479,14 @@ jobs:
           retention-days: 7
           if-no-files-found: warn
 
-  # Job 5: E2E Tests (Optional, runs on main/develop only)
+  # Job 5: E2E Tests (runs on main and PRs to main)
   # E2E tests are expensive - only run after unit tests pass
+  # Trunk-based: Run on main pushes and all PRs to catch issues before merge
   e2e-tests:
     name: E2E Tests
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+    if: github.ref == 'refs/heads/main' || github.event_name == 'pull_request'
     needs: [build, test-frontend, test-backend]
 
     services:

@@ -1,12 +1,26 @@
 ## CI/CD Prerequisites Checklist
 
-**Last Updated:** January 16, 2026
+**Last Updated:** February 9, 2026
+**Branching Strategy:** Trunk-Based Development
 
 ### Repository Setup
 
 - [x] Repository on GitHub with appropriate access
-- [ ] Branch protection rules configured
+- [ ] Branch protection rules configured for `main`:
+  - [ ] Require pull request reviews (1+ reviewers)
+  - [ ] Dismiss stale reviews on new commits
+  - [ ] Require status checks to pass (ci-status)
+  - [ ] Require branches to be up to date
+  - [ ] Require linear history (squash merges recommended)
 - [ ] Required reviewers identified
+
+### Trunk-Based Development Notes
+
+- All work merges directly to `main` via short-lived feature branches (< 2 days)
+- PRs run full CI including E2E tests before merge
+- Main branch deploys to staging automatically
+- Production deployment requires manual approval
+- See `docs/POC-3-Implementation/TRUNK-BASED-BRANCHING-PLAN.md` for details
 
 ### Secrets Configuration (for CI - hardcoded test values)
 
