@@ -114,10 +114,10 @@ Developer                    GitHub                      CI/CD
    │─────────────────────>     │                           │
    │                           │                           │
    │  (work, commit, push)     │                           │
-   │─────────────────────>     │  Run CI on push           │
-   │                           │─────────────────────>     │
+   │─────────────────────>     │  (no CI on feature push)  │
    │                           │                           │
-   │  Open PR to main          │                           │
+   │                           │                           │
+   │  Open/Update PR to main   │                           │
    │─────────────────────>     │  Run full CI + E2E        │
    │                           │─────────────────────>     │
    │                           │                           │
@@ -125,13 +125,16 @@ Developer                    GitHub                      CI/CD
    │<─────────────────────     │                           │
    │                           │                           │
    │  Merge (squash)           │                           │
-   │─────────────────────>     │  Deploy to Staging        │
+   │─────────────────────>     │  CI runs on main          │
    │                           │─────────────────────>     │
    │                           │                           │
-   │                           │  Manual approval          │
+   │                           │  Deploy to Staging        │  (when CD is implemented)
+   │                           │─────────────────────>     │
+   │                           │                           │
+   │                           │  Manual approval          │  (when CD is implemented)
    │                           │<─────────────────────     │
    │                           │                           │
-   │                           │  Deploy to Production     │
+   │                           │  Deploy to Production     │  (when CD is implemented)
    │                           │─────────────────────>     │
 ```
 
