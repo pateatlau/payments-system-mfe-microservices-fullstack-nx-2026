@@ -37,7 +37,7 @@
 
 ## Executive Summary
 
-This document outlines the implementation plan for email verification in the MFE Payments System. The feature ensures users verify their email addresses before gaining full access to the application, following banking-grade security standards.
+This document outlines the implementation plan for email verification in the MFE Payments System. The feature ensures users verify their email addresses before gaining full access to the application.
 
 **Approach:** Hybrid (Option C) - Backend generates verification tokens and publishes events. Email sending is decoupled via RabbitMQ events, allowing the system to work without an email service during development while being production-ready.
 

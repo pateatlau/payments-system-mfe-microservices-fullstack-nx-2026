@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-MFE Payments System - A production-ready, full-stack microfrontend platform demonstrating enterprise-grade architecture patterns for payment processing applications. Built with React + Nx + Rspack + Module Federation v2 + Node.js + PostgreSQL + RabbitMQ + nginx.
+MFE Payments System - A full-stack microfrontend platform demonstrating architecture patterns for payment processing applications. Built with React + Nx + Rspack + Module Federation v2 + Node.js + PostgreSQL + RabbitMQ + nginx.
 
 **Tech Stack:**
 - **Frontend:** React 18.3.1, Rspack 1.6.x (Module Federation v2), Tailwind CSS 4.0, Zustand, TanStack Query, shadcn/ui

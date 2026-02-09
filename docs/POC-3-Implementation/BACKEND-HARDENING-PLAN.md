@@ -52,7 +52,7 @@
 
 ## Executive Summary
 
-This document outlines a comprehensive backend hardening strategy for the POC-3 payments system. After auditing the current implementation, we've identified several security gaps and areas for improvement across input validation, authentication, authorization, database security, error handling, service resilience, secrets management, and API security.
+This document outlines a backend hardening strategy for the POC-3 payments system. After auditing the current implementation, we've identified several security gaps and areas for improvement across input validation, authentication, authorization, database security, error handling, service resilience, secrets management, and API security.
 
 ---
 
@@ -67,13 +67,13 @@ This document outlines a comprehensive backend hardening strategy for the POC-3 
 - ✅ Token expiration handling (15m access, 7d refresh)
 - ✅ Consistent auth middleware pattern across services
 - ✅ Password hashing with bcrypt (10 rounds)
-- ✅ Strong password requirements (12+ chars, uppercase, lowercase, number, symbol)
+- ✅ Password requirements (12+ chars, uppercase, lowercase, number, symbol)
 
 #### 2. **Input Validation**
 
 - ✅ Zod schemas for request validation in auth and profile services
 - ✅ Email validation with proper regex
-- ✅ Password strength validation with banking-grade requirements
+- ✅ Password strength validation
 - ✅ Zod error handling in error middleware
 
 #### 3. **Error Handling**
@@ -2893,7 +2893,7 @@ Configure alerts for:
 
 ## Conclusion
 
-This hardening plan addresses critical security gaps in the POC-3 backend while maintaining pragmatic prioritization. **Phase 1 must be completed immediately** to restore production-ready security posture. Subsequent phases build defense-in-depth and prepare the system for enterprise deployment.
+This hardening plan addresses security gaps in the POC-3 backend while maintaining pragmatic prioritization. **Phase 1 must be completed immediately** to restore security posture. Subsequent phases build defense-in-depth.
 
 **Recommended Timeline:**
 

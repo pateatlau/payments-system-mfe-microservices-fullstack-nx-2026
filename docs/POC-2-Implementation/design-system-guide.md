@@ -6,7 +6,7 @@
 
 ## Overview
 
-The design system is built on **shadcn/ui** patterns with **Tailwind CSS v4** and provides production-ready, accessible components for all MFEs in the payments system.
+The design system is built on **shadcn/ui** patterns with **Tailwind CSS v4** and provides accessible components for all MFEs in the payments system.
 
 **Library:** `@mfe/shared-design-system`  
 **Location:** `libs/shared-design-system`
