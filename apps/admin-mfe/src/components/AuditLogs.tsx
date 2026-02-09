@@ -23,6 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@mfe/shared-design-system';
+import { useFocusTrap } from '@mfe/shared-utils';
 import type { AuditLog, AuditLogFilters } from '../api/audit-logs';
 import { getAuditLogs, getAvailableActions } from '../api/audit-logs';
 
@@ -36,6 +37,12 @@ export function AuditLogs() {
   const [error, setError] = useState<string | null>(null);
   const [selectedLog, setSelectedLog] = useState<AuditLog | null>(null);
   const [availableActions, setAvailableActions] = useState<string[]>([]);
+
+  // Focus trap for the details modal
+  const { containerRef: detailsModalRef } = useFocusTrap<HTMLDivElement>({
+    isActive: selectedLog !== null,
+    onEscape: () => setSelectedLog(null),
+  });
 
   // Filters
   const [filters, setFilters] = useState<AuditLogFilters>({
@@ -364,11 +371,23 @@ export function AuditLogs() {
 
       {/* Details Modal */}
       {selectedLog && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-background rounded-lg shadow-xl w-full max-w-2xl mx-4">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+          role="presentation"
+          onClick={() => setSelectedLog(null)}
+        >
+          <div
+            ref={detailsModalRef}
+            className="bg-background rounded-lg shadow-xl w-full max-w-2xl mx-4"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="audit-log-details-title"
+            tabIndex={-1}
+            onClick={e => e.stopPropagation()}
+          >
             {/* Header */}
             <div className="px-6 py-4 border-b border-border">
-              <h2 className="text-lg font-semibold text-foreground">
+              <h2 id="audit-log-details-title" className="text-lg font-semibold text-foreground">
                 Audit Log Details
               </h2>
             </div>

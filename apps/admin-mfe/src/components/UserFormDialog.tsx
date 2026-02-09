@@ -17,6 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@mfe/shared-design-system';
+import { useFocusTrap } from '@mfe/shared-utils';
 import { UserRole } from 'shared-types';
 import { createUser, updateUser, type User } from '../api/users';
 
@@ -78,6 +79,12 @@ export function UserFormDialog({
   onSubmit,
 }: UserFormDialogProps) {
   const isEditMode = user !== null;
+
+  // Focus trap for accessibility
+  const { containerRef } = useFocusTrap<HTMLDivElement>({
+    isActive: true,
+    onEscape: onClose,
+  });
 
   // Form state
   const [formData, setFormData] = useState<UserFormData>({
@@ -211,15 +218,31 @@ export function UserFormDialog({
     }
   };
 
+  const dialogTitleId = 'user-form-dialog-title';
+  const dialogDescriptionId = 'user-form-dialog-description';
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="w-full max-w-md mx-4 rounded-lg shadow-xl bg-background">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+      role="presentation"
+      onClick={onClose}
+    >
+      <div
+        ref={containerRef}
+        className="w-full max-w-md mx-4 rounded-lg shadow-xl bg-background"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={dialogTitleId}
+        aria-describedby={dialogDescriptionId}
+        tabIndex={-1}
+        onClick={e => e.stopPropagation()}
+      >
         {/* Header */}
         <div className="px-6 py-4 border-b border-border">
-          <h2 className="text-lg font-semibold text-foreground">
+          <h2 id={dialogTitleId} className="text-lg font-semibold text-foreground">
             {isEditMode ? 'Edit User' : 'Create New User'}
           </h2>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <p id={dialogDescriptionId} className="mt-1 text-sm text-muted-foreground">
             {isEditMode
               ? 'Update user information'
               : 'Add a new user to the system'}

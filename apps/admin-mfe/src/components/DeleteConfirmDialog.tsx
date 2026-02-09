@@ -5,6 +5,7 @@
  */
 
 import { Button } from '@mfe/shared-design-system';
+import { useFocusTrap } from '@mfe/shared-utils';
 
 /**
  * Props for DeleteConfirmDialog
@@ -40,17 +41,39 @@ export function DeleteConfirmDialog({
   onCancel,
   onConfirm,
 }: DeleteConfirmDialogProps) {
+  // Focus trap for accessibility
+  const { containerRef } = useFocusTrap<HTMLDivElement>({
+    isActive: true,
+    onEscape: onCancel,
+  });
+
+  const dialogTitleId = 'delete-confirm-dialog-title';
+  const dialogDescriptionId = 'delete-confirm-dialog-description';
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="bg-background rounded-lg shadow-xl w-full max-w-md mx-4">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+      role="presentation"
+      onClick={onCancel}
+    >
+      <div
+        ref={containerRef}
+        className="bg-background rounded-lg shadow-xl w-full max-w-md mx-4"
+        role="alertdialog"
+        aria-modal="true"
+        aria-labelledby={dialogTitleId}
+        aria-describedby={dialogDescriptionId}
+        tabIndex={-1}
+        onClick={e => e.stopPropagation()}
+      >
         {/* Header */}
         <div className="px-6 py-4 border-b border-border">
-          <h2 className="text-lg font-semibold text-red-600">{title}</h2>
+          <h2 id={dialogTitleId} className="text-lg font-semibold text-red-600">{title}</h2>
         </div>
 
         {/* Content */}
         <div className="px-6 py-4">
-          <p className="text-foreground">{message}</p>
+          <p id={dialogDescriptionId} className="text-foreground">{message}</p>
         </div>
 
         {/* Footer */}

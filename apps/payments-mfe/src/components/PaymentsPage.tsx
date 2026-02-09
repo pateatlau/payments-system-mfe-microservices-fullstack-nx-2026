@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuthStore } from 'shared-auth-store';
 import { UserRole } from 'shared-types';
 import {
@@ -10,6 +10,7 @@ import {
   Toast,
   ToastContainer,
 } from '@mfe/shared-design-system';
+import { useFocusTrap } from '@mfe/shared-utils';
 import {
   usePayments,
   useCreatePayment,
@@ -22,9 +23,6 @@ import { PaymentDetails } from './PaymentDetails';
 import { PaymentsSection } from './PaymentsSection';
 import type { UsePaymentsFilters } from '../hooks/usePayments';
 import type { PaymentWithParties } from './PaymentTableUtils';
-
-const FOCUSABLE_SELECTOR =
-  'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])';
 
 /**
  * PaymentsPage component props
@@ -44,8 +42,12 @@ function PaymentsPageInner({ onPaymentSuccess }: PaymentsPageProps = {}) {
   const [selectedPaymentId, setSelectedPaymentId] = useState<string | null>(
     null
   );
-  const dialogRef = useRef<HTMLDivElement | null>(null);
-  const previouslyFocusedRef = useRef<HTMLElement | null>(null);
+
+  // Focus trap for the payment details modal
+  const { containerRef: dialogRef } = useFocusTrap<HTMLDivElement>({
+    isActive: selectedPaymentId !== null,
+    onEscape: () => setSelectedPaymentId(null),
+  });
 
   const [filters, setFilters] = useState<UsePaymentsFilters>({
     status: 'all',
@@ -92,54 +94,6 @@ function PaymentsPageInner({ onPaymentSuccess }: PaymentsPageProps = {}) {
   const isVendor = hasRole(UserRole.VENDOR);
   const isCustomer = hasRole(UserRole.CUSTOMER);
   const isAdmin = hasRole(UserRole.ADMIN);
-
-  // Modal focus management
-  useEffect(() => {
-    if (!selectedPaymentId) return;
-
-    previouslyFocusedRef.current = document.activeElement as HTMLElement | null;
-
-    const dialogEl = dialogRef.current;
-    const initialFocusTarget =
-      dialogEl?.querySelector<HTMLElement>(FOCUSABLE_SELECTOR);
-    initialFocusTarget?.focus();
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (!dialogRef.current) return;
-
-      if (event.key === 'Escape') {
-        event.preventDefault();
-        setSelectedPaymentId(null);
-        return;
-      }
-
-      if (event.key !== 'Tab') return;
-
-      const focusable =
-        dialogRef.current.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR);
-      if (focusable.length === 0) return;
-
-      const first = focusable[0]!;
-      const last = focusable[focusable.length - 1]!;
-      const active = document.activeElement as HTMLElement | null;
-
-      if (event.shiftKey) {
-        if (active === first || active === dialogRef.current) {
-          event.preventDefault();
-          (last || first).focus();
-        }
-      } else if (active === last) {
-        event.preventDefault();
-        first.focus();
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-      previouslyFocusedRef.current?.focus?.();
-    };
-  }, [selectedPaymentId]);
 
   useEffect(() => {
     if (!paymentsError) return;
@@ -238,15 +192,12 @@ function PaymentsPageInner({ onPaymentSuccess }: PaymentsPageProps = {}) {
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
           onClick={() => setSelectedPaymentId(null)}
-          onKeyDown={e => e.key === 'Escape' && setSelectedPaymentId(null)}
           role="presentation"
         >
-          {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
           <div
             ref={dialogRef}
             className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-background rounded-lg shadow-xl"
             onClick={e => e.stopPropagation()}
-            onKeyDown={e => e.stopPropagation()}
             role="dialog"
             aria-modal="true"
             aria-labelledby="payment-details-title"

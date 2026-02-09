@@ -16,6 +16,7 @@ module.exports = {
       '<rootDir>/../../libs/shared-api-client/src/index.ts',
     '^@mfe/shared-event-bus$':
       '<rootDir>/../../libs/shared-event-bus/src/index.ts',
+    '^@mfe/shared-utils$': '<rootDir>/../../libs/shared-utils/src/index.ts',
     '^shared-utils$': '<rootDir>/../../libs/shared-utils/src/index.ts',
     '^shared-ui$': '<rootDir>/../../libs/shared-ui/src/index.ts',
     '^shared-types$': '<rootDir>/../../libs/shared-types/src/index.ts',
