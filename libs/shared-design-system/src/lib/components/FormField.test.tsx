@@ -196,16 +196,8 @@ describe('FormField', () => {
       expect(errorMessage).toHaveTextContent('Email is required');
     });
 
-    it('error message has aria-live="polite"', () => {
-      render(
-        <FormField name="email" label="Email Address" error="Email is required">
-          <Input type="email" />
-        </FormField>
-      );
-
-      const errorMessage = screen.getByRole('alert');
-      expect(errorMessage).toHaveAttribute('aria-live', 'polite');
-    });
+    // Note: role="alert" implies aria-live="assertive", so we don't add aria-live="polite"
+    // which would conflict. The role="alert" provides the necessary live region behavior.
   });
 
   describe('useFormField hook', () => {
@@ -257,7 +249,7 @@ describe('FormField', () => {
   });
 
   describe('multiple children', () => {
-    it('applies accessibility props to all valid element children', () => {
+    it('applies accessibility props to all valid element children with unique IDs', () => {
       render(
         <FormField name="multi" label="Multi Input" required>
           <Input type="text" data-testid="input1" />
@@ -268,10 +260,27 @@ describe('FormField', () => {
       const input1 = screen.getByTestId('input1');
       const input2 = screen.getByTestId('input2');
 
+      // First child gets base ID, subsequent children get indexed IDs to avoid duplicates
       expect(input1).toHaveAttribute('id', 'field-multi');
       expect(input1).toHaveAttribute('aria-required', 'true');
-      expect(input2).toHaveAttribute('id', 'field-multi');
+      expect(input2).toHaveAttribute('id', 'field-multi-1');
       expect(input2).toHaveAttribute('aria-required', 'true');
+    });
+
+    it('preserves explicit IDs on children', () => {
+      render(
+        <FormField name="multi" label="Multi Input">
+          <Input type="text" id="custom-id" data-testid="input1" />
+          <Input type="text" data-testid="input2" />
+        </FormField>
+      );
+
+      const input1 = screen.getByTestId('input1');
+      const input2 = screen.getByTestId('input2');
+
+      // Child with explicit ID keeps it, other gets indexed ID
+      expect(input1).toHaveAttribute('id', 'custom-id');
+      expect(input2).toHaveAttribute('id', 'field-multi-1');
     });
   });
 

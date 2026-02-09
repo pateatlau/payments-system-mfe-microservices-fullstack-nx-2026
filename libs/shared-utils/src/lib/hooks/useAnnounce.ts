@@ -31,6 +31,7 @@ export function useAnnounce() {
   const politeRef = useRef<HTMLDivElement | null>(null);
   const assertiveRef = useRef<HTMLDivElement | null>(null);
   const clearTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const setMessageTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     // Create or find existing live regions
@@ -91,6 +92,9 @@ export function useAnnounce() {
       if (clearTimeoutRef.current) {
         clearTimeout(clearTimeoutRef.current);
       }
+      if (setMessageTimeoutRef.current) {
+        clearTimeout(setMessageTimeoutRef.current);
+      }
       // Don't remove regions - other components may use them
     };
   }, []);
@@ -103,10 +107,14 @@ export function useAnnounce() {
 
       if (!region) return;
 
-      // Clear any pending timeout
+      // Clear any pending timeouts
       if (clearTimeoutRef.current) {
         clearTimeout(clearTimeoutRef.current);
         clearTimeoutRef.current = null;
+      }
+      if (setMessageTimeoutRef.current) {
+        clearTimeout(setMessageTimeoutRef.current);
+        setMessageTimeoutRef.current = null;
       }
 
       // Clear first to ensure re-announcement of same message
@@ -115,18 +123,19 @@ export function useAnnounce() {
       // Use setTimeout to ensure DOM update triggers announcement
       // This is necessary because screen readers may not detect
       // changes if the content is set synchronously
-      setTimeout(() => {
+      setMessageTimeoutRef.current = setTimeout(() => {
         region.textContent = message;
-      }, 50);
 
-      // Clear after delay to prevent stale content
-      if (clearAfter > 0) {
-        clearTimeoutRef.current = setTimeout(() => {
-          if (region.textContent === message) {
-            region.textContent = '';
-          }
-        }, clearAfter);
-      }
+        // Clear after delay to prevent stale content
+        // Schedule this after message is written to avoid race conditions
+        if (clearAfter > 0) {
+          clearTimeoutRef.current = setTimeout(() => {
+            if (region.textContent === message) {
+              region.textContent = '';
+            }
+          }, clearAfter);
+        }
+      }, 50);
     },
     []
   );

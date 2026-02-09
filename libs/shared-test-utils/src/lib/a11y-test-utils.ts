@@ -11,8 +11,29 @@ import { axe, toHaveNoViolations, JestAxeConfigureOptions } from 'jest-axe';
 import { render, RenderResult, RenderOptions } from '@testing-library/react';
 import * as React from 'react';
 
-// Ensure jest-axe matchers are available
-expect.extend(toHaveNoViolations);
+// Re-export toHaveNoViolations for use in test setup files
+export { toHaveNoViolations };
+
+/**
+ * Extend Jest matchers with jest-axe matchers.
+ * Call this in your test setup file (e.g., setupTests.ts) to enable expect(...).toHaveNoViolations()
+ *
+ * @example
+ * // In your test setup file:
+ * import { extendExpectWithA11yMatchers } from '@mfe/shared-test-utils';
+ * extendExpectWithA11yMatchers();
+ */
+export function extendExpectWithA11yMatchers(): void {
+  if (typeof expect !== 'undefined' && typeof expect.extend === 'function') {
+    expect.extend(toHaveNoViolations);
+  }
+}
+
+// Auto-extend if running in Jest environment (for backwards compatibility)
+// This is guarded to prevent errors in non-Jest environments
+if (typeof expect !== 'undefined' && typeof expect.extend === 'function') {
+  expect.extend(toHaveNoViolations);
+}
 
 /**
  * Result of an accessibility audit
@@ -78,7 +99,8 @@ export async function renderWithA11yAudit(
   options?: RenderWithA11yAuditOptions
 ): Promise<A11yAuditResult> {
   const { axeOptions, renderOptions } = options ?? {};
-  const mergedAxeOptions = { ...defaultAxeConfig, ...axeOptions };
+  // Use createAxeConfig for deep merge of nested rules
+  const mergedAxeOptions = axeOptions ? createAxeConfig(axeOptions) : defaultAxeConfig;
 
   const renderResult = render(ui, renderOptions);
   const a11yResults = await axe(renderResult.container, mergedAxeOptions);
@@ -126,7 +148,8 @@ export async function runA11yAudit(
   container: Element,
   axeOptions?: JestAxeConfigureOptions
 ): Promise<Awaited<ReturnType<typeof axe>>> {
-  const mergedOptions = { ...defaultAxeConfig, ...axeOptions };
+  // Use createAxeConfig for deep merge of nested rules
+  const mergedOptions = axeOptions ? createAxeConfig(axeOptions) : defaultAxeConfig;
   return axe(container, mergedOptions);
 }
 

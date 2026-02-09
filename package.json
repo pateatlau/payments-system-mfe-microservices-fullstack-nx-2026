@@ -258,9 +258,9 @@
     "test:performance": "pnpm test:performance:load",
     "test:security:validation": "pnpm tsx scripts/security/security-validation.test.ts",
     "test:security": "pnpm test:security:validation",
-    "test:a11y": "nx run-many --target=test --projects=shared-design-system,shared-test-utils --testPathPattern=accessibility --parallel",
+    "test:a11y": "nx run-many --target=test --projects=shared-design-system --testPathPattern=accessibility --parallel && nx test shared-test-utils --testPathPattern=a11y-test-utils",
     "test:a11y:design-system": "nx test shared-design-system --testPathPattern=accessibility.spec",
-    "test:a11y:test-utils": "nx test shared-test-utils",
+    "test:a11y:test-utils": "nx test shared-test-utils --testPathPattern=a11y-test-utils",
     "test:e2e:a11y": "pnpm build:remotes && nx e2e shell-e2e --grep 'Accessibility'",
     "test:e2e:a11y:audit": "pnpm build:remotes && nx e2e shell-e2e --test-file=a11y-audit.spec.ts"
   },

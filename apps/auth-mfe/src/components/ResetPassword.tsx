@@ -300,7 +300,8 @@ export function ResetPassword({
               {/* New Password field */}
               <div className="space-y-2">
                 <Label htmlFor="newPassword">
-                  New Password <span className="text-red-500">*</span>
+                  New Password <span className="text-destructive" aria-hidden="true">*</span>
+                  <span className="sr-only"> (required)</span>
                 </Label>
                 <PasswordInput
                   id="newPassword"
@@ -309,6 +310,7 @@ export function ResetPassword({
                   disabled={isFormLoading}
                   autoComplete="new-password"
                   autoFocus
+                  aria-required="true"
                 />
                 {errors.newPassword && (
                   <p className="text-sm text-destructive" role="alert">
@@ -320,7 +322,8 @@ export function ResetPassword({
               {/* Confirm Password field */}
               <div className="space-y-2">
                 <Label htmlFor="confirmPassword">
-                  Confirm Password <span className="text-red-500">*</span>
+                  Confirm Password <span className="text-destructive" aria-hidden="true">*</span>
+                  <span className="sr-only"> (required)</span>
                 </Label>
                 <PasswordInput
                   id="confirmPassword"
@@ -328,6 +331,7 @@ export function ResetPassword({
                   placeholder="Confirm new password"
                   disabled={isFormLoading}
                   autoComplete="new-password"
+                  aria-required="true"
                 />
                 {errors.confirmPassword && (
                   <p className="text-sm text-destructive" role="alert">

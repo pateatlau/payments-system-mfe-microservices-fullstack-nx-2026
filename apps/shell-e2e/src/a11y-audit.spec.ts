@@ -154,13 +154,20 @@ test.describe('Keyboard Navigation', () => {
       return { tagName: el?.tagName, type: (el as HTMLInputElement)?.type };
     });
 
-    // Tab to email input
-    while (focusedElement.type !== 'email') {
+    // Tab to email input with max iteration guard
+    const maxTabs = 20;
+    let tabCount = 0;
+    while (focusedElement.type !== 'email' && tabCount < maxTabs) {
       await page.keyboard.press('Tab');
       focusedElement = await page.evaluate(() => {
         const el = document.activeElement;
         return { tagName: el?.tagName, type: (el as HTMLInputElement)?.type };
       });
+      tabCount++;
+    }
+
+    if (tabCount >= maxTabs) {
+      throw new Error(`Could not reach email input after ${maxTabs} tab presses. Focus is on: ${focusedElement.tagName}[type=${focusedElement.type}]`);
     }
 
     expect(focusedElement.tagName).toBe('INPUT');
@@ -228,7 +235,7 @@ test.describe('Focus Management', () => {
     for (let i = 0; i < Math.min(5, interactiveElements.length); i++) {
       await page.keyboard.press('Tab');
 
-      const _hasFocusStyles = await page.evaluate(() => {
+      const hasFocusStyles = await page.evaluate(() => {
         const el = document.activeElement;
         if (!el) return false;
 
@@ -245,8 +252,9 @@ test.describe('Focus Management', () => {
         );
       });
 
-      // Focus should be visible (this is a soft check)
-      // Hard failures would be caught by axe-core
+      // Focus indicators should be present for accessibility
+      // Note: This is a soft check - hard failures would be caught by axe-core
+      expect(hasFocusStyles).toBe(true);
     }
   });
 
@@ -257,9 +265,18 @@ test.describe('Focus Management', () => {
     // Tab to first tab button
     await page.keyboard.press('Tab');
 
-    const _firstTabFocused = await page.evaluate(() => {
-      return document.activeElement?.textContent?.toLowerCase().includes('profile');
+    // Verify we've reached an interactive element (tab, button, or input)
+    const firstFocusedElement = await page.evaluate(() => {
+      const el = document.activeElement;
+      return {
+        tagName: el?.tagName,
+        role: el?.getAttribute('role'),
+        textContent: el?.textContent?.toLowerCase(),
+      };
     });
+
+    // First focused element should be a tab, button, or link
+    expect(['BUTTON', 'A', 'INPUT']).toContain(firstFocusedElement.tagName);
 
     // Tab to next tab
     await page.keyboard.press('Tab');
@@ -289,9 +306,8 @@ test.describe('ARIA Attributes', () => {
     const hasMain = await page.locator('main, [role="main"]').count();
     expect(hasMain).toBeGreaterThan(0);
 
-    // Check for navigation landmark
-    const hasNav = await page.locator('nav, [role="navigation"]').count();
-    expect(hasNav).toBeGreaterThanOrEqual(0); // May not always have nav on signin
+    // Navigation landmark is optional on signin page (unauthenticated state)
+    // No assertion needed - just documenting that nav may or may not be present
 
     // Check for form elements have labels
     const emailInput = page.locator('input[type="email"]');
@@ -316,20 +332,33 @@ test.describe('ARIA Attributes', () => {
     // Check if error messages have proper roles
     const errorMessages = await page.locator('[role="alert"], .text-destructive, .text-red-500').all();
 
-    // If there are error messages, they should be properly announced
+    // Collect assertion failures for better error reporting
+    const failedElements: string[] = [];
+
+    // Each error message should be announced to screen readers
     for (const error of errorMessages) {
       const role = await error.getAttribute('role');
       const ariaLive = await error.getAttribute('aria-live');
+      const text = await error.textContent();
 
-      // Error messages should have role="alert" or aria-live
-      if (role !== 'alert' && ariaLive !== 'assertive' && ariaLive !== 'polite') {
-        // Check if parent has role="alert"
-        const _parentRole = await error.evaluate((el) =>
-          el.closest('[role="alert"]') !== null
-        );
-        // Allow form error patterns that may not need explicit role
+      // Check if element or parent has role="alert" or aria-live
+      const hasParentAlert = await error.evaluate((el) =>
+        el.closest('[role="alert"]') !== null
+      );
+
+      const isProperlyAnnounced =
+        role === 'alert' ||
+        ariaLive === 'assertive' ||
+        ariaLive === 'polite' ||
+        hasParentAlert;
+
+      if (!isProperlyAnnounced && text?.trim()) {
+        failedElements.push(`Error message "${text?.substring(0, 50)}" lacks role="alert" or aria-live attribute`);
       }
     }
+
+    // Assert all error messages are properly announced
+    expect(failedElements).toEqual([]);
   });
 
   test('Buttons should have accessible names', async ({ page }) => {
@@ -350,48 +379,58 @@ test.describe('ARIA Attributes', () => {
 });
 
 test.describe('Color Contrast', () => {
-  test('Should capture screenshots for manual contrast verification', async ({ page }) => {
+  test('Should capture screenshots for manual contrast verification', async ({ page }, testInfo) => {
     await page.goto('/signin');
     await page.waitForLoadState('networkidle');
 
-    // Take screenshot of light mode
+    // Helper to run contrast check
+    async function runContrastCheck(): Promise<{ id: string; description: string; nodes: unknown[] }[]> {
+      const results = await new AxeBuilder({ page })
+        .withTags(['wcag2aa'])
+        .options({
+          rules: {
+            'color-contrast': { enabled: true },
+          },
+        })
+        .analyze();
+      return results.violations.filter((v) => v.id === 'color-contrast');
+    }
+
+    // Run contrast check on light mode
+    const lightModeViolations = await runContrastCheck();
+
+    // Take screenshot of light mode - use testInfo.outputPath for unique paths
     await page.screenshot({
-      path: 'a11y-audit-signin-light.png',
+      path: testInfo.outputPath('a11y-audit-signin-light.png'),
       fullPage: true,
     });
 
     // Toggle to dark mode if available
     const themeToggle = page.locator('[aria-label*="theme"], [aria-label*="dark"], [aria-label*="light"]');
+    let darkModeViolations: { id: string; description: string; nodes: unknown[] }[] = [];
     if (await themeToggle.count() > 0) {
       await themeToggle.first().click();
       await page.waitForTimeout(500);
 
+      // Run contrast check on dark mode
+      darkModeViolations = await runContrastCheck();
+
       await page.screenshot({
-        path: 'a11y-audit-signin-dark.png',
+        path: testInfo.outputPath('a11y-audit-signin-dark.png'),
         fullPage: true,
       });
     }
 
-    // Run axe contrast check
-    const contrastResults = await new AxeBuilder({ page })
-      .withTags(['wcag2aa'])
-      .options({
-        rules: {
-          'color-contrast': { enabled: true },
-        },
-      })
-      .analyze();
+    // Combine violations from both modes
+    const allContrastViolations = [...lightModeViolations, ...darkModeViolations];
 
-    const contrastViolations = contrastResults.violations.filter(
-      (v) => v.id === 'color-contrast'
-    );
-
-    if (contrastViolations.length > 0) {
-      console.log('Color Contrast Issues:', JSON.stringify(contrastViolations, null, 2));
+    if (allContrastViolations.length > 0) {
+      console.log('Light Mode Contrast Issues:', JSON.stringify(lightModeViolations, null, 2));
+      console.log('Dark Mode Contrast Issues:', JSON.stringify(darkModeViolations, null, 2));
     }
 
-    // Contrast violations should be zero for WCAG 2.1 AA
-    expect(contrastViolations).toEqual([]);
+    // Contrast violations should be zero for WCAG 2.1 AA in both modes
+    expect(allContrastViolations).toEqual([]);
   });
 });
 

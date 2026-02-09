@@ -438,7 +438,8 @@ export function SignIn({ onSuccess, onNavigateToSignUp, onNavigateToForgotPasswo
               {/* Email field */}
               <div className="space-y-2">
                 <Label htmlFor="email">
-                  Email <span className="text-red-500">*</span>
+                  Email <span className="text-destructive" aria-hidden="true">*</span>
+                  <span className="sr-only"> (required)</span>
                 </Label>
                 <Input
                   id="email"
@@ -447,6 +448,7 @@ export function SignIn({ onSuccess, onNavigateToSignUp, onNavigateToForgotPasswo
                   placeholder="you@example.com"
                   disabled={isFormLoading}
                   autoComplete="email"
+                  aria-required="true"
                 />
                 {signInErrors.email && (
                   <p className="text-sm text-destructive" role="alert">
@@ -459,7 +461,8 @@ export function SignIn({ onSuccess, onNavigateToSignUp, onNavigateToForgotPasswo
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <Label htmlFor="password">
-                    Password <span className="text-red-500">*</span>
+                    Password <span className="text-destructive" aria-hidden="true">*</span>
+                    <span className="sr-only"> (required)</span>
                   </Label>
                   {onNavigateToForgotPassword && (
                     <Button
@@ -478,6 +481,7 @@ export function SignIn({ onSuccess, onNavigateToSignUp, onNavigateToForgotPasswo
                   placeholder="Enter your password"
                   disabled={isFormLoading}
                   autoComplete="current-password"
+                  aria-required="true"
                 />
                 {signInErrors.password && (
                   <p className="text-sm text-destructive" role="alert">

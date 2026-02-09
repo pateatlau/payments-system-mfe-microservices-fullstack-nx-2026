@@ -178,20 +178,41 @@ export const FormField = React.forwardRef<HTMLDivElement, FormFieldProps>(
             </p>
           )}
 
-          {/* Clone child to inject accessibility props */}
-          {React.Children.map(children, (child) => {
+          {/* Clone children to inject accessibility props */}
+          {React.Children.map(children, (child, index) => {
             if (!React.isValidElement(child)) {
               return child;
             }
+
+            const childProps = child.props as Record<string, unknown>;
+
+            // Generate unique ID per child (first child gets base id, subsequent get indexed)
+            const childId = childProps.id as string | undefined ?? (index === 0 ? id : `${id}-${index}`);
+
+            // Merge aria-describedby with any existing value from child
+            const existingDescribedBy = childProps['aria-describedby'] as string | undefined;
+            const mergedDescribedBy = [existingDescribedBy, ariaDescribedBy]
+              .filter(Boolean)
+              .join(' ') || undefined;
+
+            // Only set aria-invalid if child doesn't already have it explicitly set
+            const ariaInvalid = childProps['aria-invalid'] !== undefined
+              ? childProps['aria-invalid']
+              : (hasError || undefined);
+
+            // Only set aria-required if child doesn't already have it explicitly set
+            const ariaRequired = childProps['aria-required'] !== undefined
+              ? childProps['aria-required']
+              : (required || undefined);
 
             // Clone the child element and inject accessibility props
             return React.cloneElement(
               child as React.ReactElement<Record<string, unknown>>,
               {
-                id,
-                'aria-invalid': hasError || undefined,
-                'aria-required': required || undefined,
-                'aria-describedby': ariaDescribedBy,
+                id: childId,
+                'aria-invalid': ariaInvalid,
+                'aria-required': ariaRequired,
+                'aria-describedby': mergedDescribedBy,
               }
             );
           })}
@@ -200,7 +221,6 @@ export const FormField = React.forwardRef<HTMLDivElement, FormFieldProps>(
             <p
               id={errorId}
               role="alert"
-              aria-live="polite"
               className="text-sm text-[rgb(var(--destructive))]"
             >
               {error}
