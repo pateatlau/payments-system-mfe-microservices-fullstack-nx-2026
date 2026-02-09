@@ -168,18 +168,28 @@ jobs:
       # The shell app is a Module Federation host that imports all MFEs,
       # causing Istanbul coverage instrumentation to consume excessive memory (8GB+)
       # Shell is primarily an integration point; business logic coverage comes from MFEs/libs
-      # Tests run in batches via direct jest calls (nx adds memory overhead)
+      # Tests run in smaller batches via direct jest calls to prevent memory accumulation
       - name: Run shell tests (without coverage, in batches)
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
         run: |
           cd apps/shell
-          # Run tests in batches - each jest invocation starts with fresh memory
-          # Using direct jest calls instead of nx to reduce memory overhead
-          npx jest --config jest.config.js --testPathPatterns="integration" --runInBand --forceExit --no-coverage
-          npx jest --config jest.config.js --testPathPatterns="components" --runInBand --forceExit --no-coverage
-          npx jest --config jest.config.js --testPathPatterns="pages" --runInBand --forceExit --no-coverage
-          npx jest --config jest.config.js --testPathPatterns="routes|utils" --runInBand --forceExit --no-coverage
-          npx jest --config jest.config.js --testPathPatterns="app/App|hooks" --runInBand --forceExit --no-coverage
+          # Run tests in small batches - each jest invocation starts with fresh memory
+          # Explicitly set NODE_OPTIONS for each subprocess
+          # Integration tests (2 files)
+          NODE_OPTIONS="--max-old-space-size=4096" npx jest --config jest.config.js --testPathPatterns="AppIntegration" --runInBand --forceExit --no-coverage
+          NODE_OPTIONS="--max-old-space-size=4096" npx jest --config jest.config.js --testPathPatterns="PaymentsFlowIntegration" --runInBand --forceExit --no-coverage
+          # Component tests (3 files) - run individually
+          NODE_OPTIONS="--max-old-space-size=4096" npx jest --config jest.config.js --testPathPatterns="Layout.test" --runInBand --forceExit --no-coverage
+          NODE_OPTIONS="--max-old-space-size=4096" npx jest --config jest.config.js --testPathPatterns="ProtectedRoute.test" --runInBand --forceExit --no-coverage
+          NODE_OPTIONS="--max-old-space-size=4096" npx jest --config jest.config.js --testPathPatterns="RemoteErrorBoundary.test" --runInBand --forceExit --no-coverage
+          # Page tests (5 files)
+          NODE_OPTIONS="--max-old-space-size=4096" npx jest --config jest.config.js --testPathPatterns="pages/" --runInBand --forceExit --no-coverage
+          # Route tests (2 files)
+          NODE_OPTIONS="--max-old-space-size=4096" npx jest --config jest.config.js --testPathPatterns="routes/" --runInBand --forceExit --no-coverage
+          # Utils and hooks (2 files)
+          NODE_OPTIONS="--max-old-space-size=4096" npx jest --config jest.config.js --testPathPatterns="register-sw|useEventBus" --runInBand --forceExit --no-coverage
+          # App test (1 file)
+          NODE_OPTIONS="--max-old-space-size=4096" npx jest --config jest.config.js --testPathPatterns="app/App.test" --runInBand --forceExit --no-coverage
 
       - name: Run MFE and library tests with coverage (all on main/develop)
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
@@ -197,13 +207,17 @@ jobs:
           SHELL_AFFECTED=$(NX_NO_CLOUD=true pnpm nx print-affected --target=test --select=projects --base=${{ steps.set-shas.outputs.base }} --head=${{ steps.set-shas.outputs.head }} 2>/dev/null | grep -c "shell" || echo "0")
 
           if [ "$SHELL_AFFECTED" != "0" ]; then
-            # Run shell tests in batches via direct jest (nx adds memory overhead)
+            # Run shell tests in smaller batches via direct jest
             cd apps/shell
-            npx jest --config jest.config.js --testPathPatterns="integration" --runInBand --forceExit --no-coverage || true
-            npx jest --config jest.config.js --testPathPatterns="components" --runInBand --forceExit --no-coverage || true
-            npx jest --config jest.config.js --testPathPatterns="pages" --runInBand --forceExit --no-coverage || true
-            npx jest --config jest.config.js --testPathPatterns="routes|utils" --runInBand --forceExit --no-coverage || true
-            npx jest --config jest.config.js --testPathPatterns="app/App|hooks" --runInBand --forceExit --no-coverage || true
+            NODE_OPTIONS="--max-old-space-size=4096" npx jest --config jest.config.js --testPathPatterns="AppIntegration" --runInBand --forceExit --no-coverage || true
+            NODE_OPTIONS="--max-old-space-size=4096" npx jest --config jest.config.js --testPathPatterns="PaymentsFlowIntegration" --runInBand --forceExit --no-coverage || true
+            NODE_OPTIONS="--max-old-space-size=4096" npx jest --config jest.config.js --testPathPatterns="Layout.test" --runInBand --forceExit --no-coverage || true
+            NODE_OPTIONS="--max-old-space-size=4096" npx jest --config jest.config.js --testPathPatterns="ProtectedRoute.test" --runInBand --forceExit --no-coverage || true
+            NODE_OPTIONS="--max-old-space-size=4096" npx jest --config jest.config.js --testPathPatterns="RemoteErrorBoundary.test" --runInBand --forceExit --no-coverage || true
+            NODE_OPTIONS="--max-old-space-size=4096" npx jest --config jest.config.js --testPathPatterns="pages/" --runInBand --forceExit --no-coverage || true
+            NODE_OPTIONS="--max-old-space-size=4096" npx jest --config jest.config.js --testPathPatterns="routes/" --runInBand --forceExit --no-coverage || true
+            NODE_OPTIONS="--max-old-space-size=4096" npx jest --config jest.config.js --testPathPatterns="register-sw|useEventBus" --runInBand --forceExit --no-coverage || true
+            NODE_OPTIONS="--max-old-space-size=4096" npx jest --config jest.config.js --testPathPatterns="app/App.test" --runInBand --forceExit --no-coverage || true
             cd ../..
           fi
 
