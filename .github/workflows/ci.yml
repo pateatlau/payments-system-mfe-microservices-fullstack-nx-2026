@@ -168,11 +168,18 @@ jobs:
       # The shell app is a Module Federation host that imports all MFEs,
       # causing Istanbul coverage instrumentation to consume excessive memory (8GB+)
       # Shell is primarily an integration point; business logic coverage comes from MFEs/libs
-      # --forceExit prevents hanging on open handles (common with Module Federation)
-      - name: Run shell tests (without coverage)
+      # Tests run in batches via direct jest calls (nx adds memory overhead)
+      - name: Run shell tests (without coverage, in batches)
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
         run: |
-          NX_NO_CLOUD=true pnpm nx test shell --runInBand --forceExit
+          cd apps/shell
+          # Run tests in batches - each jest invocation starts with fresh memory
+          # Using direct jest calls instead of nx to reduce memory overhead
+          npx jest --config jest.config.js --testPathPatterns="integration" --runInBand --forceExit --no-coverage
+          npx jest --config jest.config.js --testPathPatterns="components" --runInBand --forceExit --no-coverage
+          npx jest --config jest.config.js --testPathPatterns="pages" --runInBand --forceExit --no-coverage
+          npx jest --config jest.config.js --testPathPatterns="routes|utils" --runInBand --forceExit --no-coverage
+          npx jest --config jest.config.js --testPathPatterns="app/App|hooks" --runInBand --forceExit --no-coverage
 
       - name: Run MFE and library tests with coverage (all on main/develop)
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
@@ -186,14 +193,20 @@ jobs:
       - name: Run frontend unit tests (affected on feature branches)
         if: github.ref != 'refs/heads/main' && github.ref != 'refs/heads/develop'
         run: |
-          # Run shell separately without coverage (--forceExit prevents hanging)
-          NX_NO_CLOUD=true pnpm nx affected --target=test \
-            --base=${{ steps.set-shas.outputs.base }} \
-            --head=${{ steps.set-shas.outputs.head }} \
-            --projects=shell \
-            --runInBand \
-            --forceExit \
-            --passWithNoTests || true
+          # Check if shell is affected
+          SHELL_AFFECTED=$(NX_NO_CLOUD=true pnpm nx print-affected --target=test --select=projects --base=${{ steps.set-shas.outputs.base }} --head=${{ steps.set-shas.outputs.head }} 2>/dev/null | grep -c "shell" || echo "0")
+
+          if [ "$SHELL_AFFECTED" != "0" ]; then
+            # Run shell tests in batches via direct jest (nx adds memory overhead)
+            cd apps/shell
+            npx jest --config jest.config.js --testPathPatterns="integration" --runInBand --forceExit --no-coverage || true
+            npx jest --config jest.config.js --testPathPatterns="components" --runInBand --forceExit --no-coverage || true
+            npx jest --config jest.config.js --testPathPatterns="pages" --runInBand --forceExit --no-coverage || true
+            npx jest --config jest.config.js --testPathPatterns="routes|utils" --runInBand --forceExit --no-coverage || true
+            npx jest --config jest.config.js --testPathPatterns="app/App|hooks" --runInBand --forceExit --no-coverage || true
+            cd ../..
+          fi
+
           # Run other frontend projects with coverage
           NX_NO_CLOUD=true pnpm nx affected --target=test \
             --base=${{ steps.set-shas.outputs.base }} \
