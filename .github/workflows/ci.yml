@@ -833,9 +833,11 @@ jobs:
         if: ${{ success() || failure() }}
         run: |
           echo "🔍 Running accessibility E2E tests with @axe-core/playwright"
-          npx playwright test --config=apps/shell-e2e/playwright.config.ts apps/shell-e2e/src/a11y/
-        # Note: Accessibility tests verify ARIA attributes, screen reader compatibility,
-        # keyboard navigation, and color contrast across all MFEs
+          npx playwright test --config=apps/shell-e2e/playwright.a11y.config.ts
+        # Note: Uses dedicated a11y config that:
+        # 1. Sets testDir to src/a11y (accessibility tests only)
+        # 2. Removes CI testMatch filter that limits to critical path tests
+        # 3. Reuses web servers started by main E2E tests
 
       - name: Accessibility E2E summary
         if: always()
