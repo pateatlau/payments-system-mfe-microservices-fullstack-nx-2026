@@ -56,7 +56,12 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({
             key={toast.id}
             className="animate-fade-in-up cursor-pointer"
             onClick={() => removeToast(toast.id)}
-            onKeyDown={e => e.key === 'Enter' && removeToast(toast.id)}
+            onKeyDown={e => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                removeToast(toast.id);
+              }
+            }}
             role="button"
             tabIndex={0}
           >

@@ -128,6 +128,9 @@ describe('useFocusTrap', () => {
       // Wait for requestAnimationFrame
       await new Promise(resolve => requestAnimationFrame(resolve));
 
+      // Assert that the first button now has focus
+      expect(document.activeElement).toBe(button1);
+
       // Clean up
       document.body.removeChild(outsideButton);
     });

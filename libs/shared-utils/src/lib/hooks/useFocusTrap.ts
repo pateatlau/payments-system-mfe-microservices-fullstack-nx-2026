@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, type RefObject } from 'react';
 
 /**
  * Selector for all focusable elements within a container.
@@ -37,7 +37,7 @@ export interface UseFocusTrapReturn<T extends HTMLElement> {
   /**
    * Ref to attach to the container element that should trap focus.
    */
-  containerRef: React.RefObject<T>;
+  containerRef: RefObject<T>;
 }
 
 /**
@@ -82,6 +82,12 @@ export function useFocusTrap<T extends HTMLElement = HTMLDivElement>(
 
   const containerRef = useRef<T | null>(null);
   const previouslyFocusedRef = useRef<HTMLElement | null>(null);
+  const onEscapeRef = useRef(onEscape);
+
+  // Update onEscape ref whenever it changes
+  useEffect(() => {
+    onEscapeRef.current = onEscape;
+  }, [onEscape]);
 
   // Get all focusable elements within the container
   const getFocusableElements = useCallback((): HTMLElement[] => {
@@ -98,12 +104,13 @@ export function useFocusTrap<T extends HTMLElement = HTMLDivElement>(
     previouslyFocusedRef.current = document.activeElement as HTMLElement | null;
 
     // Auto-focus first focusable element
+    let rafId: number | null = null;
     if (autoFocus) {
       const focusableElements = getFocusableElements();
       const firstFocusable = focusableElements[0];
       if (firstFocusable) {
         // Use requestAnimationFrame to ensure the modal is rendered
-        requestAnimationFrame(() => {
+        rafId = requestAnimationFrame(() => {
           firstFocusable.focus();
         });
       } else if (containerRef.current) {
@@ -118,7 +125,7 @@ export function useFocusTrap<T extends HTMLElement = HTMLDivElement>(
       // Handle Escape key
       if (event.key === 'Escape') {
         event.preventDefault();
-        onEscape?.();
+        onEscapeRef.current?.();
         return;
       }
 
@@ -155,6 +162,11 @@ export function useFocusTrap<T extends HTMLElement = HTMLDivElement>(
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
 
+      // Cancel pending RAF if cleanup happens before it executes
+      if (rafId !== null) {
+        cancelAnimationFrame(rafId);
+      }
+
       // Restore focus to previously focused element
       if (restoreFocus && previouslyFocusedRef.current) {
         // Use setTimeout to ensure this happens after modal is removed from DOM
@@ -163,7 +175,7 @@ export function useFocusTrap<T extends HTMLElement = HTMLDivElement>(
         }, 0);
       }
     };
-  }, [isActive, onEscape, restoreFocus, autoFocus, getFocusableElements]);
+  }, [isActive, restoreFocus, autoFocus, getFocusableElements]);
 
   return { containerRef };
 }

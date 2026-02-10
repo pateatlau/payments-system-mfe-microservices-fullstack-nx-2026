@@ -1,9 +1,9 @@
-#!/usr/bin/env npx ts-node
+#!/usr/bin/env tsx
 /**
  * Color Contrast Audit Script
  *
  * Audits all color combinations in the design system for WCAG 2.1 AA compliance.
- * Run: npx ts-node scripts/contrast-audit.ts
+ * Run: pnpm test:a11y:contrast
  *
  * WCAG 2.1 AA Requirements:
  * - Normal text: 4.5:1 minimum contrast ratio
@@ -33,7 +33,7 @@ function getLuminance(hex: string): number {
   const b = (rgb & 0xff) / 255;
 
   const toLinear = (c: number): number =>
-    c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+    c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
 
   return 0.2126 * toLinear(r) + 0.7152 * toLinear(g) + 0.0722 * toLinear(b);
 }
