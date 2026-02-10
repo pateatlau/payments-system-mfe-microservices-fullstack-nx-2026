@@ -367,16 +367,49 @@ Rationale:
 
 ### Task 2.6: Add Additional CSP Directives
 
-- [ ] Add `frame-ancestors 'self'` (prevent clickjacking)
-- [ ] Add `base-uri 'self'` (prevent base tag injection)
-- [ ] Add `form-action 'self'` (restrict form submissions)
-- [ ] Add `object-src 'none'` (disable plugins)
-- [ ] Add `upgrade-insecure-requests` (force HTTPS)
-- [ ] Test all directives don't break functionality
+- [x] Add `frame-ancestors 'self'` (prevent clickjacking) - already present
+- [x] Add `base-uri 'self'` (prevent base tag injection)
+- [x] Add `form-action 'self'` (restrict form submissions)
+- [x] Add `object-src 'none'` (disable plugins)
+- [ ] Add `upgrade-insecure-requests` (force HTTPS) - NOT added, see notes
+- [x] Test all directives don't break functionality
 
-**Status:** Not Started
-**Completed Date:**
+**Status:** Complete
+**Completed Date:** 2026-02-11
 **Notes:**
+
+**Directives added:**
+
+| Directive | Value | Purpose |
+|-----------|-------|---------|
+| `frame-ancestors` | `'self'` | Prevent clickjacking (already present) |
+| `base-uri` | `'self'` | Prevent base tag injection attacks |
+| `form-action` | `'self'` | Restrict form submissions to same origin |
+| `object-src` | `'none'` | Disable plugins (Flash, Java, Silverlight) |
+
+**`upgrade-insecure-requests` NOT added:**
+This directive auto-upgrades HTTP requests to HTTPS. Not suitable for development:
+- Dev servers (4200-4204) use HTTP
+- Module Federation loads remotes via HTTP in dev mode
+- Would break development workflow
+
+**Recommendation for production:**
+Add `upgrade-insecure-requests` in production nginx config where all resources are HTTPS.
+
+**Final CSP Policy:**
+```
+default-src 'self';
+script-src 'self' 'nonce-{nonce}' 'strict-dynamic' https://embeddable-sandbox.cdn.apollographql.com http://localhost:4200-4204;
+style-src 'self' 'nonce-{nonce}' 'unsafe-inline' https://embeddable-sandbox.cdn.apollographql.com;
+img-src 'self' data: https: http:;
+font-src 'self' data: https://embeddable-sandbox.cdn.apollographql.com;
+connect-src 'self' wss: ws: https: http://localhost:4200-4204;
+frame-src 'self' https://sandbox.embed.apollographql.com;
+frame-ancestors 'self';
+base-uri 'self';
+form-action 'self';
+object-src 'none';
+```
 
 ---
 
@@ -964,4 +997,4 @@ After all phases complete, run comprehensive security testing:
 ---
 
 **Last Updated:** February 11, 2026
-**Status:** In Progress - Phase 1 complete, Phase 2 Tasks 2.1-2.5 complete
+**Status:** In Progress - Phase 1 complete, Phase 2 Tasks 2.1-2.6 complete
