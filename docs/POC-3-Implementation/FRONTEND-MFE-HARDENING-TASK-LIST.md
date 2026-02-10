@@ -5,10 +5,10 @@
 **Date:** February 10, 2026
 **Phase:** Frontend MFE Security Hardening
 
-**Overall Progress:** 10% (4 of 42 tasks complete, 1 of 7 phases complete)
+**Overall Progress:** 12% (5 of 42 tasks complete, 1 of 7 phases complete)
 
 - Phase 1: Rate Limiting Restoration (100% - 4/4 sub-tasks complete) ✅
-- Phase 2: Content Security Policy Hardening (0% - 0/8 sub-tasks complete)
+- Phase 2: Content Security Policy Hardening (12.5% - 1/8 sub-tasks complete)
 - Phase 3: CSRF Protection (0% - 0/6 sub-tasks complete)
 - Phase 4: Dependency Security & CI Integration (0% - 0/6 sub-tasks complete)
 - Phase 5: XSS & Injection Prevention (0% - 0/6 sub-tasks complete)
@@ -132,21 +132,64 @@ Current logging provides sufficient visibility. API Gateway also has its own Pro
 
 ### Task 2.1: Audit Current CSP Usage
 
-- [ ] Document current CSP in nginx.conf
-- [ ] Search codebase for inline scripts: `grep -r "<script>" apps/`
-- [ ] Search for inline styles: `grep -r "style=" apps/`
-- [ ] Search for eval usage: `grep -r "eval(" apps/`
-- [ ] Document all CSP violations that would occur with strict policy
+- [x] Document current CSP in nginx.conf
+- [x] Search codebase for inline scripts: `grep -r "<script>" apps/`
+- [x] Search for inline styles: `grep -r "style=" apps/`
+- [x] Search for eval usage: `grep -r "eval(" apps/`
+- [x] Document all CSP violations that would occur with strict policy
 
-**Status:** Not Started
-**Completed Date:**
+**Status:** Complete
+**Completed Date:** 2026-02-11
 **Notes:**
 
-**Current CSP (from nginx.conf):**
+**Current CSP (from nginx.conf line 167):**
 ```nginx
-script-src 'self' 'unsafe-inline' 'unsafe-eval' https://embeddable-sandbox.cdn.apollographql.com
-style-src 'self' 'unsafe-inline' https://embeddable-sandbox.cdn.apollographql.com
+default-src 'self';
+script-src 'self' 'unsafe-inline' 'unsafe-eval' https://embeddable-sandbox.cdn.apollographql.com http://localhost:4200-4204;
+style-src 'self' 'unsafe-inline' https://embeddable-sandbox.cdn.apollographql.com;
+img-src 'self' data: https: http:;
+font-src 'self' data: https://embeddable-sandbox.cdn.apollographql.com;
+connect-src 'self' wss: ws: https: http://localhost:4200-4204;
+frame-src 'self' https://sandbox.embed.apollographql.com;
+frame-ancestors 'self';
 ```
+
+**Inline Script Audit Results:**
+- `apps/shell/public/offline.html` - Contains inline `<script>` and `<style>` tags (offline fallback page)
+  - Risk: LOW (static page, not part of main React app)
+  - Action: Move to external files or add nonce in future task
+- Test files (`*.spec.ts`) - Contain XSS test strings (expected for security testing, no action needed)
+
+**Inline Style Audit Results:**
+- `apps/shell/public/offline.html` - Contains `<style>` block
+- `style-loader` in rspack (dev mode only) - Injects CSS via `<style>` tags
+  - Production uses extracted CSS files, not inline styles
+- No `style=` inline attributes found in JSX/HTML files
+
+**eval() / new Function() Audit Results:**
+- **No explicit `eval()` calls** in application code
+- **No `new Function()` calls** in application code
+- **No string-based `setTimeout`/`setInterval`** calls
+- `dangerouslySetInnerHTML` - **Not used** anywhere in codebase
+
+**⚠️ Critical Finding: Module Federation + unsafe-eval**
+
+Research indicates Module Federation may require `unsafe-eval` for dynamic script loading:
+- GitHub Issue: https://github.com/module-federation/core/issues/2631
+- webpack discussion: https://github.com/webpack/webpack/discussions/18073
+- Rspack `devtool: 'eval-source-map'` (dev mode) uses eval internally
+
+**Development vs Production CSP Considerations:**
+| Mode | Requirement | Reason |
+|------|-------------|--------|
+| Development | `unsafe-eval` required | `eval-source-map` devtool, style-loader |
+| Production | `unsafe-eval` may be required | Module Federation runtime (needs testing) |
+
+**Recommendation for Phase 2:**
+1. Test if production build works without `unsafe-eval` (Tasks 2.3-2.4)
+2. If Module Federation requires it, document as security exception
+3. Consider CSP nonce for scripts as alternative to `unsafe-inline`
+4. Focus on removing `unsafe-inline` from `style-src` in production
 
 ---
 
@@ -259,7 +302,7 @@ style-src 'self' 'unsafe-inline' https://embeddable-sandbox.cdn.apollographql.co
 
 ---
 
-**Phase 2 Completion:** **0% (0/8 sub-tasks complete)**
+**Phase 2 Completion:** **12.5% (1/8 sub-tasks complete)**
 
 ---
 
@@ -759,13 +802,13 @@ style-src 'self' 'unsafe-inline' https://embeddable-sandbox.cdn.apollographql.co
 | Phase | Description | Sub-tasks Complete | Total | Percentage |
 |-------|-------------|-------------------|-------|------------|
 | Phase 1 | Rate Limiting Restoration | 4 | 4 | 100% ✅ |
-| Phase 2 | CSP Hardening | 0 | 8 | 0% |
+| Phase 2 | CSP Hardening | 1 | 8 | 12.5% |
 | Phase 3 | CSRF Protection | 0 | 6 | 0% |
 | Phase 4 | Dependency Security | 0 | 6 | 0% |
 | Phase 5 | XSS Prevention | 0 | 6 | 0% |
 | Phase 6 | Module Federation Security | 0 | 7 | 0% |
 | Phase 7 | Session & Auth Hardening | 0 | 5 | 0% |
-| **Total** | | **4** | **42** | **10%** |
+| **Total** | | **5** | **42** | **12%** |
 
 ---
 
@@ -813,5 +856,5 @@ After all phases complete, run comprehensive security testing:
 
 ---
 
-**Last Updated:** February 10, 2026
-**Status:** In Progress - Phase 1 complete, Phase 2 pending
+**Last Updated:** February 11, 2026
+**Status:** In Progress - Phase 1 complete, Phase 2 Task 2.1 complete
