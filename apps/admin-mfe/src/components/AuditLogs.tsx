@@ -4,7 +4,7 @@
  * Displays system audit logs with filtering and pagination
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Card,
   CardContent,
@@ -23,6 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@mfe/shared-design-system';
+import { useFocusTrap } from '@mfe/shared-utils';
 import type { AuditLog, AuditLogFilters } from '../api/audit-logs';
 import { getAuditLogs, getAvailableActions } from '../api/audit-logs';
 
@@ -36,6 +37,17 @@ export function AuditLogs() {
   const [error, setError] = useState<string | null>(null);
   const [selectedLog, setSelectedLog] = useState<AuditLog | null>(null);
   const [availableActions, setAvailableActions] = useState<string[]>([]);
+
+  // Stable callback for closing the modal
+  const handleEscape = useCallback(() => {
+    setSelectedLog(null);
+  }, []);
+
+  // Focus trap for the details modal
+  const { containerRef: detailsModalRef } = useFocusTrap<HTMLDivElement>({
+    isActive: selectedLog !== null,
+    onEscape: handleEscape,
+  });
 
   // Filters
   const [filters, setFilters] = useState<AuditLogFilters>({
@@ -242,31 +254,38 @@ export function AuditLogs() {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full">
+              <table
+                className="w-full"
+                aria-label="Audit logs"
+                aria-describedby="audit-logs-caption"
+              >
+                <caption id="audit-logs-caption" className="sr-only">
+                  System audit logs showing user actions, timestamps, and resources affected
+                </caption>
                 <thead className="bg-muted border-b border-border">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                    <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                       Timestamp
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                    <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                       User
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                    <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                       Action
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                    <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                       Resource
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                    <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                       IP Address
                     </th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                    <th scope="col" className="px-4 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">
                       Actions
                     </th>
                   </tr>
                 </thead>
                 <tbody className="bg-card divide-y divide-border">
-                  {logs.map(log => (
+                  {logs.map((log) => (
                     <tr key={log.id} className="hover:bg-muted/50">
                       <td className="px-4 py-4 whitespace-nowrap">
                         <div className="text-sm text-foreground">
@@ -304,6 +323,7 @@ export function AuditLogs() {
                           variant="outline"
                           size="sm"
                           onClick={() => handleViewDetails(log)}
+                          aria-label={`View details for ${log.action.replace(/_/g, ' ')} by ${log.userName || 'Unknown'}`}
                         >
                           Details
                         </Button>
@@ -317,18 +337,26 @@ export function AuditLogs() {
 
           {/* Pagination */}
           {!isLoading && pagination.totalPages > 1 && (
-            <div className="flex items-center justify-between mt-6 pt-4 border-t border-border">
-              <div className="text-sm text-muted-foreground">
+            <nav
+              className="flex items-center justify-between mt-6 pt-4 border-t border-border"
+              aria-label="Audit logs pagination"
+            >
+              <div
+                className="text-sm text-muted-foreground"
+                aria-live="polite"
+                aria-atomic="true"
+              >
                 Showing {(pagination.page - 1) * pagination.limit + 1} to{' '}
                 {Math.min(pagination.page * pagination.limit, pagination.total)}{' '}
                 of {pagination.total} results
               </div>
-              <div className="flex space-x-2">
+              <div className="flex space-x-2" role="group" aria-label="Pagination controls">
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => handlePageChange(1)}
                   disabled={pagination.page === 1}
+                  aria-label="Go to first page"
                 >
                   First
                 </Button>
@@ -337,6 +365,7 @@ export function AuditLogs() {
                   size="sm"
                   onClick={() => handlePageChange(pagination.page - 1)}
                   disabled={pagination.page === 1}
+                  aria-label="Go to previous page"
                 >
                   Previous
                 </Button>
@@ -345,6 +374,7 @@ export function AuditLogs() {
                   size="sm"
                   onClick={() => handlePageChange(pagination.page + 1)}
                   disabled={pagination.page === pagination.totalPages}
+                  aria-label="Go to next page"
                 >
                   Next
                 </Button>
@@ -353,90 +383,104 @@ export function AuditLogs() {
                   size="sm"
                   onClick={() => handlePageChange(pagination.totalPages)}
                   disabled={pagination.page === pagination.totalPages}
+                  aria-label="Go to last page"
                 >
                   Last
                 </Button>
               </div>
-            </div>
+            </nav>
           )}
         </CardContent>
       </Card>
 
       {/* Details Modal */}
       {selectedLog && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-background rounded-lg shadow-xl w-full max-w-2xl mx-4">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+          role="presentation"
+          onClick={() => setSelectedLog(null)}
+        >
+          <div
+            ref={detailsModalRef}
+            className="bg-background rounded-lg shadow-xl w-full max-w-2xl mx-4"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="audit-log-details-title"
+            tabIndex={-1}
+            onClick={e => e.stopPropagation()}
+          >
             {/* Header */}
             <div className="px-6 py-4 border-b border-border">
-              <h2 className="text-lg font-semibold text-foreground">
+              <h2 id="audit-log-details-title" className="text-lg font-semibold text-foreground">
                 Audit Log Details
               </h2>
             </div>
 
             {/* Content */}
             <div className="px-6 py-4 space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <dl className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label>Action</Label>
-                  <Badge
-                    variant={getActionBadgeVariant(selectedLog.action)}
-                    className="mt-1"
-                  >
-                    {selectedLog.action.replace(/_/g, ' ')}
-                  </Badge>
+                  <dt className="text-sm font-medium leading-none">Action</dt>
+                  <dd className="mt-1">
+                    <Badge variant={getActionBadgeVariant(selectedLog.action)}>
+                      {selectedLog.action.replace(/_/g, ' ')}
+                    </Badge>
+                  </dd>
                 </div>
                 <div>
-                  <Label>Timestamp</Label>
-                  <p className="text-sm text-foreground mt-1">
+                  <dt className="text-sm font-medium leading-none">Timestamp</dt>
+                  <dd className="text-sm text-foreground mt-1">
                     {new Date(selectedLog.timestamp).toLocaleString()}
-                  </p>
+                  </dd>
                 </div>
                 <div>
-                  <Label>User</Label>
-                  <p className="text-sm text-foreground mt-1">
+                  <dt className="text-sm font-medium leading-none">User</dt>
+                  <dd className="text-sm text-foreground mt-1">
                     {selectedLog.userName || 'Unknown'}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
+                  </dd>
+                  <dd className="text-xs text-muted-foreground">
                     {selectedLog.userEmail}
-                  </p>
+                  </dd>
                 </div>
                 <div>
-                  <Label>IP Address</Label>
-                  <p className="text-sm text-foreground mt-1">
+                  <dt className="text-sm font-medium leading-none">IP Address</dt>
+                  <dd className="text-sm text-foreground mt-1">
                     {selectedLog.ipAddress || 'N/A'}
-                  </p>
+                  </dd>
                 </div>
                 <div>
-                  <Label>Resource Type</Label>
-                  <p className="text-sm text-foreground mt-1">
+                  <dt className="text-sm font-medium leading-none">Resource Type</dt>
+                  <dd className="text-sm text-foreground mt-1">
                     {selectedLog.resourceType}
-                  </p>
+                  </dd>
                 </div>
                 <div>
-                  <Label>Resource ID</Label>
-                  <p className="text-sm text-foreground mt-1 break-all">
+                  <dt className="text-sm font-medium leading-none">Resource ID</dt>
+                  <dd className="text-sm text-foreground mt-1 break-all">
                     {selectedLog.resourceId}
-                  </p>
+                  </dd>
                 </div>
-              </div>
 
-              {selectedLog.details && (
-                <div>
-                  <Label>Details</Label>
-                  <pre className="mt-1 p-3 bg-muted border border-border rounded text-xs overflow-auto">
-                    {JSON.stringify(selectedLog.details, null, 2)}
-                  </pre>
-                </div>
-              )}
+                {selectedLog.details && (
+                  <div>
+                    <dt className="text-sm font-medium leading-none">Details</dt>
+                    <dd className="mt-1">
+                      <pre className="p-3 bg-muted border border-border rounded text-xs overflow-auto">
+                        {JSON.stringify(selectedLog.details, null, 2)}
+                      </pre>
+                    </dd>
+                  </div>
+                )}
 
-              {selectedLog.userAgent && (
-                <div>
-                  <Label>User Agent</Label>
-                  <p className="text-xs text-muted-foreground mt-1 break-all">
-                    {selectedLog.userAgent}
-                  </p>
-                </div>
-              )}
+                {selectedLog.userAgent && (
+                  <div>
+                    <dt className="text-sm font-medium leading-none">User Agent</dt>
+                    <dd className="text-xs text-muted-foreground mt-1 break-all">
+                      {selectedLog.userAgent}
+                    </dd>
+                  </div>
+                )}
+              </dl>
             </div>
 
             {/* Footer */}

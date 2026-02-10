@@ -31,8 +31,15 @@ test.describe('Profile Management Flow', () => {
     // Wait for redirect to payments page
     await expect(page).toHaveURL(/.*payments/, { timeout: 10000 });
 
+    // Verify we're authenticated and on payments page
+    await expect(page.locator('h1, h2').first()).toContainText(/payment/i, {
+      timeout: 5000,
+    });
+
     // Step 2: Navigate to Profile page via header navigation
-    await page.click('text=/profile/i');
+    const profileLink = page.locator('text=/profile/i');
+    await expect(profileLink).toBeVisible({ timeout: 5000 });
+    await profileLink.click();
 
     // Wait for profile page to load
     await expect(page).toHaveURL(/.*profile/, { timeout: 10000 });
@@ -65,7 +72,9 @@ test.describe('Profile Management Flow', () => {
     ).toBeVisible({ timeout: 5000 });
 
     // Step 6: Switch to Preferences tab
-    await page.click('button:has-text("Preferences")');
+    const preferencesTab = page.locator('button:has-text("Preferences")');
+    await expect(preferencesTab).toBeVisible({ timeout: 5000 });
+    await preferencesTab.click();
 
     // Verify preferences form is visible
     await expect(page.locator('label:has-text("Language")')).toBeVisible({
@@ -93,7 +102,9 @@ test.describe('Profile Management Flow', () => {
     ).toBeVisible({ timeout: 5000 });
 
     // Step 9: Switch to Account tab
-    await page.click('button:has-text("Account")');
+    const accountTab = page.locator('button:has-text("Account")');
+    await expect(accountTab).toBeVisible({ timeout: 5000 });
+    await accountTab.click();
 
     // Verify account information is displayed
     await expect(page.locator('text=/read-only overview/i')).toBeVisible({
@@ -113,7 +124,9 @@ test.describe('Profile Management Flow', () => {
     await expect(page).toHaveURL(/.*payments/, { timeout: 10000 });
 
     // Navigate to profile
-    await page.click('text=/profile/i');
+    const profileLink = page.locator('text=/profile/i');
+    await expect(profileLink).toBeVisible({ timeout: 5000 });
+    await profileLink.click();
     await expect(page).toHaveURL(/.*profile/, { timeout: 10000 });
 
     // Try to submit invalid phone number
@@ -136,11 +149,15 @@ test.describe('Profile Management Flow', () => {
     await expect(page).toHaveURL(/.*payments/, { timeout: 10000 });
 
     // Navigate to profile
-    await page.click('text=/profile/i');
+    const profileLink = page.locator('text=/profile/i');
+    await expect(profileLink).toBeVisible({ timeout: 5000 });
+    await profileLink.click();
     await expect(page).toHaveURL(/.*profile/, { timeout: 10000 });
 
     // Navigate back to payments
-    await page.click('text=/payments/i');
+    const paymentsLink = page.locator('text=/payments/i');
+    await expect(paymentsLink).toBeVisible({ timeout: 5000 });
+    await paymentsLink.click();
     await expect(page).toHaveURL(/.*payments/, { timeout: 10000 });
   });
 
@@ -171,10 +188,20 @@ test.describe('Profile Management Flow', () => {
     await page.fill('input[placeholder*="address"]', '123, Brigade Road, Bengaluru');
 
     // Switch to preferences tab
-    await page.click('button:has-text("Preferences")');
+    const preferencesTab = page.locator('button:has-text("Preferences")');
+    await expect(preferencesTab).toBeVisible({ timeout: 5000 });
+    await preferencesTab.click();
+    await expect(page.locator('label:has-text("Language")')).toBeVisible({
+      timeout: 5000,
+    });
 
     // Switch back to profile tab
-    await page.click('button:has-text("Profile")');
+    const profileTab = page.locator('button:has-text("Profile")');
+    await expect(profileTab).toBeVisible({ timeout: 5000 });
+    await profileTab.click();
+    await expect(page.locator('input[placeholder*="phone"]')).toBeVisible({
+      timeout: 5000,
+    });
 
     // Verify form values are maintained
     await expect(page.locator('input[placeholder*="phone"]')).toHaveValue(

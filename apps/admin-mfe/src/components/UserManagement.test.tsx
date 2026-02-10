@@ -154,7 +154,7 @@ describe('UserManagement', () => {
 
     render(<UserManagement />);
 
-    expect(screen.getByRole('status')).toBeInTheDocument(); // Loading component
+    expect(screen.getByLabelText('Loading...')).toBeInTheDocument(); // Loading component
   });
 
   it('should display error message on API failure', async () => {
@@ -305,7 +305,7 @@ describe('UserManagement', () => {
       expect(screen.getByText('John Doe')).toBeInTheDocument();
     });
 
-    const editButtons = screen.getAllByRole('button', { name: 'Edit' });
+    const editButtons = screen.getAllByRole('button', { name: /^Edit /i });
     fireEvent.click(editButtons[0]);
 
     await waitFor(() => {
@@ -363,7 +363,7 @@ describe('UserManagement', () => {
       expect(screen.getByText('John Doe')).toBeInTheDocument();
     });
 
-    const deleteButtons = screen.getAllByRole('button', { name: 'Delete' });
+    const deleteButtons = screen.getAllByRole('button', { name: /^Delete /i });
     fireEvent.click(deleteButtons[0]);
 
     await waitFor(() => {
@@ -381,7 +381,7 @@ describe('UserManagement', () => {
     });
 
     // Open delete dialog
-    const deleteButtons = screen.getAllByRole('button', { name: 'Delete' });
+    const deleteButtons = screen.getAllByRole('button', { name: /^Delete /i });
     fireEvent.click(deleteButtons[0]);
 
     await waitFor(() => {
@@ -406,7 +406,7 @@ describe('UserManagement', () => {
     });
 
     // Open delete dialog
-    const deleteButtons = screen.getAllByRole('button', { name: 'Delete' });
+    const deleteButtons = screen.getAllByRole('button', { name: /^Delete /i });
     fireEvent.click(deleteButtons[0]);
 
     await waitFor(() => {

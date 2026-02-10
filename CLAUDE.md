@@ -1166,12 +1166,93 @@ return <ExistingFeature />;
 
 See `docs/POC-3-Implementation/TRUNK-BASED-BRANCHING-PLAN.md` for full details.
 
+## Accessibility (WCAG 2.1 AA)
+
+This application targets WCAG 2.1 Level AA compliance. All new features and components must follow accessibility best practices.
+
+### Key Requirements
+
+- **Semantic HTML**: Use native elements (`<button>`, `<nav>`, `<main>`) over ARIA
+- **Keyboard Navigation**: All functionality accessible via keyboard
+- **Focus Management**: Visible focus indicators, logical tab order, focus trapping for modals
+- **Form Accessibility**: Labels associated with inputs, errors linked via `aria-describedby`
+- **Screen Reader Support**: ARIA live regions for dynamic content, proper heading hierarchy
+- **Color Contrast**: Minimum 4.5:1 for text, 3:1 for UI components
+
+### Testing Commands
+
+```bash
+# Unit accessibility tests (jest-axe)
+pnpm test:a11y
+
+# E2E accessibility tests (all MFEs)
+pnpm test:e2e:a11y:all
+
+# Individual MFE tests
+pnpm test:e2e:a11y:auth
+pnpm test:e2e:a11y:payments
+pnpm test:e2e:a11y:admin
+pnpm test:e2e:a11y:profile
+
+# Keyboard navigation tests
+pnpm test:e2e:a11y:keyboard
+
+# Screen reader compatibility tests
+pnpm test:e2e:a11y:screen-reader
+
+# Color contrast audit
+pnpm test:a11y:contrast
+```
+
+### When Adding New Components
+
+1. Use semantic HTML elements
+2. Add proper ARIA attributes only when HTML semantics are insufficient
+3. Ensure keyboard accessibility (Tab, Enter, Space, Escape)
+4. Test with screen reader (VoiceOver or NVDA)
+5. Add jest-axe accessibility test
+6. Verify color contrast meets requirements
+
+### Key Shared Utilities
+
+- `useFocusTrap` - Focus trapping for modals (`@mfe/shared-utils`)
+- `useAnnounce` - Screen reader announcements (`@mfe/shared-utils`)
+- `FormField` - Accessible form field wrapper (`@mfe/shared-design-system`)
+- `SkipLink` - Skip navigation link (`@mfe/shared-design-system`)
+- `Loading` - Accessible loading indicator (`@mfe/shared-design-system`)
+
+### Modal Dialog Pattern
+
+```tsx
+<div
+  ref={focusTrapRef}
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="dialog-title"
+>
+  <h2 id="dialog-title">Dialog Title</h2>
+  {/* Content */}
+</div>
+```
+
+### Form Field Pattern
+
+```tsx
+<FormField name="email" label="Email" required error={errors.email}>
+  <Input type="email" />
+</FormField>
+```
+
+See `docs/ACCESSIBILITY-GUIDELINES.md` for full documentation.
+
 ## Documentation
 
 Key resources in `docs/`:
 - `EXECUTIVE_SUMMARY.md` - Architecture overview for stakeholders
 - `IMPLEMENTATION-JOURNEY.md` - Evolution from POC-0 to POC-3
+- `ACCESSIBILITY-GUIDELINES.md` - WCAG 2.1 AA compliance guidelines
 - `POC-3-Implementation/implementation-plan.md` - Current phase plan
+- `POC-3-Implementation/ACCESSIBILITY-COMPLIANCE-PLAN.md` - Accessibility implementation plan
 - `POC-3-Implementation/TRUNK-BASED-BRANCHING-PLAN.md` - Branching strategy details
 - `POC-3-Implementation/DARK-MODE-FULL-IMPLEMENTATION-PLAN.md` - Theme system details
 - `POC-3-Implementation/ssl-tls-setup-guide.md` - HTTPS setup and troubleshooting

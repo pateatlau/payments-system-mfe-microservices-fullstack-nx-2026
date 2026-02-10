@@ -281,7 +281,7 @@ export function SignUp({ onSuccess, onNavigateToSignIn }: SignUpProps = {}) {
         </div>
         <Card>
           <CardHeader>
-            <CardTitle>Sign Up</CardTitle>
+            <CardTitle as="h1">Sign Up</CardTitle>
             <CardDescription>
               Create your account to get started
             </CardDescription>

@@ -106,7 +106,7 @@ export function ForgotPassword({ onNavigateToSignIn }: ForgotPasswordProps = {})
           </div>
           <Card>
             <CardHeader>
-              <CardTitle>Check Your Email</CardTitle>
+              <CardTitle as="h1">Check Your Email</CardTitle>
               <CardDescription>
                 Password reset instructions sent
               </CardDescription>
@@ -189,7 +189,7 @@ export function ForgotPassword({ onNavigateToSignIn }: ForgotPasswordProps = {})
         </div>
         <Card>
           <CardHeader>
-            <CardTitle>Forgot Password</CardTitle>
+            <CardTitle as="h1">Forgot Password</CardTitle>
             <CardDescription>
               Enter your email address and we'll send you a link to reset your password
             </CardDescription>

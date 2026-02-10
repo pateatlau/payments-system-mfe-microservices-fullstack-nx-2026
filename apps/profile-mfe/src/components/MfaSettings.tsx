@@ -199,7 +199,7 @@ export function MfaSettings() {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Set Up Two-Factor Authentication</CardTitle>
+          <CardTitle as="h2">Set Up Two-Factor Authentication</CardTitle>
           <CardDescription>
             Scan the QR code with your authenticator app (Google Authenticator, Authy, etc.)
           </CardDescription>
@@ -224,7 +224,7 @@ export function MfaSettings() {
 
           {/* Backup Codes */}
           <div className="border rounded-lg p-4 bg-muted/50">
-            <h4 className="font-medium mb-2">Save Your Backup Codes</h4>
+            <h3 className="font-medium mb-2">Save Your Backup Codes</h3>
             <p className="text-sm text-muted-foreground mb-3">
               Store these codes somewhere safe. You can use them to access your account if you lose your authenticator.
             </p>
@@ -299,7 +299,7 @@ export function MfaSettings() {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Disable Two-Factor Authentication</CardTitle>
+          <CardTitle as="h2">Disable Two-Factor Authentication</CardTitle>
           <CardDescription>
             Enter your password and current authenticator code to disable MFA.
           </CardDescription>
@@ -380,7 +380,7 @@ export function MfaSettings() {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Regenerate Backup Codes</CardTitle>
+          <CardTitle as="h2">Regenerate Backup Codes</CardTitle>
           <CardDescription>
             This will invalidate your existing backup codes and generate new ones.
           </CardDescription>
@@ -466,7 +466,7 @@ export function MfaSettings() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Two-Factor Authentication</CardTitle>
+        <CardTitle as="h2">Two-Factor Authentication</CardTitle>
         <CardDescription>
           Add an extra layer of security to your account by requiring a code from your authenticator app.
         </CardDescription>
@@ -491,7 +491,7 @@ export function MfaSettings() {
         {/* Status display */}
         <div className="flex items-center justify-between p-4 border rounded-lg">
           <div>
-            <h4 className="font-medium">Status</h4>
+            <h3 className="font-medium">Status</h3>
             <p className="text-sm text-muted-foreground">
               {mfaStatus?.enabled && mfaStatus?.verified
                 ? 'Two-factor authentication is enabled'
@@ -515,7 +515,7 @@ export function MfaSettings() {
             {/* Backup codes info */}
             <div className="flex items-center justify-between p-4 border rounded-lg">
               <div>
-                <h4 className="font-medium">Backup Codes</h4>
+                <h3 className="font-medium">Backup Codes</h3>
                 <p className="text-sm text-muted-foreground">
                   {mfaStatus.backupCodesRemaining} of 10 codes remaining
                 </p>

@@ -195,7 +195,7 @@ export function LinkedAccounts() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Linked Accounts</CardTitle>
+        <CardTitle as="h2">Linked Accounts</CardTitle>
         <CardDescription>
           Connect your social accounts for quick sign-in. You can link multiple
           accounts to your profile.
@@ -223,9 +223,9 @@ export function LinkedAccounts() {
         {/* Unlink confirmation dialog */}
         {unlinkConfirm.isOpen && (
           <div className="border rounded-lg p-4 bg-destructive/5 border-destructive/20">
-            <h4 className="font-medium text-destructive mb-2">
+            <h3 className="font-medium text-destructive mb-2">
               Unlink {unlinkConfirm.providerName}?
-            </h4>
+            </h3>
             <p className="text-sm text-muted-foreground mb-4">
               You will no longer be able to sign in using this{' '}
               {unlinkConfirm.providerName} account. This action cannot be
@@ -254,9 +254,9 @@ export function LinkedAccounts() {
 
         {/* Linked accounts list */}
         <div className="space-y-3">
-          <h4 className="text-sm font-medium text-muted-foreground">
+          <h3 className="text-sm font-medium text-muted-foreground">
             Connected Accounts
-          </h4>
+          </h3>
           {linkedAccounts && linkedAccounts.length > 0 ? (
             <div className="space-y-2">
               {linkedAccounts.map((account) => {
@@ -315,9 +315,9 @@ export function LinkedAccounts() {
         {/* Available providers to link */}
         {availableProviders.length > 0 && (
           <div className="space-y-3 pt-4 border-t">
-            <h4 className="text-sm font-medium text-muted-foreground">
+            <h3 className="text-sm font-medium text-muted-foreground">
               Add Another Account
-            </h4>
+            </h3>
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
               {availableProviders.map((provider) => {
                 const config = providerConfig[provider] || {

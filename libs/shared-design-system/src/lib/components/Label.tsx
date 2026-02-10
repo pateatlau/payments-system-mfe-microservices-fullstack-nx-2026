@@ -12,6 +12,7 @@ export type LabelProps = React.LabelHTMLAttributes<HTMLLabelElement>;
 
 const Label = React.forwardRef<HTMLLabelElement, LabelProps>(
   ({ className, ...props }, ref) => (
+    // eslint-disable-next-line jsx-a11y/label-has-associated-control -- Label component is used with htmlFor prop at usage site
     <label
       ref={ref}
       className={cn(

@@ -66,31 +66,38 @@ export function PaymentTable({
     <>
       <Card className="overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full">
+          <table
+            className="w-full"
+            aria-label="Payments"
+            aria-describedby="payments-table-caption"
+          >
+            <caption id="payments-table-caption" className="sr-only">
+              List of payments showing sender, recipient, amount, status, and available actions
+            </caption>
             <thead className="bg-muted">
               <tr>
-                <th className="px-3 py-2 text-[10px] font-medium tracking-wider text-left uppercase text-muted-foreground">
+                <th scope="col" className="px-3 py-2 text-[10px] font-medium tracking-wider text-left uppercase text-muted-foreground">
                   From
                 </th>
-                <th className="px-3 py-2 text-[10px] font-medium tracking-wider text-left uppercase text-muted-foreground">
+                <th scope="col" className="px-3 py-2 text-[10px] font-medium tracking-wider text-left uppercase text-muted-foreground">
                   To
                 </th>
-                <th className="px-3 py-2 text-[10px] font-medium tracking-wider text-right uppercase text-muted-foreground">
+                <th scope="col" className="px-3 py-2 text-[10px] font-medium tracking-wider text-right uppercase text-muted-foreground">
                   Amount
                 </th>
-                <th className="px-3 py-2 text-[10px] font-medium tracking-wider text-left uppercase text-muted-foreground">
+                <th scope="col" className="px-3 py-2 text-[10px] font-medium tracking-wider text-left uppercase text-muted-foreground">
                   Type
                 </th>
-                <th className="px-3 py-2 text-[10px] font-medium tracking-wider text-left uppercase text-muted-foreground">
+                <th scope="col" className="px-3 py-2 text-[10px] font-medium tracking-wider text-left uppercase text-muted-foreground">
                   Status
                 </th>
-                <th className="px-3 py-2 text-[10px] font-medium tracking-wider text-left uppercase text-muted-foreground">
+                <th scope="col" className="px-3 py-2 text-[10px] font-medium tracking-wider text-left uppercase text-muted-foreground">
                   Description
                 </th>
-                <th className="px-3 py-2 text-[10px] font-medium tracking-wider text-left uppercase text-muted-foreground">
+                <th scope="col" className="px-3 py-2 text-[10px] font-medium tracking-wider text-left uppercase text-muted-foreground">
                   Created
                 </th>
-                <th className="px-3 py-2 text-[10px] font-medium tracking-wider text-left uppercase text-muted-foreground">
+                <th scope="col" className="px-3 py-2 text-[10px] font-medium tracking-wider text-left uppercase text-muted-foreground">
                   Actions
                 </th>
               </tr>
@@ -121,15 +128,20 @@ export function PaymentTable({
               ) : (
                 <tr>
                   <td colSpan={8} className="px-6 py-10">
-                    <div className="flex flex-col items-center justify-center gap-3 text-center text-muted-foreground">
-                      <p className="text-lg font-semibold">
+                    <div
+                      className="flex flex-col items-center justify-center gap-3 text-center text-muted-foreground"
+                      role="status"
+                      aria-labelledby="no-payments-title"
+                      aria-describedby="no-payments-hint"
+                    >
+                      <p id="no-payments-title" className="text-lg font-semibold">
                         {hasActiveFilters
                           ? 'No payments match your filters'
                           : isVendor
                             ? 'No payments yet. Create the first payment.'
                             : 'No payments found for your account.'}
                       </p>
-                      <p className="text-sm text-muted-foreground">
+                      <p id="no-payments-hint" className="text-sm text-muted-foreground">
                         {hasActiveFilters
                           ? 'Try adjusting or clearing the filters to see more results.'
                           : isVendor

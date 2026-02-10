@@ -239,16 +239,21 @@ describe('Design System Accessibility', () => {
 
     it('should have role="status" for screen readers', () => {
       render(<Loading />);
-      expect(screen.getByRole('status')).toBeInTheDocument();
+      // Use getAllByRole to handle multiple status regions (Loading + global announcer)
+      const statusElements = screen.getAllByRole('status');
+      const loadingStatus = statusElements.find(el => el.classList.contains('flex'));
+      expect(loadingStatus).toBeInTheDocument();
     });
 
     it('should have accessible label', () => {
       render(<Loading />);
-      const status = screen.getByRole('status');
+      // Use getAllByRole to handle multiple status regions (Loading + global announcer)
+      const statusElements = screen.getAllByRole('status');
+      const loadingStatus = statusElements.find(el => el.classList.contains('flex'));
       // Should have either aria-label or visible text
       expect(
-        status.getAttribute('aria-label') ||
-        status.textContent
+        loadingStatus?.getAttribute('aria-label') ||
+        loadingStatus?.textContent
       ).toBeTruthy();
     });
   });
@@ -320,9 +325,9 @@ describe('Design System Accessibility', () => {
       const { container } = render(
         <Toast
           title="Success"
-          description="Operation completed"
+          message="Operation completed"
           variant="default"
-          onClose={() => {}}
+          onDismiss={() => {}}
         />
       );
       const results = await axe(container, axeOptions);
@@ -330,15 +335,15 @@ describe('Design System Accessibility', () => {
     });
 
     it('should have no violations for all variants', async () => {
-      const variants = ['default', 'destructive', 'success'] as const;
+      const variants = ['default', 'error', 'success'] as const;
 
       for (const variant of variants) {
         const { container } = render(
           <Toast
             title={`${variant} Toast`}
-            description="Description text"
+            message="Description text"
             variant={variant}
-            onClose={() => {}}
+            onDismiss={() => {}}
           />
         );
         const results = await axe(container, axeOptions);
@@ -350,12 +355,15 @@ describe('Design System Accessibility', () => {
       render(
         <Toast
           title="Alert"
-          description="Important message"
+          message="Important message"
           variant="default"
-          onClose={() => {}}
+          onDismiss={() => {}}
         />
       );
-      expect(screen.getByRole('alert')).toBeInTheDocument();
+      // Use getAllByRole to handle multiple alert regions (Toast + global announcer)
+      const alerts = screen.getAllByRole('alert');
+      const toastAlert = alerts.find(el => el.textContent?.includes('Important message'));
+      expect(toastAlert).toBeInTheDocument();
     });
   });
 

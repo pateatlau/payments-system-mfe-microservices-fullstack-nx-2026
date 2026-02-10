@@ -213,9 +213,9 @@ export function PaymentDetails({
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
             {/* Amount */}
             <div>
-              <label className="text-sm font-medium text-muted-foreground">
+              <span className="text-sm font-medium text-muted-foreground block">
                 Amount
-              </label>
+              </span>
               <p className="text-xl font-bold">
                 {formatCurrency(payment.amount, payment.currency)}
               </p>
@@ -223,25 +223,25 @@ export function PaymentDetails({
 
             {/* Currency */}
             <div>
-              <label className="text-sm font-medium text-muted-foreground">
+              <span className="text-sm font-medium text-muted-foreground block">
                 Currency
-              </label>
+              </span>
               <p className="text-lg font-semibold">{payment.currency}</p>
             </div>
 
             {/* Type */}
             <div>
-              <label className="text-sm font-medium text-muted-foreground">
+              <span className="text-sm font-medium text-muted-foreground block">
                 Type
-              </label>
+              </span>
               <p className="text-lg font-semibold capitalize">{payment.type}</p>
             </div>
 
             {/* Status */}
             <div>
-              <label className="text-sm font-medium text-muted-foreground">
+              <span className="text-sm font-medium text-muted-foreground block">
                 Status
-              </label>
+              </span>
               {(() => {
                 const info = getStatusInfo(payment.status as PaymentStatus);
                 return (
@@ -258,18 +258,18 @@ export function PaymentDetails({
 
             {/* Created Date */}
             <div>
-              <label className="text-sm font-medium text-muted-foreground">
+              <span className="text-sm font-medium text-muted-foreground block">
                 Created
-              </label>
+              </span>
               <p className="text-sm">{formatDate(payment.createdAt)}</p>
             </div>
 
             {/* Completed Date */}
             {payment.completedAt && (
               <div>
-                <label className="text-sm font-medium text-muted-foreground">
+                <span className="text-sm font-medium text-muted-foreground block">
                   Completed
-                </label>
+                </span>
                 <p className="text-sm">{formatDate(payment.completedAt)}</p>
               </div>
             )}
@@ -278,9 +278,9 @@ export function PaymentDetails({
           {/* Description */}
           {payment.description && (
             <div className="pt-4 border-t border-border">
-              <label className="text-sm font-medium text-muted-foreground">
+              <span className="text-sm font-medium text-muted-foreground block">
                 Description
-              </label>
+              </span>
               <p className="mt-1 text-sm text-foreground">
                 {payment.description}
               </p>
@@ -298,9 +298,9 @@ export function PaymentDetails({
           <div className="grid gap-4 sm:grid-cols-2">
             {/* Sender */}
             <div className="p-4 rounded-lg bg-muted">
-              <label className="text-sm font-medium text-muted-foreground">
+              <span className="text-sm font-medium text-muted-foreground block">
                 From (Sender)
-              </label>
+              </span>
               <div className="mt-2 space-y-1">
                 {payment.sender?.email && (
                   <p className="font-semibold">{payment.sender.email}</p>
@@ -320,9 +320,9 @@ export function PaymentDetails({
 
             {/* Recipient */}
             <div className="p-4 rounded-lg bg-muted">
-              <label className="text-sm font-medium text-muted-foreground">
+              <span className="text-sm font-medium text-muted-foreground block">
                 To (Recipient)
-              </label>
+              </span>
               <div className="mt-2 space-y-1">
                 {payment.recipient?.email && (
                   <p className="font-semibold">{payment.recipient.email}</p>

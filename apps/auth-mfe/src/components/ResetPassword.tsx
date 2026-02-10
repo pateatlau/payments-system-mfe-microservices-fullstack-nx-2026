@@ -174,7 +174,7 @@ export function ResetPassword({
           </div>
           <Card>
             <CardHeader>
-              <CardTitle>Password Reset Successful</CardTitle>
+              <CardTitle as="h1">Password Reset Successful</CardTitle>
               <CardDescription>
                 Your password has been updated
               </CardDescription>
@@ -238,7 +238,7 @@ export function ResetPassword({
           </div>
           <Card>
             <CardHeader>
-              <CardTitle>Invalid Reset Link</CardTitle>
+              <CardTitle as="h1">Invalid Reset Link</CardTitle>
               <CardDescription>
                 This password reset link is not valid
               </CardDescription>
@@ -283,7 +283,7 @@ export function ResetPassword({
         </div>
         <Card>
           <CardHeader>
-            <CardTitle>Reset Password</CardTitle>
+            <CardTitle as="h1">Reset Password</CardTitle>
             <CardDescription>
               Enter your new password below
             </CardDescription>

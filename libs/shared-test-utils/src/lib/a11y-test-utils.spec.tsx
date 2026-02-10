@@ -31,7 +31,7 @@ const AccessibleForm = () => (
 );
 
 // Component with intentionally missing alt attribute for accessibility testing
-// Using data attribute to bypass ESLint since jsx-a11y plugin is not configured
+// eslint-disable-next-line jsx-a11y/alt-text
 const InaccessibleImage = () => <img src="test.jpg" data-testid="no-alt-img" />;
 
 describe('a11y-test-utils', () => {

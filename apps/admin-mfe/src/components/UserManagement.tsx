@@ -290,25 +290,32 @@ export function UserManagement() {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full">
+              <table
+                className="w-full"
+                aria-label="User management"
+                aria-describedby="user-table-caption"
+              >
+                <caption id="user-table-caption" className="sr-only">
+                  List of users with their roles, verification status, and management actions
+                </caption>
                 <thead className="bg-muted border-b border-border">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                    <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                       Name
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                    <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                       Email
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                    <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                       Role
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                    <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                       Status
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                    <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                       Created
                     </th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                    <th scope="col" className="px-4 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">
                       Actions
                     </th>
                   </tr>
@@ -333,7 +340,10 @@ export function UserManagement() {
                             handleRoleChange(user.id, value as UserRole)
                           }
                         >
-                          <SelectTrigger className="h-8 w-32 text-xs">
+                          <SelectTrigger
+                            className="h-8 w-32 text-xs"
+                            aria-label={`Change role for ${user.name}, currently ${user.role}`}
+                          >
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -356,20 +366,21 @@ export function UserManagement() {
                         </div>
                       </td>
                       <td className="px-4 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <div className="flex justify-end gap-2">
+                        <div className="flex justify-end gap-2" role="group" aria-label={`Actions for ${user.name}`}>
                           <Button
                             variant="ghost"
                             size="sm"
                             className="p-0 text-primary hover:text-primary hover:bg-primary/10 focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 h-7 w-7"
                             onClick={() => handleEditUser(user)}
                             title="Edit"
-                            aria-label="Edit"
+                            aria-label={`Edit ${user.name}`}
                           >
                             <svg
                               xmlns="http://www.w3.org/2000/svg"
                               viewBox="0 0 20 20"
                               fill="currentColor"
                               className="w-4 h-4"
+                              aria-hidden="true"
                             >
                               <path d="M13.586 3.586a2 2 0 0 1 2.828 2.828l-8.5 8.5a2 2 0 0 1-1.061.561l-3.15.525a.75.75 0 0 1-.87-.87l.525-3.15a2 2 0 0 1 .561-1.061l8.5-8.5Z" />
                             </svg>
@@ -380,13 +391,14 @@ export function UserManagement() {
                             className="p-0 hover:bg-destructive/80 h-7 w-7"
                             onClick={() => handleDeleteClick(user)}
                             title="Delete"
-                            aria-label="Delete"
+                            aria-label={`Delete ${user.name}`}
                           >
                             <svg
                               xmlns="http://www.w3.org/2000/svg"
                               viewBox="0 0 20 20"
                               fill="currentColor"
                               className="w-4 h-4"
+                              aria-hidden="true"
                             >
                               <path
                                 fillRule="evenodd"
@@ -406,18 +418,26 @@ export function UserManagement() {
 
           {/* Pagination */}
           {!isLoading && pagination.totalPages > 1 && (
-            <div className="flex items-center justify-between mt-6 pt-4 border-t border-border">
-              <div className="text-sm text-muted-foreground">
+            <nav
+              className="flex items-center justify-between mt-6 pt-4 border-t border-border"
+              aria-label="User list pagination"
+            >
+              <div
+                className="text-sm text-muted-foreground"
+                aria-live="polite"
+                aria-atomic="true"
+              >
                 Showing {(pagination.page - 1) * pagination.limit + 1} to{' '}
                 {Math.min(pagination.page * pagination.limit, pagination.total)}{' '}
                 of {pagination.total} results
               </div>
-              <div className="flex space-x-2">
+              <div className="flex space-x-2" role="group" aria-label="Pagination controls">
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => handlePageChange(pagination.page - 1)}
                   disabled={pagination.page === 1}
+                  aria-label="Go to previous page"
                 >
                   Previous
                 </Button>
@@ -426,11 +446,12 @@ export function UserManagement() {
                   size="sm"
                   onClick={() => handlePageChange(pagination.page + 1)}
                   disabled={pagination.page === pagination.totalPages}
+                  aria-label="Go to next page"
                 >
                   Next
                 </Button>
               </div>
-            </div>
+            </nav>
           )}
         </CardContent>
       </Card>

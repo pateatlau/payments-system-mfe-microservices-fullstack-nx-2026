@@ -15,3 +15,9 @@ export type {
   UseDocumentTitleFromRouteOptions,
   RouteTitle,
 } from './useDocumentTitleFromRoute';
+
+export { useFocusTrap } from './useFocusTrap';
+export type {
+  UseFocusTrapOptions,
+  UseFocusTrapReturn,
+} from './useFocusTrap';

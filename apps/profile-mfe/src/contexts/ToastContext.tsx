@@ -54,8 +54,16 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({
         {toasts.map(toast => (
           <div
             key={toast.id}
-            className="animate-fade-in-up"
+            className="animate-fade-in-up cursor-pointer"
             onClick={() => removeToast(toast.id)}
+            onKeyDown={e => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                removeToast(toast.id);
+              }
+            }}
+            role="button"
+            tabIndex={0}
           >
             <Alert
               variant={toast.type === 'error' ? 'destructive' : 'default'}

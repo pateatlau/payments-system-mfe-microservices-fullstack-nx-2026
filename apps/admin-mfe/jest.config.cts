@@ -18,6 +18,8 @@ module.exports = {
       '<rootDir>/../../libs/shared-event-bus/src/index.ts',
     '^@mfe/shared-design-system$':
       '<rootDir>/../../libs/shared-design-system/src/index.ts',
+    '^@mfe/shared-utils$':
+      '<rootDir>/../../libs/shared-utils/src/index.ts',
     // Mock remote Module Federation modules
     '^paymentsMfe/PaymentReports$':
       '<rootDir>/src/__mocks__/paymentsMfe/PaymentReports.tsx',

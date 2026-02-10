@@ -155,7 +155,7 @@ describe('AuditLogs', () => {
     render(<AuditLogs />);
 
     // Loading should appear briefly
-    const loadingElement = screen.queryByRole('status');
+    const loadingElement = screen.queryByLabelText('Loading...');
     // It may have already loaded, so we check if it exists or existed
     expect(
       loadingElement !== null || screen.queryByText('USER LOGIN') !== null

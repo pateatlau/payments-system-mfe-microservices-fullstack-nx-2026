@@ -296,8 +296,8 @@ export function PaymentFilters({
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label>Date range</Label>
+              <div className="space-y-2" role="group" aria-labelledby="date-range-label">
+                <span id="date-range-label" className="text-sm font-medium leading-none">Date range</span>
                 <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                   <Controller
                     control={control}
@@ -329,16 +329,16 @@ export function PaymentFilters({
                   />
                 </div>
                 {errors.toDate?.message && (
-                  <p className="text-sm text-red-600" role="alert">
+                  <p className="text-sm text-destructive" role="alert">
                     {errors.toDate.message}
                   </p>
                 )}
               </div>
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-3" role="group" aria-labelledby="amount-range-label">
               <div className="flex items-center justify-between">
-                <Label>Amount range</Label>
+                <span id="amount-range-label" className="text-sm font-medium leading-none">Amount range</span>
                 <span className="text-xs text-muted-foreground">
                   {MIN_AMOUNT.toLocaleString()} - {MAX_AMOUNT.toLocaleString()}
                 </span>

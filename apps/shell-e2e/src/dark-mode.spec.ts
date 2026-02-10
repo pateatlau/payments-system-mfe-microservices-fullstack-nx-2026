@@ -44,6 +44,7 @@ test.describe('Dark Mode Theme System', () => {
           'button[data-testid="theme-toggle"], button:has-text("☀"), button:has-text("🌙")'
         )
         .first();
+      await expect(themeToggle).toBeVisible({ timeout: 5000 });
       await themeToggle.click();
       await page.waitForTimeout(300);
     }
@@ -54,6 +55,7 @@ test.describe('Dark Mode Theme System', () => {
         'button[data-testid="theme-toggle"], button:has-text("☀"), button:has-text("🌙")'
       )
       .first();
+    await expect(themeToggle).toBeVisible({ timeout: 5000 });
     await themeToggle.click();
     await page.waitForTimeout(300);
 
@@ -77,6 +79,7 @@ test.describe('Dark Mode Theme System', () => {
           'button[data-testid="theme-toggle"], button:has-text("☀"), button:has-text("🌙")'
         )
         .first();
+      await expect(themeToggle).toBeVisible({ timeout: 5000 });
       await themeToggle.click();
       await page.waitForTimeout(300);
     }
@@ -87,6 +90,7 @@ test.describe('Dark Mode Theme System', () => {
         'button[data-testid="theme-toggle"], button:has-text("☀"), button:has-text("🌙")'
       )
       .first();
+    await expect(themeToggle).toBeVisible({ timeout: 5000 });
     await themeToggle.click();
     await page.waitForTimeout(300);
 
@@ -110,6 +114,7 @@ test.describe('Dark Mode Theme System', () => {
           'button[data-testid="theme-toggle"], button:has-text("☀"), button:has-text("🌙")'
         )
         .first();
+      await expect(themeToggle).toBeVisible({ timeout: 5000 });
       await themeToggle.click();
       await page.waitForTimeout(300);
     }
@@ -147,6 +152,7 @@ test.describe('Dark Mode Theme System', () => {
           'button[data-testid="theme-toggle"], button:has-text("☀"), button:has-text("🌙")'
         )
         .first();
+      await expect(themeToggle).toBeVisible({ timeout: 5000 });
       await themeToggle.click();
       await page.waitForTimeout(300);
     }
@@ -264,6 +270,7 @@ test.describe('Dark Mode Theme System', () => {
           'button[data-testid="theme-toggle"], button:has-text("☀"), button:has-text("🌙")'
         )
         .first();
+      await expect(themeToggle).toBeVisible({ timeout: 5000 });
       await themeToggle.click();
       await page.waitForTimeout(300);
     }
@@ -304,6 +311,7 @@ test.describe('Dark Mode Theme System', () => {
           'button[data-testid="theme-toggle"], button:has-text("☀"), button:has-text("🌙")'
         )
         .first();
+      await expect(themeToggle).toBeVisible({ timeout: 5000 });
       await themeToggle.click();
       await page.waitForTimeout(300);
     }
@@ -348,7 +356,8 @@ test.describe('Dark Mode Across Different Pages', () => {
       el.classList.contains('dark')
     );
 
-    if (themeToggle.count() > 0) {
+    if ((await themeToggle.count()) > 0) {
+      await expect(themeToggle).toBeVisible({ timeout: 5000 });
       await themeToggle.click();
       await page.waitForTimeout(300);
 
