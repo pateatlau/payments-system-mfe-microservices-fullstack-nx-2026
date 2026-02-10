@@ -7,6 +7,11 @@
 
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+
+    <!-- CSP Nonce: nginx replaces __CSP_NONCE__ with unique per-request value -->
+    <!-- This enables strict CSP without unsafe-inline for scripts -->
+    <meta name="csp-nonce" content="__CSP_NONCE__" />
+
     <!-- CSS will be injected by Rspack HtmlRspackPlugin -->
   </head>
   <body>
