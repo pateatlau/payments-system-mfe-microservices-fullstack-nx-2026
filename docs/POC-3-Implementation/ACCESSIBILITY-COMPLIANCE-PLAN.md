@@ -2413,7 +2413,7 @@ Phase 4.1 completed CI/CD integration for accessibility testing:
    - Runs in parallel with other test jobs for fast feedback
 
 2. **Enhanced Job 6: E2E Tests** - Added accessibility E2E tests:
-   - Runs `npx playwright test apps/shell-e2e/src/a11y/` after regular E2E tests
+   - Runs `npx playwright test --config=apps/shell-e2e/playwright.config.ts apps/shell-e2e/src/a11y/` after regular E2E tests
    - 170 E2E accessibility tests with @axe-core/playwright
    - Tests Auth, Payments, Admin, Profile, Keyboard Navigation, Screen Reader
    - Verifies ARIA attributes, focus management, color contrast
