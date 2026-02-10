@@ -37,7 +37,7 @@ export interface UseFocusTrapReturn<T extends HTMLElement> {
   /**
    * Ref to attach to the container element that should trap focus.
    */
-  containerRef: React.RefObject<T | null>;
+  containerRef: React.RefObject<T>;
 }
 
 /**
@@ -139,13 +139,13 @@ export function useFocusTrap<T extends HTMLElement = HTMLDivElement>(
           activeElement === containerRef.current
         ) {
           event.preventDefault();
-          lastFocusable.focus();
+          lastFocusable?.focus();
         }
       } else {
         // Tab: if on last element, go to first
         if (activeElement === lastFocusable) {
           event.preventDefault();
-          firstFocusable.focus();
+          firstFocusable?.focus();
         }
       }
     };

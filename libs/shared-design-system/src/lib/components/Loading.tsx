@@ -76,7 +76,7 @@ function Loading({
 
   return (
     <div
-      className={cn('flex flex-col items-center gap-2', props.className)}
+      className={cn('flex flex-col items-center gap-2', className)}
       role="status"
       aria-busy="true"
       aria-live="polite"

@@ -165,6 +165,10 @@ module.exports = {
         __dirname,
         '../../libs/shared-utils/src/index.ts'
       ),
+      '@mfe/shared-utils': path.resolve(
+        __dirname,
+        '../../libs/shared-utils/src/index.ts'
+      ),
       'shared-types': path.resolve(
         __dirname,
         '../../libs/shared-types/src/index.ts'
