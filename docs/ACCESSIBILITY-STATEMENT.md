@@ -54,13 +54,15 @@ The MFE Payments System includes the following accessibility features:
 - **Language declaration** - Page language declared for proper pronunciation
 - **Responsive design** - Works across different screen sizes and orientations
 
-## Screen Readers Tested
+## Screen Reader Compatibility
 
-We have tested this application with the following screen readers:
+We have created comprehensive testing procedures for the following screen readers:
 
-- **VoiceOver** (macOS, iOS) - Built-in screen reader
-- **NVDA** (Windows) - Free, open-source screen reader
-- **JAWS** (Windows) - Commercial screen reader (periodic testing)
+- **VoiceOver** (macOS, iOS) - Built-in screen reader (testing guide available)
+- **NVDA** (Windows) - Free, open-source screen reader (testing guide available)
+- **JAWS** (Windows) - Commercial screen reader (periodic testing planned)
+
+Automated tests verify all ARIA attributes required for screen reader support. Manual testing with actual screen readers is performed periodically and before major releases.
 
 ## Browsers Supported
 
@@ -75,9 +77,9 @@ The MFE Payments System is designed to work with the following browsers and assi
 
 We are aware of the following accessibility limitations and are working to address them:
 
-1. **Landmark Structure** - Some pages may not have complete landmark regions (under review)
-2. **Keyboard Navigation Audit** - Comprehensive keyboard navigation audit in progress
-3. **Language of Parts** - Multi-language content sections not yet implemented (WCAG 3.1.2)
+1. **Landmark Structure** - Some pages may not have complete landmark regions (planned for future iteration)
+2. **Keyboard Navigation** - Keyboard shortcuts documentation is complete; comprehensive manual audit of edge cases in progress
+3. **Language of Parts (WCAG 3.1.2)** - Application is currently English-only; multi-language support not yet implemented
 
 These limitations are documented in our [Accessibility Compliance Plan](./POC-3-Implementation/ACCESSIBILITY-COMPLIANCE-PLAN.md) and will be addressed in future updates.
 
@@ -85,8 +87,8 @@ These limitations are documented in our [Accessibility Compliance Plan](./POC-3-
 
 We welcome your feedback on the accessibility of the MFE Payments System. Please let us know if you encounter accessibility barriers:
 
-- **Email:** accessibility@example.com
-- **GitHub Issues:** https://github.com/your-org/payments-system/issues
+- **Email:** [TO BE CONFIGURED]
+- **GitHub Issues:** [TO BE CONFIGURED - GitHub Issues URL]
 - **Response Time:** We aim to respond to accessibility feedback within 2 business days
 
 When reporting an accessibility issue, please include:
@@ -142,7 +144,7 @@ For detailed implementation status, see our [Accessibility Compliance Plan](./PO
 
 If you are not satisfied with our response to your accessibility feedback, you may:
 
-1. Escalate the issue via email to: senior-management@example.com
+1. Escalate the issue via email to: [TO BE CONFIGURED]
 2. File a formal complaint with your local accessibility enforcement authority
 
 ## Date of Statement

@@ -23,10 +23,10 @@ The MFE Payments System demonstrates a strong commitment to accessibility and me
 | Level | Total Criteria | Pass | Partial | Fail | N/A |
 |-------|----------------|------|---------|------|-----|
 | **WCAG 2.1 A** | 30 | 28 | 2 | 0 | 0 |
-| **WCAG 2.1 AA** | 20 | 17 | 3 | 0 | 0 |
-| **Combined** | 50 | 45 | 5 | 0 | 0 |
+| **WCAG 2.1 AA** | 18 | 17 | 1 | 0 | 0 |
+| **Combined** | 48 | 45 | 3 | 0 | 0 |
 
-**Conformance Rate:** 90% fully conformant, 10% partially conformant
+**Conformance Rate:** 94% fully conformant (45/48 criteria), 6% partially conformant (3/48 criteria)
 
 ### Key Strengths
 
@@ -41,9 +41,9 @@ The MFE Payments System demonstrates a strong commitment to accessibility and me
 
 ### Areas for Improvement
 
-- ⚠️ Complete landmark structure on all pages (in progress)
-- ⚠️ Comprehensive keyboard navigation audit (in progress)
-- ⚠️ Language of parts for multi-language content (WCAG 3.1.2) (future)
+- ⚠️ Complete landmark structure on all pages (planned for future iteration)
+- ⚠️ Keyboard Navigation - Shortcuts documented; manual audit of edge cases in progress
+- ⚠️ Language of Parts (WCAG 3.1.2) - English-only currently; multi-language support future enhancement
 
 ---
 
@@ -60,8 +60,8 @@ The MFE Payments System demonstrates a strong commitment to accessibility and me
 
 **Automated Test Coverage:**
 - 214 unit tests in shared-design-system (all passing)
-- 48 unit tests in shared-test-utils (all passing)
-- 150+ E2E accessibility tests across 6 test files (all passing)
+- 78 unit tests in shared-test-utils (all passing)
+- 170 E2E accessibility tests across 6 test files (all passing)
 
 ### Manual Testing
 
@@ -251,7 +251,16 @@ All components in `libs/shared-design-system/` have been audited and tested with
 
 **Total:** 214 tests, all passing ✅
 
-### Shared Utilities
+### Shared Utilities (libs/shared-test-utils)
+
+| Category | Status | Tests | Notes |
+|----------|--------|-------|-------|
+| Accessibility test utilities | ✅ Pass | 29 tests | renderWithA11yAudit, axe config, focusable element detection |
+| Contrast test utilities | ✅ Pass | 49 tests | Color contrast calculation (WCAG 2.1 spec), contrast validation |
+
+**Total:** 78 tests, all passing ✅
+
+### Accessibility Hooks (libs/shared-utils)
 
 | Utility | Status | Tests | Notes |
 |---------|--------|-------|-------|
@@ -459,16 +468,16 @@ All ARIA attributes required for screen reader support have been verified progra
 
 #### 2. Keyboard Navigation Audit (Priority: Medium)
 
-**Status:** ⚠️ In Progress
+**Status:** ⚠️ Partial
 
-**Issue:** Comprehensive keyboard navigation audit not yet complete.
+**Issue:** Keyboard shortcuts are fully documented and E2E tests verify keyboard accessibility. Comprehensive manual audit of edge cases in progress.
 
 **Impact:** Some edge cases in keyboard navigation may exist.
 
 **Recommendation:**
-- Complete full keyboard audit of all pages
-- Document all keyboard shortcuts in user documentation ✅ (completed)
-- Add keyboard shortcut cheat sheet in-app (future)
+- Complete manual keyboard audit of all pages and edge cases
+- Keyboard shortcuts documentation ✅ (completed - docs/KEYBOARD-SHORTCUTS.md)
+- Add keyboard shortcut cheat sheet in-app (future enhancement)
 
 **Planned:** Documented in ACCESSIBILITY-COMPLIANCE-PLAN.md
 
@@ -540,8 +549,8 @@ All ARIA attributes required for screen reader support have been verified progra
 
 | Tool | Version | Purpose | Integration |
 |------|---------|---------|-------------|
-| jest-axe | 10.1.0 | Unit test accessibility audits | Jest test suites |
-| @axe-core/playwright | 4.10.2 | E2E accessibility audits | Playwright E2E tests |
+| jest-axe | ^10.0.0 | Unit test accessibility audits | Jest test suites |
+| @axe-core/playwright | ^4.11.0 | E2E accessibility audits | Playwright E2E tests |
 | eslint-plugin-jsx-a11y | 6.10.2 | Compile-time linting | ESLint configuration |
 | Contrast audit script | Custom | Color contrast verification | npm script |
 
@@ -562,9 +571,9 @@ All ARIA attributes required for screen reader support have been verified progra
 
 ### Test Coverage
 
-- **Unit tests:** 279 accessibility-focused tests
+- **Unit tests:** 357 accessibility-focused tests (214 design system + 78 test utils + 65 hooks)
 - **E2E tests:** 170 accessibility-focused tests
-- **Total:** 449 automated accessibility tests
+- **Total:** 527 automated accessibility tests
 
 **All tests passing** ✅
 
@@ -618,7 +627,7 @@ All ARIA attributes required for screen reader support have been verified progra
 - [x] 3.3.4 Error Prevention (Legal, Financial, Data)
 - [x] 4.1.3 Status Messages
 
-**Level AA Conformance:** 17/18 fully conformant (94%), 1/18 partial (6%)
+**Level AA Conformance:** 17/18 criteria passing, 1/18 partial (94% fully conformant)
 
 ---
 

@@ -345,8 +345,8 @@ Currently, the application uses standard browser keyboard shortcuts. In future v
 
 If you encounter any keyboard accessibility issues, please:
 
-- **Email:** accessibility@example.com
-- **GitHub Issues:** https://github.com/your-org/payments-system/issues
+- **Email:** [TO BE CONFIGURED]
+- **GitHub Issues:** [TO BE CONFIGURED - GitHub Issues URL]
 
 Include:
 - The page or feature affected
