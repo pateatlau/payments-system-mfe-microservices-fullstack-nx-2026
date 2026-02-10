@@ -121,6 +121,7 @@ describe('Loading', () => {
     render(<Loading className="custom-spinner" />);
     // The className is applied to the outer container
     const statusElements = screen.getAllByRole('status');
-    expect(statusElements.length).toBeGreaterThan(0);
+    const loadingStatus = statusElements.find(el => el.classList.contains('flex'));
+    expect(loadingStatus).toHaveClass('custom-spinner');
   });
 });

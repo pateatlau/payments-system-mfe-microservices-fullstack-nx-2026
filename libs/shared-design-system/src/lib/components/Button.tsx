@@ -99,6 +99,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     className,
     variant,
     size,
+    asChild,
     loading = false,
     loadingText,
     children,
@@ -106,6 +107,12 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     ...props
   }, ref) => {
     const isDisabled = disabled || loading;
+
+    // Note: asChild is not currently implemented.
+    // If you need polymorphic component behavior, consider using Radix UI Slot.
+    if (asChild) {
+      console.warn('Button: asChild prop is not implemented');
+    }
 
     return (
       <button

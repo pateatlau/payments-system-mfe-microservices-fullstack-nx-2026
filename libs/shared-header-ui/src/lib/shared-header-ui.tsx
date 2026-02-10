@@ -168,7 +168,7 @@ export function Header({
                 alt="HDFC Bank Logo"
                 className="h-10 w-10 rounded"
               />
-              <span className="text-xl font-bold tracking-tight">{branding}</span>
+              <h1 className="text-xl font-bold tracking-tight">{branding}</h1>
             </Link>
           </div>
 
