@@ -1253,7 +1253,9 @@ For comprehensive accessibility information, see:
 - **[KEYBOARD-SHORTCUTS.md](docs/KEYBOARD-SHORTCUTS.md)** - Complete keyboard shortcuts reference
 - **[COLOR-CONTRAST-GUIDELINES.md](docs/COLOR-CONTRAST-GUIDELINES.md)** - Color usage standards
 
-**Conformance Status:** WCAG 2.1 Level AA - Substantially Conformant (90% fully conformant)
+**Conformance Status:** WCAG 2.1 Level AA - Substantially Conformant (94% fully conformant - 45/48 criteria)
+
+**CI/CD Integration:** 527 automated accessibility tests run on every PR, enforcing WCAG 2.1 compliance. Tests fail CI on accessibility violations.
 
 ## Documentation
 

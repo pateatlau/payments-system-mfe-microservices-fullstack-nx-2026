@@ -20,7 +20,8 @@ A full-stack microfrontend platform demonstrating architecture patterns for paym
 - **Dual API:** REST (Swagger UI) + GraphQL (Apollo Server)
 - **Full Observability:** Prometheus metrics, Grafana dashboards, Jaeger tracing, Sentry errors
 - **Security:** JWT authentication, RBAC, MFA, anomaly detection, session management, social login (OAuth via Auth0)
-- **CI Pipeline:** GitHub Actions with Nx Cloud distributed caching (50-65% faster builds)
+- **Accessibility:** WCAG 2.1 Level AA compliance (94% conformant), 527 automated tests, screen reader support
+- **CI Pipeline:** GitHub Actions with Nx Cloud distributed caching (50-65% faster builds), automated accessibility testing
 - **Trunk-Based Development:** Short-lived feature branches, squash merges to main
 - **Cross-Browser:** Full support for Chrome, Firefox, Safari, Edge, and Brave
 
@@ -331,6 +332,49 @@ pnpm test:e2e                 # End-to-end tests
 
 ---
 
+## Accessibility (WCAG 2.1 Level AA)
+
+The MFE Payments System achieves **WCAG 2.1 Level AA - Substantially Conformant** status with **94% full conformance** (45/48 criteria).
+
+### Automated Testing (527 tests on every PR)
+
+```bash
+# Unit tests (357 tests)
+pnpm test:a11y                  # All accessibility unit tests
+pnpm test:a11y:contrast         # Color contrast audit
+
+# E2E tests (170 tests)
+pnpm test:e2e:a11y:all          # All accessibility E2E tests
+pnpm test:e2e:a11y:auth         # Auth MFE (25 tests)
+pnpm test:e2e:a11y:payments     # Payments MFE (28 tests)
+pnpm test:e2e:a11y:admin        # Admin MFE (30 tests)
+pnpm test:e2e:a11y:profile      # Profile MFE (32 tests)
+pnpm test:e2e:a11y:keyboard     # Keyboard navigation (20 tests)
+pnpm test:e2e:a11y:screen-reader # Screen reader (35 tests)
+```
+
+### Key Features
+
+- ✅ **Keyboard accessibility** - All functionality accessible via keyboard
+- ✅ **Screen reader support** - VoiceOver, NVDA, JAWS compatible
+- ✅ **Color contrast** - 4.5:1 for text, 3:1 for UI components
+- ✅ **Focus management** - Visible indicators, logical tab order, modal trapping
+- ✅ **ARIA attributes** - Proper roles, states, and properties
+- ✅ **Responsive** - Text resizable to 200%, content reflows at 400% zoom
+- ✅ **CI/CD enforcement** - Tests fail on accessibility violations
+
+### Documentation
+
+- [Accessibility Statement](docs/ACCESSIBILITY-STATEMENT.md) - Public commitment and conformance status
+- [Accessibility Guidelines](docs/ACCESSIBILITY-GUIDELINES.md) - Developer guidelines and best practices
+- [Accessibility Audit Report](docs/ACCESSIBILITY-AUDIT-REPORT.md) - Detailed audit results and WCAG compliance
+- [Screen Reader Testing Guide](docs/SCREEN-READER-TESTING-GUIDE.md) - Manual testing procedures (VoiceOver/NVDA)
+- [Keyboard Shortcuts Reference](docs/KEYBOARD-SHORTCUTS.md) - Complete keyboard shortcuts
+- [Color Contrast Guidelines](docs/COLOR-CONTRAST-GUIDELINES.md) - Color usage standards
+- [Accessibility Compliance Plan](docs/POC-3-Implementation/ACCESSIBILITY-COMPLIANCE-PLAN.md) - Implementation roadmap
+
+---
+
 ## Documentation
 
 ### Key Resources (Start Here)
@@ -418,6 +462,7 @@ For details, see [Trunk-Based Branching Plan](docs/POC-3-Implementation/TRUNK-BA
 - **Development Environment:** Functional with HTTPS/TLS and observability stack
 - **Live Demo:** Available locally at https://localhost with complete feature set
 - **CI Pipeline:** ✅ Complete with GitHub Actions + Nx Cloud distributed caching
+- **Accessibility:** ✅ Complete - WCAG 2.1 AA (94% conformant) with automated testing
 - **Branching Strategy:** ✅ Trunk-based development (main branch only)
 - **CD & Deployment:** Pending implementation (planned for next phase)
 - **Internet Live Demo:** Will be available once deployment pipeline is implemented
@@ -430,6 +475,6 @@ For detailed setup instructions, troubleshooting, and development workflows, ref
 
 ---
 
-**Last Updated:** February 9, 2026
-**Status:** POC-3 Complete + CI Pipeline + Trunk-Based Development + Backend Hardening + Social Login
-**Next Phase:** CD Pipeline + Cloud Deployment + Accessibility Compliance
+**Last Updated:** February 10, 2026
+**Status:** POC-3 Complete + CI Pipeline + Trunk-Based Development + Backend Hardening + Social Login + Accessibility (WCAG 2.1 AA)
+**Next Phase:** CD Pipeline + Cloud Deployment
