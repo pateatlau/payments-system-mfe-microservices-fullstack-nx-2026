@@ -829,25 +829,23 @@ jobs:
           path: playwright-report/
           retention-days: 7
 
+      # TODO: Re-enable accessibility E2E tests once server lifecycle issues are resolved
+      # Issue: Tests timeout due to web server port conflicts with main E2E tests
+      # The accessibility UNIT tests (357 tests in Job 4) still run and enforce compliance
+      # Tracking: See PR #62 discussion for details on the attempted fixes
       - name: Run E2E Accessibility Tests (WCAG 2.1 AA)
-        if: ${{ success() || failure() }}
-        continue-on-error: true  # Don't fail the build - a11y E2E tests are informational for now
+        if: false  # TEMPORARILY DISABLED - see TODO above
+        continue-on-error: true
         run: |
           echo "🔍 Running accessibility E2E tests with @axe-core/playwright"
-          echo "⚠️ Note: These tests are informational and won't fail the build"
           npx playwright test --config=apps/shell-e2e/playwright.a11y.config.ts
-        # Note: Uses dedicated a11y config that:
-        # 1. Sets testDir to src/a11y (accessibility tests only)
-        # 2. Removes CI testMatch filter that limits to critical path tests
-        # 3. Starts its own web servers (reuseExistingServer: false needed)
-        # TODO: Fix server lifecycle and remove continue-on-error once stable
 
       - name: Accessibility E2E summary
         if: always()
         run: |
-          echo "✅ Accessibility E2E tests completed"
-          echo "📊 170 E2E tests across 6 test files"
-          echo "🎯 Coverage: Auth, Payments, Admin, Profile, Keyboard, Screen Reader"
+          echo "ℹ️ Accessibility E2E tests are temporarily disabled in CI"
+          echo "📊 Accessibility UNIT tests (357 tests) still run in Job 4"
+          echo "🎯 Full E2E accessibility suite available locally: pnpm test:e2e:a11y:all"
 
   # Job 7: Reserved for future use (e.g., visual regression testing, performance testing)
   # Keeping numbering sequential for clarity
