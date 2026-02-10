@@ -356,7 +356,7 @@ test.describe('Payments MFE Accessibility - Create Payment Form', () => {
         await page.waitForTimeout(500);
 
         // Check for accessible error messages
-        const errors = await page.locator('[role="alert"], [aria-invalid="true"], .text-destructive').all();
+        const _errors = await page.locator('[role="alert"], [aria-invalid="true"], .text-destructive').all();
         // Form should indicate errors in some accessible way
       }
     }
@@ -435,7 +435,7 @@ test.describe('Payments MFE Accessibility - Loading States', () => {
     for (const indicator of loadingIndicators) {
       const role = await indicator.getAttribute('role');
       const ariaBusy = await indicator.getAttribute('aria-busy');
-      const ariaLabel = await indicator.getAttribute('aria-label');
+      const _ariaLabel = await indicator.getAttribute('aria-label');
       const ariaLive = await indicator.getAttribute('aria-live');
 
       // Should have role="status" or aria-live
@@ -501,7 +501,7 @@ test.describe('Payments MFE Accessibility - Pagination', () => {
       for (const button of pageButtons) {
         const text = await button.textContent();
         const ariaLabel = await button.getAttribute('aria-label');
-        const ariaCurrent = await button.getAttribute('aria-current');
+        const _ariaCurrent = await button.getAttribute('aria-current');
 
         // Each button should have accessible name
         expect(text?.trim() || ariaLabel).toBeTruthy();

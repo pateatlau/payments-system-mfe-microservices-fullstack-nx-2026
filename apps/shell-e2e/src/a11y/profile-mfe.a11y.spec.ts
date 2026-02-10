@@ -226,7 +226,7 @@ test.describe('Profile MFE Accessibility - Profile Form', () => {
 
       // Check for error indication
       const ariaInvalid = await phoneInput.getAttribute('aria-invalid');
-      const hasError =
+      const _hasError =
         ariaInvalid === 'true' ||
         (await page.locator('[role="alert"]').count()) > 0 ||
         (await page.locator('.text-destructive').count()) > 0;
@@ -320,7 +320,7 @@ test.describe('Profile MFE Accessibility - Preferences Form', () => {
       await page.keyboard.press('ArrowDown');
 
       // Value should change
-      const initialValue = await languageSelect.inputValue();
+      const _initialValue = await languageSelect.inputValue();
 
       await page.keyboard.press('ArrowDown');
 
@@ -555,10 +555,10 @@ test.describe('Profile MFE Accessibility - Error Handling', () => {
       await page.waitForTimeout(500);
 
       // Error should be in alert role or aria-live region
-      const alerts = await page.locator('[role="alert"], [aria-live="assertive"], [aria-live="polite"]').all();
+      const _alerts = await page.locator('[role="alert"], [aria-live="assertive"], [aria-live="polite"]').all();
 
       // Check for error indicators
-      const errorIndicators = await page.locator('[aria-invalid="true"], .text-destructive').all();
+      const _errorIndicators = await page.locator('[aria-invalid="true"], .text-destructive').all();
 
       // Either alerts or error indicators should be present
     }

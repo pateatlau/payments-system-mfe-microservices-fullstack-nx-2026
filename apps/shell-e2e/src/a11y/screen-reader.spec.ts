@@ -64,7 +64,7 @@ test.describe('Screen Reader - ARIA Live Regions', () => {
     const politeCount = await politeAnnouncer.count();
 
     // Check for assertive announcer
-    const assertiveAnnouncer = page.locator(
+    const _assertiveAnnouncer = page.locator(
       '[aria-live="assertive"], [role="alert"]'
     );
 
@@ -85,7 +85,7 @@ test.describe('Screen Reader - ARIA Live Regions', () => {
     const assertiveLive = await page.locator('[aria-live="assertive"]').all();
 
     // Form should have some error indication mechanism
-    const hasErrorMechanism = alerts.length > 0 || assertiveLive.length > 0;
+    const _hasErrorMechanism = alerts.length > 0 || assertiveLive.length > 0;
   });
 
   test('success messages should use aria-live="polite"', async ({ page }) => {
@@ -104,7 +104,7 @@ test.describe('Screen Reader - ARIA Live Regions', () => {
       await page.waitForTimeout(1000);
 
       // Check for success message in live region
-      const statusMessages = await page.locator(
+      const _statusMessages = await page.locator(
         '[role="status"], [aria-live="polite"]'
       ).all();
 
@@ -153,11 +153,11 @@ test.describe('Screen Reader - Form Accessibility', () => {
     const passwordInput = page.locator('input[type="password"]');
 
     // Check for required attribute or aria-required
-    const emailRequired =
+    const _emailRequired =
       (await emailInput.getAttribute('required')) !== null ||
       (await emailInput.getAttribute('aria-required')) === 'true';
 
-    const passwordRequired =
+    const _passwordRequired =
       (await passwordInput.getAttribute('required')) !== null ||
       (await passwordInput.getAttribute('aria-required')) === 'true';
 
@@ -173,7 +173,7 @@ test.describe('Screen Reader - Form Accessibility', () => {
     await page.waitForTimeout(500);
 
     // Check if fields are marked as invalid
-    const invalidFields = await page.locator('[aria-invalid="true"]').all();
+    const _invalidFields = await page.locator('[aria-invalid="true"]').all();
 
     // Form should mark invalid fields
   });
@@ -278,9 +278,9 @@ test.describe('Screen Reader - Button Accessibility', () => {
     await submitButton.click();
 
     // Check button state during loading
-    const ariaBusy = await submitButton.getAttribute('aria-busy');
-    const disabled = await submitButton.getAttribute('disabled');
-    const ariaDisabled = await submitButton.getAttribute('aria-disabled');
+    const _ariaBusy = await submitButton.getAttribute('aria-busy');
+    const _disabled = await submitButton.getAttribute('disabled');
+    const _ariaDisabled = await submitButton.getAttribute('aria-disabled');
 
     // Loading buttons should indicate their state
   });
@@ -483,7 +483,7 @@ test.describe('Screen Reader - Navigation Accessibility', () => {
 
     // Current page link should have aria-current
     const currentPage = page.locator('[aria-current="page"], [aria-current="true"]');
-    const currentCount = await currentPage.count();
+    const _currentCount = await currentPage.count();
 
     // At least one link should indicate current page
     // (or the application uses visual styling only)
@@ -528,7 +528,7 @@ test.describe('Screen Reader - Loading States', () => {
     for (const indicator of loadingIndicators) {
       const role = await indicator.getAttribute('role');
       const ariaBusy = await indicator.getAttribute('aria-busy');
-      const ariaLabel = await indicator.getAttribute('aria-label');
+      const _ariaLabel = await indicator.getAttribute('aria-label');
 
       // Should have role="status" or aria-busy
       expect(role === 'status' || ariaBusy).toBeTruthy();
@@ -540,7 +540,7 @@ test.describe('Screen Reader - Loading States', () => {
     await page.waitForLoadState('networkidle');
 
     // Areas that update dynamically should have aria-live
-    const liveRegions = await page.locator('[aria-live]').all();
+    const _liveRegions = await page.locator('[aria-live]').all();
 
     // Should have at least one live region for dynamic content
     // (for announcing loading complete, data updates, etc.)
@@ -628,7 +628,7 @@ test.describe('Screen Reader - Image Accessibility', () => {
     await page.waitForLoadState('networkidle');
 
     // SVGs that are decorative should have aria-hidden
-    const decorativeSvgs = await page.locator('svg[aria-hidden="true"]').all();
+    const _decorativeSvgs = await page.locator('svg[aria-hidden="true"]').all();
 
     // There should be some decorative SVGs (icons, etc.)
     // This is just checking the pattern is used
@@ -715,7 +715,7 @@ test.describe('Screen Reader - Route Announcements', () => {
     await page.waitForLoadState('networkidle');
 
     // Check for route announcer
-    const announcer = page.locator(
+    const _announcer = page.locator(
       '#a11y-announcer-polite, [id*="announcer"][aria-live="polite"]'
     );
 

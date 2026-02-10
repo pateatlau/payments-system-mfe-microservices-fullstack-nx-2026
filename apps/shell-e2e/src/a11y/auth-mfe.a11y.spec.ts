@@ -169,7 +169,7 @@ test.describe('Auth MFE Accessibility - Sign In Page', () => {
 
     // Check that invalid fields have aria-invalid
     const emailInput = page.locator('input[type="email"]');
-    const ariaInvalid = await emailInput.getAttribute('aria-invalid');
+    const _ariaInvalid = await emailInput.getAttribute('aria-invalid');
     // If validation is triggered, aria-invalid should be set
     // (may be true or not present depending on validation state)
   });
@@ -183,11 +183,11 @@ test.describe('Auth MFE Accessibility - Sign In Page', () => {
     await page.waitForTimeout(500);
 
     // Error messages should have role="alert" or be in aria-live region
-    const alerts = await page.locator('[role="alert"]').all();
+    const _alerts = await page.locator('[role="alert"]').all();
 
     // At least check that error text is visible
     const errorText = page.locator('text=/invalid|error|required|minimum/i');
-    const errorVisible = await errorText.count();
+    const _errorVisible = await errorText.count();
     // Form may validate or show error - both are acceptable
   });
 
@@ -359,7 +359,7 @@ test.describe('Auth MFE Accessibility - Sign Up Page', () => {
     await page.waitForTimeout(500);
 
     // Check for error messages
-    const errors = await page.locator('[role="alert"], .text-destructive, [aria-live="assertive"]').all();
+    const _errors = await page.locator('[role="alert"], .text-destructive, [aria-live="assertive"]').all();
     // Form should show some indication of errors (visible text or aria-live)
   });
 });

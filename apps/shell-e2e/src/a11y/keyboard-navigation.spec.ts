@@ -35,6 +35,7 @@ async function loginAsCustomer(page: Page): Promise<void> {
 /**
  * Helper to login as admin
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function loginAsAdmin(page: Page): Promise<void> {
   await page.goto('/signin');
   await page.waitForLoadState('networkidle');
@@ -498,13 +499,13 @@ test.describe('Keyboard Navigation - Special Key Handling', () => {
     if (await select.count() > 0) {
       await select.focus();
 
-      const initialValue = await select.inputValue();
+      const _initialValue = await select.inputValue();
 
       // Press ArrowDown to change selection
       await page.keyboard.press('ArrowDown');
 
       // Value may change (depends on implementation)
-      const newValue = await select.inputValue();
+      const _newValue = await select.inputValue();
 
       // Just verify we can interact with arrow keys
     }
