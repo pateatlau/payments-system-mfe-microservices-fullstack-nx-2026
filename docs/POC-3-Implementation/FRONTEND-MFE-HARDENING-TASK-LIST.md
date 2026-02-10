@@ -73,7 +73,7 @@
 - API (line 200): `burst=20 nodelay` - appropriate for 100r/m limit
 - Static (line 536): `burst=100 nodelay` - appropriate for 1000r/m limit
 
-GraphQL endpoint (`/graphql`) has no rate limiting - added TODO comment for future implementation when GraphQL usage increases.
+GraphQL endpoint (`/graphql`) now has rate limiting via `api_limit` zone (100r/m, burst=20). For future consideration: dedicated `graphql_limit` zone with query complexity analysis if GraphQL usage increases significantly.
 
 ---
 
