@@ -18,6 +18,8 @@ module.exports = {
       '<rootDir>/../../libs/shared-event-bus/src/index.ts',
     '^@mfe/shared-design-system$':
       '<rootDir>/../../libs/shared-design-system/src/index.ts',
+    '^@mfe/shared-utils$':
+      '<rootDir>/../../libs/shared-utils/src/index.ts',
     '^shared-websocket$': '<rootDir>/../../libs/shared-websocket/src/index.ts',
     '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
   },

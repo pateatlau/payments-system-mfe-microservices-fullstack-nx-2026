@@ -154,7 +154,7 @@ describe('UserManagement', () => {
 
     render(<UserManagement />);
 
-    expect(screen.getByRole('status')).toBeInTheDocument(); // Loading component
+    expect(screen.getByLabelText('Loading...')).toBeInTheDocument(); // Loading component
   });
 
   it('should display error message on API failure', async () => {

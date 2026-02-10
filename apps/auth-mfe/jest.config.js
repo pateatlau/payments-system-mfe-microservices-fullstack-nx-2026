@@ -12,6 +12,7 @@ module.exports = {
     '^@/(.*)$': '<rootDir>/src/$1',
     // Map shared libraries
     '^shared-utils$': '<rootDir>/../../libs/shared-utils/src/index.ts',
+    '^@mfe/shared-utils$': '<rootDir>/../../libs/shared-utils/src/index.ts',
     '^shared-ui$': '<rootDir>/../../libs/shared-ui/src/index.ts',
     '^shared-types$': '<rootDir>/../../libs/shared-types/src/index.ts',
     '^shared-auth-store$':
