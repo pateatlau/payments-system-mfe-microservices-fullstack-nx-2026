@@ -148,13 +148,13 @@ describe('Design System Color Compliance', () => {
     });
 
     it('should have valid RGB format for all light mode colors', () => {
-      Object.entries(lightModeColors).forEach(([key, value]) => {
+      Object.entries(lightModeColors).forEach(([_key, value]) => {
         expect(() => parseColor(value)).not.toThrow();
       });
     });
 
     it('should have valid RGB format for all dark mode colors', () => {
-      Object.entries(darkModeColors).forEach(([key, value]) => {
+      Object.entries(darkModeColors).forEach(([_key, value]) => {
         expect(() => parseColor(value)).not.toThrow();
       });
     });

@@ -280,7 +280,7 @@ export function AuditLogs() {
                   </tr>
                 </thead>
                 <tbody className="bg-card divide-y divide-border">
-                  {logs.map((log, index) => (
+                  {logs.map((log) => (
                     <tr key={log.id} className="hover:bg-muted/50">
                       <td className="px-4 py-4 whitespace-nowrap">
                         <div className="text-sm text-foreground">
@@ -383,7 +383,7 @@ export function AuditLogs() {
                   Last
                 </Button>
               </div>
-            </div>
+            </nav>
           )}
         </CardContent>
       </Card>
