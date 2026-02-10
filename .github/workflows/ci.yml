@@ -833,7 +833,7 @@ jobs:
         if: ${{ success() || failure() }}
         run: |
           echo "🔍 Running accessibility E2E tests with @axe-core/playwright"
-          cd apps/shell-e2e && npx playwright test src/a11y/
+          npx playwright test apps/shell-e2e/src/a11y/
         # Note: Accessibility tests verify ARIA attributes, screen reader compatibility,
         # keyboard navigation, and color contrast across all MFEs
 
