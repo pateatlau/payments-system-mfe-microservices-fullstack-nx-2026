@@ -1255,7 +1255,13 @@ For comprehensive accessibility information, see:
 
 **Conformance Status:** WCAG 2.1 Level AA - Substantially Conformant (94% fully conformant - 45/48 criteria)
 
-**CI/CD Integration:** 527 automated accessibility tests run on every PR, enforcing WCAG 2.1 compliance. Tests fail CI on accessibility violations.
+**CI/CD Integration:** 357 accessibility unit tests run on every PR, enforcing WCAG 2.1 compliance. Tests fail CI on accessibility violations.
+
+**TODO: Accessibility E2E Tests in CI**
+- 137 E2E tests are temporarily disabled in CI due to server lifecycle/timeout issues
+- Tests available locally: `pnpm test:e2e:a11y:all`
+- See PR #62 and `docs/POC-3-Implementation/ACCESSIBILITY-COMPLIANCE-PLAN.md` for details
+- Future fix: Separate CI job with dedicated timeout or scheduled runs
 
 ## Documentation
 

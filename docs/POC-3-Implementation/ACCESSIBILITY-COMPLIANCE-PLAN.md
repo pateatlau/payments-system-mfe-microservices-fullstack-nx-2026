@@ -2412,13 +2412,18 @@ Phase 4.1 completed CI/CD integration for accessibility testing:
    - Fails CI on accessibility violations
    - Runs in parallel with other test jobs for fast feedback
 
-2. **Enhanced Job 6: E2E Tests** - Added accessibility E2E tests:
-   - Runs `npx playwright test --config=apps/shell-e2e/playwright.a11y.config.ts` after regular E2E tests
-   - Uses dedicated accessibility Playwright config (avoids CI testMatch filter)
-   - 170 E2E accessibility tests with @axe-core/playwright
+2. **Enhanced Job 6: E2E Tests** - Accessibility E2E tests (⚠️ TEMPORARILY DISABLED):
+   - **Status:** Disabled in CI due to server lifecycle/timeout issues
+   - Config: `apps/shell-e2e/playwright.a11y.config.ts`
+   - 137 E2E accessibility tests with @axe-core/playwright
    - Tests Auth, Payments, Admin, Profile, Keyboard Navigation, Screen Reader
-   - Verifies ARIA attributes, focus management, color contrast
-   - Full stack required (backend services + PostgreSQL)
+   - **Available locally:** `pnpm test:e2e:a11y:all`
+
+   **TODO: Re-enable accessibility E2E tests in CI**
+   - Issue: Tests timeout due to port conflicts with main E2E test servers
+   - Attempted fixes: dedicated config, reuseExistingServer:false, continue-on-error
+   - Solution needed: Separate CI job with own timeout, or scheduled runs
+   - Tracking: See PR #62 for full discussion
 
 3. **Lighthouse CI Configuration** - Created `lighthouserc.json`:
    - Configured for unauthenticated pages (signin, signup)
@@ -2441,14 +2446,20 @@ Job 9: Report Status (includes accessibility job)
 ```
 
 **Test Coverage in CI:**
-- **Unit Tests:** 357 accessibility tests (jest-axe)
-- **E2E Tests:** 170 accessibility tests (@axe-core/playwright)
-- **Total:** 527 automated accessibility tests on every PR
+- **Unit Tests:** 357 accessibility tests (jest-axe) ✅ ACTIVE
+- **E2E Tests:** 137 accessibility tests (@axe-core/playwright) ⚠️ DISABLED
+- **Active Total:** 357 automated accessibility tests on every PR
 
 **Failure Behavior:**
-- Any accessibility violation causes CI to fail
+- Accessibility unit test violations cause CI to fail
 - Prevents merging PRs with accessibility regressions
-- Fast feedback loop for developers (15-20 minute full CI run)
+- Fast feedback loop for developers
+
+**Local Testing (includes disabled E2E tests):**
+```bash
+pnpm test:a11y              # Unit tests (357 tests)
+pnpm test:e2e:a11y:all      # E2E tests (137 tests) - run locally
+```
 
 ---
 
