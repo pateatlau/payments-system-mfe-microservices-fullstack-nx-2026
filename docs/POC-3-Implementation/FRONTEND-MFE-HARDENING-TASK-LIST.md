@@ -5,10 +5,10 @@
 **Date:** February 10, 2026
 **Phase:** Frontend MFE Security Hardening
 
-**Overall Progress:** 12% (5 of 42 tasks complete, 1 of 7 phases complete)
+**Overall Progress:** 29% (12 of 42 tasks complete, 2 of 7 phases complete)
 
 - Phase 1: Rate Limiting Restoration (100% - 4/4 sub-tasks complete) ✅
-- Phase 2: Content Security Policy Hardening (12.5% - 1/8 sub-tasks complete)
+- Phase 2: Content Security Policy Hardening (100% - 8/8 sub-tasks complete) ✅
 - Phase 3: CSRF Protection (0% - 0/6 sub-tasks complete)
 - Phase 4: Dependency Security & CI Integration (0% - 0/6 sub-tasks complete)
 - Phase 5: XSS & Injection Prevention (0% - 0/6 sub-tasks complete)
@@ -457,19 +457,57 @@ Change `Content-Security-Policy-Report-Only` back to `Content-Security-Policy`
 
 ### Task 2.8: Enforce CSP
 
-- [ ] Review all violation reports - confirm no false positives
-- [ ] Change `Content-Security-Policy-Report-Only` to `Content-Security-Policy`
-- [ ] Keep `report-uri` for ongoing monitoring
-- [ ] Test full application flow
-- [ ] Document final CSP policy
+- [x] Review all violation reports - confirm no false positives
+- [x] Change `Content-Security-Policy-Report-Only` to `Content-Security-Policy`
+- [x] Keep `report-uri` for ongoing monitoring
+- [x] Test full application flow
+- [x] Document final CSP policy
 
-**Status:** Not Started
-**Completed Date:**
+**Status:** Complete
+**Completed Date:** 2026-02-11
 **Notes:**
+
+**CSP Enforcement Activated:**
+Changed `Content-Security-Policy-Report-Only` to `Content-Security-Policy` in nginx.conf.
+
+**Final Enforced CSP Policy:**
+```
+default-src 'self';
+script-src 'self' 'nonce-{nonce}' 'strict-dynamic' https://embeddable-sandbox.cdn.apollographql.com http://localhost:4200-4204;
+style-src 'self' 'nonce-{nonce}' 'unsafe-inline' https://embeddable-sandbox.cdn.apollographql.com;
+img-src 'self' data: https: http:;
+font-src 'self' data: https://embeddable-sandbox.cdn.apollographql.com;
+connect-src 'self' wss: ws: https: http://localhost:4200-4204;
+frame-src 'self' https://sandbox.embed.apollographql.com;
+frame-ancestors 'self';
+base-uri 'self';
+form-action 'self';
+object-src 'none';
+report-uri /api/csp-violations;
+```
+
+**Security Improvements Achieved:**
+| Directive | Before | After | Improvement |
+|-----------|--------|-------|-------------|
+| script-src | 'unsafe-inline' 'unsafe-eval' | 'nonce-{n}' 'strict-dynamic' | XSS protection |
+| style-src | 'unsafe-inline' only | 'nonce-{n}' + 'unsafe-inline' | Partial hardening |
+| base-uri | not set | 'self' | Prevents base tag injection |
+| form-action | not set | 'self' | Restricts form targets |
+| object-src | not set | 'none' | Blocks plugins |
+
+**Monitoring:**
+- Violations continue to be logged via `report-uri /api/csp-violations`
+- Check API Gateway logs for "CSP Violation Report" entries
+- Browser DevTools Console shows blocked content (not just warnings)
+
+**Development Notes:**
+- Dev builds may show CSP errors due to eval-source-map (expected)
+- Use HTTP mode (`pnpm dev:mf`) for strict CSP testing in development
+- Production builds work without 'unsafe-eval'
 
 ---
 
-**Phase 2 Completion:** **12.5% (1/8 sub-tasks complete)**
+**Phase 2 Completion:** **100% (8/8 sub-tasks complete)** ✅
 
 ---
 
@@ -969,13 +1007,13 @@ Change `Content-Security-Policy-Report-Only` back to `Content-Security-Policy`
 | Phase | Description | Sub-tasks Complete | Total | Percentage |
 |-------|-------------|-------------------|-------|------------|
 | Phase 1 | Rate Limiting Restoration | 4 | 4 | 100% ✅ |
-| Phase 2 | CSP Hardening | 1 | 8 | 12.5% |
+| Phase 2 | CSP Hardening | 8 | 8 | 100% ✅ |
 | Phase 3 | CSRF Protection | 0 | 6 | 0% |
 | Phase 4 | Dependency Security | 0 | 6 | 0% |
 | Phase 5 | XSS Prevention | 0 | 6 | 0% |
 | Phase 6 | Module Federation Security | 0 | 7 | 0% |
 | Phase 7 | Session & Auth Hardening | 0 | 5 | 0% |
-| **Total** | | **5** | **42** | **12%** |
+| **Total** | | **12** | **42** | **29%** |
 
 ---
 
@@ -1024,4 +1062,4 @@ After all phases complete, run comprehensive security testing:
 ---
 
 **Last Updated:** February 11, 2026
-**Status:** In Progress - Phase 1 complete, Phase 2 Tasks 2.1-2.7 complete
+**Status:** In Progress - Phase 1 complete, Phase 2 complete
