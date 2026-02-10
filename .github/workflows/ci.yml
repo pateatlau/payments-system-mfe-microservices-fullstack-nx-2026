@@ -830,9 +830,10 @@ jobs:
           retention-days: 7
 
       - name: Run E2E Accessibility Tests (WCAG 2.1 AA)
+        if: ${{ success() || failure() }}
         run: |
           echo "🔍 Running accessibility E2E tests with @axe-core/playwright"
-          NX_NO_CLOUD=true pnpm nx e2e shell-e2e --test-dir=a11y
+          cd apps/shell-e2e && npx playwright test src/a11y/
         # Note: Accessibility tests verify ARIA attributes, screen reader compatibility,
         # keyboard navigation, and color contrast across all MFEs
 
@@ -842,6 +843,9 @@ jobs:
           echo "✅ Accessibility E2E tests completed"
           echo "📊 170 E2E tests across 6 test files"
           echo "🎯 Coverage: Auth, Payments, Admin, Profile, Keyboard, Screen Reader"
+
+  # Job 7: Reserved for future use (e.g., visual regression testing, performance testing)
+  # Keeping numbering sequential for clarity
 
   # Job 8: Security Scanning
   security-scan:
@@ -880,7 +884,7 @@ jobs:
   ci-status:
     name: CI Status Check
     runs-on: ubuntu-latest
-    needs: [lint-and-typecheck, test-frontend, test-backend, build]
+    needs: [lint-and-typecheck, test-frontend, test-backend, test-accessibility, build]
     if: always()
 
     steps:
@@ -889,6 +893,7 @@ jobs:
           if [ "${{ needs.lint-and-typecheck.result }}" != "success" ] || \
              [ "${{ needs.test-frontend.result }}" != "success" ] || \
              [ "${{ needs.test-backend.result }}" != "success" ] || \
+             [ "${{ needs.test-accessibility.result }}" != "success" ] || \
              [ "${{ needs.build.result }}" != "success" ]; then
             echo "❌ CI Pipeline Failed"
             exit 1

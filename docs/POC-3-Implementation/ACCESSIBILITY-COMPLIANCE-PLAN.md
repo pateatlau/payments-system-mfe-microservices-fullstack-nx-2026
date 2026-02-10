@@ -2406,14 +2406,14 @@ jobs:
 Phase 4.1 completed CI/CD integration for accessibility testing:
 
 1. **New Job 4: Accessibility Unit Tests** - Added to `.github/workflows/ci.yml`:
-   - Runs `pnpm test:a11y` (527 automated tests)
+   - Runs `pnpm test:a11y` (357 unit tests)
    - Runs `pnpm test:a11y:contrast` (color contrast audit)
    - Verifies WCAG 2.1 Level AA compliance
    - Fails CI on accessibility violations
    - Runs in parallel with other test jobs for fast feedback
 
 2. **Enhanced Job 6: E2E Tests** - Added accessibility E2E tests:
-   - Runs `pnpm nx e2e shell-e2e --test-dir=a11y` after regular E2E tests
+   - Runs `npx playwright test src/a11y/` after regular E2E tests
    - 170 E2E accessibility tests with @axe-core/playwright
    - Tests Auth, Payments, Admin, Profile, Keyboard Navigation, Screen Reader
    - Verifies ARIA attributes, focus management, color contrast
@@ -2434,8 +2434,9 @@ Job 3: Backend Unit Tests
 Job 4: Accessibility Unit Tests ✅ NEW
 Job 5: Build All Projects
 Job 6: E2E Tests (includes accessibility E2E) ✅ ENHANCED
+Job 7: Reserved for future use
 Job 8: Security Scanning
-Job 9: Report Status
+Job 9: Report Status (includes accessibility job)
 ```
 
 **Test Coverage in CI:**
