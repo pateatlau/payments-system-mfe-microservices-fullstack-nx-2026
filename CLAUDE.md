@@ -1243,18 +1243,35 @@ pnpm test:a11y:contrast
 </FormField>
 ```
 
-See `docs/ACCESSIBILITY-GUIDELINES.md` for full documentation.
+### Accessibility Documentation
+
+For comprehensive accessibility information, see:
+- **[ACCESSIBILITY-STATEMENT.md](docs/ACCESSIBILITY-STATEMENT.md)** - Public commitment and conformance status
+- **[ACCESSIBILITY-GUIDELINES.md](docs/ACCESSIBILITY-GUIDELINES.md)** - Developer guidelines and best practices
+- **[ACCESSIBILITY-AUDIT-REPORT.md](docs/ACCESSIBILITY-AUDIT-REPORT.md)** - Detailed audit results and WCAG compliance
+- **[SCREEN-READER-TESTING-GUIDE.md](docs/SCREEN-READER-TESTING-GUIDE.md)** - Manual testing with VoiceOver/NVDA
+- **[KEYBOARD-SHORTCUTS.md](docs/KEYBOARD-SHORTCUTS.md)** - Complete keyboard shortcuts reference
+- **[COLOR-CONTRAST-GUIDELINES.md](docs/COLOR-CONTRAST-GUIDELINES.md)** - Color usage standards
+
+**Conformance Status:** WCAG 2.1 Level AA - Substantially Conformant (90% fully conformant)
 
 ## Documentation
 
 Key resources in `docs/`:
 - `EXECUTIVE_SUMMARY.md` - Architecture overview for stakeholders
 - `IMPLEMENTATION-JOURNEY.md` - Evolution from POC-0 to POC-3
-- `ACCESSIBILITY-GUIDELINES.md` - WCAG 2.1 AA compliance guidelines
 - `POC-3-Implementation/implementation-plan.md` - Current phase plan
-- `POC-3-Implementation/ACCESSIBILITY-COMPLIANCE-PLAN.md` - Accessibility implementation plan
 - `POC-3-Implementation/TRUNK-BASED-BRANCHING-PLAN.md` - Branching strategy details
 - `POC-3-Implementation/DARK-MODE-FULL-IMPLEMENTATION-PLAN.md` - Theme system details
 - `POC-3-Implementation/ssl-tls-setup-guide.md` - HTTPS setup and troubleshooting
 - `POC-3-Implementation/OBSERVABILITY_LIVE_SETUP.md` - Metrics/tracing setup
 - `adr/` - Architecture Decision Records
+
+**Accessibility Documentation:**
+- `ACCESSIBILITY-STATEMENT.md` - Public accessibility statement (WCAG 2.1 Level AA)
+- `ACCESSIBILITY-GUIDELINES.md` - Developer guidelines for maintaining accessibility
+- `ACCESSIBILITY-AUDIT-REPORT.md` - Comprehensive accessibility audit report
+- `POC-3-Implementation/ACCESSIBILITY-COMPLIANCE-PLAN.md` - Implementation roadmap and status
+- `SCREEN-READER-TESTING-GUIDE.md` - Manual testing procedures for VoiceOver/NVDA
+- `KEYBOARD-SHORTCUTS.md` - Complete keyboard shortcuts reference
+- `COLOR-CONTRAST-GUIDELINES.md` - Color usage standards
