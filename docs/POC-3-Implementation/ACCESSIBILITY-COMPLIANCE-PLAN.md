@@ -186,7 +186,7 @@ This document outlines the implementation plan for achieving full WCAG 2.1 AA co
 - [x] Create shared accessibility test utilities
 - [x] Add axe-core rules to component tests
 - [x] Configure Playwright accessibility audits for E2E
-- [ ] Add accessibility checks to CI pipeline (deferred - requires CI configuration)
+- [x] Add accessibility checks to CI pipeline (completed in Priority 4.1)
 
 **Implementation Notes:**
 
@@ -362,10 +362,10 @@ test.describe('Accessibility Audit', () => {
 
 **Success Criteria:**
 
-- [ ] jest-axe integrated into shared test utilities
-- [ ] At least 5 design system components have a11y tests
-- [ ] Playwright E2E accessibility audit covers all main pages
-- [ ] CI fails on critical accessibility violations
+- [x] jest-axe integrated into shared test utilities
+- [x] At least 5 design system components have a11y tests
+- [x] Playwright E2E accessibility audit covers all main pages
+- [x] CI fails on critical accessibility violations
 
 ---
 
@@ -487,11 +487,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 **Success Criteria:**
 
-- [ ] Skip link component created and exported
-- [ ] Skip link appears on Tab press from page load
-- [ ] Clicking skip link focuses main content
-- [ ] Works correctly across all MFEs
-- [ ] E2E test verifies functionality
+- [x] Skip link component created and exported
+- [x] Skip link appears on Tab press from page load
+- [x] Clicking skip link focuses main content
+- [x] Works correctly across all MFEs
+- [x] E2E test verifies functionality
 
 ---
 
@@ -694,12 +694,12 @@ function PaymentCreateForm() {
 
 **Success Criteria:**
 
-- [ ] useAnnounce hook created and exported
-- [ ] LiveRegion component created and exported
-- [ ] Form submissions announce status
-- [ ] Loading states announce appropriately
-- [ ] Error messages announced to screen readers
-- [ ] Route changes announced (page title)
+- [x] useAnnounce hook created and exported
+- [x] LiveRegion component created and exported
+- [x] Form submissions announce status
+- [x] Loading states announce appropriately
+- [x] Error messages announced to screen readers
+- [x] Route changes announced (page title)
 
 ---
 
