@@ -4,7 +4,7 @@
  * Displays system audit logs with filtering and pagination
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Card,
   CardContent,
@@ -38,10 +38,15 @@ export function AuditLogs() {
   const [selectedLog, setSelectedLog] = useState<AuditLog | null>(null);
   const [availableActions, setAvailableActions] = useState<string[]>([]);
 
+  // Stable callback for closing the modal
+  const handleEscape = useCallback(() => {
+    setSelectedLog(null);
+  }, []);
+
   // Focus trap for the details modal
   const { containerRef: detailsModalRef } = useFocusTrap<HTMLDivElement>({
     isActive: selectedLog !== null,
-    onEscape: () => setSelectedLog(null),
+    onEscape: handleEscape,
   });
 
   // Filters
@@ -455,27 +460,27 @@ export function AuditLogs() {
                     {selectedLog.resourceId}
                   </dd>
                 </div>
+
+                {selectedLog.details && (
+                  <div>
+                    <dt className="text-sm font-medium leading-none">Details</dt>
+                    <dd className="mt-1">
+                      <pre className="p-3 bg-muted border border-border rounded text-xs overflow-auto">
+                        {JSON.stringify(selectedLog.details, null, 2)}
+                      </pre>
+                    </dd>
+                  </div>
+                )}
+
+                {selectedLog.userAgent && (
+                  <div>
+                    <dt className="text-sm font-medium leading-none">User Agent</dt>
+                    <dd className="text-xs text-muted-foreground mt-1 break-all">
+                      {selectedLog.userAgent}
+                    </dd>
+                  </div>
+                )}
               </dl>
-
-              {selectedLog.details && (
-                <div>
-                  <dt className="text-sm font-medium leading-none">Details</dt>
-                  <dd className="mt-1">
-                    <pre className="p-3 bg-muted border border-border rounded text-xs overflow-auto">
-                      {JSON.stringify(selectedLog.details, null, 2)}
-                    </pre>
-                  </dd>
-                </div>
-              )}
-
-              {selectedLog.userAgent && (
-                <div>
-                  <dt className="text-sm font-medium leading-none">User Agent</dt>
-                  <dd className="text-xs text-muted-foreground mt-1 break-all">
-                    {selectedLog.userAgent}
-                  </dd>
-                </div>
-              )}
             </div>
 
             {/* Footer */}

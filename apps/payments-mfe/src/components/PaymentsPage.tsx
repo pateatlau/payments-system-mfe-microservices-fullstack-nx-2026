@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useAuthStore } from 'shared-auth-store';
 import { UserRole } from 'shared-types';
 import {
@@ -43,10 +43,15 @@ function PaymentsPageInner({ onPaymentSuccess }: PaymentsPageProps = {}) {
     null
   );
 
+  // Stable callback for closing the modal
+  const handleEscape = useCallback(() => {
+    setSelectedPaymentId(null);
+  }, []);
+
   // Focus trap for the payment details modal
   const { containerRef: dialogRef } = useFocusTrap<HTMLDivElement>({
     isActive: selectedPaymentId !== null,
-    onEscape: () => setSelectedPaymentId(null),
+    onEscape: handleEscape,
   });
 
   const [filters, setFilters] = useState<UsePaymentsFilters>({

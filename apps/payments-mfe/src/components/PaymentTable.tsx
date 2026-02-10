@@ -131,16 +131,17 @@ export function PaymentTable({
                     <div
                       className="flex flex-col items-center justify-center gap-3 text-center text-muted-foreground"
                       role="status"
-                      aria-label={hasActiveFilters ? 'No payments match your filters' : 'No payments found'}
+                      aria-labelledby="no-payments-title"
+                      aria-describedby="no-payments-hint"
                     >
-                      <p className="text-lg font-semibold">
+                      <p id="no-payments-title" className="text-lg font-semibold">
                         {hasActiveFilters
                           ? 'No payments match your filters'
                           : isVendor
                             ? 'No payments yet. Create the first payment.'
                             : 'No payments found for your account.'}
                       </p>
-                      <p className="text-sm text-muted-foreground">
+                      <p id="no-payments-hint" className="text-sm text-muted-foreground">
                         {hasActiveFilters
                           ? 'Try adjusting or clearing the filters to see more results.'
                           : isVendor

@@ -34,8 +34,10 @@ This document outlines the color contrast requirements and design system colors 
 | `--foreground` | 249 250 251 | #F9FAFB | Primary text | 16.98:1 |
 | `--muted-foreground` | 156 163 175 | #9CA3AF | Secondary text | 6.99:1 |
 | `--border` | 156 163 175 | #9CA3AF | Borders, inputs | 6.99:1 |
-| `--primary` | 26 116 184 | #1A74B8 | Primary actions | 3.58:1 |
-| `--destructive` | 220 38 38 | #DC2626 | Destructive actions | 3.67:1 |
+| `--primary` | 26 116 184 | #1A74B8 | Primary actions (UI elements/large text only) | 3.58:1 ⚠️ |
+| `--destructive` | 220 38 38 | #DC2626 | Destructive actions (UI elements/large text only) | 3.67:1 ⚠️ |
+
+> **⚠️ Note:** The `--primary` and `--destructive` tokens in dark mode do not meet WCAG 2.1 AA requirements (4.5:1) for normal-sized body text. These tokens should only be used for UI elements (buttons, icons, borders) or large text (18px+ or 14px+ bold). For normal-sized text, use `--foreground` or `--muted-foreground` instead.
 
 ### Button Text Contrast
 

@@ -11,7 +11,7 @@
   --muted-foreground: 75 85 99; /* gray-700 for muted text (improved contrast: 5.9:1) */
 
   /* Border colors - WCAG 2.1 AA compliant (3:1 minimum for UI components) */
-  /* Using gray-500 (#6B7280) for 4.15:1 contrast on white */
+  /* Using gray-500 (#6B7280) for 4.8:1 contrast on white */
   --border: 107 114 128; /* gray-500 for borders */
   --input: 107 114 128; /* gray-500 for input borders */
   --ring: 8 70 131; /* primary for focus rings */
@@ -67,7 +67,7 @@
   --muted-foreground: 156 163 175; /* gray-400 for muted text */
 
   /* Border colors - WCAG 2.1 AA compliant (3:1 minimum for UI components) */
-  /* Using gray-400 (#9CA3AF) for 3.67:1 contrast on gray-900 background */
+  /* Using gray-400 (#9CA3AF) for 7:1 contrast on gray-900 background (#111827) */
   --border: 156 163 175; /* gray-400 for borders */
   --input: 156 163 175; /* gray-400 for input borders */
   --ring: 26 116 184; /* primary-400 for focus rings */

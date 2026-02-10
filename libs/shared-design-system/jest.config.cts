@@ -10,6 +10,6 @@ module.exports = {
   setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts'],
   testEnvironment: 'jsdom',
   moduleNameMapper: {
-    '@mfe/shared-utils': '<rootDir>/../shared-utils/src/index.ts',
+    '^@mfe/shared-utils$': '<rootDir>/../shared-utils/src/index.ts',
   },
 };
