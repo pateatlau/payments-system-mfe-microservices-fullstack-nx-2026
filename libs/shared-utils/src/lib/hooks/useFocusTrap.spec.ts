@@ -107,8 +107,8 @@ describe('useFocusTrap', () => {
       document.body.appendChild(outsideButton);
       outsideButton.focus();
 
-      // Render hook
-      const { result } = renderHook(
+      // Render hook with isActive: false initially
+      const { result, rerender } = renderHook(
         ({ isActive }) => useFocusTrap<HTMLDivElement>({ isActive }),
         { initialProps: { isActive: false } }
       );
@@ -117,12 +117,6 @@ describe('useFocusTrap', () => {
       (result.current.containerRef as React.MutableRefObject<HTMLDivElement>).current = container;
 
       // Activate the hook
-      const { rerender } = renderHook(
-        ({ isActive }) => useFocusTrap<HTMLDivElement>({ isActive }),
-        { initialProps: { isActive: false } }
-      );
-
-      (result.current.containerRef as React.MutableRefObject<HTMLDivElement>).current = container;
       rerender({ isActive: true });
 
       // Wait for requestAnimationFrame
