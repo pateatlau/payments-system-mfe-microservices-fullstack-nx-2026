@@ -263,7 +263,14 @@
     "test:a11y:test-utils": "nx test shared-test-utils --testPathPattern=a11y-test-utils",
     "test:a11y:contrast": "npx ts-node libs/shared-test-utils/src/lib/contrast-audit.ts",
     "test:e2e:a11y": "pnpm build:remotes && nx e2e shell-e2e --grep 'Accessibility'",
-    "test:e2e:a11y:audit": "pnpm build:remotes && nx e2e shell-e2e --test-file=a11y-audit.spec.ts"
+    "test:e2e:a11y:audit": "pnpm build:remotes && nx e2e shell-e2e --test-file=a11y-audit.spec.ts",
+    "test:e2e:a11y:auth": "pnpm build:remotes && nx e2e shell-e2e --test-file=a11y/auth-mfe.a11y.spec.ts",
+    "test:e2e:a11y:payments": "pnpm build:remotes && nx e2e shell-e2e --test-file=a11y/payments-mfe.a11y.spec.ts",
+    "test:e2e:a11y:admin": "pnpm build:remotes && nx e2e shell-e2e --test-file=a11y/admin-mfe.a11y.spec.ts",
+    "test:e2e:a11y:profile": "pnpm build:remotes && nx e2e shell-e2e --test-file=a11y/profile-mfe.a11y.spec.ts",
+    "test:e2e:a11y:keyboard": "pnpm build:remotes && nx e2e shell-e2e --test-file=a11y/keyboard-navigation.spec.ts",
+    "test:e2e:a11y:screen-reader": "pnpm build:remotes && nx e2e shell-e2e --test-file=a11y/screen-reader.spec.ts",
+    "test:e2e:a11y:all": "pnpm build:remotes && nx e2e shell-e2e --test-dir=a11y"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.11.0",
