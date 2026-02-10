@@ -47,7 +47,12 @@
 
 **Status:** Complete
 **Completed Date:** 2026-02-10
-**Notes:** Original emergency values (10000r/m, 100000r/m) replaced with production values. Backup not needed as original values were documented in comments. nginx config validated and restarted successfully.
+**Notes:** Original emergency values replaced with production values. nginx config validated and restarted successfully.
+
+**Previous emergency values (for reference):**
+- API: `rate=10000r/m` → now `rate=100r/m`
+- Auth: `rate=10000r/m` → now `rate=10r/m`
+- Static: `rate=100000r/m` → now `rate=1000r/m`
 
 **Files modified:**
 - `nginx/nginx.conf` (lines 50-56)
@@ -138,7 +143,7 @@ Current logging provides sufficient visibility. API Gateway also has its own Pro
 **Notes:**
 
 **Current CSP (from nginx.conf):**
-```
+```nginx
 script-src 'self' 'unsafe-inline' 'unsafe-eval' https://embeddable-sandbox.cdn.apollographql.com
 style-src 'self' 'unsafe-inline' https://embeddable-sandbox.cdn.apollographql.com
 ```
@@ -753,14 +758,14 @@ style-src 'self' 'unsafe-inline' https://embeddable-sandbox.cdn.apollographql.co
 
 | Phase | Description | Sub-tasks Complete | Total | Percentage |
 |-------|-------------|-------------------|-------|------------|
-| Phase 1 | Rate Limiting Restoration | 0 | 4 | 0% |
+| Phase 1 | Rate Limiting Restoration | 4 | 4 | 100% ✅ |
 | Phase 2 | CSP Hardening | 0 | 8 | 0% |
 | Phase 3 | CSRF Protection | 0 | 6 | 0% |
 | Phase 4 | Dependency Security | 0 | 6 | 0% |
 | Phase 5 | XSS Prevention | 0 | 6 | 0% |
 | Phase 6 | Module Federation Security | 0 | 7 | 0% |
 | Phase 7 | Session & Auth Hardening | 0 | 5 | 0% |
-| **Total** | | **0** | **42** | **0%** |
+| **Total** | | **4** | **42** | **10%** |
 
 ---
 
@@ -809,4 +814,4 @@ After all phases complete, run comprehensive security testing:
 ---
 
 **Last Updated:** February 10, 2026
-**Status:** Not Started - Ready for Phase 1
+**Status:** In Progress - Phase 1 complete, Phase 2 pending
