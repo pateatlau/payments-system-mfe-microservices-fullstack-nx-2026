@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Offline - Payments System</title>
-    <style>
+    <style nonce="__CSP_NONCE__">
       * {
         margin: 0;
         padding: 0;
@@ -91,19 +91,24 @@
         It looks like you've lost your internet connection. Don't worry, some
         features may still work from the cache.
       </p>
-      <button class="retry-btn" onclick="window.location.reload()">
+      <button class="retry-btn" id="retry-btn">
         Try Again
       </button>
       <div class="status" id="status"></div>
     </div>
 
-    <script>
+    <script nonce="__CSP_NONCE__">
+      // Retry button click handler (moved from inline onclick for CSP compliance)
+      document.getElementById('retry-btn').addEventListener('click', function() {
+        window.location.reload();
+      });
+
       // Check connection status
       function updateStatus() {
-        const status = document.getElementById('status');
+        var status = document.getElementById('status');
         if (navigator.onLine) {
           status.textContent = '✓ Connection restored';
-          setTimeout(() => {
+          setTimeout(function() {
             window.location.reload();
           }, 1000);
         } else {
@@ -119,7 +124,7 @@
       updateStatus();
 
       // Auto-retry every 10 seconds
-      setInterval(() => {
+      setInterval(function() {
         if (navigator.onLine) {
           window.location.reload();
         }

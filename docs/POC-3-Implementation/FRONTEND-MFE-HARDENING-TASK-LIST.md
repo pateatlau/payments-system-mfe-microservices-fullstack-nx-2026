@@ -230,15 +230,38 @@ Instead of API Gateway (which doesn't serve HTML), we use nginx's `$request_id` 
 
 ### Task 2.3: Remove unsafe-inline from script-src
 
-- [ ] Add nonce to all inline scripts (if any)
-- [ ] Move any inline scripts to external files
-- [ ] Update CSP: replace `'unsafe-inline'` with `'nonce-{NONCE}'`
-- [ ] Test application still works
-- [ ] Verify no CSP violations in browser console
+- [x] Add nonce to all inline scripts (if any)
+- [x] Move any inline scripts to external files
+- [x] Update CSP: replace `'unsafe-inline'` with `'nonce-{NONCE}'`
+- [ ] Test application still works (requires manual verification)
+- [ ] Verify no CSP violations in browser console (requires manual verification)
 
-**Status:** Not Started
-**Completed Date:**
+**Status:** Complete (pending manual verification)
+**Completed Date:** 2026-02-11
 **Notes:**
+
+**Changes made:**
+
+1. **offline.html** - Added nonce placeholders:
+   - `<style nonce="__CSP_NONCE__">` for inline styles
+   - `<script nonce="__CSP_NONCE__">` for inline scripts
+   - Removed inline `onclick` handler, moved to addEventListener
+
+2. **nginx.conf** - Updated script-src CSP directive:
+   - Removed: `'unsafe-inline'`
+   - Added: `'strict-dynamic'` (allows dynamically loaded scripts from trusted sources)
+   - Kept: `'nonce-$csp_nonce'` for nonce-based script allowlisting
+
+**New CSP script-src:**
+```
+script-src 'self' 'nonce-$csp_nonce' 'strict-dynamic' 'unsafe-eval' ...
+```
+
+**Note on 'strict-dynamic':**
+This CSP directive is critical for Module Federation. It allows scripts with a valid nonce to dynamically load other scripts without those scripts needing their own nonce. This is how Module Federation's dynamic imports work.
+
+**Note on GraphQL endpoint:**
+The `/graphql` location keeps `'unsafe-inline'` for Apollo Sandbox compatibility (development tool only).
 
 ---
 
@@ -873,4 +896,4 @@ After all phases complete, run comprehensive security testing:
 ---
 
 **Last Updated:** February 11, 2026
-**Status:** In Progress - Phase 1 complete, Phase 2 Tasks 2.1-2.2 complete
+**Status:** In Progress - Phase 1 complete, Phase 2 Tasks 2.1-2.3 complete
