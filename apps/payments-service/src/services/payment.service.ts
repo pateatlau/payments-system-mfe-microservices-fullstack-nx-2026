@@ -33,6 +33,24 @@ import {
 } from '../events/publisher';
 
 /**
+ * Serialize a payment object for API response
+ * Converts Prisma Decimal to number for JSON serialization
+ */
+function serializePayment<T extends { amount: unknown }>(payment: T): T & { amount: number } {
+  return {
+    ...payment,
+    amount: Number(payment.amount),
+  };
+}
+
+/**
+ * Serialize an array of payments for API response
+ */
+function serializePayments<T extends { amount: unknown }>(payments: T[]): (T & { amount: number })[] {
+  return payments.map(serializePayment);
+}
+
+/**
  * Payment reports data structure
  */
 export interface PaymentReportsData {
@@ -138,7 +156,7 @@ export const paymentService = {
     });
 
     const result = {
-      payments,
+      payments: serializePayments(payments),
       pagination: {
         page,
         limit,
@@ -226,8 +244,10 @@ export const paymentService = {
       }
     }
 
+    const serializedPayment = serializePayment(payment);
+
     // Cache the payment
-    await cache.set(cacheKey, payment, {
+    await cache.set(cacheKey, serializedPayment, {
       ttl: PaymentsCacheTTL.PAYMENT_BY_ID,
       tags: [
         CacheTags.payments,
@@ -236,7 +256,7 @@ export const paymentService = {
       ],
     });
 
-    return payment;
+    return serializedPayment;
   },
 
   /**
@@ -342,7 +362,7 @@ export const paymentService = {
       console.error('[Payments Service] Failed to publish payment.created event:', error);
     }
 
-    return payment;
+    return serializePayment(payment);
   },
 
   /**
@@ -458,7 +478,7 @@ export const paymentService = {
     // Also invalidate global payments caches (e.g., admin lists)
     await cache.invalidateByTag(CacheTags.payments);
 
-    return updatedPayment;
+    return serializePayment(updatedPayment);
   },
 
   /**
@@ -574,7 +594,7 @@ export const paymentService = {
       console.error('[Payments Service] Failed to publish payment status event:', error);
     }
 
-    return updatedPayment;
+    return serializePayment(updatedPayment);
   },
 
   /**
