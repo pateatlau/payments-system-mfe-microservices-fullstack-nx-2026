@@ -47,6 +47,7 @@ import { generalRateLimiter } from './middleware/rateLimit';
 import { requestLogger } from './utils/logger';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 import healthRoutes from './routes/health';
+import cspRoutes from './routes/csp';
 import proxyRoutes from './routes/proxy-routes';
 import { logger } from './utils/logger';
 import { createWebSocketServer } from './websocket/server';
@@ -141,6 +142,11 @@ app.use(requestLimits);
 app.use('/health', express.json());
 app.use('/health', express.urlencoded({ extended: true }));
 app.use(healthRoutes);
+
+// CSP violation reporting endpoint (no auth required)
+// Body parsing is handled within cspRoutes for the specific endpoint only
+// to avoid breaking streaming proxy handlers that rely on req.pipe()
+app.use('/api', cspRoutes);
 
 // Swagger UI (no auth required) - serves at /api-docs
 setupSwagger(app);

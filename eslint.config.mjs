@@ -95,6 +95,29 @@ export default tseslint.config(
     },
   },
   {
+    // Node.js build plugins (Rspack, Webpack plugins)
+    files: ['**/plugins/**/*.js'],
+    languageOptions: {
+      globals: {
+        require: 'readonly',
+        module: 'readonly',
+        exports: 'readonly',
+        __dirname: 'readonly',
+        __filename: 'readonly',
+        process: 'readonly',
+        console: 'readonly',
+      },
+      ecmaVersion: 'latest',
+      sourceType: 'script', // CommonJS
+    },
+    rules: {
+      '@typescript-eslint/no-require-imports': 'off',
+      'no-undef': 'off', // Node.js globals are defined above
+      '@typescript-eslint/no-var-requires': 'off',
+      'no-console': 'off', // Build plugins may need console output
+    },
+  },
+  {
     ignores: [
       'node_modules/**',
       'dist/**',

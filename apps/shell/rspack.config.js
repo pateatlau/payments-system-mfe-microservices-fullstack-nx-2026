@@ -21,6 +21,7 @@
 const rspack = require('@rspack/core');
 const path = require('path');
 const ReactRefreshPlugin = require('@rspack/plugin-react-refresh');
+const CspNoncePlugin = require('./plugins/csp-nonce-plugin');
 
 // Check if running in HTTPS mode (via nginx proxy)
 const isHttpsMode = process.env.NX_HTTPS_MODE === 'true';
@@ -318,6 +319,11 @@ module.exports = {
       template: path.resolve(__dirname, 'index.html'),
       inject: 'body',
       scriptLoading: 'defer',
+    }),
+    // CSP Nonce injection - adds nonce="__CSP_NONCE__" to script/style tags
+    // nginx's sub_filter replaces placeholder with unique per-request value
+    new CspNoncePlugin({
+      placeholder: '__CSP_NONCE__',
     }),
     // Module Federation Plugin - Shell acts as HOST consuming remote MFEs
     new rspack.container.ModuleFederationPlugin({
