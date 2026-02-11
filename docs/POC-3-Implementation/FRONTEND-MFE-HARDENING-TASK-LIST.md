@@ -807,17 +807,26 @@ Search for `fetch(` and `axios.` in all MFE source files found:
 
 ### Task 4.3: Add npm Audit to CI Pipeline
 
-- [ ] Add `pnpm audit --audit-level=high` to CI workflow
-- [ ] Configure to fail build on high/critical vulnerabilities
-- [ ] Add audit results to PR comments (optional)
-- [ ] Test CI catches vulnerabilities
+- [x] Add `pnpm audit --audit-level=high` to CI workflow
+- [x] Configure to fail build on high/critical vulnerabilities
+- [ ] Add audit results to PR comments (optional) - skipped, not essential
+- [x] Test CI catches vulnerabilities
 
-**Status:** Not Started
-**Completed Date:**
+**Status:** Complete
+**Completed Date:** 2026-02-12
 **Notes:**
 
-**File to modify:**
-- `.github/workflows/ci.yml`
+**Changes to `.github/workflows/ci.yml`:**
+- Updated Job 8 (Security Scan) to use `pnpm audit` instead of `npm audit`
+- Added pnpm setup steps (Node.js, pnpm, cache) to security-scan job
+- Configured `pnpm audit --audit-level=high` to fail on HIGH/CRITICAL vulnerabilities
+- Removed `continue-on-error: true` so the build fails on vulnerabilities
+- Increased timeout from 10 to 15 minutes to account for dependency installation
+
+**Behavior:**
+- CI will **fail** if HIGH or CRITICAL vulnerabilities are found
+- Moderate and low vulnerabilities are reported but don't fail the build
+- Trivy scanner also runs for additional security coverage
 
 ---
 
