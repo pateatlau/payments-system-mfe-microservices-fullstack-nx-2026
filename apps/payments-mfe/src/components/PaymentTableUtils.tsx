@@ -21,17 +21,41 @@ export interface PaymentWithParties extends Payment {
   recipient?: PartyInfo | null;
 }
 
-function formatCurrency(amount: number, currency: string): string {
+function formatCurrency(amount: number | string, currency: string): string {
+  // Handle undefined, null, or invalid values
+  if (amount === undefined || amount === null || currency === undefined) {
+    return '-';
+  }
+
+  // Convert string to number if needed (Prisma Decimal comes as string in JSON)
+  const numericAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
+
+  // Handle NaN
+  if (isNaN(numericAmount)) {
+    return '-';
+  }
+
   // Use en-IN locale for INR, otherwise use en-US for other currencies
   const locale = currency === 'INR' ? 'en-IN' : 'en-US';
   return new Intl.NumberFormat(locale, {
     style: 'currency',
     currency,
-  }).format(amount);
+  }).format(numericAmount);
 }
 
-function formatDate(dateString: string): string {
+function formatDate(dateString: string | undefined | null): string {
+  // Handle undefined, null, or empty values
+  if (!dateString) {
+    return '-';
+  }
+
   const date = new Date(dateString);
+
+  // Handle invalid date
+  if (isNaN(date.getTime())) {
+    return '-';
+  }
+
   const day = date.getDate().toString().padStart(2, '0');
   const month = date.toLocaleDateString('en-IN', { month: 'short' });
   const year = date.getFullYear();
