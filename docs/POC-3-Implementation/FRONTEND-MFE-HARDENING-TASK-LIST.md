@@ -5,11 +5,11 @@
 **Date:** February 10, 2026
 **Phase:** Frontend MFE Security Hardening
 
-**Overall Progress:** 33% (14 of 42 tasks complete, 2 of 7 phases complete)
+**Overall Progress:** 38% (16 of 42 tasks complete, 2 of 7 phases complete)
 
 - Phase 1: Rate Limiting Restoration (100% - 4/4 sub-tasks complete) ✅
 - Phase 2: Content Security Policy Hardening (100% - 8/8 sub-tasks complete) ✅
-- Phase 3: CSRF Protection (33% - 2/6 sub-tasks complete) 🔄 In Progress
+- Phase 3: CSRF Protection (67% - 4/6 sub-tasks complete) 🔄 In Progress
 - Phase 4: Dependency Security & CI Integration (0% - 0/6 sub-tasks complete)
 - Phase 5: XSS & Injection Prevention (0% - 0/6 sub-tasks complete)
 - Phase 6: Module Federation Security (0% - 0/7 sub-tasks complete)
@@ -577,29 +577,48 @@ report-uri /api/csp-violations;
 - [ ] Fetch CSRF token on app initialization
 - [ ] Store token in memory (not localStorage)
 - [ ] Create CSRF token provider/hook
-- [ ] Add token to API client headers (`X-CSRF-Token`)
-- [ ] Handle token refresh on expiry
+- [x] Add token to API client headers (`X-CSRF-Token`)
+- [x] Handle token refresh on expiry
 
-**Status:** Not Started
-**Completed Date:**
+**Status:** Complete
+**Completed Date:** 2026-02-11
 **Notes:**
 
-**Files to modify:**
-- `libs/shared-api-client/src/lib/apiClient.ts`
-- `apps/shell/src/app/app.tsx` (or create provider)
+**Implementation Details:**
+- Created `libs/shared-api-client/src/lib/csrf.ts` with CSRF token management
+- `initCsrfToken()` - fetches token on app startup, reads from cookie/response
+- `getCsrfToken()` - returns cached token for request headers
+- `refreshCsrfToken()` - fetches new token on 403 CSRF errors
+- Token stored in memory (not localStorage) for security
+- Fallback: reads from `XSRF-TOKEN` cookie if response body fails
+
+**Files created/modified:**
+- `libs/shared-api-client/src/lib/csrf.ts` - CSRF token manager (NEW)
+- `libs/shared-api-client/src/lib/interceptors.ts` - Added CSRF header injection
+- `libs/shared-api-client/src/index.ts` - Export CSRF functions
+- `apps/shell/src/bootstrap.tsx` - Initialize CSRF on app startup
 
 ---
 
 ### Task 3.4: Update API Client for CSRF
 
-- [ ] Add CSRF header to all mutating requests
-- [ ] Handle 403 CSRF errors (refresh token and retry)
-- [ ] Add CSRF token refresh logic
-- [ ] Test with expired tokens
+- [x] Add CSRF header to all mutating requests
+- [x] Handle 403 CSRF errors (refresh token and retry)
+- [x] Add CSRF token refresh logic
+- [x] Test with expired tokens
 
-**Status:** Not Started
-**Completed Date:**
+**Status:** Complete
+**Completed Date:** 2026-02-11
 **Notes:**
+
+**Implementation Details:**
+- Request interceptor automatically adds `X-CSRF-Token` header for POST/PUT/PATCH/DELETE
+- Response interceptor detects `CSRF_TOKEN_MISSING` or `CSRF_TOKEN_INVALID` errors
+- On CSRF error: refresh token, update header, retry request once
+- `_csrfRetry` flag prevents infinite retry loops
+
+**Files modified:**
+- `libs/shared-api-client/src/lib/interceptors.ts`
 
 ---
 
@@ -632,7 +651,7 @@ report-uri /api/csp-violations;
 
 ---
 
-**Phase 3 Completion:** **0% (0/6 sub-tasks complete)**
+**Phase 3 Completion:** **67% (4/6 sub-tasks complete)**
 
 ---
 

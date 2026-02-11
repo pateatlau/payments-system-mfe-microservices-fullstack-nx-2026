@@ -15,6 +15,7 @@ import {
   clearUser,
   setTag,
 } from '@mfe-poc/shared-observability';
+import { initCsrfToken } from '@mfe/shared-api-client';
 
 // Import remote components
 // This file (bootstrap.tsx) is dynamically imported, providing the async boundary
@@ -116,6 +117,17 @@ async function bootstrap() {
   } catch (error) {
     console.warn(
       'Theme initialization failed, continuing with defaults.',
+      error
+    );
+  }
+
+  // Initialize CSRF token for protection against CSRF attacks
+  // This ensures the token is available before any API calls are made
+  try {
+    await initCsrfToken();
+  } catch (error) {
+    console.warn(
+      'CSRF token initialization failed, will retry on first API call.',
       error
     );
   }

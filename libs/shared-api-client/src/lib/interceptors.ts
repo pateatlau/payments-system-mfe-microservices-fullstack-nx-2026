@@ -3,7 +3,9 @@
  *
  * Handles:
  * - Request interceptor: Adds JWT token to Authorization header
+ * - Request interceptor: Adds CSRF token to X-CSRF-Token header for mutations
  * - Response interceptor: Handles errors, token refresh, and retry logic
+ * - Response interceptor: Handles CSRF token refresh on 403 errors
  */
 
 import {
@@ -12,6 +14,12 @@ import {
   AxiosResponse,
   AxiosError,
 } from 'axios';
+import {
+  getCsrfToken,
+  refreshCsrfToken,
+  requiresCsrfToken,
+  CSRF_HEADER_NAME,
+} from './csrf';
 
 /**
  * Token management interface for interceptors
@@ -146,6 +154,15 @@ function setupRequestInterceptor(
       const token = tokenManager.getAccessToken();
       addTokenToRequest(config, token);
 
+      // Add CSRF token for state-changing requests (POST, PUT, PATCH, DELETE)
+      const method = config.method?.toUpperCase() || 'GET';
+      if (requiresCsrfToken(method)) {
+        const csrfToken = getCsrfToken();
+        if (csrfToken && config.headers) {
+          config.headers[CSRF_HEADER_NAME] = csrfToken;
+        }
+      }
+
       // Add request ID for tracing (optional)
       if (!config.headers['X-Request-ID']) {
         // Use a simple UUID v4 generator or fallback
@@ -270,6 +287,57 @@ function setupResponseInterceptor(
 
           // Don't retry if refresh failed
           return Promise.reject(refreshError);
+        }
+      }
+
+      // Handle 403 Forbidden - could be CSRF error
+      if (error.response?.status === 403 && originalRequest) {
+        const apiError = error.response.data as {
+          error?: {
+            code: string;
+            message: string;
+          };
+        };
+
+        // Check if it's a CSRF error
+        const errorCode = apiError?.error?.code;
+        if (
+          errorCode === 'CSRF_TOKEN_MISSING' ||
+          errorCode === 'CSRF_TOKEN_INVALID'
+        ) {
+          // Check if we already retried CSRF refresh
+          if ((originalRequest as { _csrfRetry?: boolean })._csrfRetry) {
+            // Already retried, don't retry again
+            const csrfError = new Error(
+              apiError.error?.message || 'CSRF validation failed'
+            );
+            (csrfError as Error & { code?: string }).code = errorCode;
+            return Promise.reject(csrfError);
+          }
+
+          // Mark as CSRF retry attempt
+          (originalRequest as { _csrfRetry?: boolean })._csrfRetry = true;
+
+          try {
+            // Refresh CSRF token
+            const newCsrfToken = await refreshCsrfToken(baseURL);
+
+            if (newCsrfToken && originalRequest.headers) {
+              // Update header with new token
+              originalRequest.headers[CSRF_HEADER_NAME] = newCsrfToken;
+              // Retry the request
+              return axiosInstance(originalRequest);
+            }
+          } catch (csrfRefreshError) {
+            console.warn('[CSRF] Failed to refresh CSRF token:', csrfRefreshError);
+          }
+
+          // CSRF refresh failed, reject with original error
+          const csrfError = new Error(
+            apiError.error?.message || 'CSRF validation failed'
+          );
+          (csrfError as Error & { code?: string }).code = errorCode;
+          return Promise.reject(csrfError);
         }
       }
 
