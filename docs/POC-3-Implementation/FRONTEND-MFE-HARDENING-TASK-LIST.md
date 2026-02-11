@@ -912,18 +912,38 @@ Search for `fetch(` and `axios.` in all MFE source files found:
 
 ### Task 4.6: Lock File Integrity
 
-- [ ] Verify `pnpm-lock.yaml` is committed
-- [ ] Add CI check for lock file integrity
-- [ ] Document lock file update process
-- [ ] Ensure `pnpm install --frozen-lockfile` used in CI
+- [x] Verify `pnpm-lock.yaml` is committed
+- [x] Add CI check for lock file integrity
+- [x] Document lock file update process
+- [x] Ensure `pnpm install --frozen-lockfile` used in CI
 
-**Status:** Not Started
-**Completed Date:**
+**Status:** Complete
+**Completed Date:** 2026-02-12
 **Notes:**
+
+**Lock File Status:**
+- ✅ `pnpm-lock.yaml` is tracked in git
+- ✅ All CI jobs use `pnpm install --frozen-lockfile --prefer-offline`
+- ✅ CI will fail if lock file is out of sync with package.json
+
+**Lock File Update Process:**
+1. Developer updates `package.json` (add/remove/update dependency)
+2. Run `pnpm install` locally to update `pnpm-lock.yaml`
+3. Commit both `package.json` and `pnpm-lock.yaml` together
+4. CI verifies lock file integrity with `--frozen-lockfile`
+
+**CI Jobs Using `--frozen-lockfile`:**
+- lint-and-typecheck (line 69)
+- test-frontend (line 156)
+- test-backend (line 340)
+- test-accessibility (line 414)
+- build (line 473)
+- e2e-tests (line 651)
+- security-scan (line 893)
 
 ---
 
-**Phase 4 Completion:** **0% (0/6 sub-tasks complete)**
+**Phase 4 Completion:** **100% (6/6 sub-tasks complete)**
 
 ---
 
