@@ -917,6 +917,22 @@ jobs:
           pnpm audit --audit-level=high
           echo "✅ No high/critical vulnerabilities found"
 
+      - name: Check license compliance
+        # Fails if GPL or other copyleft licenses are found (excluding dev dependencies)
+        # Permissive licenses allowed: MIT, Apache-2.0, BSD, ISC, 0BSD, CC0, Unlicense, MPL-2.0
+        run: |
+          echo "=== Running license compliance check ==="
+          npx license-checker --summary
+          # Check for problematic licenses (GPL, LGPL, AGPL)
+          # Exclude our own UNLICENSED project
+          PROBLEMATIC=$(npx license-checker --json | jq -r 'to_entries[] | select(.value.licenses | test("GPL|LGPL|AGPL"; "i")) | select(.key | test("payments-system") | not) | .key' 2>/dev/null || echo "")
+          if [ -n "$PROBLEMATIC" ]; then
+            echo "❌ Found problematic licenses:"
+            echo "$PROBLEMATIC"
+            exit 1
+          fi
+          echo "✅ No problematic licenses found"
+
   # Job 9: Report Status
   ci-status:
     name: CI Status Check
