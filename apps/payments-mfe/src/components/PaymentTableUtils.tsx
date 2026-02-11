@@ -21,13 +21,23 @@ export interface PaymentWithParties extends Payment {
   recipient?: PartyInfo | null;
 }
 
-function formatCurrency(amount: number, currency: string): string {
+function formatCurrency(amount: number | string, currency: string): string {
+  // Convert string to number if needed (Prisma Decimal comes as string in JSON)
+  const numericAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
+
+  // Guard against NaN - return placeholder if parsing failed
+  if (!Number.isFinite(numericAmount)) {
+    return '-';
+  }
+
   // Use en-IN locale for INR, otherwise use en-US for other currencies
   const locale = currency === 'INR' ? 'en-IN' : 'en-US';
   return new Intl.NumberFormat(locale, {
     style: 'currency',
     currency,
-  }).format(amount);
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(numericAmount);
 }
 
 function formatDate(dateString: string): string {

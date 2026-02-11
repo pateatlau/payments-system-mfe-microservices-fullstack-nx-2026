@@ -858,11 +858,39 @@ jobs:
   security-scan:
     name: Security Scan
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+            node_modules
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --prefer-offline
 
       - name: Run Trivy vulnerability scanner
         # Pin to specific version for security and reproducibility
@@ -881,11 +909,29 @@ jobs:
         with:
           sarif_file: 'trivy-results.sarif'
 
-      - name: Run npm audit
-        # Note: continue-on-error allows pipeline to pass even with known vulnerabilities
-        # Remove this when all HIGH/CRITICAL vulnerabilities are resolved
-        continue-on-error: true
-        run: npm audit --audit-level=high
+      - name: Run pnpm audit (fail on high/critical)
+        # Fails the build if HIGH or CRITICAL vulnerabilities are found
+        # Moderate and low vulnerabilities are reported but don't fail the build
+        run: |
+          echo "=== Running pnpm audit ==="
+          pnpm audit --audit-level=high
+          echo "✅ No high/critical vulnerabilities found"
+
+      - name: Check license compliance
+        # Fails if GPL or other copyleft licenses are found in production dependencies
+        # Permissive licenses allowed: MIT, Apache-2.0, BSD, ISC, 0BSD, CC0, Unlicense, MPL-2.0
+        run: |
+          echo "=== Running license compliance check (production dependencies only) ==="
+          npx license-checker --production --summary
+          # Check for problematic licenses (GPL, LGPL, AGPL)
+          # Exclude our own UNLICENSED project
+          PROBLEMATIC=$(npx license-checker --production --json | jq -r 'to_entries[] | select(.value.licenses | test("GPL|LGPL|AGPL"; "i")) | select(.key | test("payments-system") | not) | .key')
+          if [ -n "$PROBLEMATIC" ]; then
+            echo "❌ Found problematic licenses:"
+            echo "$PROBLEMATIC"
+            exit 1
+          fi
+          echo "✅ No problematic licenses found"
 
   # Job 9: Report Status
   ci-status:
