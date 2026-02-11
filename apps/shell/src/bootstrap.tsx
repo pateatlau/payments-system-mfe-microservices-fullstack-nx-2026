@@ -15,6 +15,7 @@ import {
   clearUser,
   setTag,
 } from '@mfe-poc/shared-observability';
+import { initCsrfToken } from '@mfe/shared-api-client';
 
 // Import remote components
 // This file (bootstrap.tsx) is dynamically imported, providing the async boundary
@@ -119,6 +120,16 @@ async function bootstrap() {
       error
     );
   }
+
+  // Initialize CSRF token for protection against CSRF attacks
+  // Non-blocking: token will be fetched, but we don't wait for it
+  // If token isn't ready by first API call, it will be fetched then
+  initCsrfToken().catch(error => {
+    console.warn(
+      'CSRF token initialization failed, will retry on first API call.',
+      error
+    );
+  });
 
   const root = ReactDOM.createRoot(
     document.getElementById('root') as HTMLElement
