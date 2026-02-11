@@ -765,15 +765,43 @@ Search for `fetch(` and `axios.` in all MFE source files found:
 
 ### Task 4.2: Fix Critical/High Vulnerabilities
 
-- [ ] Update packages with critical vulnerabilities
-- [ ] Update packages with high vulnerabilities
-- [ ] Test application after updates
-- [ ] Document any packages that can't be updated (and why)
-- [ ] Re-run audit to confirm fixes
+- [x] Update packages with critical vulnerabilities
+- [x] Update packages with high vulnerabilities
+- [x] Test application after updates
+- [x] Document any packages that can't be updated (and why)
+- [x] Re-run audit to confirm fixes
 
-**Status:** Not Started
-**Completed Date:**
+**Status:** Complete
+**Completed Date:** 2026-02-11
 **Notes:**
+
+**Direct Dependencies Updated:**
+
+| Package | Before | After | Vulnerabilities Fixed |
+|---------|--------|-------|----------------------|
+| react-router | 7.10.1 | 7.13.0 | XSS via Open Redirects, SSR XSS, CSRF |
+| react-router-dom | 7.10.1 | 7.13.0 | (same as above) |
+| @apollo/server | 5.2.0 | 5.4.0 | DoS with startStandaloneServer |
+| axios | 1.13.2 | 1.13.5 | DoS via __proto__ in mergeConfig |
+
+**Transitive Dependencies Fixed via pnpm overrides:**
+
+| Package | Override | Vulnerabilities Fixed |
+|---------|----------|----------------------|
+| qs | >=6.14.1 | DoS via memory exhaustion |
+
+**Remaining Vulnerabilities (all moderate/low, transitive):**
+
+| Severity | Package | Reason Cannot Update |
+|----------|---------|---------------------|
+| MODERATE | esbuild | Transitive via @nx/esbuild, @module-federation - waiting for upstream |
+| MODERATE | lodash | Transitive via geoip-lite - waiting for upstream |
+| LOW | diff | Transitive via ts-node - waiting for upstream |
+| LOW | webpack x2 | Transitive via @module-federation/enhanced - waiting for upstream |
+
+**Test Results:**
+- Build: ✅ Successful (`pnpm build:shell`)
+- Tests: 105 passed, 2 failed (pre-existing failures, not caused by updates)
 
 ---
 
