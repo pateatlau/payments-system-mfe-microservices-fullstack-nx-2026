@@ -520,15 +520,27 @@ export const paymentService = {
       }
     }
 
-    // Update payment
-    // Note: sender/recipient relations removed - users are in auth-service (POC-3)
-    // User details should be fetched from Auth Service API if needed
+    // Update payment with sender/recipient relations for consistent API response
     const updatedPayment = await db.payment.update({
       where: { id: paymentId },
       data: {
         status: data.status,
         completedAt:
           data.status === 'completed' ? new Date() : payment.completedAt,
+      },
+      include: {
+        sender: {
+          select: {
+            id: true,
+            email: true,
+          },
+        },
+        recipient: {
+          select: {
+            id: true,
+            email: true,
+          },
+        },
       },
     });
 

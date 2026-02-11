@@ -918,14 +918,14 @@ jobs:
           echo "✅ No high/critical vulnerabilities found"
 
       - name: Check license compliance
-        # Fails if GPL or other copyleft licenses are found (excluding dev dependencies)
+        # Fails if GPL or other copyleft licenses are found in production dependencies
         # Permissive licenses allowed: MIT, Apache-2.0, BSD, ISC, 0BSD, CC0, Unlicense, MPL-2.0
         run: |
-          echo "=== Running license compliance check ==="
-          npx license-checker --summary
+          echo "=== Running license compliance check (production dependencies only) ==="
+          npx license-checker --production --summary
           # Check for problematic licenses (GPL, LGPL, AGPL)
           # Exclude our own UNLICENSED project
-          PROBLEMATIC=$(npx license-checker --json | jq -r 'to_entries[] | select(.value.licenses | test("GPL|LGPL|AGPL"; "i")) | select(.key | test("payments-system") | not) | .key' 2>/dev/null || echo "")
+          PROBLEMATIC=$(npx license-checker --production --json | jq -r 'to_entries[] | select(.value.licenses | test("GPL|LGPL|AGPL"; "i")) | select(.key | test("payments-system") | not) | .key')
           if [ -n "$PROBLEMATIC" ]; then
             echo "❌ Found problematic licenses:"
             echo "$PROBLEMATIC"
