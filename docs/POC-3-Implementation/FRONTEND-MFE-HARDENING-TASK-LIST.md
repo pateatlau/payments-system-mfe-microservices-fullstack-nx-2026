@@ -832,15 +832,43 @@ Search for `fetch(` and `axios.` in all MFE source files found:
 
 ### Task 4.4: Configure Dependabot or Renovate
 
-- [ ] Create `.github/dependabot.yml` configuration
-- [ ] Configure weekly security updates
-- [ ] Configure grouping for related packages
-- [ ] Set up auto-merge for patch updates (optional)
-- [ ] Test Dependabot creates PRs
+- [x] Create `.github/dependabot.yml` configuration
+- [x] Configure weekly security updates
+- [x] Configure grouping for related packages
+- [ ] Set up auto-merge for patch updates (optional) - skipped, requires admin approval workflow
+- [ ] Test Dependabot creates PRs - will test after merge to main
 
-**Status:** Not Started
-**Completed Date:**
+**Status:** Complete
+**Completed Date:** 2026-02-12
 **Notes:**
+
+**Created `.github/dependabot.yml` with:**
+
+**Package Ecosystems:**
+- `npm` - For pnpm dependencies (weekly, Monday 9am IST)
+- `github-actions` - For CI workflow actions
+- `docker` - For Dockerfile base images
+
+**Dependency Groups (to reduce PR noise):**
+- `react` - React, React DOM, React Router
+- `testing` - Jest, Testing Library, Playwright
+- `nx` - Nx monorepo tools
+- `module-federation` - Module Federation packages
+- `build-tools` - Rspack, TypeScript, esbuild, Tailwind
+- `backend` - Express ecosystem
+- `database` - Prisma
+- `observability` - OpenTelemetry, Sentry, Winston
+- `graphql` - Apollo, GraphQL tools
+- `linting` - ESLint, Prettier
+- `types` - @types/* packages
+
+**Ignored Updates (require manual review):**
+- Major version updates for React, React DOM, Nx (breaking changes)
+
+**Settings:**
+- 10 open PRs limit for npm
+- Commit prefixes: `chore(deps)`, `chore(deps-dev)`, `chore(ci)`, `chore(docker)`
+- Labels: `dependencies`, `security`
 
 ---
 

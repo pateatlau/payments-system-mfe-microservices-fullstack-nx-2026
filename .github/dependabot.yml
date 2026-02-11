@@ -1,0 +1,174 @@
+# Dependabot Configuration
+# Automatically creates PRs for security updates and dependency updates
+# https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+
+version: 2
+updates:
+  # npm dependencies (pnpm uses npm ecosystem)
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Kolkata"
+    open-pull-requests-limit: 10
+
+    # Commit message settings
+    commit-message:
+      prefix: "chore(deps)"
+      prefix-development: "chore(deps-dev)"
+      include: "scope"
+
+    # Labels for PRs
+    labels:
+      - "dependencies"
+      - "security"
+
+    # Reviewers (optional - uncomment and add your team)
+    # reviewers:
+    #   - "your-team"
+
+    # Group related dependencies to reduce PR noise
+    groups:
+      # React ecosystem
+      react:
+        patterns:
+          - "react"
+          - "react-dom"
+          - "react-router"
+          - "react-router-dom"
+          - "@types/react"
+          - "@types/react-dom"
+
+      # Testing libraries
+      testing:
+        patterns:
+          - "jest"
+          - "@jest/*"
+          - "@testing-library/*"
+          - "playwright"
+          - "@playwright/*"
+        update-types:
+          - "minor"
+          - "patch"
+
+      # Nx monorepo tools
+      nx:
+        patterns:
+          - "nx"
+          - "@nx/*"
+          - "@nrwl/*"
+
+      # Module Federation
+      module-federation:
+        patterns:
+          - "@module-federation/*"
+
+      # Build tools
+      build-tools:
+        patterns:
+          - "@rspack/*"
+          - "typescript"
+          - "esbuild"
+          - "postcss"
+          - "tailwindcss"
+          - "@tailwindcss/*"
+        update-types:
+          - "minor"
+          - "patch"
+
+      # Backend/Express
+      backend:
+        patterns:
+          - "express"
+          - "express-*"
+          - "@types/express"
+          - "cors"
+          - "helmet"
+
+      # Database
+      database:
+        patterns:
+          - "prisma"
+          - "@prisma/*"
+
+      # Observability
+      observability:
+        patterns:
+          - "@opentelemetry/*"
+          - "@sentry/*"
+          - "prom-client"
+          - "winston"
+
+      # GraphQL
+      graphql:
+        patterns:
+          - "graphql"
+          - "@apollo/*"
+          - "@graphql-tools/*"
+
+      # Linting and formatting
+      linting:
+        patterns:
+          - "eslint"
+          - "eslint-*"
+          - "@typescript-eslint/*"
+          - "prettier"
+        update-types:
+          - "minor"
+          - "patch"
+
+      # Type definitions (low priority)
+      types:
+        patterns:
+          - "@types/*"
+        update-types:
+          - "minor"
+          - "patch"
+
+    # Ignore specific packages that require manual review
+    ignore:
+      # Major version updates require careful review
+      - dependency-name: "react"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react-dom"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "nx"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@nx/*"
+        update-types: ["version-update:semver-major"]
+
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Kolkata"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "chore(ci)"
+    labels:
+      - "dependencies"
+      - "ci"
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+
+  # Docker (if using Dockerfiles)
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Kolkata"
+    open-pull-requests-limit: 3
+    commit-message:
+      prefix: "chore(docker)"
+    labels:
+      - "dependencies"
+      - "docker"
