@@ -144,8 +144,8 @@ app.use('/health', express.urlencoded({ extended: true }));
 app.use(healthRoutes);
 
 // CSP violation reporting endpoint (no auth required)
-// Browsers send CSP reports with Content-Type: application/csp-report
-app.use('/api', express.json({ type: ['application/json', 'application/csp-report'] }));
+// Body parsing is handled within cspRoutes for the specific endpoint only
+// to avoid breaking streaming proxy handlers that rely on req.pipe()
 app.use('/api', cspRoutes);
 
 // Swagger UI (no auth required) - serves at /api-docs

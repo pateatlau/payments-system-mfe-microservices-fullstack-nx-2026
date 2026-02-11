@@ -37,9 +37,20 @@
  */
 
 import { Router, Request, Response } from 'express';
+import express from 'express';
 import { logger } from '../utils/logger';
 
 const router = Router();
+
+/**
+ * Body parser for CSP reports only
+ * Applied only to this router, not globally on /api
+ * This prevents breaking streaming proxy handlers that rely on req.pipe()
+ */
+const cspBodyParser = express.json({
+  type: ['application/json', 'application/csp-report'],
+  limit: '16kb', // CSP reports are small
+});
 
 /**
  * CSP Report structure (report-uri format)
@@ -63,7 +74,7 @@ interface CspReport {
  * Receives CSP violation reports from browsers.
  * Content-Type: application/csp-report or application/json
  */
-router.post('/csp-violations', (req: Request, res: Response) => {
+router.post('/csp-violations', cspBodyParser, (req: Request, res: Response) => {
   try {
     // Extract the CSP report from the request body
     // Browsers send either { "csp-report": {...} } or the report directly
