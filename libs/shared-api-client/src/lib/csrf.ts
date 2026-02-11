@@ -53,35 +53,52 @@ export async function fetchCsrfToken(baseURL?: string): Promise<string | null> {
     // Resolve base URL
     const apiUrl = baseURL || resolveApiUrl();
 
-    const response = await fetch(`${apiUrl}/csrf-token`, {
-      method: 'GET',
-      credentials: 'include', // Include cookies for CORS
-      headers: {
-        Accept: 'application/json',
-      },
-    });
+    // Create abort controller with timeout to prevent blocking app startup
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
 
-    if (!response.ok) {
-      console.warn('[CSRF] Failed to fetch CSRF token:', response.status);
-      return null;
-    }
+    try {
+      const response = await fetch(`${apiUrl}/csrf-token`, {
+        method: 'GET',
+        credentials: 'include', // Include cookies for CORS
+        headers: {
+          Accept: 'application/json',
+        },
+        signal: controller.signal,
+      });
 
-    const data = (await response.json()) as {
-      success: boolean;
-      data?: {
-        token: string;
-        headerName: string;
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        console.warn('[CSRF] Failed to fetch CSRF token:', response.status);
+        return null;
+      }
+
+      const data = (await response.json()) as {
+        success: boolean;
+        data?: {
+          token: string;
+          headerName: string;
+        };
       };
-    };
 
-    if (data.success && data.data?.token) {
-      return data.data.token;
+      if (data.success && data.data?.token) {
+        return data.data.token;
+      }
+
+      // Fallback: try to read from cookie (backend sets it)
+      return getTokenFromCookie();
+    } catch (fetchError) {
+      clearTimeout(timeoutId);
+      throw fetchError;
     }
-
-    // Fallback: try to read from cookie (backend sets it)
-    return getTokenFromCookie();
   } catch (error) {
-    console.warn('[CSRF] Error fetching CSRF token:', error);
+    // Handle abort/timeout gracefully
+    if (error instanceof Error && error.name === 'AbortError') {
+      console.warn('[CSRF] CSRF token fetch timed out, will retry on first API call');
+    } else {
+      console.warn('[CSRF] Error fetching CSRF token:', error);
+    }
     // Fallback: try to read from cookie
     return getTokenFromCookie();
   }

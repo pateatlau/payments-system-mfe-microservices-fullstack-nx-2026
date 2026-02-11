@@ -122,15 +122,14 @@ async function bootstrap() {
   }
 
   // Initialize CSRF token for protection against CSRF attacks
-  // This ensures the token is available before any API calls are made
-  try {
-    await initCsrfToken();
-  } catch (error) {
+  // Non-blocking: token will be fetched, but we don't wait for it
+  // If token isn't ready by first API call, it will be fetched then
+  initCsrfToken().catch(error => {
     console.warn(
       'CSRF token initialization failed, will retry on first API call.',
       error
     );
-  }
+  });
 
   const root = ReactDOM.createRoot(
     document.getElementById('root') as HTMLElement
