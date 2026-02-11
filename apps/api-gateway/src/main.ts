@@ -16,6 +16,7 @@
  * ✅ Header forwarding (X-Forwarded-*)
  * ✅ Swagger UI (/api-docs)
  * ✅ GraphQL API (/graphql)
+ * ✅ CSRF protection (double-submit cookie pattern)
  *
  * Proxy Routes:
  * - /api/auth/* -> Auth Service (3001)
@@ -39,6 +40,7 @@
  */
 
 import express from 'express';
+import cookieParser from 'cookie-parser';
 import { createServer } from 'http';
 import { config } from './config';
 import { corsMiddleware } from './middleware/cors';
@@ -48,6 +50,7 @@ import { requestLogger } from './utils/logger';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 import healthRoutes from './routes/health';
 import cspRoutes from './routes/csp';
+import csrfRoutes from './routes/csrf';
 import proxyRoutes from './routes/proxy-routes';
 import { logger } from './utils/logger';
 import { createWebSocketServer } from './websocket/server';
@@ -67,6 +70,7 @@ import {
 import { createApolloServer, applyGraphQLMiddleware } from './graphql/server';
 import { optionalAuth } from './middleware/auth';
 import { setupSwagger } from './swagger';
+import { createCsrfMiddleware } from './middleware/csrf';
 
 /**
  * Initialize OpenTelemetry Tracing (must be first, before any other imports/initialization)
@@ -114,6 +118,9 @@ app.use(securityMiddleware);
 // 2. CORS
 app.use(corsMiddleware);
 
+// 2.5. Cookie parser (required for CSRF protection)
+app.use(cookieParser());
+
 // 3. Request logging
 app.use(requestLogger);
 
@@ -148,6 +155,10 @@ app.use(healthRoutes);
 // to avoid breaking streaming proxy handlers that rely on req.pipe()
 app.use('/api', cspRoutes);
 
+// CSRF token endpoint (no auth required, but needs cookie parser)
+// Returns CSRF token for frontend to include in X-CSRF-Token header
+app.use('/api', csrfRoutes);
+
 // Swagger UI (no auth required) - serves at /api-docs
 setupSwagger(app);
 
@@ -162,6 +173,32 @@ app.get('/metrics', async (_req, res) => {
     res.status(500).send('Error generating metrics');
   }
 });
+
+// CSRF Protection for API routes
+// Protects against cross-site request forgery on state-changing endpoints
+// Skip auth endpoints (login, register, refresh) as they establish sessions
+// The frontend must:
+// 1. Fetch CSRF token from GET /api/csrf-token
+// 2. Include token in X-CSRF-Token header on POST/PUT/DELETE/PATCH requests
+const csrfProtection = createCsrfMiddleware({
+  skipPaths: [
+    // Auth endpoints that don't require CSRF (session establishment)
+    '/api/auth/login',
+    '/api/auth/register',
+    '/api/auth/refresh',
+    '/api/auth/forgot-password',
+    '/api/auth/reset-password',
+    '/api/auth/verify-email',
+    '/api/auth/oauth',       // OAuth flows have their own protection
+    // CSP and CSRF token endpoints
+    '/api/csp-violations',
+    '/api/csrf-token',
+    // Health and metrics
+    '/health',
+    '/metrics',
+  ],
+});
+app.use(csrfProtection);
 
 // API proxy routes to backend services
 // IMPORTANT: Do NOT use body parsing middleware before proxy routes
