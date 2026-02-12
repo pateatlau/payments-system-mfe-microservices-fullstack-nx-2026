@@ -5,14 +5,14 @@
 **Date:** February 10, 2026
 **Phase:** Frontend MFE Security Hardening
 
-**Overall Progress:** 74% (31 of 42 tasks complete, 5 of 7 phases complete)
+**Overall Progress:** 76% (32 of 42 tasks complete, 5 of 7 phases complete)
 
 - Phase 1: Rate Limiting Restoration (100% - 4/4 sub-tasks complete) ✅
 - Phase 2: Content Security Policy Hardening (100% - 8/8 sub-tasks complete) ✅
 - Phase 3: CSRF Protection (100% - 6/6 sub-tasks complete) ✅
 - Phase 4: Dependency Security & CI Integration (100% - 6/6 sub-tasks complete) ✅
 - Phase 5: XSS & Injection Prevention (100% - 6/6 sub-tasks complete) ✅
-- Phase 6: Module Federation Security (14% - 1/7 sub-tasks complete) 🔄
+- Phase 6: Module Federation Security (29% - 2/7 sub-tasks complete) 🔄
 - Phase 7: Session & Auth Hardening (0% - 0/5 sub-tasks complete)
 
 > **📋 Related Document:** See [`FRONTEND-MFE-HARDENING-PLAN.md`](./FRONTEND-MFE-HARDENING-PLAN.md) for detailed technical analysis and implementation guidance.
@@ -1269,18 +1269,55 @@ if (!result.valid) {
 
 ### Task 6.2: Create Remote Loader with Verification
 
-- [ ] Create custom remote loader function
-- [ ] Fetch remote content
-- [ ] Verify hash matches expected
-- [ ] Only load if verified
-- [ ] Log and alert on verification failure
+- [x] Create custom remote loader function
+- [x] Fetch remote content
+- [x] Verify hash matches expected
+- [x] Only load if verified
+- [x] Log and alert on verification failure
 
-**Status:** Not Started
-**Completed Date:**
+**Status:** Complete
+**Completed Date:** 2026-02-12
 **Notes:**
 
-**File to create:**
-- `libs/shared-utils/src/lib/remote-loader.ts`
+**Implementation Details:**
+
+Task 6.2 combines two requirements:
+1. **Remote URL Validation** - Allowlist-based URL validation (new in this task)
+2. **Integrity Verification** - SRI hash verification (implemented in Task 6.1)
+
+**Remote URL Validator** (`libs/shared-utils/src/lib/remote-url-validator.ts`):
+- `validateRemoteUrl()` - Validate URLs against configurable allowlist
+- `RemoteUrlValidator` class - Reusable validator with caching
+- Supports wildcard patterns for origins and paths
+- Blocks dangerous URL patterns (javascript:, data:, credentials, etc.)
+- Environment-aware defaults (stricter in production)
+
+**Features:**
+- Origin validation with wildcards (e.g., `http://localhost:*`, `https://*.example.com`)
+- Path pattern matching (glob-style, e.g., `/mfe/*/remoteEntry.js`)
+- Protocol enforcement (HTTPS-only in production)
+- Dangerous pattern blocking (javascript:, data:, file:, credentials)
+- rspack config validation helper
+
+**Test Coverage** (`libs/shared-utils/src/lib/remote-url-validator.spec.ts`):
+- 39 tests covering URL validation, pattern matching, edge cases
+- Tests for wildcards, IPv4/IPv6, query strings, custom validators
+
+**Files Created:**
+- `libs/shared-utils/src/lib/remote-url-validator.ts`
+- `libs/shared-utils/src/lib/remote-url-validator.spec.ts`
+
+**Usage:**
+```typescript
+import { validateRemoteUrl, RemoteUrlValidator } from '@mfe/shared-utils';
+
+// Quick validation
+const result = validateRemoteUrl('http://localhost:4201/remoteEntry.js');
+
+// Validate rspack remotes config
+const validator = new RemoteUrlValidator({ allowedOrigins: ['http://localhost'] });
+const invalid = validator.validateRemotesConfig(remotesConfig);
+```
 
 ---
 
@@ -1351,7 +1388,7 @@ if (!result.valid) {
 
 ---
 
-**Phase 6 Completion:** **14% (1/7 sub-tasks complete)** 🔄
+**Phase 6 Completion:** **29% (2/7 sub-tasks complete)** 🔄
 
 ---
 
@@ -1454,9 +1491,9 @@ if (!result.valid) {
 | Phase 3 | CSRF Protection | 6 | 6 | 100% ✅ |
 | Phase 4 | Dependency Security | 6 | 6 | 100% ✅ |
 | Phase 5 | XSS Prevention | 6 | 6 | 100% ✅ |
-| Phase 6 | Module Federation Security | 1 | 7 | 14% 🔄 |
+| Phase 6 | Module Federation Security | 2 | 7 | 29% 🔄 |
 | Phase 7 | Session & Auth Hardening | 0 | 5 | 0% |
-| **Total** | | **31** | **42** | **74%** |
+| **Total** | | **32** | **42** | **76%** |
 
 ---
 
@@ -1505,4 +1542,4 @@ After all phases complete, run comprehensive security testing:
 ---
 
 **Last Updated:** February 12, 2026
-**Status:** In Progress - Phase 6 Task 6.1 complete (SRI Hash Generation)
+**Status:** In Progress - Phase 6 Tasks 6.1-6.2 complete (SRI + URL Validation)
