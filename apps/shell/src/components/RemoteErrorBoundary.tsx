@@ -177,7 +177,7 @@ function CircuitBreakerStatus({
  */
 function DefaultErrorFallback({
   error,
-  resetErrorBoundary,
+  resetErrorBoundary: _resetErrorBoundary,
   remoteName,
   componentName,
   circuitState,

@@ -5,14 +5,14 @@
 **Date:** February 10, 2026
 **Phase:** Frontend MFE Security Hardening
 
-**Overall Progress:** 81% (34 of 42 tasks complete, 5 of 7 phases complete)
+**Overall Progress:** 83% (35 of 42 tasks complete, 5 of 7 phases complete)
 
 - Phase 1: Rate Limiting Restoration (100% - 4/4 sub-tasks complete) ✅
 - Phase 2: Content Security Policy Hardening (100% - 8/8 sub-tasks complete) ✅
 - Phase 3: CSRF Protection (100% - 6/6 sub-tasks complete) ✅
 - Phase 4: Dependency Security & CI Integration (100% - 6/6 sub-tasks complete) ✅
 - Phase 5: XSS & Injection Prevention (100% - 6/6 sub-tasks complete) ✅
-- Phase 6: Module Federation Security (57% - 4/7 sub-tasks complete) 🔄
+- Phase 6: Module Federation Security (71% - 5/7 sub-tasks complete) 🔄
 - Phase 7: Session & Auth Hardening (0% - 0/5 sub-tasks complete)
 
 > **📋 Related Document:** See [`FRONTEND-MFE-HARDENING-PLAN.md`](./FRONTEND-MFE-HARDENING-PLAN.md) for detailed technical analysis and implementation guidance.
@@ -1430,14 +1430,55 @@ Certificate pinning via HPKP (HTTP Public Key Pinning) is deprecated. Modern app
 
 ### Task 6.5: Add Remote Health Checks
 
-- [ ] Create health check endpoint for each MFE
-- [ ] Implement pre-load health check in shell
-- [ ] Skip loading unhealthy remotes gracefully
-- [ ] Add health status to monitoring
+- [x] Create health check endpoint for each MFE
+- [x] Implement pre-load health check in shell
+- [x] Skip loading unhealthy remotes gracefully
+- [x] Add health status to monitoring
 
-**Status:** Not Started
-**Completed Date:**
+**Status:** Complete
+**Completed Date:** 2026-02-12
 **Notes:**
+
+**Implementation Details:**
+
+1. **Health Check Endpoints** - Created `/health.json` for each MFE:
+   - `apps/auth-mfe/public/health.json`
+   - `apps/payments-mfe/public/health.json`
+   - `apps/admin-mfe/public/health.json`
+   - `apps/profile-mfe/public/health.json`
+   - Each returns: `status`, `name`, `version`, `timestamp`, `message`, `components`
+
+2. **Health Check Utilities** (`libs/shared-utils/src/lib/remote-health-check.ts`):
+   - `checkRemoteHealth()` - Check single MFE health with circuit breaker integration
+   - `checkAllRemotesHealth()` - Check all MFEs in parallel
+   - `getAggregatedHealthStatus()` - Get combined health status
+   - `preloadHealthCheck()` - Shell pre-load health check
+   - `isRemoteHealthy()` - Quick check via circuit breaker state
+   - Configurable timeout, degraded status handling
+
+3. **Pre-load Health Check** (`apps/shell/src/bootstrap.tsx`):
+   - Health checks run on app initialization (non-blocking)
+   - Updates circuit breaker state for each MFE
+   - Logs health status to console
+
+4. **Skip Unhealthy Remotes** (`apps/shell/src/remotes/index.tsx`):
+   - `createRemoteComponent()` - Factory with circuit breaker integration
+   - Checks circuit breaker state before attempting to load
+   - Returns fallback UI if circuit is open
+   - Records success/failure with circuit breaker
+
+5. **Health Status Monitoring** (`apps/shell/src/components/RemoteHealthStatus.tsx`):
+   - `RemoteHealthStatus` - Full status display component
+   - `RemoteHealthBadge` - Compact status indicator
+   - React hook: `useRemoteHealth()` - Health monitoring with polling
+
+6. **React Hook** (`apps/shell/src/hooks/useRemoteHealth.ts`):
+   - `useRemoteHealth()` - Monitor all MFEs with optional polling
+   - `useSingleRemoteHealth()` - Monitor single MFE
+
+**Test Coverage:**
+- 17 unit tests for remote health check utilities
+- Tests cover: healthy/unhealthy responses, degraded status, circuit breaker integration, timeout handling
 
 ---
 
@@ -1468,7 +1509,7 @@ Certificate pinning via HPKP (HTTP Public Key Pinning) is deprecated. Modern app
 
 ---
 
-**Phase 6 Completion:** **57% (4/7 sub-tasks complete)** 🔄
+**Phase 6 Completion:** **71% (5/7 sub-tasks complete)** 🔄
 
 ---
 

@@ -1,0 +1,11 @@
+{
+  "status": "healthy",
+  "name": "paymentsMfe",
+  "version": "1.0.0",
+  "timestamp": 0,
+  "message": "Payments MFE is ready",
+  "components": [
+    "PaymentsPage",
+    "ReportsPage"
+  ]
+}

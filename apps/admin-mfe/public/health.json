@@ -1,0 +1,10 @@
+{
+  "status": "healthy",
+  "name": "adminMfe",
+  "version": "1.0.0",
+  "timestamp": 0,
+  "message": "Admin MFE is ready",
+  "components": [
+    "AdminDashboard"
+  ]
+}
