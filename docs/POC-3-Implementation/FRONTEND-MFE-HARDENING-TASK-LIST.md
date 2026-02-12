@@ -5,14 +5,14 @@
 **Date:** February 10, 2026
 **Phase:** Frontend MFE Security Hardening
 
-**Overall Progress:** 71% (30 of 42 tasks complete, 5 of 7 phases complete)
+**Overall Progress:** 74% (31 of 42 tasks complete, 5 of 7 phases complete)
 
 - Phase 1: Rate Limiting Restoration (100% - 4/4 sub-tasks complete) ✅
 - Phase 2: Content Security Policy Hardening (100% - 8/8 sub-tasks complete) ✅
 - Phase 3: CSRF Protection (100% - 6/6 sub-tasks complete) ✅
 - Phase 4: Dependency Security & CI Integration (100% - 6/6 sub-tasks complete) ✅
 - Phase 5: XSS & Injection Prevention (100% - 6/6 sub-tasks complete) ✅
-- Phase 6: Module Federation Security (0% - 0/7 sub-tasks complete)
+- Phase 6: Module Federation Security (14% - 1/7 sub-tasks complete) 🔄
 - Phase 7: Session & Auth Hardening (0% - 0/5 sub-tasks complete)
 
 > **📋 Related Document:** See [`FRONTEND-MFE-HARDENING-PLAN.md`](./FRONTEND-MFE-HARDENING-PLAN.md) for detailed technical analysis and implementation guidance.
@@ -1219,19 +1219,51 @@ function sanitizeString(value: string): string {
 
 ### Task 6.1: Implement Subresource Integrity (SRI) for Remotes
 
-- [ ] Create SRI hash generation script
-- [ ] Generate hashes for all remoteEntry.js files post-build
-- [ ] Store hashes in manifest file
-- [ ] Modify shell to verify integrity before loading remotes
-- [ ] Test with tampered remote (should fail)
+- [x] Create SRI hash generation script
+- [x] Generate hashes for all remoteEntry.js files post-build
+- [x] Store hashes in manifest file
+- [x] Modify shell to verify integrity before loading remotes
+- [x] Test with tampered remote (should fail)
 
-**Status:** Not Started
-**Completed Date:**
+**Status:** Complete
+**Completed Date:** 2026-02-12
 **Notes:**
 
-**Files to create:**
-- `scripts/generate-sri-hashes.js`
-- `dist/sri-manifest.json` (generated)
+**Implementation Details:**
+
+1. **SRI Hash Generation Script** (`scripts/security/generate-sri-hashes.js`):
+   - Generates SHA-384 hashes for all remoteEntry.js files
+   - Creates JSON manifest at `dist/sri-manifest.json`
+   - Also generates TypeScript constants at `libs/shared-utils/src/lib/sri-hashes.generated.ts`
+   - New npm scripts: `pnpm build:remotes:sri`, `pnpm security:sri`
+
+2. **Secure Remote Loader** (`libs/shared-utils/src/lib/secure-remote-loader.ts`):
+   - `verifyRemoteIntegrity()` - Verifies remote content against expected hash
+   - `SecureRemoteLoader` class - Full-featured loader with caching
+   - URL allowlist validation (blocks unauthorized origins)
+   - Security event logging for audit trail
+   - Configurable: strictMode, allowedOrigins, fetchTimeout
+
+3. **Test Coverage** (`libs/shared-utils/src/lib/secure-remote-loader.spec.ts`):
+   - 19 tests covering integrity verification, hash mismatch detection, URL blocking
+   - Tests for tampered content detection, network errors, timeout handling
+
+**Files Created:**
+- `scripts/security/generate-sri-hashes.js`
+- `libs/shared-utils/src/lib/secure-remote-loader.ts`
+- `libs/shared-utils/src/lib/secure-remote-loader.spec.ts`
+- `libs/shared-utils/src/lib/sri-hashes.generated.ts` (auto-generated)
+- `dist/sri-manifest.json` (auto-generated)
+
+**Usage:**
+```typescript
+import { verifyRemoteIntegrity } from '@mfe/shared-utils';
+
+const result = await verifyRemoteIntegrity('authMfe', remoteUrl);
+if (!result.valid) {
+  console.error('Remote integrity check failed:', result.error);
+}
+```
 
 ---
 
@@ -1319,7 +1351,7 @@ function sanitizeString(value: string): string {
 
 ---
 
-**Phase 6 Completion:** **0% (0/7 sub-tasks complete)**
+**Phase 6 Completion:** **14% (1/7 sub-tasks complete)** 🔄
 
 ---
 
@@ -1422,9 +1454,9 @@ function sanitizeString(value: string): string {
 | Phase 3 | CSRF Protection | 6 | 6 | 100% ✅ |
 | Phase 4 | Dependency Security | 6 | 6 | 100% ✅ |
 | Phase 5 | XSS Prevention | 6 | 6 | 100% ✅ |
-| Phase 6 | Module Federation Security | 0 | 7 | 0% |
+| Phase 6 | Module Federation Security | 1 | 7 | 14% 🔄 |
 | Phase 7 | Session & Auth Hardening | 0 | 5 | 0% |
-| **Total** | | **30** | **42** | **71%** |
+| **Total** | | **31** | **42** | **74%** |
 
 ---
 
@@ -1473,4 +1505,4 @@ After all phases complete, run comprehensive security testing:
 ---
 
 **Last Updated:** February 12, 2026
-**Status:** In Progress - Phases 1-5 complete, starting Phase 6
+**Status:** In Progress - Phase 6 Task 6.1 complete (SRI Hash Generation)
