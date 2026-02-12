@@ -33,15 +33,17 @@ declare const process: { env: { NX_API_BASE_URL?: string } };
 const envBaseURL: string | undefined = process.env.NX_API_BASE_URL;
 
 // Create token provider that accesses auth store directly (Zustand allows direct access)
-// Token provider functions access store state dynamically on each call
+// POC-3 Phase 7.2: Updated for HttpOnly cookie-based refresh tokens
 const tokenProvider: TokenProvider = {
   getAccessToken: () => useAuthStore.getState().accessToken ?? null,
-  getRefreshToken: () => useAuthStore.getState().refreshToken ?? null,
-  setTokens: (accessToken: string, refreshToken: string) => {
-    useAuthStore.setState({ accessToken, refreshToken });
+  // POC-3 Phase 7.2: Refresh token is in HttpOnly cookie, not accessible to JS
+  getRefreshToken: () => null,
+  // POC-3 Phase 7.2: Only set access token (refresh token managed via HttpOnly cookie)
+  setAccessToken: (accessToken: string) => {
+    useAuthStore.setState({ accessToken });
   },
   clearTokens: () => {
-    useAuthStore.setState({ accessToken: null, refreshToken: null });
+    useAuthStore.setState({ accessToken: null });
   },
 };
 
@@ -51,8 +53,9 @@ const paymentsApiClient = new ApiClient({
   // Direct API Gateway access (http://localhost:3000/api) can be set via NX_API_BASE_URL
   baseURL: envBaseURL || 'https://localhost/api',
   tokenProvider,
-  onTokenRefresh: (accessToken: string, refreshToken: string) => {
-    useAuthStore.setState({ accessToken, refreshToken });
+  // POC-3 Phase 7.2: Only receive accessToken (refreshToken is in HttpOnly cookie)
+  onTokenRefresh: (accessToken: string) => {
+    useAuthStore.setState({ accessToken });
   },
   onUnauthorized: () => {
     useAuthStore.getState().logout();

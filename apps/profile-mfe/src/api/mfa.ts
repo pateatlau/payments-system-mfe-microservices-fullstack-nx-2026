@@ -26,11 +26,12 @@ const envBaseURL: string | undefined = process.env.NX_API_BASE_URL;
 const mfaApiClient = new ApiClient({
   baseURL: envBaseURL || 'https://localhost/api',
   timeout: 30000,
+  // POC-3 Phase 7.2: Updated for HttpOnly cookie-based refresh tokens
   tokenProvider: {
     getAccessToken: () => useAuthStore.getState().accessToken,
-    getRefreshToken: () => useAuthStore.getState().refreshToken,
-    setTokens: (accessToken: string, refreshToken: string) => {
-      useAuthStore.getState().setAccessToken(accessToken, refreshToken);
+    getRefreshToken: () => null, // Refresh token is in HttpOnly cookie
+    setAccessToken: (accessToken: string) => {
+      useAuthStore.getState().setAccessToken(accessToken);
     },
     clearTokens: () => {
       useAuthStore.getState().logout();

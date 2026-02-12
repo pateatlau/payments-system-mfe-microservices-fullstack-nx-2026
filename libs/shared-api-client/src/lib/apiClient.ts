@@ -14,11 +14,19 @@ import { setupInterceptors } from './interceptors';
 /**
  * Token provider interface
  * Allows injecting token management from auth store
+ *
+ * POC-3 Phase 7.2: Updated for HttpOnly cookie-based refresh tokens
+ * - getRefreshToken: Optional, for backwards compatibility. Returns null since
+ *   refresh tokens are now in HttpOnly cookies (not accessible from JS)
+ * - setAccessToken: Only sets the access token. Refresh token is managed via
+ *   HttpOnly cookie by the server.
  */
 export interface TokenProvider {
   getAccessToken: () => string | null;
-  getRefreshToken: () => string | null;
-  setTokens: (accessToken: string, refreshToken: string) => void;
+  /** @deprecated Refresh token is now in HttpOnly cookie, returns null */
+  getRefreshToken?: () => string | null;
+  /** Sets only the access token. Refresh token is in HttpOnly cookie. */
+  setAccessToken: (accessToken: string) => void;
   clearTokens: () => void;
 }
 
@@ -29,7 +37,8 @@ export interface ApiClientConfig {
   baseURL?: string;
   timeout?: number;
   tokenProvider?: TokenProvider;
-  onTokenRefresh?: (accessToken: string, refreshToken: string) => void;
+  /** Called when access token is refreshed. Refresh token is in HttpOnly cookie. */
+  onTokenRefresh?: (accessToken: string) => void;
   onUnauthorized?: () => void;
   refreshURL?: string; // Optional: Override URL for token refresh (defaults to baseURL)
 }
@@ -115,7 +124,8 @@ function resolveBaseURL(configBaseURL?: string): string {
 export class ApiClient {
   private _axiosInstance: AxiosInstance | null = null;
   private tokenProvider?: TokenProvider;
-  private onTokenRefresh?: (accessToken: string, refreshToken: string) => void;
+  // POC-3 Phase 7.2: Updated to only receive accessToken (refresh token in HttpOnly cookie)
+  private onTokenRefresh?: (accessToken: string) => void;
   private onUnauthorized?: () => void;
   private configBaseURL?: string;
   private configTimeout: number;
@@ -152,14 +162,17 @@ export class ApiClient {
       });
 
       // Setup interceptors
+      // POC-3 Phase 7.2: Updated token manager for HttpOnly cookie-based refresh tokens
       setupInterceptors(
         this._axiosInstance,
         {
           getAccessToken: () => this.tokenProvider?.getAccessToken() ?? null,
-          getRefreshToken: () => this.tokenProvider?.getRefreshToken() ?? null,
-          setTokens: (accessToken, refreshToken) => {
-            this.tokenProvider?.setTokens(accessToken, refreshToken);
-            this.onTokenRefresh?.(accessToken, refreshToken);
+          // Refresh token is now in HttpOnly cookie - return null for backwards compat
+          getRefreshToken: () => this.tokenProvider?.getRefreshToken?.() ?? null,
+          // Only set access token - refresh token is managed via HttpOnly cookie
+          setAccessToken: (accessToken) => {
+            this.tokenProvider?.setAccessToken(accessToken);
+            this.onTokenRefresh?.(accessToken);
           },
           clearTokens: () => {
             this.tokenProvider?.clearTokens();

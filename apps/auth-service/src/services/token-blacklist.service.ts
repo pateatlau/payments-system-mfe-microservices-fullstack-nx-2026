@@ -167,12 +167,8 @@ export function validateFingerprintDetailed(
     return { isValid: true };
   }
 
-  // Fingerprint mismatch - try to identify what changed
-  // Generate fingerprint without client fingerprint to isolate the change
-  const ipUaFingerprint = generateFingerprint(ip, userAgent);
-
-  // This is a simplified check - in production you might want to store
-  // individual components separately for better diagnostics
+  // Fingerprint mismatch - log details for diagnostics
+  // In production, you might want to store individual components separately
   return {
     isValid: false,
     mismatchType: 'exact',

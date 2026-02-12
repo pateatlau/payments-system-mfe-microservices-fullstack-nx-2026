@@ -82,11 +82,15 @@ export function clearCachedFingerprint(): void {
 
 /**
  * Token management interface for interceptors
+ *
+ * POC-3 Phase 7.2: Updated for HttpOnly cookie-based refresh tokens
  */
 interface TokenManager {
   getAccessToken: () => string | null;
+  /** @deprecated Refresh token is in HttpOnly cookie, returns null */
   getRefreshToken: () => string | null;
-  setTokens: (accessToken: string, refreshToken: string) => void;
+  /** Sets only access token. Refresh token is managed via HttpOnly cookie. */
+  setAccessToken: (accessToken: string) => void;
   clearTokens: () => void;
 }
 
@@ -161,27 +165,24 @@ function onTokenRefreshFailed(error: unknown): void {
 /**
  * Attempt to refresh the access token
  *
- * POC-3 Phase 7.1: Updated to work with HttpOnly cookie-based refresh tokens
- * The refresh token is now sent automatically via HttpOnly cookie
- * We also send it in the body for backwards compatibility with non-cookie auth
+ * POC-3 Phase 7.1/7.2: Updated for HttpOnly cookie-based refresh tokens
+ * - The refresh token is sent automatically via HttpOnly cookie
+ * - The new refresh token is set via HttpOnly cookie by the server
+ * - We only receive and return the new access token
  */
 async function refreshAccessToken(
-  tokenManager: TokenManager,
+  _tokenManager: TokenManager,
   baseURL: string
-): Promise<{ accessToken: string; refreshToken: string }> {
-  // Get refresh token from memory (if available, for backwards compatibility)
-  const refreshToken = tokenManager.getRefreshToken();
-
-  // POC-3 Phase 7.1: Include credentials to send HttpOnly cookies
-  // The server will read the refresh token from the cookie
-  // We also send it in body as fallback for backwards compatibility
+): Promise<{ accessToken: string }> {
+  // POC-3 Phase 7.2: Include credentials to send HttpOnly refresh token cookie
+  // The server reads the refresh token from the cookie and sets a new one
   const response = await fetch(`${baseURL}/auth/refresh`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
     credentials: 'include', // Send HttpOnly cookies with request
-    body: JSON.stringify(refreshToken ? { refreshToken } : {}),
+    body: JSON.stringify({}), // Empty body - refresh token is in cookie
   });
 
   if (!response.ok) {
@@ -192,7 +193,7 @@ async function refreshAccessToken(
     success: boolean;
     data: {
       accessToken: string;
-      refreshToken: string;
+      // refreshToken is set via HttpOnly cookie, not in response body
     };
   };
 
@@ -202,7 +203,6 @@ async function refreshAccessToken(
 
   return {
     accessToken: data.data.accessToken,
-    refreshToken: data.data.refreshToken,
   };
 }
 
@@ -340,12 +340,14 @@ function setupResponseInterceptor(
         isRefreshing = true;
 
         try {
-          const { accessToken, refreshToken } = await refreshAccessToken(
+          // POC-3 Phase 7.2: Refresh token is now set via HttpOnly cookie by the server
+          // We only need to store the new access token in memory
+          const { accessToken } = await refreshAccessToken(
             tokenManager,
             baseURL
           );
 
-          tokenManager.setTokens(accessToken, refreshToken);
+          tokenManager.setAccessToken(accessToken);
           onTokenRefreshed(accessToken);
 
           // Retry original request with new token

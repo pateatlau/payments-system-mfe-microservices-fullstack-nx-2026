@@ -100,14 +100,13 @@ export const useAuthStore = create<AuthState>()(
   persist(
     (set, get) => {
       // Create token provider for API client
-      // POC-3 Phase 7.2: refreshToken returns null - server uses HttpOnly cookie
+      // POC-3 Phase 7.2: Updated for HttpOnly cookie-based refresh tokens
       const tokenProvider: TokenProvider = {
         getAccessToken: () => get().accessToken ?? null,
-        // Refresh token is now in HttpOnly cookie, not accessible to JS
+        // POC-3 Phase 7.2: Refresh token is now in HttpOnly cookie, not accessible to JS
         getRefreshToken: () => null,
-        setTokens: (accessToken: string, _refreshToken: string) => {
-          // Only store access token in memory
-          // refreshToken is ignored - it's set as HttpOnly cookie by server
+        // POC-3 Phase 7.2: Only set access token - refresh token managed via HttpOnly cookie
+        setAccessToken: (accessToken: string) => {
           set({ accessToken });
         },
         clearTokens: () => {

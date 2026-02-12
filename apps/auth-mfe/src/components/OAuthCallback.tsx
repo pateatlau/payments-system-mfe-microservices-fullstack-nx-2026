@@ -72,8 +72,9 @@ export function OAuthCallback() {
 
       try {
         console.log('[OAuthCallback] Setting tokens in auth store...');
-        // Update auth store with tokens first
-        setAccessToken(accessToken, refreshToken);
+        // Update auth store with access token (refresh token is in HttpOnly cookie)
+        // POC-3 Phase 7.2: setAccessToken now only takes accessToken
+        setAccessToken(accessToken);
 
         // Fetch user data using the new tokens
         // The apiClient.get<T> returns ApiResponse<T>, so get<User> returns { success, data: User }
