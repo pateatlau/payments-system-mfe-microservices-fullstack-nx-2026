@@ -101,8 +101,7 @@ export class EventBus implements IEventBus {
   constructor(options: EventBusOptions = {}) {
     this.maxHistorySize = options.maxHistorySize ?? 100;
     // Enable validation by default in development and test environments
-    // Use dot notation for process.env.NODE_ENV so Rspack/DefinePlugin can statically replace it
-    const nodeEnv = process.env.NODE_ENV;
+    const nodeEnv = process.env['NODE_ENV'];
     const defaultValidation = nodeEnv === 'development' || nodeEnv === 'test';
     this.enableValidation = options.enableValidation ?? defaultValidation;
     this.strictValidation = options.strictValidation ?? false;
@@ -178,9 +177,9 @@ export class EventBus implements IEventBus {
           : `${Date.now()}-${Math.random().toString(36).substring(2, 15)}`,
     };
 
-    // Log event in development
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`[EventBus] ${eventType}`, { payload, meta });
+    // Log event in development (without sensitive payload data)
+    if (process.env['NODE_ENV'] === 'development') {
+      console.log(`[EventBus] ${eventType}`, { meta });
     }
 
     // Create event object
