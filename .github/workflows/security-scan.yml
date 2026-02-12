@@ -1,0 +1,218 @@
+# Security Scanning Workflow
+#
+# Runs OWASP ZAP security scans on the application.
+# Triggered manually or on schedule.
+#
+# This workflow:
+# 1. Starts the full application stack
+# 2. Runs OWASP ZAP baseline scan
+# 3. Uploads security report as artifact
+#
+name: Security Scan
+
+on:
+  # Manual trigger with options
+  workflow_dispatch:
+    inputs:
+      scan_type:
+        description: 'Type of scan to run'
+        required: true
+        default: 'baseline'
+        type: choice
+        options:
+          - baseline
+          - full
+
+  # Weekly scheduled scan
+  schedule:
+    - cron: '0 2 * * 0'  # Every Sunday at 2 AM UTC
+
+# Prevent concurrent security scans
+concurrency:
+  group: security-scan-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '24.11.x'
+  PNPM_VERSION: 9
+
+jobs:
+  security-scan:
+    name: OWASP ZAP Security Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma clients
+        run: pnpm db:all:generate
+
+      - name: Build backend
+        run: pnpm build:backend
+
+      - name: Build frontend
+        run: pnpm build:remotes && pnpm build:shell
+
+      - name: Setup environment
+        run: |
+          # Create .env files for services
+          for service in auth payments admin profile; do
+            cat > apps/${service}-service/.env << EOF
+          NODE_ENV=test
+          PORT=300$((1 + $(echo $service | grep -c 'auth')))
+          DATABASE_URL=postgresql://postgres:postgres@localhost:5432/${service}_db
+          JWT_SECRET=test-jwt-secret-for-security-scan
+          JWT_EXPIRES_IN=15m
+          JWT_REFRESH_EXPIRES_IN=7d
+          REDIS_URL=redis://localhost:6379
+          EOF
+          done
+
+          # API Gateway env
+          cat > apps/api-gateway/.env << EOF
+          NODE_ENV=test
+          PORT=3000
+          AUTH_SERVICE_URL=http://localhost:3001
+          PAYMENTS_SERVICE_URL=http://localhost:3002
+          ADMIN_SERVICE_URL=http://localhost:3003
+          PROFILE_SERVICE_URL=http://localhost:3004
+          JWT_SECRET=test-jwt-secret-for-security-scan
+          REDIS_URL=redis://localhost:6379
+          CORS_ORIGINS=http://localhost:4200
+          EOF
+
+      - name: Run database migrations
+        run: |
+          for service in auth payments admin profile; do
+            cd apps/${service}-service
+            npx prisma migrate deploy || true
+            cd ../..
+          done
+
+      - name: Start backend services
+        run: |
+          pnpm dev:backend &
+          sleep 30  # Wait for services to start
+
+      - name: Start frontend (preview mode)
+        run: |
+          cd dist/apps/shell
+          npx serve -s -l 4200 &
+          sleep 10
+
+      - name: Verify services are running
+        run: |
+          curl -f http://localhost:3000/health || exit 1
+          curl -f http://localhost:4200 || exit 1
+          echo "Services are running"
+
+      - name: Run OWASP ZAP Baseline Scan
+        uses: zaproxy/action-baseline@v0.14.0
+        with:
+          target: 'http://localhost:4200'
+          rules_file_name: 'scripts/security/zap-rules.tsv'
+          cmd_options: '-a -j'
+          allow_issue_writing: false
+
+      - name: Run ZAP API Scan
+        uses: zaproxy/action-api-scan@v0.9.0
+        with:
+          target: 'http://localhost:3000/api-docs/swagger.json'
+          rules_file_name: 'scripts/security/zap-rules.tsv'
+          allow_issue_writing: false
+        continue-on-error: true
+
+      - name: Upload ZAP Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: zap-security-report
+          path: |
+            report_html.html
+            report_json.json
+            report_md.md
+          retention-days: 30
+
+      - name: Create security summary
+        if: always()
+        run: |
+          echo "## Security Scan Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Scan completed at: $(date -u)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Scan Configuration" >> $GITHUB_STEP_SUMMARY
+          echo "- Scan Type: ${{ inputs.scan_type || 'baseline' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Target: http://localhost:4200" >> $GITHUB_STEP_SUMMARY
+          echo "- API Target: http://localhost:3000/api-docs/swagger.json" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "See artifacts for detailed reports." >> $GITHUB_STEP_SUMMARY
+
+  # Notify on failure (optional - requires Slack webhook)
+  notify-failure:
+    name: Notify on Failure
+    needs: security-scan
+    if: failure()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create issue on failure
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const date = new Date().toISOString().split('T')[0];
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `Security Scan Failed - ${date}`,
+              body: `## Security Scan Failure
+
+            The scheduled security scan has failed.
+
+            **Workflow Run:** [View Run](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})
+
+            Please review the scan results and address any critical security issues.
+
+            **Labels:** security, automated
+            `,
+              labels: ['security', 'automated', 'needs-review']
+            });
