@@ -14,7 +14,6 @@
 import {
   validateRemoteUrl,
   RemoteUrlValidator,
-  ValidationResult,
 } from './remote-url-validator';
 import {
   CircuitBreaker,
@@ -24,7 +23,6 @@ import {
 } from './circuit-breaker';
 import {
   checkRemoteHealth,
-  isRemoteHealthy,
   getDefaultMfeConfigs,
   MfeConfig,
 } from './remote-health-check';

@@ -6,7 +6,7 @@ import {
   afterEach,
   jest,
 } from '@jest/globals';
-import { render, screen, waitFor, act } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import React from 'react';
 import { RemoteErrorBoundary } from './RemoteErrorBoundary';
