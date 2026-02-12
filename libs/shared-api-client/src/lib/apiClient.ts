@@ -146,6 +146,9 @@ export class ApiClient {
         headers: {
           'Content-Type': 'application/json',
         },
+        // POC-3 Phase 7.1: Enable credentials for HttpOnly cookie support
+        // This allows the browser to send/receive HttpOnly cookies with requests
+        withCredentials: true,
       });
 
       // Setup interceptors

@@ -371,7 +371,10 @@ describe('Interceptors', () => {
 
       const resultPromise = responseErrorInterceptor(error) as Promise<unknown>;
 
-      await expect(resultPromise).rejects.toThrow('No refresh token available');
+      // POC-3 Phase 7.1: When refresh token is missing from memory, the client
+      // will still attempt to refresh via HttpOnly cookie. In test environment,
+      // this will fail with "Token refresh failed" since there's no cookie.
+      await expect(resultPromise).rejects.toThrow('Token refresh failed');
     });
 
     it('should transform API error responses', async () => {

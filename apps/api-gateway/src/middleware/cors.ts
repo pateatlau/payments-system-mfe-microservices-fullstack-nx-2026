@@ -25,9 +25,11 @@ export const corsMiddleware = cors({
       callback(new Error('Not allowed by CORS'));
     }
   },
+  // POC-3 Phase 7.1: credentials: true is required for HttpOnly cookie authentication
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-ID'],
+  // Include X-CSRF-Token for CSRF protection
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-ID', 'X-CSRF-Token', 'X-Device-ID'],
   exposedHeaders: ['X-Request-ID'],
   maxAge: 86400, // 24 hours
 });

@@ -9,7 +9,6 @@ import * as authService from '../services/auth.service';
 import {
   registerSchema,
   loginSchema,
-  refreshTokenSchema,
   changePasswordSchema,
   forgotPasswordSchema,
   resetPasswordSchema,
@@ -18,6 +17,11 @@ import {
 } from '../validators/auth.validators';
 import { mfaLoginCompleteSchema } from '../validators/mfa.validators';
 import * as passwordResetService from '../services/password-reset.service';
+import {
+  setRefreshTokenCookie,
+  clearRefreshTokenCookie,
+  getRefreshTokenFromCookie,
+} from '../utils/cookies';
 
 // Import Prisma via dynamic require to avoid dist path issues
 // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -255,7 +259,14 @@ export const login = async (
     // Login user with request metadata for token fingerprinting
     const result = await authService.login(data, getRequestMeta(req));
 
-    // Return response
+    // If MFA is not required and we have a refresh token, set it as HttpOnly cookie
+    // POC-3 Phase 7.1: Refresh tokens are now stored in HttpOnly cookies
+    if (result.refreshToken && !result.mfaRequired) {
+      setRefreshTokenCookie(res, result.refreshToken);
+    }
+
+    // Return response (refresh token is also in body for backwards compatibility,
+    // but frontend should transition to using the HttpOnly cookie)
     res.status(200).json({
       success: true,
       data: result,
@@ -339,6 +350,12 @@ export const completeMfaLogin = async (
       getRequestMeta(req)
     );
 
+    // Set refresh token as HttpOnly cookie
+    // POC-3 Phase 7.1: Refresh tokens are now stored in HttpOnly cookies
+    if (result.refreshToken) {
+      setRefreshTokenCookie(res, result.refreshToken);
+    }
+
     // Return response
     res.status(200).json({
       success: true,
@@ -352,6 +369,9 @@ export const completeMfaLogin = async (
 /**
  * POST /auth/refresh
  * Refresh access token (with rotation - returns new refresh token too)
+ *
+ * POC-3 Phase 7.1: Supports both cookie-based and body-based refresh tokens
+ * Priority: 1. HttpOnly cookie, 2. Request body
  */
 export const refresh = async (
   req: Request,
@@ -359,16 +379,34 @@ export const refresh = async (
   next: NextFunction
 ) => {
   try {
-    // Validate request body
-    const data = refreshTokenSchema.parse(req.body);
+    // Get refresh token from cookie first, fallback to body
+    const cookieRefreshToken = getRefreshTokenFromCookie(req.cookies);
+    const bodyRefreshToken = req.body.refreshToken;
+    const refreshToken = cookieRefreshToken || bodyRefreshToken;
+
+    if (!refreshToken) {
+      return res.status(401).json({
+        success: false,
+        error: {
+          code: 'MISSING_TOKEN',
+          message: 'Refresh token is required',
+        },
+      });
+    }
 
     // Refresh token with rotation (returns new access AND refresh token)
     const result = await authService.refreshAccessToken(
-      data.refreshToken,
+      refreshToken,
       getRequestMeta(req)
     );
 
-    // Return response with both tokens
+    // Set new refresh token as HttpOnly cookie (token rotation)
+    // POC-3 Phase 7.1: Refresh tokens are rotated and stored in HttpOnly cookies
+    if (result.refreshToken) {
+      setRefreshTokenCookie(res, result.refreshToken);
+    }
+
+    // Return response with both tokens (body for backwards compatibility)
     res.status(200).json({
       success: true,
       data: result,
@@ -381,6 +419,8 @@ export const refresh = async (
 /**
  * POST /auth/logout
  * Logout a user (requires authentication)
+ *
+ * POC-3 Phase 7.1: Clears HttpOnly refresh token cookie
  */
 export const logout = async (
   req: Request,
@@ -401,11 +441,17 @@ export const logout = async (
       });
     }
 
-    // Get refresh token from body
-    const refreshToken = req.body.refreshToken;
+    // Get refresh token from cookie first, fallback to body
+    const cookieRefreshToken = getRefreshTokenFromCookie(req.cookies);
+    const bodyRefreshToken = req.body.refreshToken;
+    const refreshToken = cookieRefreshToken || bodyRefreshToken;
 
     // Logout user
     await authService.logout(userId, refreshToken);
+
+    // Clear refresh token cookie
+    // POC-3 Phase 7.1: Clear HttpOnly cookie on logout
+    clearRefreshTokenCookie(res);
 
     // Return response
     res.status(200).json({

@@ -7,9 +7,20 @@ import * as authController from './auth.controller';
 import * as authService from '../services/auth.service';
 import { ApiError } from '../middleware/errorHandler';
 import { ZodError } from 'zod';
+import {
+  setRefreshTokenCookie,
+  clearRefreshTokenCookie,
+} from '../utils/cookies';
 
 // Mock auth service
 jest.mock('../services/auth.service');
+
+// Mock cookie utilities
+jest.mock('../utils/cookies', () => ({
+  setRefreshTokenCookie: jest.fn(),
+  clearRefreshTokenCookie: jest.fn(),
+  getRefreshTokenFromCookie: jest.fn((cookies) => cookies?.mfe_refresh_token ?? null),
+}));
 
 // Mock validators
 jest.mock('../validators/auth.validators', () => ({
@@ -35,6 +46,7 @@ describe('AuthController', () => {
   beforeEach(() => {
     mockRequest = {
       body: {},
+      cookies: {},
       user: undefined,
       ip: '127.0.0.1',
       socket: { remoteAddress: '127.0.0.1' },
@@ -43,6 +55,8 @@ describe('AuthController', () => {
     mockResponse = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn().mockReturnThis(),
+      cookie: jest.fn().mockReturnThis(),
+      clearCookie: jest.fn().mockReturnThis(),
     };
     mockNext = jest.fn();
     jest.clearAllMocks();
@@ -146,6 +160,11 @@ describe('AuthController', () => {
         success: true,
         data: mockResult,
       });
+      // POC-3 Phase 7.1: Verify refresh token cookie is set
+      expect(setRefreshTokenCookie).toHaveBeenCalledWith(
+        mockResponse,
+        'refresh-token'
+      );
     });
 
     it('should handle invalid credentials', async () => {
@@ -243,6 +262,8 @@ describe('AuthController', () => {
           message: 'Logged out successfully',
         },
       });
+      // POC-3 Phase 7.1: Verify refresh token cookie is cleared
+      expect(clearRefreshTokenCookie).toHaveBeenCalledWith(mockResponse);
     });
 
     it('should return 401 if user not authenticated', async () => {

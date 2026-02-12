@@ -6,6 +6,7 @@
 
 import express from 'express';
 import helmet from 'helmet';
+import cookieParser from 'cookie-parser';
 import { config } from './config';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 import healthRoutes from './routes/health';
@@ -131,9 +132,12 @@ app.use(
       'Authorization',
       'X-Requested-With',
       'X-Request-ID',
+      'X-CSRF-Token',
+      'X-Device-ID',
       'Accept',
       'Origin',
     ],
+    // POC-3 Phase 7.1: credentials: true is required for HttpOnly cookie authentication
     credentials: true,
     optionsSuccessStatus: 204,
   })
@@ -150,6 +154,10 @@ const requestLimits = createRequestLimitsMiddleware({
   skipPaths: ['/health', '/metrics'],
 });
 app.use(requestLimits);
+
+// Cookie parser (for HttpOnly refresh token cookies)
+// POC-3 Phase 7.1: Required for reading refresh tokens from cookies
+app.use(cookieParser());
 
 // Body parsing with size limits
 const { jsonOptions, urlEncodedOptions } = getBodyParserOptions({

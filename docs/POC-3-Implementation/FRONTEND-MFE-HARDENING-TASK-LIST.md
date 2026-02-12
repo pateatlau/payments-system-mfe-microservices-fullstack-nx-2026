@@ -5,7 +5,7 @@
 **Date:** February 10, 2026
 **Phase:** Frontend MFE Security Hardening
 
-**Overall Progress:** 88% (37 of 42 tasks complete, 6 of 7 phases complete)
+**Overall Progress:** 90% (38 of 42 tasks complete, 6 of 7 phases in progress)
 
 - Phase 1: Rate Limiting Restoration (100% - 4/4 sub-tasks complete) ✅
 - Phase 2: Content Security Policy Hardening (100% - 8/8 sub-tasks complete) ✅
@@ -13,7 +13,7 @@
 - Phase 4: Dependency Security & CI Integration (100% - 6/6 sub-tasks complete) ✅
 - Phase 5: XSS & Injection Prevention (100% - 6/6 sub-tasks complete) ✅
 - Phase 6: Module Federation Security (100% - 7/7 sub-tasks complete) ✅
-- Phase 7: Session & Auth Hardening (0% - 0/5 sub-tasks complete)
+- Phase 7: Session & Auth Hardening (20% - 1/5 sub-tasks complete)
 
 > **📋 Related Document:** See [`FRONTEND-MFE-HARDENING-PLAN.md`](./FRONTEND-MFE-HARDENING-PLAN.md) for detailed technical analysis and implementation guidance.
 
@@ -1603,20 +1603,61 @@ Certificate pinning via HPKP (HTTP Public Key Pinning) is deprecated. Modern app
 
 ### Task 7.1: Migrate Tokens to HttpOnly Cookies
 
-- [ ] Update auth service to set tokens in HttpOnly cookies
-- [ ] Configure Secure flag for cookies
-- [ ] Configure SameSite=Strict
-- [ ] Update API client to work with cookie-based auth
-- [ ] Test authentication flow
+- [x] Update auth service to set tokens in HttpOnly cookies
+- [x] Configure Secure flag for cookies
+- [x] Configure SameSite=Strict
+- [x] Update API client to work with cookie-based auth
+- [x] Test authentication flow
 
-**Status:** Not Started
-**Completed Date:**
+**Status:** Complete
+**Completed Date:** 2026-02-12
 **Notes:**
 
-**Files to modify:**
-- `apps/auth-service/src/controllers/auth.controller.ts`
-- `libs/shared-api-client/src/lib/apiClient.ts`
-- `libs/shared-auth-store/src/lib/shared-auth-store.ts`
+**Implementation Details:**
+
+1. **Cookie Utilities** (`apps/auth-service/src/utils/cookies.ts`):
+   - Created secure cookie management utilities
+   - HttpOnly: true - Prevents JavaScript access (XSS protection)
+   - Secure: true in production - HTTPS only
+   - SameSite: 'strict' - Prevents CSRF attacks
+   - Path: '/' - Available for all API requests
+
+2. **Auth Controller Updates** (`apps/auth-service/src/controllers/auth.controller.ts`):
+   - `login()` - Sets refresh token as HttpOnly cookie on successful login
+   - `completeMfaLogin()` - Sets refresh token cookie after MFA verification
+   - `refresh()` - Reads token from cookie (fallback to body), sets new cookie (rotation)
+   - `logout()` - Clears refresh token cookie
+
+3. **API Client Updates** (`libs/shared-api-client/src/lib/apiClient.ts`):
+   - Added `withCredentials: true` for axios instance (sends/receives cookies)
+
+4. **Interceptors Updates** (`libs/shared-api-client/src/lib/interceptors.ts`):
+   - `refreshAccessToken()` - Includes `credentials: 'include'` in fetch
+   - Falls back to body refresh token for backwards compatibility
+
+5. **CORS Updates**:
+   - `apps/api-gateway/src/middleware/cors.ts` - Added X-CSRF-Token, X-Device-ID headers
+   - `apps/auth-service/src/main.ts` - Same CORS header additions + cookie-parser
+
+**Files Created:**
+- `apps/auth-service/src/utils/cookies.ts` - Cookie management utilities
+- `apps/auth-service/src/utils/cookies.spec.ts` - Cookie utility tests
+
+**Files Modified:**
+- `apps/auth-service/src/main.ts` - Added cookie-parser middleware
+- `apps/auth-service/src/controllers/auth.controller.ts` - Cookie handling in auth endpoints
+- `apps/auth-service/src/controllers/auth.controller.spec.ts` - Updated tests for cookie mocking
+- `libs/shared-api-client/src/lib/apiClient.ts` - Added withCredentials: true
+- `libs/shared-api-client/src/lib/apiClient.test.ts` - Updated test expectations
+- `libs/shared-api-client/src/lib/interceptors.ts` - Added credentials: 'include' to fetch
+- `libs/shared-api-client/src/lib/interceptors.test.ts` - Updated test expectations
+- `apps/api-gateway/src/middleware/cors.ts` - Added CORS headers
+
+**Security Notes:**
+- Access tokens remain in memory only (not in cookies) - short-lived, 15 min expiry
+- Refresh tokens are now HttpOnly cookies - protected from XSS, 7-day expiry
+- Both cookie and body-based refresh tokens supported for backwards compatibility
+- SameSite=Strict prevents CSRF attacks on refresh endpoint
 
 ---
 
@@ -1678,7 +1719,7 @@ Certificate pinning via HPKP (HTTP Public Key Pinning) is deprecated. Modern app
 
 ---
 
-**Phase 7 Completion:** **0% (0/5 sub-tasks complete)**
+**Phase 7 Completion:** **20% (1/5 sub-tasks complete)**
 
 ---
 
@@ -1696,8 +1737,8 @@ Certificate pinning via HPKP (HTTP Public Key Pinning) is deprecated. Modern app
 | Phase 4 | Dependency Security | 6 | 6 | 100% ✅ |
 | Phase 5 | XSS Prevention | 6 | 6 | 100% ✅ |
 | Phase 6 | Module Federation Security | 7 | 7 | 100% ✅ |
-| Phase 7 | Session & Auth Hardening | 0 | 5 | 0% |
-| **Total** | | **37** | **42** | **88%** |
+| Phase 7 | Session & Auth Hardening | 1 | 5 | 20% |
+| **Total** | | **38** | **42** | **90%** |
 
 ---
 
@@ -1746,4 +1787,4 @@ After all phases complete, run comprehensive security testing:
 ---
 
 **Last Updated:** February 12, 2026
-**Status:** In Progress - Phase 6 Complete (Module Federation Security), Phase 7 Not Started
+**Status:** In Progress - Phase 7 Task 7.1 Complete (HttpOnly Cookies)

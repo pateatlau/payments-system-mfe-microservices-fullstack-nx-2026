@@ -101,23 +101,28 @@ function onTokenRefreshFailed(error: unknown): void {
 
 /**
  * Attempt to refresh the access token
+ *
+ * POC-3 Phase 7.1: Updated to work with HttpOnly cookie-based refresh tokens
+ * The refresh token is now sent automatically via HttpOnly cookie
+ * We also send it in the body for backwards compatibility with non-cookie auth
  */
 async function refreshAccessToken(
   tokenManager: TokenManager,
   baseURL: string
 ): Promise<{ accessToken: string; refreshToken: string }> {
+  // Get refresh token from memory (if available, for backwards compatibility)
   const refreshToken = tokenManager.getRefreshToken();
 
-  if (!refreshToken) {
-    throw new Error('No refresh token available');
-  }
-
+  // POC-3 Phase 7.1: Include credentials to send HttpOnly cookies
+  // The server will read the refresh token from the cookie
+  // We also send it in body as fallback for backwards compatibility
   const response = await fetch(`${baseURL}/auth/refresh`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ refreshToken }),
+    credentials: 'include', // Send HttpOnly cookies with request
+    body: JSON.stringify(refreshToken ? { refreshToken } : {}),
   });
 
   if (!response.ok) {
