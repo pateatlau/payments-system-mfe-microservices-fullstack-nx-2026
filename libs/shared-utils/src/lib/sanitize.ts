@@ -16,17 +16,43 @@ import type { Config, DOMPurify as DOMPurifyType } from 'dompurify';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const createDOMPurify = (DOMPurifyLib as any).default ?? DOMPurifyLib;
 
-// Lazy-initialized DOMPurify instance
-// This ensures window is available when the functions are called
-let _purify: DOMPurifyType | null = null;
+// Lazy-initialized DOMPurify instances
+// Using separate instances for different purposes to avoid hook interference
+let _purifyWithLinkSecurity: DOMPurifyType | null = null;
+let _purifyBasic: DOMPurifyType | null = null;
 
-function getDOMPurify(): DOMPurifyType {
-  if (!_purify) {
+/**
+ * Get DOMPurify instance with permanent link security hooks
+ * Used by sanitizeHtml to enforce rel="noopener noreferrer" on all links
+ */
+function getDOMPurifyWithLinkSecurity(): DOMPurifyType {
+  if (!_purifyWithLinkSecurity) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    _purify = createDOMPurify(window as any);
+    const purify = createDOMPurify(window as any) as DOMPurifyType;
+
+    // Register hook once at initialization - permanent and thread-safe
+    purify.addHook('afterSanitizeAttributes', (node: Element) => {
+      if (node.tagName === 'A' && node.hasAttribute('href')) {
+        node.setAttribute('target', '_blank');
+        node.setAttribute('rel', 'noopener noreferrer');
+      }
+    });
+
+    _purifyWithLinkSecurity = purify;
   }
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  return _purify!;
+  return _purifyWithLinkSecurity;
+}
+
+/**
+ * Get basic DOMPurify instance without hooks
+ * Used by stripHtml and containsDangerousHtml
+ */
+function getDOMPurifyBasic(): DOMPurifyType {
+  if (!_purifyBasic) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    _purifyBasic = createDOMPurify(window as any) as DOMPurifyType;
+  }
+  return _purifyBasic;
 }
 
 export type SanitizePreset = 'strict' | 'standard' | 'rich' | 'textOnly';
@@ -67,8 +93,6 @@ export const SANITIZE_PRESETS: Record<SanitizePreset, Config> = {
     ],
     ALLOWED_ATTR: ['href', 'title', 'target', 'rel'],
     ADD_ATTR: ['target', 'rel'],
-    // Force all links to open in new tab with noopener
-    FORCE_BODY: true,
   },
 
   /**
@@ -151,20 +175,8 @@ export function sanitizeHtml(
 
   const config = SANITIZE_PRESETS[preset];
 
-  // Add hook to enforce rel="noopener noreferrer" on all links
-  getDOMPurify().addHook('afterSanitizeAttributes', (node: Element) => {
-    if (node.tagName === 'A' && node.hasAttribute('href')) {
-      node.setAttribute('target', '_blank');
-      node.setAttribute('rel', 'noopener noreferrer');
-    }
-  });
-
-  const clean = getDOMPurify().sanitize(dirty, config);
-
-  // Remove the hook to avoid affecting other sanitize calls
-  getDOMPurify().removeHook('afterSanitizeAttributes');
-
-  return clean;
+  // Use the instance with permanent link security hooks
+  return getDOMPurifyWithLinkSecurity().sanitize(dirty, config);
 }
 
 /**
@@ -179,11 +191,14 @@ export function sanitizeHtml(
  */
 export function stripHtml(dirty: string): string {
   if (!dirty) return '';
-  return getDOMPurify().sanitize(dirty, SANITIZE_PRESETS.textOnly);
+  return getDOMPurifyBasic().sanitize(dirty, SANITIZE_PRESETS.textOnly);
 }
 
 /**
  * Check if a string contains potentially dangerous HTML
+ *
+ * Uses strict equality comparison between original and sanitized content
+ * to detect any modification by DOMPurify.
  *
  * @param html - The HTML string to check
  * @returns true if the string contains potentially dangerous content
@@ -196,59 +211,71 @@ export function containsDangerousHtml(html: string): boolean {
   if (!html) return false;
 
   // Sanitize with the most permissive preset (rich)
-  const sanitized = getDOMPurify().sanitize(html, SANITIZE_PRESETS.rich);
+  const sanitized = getDOMPurifyBasic().sanitize(html, SANITIZE_PRESETS.rich);
 
-  // If sanitization changed the content significantly, it likely contained dangerous HTML
-  // Compare lengths as a quick heuristic
-  const originalLength = html.length;
-  const sanitizedLength = sanitized.length;
-
-  // If more than 10% of content was removed, consider it dangerous
-  return sanitizedLength < originalLength * 0.9;
+  // Strict comparison: if sanitization changed anything, it's dangerous
+  // This is more reliable than length-based heuristics
+  return sanitized !== html;
 }
 
 /**
  * Sanitize a URL to prevent javascript: and data: URLs
  *
+ * Handles protocol injection attacks by normalizing control characters
+ * before checking protocols.
+ *
  * @param url - The URL to sanitize
- * @returns Sanitized URL or empty string if dangerous
+ * @returns Sanitized (trimmed) URL or empty string if dangerous
  *
  * @example
  * sanitizeUrl('javascript:alert("xss")'); // ''
  * sanitizeUrl('https://example.com'); // 'https://example.com'
+ * sanitizeUrl('  https://example.com  '); // 'https://example.com'
  */
 export function sanitizeUrl(url: string): string {
   if (!url) return '';
 
-  // Trim and lowercase for comparison
-  const trimmed = url.trim().toLowerCase();
+  // Trim whitespace from the URL
+  const trimmed = url.trim();
+
+  // Normalize for protocol checks: remove all ASCII control characters and whitespace
+  // This prevents protocol injection via interior whitespace (e.g., "java\tscript:")
+  // Using character code ranges to avoid lint warnings about control characters
+  // eslint-disable-next-line no-control-regex
+  const controlCharRegex = /[\u0000-\u0020\u007f-\u009f]/g;
+  const normalized = trimmed.toLowerCase().replace(controlCharRegex, '');
 
   // Block dangerous protocols
-  const dangerousProtocols = [
-    'javascript:',
-    'data:',
-    'vbscript:',
-    'file:',
-  ];
+  const dangerousProtocols = ['javascript:', 'data:', 'vbscript:', 'file:'];
 
   for (const protocol of dangerousProtocols) {
-    if (trimmed.startsWith(protocol)) {
+    if (normalized.startsWith(protocol)) {
       return '';
     }
   }
 
-  // Allow relative URLs and standard protocols
-  const safeProtocols = ['http:', 'https:', 'mailto:', 'tel:'];
-  const hasProtocol = trimmed.includes(':');
+  // Check for protocol presence using normalized string
+  const hasProtocol = normalized.includes(':');
 
   if (hasProtocol) {
-    const isRelative = trimmed.startsWith('/') || trimmed.startsWith('./');
-    const isSafe = safeProtocols.some((p) => trimmed.startsWith(p));
+    // Check relative URLs using trimmed (original) string for accuracy
+    const trimmedLower = trimmed.toLowerCase();
+    const isRelative =
+      trimmedLower.startsWith('/') ||
+      trimmedLower.startsWith('./') ||
+      trimmedLower.startsWith('../') ||
+      trimmedLower.startsWith('?') ||
+      trimmedLower.startsWith('#');
+
+    // Safe protocols
+    const safeProtocols = ['http:', 'https:', 'mailto:', 'tel:'];
+    const isSafe = safeProtocols.some((p) => normalized.startsWith(p));
 
     if (!isRelative && !isSafe) {
       return '';
     }
   }
 
-  return url;
+  // Return trimmed URL (not original with whitespace)
+  return trimmed;
 }

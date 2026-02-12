@@ -156,11 +156,13 @@ export class EventBus implements IEventBus {
         if (this.strictValidation) {
           throw new Error(errorMessage);
         } else {
+          // Log warning without sensitive payload data
           console.warn(errorMessage, {
             eventType,
-            payload,
             errors: validationResult.error.errors,
           });
+          // Reject invalid events even in non-strict mode to prevent handlers from crashing
+          return;
         }
       }
     }

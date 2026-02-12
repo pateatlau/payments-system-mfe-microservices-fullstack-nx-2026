@@ -216,7 +216,7 @@ describe('EventBus', () => {
       for (let i = 0; i < 10; i++) {
         smallEventBus.emit(
           'system:error',
-          { message: `Error ${i}`, code: 'TEST' },
+          { error: { code: 'TEST', message: `Error ${i}` } },
           'shell'
         );
       }

@@ -200,6 +200,31 @@ describe('sanitize utilities', () => {
       expect(sanitizeUrl('  javascript:alert(1)')).toBe('');
     });
 
+    it('should block protocol injection with control characters', () => {
+      // Tab character in protocol
+      expect(sanitizeUrl('java\tscript:alert(1)')).toBe('');
+      // Newline in protocol
+      expect(sanitizeUrl('java\nscript:alert(1)')).toBe('');
+      // Carriage return in protocol
+      expect(sanitizeUrl('java\rscript:alert(1)')).toBe('');
+      // Mixed control characters
+      expect(sanitizeUrl('j\ta\nv\ra\tscript:alert(1)')).toBe('');
+    });
+
+    it('should trim whitespace and return trimmed URL', () => {
+      expect(sanitizeUrl('  https://example.com  ')).toBe('https://example.com');
+      expect(sanitizeUrl('\thttps://example.com\n')).toBe('https://example.com');
+    });
+
+    it('should allow relative URLs with parent directory', () => {
+      expect(sanitizeUrl('../parent/path')).toBe('../parent/path');
+    });
+
+    it('should allow query-only and fragment-only URLs', () => {
+      expect(sanitizeUrl('?query=value')).toBe('?query=value');
+      expect(sanitizeUrl('#anchor')).toBe('#anchor');
+    });
+
     it('should block data: URLs', () => {
       expect(sanitizeUrl('data:text/html,<script>alert(1)</script>')).toBe('');
     });
