@@ -29,10 +29,14 @@ const getPrisma = () => require('../lib/prisma').prisma;
 
 /**
  * Helper to extract request metadata for fingerprinting
+ *
+ * POC-3 Phase 7.3: Enhanced to include client-side fingerprint
  */
 const getRequestMeta = (req: Request) => ({
   ip: req.ip || req.socket.remoteAddress || 'unknown',
   userAgent: req.get('user-agent') || 'unknown',
+  // POC-3 Phase 7.3: Extract client fingerprint from header
+  clientFingerprint: req.get('x-client-fingerprint') || undefined,
 });
 
 /**

@@ -19,7 +19,7 @@ export {
   type ApiError,
 } from './lib/apiClient';
 
-export { setupInterceptors } from './lib/interceptors';
+export { setupInterceptors, clearCachedFingerprint } from './lib/interceptors';
 
 // CSRF Token Management
 export {

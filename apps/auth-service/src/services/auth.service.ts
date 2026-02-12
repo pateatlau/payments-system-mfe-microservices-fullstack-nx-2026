@@ -13,7 +13,25 @@
  * - Token family tracking for reuse detection
  * - Token fingerprinting (IP + User-Agent)
  * - Token blacklisting via Redis
+ *
+ * POC-3 Phase 7.3: Session Fingerprinting
+ * - Enhanced fingerprinting with client-side hash
+ * - Mandatory fingerprint validation on token refresh
+ * - Detailed logging for security incidents
  */
+
+/**
+ * POC-3 Phase 7.3: Request metadata for fingerprinting
+ * Extracted from HTTP request headers by the controller
+ */
+export interface RequestMeta {
+  /** Client IP address */
+  ip: string;
+  /** User-Agent header */
+  userAgent: string;
+  /** Client-side fingerprint hash (from X-Client-Fingerprint header) */
+  clientFingerprint?: string;
+}
 
 import bcrypt from 'bcrypt';
 import { prisma } from '../lib/prisma';
@@ -119,7 +137,7 @@ export interface RegistrationResponse {
  */
 export const register = async (
   data: RegisterInput,
-  _requestMeta?: { ip: string; userAgent: string }
+  _requestMeta?: RequestMeta
 ): Promise<RegistrationResponse> => {
   // Check if user already exists (try cache first)
   const emailCacheKey = CacheKeys.userByEmail(data.email);
@@ -229,7 +247,7 @@ export interface LoginResponse extends AuthResponse {
  */
 export const login = async (
   data: LoginInput,
-  requestMeta?: { ip: string; userAgent: string }
+  requestMeta?: RequestMeta
 ): Promise<LoginResponse> => {
   const ip = requestMeta?.ip || 'unknown';
 
@@ -408,9 +426,14 @@ export const login = async (
   const tokens = generateTokenPair(jwtPayload);
 
   // Generate token family and fingerprint for rotation tracking
+  // POC-3 Phase 7.3: Enhanced fingerprint includes client-side fingerprint
   const tokenFamily = generateTokenFamily();
   const fingerprint = requestMeta
-    ? generateFingerprint(requestMeta.ip, requestMeta.userAgent)
+    ? generateFingerprint(
+        requestMeta.ip,
+        requestMeta.userAgent,
+        requestMeta.clientFingerprint
+      )
     : null;
 
   // Delete old refresh tokens for this user (prevent unique constraint violations)
@@ -477,7 +500,7 @@ export const login = async (
 export const completeMfaLogin = async (
   mfaToken: string,
   mfaCode: string,
-  requestMeta?: { ip: string; userAgent: string }
+  requestMeta?: RequestMeta
 ): Promise<AuthResponse> => {
   // Verify the MFA token
   const jwt = await import('jsonwebtoken');
@@ -554,9 +577,14 @@ export const completeMfaLogin = async (
   const tokens = generateTokenPair(jwtPayload);
 
   // Generate token family and fingerprint for rotation tracking
+  // POC-3 Phase 7.3: Enhanced fingerprint includes client-side fingerprint
   const tokenFamily = generateTokenFamily();
   const fingerprint = requestMeta
-    ? generateFingerprint(requestMeta.ip, requestMeta.userAgent)
+    ? generateFingerprint(
+        requestMeta.ip,
+        requestMeta.userAgent,
+        requestMeta.clientFingerprint
+      )
     : null;
 
   // Delete old refresh tokens for this user
@@ -633,7 +661,7 @@ export interface RefreshResponse {
  */
 export const refreshAccessToken = async (
   refreshToken: string,
-  requestMeta?: { ip: string; userAgent: string }
+  requestMeta?: RequestMeta
 ): Promise<RefreshResponse> => {
   // Verify refresh token JWT
   let payload: JwtPayload;
@@ -743,21 +771,34 @@ export const refreshAccessToken = async (
     throw new ApiError(401, 'TOKEN_EXPIRED', 'Refresh token expired');
   }
 
-  // Optional: Validate fingerprint (if stored)
+  // POC-3 Phase 7.3: Validate fingerprint (mandatory when stored)
+  // Enhanced to include client-side fingerprint for better security
   if (requestMeta && storedToken.fingerprint) {
     const fingerprintValid = validateFingerprint(
       storedToken.fingerprint,
       requestMeta.ip,
-      requestMeta.userAgent
+      requestMeta.userAgent,
+      requestMeta.clientFingerprint
     );
 
     if (!fingerprintValid) {
       // Fingerprint mismatch - possible token theft
+      // POC-3 Phase 7.3: Enhanced logging with more details
       console.warn(
-        `[Security] Fingerprint mismatch for user ${payload.userId}. Token may have been stolen.`
+        `[Security] Fingerprint mismatch detected:`,
+        JSON.stringify({
+          userId: payload.userId,
+          email: payload.email,
+          ip: requestMeta.ip?.substring(0, 15) + '...',
+          userAgent: requestMeta.userAgent?.substring(0, 50) + '...',
+          hasClientFingerprint: !!requestMeta.clientFingerprint,
+          timestamp: new Date().toISOString(),
+          action: 'TOKEN_REVOKED',
+        })
       );
 
       // Revoke this specific token (but not entire family for now)
+      // This allows legitimate users to re-login while blocking the attacker
       await prisma.refreshToken.update({
         where: { id: storedToken.id },
         data: { isRevoked: true },
@@ -778,8 +819,13 @@ export const refreshAccessToken = async (
   const tokens = generateTokenPair(payload);
 
   // Generate new fingerprint for the rotated token
+  // POC-3 Phase 7.3: Enhanced fingerprint includes client-side fingerprint
   const newFingerprint = requestMeta
-    ? generateFingerprint(requestMeta.ip, requestMeta.userAgent)
+    ? generateFingerprint(
+        requestMeta.ip,
+        requestMeta.userAgent,
+        requestMeta.clientFingerprint
+      )
     : storedToken.fingerprint;
 
   // Mark old token as revoked (not deleted, for reuse detection)

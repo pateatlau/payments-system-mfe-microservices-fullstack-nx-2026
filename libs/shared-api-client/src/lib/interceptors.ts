@@ -4,6 +4,7 @@
  * Handles:
  * - Request interceptor: Adds JWT token to Authorization header
  * - Request interceptor: Adds CSRF token to X-CSRF-Token header for mutations
+ * - Request interceptor: Adds session fingerprint for security (POC-3 Phase 7.3)
  * - Response interceptor: Handles errors, token refresh, and retry logic
  * - Response interceptor: Handles CSRF token refresh on 403 errors
  */
@@ -20,6 +21,64 @@ import {
   requiresCsrfToken,
   CSRF_HEADER_NAME,
 } from './csrf';
+
+/**
+ * POC-3 Phase 7.3: Session fingerprint header name
+ */
+const FINGERPRINT_HEADER_NAME = 'X-Client-Fingerprint';
+
+/**
+ * POC-3 Phase 7.3: Cached fingerprint to avoid async operations on every request
+ */
+let cachedFingerprintHeader: string | null = null;
+let fingerprintPromise: Promise<string> | null = null;
+
+/**
+ * POC-3 Phase 7.3: Initialize fingerprint asynchronously
+ * This is called once on module load to pre-compute the fingerprint
+ */
+async function initializeFingerprint(): Promise<string> {
+  if (typeof window === 'undefined') {
+    return ''; // SSR - no fingerprint
+  }
+
+  try {
+    // Dynamic import to avoid circular dependencies and enable tree-shaking
+    const { getSessionFingerprintHeader } = await import('@mfe/shared-utils');
+    return await getSessionFingerprintHeader();
+  } catch (error) {
+    console.warn('[Interceptors] Failed to generate session fingerprint:', error);
+    return '';
+  }
+}
+
+/**
+ * POC-3 Phase 7.3: Get or initialize the fingerprint header
+ */
+function getFingerprintHeader(): string {
+  if (cachedFingerprintHeader !== null) {
+    return cachedFingerprintHeader;
+  }
+
+  // Start initialization if not already started
+  if (!fingerprintPromise) {
+    fingerprintPromise = initializeFingerprint().then(header => {
+      cachedFingerprintHeader = header;
+      return header;
+    });
+  }
+
+  // Return empty string while initializing (fingerprint will be available on subsequent requests)
+  return '';
+}
+
+/**
+ * POC-3 Phase 7.3: Clear cached fingerprint (call on logout)
+ */
+export function clearCachedFingerprint(): void {
+  cachedFingerprintHeader = null;
+  fingerprintPromise = null;
+}
 
 /**
  * Token management interface for interceptors
@@ -187,6 +246,16 @@ function setupRequestInterceptor(
         } catch (_error) {
           // localStorage might not be available (e.g., in private browsing)
           // Silently fail - device ID is optional
+        }
+      }
+
+      // POC-3 Phase 7.3: Add session fingerprint for security
+      // The fingerprint helps detect session hijacking by verifying
+      // the request comes from the same browser/device as the original session
+      if (!config.headers[FINGERPRINT_HEADER_NAME]) {
+        const fingerprintHeader = getFingerprintHeader();
+        if (fingerprintHeader) {
+          config.headers[FINGERPRINT_HEADER_NAME] = fingerprintHeader;
         }
       }
 
