@@ -96,11 +96,18 @@ jobs:
 
       - name: Setup environment
         run: |
-          # Create .env files for services
+          # Create .env files for services with correct port mapping
           for service in auth payments admin profile; do
+            # Map service name to port number
+            case $service in
+              auth)     PORT=3001 ;;
+              payments) PORT=3002 ;;
+              admin)    PORT=3003 ;;
+              profile)  PORT=3004 ;;
+            esac
             cat > apps/${service}-service/.env << EOF
           NODE_ENV=test
-          PORT=300$((1 + $(echo $service | grep -c 'auth')))
+          PORT=${PORT}
           DATABASE_URL=postgresql://postgres:postgres@localhost:5432/${service}_db
           JWT_SECRET=test-jwt-secret-for-security-scan
           JWT_EXPIRES_IN=15m
@@ -148,7 +155,7 @@ jobs:
           echo "Services are running"
 
       - name: Run OWASP ZAP Baseline Scan
-        uses: zaproxy/action-baseline@v0.14.0
+        uses: zaproxy/action-baseline@v0.15.0
         with:
           target: 'http://localhost:4200'
           rules_file_name: 'scripts/security/zap-rules.tsv'
@@ -156,7 +163,7 @@ jobs:
           allow_issue_writing: false
 
       - name: Run ZAP API Scan
-        uses: zaproxy/action-api-scan@v0.9.0
+        uses: zaproxy/action-api-scan@v0.10.0
         with:
           target: 'http://localhost:3000/api-docs/swagger.json'
           rules_file_name: 'scripts/security/zap-rules.tsv'
@@ -200,11 +207,56 @@ jobs:
         with:
           script: |
             const date = new Date().toISOString().split('T')[0];
-            await github.rest.issues.create({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              title: `Security Scan Failed - ${date}`,
-              body: `## Security Scan Failure
+            const issueLabels = ['security', 'automated', 'needs-review'];
+
+            // Ensure labels exist before creating issue
+            for (const label of issueLabels) {
+              try {
+                await github.rest.issues.getLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  name: label
+                });
+              } catch (e) {
+                if (e.status === 404) {
+                  // Label doesn't exist, create it
+                  await github.rest.issues.createLabel({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    name: label,
+                    color: label === 'security' ? 'b60205' : label === 'automated' ? '0e8a16' : 'fbca04',
+                    description: label === 'security' ? 'Security-related issues' :
+                                 label === 'automated' ? 'Automatically created' :
+                                 'Needs review'
+                  });
+                }
+              }
+            }
+
+            // Create the issue with labels
+            try {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: `Security Scan Failed - ${date}`,
+                body: `## Security Scan Failure
+
+            The scheduled security scan has failed.
+
+            **Workflow Run:** [View Run](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})
+
+            Please review the scan results and address any critical security issues.
+            `,
+                labels: issueLabels
+              });
+            } catch (e) {
+              // If labeling fails, create issue without labels
+              console.log('Failed to create issue with labels, retrying without:', e.message);
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: `Security Scan Failed - ${date}`,
+                body: `## Security Scan Failure
 
             The scheduled security scan has failed.
 
@@ -212,7 +264,7 @@ jobs:
 
             Please review the scan results and address any critical security issues.
 
-            **Labels:** security, automated
-            `,
-              labels: ['security', 'automated', 'needs-review']
-            });
+            **Note:** Labels could not be applied automatically.
+            `
+              });
+            }

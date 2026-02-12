@@ -56,17 +56,17 @@ print_test() {
 
 print_pass() {
   echo -e "${GREEN}[PASS]${NC} $1"
-  ((PASSED++))
+  PASSED=$((PASSED + 1))
 }
 
 print_fail() {
   echo -e "${RED}[FAIL]${NC} $1"
-  ((FAILED++))
+  FAILED=$((FAILED + 1))
 }
 
 print_warn() {
   echo -e "${YELLOW}[WARN]${NC} $1"
-  ((WARNINGS++))
+  WARNINGS=$((WARNINGS + 1))
 }
 
 print_info() {
@@ -171,7 +171,7 @@ test_session_fingerprinting() {
 
   RESPONSE=$(curl -ks -w "\n%{http_code}" -X POST "${API_URL}/auth/refresh" \
     -H "Content-Type: application/json" \
-    -H "X-Client-Fingerprint: tampered-fingerprint-12345" \
+    -H "X-Client-Fingerprint: ${FINGERPRINT}-tampered" \
     --cookie "mfe_refresh_token=fake-token" 2>&1)
 
   HTTP_CODE=$(echo "$RESPONSE" | tail -n1)

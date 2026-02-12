@@ -57,7 +57,7 @@ async function initializeFingerprint(): Promise<string> {
  * This is an async function that waits for fingerprint to be ready
  */
 async function ensureFingerprintHeader(): Promise<string> {
-  // Return cached value if available
+  // Return cached value if available (only non-empty values are cached)
   if (cachedFingerprintHeader !== null) {
     return cachedFingerprintHeader;
   }
@@ -69,7 +69,15 @@ async function ensureFingerprintHeader(): Promise<string> {
 
   // Await the fingerprint initialization
   const header = await fingerprintPromise;
-  cachedFingerprintHeader = header;
+
+  // Only cache non-empty fingerprints to allow retry on subsequent requests
+  if (header) {
+    cachedFingerprintHeader = header;
+  } else {
+    // Reset promise to allow retry on next request
+    fingerprintPromise = null;
+  }
+
   return header;
 }
 

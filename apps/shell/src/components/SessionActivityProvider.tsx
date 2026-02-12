@@ -50,26 +50,33 @@ export function SessionActivityProvider({
 
   // Handle session timeout
   const handleTimeout = useCallback(async () => {
-    console.warn('[SessionActivity] Session timed out due to inactivity');
+    try {
+      console.warn('[SessionActivity] Session timed out due to inactivity');
 
-    // Emit session expired event
-    if (user?.id) {
-      eventBus.emit(
-        'auth:session-expired',
-        {
-          userId: user.id,
-          reason: 'inactivity_timeout',
-        },
-        'shell'
-      );
+      // Emit session expired event
+      if (user?.id) {
+        eventBus.emit(
+          'auth:session-expired',
+          {
+            userId: user.id,
+            reason: 'inactivity_timeout',
+          },
+          'shell'
+        );
+      }
+
+      // Clear fingerprint caches
+      clearSessionFingerprint();
+      clearCachedFingerprint();
+
+      // Perform logout
+      await logout();
+    } catch (error) {
+      console.error('[SessionActivity] Error during timeout logout:', error);
+      // Clear fingerprint caches even on error to ensure clean state
+      clearSessionFingerprint();
+      clearCachedFingerprint();
     }
-
-    // Clear fingerprint caches
-    clearSessionFingerprint();
-    clearCachedFingerprint();
-
-    // Perform logout
-    await logout();
   }, [logout, user?.id]);
 
   // Handle warning shown

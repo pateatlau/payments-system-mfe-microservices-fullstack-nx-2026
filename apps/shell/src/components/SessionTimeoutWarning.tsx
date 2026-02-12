@@ -120,11 +120,17 @@ export function SessionTimeoutWarning({
               isUrgent ? 'text-destructive' : 'text-foreground'
             }`}
             role="timer"
-            aria-live="polite"
+            aria-live="off"
             aria-atomic="true"
           >
             {formatted}
           </div>
+          {/* Screen reader announcement - only announce every 30 seconds to avoid verbosity */}
+          <span className="sr-only" aria-live="polite" aria-atomic="true">
+            {timeRemaining % 30000 < 1000 || timeRemaining <= 10000
+              ? `Session expires in ${formatted}`
+              : ''}
+          </span>
         </div>
 
         {/* Buttons */}
