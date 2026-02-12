@@ -252,7 +252,7 @@ module.exports = {
         isProduction ? 'production' : 'development'
       ),
     }),
-    // Copy public assets (favicon.ico, etc.) to output directory
+    // Copy public assets (favicon.ico, health.json, etc.) to output directory
     new rspack.CopyRspackPlugin({
       patterns: [
         {
@@ -262,6 +262,11 @@ module.exports = {
         },
         {
           from: path.resolve(__dirname, 'src/favicon.ico'),
+          to: path.resolve(__dirname, '../../dist/apps/admin-mfe'),
+          noErrorOnMissing: true,
+        },
+        {
+          from: path.resolve(__dirname, 'public'),
           to: path.resolve(__dirname, '../../dist/apps/admin-mfe'),
           noErrorOnMissing: true,
         },

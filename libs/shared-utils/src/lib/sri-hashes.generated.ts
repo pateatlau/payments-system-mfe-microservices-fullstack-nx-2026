@@ -11,7 +11,7 @@ export const SRI_ALGORITHM = 'sha384' as const;
 
 export const SRI_GENERATED_AT = '2026-02-12T09:01:04.623Z' as const;
 
-export const REMOTE_INTEGRITY_HASHES: Record<string, string> = {
+export const REMOTE_INTEGRITY_HASHES = {
   'authMfe': 'sha384-v1dOXIn6XEye1nyABbjJghdy2X2Gqo+/QoY083ydvG7Qb/6d6rG8XM2hP6n6Q/1Q',
   'paymentsMfe': 'sha384-b4VGfnIPWhYYzurC8bWfmo/ORtXtSpJS4xzxlwqVz6u/lNJe9Tl+Jh4Qn0rBU+J/',
   'adminMfe': 'sha384-coT3QkQx2+I5nVWY4UFqy6TaJViDJ4LkNcz3A8EnhOlAJPWpgATJ1xb0HKUtyBLR',

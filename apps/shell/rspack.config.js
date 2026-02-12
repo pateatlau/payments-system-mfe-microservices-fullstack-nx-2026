@@ -99,6 +99,39 @@ const getRemoteUrl = (mfeName, port) => {
 };
 
 /**
+ * Check if a URL origin matches an allowed origin
+ * @security Uses strict matching to prevent spoofing (e.g., localhost.evil.com)
+ */
+function isOriginAllowed(parsedUrl, allowedOrigins) {
+  for (const allowed of allowedOrigins) {
+    try {
+      // Parse the allowed origin (add path if needed for URL parsing)
+      const allowedUrl = new URL(allowed.includes('/') ? allowed : `${allowed}/`);
+
+      // Protocol must match exactly
+      if (parsedUrl.protocol !== allowedUrl.protocol) continue;
+
+      // Hostname must match exactly (no prefix matching)
+      if (parsedUrl.hostname !== allowedUrl.hostname) continue;
+
+      // For development with localhost, allow any port
+      if (parsedUrl.hostname === 'localhost') {
+        return true;
+      }
+
+      // For non-localhost, port must match if specified in allowed origin
+      if (allowedUrl.port && parsedUrl.port !== allowedUrl.port) continue;
+
+      return true;
+    } catch {
+      // Invalid allowed origin, skip
+      continue;
+    }
+  }
+  return false;
+}
+
+/**
  * Validate all remote URLs at build time
  * @security Prevents loading remotes from unauthorized origins
  */
@@ -111,15 +144,12 @@ function validateRemoteUrls(remotes) {
 
     try {
       const parsedUrl = new URL(url);
-      const origin = `${parsedUrl.protocol}//${parsedUrl.hostname}`;
 
-      // Check if origin is allowed
-      const isAllowed = ALLOWED_REMOTE_ORIGINS.some(
-        allowed => origin === allowed || origin.startsWith(allowed)
-      );
+      // Check if origin is allowed using strict matching
+      const isAllowed = isOriginAllowed(parsedUrl, ALLOWED_REMOTE_ORIGINS);
 
       if (!isAllowed) {
-        errors.push(`${name}: Origin not allowed - ${origin}`);
+        errors.push(`${name}: Origin not allowed - ${parsedUrl.origin}`);
       }
 
       // Production must use HTTPS

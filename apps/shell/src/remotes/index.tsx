@@ -29,55 +29,6 @@ function LoadingFallback({ message = 'Loading...' }: { message?: string }) {
 }
 
 /**
- * Error fallback component
- */
-function ErrorFallback({
-  componentName,
-  remoteName,
-  isCircuitOpen = false,
-}: {
-  componentName: string;
-  remoteName?: string;
-  isCircuitOpen?: boolean;
-}) {
-  return (
-    <div className="min-h-[200px] flex items-center justify-center">
-      <div className="max-w-md mx-auto bg-card rounded-lg shadow-lg p-8 text-center">
-        <div className="mb-4 flex justify-center">
-          <svg
-            className="h-12 w-12 text-yellow-500"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            aria-hidden="true"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-            />
-          </svg>
-        </div>
-        <h2 className="text-xl font-bold text-foreground mb-2">
-          {isCircuitOpen ? 'Service Temporarily Unavailable' : 'Failed to Load'}
-        </h2>
-        <p className="text-muted-foreground text-sm">
-          {isCircuitOpen
-            ? `The ${componentName} service is temporarily unavailable. Please try again later.`
-            : `Failed to load ${componentName} component${remoteName ? ` from ${remoteName}` : ''}.`}
-        </p>
-        {isCircuitOpen && (
-          <p className="text-xs text-muted-foreground mt-2">
-            The system will automatically retry when the service recovers.
-          </p>
-        )}
-      </div>
-    </div>
-  );
-}
-
-/**
  * Higher-order component to wrap lazy-loaded components with Suspense
  */
 function withSuspense<P extends object>(
@@ -94,12 +45,32 @@ function withSuspense<P extends object>(
 }
 
 /**
+ * Custom error class for remote loading failures
+ * Allows RemoteErrorBoundary to identify and handle remote-specific errors
+ */
+class RemoteLoadError extends Error {
+  constructor(
+    message: string,
+    public readonly remoteName: string,
+    public readonly componentName: string,
+    public readonly isCircuitOpen: boolean
+  ) {
+    super(message);
+    this.name = 'RemoteLoadError';
+  }
+}
+
+/**
  * Create a lazy-loaded remote component with circuit breaker integration
  *
  * @param remoteName - Name of the remote MFE (e.g., 'authMfe')
  * @param componentName - Name of the component (e.g., 'SignIn')
  * @param importFn - Function that returns the dynamic import promise
  * @returns Lazy React component
+ *
+ * @throws RemoteLoadError - When circuit breaker is open or import fails
+ *         The error is caught by RemoteErrorBoundary which renders the fallback
+ *         This allows React.lazy to retry on future mounts instead of caching failure
  */
 function createRemoteComponent(
   remoteName: string,
@@ -114,15 +85,13 @@ function createRemoteComponent(
       console.warn(
         `[MFE] Skipping ${componentName} from ${remoteName} - circuit breaker is open`
       );
-      return {
-        default: () => (
-          <ErrorFallback
-            componentName={componentName}
-            remoteName={remoteName}
-            isCircuitOpen={true}
-          />
-        ),
-      };
+      // Reject so React.lazy will retry on next mount
+      throw new RemoteLoadError(
+        `Circuit breaker is open for ${remoteName}`,
+        remoteName,
+        componentName,
+        true
+      );
     }
 
     try {
@@ -141,15 +110,13 @@ function createRemoteComponent(
         error
       );
 
-      return {
-        default: () => (
-          <ErrorFallback
-            componentName={componentName}
-            remoteName={remoteName}
-            isCircuitOpen={false}
-          />
-        ),
-      };
+      // Reject so React.lazy will retry on next mount
+      throw new RemoteLoadError(
+        `Failed to load ${componentName} from ${remoteName}: ${err.message}`,
+        remoteName,
+        componentName,
+        false
+      );
     }
   });
 }

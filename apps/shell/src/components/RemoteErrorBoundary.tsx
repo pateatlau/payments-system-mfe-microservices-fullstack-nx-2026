@@ -133,14 +133,17 @@ function RetryingFallback({
             />
           </svg>
         </div>
-        <p className="text-sm text-muted-foreground">
-          Loading {componentName}... (Attempt {retryCount + 1})
-        </p>
-        {countdown > 0 && (
-          <p className="text-xs text-muted-foreground mt-2">
-            Retrying in {countdown}s
+        {/* ARIA live region to announce status changes to screen readers */}
+        <div aria-live="polite" aria-atomic="true">
+          <p className="text-sm text-muted-foreground">
+            Loading {componentName}... (Attempt {retryCount + 1})
           </p>
-        )}
+          {countdown > 0 && (
+            <p className="text-xs text-muted-foreground mt-2">
+              Retrying in {countdown}s
+            </p>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -166,8 +169,12 @@ function CircuitBreakerStatus({
       : 'Testing service recovery...';
 
   return (
-    <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
-      <span className={`w-2 h-2 rounded-full ${statusColor}`} />
+    <div
+      className="flex items-center gap-2 text-sm text-muted-foreground mb-4"
+      aria-live="polite"
+      aria-atomic="true"
+    >
+      <span className={`w-2 h-2 rounded-full ${statusColor}`} aria-hidden="true" />
       <span>{statusText}</span>
     </div>
   );
@@ -404,25 +411,44 @@ export function RemoteErrorBoundary({
   );
 
   const handleReset = useCallback(() => {
-    // Record success in circuit breaker
-    remoteCircuitBreaker.recordSuccess(remoteName);
+    // Don't record success here - the RecoveryDetector will record success
+    // only when the children actually mount successfully
     setCircuitState(remoteCircuitBreaker.getState(remoteName));
-
-    // Reset retry count on successful render
-    if (retryCount > 0) {
-      setRetryCount(0);
-      onRecovery?.(remoteName);
-    }
-  }, [remoteName, retryCount, onRecovery]);
+  }, [remoteName]);
 
   const handleManualRetry = useCallback(() => {
+    // Don't allow manual retry when circuit is open
+    if (circuitState === 'OPEN') {
+      return;
+    }
+
     if (retryTimerRef.current) {
       clearTimeout(retryTimerRef.current);
     }
     setRetryCount(c => c + 1);
     setIsAutoRetrying(false);
     boundaryRef.current.resetErrorBoundary?.();
-  }, []);
+  }, [circuitState]);
+
+  // Effect to detect successful recovery when children render after a retry
+  useEffect(() => {
+    // Only check for recovery if we had previous retries
+    if (retryCount > 0) {
+      // This effect runs when the component successfully re-renders
+      // If we're here and not in error state, the retry succeeded
+      const checkRecovery = () => {
+        remoteCircuitBreaker.recordSuccess(remoteName);
+        setRetryCount(0);
+        setCircuitState(remoteCircuitBreaker.getState(remoteName));
+        onRecovery?.(remoteName);
+      };
+
+      // Delay slightly to ensure we're not in a render cycle
+      const timerId = setTimeout(checkRecovery, 0);
+      return () => clearTimeout(timerId);
+    }
+    return undefined;
+  }, [remoteName, retryCount, onRecovery]);
 
   // Custom fallback renderer
   const FallbackRenderer = useCallback(

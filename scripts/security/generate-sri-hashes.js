@@ -168,7 +168,7 @@ export const SRI_ALGORITHM = '${manifest.algorithm}' as const;
 
 export const SRI_GENERATED_AT = '${manifest.generatedAt}' as const;
 
-export const REMOTE_INTEGRITY_HASHES: Record<string, string> = {
+export const REMOTE_INTEGRITY_HASHES = {
 ${remoteHashes}
 } as const;
 

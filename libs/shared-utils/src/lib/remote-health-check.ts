@@ -154,11 +154,11 @@ export async function checkRemoteHealth(
     };
   }
 
-  try {
-    // Create abort controller for timeout
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), mergedConfig.timeout);
+  // Create abort controller for timeout - declared outside try for cleanup in finally
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), mergedConfig.timeout);
 
+  try {
     const response = await fetchFn(healthUrl, {
       method: 'GET',
       signal: controller.signal,
@@ -169,7 +169,6 @@ export async function checkRemoteHealth(
       cache: 'no-store',
     });
 
-    clearTimeout(timeoutId);
     duration = performance.now() - startTime;
 
     if (!response.ok) {
@@ -257,6 +256,9 @@ export async function checkRemoteHealth(
       duration,
       circuitState: remoteCircuitBreaker.getState(mfe.name),
     };
+  } finally {
+    // Always clear the timeout to prevent memory leaks
+    clearTimeout(timeoutId);
   }
 }
 

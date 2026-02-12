@@ -117,13 +117,24 @@ const isBrowser = typeof window !== 'undefined';
 const isProduction = typeof process !== 'undefined' && process.env?.['NODE_ENV'] === 'production';
 
 /**
+ * Result of SHA-384 hash calculation
+ */
+interface HashResult {
+  /** The calculated hash, or null if unavailable */
+  hash: string | null;
+  /** Whether crypto API is available */
+  cryptoAvailable: boolean;
+}
+
+/**
  * Calculate SHA-384 hash of content
  * Uses Web Crypto API in browser, returns base64-encoded hash
+ * Returns null hash if crypto API is unavailable (e.g., SSR, older browsers)
  */
-async function calculateSHA384(content: ArrayBuffer | string): Promise<string> {
+async function calculateSHA384(content: ArrayBuffer | string): Promise<HashResult> {
   if (!isBrowser || !window.crypto?.subtle) {
-    // Server-side or no crypto API - skip verification
-    return '';
+    // Server-side or no crypto API - verification not possible
+    return { hash: null, cryptoAvailable: false };
   }
 
   const data =
@@ -133,7 +144,7 @@ async function calculateSHA384(content: ArrayBuffer | string): Promise<string> {
   const hashArray = Array.from(new Uint8Array(hashBuffer));
   const hashBase64 = btoa(String.fromCharCode(...hashArray));
 
-  return `sha384-${hashBase64}`;
+  return { hash: `sha384-${hashBase64}`, cryptoAvailable: true };
 }
 
 /**
@@ -160,20 +171,39 @@ async function fetchWithTimeout(
 
 /**
  * Verify URL is from an allowed origin
+ * @security Uses strict matching to prevent spoofing (e.g., localhost.evil.com)
  */
 function isUrlAllowed(url: string, allowedOrigins: string[]): boolean {
   try {
     const parsedUrl = new URL(url);
-    const origin = `${parsedUrl.protocol}//${parsedUrl.hostname}`;
-    const originWithPort = `${parsedUrl.protocol}//${parsedUrl.host}`;
 
-    return allowedOrigins.some(
-      (allowed) =>
-        origin === allowed ||
-        originWithPort === allowed ||
-        origin.startsWith(allowed) ||
-        originWithPort.startsWith(allowed)
-    );
+    for (const allowed of allowedOrigins) {
+      try {
+        // Parse the allowed origin (add path if needed for URL parsing)
+        const allowedUrl = new URL(allowed.includes('/') ? allowed : `${allowed}/`);
+
+        // Protocol must match exactly
+        if (parsedUrl.protocol !== allowedUrl.protocol) continue;
+
+        // Hostname must match exactly (no prefix matching to prevent spoofing)
+        if (parsedUrl.hostname !== allowedUrl.hostname) continue;
+
+        // For localhost, allow any port (development convenience)
+        if (parsedUrl.hostname === 'localhost') {
+          return true;
+        }
+
+        // For non-localhost, port must match if specified in allowed origin
+        if (allowedUrl.port && parsedUrl.port !== allowedUrl.port) continue;
+
+        return true;
+      } catch {
+        // Invalid allowed origin, skip
+        continue;
+      }
+    }
+
+    return false;
   } catch {
     // Invalid URL
     return false;
@@ -187,11 +217,18 @@ function isUrlAllowed(url: string, allowedOrigins: string[]): boolean {
 let cachedHashes: Record<string, string> = {};
 
 /**
+ * Sentinel to prevent repeated fetch attempts
+ * Once true, loadSRIManifest will return cached results without fetching
+ */
+let manifestLoaded = false;
+
+/**
  * Load SRI manifest from dist directory
- * Called once on first verification
+ * Called once on first verification - uses sentinel to prevent repeated fetches
  */
 async function loadSRIManifest(): Promise<Record<string, string>> {
-  if (Object.keys(cachedHashes).length > 0) {
+  // Return cached hashes if already loaded (even if empty)
+  if (manifestLoaded) {
     return cachedHashes;
   }
 
@@ -222,6 +259,9 @@ async function loadSRIManifest(): Promise<Record<string, string>> {
     );
   }
 
+  // Mark as loaded regardless of success/failure to prevent repeated attempts
+  manifestLoaded = true;
+
   return cachedHashes;
 }
 
@@ -230,6 +270,8 @@ async function loadSRIManifest(): Promise<Record<string, string>> {
  */
 export function setIntegrityHashes(hashes: Record<string, string>): void {
   cachedHashes = { ...hashes };
+  // Mark as loaded to skip fetch attempts
+  manifestLoaded = true;
 }
 
 /**
@@ -357,7 +399,41 @@ export async function verifyRemoteIntegrity(
 
     // Calculate hash of content
     const content = await response.arrayBuffer();
-    const actualHash = await calculateSHA384(content);
+    const hashResult = await calculateSHA384(content);
+
+    // If crypto API is unavailable, decide based on strictMode
+    if (!hashResult.cryptoAvailable) {
+      emitEvent('crypto_unavailable', {
+        strictMode,
+        size: content.byteLength,
+      });
+
+      if (strictMode) {
+        // In strict mode, fail verification when crypto is unavailable
+        return {
+          valid: false,
+          remoteName,
+          url,
+          expectedHash,
+          error: 'Crypto API unavailable - cannot verify integrity in strict mode',
+          timestamp,
+          durationMs: performance.now() - startTime,
+        };
+      } else {
+        // In non-strict mode, skip verification and allow
+        return {
+          valid: true,
+          remoteName,
+          url,
+          expectedHash,
+          actualHash: undefined,
+          timestamp,
+          durationMs: performance.now() - startTime,
+        };
+      }
+    }
+
+    const actualHash = hashResult.hash;
 
     // Compare hashes
     if (actualHash === expectedHash) {
