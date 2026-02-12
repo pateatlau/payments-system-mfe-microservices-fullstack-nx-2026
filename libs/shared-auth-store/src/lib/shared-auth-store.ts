@@ -150,6 +150,7 @@ export const useAuthStore = create<AuthState>()(
             // Check if MFA is required
             if ('mfaRequired' in data && data.mfaRequired === true) {
               // MFA required - store temporary token and wait for MFA code
+              // POC-3 Phase 7.2: refreshToken removed from state (now HttpOnly cookie)
               set({
                 user: data.user,
                 mfaPending: true,
@@ -159,7 +160,6 @@ export const useAuthStore = create<AuthState>()(
                 // Don't set authenticated yet
                 isAuthenticated: false,
                 accessToken: null,
-                refreshToken: null,
               });
               return;
             }

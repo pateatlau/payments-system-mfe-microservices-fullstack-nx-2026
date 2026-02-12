@@ -5,7 +5,7 @@
 **Date:** February 10, 2026
 **Phase:** Frontend MFE Security Hardening
 
-**Overall Progress:** 95% (40 of 42 tasks complete, 6 of 7 phases complete + 1 in progress)
+**Overall Progress:** 98% (41 of 42 tasks complete, 6 of 7 phases complete + 1 in progress)
 
 - Phase 1: Rate Limiting Restoration (100% - 4/4 sub-tasks complete) ✅
 - Phase 2: Content Security Policy Hardening (100% - 8/8 sub-tasks complete) ✅
@@ -13,7 +13,7 @@
 - Phase 4: Dependency Security & CI Integration (100% - 6/6 sub-tasks complete) ✅
 - Phase 5: XSS & Injection Prevention (100% - 6/6 sub-tasks complete) ✅
 - Phase 6: Module Federation Security (100% - 7/7 sub-tasks complete) ✅
-- Phase 7: Session & Auth Hardening (60% - 3/5 sub-tasks complete)
+- Phase 7: Session & Auth Hardening (80% - 4/5 sub-tasks complete)
 
 > **📋 Related Document:** See [`FRONTEND-MFE-HARDENING-PLAN.md`](./FRONTEND-MFE-HARDENING-PLAN.md) for detailed technical analysis and implementation guidance.
 
@@ -1799,15 +1799,94 @@ Session fingerprinting detects session hijacking by capturing browser/device cha
 
 ### Task 7.4: Add Session Activity Monitoring
 
-- [ ] Track last activity timestamp per session
-- [ ] Implement idle timeout (15-30 min configurable)
-- [ ] Show warning before session expires
-- [ ] Implement session extension on activity
-- [ ] Test idle timeout flow
+- [x] Track last activity timestamp per session
+- [x] Implement idle timeout (15-30 min configurable)
+- [x] Show warning before session expires
+- [x] Implement session extension on activity
+- [x] Test idle timeout flow
 
-**Status:** Not Started
-**Completed Date:**
+**Status:** Complete
+**Completed Date:** 2026-02-13
 **Notes:**
+
+**Session Activity Monitoring Implementation (POC-3 Phase 7.4):**
+
+A comprehensive session activity monitoring system that detects idle sessions, warns users before timeout, and provides session extension capabilities.
+
+**Core Components:**
+
+1. **SessionActivityMonitor Class** (`libs/shared-utils/src/lib/session-activity.ts`)
+   - Tracks user activity via DOM events: mousedown, mousemove, keydown, scroll, touchstart, click
+   - Configurable idle timeout (default: 15 minutes, via `NX_SESSION_TIMEOUT_MS` env var)
+   - Warning callback 2 minutes before session expires
+   - Activity throttling (30 seconds) to reduce storage writes
+   - Cross-tab synchronization via BroadcastChannel
+   - Persists last activity to localStorage for cross-tab consistency
+
+2. **useSessionActivity Hook** (`libs/shared-utils/src/lib/hooks/useSessionActivity.ts`)
+   - React hook wrapping SessionActivityMonitor
+   - Returns: `state`, `formattedTimeRemaining`, `showWarning`, `extend()`, `start()`, `stop()`, `dismissWarning()`
+   - Auto-starts when user is authenticated
+   - Auto-stops on logout
+
+3. **SessionTimeoutWarning Component** (`apps/shell/src/components/SessionTimeoutWarning.tsx`)
+   - Modal dialog with countdown timer
+   - "Stay Signed In" button to extend session
+   - "Sign Out" button for manual logout
+   - Accessible: focus trap, keyboard navigation, ARIA attributes
+   - Visual urgency indicator (red at 30 seconds remaining)
+   - Auto-extends on any user interaction (click, keypress)
+
+4. **SessionActivityProvider** (`apps/shell/src/components/SessionActivityProvider.tsx`)
+   - Wraps app in bootstrap.tsx
+   - Integrates with auth store for authentication state
+   - Emits `auth:session-expired` event on timeout
+   - Clears fingerprint caches on timeout
+   - Automatic logout on session expiration
+
+**Configuration Presets:**
+
+```typescript
+SESSION_TIMEOUT_PRESETS = {
+  strict: 5 * 60 * 1000,    // 5 minutes (high-security)
+  standard: 15 * 60 * 1000, // 15 minutes (default)
+  relaxed: 30 * 60 * 1000,  // 30 minutes
+  extended: 60 * 60 * 1000, // 60 minutes
+};
+
+SESSION_WARNING_PRESETS = {
+  short: 30 * 1000,      // 30 seconds
+  minute: 60 * 1000,     // 1 minute
+  standard: 2 * 60 * 1000, // 2 minutes (default)
+  long: 5 * 60 * 1000,   // 5 minutes
+};
+```
+
+**Environment Variable:**
+- `NX_SESSION_TIMEOUT_MS`: Override default timeout (milliseconds)
+
+**Event Bus Integration:**
+- Added `reason` field to `AuthSessionExpiredPayload` interface
+- Values: `inactivity_timeout`, `token_expired`, `forced_logout`
+
+**Test Coverage:**
+- 23 unit tests for SessionActivityMonitor (session-activity.spec.ts)
+- Tests: start/stop, activity tracking, throttling, timeout handling, session extension, state management
+
+**Files Created:**
+- `libs/shared-utils/src/lib/session-activity.ts`
+- `libs/shared-utils/src/lib/session-activity.spec.ts`
+- `libs/shared-utils/src/lib/hooks/useSessionActivity.ts`
+- `apps/shell/src/components/SessionTimeoutWarning.tsx`
+- `apps/shell/src/components/SessionActivityProvider.tsx`
+
+**Files Modified:**
+- `libs/shared-utils/src/index.ts` - Export session activity utilities
+- `libs/shared-utils/src/lib/hooks/index.ts` - Export useSessionActivity hook
+- `apps/shell/src/bootstrap.tsx` - Integrate SessionActivityProvider
+- `libs/shared-event-bus/src/lib/events/auth.ts` - Add reason to session expired payload
+- `libs/shared-event-bus/src/lib/schemas.ts` - Update auth schemas for POC-3 7.2/7.4
+- `libs/shared-auth-store/src/lib/shared-auth-store.ts` - Remove stale refreshToken reference
 
 ---
 
@@ -1827,7 +1906,7 @@ Session fingerprinting detects session hijacking by capturing browser/device cha
 
 ---
 
-**Phase 7 Completion:** **60% (3/5 sub-tasks complete)**
+**Phase 7 Completion:** **80% (4/5 sub-tasks complete)**
 
 ---
 
@@ -1845,8 +1924,8 @@ Session fingerprinting detects session hijacking by capturing browser/device cha
 | Phase 4 | Dependency Security | 6 | 6 | 100% ✅ |
 | Phase 5 | XSS Prevention | 6 | 6 | 100% ✅ |
 | Phase 6 | Module Federation Security | 7 | 7 | 100% ✅ |
-| Phase 7 | Session & Auth Hardening | 3 | 5 | 60% |
-| **Total** | | **40** | **42** | **95%** |
+| Phase 7 | Session & Auth Hardening | 4 | 5 | 80% |
+| **Total** | | **41** | **42** | **98%** |
 
 ---
 
@@ -1895,4 +1974,4 @@ After all phases complete, run comprehensive security testing:
 ---
 
 **Last Updated:** February 13, 2026
-**Status:** In Progress - Phase 7 Tasks 7.1, 7.2, 7.3 Complete (HttpOnly Cookies, Token Storage Removed, Session Fingerprinting)
+**Status:** In Progress - Phase 7 Tasks 7.1-7.4 Complete (HttpOnly Cookies, Token Storage Removed, Session Fingerprinting, Activity Monitoring)

@@ -22,6 +22,10 @@ describe('Event Bus Validation Schemas', () => {
   });
 
   describe('validateEventPayload', () => {
+    /**
+     * POC-3 Phase 7.2: Auth login payload tests updated
+     * Tokens are no longer included in auth:login events for security
+     */
     describe('auth:login', () => {
       const validPayload = {
         user: {
@@ -30,11 +34,10 @@ describe('Event Bus Validation Schemas', () => {
           name: 'Test User',
           role: 'CUSTOMER' as const,
         },
-        accessToken: 'valid-token',
-        refreshToken: 'valid-refresh-token',
+        // POC-3 Phase 7.2: Tokens removed for security
       };
 
-      it('should accept valid auth:login payload', () => {
+      it('should accept valid auth:login payload without tokens', () => {
         const result = validateEventPayload('auth:login', validPayload);
         expect(result.success).toBe(true);
       });
@@ -59,14 +62,6 @@ describe('Event Bus Validation Schemas', () => {
         const result = validateEventPayload('auth:login', {
           ...validPayload,
           user: { ...validPayload.user, role: 'INVALID_ROLE' },
-        });
-        expect(result.success).toBe(false);
-      });
-
-      it('should reject payload with empty access token', () => {
-        const result = validateEventPayload('auth:login', {
-          ...validPayload,
-          accessToken: '',
         });
         expect(result.success).toBe(false);
       });
@@ -205,8 +200,11 @@ describe('Event Bus Validation Schemas', () => {
   });
 
   describe('Individual Schema Tests', () => {
+    /**
+     * POC-3 Phase 7.2: Auth login schema updated - tokens removed for security
+     */
     describe('AuthLoginPayloadSchema', () => {
-      it('should validate complete payload', () => {
+      it('should validate payload with user only (no tokens)', () => {
         const result = AuthLoginPayloadSchema.safeParse({
           user: {
             id: '123',
@@ -214,8 +212,7 @@ describe('Event Bus Validation Schemas', () => {
             name: 'Test',
             role: 'ADMIN',
           },
-          accessToken: 'token',
-          refreshToken: 'refresh',
+          // POC-3 Phase 7.2: Tokens removed for security
         });
         expect(result.success).toBe(true);
       });

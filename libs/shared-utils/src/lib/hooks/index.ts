@@ -21,3 +21,9 @@ export type {
   UseFocusTrapOptions,
   UseFocusTrapReturn,
 } from './useFocusTrap';
+
+export { useSessionActivity, SESSION_TIMEOUT_PRESETS, SESSION_WARNING_PRESETS } from './useSessionActivity';
+export type {
+  UseSessionActivityOptions,
+  UseSessionActivityReturn,
+} from './useSessionActivity';
