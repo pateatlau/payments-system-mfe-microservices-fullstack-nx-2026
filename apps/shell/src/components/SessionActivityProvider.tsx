@@ -10,7 +10,7 @@
  * - Configurable timeout and warning periods
  */
 
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { useAuthStore } from 'shared-auth-store';
 import { eventBus } from '@mfe/shared-event-bus';
 import {
@@ -105,13 +105,25 @@ export function SessionActivityProvider({
     }
   }, [isAuthenticated, stop]);
 
-  // Log session state changes (debug)
+  // Refs for dev logging to avoid recreating interval
+  const sessionStateRef = useRef(state);
+  const showWarningRef = useRef(showWarning);
+
+  // Keep refs updated
+  useEffect(() => {
+    sessionStateRef.current = state;
+    showWarningRef.current = showWarning;
+  }, [state, showWarning]);
+
+  // Log session state changes (debug) - uses refs to avoid interval recreation
   useEffect(() => {
     if (process.env['NODE_ENV'] === 'development' && isAuthenticated) {
       const logInterval = setInterval(() => {
-        if (state.isActive && !showWarning) {
-          const minutes = Math.floor(state.timeRemaining / 60000);
-          const seconds = Math.floor((state.timeRemaining % 60000) / 1000);
+        const currentState = sessionStateRef.current;
+        const currentShowWarning = showWarningRef.current;
+        if (currentState.isActive && !currentShowWarning) {
+          const minutes = Math.floor(currentState.timeRemaining / 60000);
+          const seconds = Math.floor((currentState.timeRemaining % 60000) / 1000);
           console.debug(
             `[SessionActivity] Time remaining: ${minutes}:${seconds.toString().padStart(2, '0')}`
           );
@@ -120,7 +132,7 @@ export function SessionActivityProvider({
 
       return () => clearInterval(logInterval);
     }
-  }, [isAuthenticated, state.isActive, state.timeRemaining, showWarning]);
+  }, [isAuthenticated]); // Only depends on isAuthenticated, reads latest state from refs
 
   return (
     <>

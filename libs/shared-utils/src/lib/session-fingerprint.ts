@@ -135,12 +135,17 @@ function collectFingerprintData(): SessionFingerprintData {
   }
 
   // Get timezone name using Intl API
-  let timezone = 'Unknown';
+  let timezone: string;
   try {
     timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   } catch {
-    // Fallback to offset-based timezone
-    timezone = `UTC${new Date().getTimezoneOffset() > 0 ? '-' : '+'}${Math.abs(new Date().getTimezoneOffset() / 60)}`;
+    // Fallback to offset-based timezone with proper HH:MM format
+    // Note: getTimezoneOffset() returns minutes, negative for ahead of UTC
+    const offsetMinutes = -new Date().getTimezoneOffset();
+    const sign = offsetMinutes >= 0 ? '+' : '-';
+    const hours = Math.floor(Math.abs(offsetMinutes) / 60).toString().padStart(2, '0');
+    const minutes = (Math.abs(offsetMinutes) % 60).toString().padStart(2, '0');
+    timezone = `UTC${sign}${hours}:${minutes}`;
   }
 
   return {
@@ -158,11 +163,7 @@ function collectFingerprintData(): SessionFingerprintData {
     touchSupport:
       'ontouchstart' in window ||
       navigator.maxTouchPoints > 0 ||
-      (
-        navigator as Navigator & {
-          msMaxTouchPoints?: number;
-        }
-      ).msMaxTouchPoints! > 0,
+      ((navigator as Navigator & { msMaxTouchPoints?: number }).msMaxTouchPoints ?? 0) > 0,
     webglRenderer: getWebGLRenderer(),
   };
 }

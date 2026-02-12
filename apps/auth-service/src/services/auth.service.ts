@@ -783,13 +783,12 @@ export const refreshAccessToken = async (
 
     if (!fingerprintValid) {
       // Fingerprint mismatch - possible token theft
-      // POC-3 Phase 7.3: Enhanced logging with more details
+      // POC-3 Phase 7.3: Enhanced logging with more details (PII masked)
       console.warn(
         `[Security] Fingerprint mismatch detected:`,
         JSON.stringify({
           userId: payload.userId,
-          email: payload.email,
-          ip: requestMeta.ip?.substring(0, 15) + '...',
+          email: maskEmailForLog(payload.email),
           userAgent: requestMeta.userAgent?.substring(0, 50) + '...',
           hasClientFingerprint: !!requestMeta.clientFingerprint,
           timestamp: new Date().toISOString(),

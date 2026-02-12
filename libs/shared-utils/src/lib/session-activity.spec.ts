@@ -124,8 +124,6 @@ describe('SessionActivityMonitor', () => {
 
     it('should throttle activity updates', () => {
       monitor.start();
-      // Store initial activity for potential future assertions
-      const _initialActivity = monitor.getState().lastActivity;
       mockCallbacks.onActivity.mockClear();
 
       // Rapid events within throttle period
@@ -323,7 +321,7 @@ describe('formatTimeRemaining', () => {
   it('should format seconds only when under 1 minute', () => {
     expect(formatTimeRemaining(45000)).toBe('45 seconds');
     expect(formatTimeRemaining(10000)).toBe('10 seconds');
-    expect(formatTimeRemaining(1000)).toBe('1 seconds');
+    expect(formatTimeRemaining(1000)).toBe('1 second'); // singular form
   });
 
   it('should handle expired time', () => {

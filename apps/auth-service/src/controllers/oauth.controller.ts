@@ -174,9 +174,16 @@ export const handleOAuthCallback = async (
     // URL fragment (#) is not sent to server, providing security benefit
     // Note: refreshToken is in BOTH HttpOnly cookie AND URL for backward compatibility
     // Frontend will gradually migrate to using only the cookie
+    //
+    // TODO(security): Remove refreshToken from successParams once all MFEs have migrated
+    // to cookie-based refresh. Currently included for backward compatibility with older
+    // frontend code that expects the token in the URL fragment. This undermines the XSS
+    // protection provided by the HttpOnly cookie. Target removal: After Phase 7 migration
+    // is complete and verified across all MFEs.
+    // Tracking: https://github.com/pateatlau/payments-system-mfe-microservices-fullstack-nx-2026/issues/TBD
     const successParams = new URLSearchParams({
       accessToken: result.accessToken,
-      refreshToken: result.refreshToken, // Keep for backward compatibility
+      refreshToken: result.refreshToken, // TODO: Remove after MFE migration complete
       expiresIn: result.expiresIn,
     });
 

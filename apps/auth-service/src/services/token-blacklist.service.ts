@@ -167,12 +167,12 @@ export function validateFingerprintDetailed(
     return { isValid: true };
   }
 
-  // Fingerprint mismatch - log details for diagnostics
-  // In production, you might want to store individual components separately
+  // Fingerprint mismatch - log details for diagnostics (PII anonymized)
+  // IP is omitted to protect user privacy, only UA prefix is included
   return {
     isValid: false,
     mismatchType: 'exact',
-    details: `Fingerprint mismatch. IP: ${ip.substring(0, 10)}..., UA: ${userAgent.substring(0, 30)}...`,
+    details: `Fingerprint mismatch. UA: ${userAgent.substring(0, 30)}...`,
   };
 }
 

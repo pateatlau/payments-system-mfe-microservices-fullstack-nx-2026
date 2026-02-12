@@ -11,9 +11,9 @@
  * - Auto-extends session if user clicks anywhere or presses a key
  */
 
-import { useEffect, useRef, useCallback } from 'react';
+import { useCallback } from 'react';
 import { useAuthStore } from 'shared-auth-store';
-import { formatTimeRemaining } from '@mfe/shared-utils';
+import { formatTimeRemaining, useFocusTrap } from '@mfe/shared-utils';
 
 interface SessionTimeoutWarningProps {
   /** Time remaining in milliseconds */
@@ -30,56 +30,14 @@ export function SessionTimeoutWarning({
   isVisible,
 }: SessionTimeoutWarningProps) {
   const logout = useAuthStore(state => state.logout);
-  const modalRef = useRef<HTMLDivElement>(null);
-  const extendButtonRef = useRef<HTMLButtonElement>(null);
 
-  // Focus the extend button when modal becomes visible
-  useEffect(() => {
-    if (isVisible) {
-      // Small delay to ensure modal is rendered
-      const timer = setTimeout(() => {
-        extendButtonRef.current?.focus();
-      }, 100);
-      return () => clearTimeout(timer);
-    }
-  }, [isVisible]);
-
-  // Handle keyboard events
-  useEffect(() => {
-    if (!isVisible) return;
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      // Close on Escape
-      if (e.key === 'Escape') {
-        onExtend();
-        return;
-      }
-
-      // Trap focus within modal
-      if (e.key === 'Tab') {
-        const focusableElements = modalRef.current?.querySelectorAll(
-          'button, [tabindex]:not([tabindex="-1"])'
-        );
-        if (!focusableElements || focusableElements.length === 0) return;
-
-        const firstElement = focusableElements[0] as HTMLElement;
-        const lastElement = focusableElements[
-          focusableElements.length - 1
-        ] as HTMLElement;
-
-        if (e.shiftKey && document.activeElement === firstElement) {
-          e.preventDefault();
-          lastElement.focus();
-        } else if (!e.shiftKey && document.activeElement === lastElement) {
-          e.preventDefault();
-          firstElement.focus();
-        }
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isVisible, onExtend]);
+  // Use shared focus trap hook - handles focus management and Escape key
+  const { containerRef } = useFocusTrap<HTMLDivElement>({
+    isActive: isVisible,
+    onEscape: onExtend,
+    autoFocus: true,
+    restoreFocus: true,
+  });
 
   // Handle logout
   const handleLogout = useCallback(async () => {
@@ -105,7 +63,7 @@ export function SessionTimeoutWarning({
 
       {/* Modal */}
       <div
-        ref={modalRef}
+        ref={containerRef}
         role="alertdialog"
         aria-modal="true"
         aria-labelledby="session-timeout-title"
@@ -172,7 +130,6 @@ export function SessionTimeoutWarning({
         {/* Buttons */}
         <div className="flex flex-col sm:flex-row gap-3">
           <button
-            ref={extendButtonRef}
             onClick={onExtend}
             className="flex-1 px-4 py-2 bg-primary text-primary-foreground rounded-md font-medium hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-colors"
           >

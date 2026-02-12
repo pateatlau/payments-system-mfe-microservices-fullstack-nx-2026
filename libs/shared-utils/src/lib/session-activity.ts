@@ -105,6 +105,8 @@ export class SessionActivityMonitor {
   private channel: BroadcastChannel | null = null;
   private boundActivityHandler: () => void;
   private boundVisibilityHandler: () => void;
+  /** Flag to prevent timeout broadcast storm when receiving TIMEOUT from remote */
+  private timeoutFromRemote: boolean = false;
 
   constructor(
     config: Partial<SessionActivityConfig> = {},
@@ -225,9 +227,47 @@ export class SessionActivityMonitor {
 
   /**
    * Update configuration
+   *
+   * Structural changes (activityEvents, enableCrossTabSync, channelName, storageKey)
+   * require a restart to take effect. Numeric changes (idleTimeout, warningTime,
+   * activityThrottle) apply immediately.
    */
   updateConfig(config: Partial<SessionActivityConfig>): void {
+    const oldConfig = this.config;
+
+    // Check if any structural keys changed that require restart
+    const structuralKeys: (keyof SessionActivityConfig)[] = [
+      'activityEvents',
+      'enableCrossTabSync',
+      'channelName',
+      'storageKey',
+    ];
+
+    const needsRestart = structuralKeys.some(key => {
+      if (config[key] === undefined) return false;
+      if (key === 'activityEvents') {
+        // Compare arrays
+        const oldEvents = oldConfig.activityEvents;
+        const newEvents = config.activityEvents;
+        if (!newEvents) return false;
+        if (oldEvents.length !== newEvents.length) return true;
+        return oldEvents.some((e, i) => e !== newEvents[i]);
+      }
+      return oldConfig[key] !== config[key];
+    });
+
+    // Update config
     this.config = { ...this.config, ...config };
+
+    // If structural changes and currently running, restart to apply changes
+    if (needsRestart && this.isRunning) {
+      this.stop();
+      this.start();
+    } else if (this.isRunning) {
+      // For numeric-only changes, restart the checking interval to use new thresholds
+      this.stopChecking();
+      this.startChecking();
+    }
   }
 
   /**
@@ -323,6 +363,8 @@ export class SessionActivityMonitor {
           }
         } else if (data.type === 'TIMEOUT') {
           // Another tab timed out - trigger timeout here too
+          // Set flag to prevent re-broadcasting (avoids message storm)
+          this.timeoutFromRemote = true;
           this.handleTimeout();
         }
       };
@@ -382,10 +424,14 @@ export class SessionActivityMonitor {
    * Handle session timeout
    */
   private handleTimeout(): void {
-    // Broadcast timeout to other tabs
-    if (this.channel) {
+    // Only broadcast if this is the originating tab (not received from remote)
+    // This prevents a broadcast storm where tabs keep notifying each other
+    if (this.channel && !this.timeoutFromRemote) {
       this.channel.postMessage({ type: 'TIMEOUT' });
     }
+
+    // Clear the flag after processing
+    this.timeoutFromRemote = false;
 
     this.callbacks.onTimeout?.();
     this.stop();
@@ -454,6 +500,11 @@ export function formatTimeRemaining(ms: number): string {
 
   if (minutes > 0) {
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+  }
+
+  // Use singular form for "1 second"
+  if (remainingSeconds === 1) {
+    return '1 second';
   }
 
   return `${remainingSeconds} seconds`;

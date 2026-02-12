@@ -71,7 +71,8 @@ function parseRefreshExpiryMs(): number {
  * - httpOnly: true - Prevents JavaScript access (XSS protection)
  * - secure: true in production - HTTPS only
  * - sameSite: 'strict' - Prevents CSRF attacks
- * - path: '/auth' - Cookie only sent to auth endpoints
+ * - path: '/' - Cookie sent for all paths (required for API Gateway cross-path requests)
+ * - maxAge: Derived from JWT_REFRESH_EXPIRES_IN env var (default: 7 days)
  */
 export const REFRESH_TOKEN_COOKIE_OPTIONS = {
   httpOnly: true,

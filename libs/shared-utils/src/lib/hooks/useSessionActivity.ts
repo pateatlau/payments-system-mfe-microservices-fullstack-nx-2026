@@ -92,7 +92,24 @@ export function useSessionActivity(
   const monitorRef = useRef<SessionActivityMonitor | null>(null);
   const updateIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Create monitor instance
+  // Store callbacks in refs to avoid effect recreation when inline functions change
+  const onWarningRef = useRef(onWarning);
+  const onWarningDismissedRef = useRef(onWarningDismissed);
+  const onTimeoutRef = useRef(onTimeout);
+  const onActivityRef = useRef(onActivity);
+  const onExtendRef = useRef(onExtend);
+
+  // Keep refs updated with latest callbacks
+  useEffect(() => {
+    onWarningRef.current = onWarning;
+    onWarningDismissedRef.current = onWarningDismissed;
+    onTimeoutRef.current = onTimeout;
+    onActivityRef.current = onActivity;
+    onExtendRef.current = onExtend;
+  }, [onWarning, onWarningDismissed, onTimeout, onActivity, onExtend]);
+
+  // Create monitor instance - only depends on enabled and config
+  // Callbacks are accessed via refs to avoid recreation
   useEffect(() => {
     if (!enabled) {
       return;
@@ -101,18 +118,18 @@ export function useSessionActivity(
     const monitor = new SessionActivityMonitor(config, {
       onWarning: timeRemaining => {
         setShowWarning(true);
-        onWarning?.(timeRemaining);
+        onWarningRef.current?.(timeRemaining);
       },
       onWarningDismissed: () => {
         setShowWarning(false);
-        onWarningDismissed?.();
+        onWarningDismissedRef.current?.();
       },
       onTimeout: () => {
         setShowWarning(false);
-        onTimeout?.();
+        onTimeoutRef.current?.();
       },
-      onActivity,
-      onExtend,
+      onActivity: () => onActivityRef.current?.(),
+      onExtend: () => onExtendRef.current?.(),
     });
 
     monitorRef.current = monitor;
@@ -135,15 +152,10 @@ export function useSessionActivity(
       }
       monitorRef.current = null;
     };
-  }, [
-    enabled,
-    onWarning,
-    onWarningDismissed,
-    onTimeout,
-    onActivity,
-    onExtend,
-    // Don't include config in deps to avoid recreation
-  ]);
+    // Note: config is intentionally excluded from deps - it's only read at initialization.
+    // To update config after mount, use monitor.updateConfig() via the ref.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [enabled]);
 
   // Extend session
   const extend = useCallback(() => {

@@ -28,8 +28,8 @@ export const corsMiddleware = cors({
   // POC-3 Phase 7.1: credentials: true is required for HttpOnly cookie authentication
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  // Include X-CSRF-Token for CSRF protection
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-ID', 'X-CSRF-Token', 'X-Device-ID'],
+  // Include X-CSRF-Token for CSRF protection, X-Client-Fingerprint for session security
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-ID', 'X-CSRF-Token', 'X-Device-ID', 'X-Client-Fingerprint'],
   exposedHeaders: ['X-Request-ID'],
   maxAge: 86400, // 24 hours
 });

@@ -53,23 +53,24 @@ async function initializeFingerprint(): Promise<string> {
 }
 
 /**
- * POC-3 Phase 7.3: Get or initialize the fingerprint header
+ * POC-3 Phase 7.3: Ensure fingerprint is initialized and return it
+ * This is an async function that waits for fingerprint to be ready
  */
-function getFingerprintHeader(): string {
+async function ensureFingerprintHeader(): Promise<string> {
+  // Return cached value if available
   if (cachedFingerprintHeader !== null) {
     return cachedFingerprintHeader;
   }
 
   // Start initialization if not already started
   if (!fingerprintPromise) {
-    fingerprintPromise = initializeFingerprint().then(header => {
-      cachedFingerprintHeader = header;
-      return header;
-    });
+    fingerprintPromise = initializeFingerprint();
   }
 
-  // Return empty string while initializing (fingerprint will be available on subsequent requests)
-  return '';
+  // Await the fingerprint initialization
+  const header = await fingerprintPromise;
+  cachedFingerprintHeader = header;
+  return header;
 }
 
 /**
@@ -213,8 +214,9 @@ function setupRequestInterceptor(
   axiosInstance: AxiosInstance,
   tokenManager: TokenManager
 ): void {
+  // Use async interceptor to properly await fingerprint initialization
   axiosInstance.interceptors.request.use(
-    (config: InternalAxiosRequestConfig) => {
+    async (config: InternalAxiosRequestConfig) => {
       const token = tokenManager.getAccessToken();
       addTokenToRequest(config, token);
 
@@ -252,8 +254,9 @@ function setupRequestInterceptor(
       // POC-3 Phase 7.3: Add session fingerprint for security
       // The fingerprint helps detect session hijacking by verifying
       // the request comes from the same browser/device as the original session
+      // Await ensures fingerprint is ready before the first request
       if (!config.headers[FINGERPRINT_HEADER_NAME]) {
-        const fingerprintHeader = getFingerprintHeader();
+        const fingerprintHeader = await ensureFingerprintHeader();
         if (fingerprintHeader) {
           config.headers[FINGERPRINT_HEADER_NAME] = fingerprintHeader;
         }
