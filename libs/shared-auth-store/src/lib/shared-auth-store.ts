@@ -40,11 +40,16 @@ export interface EmailVerificationPendingState {
 
 /**
  * Auth state interface
+ *
+ * POC-3 Phase 7.2: Security hardening for token storage
+ * - accessToken: Kept in memory only (not persisted to localStorage)
+ * - refreshToken: Removed from frontend state entirely (stored in HttpOnly cookie)
+ * - Only user info and isAuthenticated are persisted to localStorage for UX
  */
 export interface AuthState {
   user: User | null;
   accessToken: string | null;
-  refreshToken: string | null;
+  // POC-3 Phase 7.2: refreshToken removed from state - now in HttpOnly cookie only
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
@@ -60,7 +65,7 @@ export interface AuthState {
   cancelMfaLogin: () => void;
   logout: () => Promise<void>;
   signup: (data: SignUpData) => Promise<void>;
-  setAccessToken: (accessToken: string, refreshToken: string) => void;
+  setAccessToken: (accessToken: string) => void;
   hasRole: (role: UserRole) => boolean;
   hasAnyRole: (roles: UserRole[]) => boolean;
   clearError: () => void;
@@ -79,21 +84,34 @@ function getApiClientWithTokenProvider(tokenProvider: TokenProvider) {
 
 /**
  * Zustand auth store with persistence middleware
- * Uses localStorage to persist auth state across page reloads
- * Integrates with backend Auth Service for real JWT authentication
+ *
+ * POC-3 Phase 7.2: Security hardening
+ * - accessToken: Memory only (cleared on page reload for security)
+ * - refreshToken: HttpOnly cookie only (not accessible to JS)
+ * - user + isAuthenticated: Persisted to localStorage for UX
+ *
+ * On page reload:
+ * - User info is restored from localStorage (for immediate UI)
+ * - Access token is null (user appears logged out momentarily)
+ * - First API call triggers automatic token refresh via HttpOnly cookie
+ * - Session is seamlessly restored
  */
 export const useAuthStore = create<AuthState>()(
   persist(
     (set, get) => {
       // Create token provider for API client
+      // POC-3 Phase 7.2: refreshToken returns null - server uses HttpOnly cookie
       const tokenProvider: TokenProvider = {
         getAccessToken: () => get().accessToken ?? null,
-        getRefreshToken: () => get().refreshToken ?? null,
-        setTokens: (accessToken: string, refreshToken: string) => {
-          set({ accessToken, refreshToken });
+        // Refresh token is now in HttpOnly cookie, not accessible to JS
+        getRefreshToken: () => null,
+        setTokens: (accessToken: string, _refreshToken: string) => {
+          // Only store access token in memory
+          // refreshToken is ignored - it's set as HttpOnly cookie by server
+          set({ accessToken });
         },
         clearTokens: () => {
-          set({ accessToken: null, refreshToken: null });
+          set({ accessToken: null });
         },
       };
 
@@ -103,7 +121,7 @@ export const useAuthStore = create<AuthState>()(
       return {
         user: null,
         accessToken: null,
-        refreshToken: null,
+        // POC-3 Phase 7.2: refreshToken removed - now in HttpOnly cookie
         isAuthenticated: false,
         isLoading: false,
         error: null,
@@ -147,12 +165,13 @@ export const useAuthStore = create<AuthState>()(
             }
 
             // Standard login (no MFA)
-            const { user, accessToken, refreshToken } = data;
+            // POC-3 Phase 7.2: refreshToken is now in HttpOnly cookie, not stored in state
+            const { user, accessToken } = data;
 
             set({
               user,
               accessToken,
-              refreshToken,
+              // refreshToken removed - now in HttpOnly cookie
               isAuthenticated: true,
               isLoading: false,
               error: null,
@@ -161,6 +180,7 @@ export const useAuthStore = create<AuthState>()(
             });
 
             // Emit login event to event bus
+            // POC-3 Phase 7.2: Don't emit refreshToken for security
             eventBus.emit(
               'auth:login',
               {
@@ -170,8 +190,7 @@ export const useAuthStore = create<AuthState>()(
                   name: user.name,
                   role: user.role,
                 },
-                accessToken,
-                refreshToken,
+                // accessToken not emitted for security - other tabs will refresh via cookie
               },
               'auth-mfe'
             );
@@ -187,7 +206,6 @@ export const useAuthStore = create<AuthState>()(
             set({
               user: null,
               accessToken: null,
-              refreshToken: null,
               isAuthenticated: false,
               isLoading: false,
               error: errorMessage,
@@ -219,12 +237,13 @@ export const useAuthStore = create<AuthState>()(
               throw new Error(response.message ?? 'MFA verification failed');
             }
 
-            const { accessToken, refreshToken, user: updatedUser } = response.data;
+            // POC-3 Phase 7.2: refreshToken is in HttpOnly cookie, not stored in state
+            const { accessToken, user: updatedUser } = response.data;
 
             set({
               user: updatedUser,
               accessToken,
-              refreshToken,
+              // refreshToken removed - now in HttpOnly cookie
               isAuthenticated: true,
               isLoading: false,
               error: null,
@@ -233,6 +252,7 @@ export const useAuthStore = create<AuthState>()(
             });
 
             // Emit login event to event bus
+            // POC-3 Phase 7.2: Don't emit tokens for security
             eventBus.emit(
               'auth:login',
               {
@@ -242,8 +262,6 @@ export const useAuthStore = create<AuthState>()(
                   name: updatedUser.name,
                   role: updatedUser.role,
                 },
-                accessToken,
-                refreshToken,
               },
               'auth-mfe'
             );
@@ -286,10 +304,10 @@ export const useAuthStore = create<AuthState>()(
             }
 
             // Clear state
+            // POC-3 Phase 7.2: refreshToken is cleared by server (HttpOnly cookie)
             set({
               user: null,
               accessToken: null,
-              refreshToken: null,
               isAuthenticated: false,
               error: null,
             });
@@ -310,7 +328,6 @@ export const useAuthStore = create<AuthState>()(
             set({
               user: null,
               accessToken: null,
-              refreshToken: null,
               isAuthenticated: false,
               error: null,
             });
@@ -355,7 +372,6 @@ export const useAuthStore = create<AuthState>()(
               set({
                 user: null,
                 accessToken: null,
-                refreshToken: null,
                 isAuthenticated: false,
                 isLoading: false,
                 error: null,
@@ -379,14 +395,15 @@ export const useAuthStore = create<AuthState>()(
             }
 
             // Legacy flow: direct login after signup (kept for backwards compatibility)
+            // POC-3 Phase 7.2: refreshToken is in HttpOnly cookie, not stored in state
             const legacyResponse = response as RegisterResponse;
             if (legacyResponse.data) {
-              const { user, accessToken, refreshToken } = legacyResponse.data;
+              const { user, accessToken } = legacyResponse.data;
 
               set({
                 user,
                 accessToken,
-                refreshToken,
+                // refreshToken removed - now in HttpOnly cookie
                 isAuthenticated: true,
                 isLoading: false,
                 error: null,
@@ -394,6 +411,7 @@ export const useAuthStore = create<AuthState>()(
               });
 
               // Emit login event to event bus (signup also logs user in)
+              // POC-3 Phase 7.2: Don't emit tokens for security
               eventBus.emit(
                 'auth:login',
                 {
@@ -403,8 +421,6 @@ export const useAuthStore = create<AuthState>()(
                     name: user.name,
                     role: user.role,
                   },
-                  accessToken,
-                  refreshToken,
                 },
                 'auth-mfe'
               );
@@ -421,7 +437,6 @@ export const useAuthStore = create<AuthState>()(
             set({
               user: null,
               accessToken: null,
-              refreshToken: null,
               isAuthenticated: false,
               isLoading: false,
               error: errorMessage,
@@ -430,17 +445,18 @@ export const useAuthStore = create<AuthState>()(
           }
         },
 
-        setAccessToken: (accessToken: string, refreshToken: string) => {
-          set({ accessToken, refreshToken });
+        // POC-3 Phase 7.2: Only accepts accessToken (refreshToken is in HttpOnly cookie)
+        setAccessToken: (accessToken: string) => {
+          set({ accessToken });
 
-          // Emit token refreshed event
+          // Emit token refreshed event (without exposing the token)
           const userId = get().user?.id;
           if (userId) {
             eventBus.emit(
               'auth:token-refreshed',
               {
                 userId,
-                accessToken,
+                // POC-3 Phase 7.2: Don't emit accessToken for security
               },
               'auth-mfe'
             );
@@ -469,12 +485,27 @@ export const useAuthStore = create<AuthState>()(
     },
     {
       name: 'auth-storage',
+      /**
+       * POC-3 Phase 7.2: Security-hardened persistence
+       *
+       * Only persist non-sensitive user info:
+       * - user: For immediate UI display on page reload
+       * - isAuthenticated: To show correct UI state
+       *
+       * NOT persisted (security):
+       * - accessToken: Memory only, cleared on reload (refreshed via cookie)
+       * - refreshToken: HttpOnly cookie only, not accessible to JS
+       * - MFA state: User must re-authenticate if page reloads during MFA
+       *
+       * On page reload, the first API call will trigger automatic token
+       * refresh using the HttpOnly cookie, restoring the session seamlessly.
+       */
       partialize: state => ({
         user: state.user,
-        accessToken: state.accessToken,
-        refreshToken: state.refreshToken,
         isAuthenticated: state.isAuthenticated,
-        // Don't persist MFA state - user should re-login if page refreshes during MFA
+        // accessToken: NOT persisted (memory only for security)
+        // refreshToken: NOT persisted (HttpOnly cookie only)
+        // MFA state: NOT persisted (user should re-login)
       }),
     }
   )

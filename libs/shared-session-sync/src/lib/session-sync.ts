@@ -145,12 +145,13 @@ export class SessionSync {
   }
 
   /**
-   * Broadcast token refresh to all tabs
+   * Broadcast token refresh notification to all tabs
    *
-   * @param newToken - New access token
+   * POC-3 Phase 7.2: No longer passes the token for security
+   * Other tabs will refresh their own token via HttpOnly cookie
    */
-  broadcastTokenRefresh(newToken: string): void {
-    const payload: TokenRefreshPayload = { token: newToken };
+  broadcastTokenRefresh(): void {
+    const payload: TokenRefreshPayload = { refreshedAt: Date.now() };
     this.broadcast('TOKEN_REFRESH', payload);
   }
 

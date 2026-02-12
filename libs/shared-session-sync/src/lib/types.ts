@@ -23,8 +23,15 @@ export interface AuthStateChangePayload {
   user?: unknown;
 }
 
+/**
+ * POC-3 Phase 7.2: Token no longer included in payload for security
+ * The payload now just signals that a token refresh occurred
+ * Other tabs will refresh their own token via the HttpOnly cookie
+ */
 export interface TokenRefreshPayload {
-  token: string;
+  // POC-3 Phase 7.2: token removed for security - not accessible to JS
+  // This event now just signals that a refresh occurred
+  refreshedAt: number;
 }
 
 export interface LogoutPayload {

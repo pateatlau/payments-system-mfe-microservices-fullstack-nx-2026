@@ -5,7 +5,7 @@
 **Date:** February 10, 2026
 **Phase:** Frontend MFE Security Hardening
 
-**Overall Progress:** 90% (38 of 42 tasks complete, 6 of 7 phases in progress)
+**Overall Progress:** 93% (39 of 42 tasks complete, 6 of 7 phases in progress)
 
 - Phase 1: Rate Limiting Restoration (100% - 4/4 sub-tasks complete) ✅
 - Phase 2: Content Security Policy Hardening (100% - 8/8 sub-tasks complete) ✅
@@ -13,7 +13,7 @@
 - Phase 4: Dependency Security & CI Integration (100% - 6/6 sub-tasks complete) ✅
 - Phase 5: XSS & Injection Prevention (100% - 6/6 sub-tasks complete) ✅
 - Phase 6: Module Federation Security (100% - 7/7 sub-tasks complete) ✅
-- Phase 7: Session & Auth Hardening (20% - 1/5 sub-tasks complete)
+- Phase 7: Session & Auth Hardening (40% - 2/5 sub-tasks complete)
 
 > **📋 Related Document:** See [`FRONTEND-MFE-HARDENING-PLAN.md`](./FRONTEND-MFE-HARDENING-PLAN.md) for detailed technical analysis and implementation guidance.
 
@@ -1670,15 +1670,56 @@ Certificate pinning via HPKP (HTTP Public Key Pinning) is deprecated. Modern app
 
 ### Task 7.2: Remove Token Storage from localStorage
 
-- [ ] Remove localStorage token storage from auth store
-- [ ] Keep only non-sensitive user info in memory/localStorage
-- [ ] Update session sync to work without token in storage
-- [ ] Test cross-tab session still works
-- [ ] Verify tokens not in localStorage
+- [x] Remove localStorage token storage from auth store
+- [x] Keep only non-sensitive user info in memory/localStorage
+- [x] Update session sync to work without token in storage
+- [x] Test cross-tab session still works
+- [x] Verify tokens not in localStorage
 
-**Status:** Not Started
-**Completed Date:**
+**Status:** Complete
+**Completed Date:** 2026-02-13
 **Notes:**
+
+**Security Model (POC-3 Phase 7.2):**
+- **Access tokens:** Memory only (Zustand store state, NOT persisted to localStorage)
+- **Refresh tokens:** HttpOnly cookies only (set by server, not accessible to JS)
+- **User info:** Persisted to localStorage for UX (non-sensitive, for immediate UI display)
+- **isAuthenticated flag:** Persisted to localStorage for UI state
+
+**Implementation Changes:**
+1. **Auth Store (`libs/shared-auth-store/src/lib/shared-auth-store.ts`):**
+   - Removed `refreshToken` from state entirely
+   - Updated `partialize` to only persist `user` and `isAuthenticated` (not tokens)
+   - Updated `TokenProvider.getRefreshToken()` to return `null` (server uses cookie)
+   - Updated `TokenProvider.setTokens()` to only store accessToken in memory
+   - Updated `setAccessToken()` signature to only accept accessToken
+   - Updated event emissions to not include tokens
+
+2. **Session Sync (`libs/shared-session-sync/`):**
+   - Updated `TokenRefreshPayload` to use `refreshedAt` timestamp instead of token
+   - Updated `broadcastTokenRefresh()` to not require token parameter
+   - Updated `useSessionSync` hook to handle new payload format
+   - Other tabs now refresh their own token via HttpOnly cookie on next API call
+
+3. **Event Bus Events:**
+   - `auth:login` no longer includes accessToken/refreshToken
+   - `auth:token-refreshed` no longer includes accessToken
+
+**Token Refresh Flow (Page Reload):**
+1. User reloads page → localStorage restores `user` and `isAuthenticated`
+2. Access token is null (memory cleared on reload)
+3. First API call returns 401 → interceptor triggers automatic token refresh
+4. Refresh request includes HttpOnly cookie → server validates and returns new tokens
+5. New access token stored in memory, session continues seamlessly
+
+**Files Modified:**
+- `libs/shared-auth-store/src/lib/shared-auth-store.ts`
+- `libs/shared-auth-store/src/lib/shared-auth-store.spec.ts`
+- `libs/shared-session-sync/src/lib/types.ts`
+- `libs/shared-session-sync/src/lib/session-sync.ts`
+- `libs/shared-session-sync/src/lib/session-sync.spec.ts`
+- `libs/shared-session-sync/src/hooks/useSessionSync.ts`
+- `libs/shared-session-sync/src/hooks/useSessionSync.spec.tsx`
 
 ---
 
