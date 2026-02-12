@@ -2,7 +2,9 @@
 import eslint from '@eslint/js';
 import tseslint from 'typescript-eslint';
 import reactHooks from 'eslint-plugin-react-hooks';
+import react from 'eslint-plugin-react';
 import jsxA11y from 'eslint-plugin-jsx-a11y';
+import security from 'eslint-plugin-security';
 import noHardcodedColors from './scripts/eslint-rules/no-hardcoded-colors.js';
 
 export default tseslint.config(
@@ -15,6 +17,7 @@ export default tseslint.config(
       'theme-colors': { rules: { 'no-hardcoded-colors': noHardcodedColors } },
       'react-hooks': reactHooks,
       'jsx-a11y': jsxA11y,
+      security: security,
     },
     rules: {
       // TypeScript-specific rules
@@ -71,6 +74,31 @@ export default tseslint.config(
       'jsx-a11y/role-supports-aria-props': 'error',
       'jsx-a11y/scope': 'error',
       'jsx-a11y/tabindex-no-positive': 'error',
+      // Security rules (XSS & injection prevention)
+      'security/detect-unsafe-regex': 'warn',
+      'security/detect-buffer-noassert': 'error',
+      'security/detect-child-process': 'warn',
+      'security/detect-disable-mustache-escape': 'error',
+      'security/detect-eval-with-expression': 'error',
+      'security/detect-no-csrf-before-method-override': 'error',
+      'security/detect-non-literal-fs-filename': 'warn',
+      'security/detect-non-literal-regexp': 'warn',
+      'security/detect-non-literal-require': 'warn',
+      'security/detect-object-injection': 'off', // Too many false positives with TypeScript
+      'security/detect-possible-timing-attacks': 'warn',
+      'security/detect-pseudoRandomBytes': 'warn',
+      'security/detect-bidi-characters': 'error',
+    },
+  },
+  {
+    // React-specific security rules
+    files: ['**/*.tsx', '**/*.jsx'],
+    plugins: {
+      react: react,
+    },
+    rules: {
+      // Warn on dangerouslySetInnerHTML usage - requires sanitization
+      'react/no-danger': 'warn',
     },
   },
   {
