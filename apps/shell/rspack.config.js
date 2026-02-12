@@ -11,11 +11,21 @@
  * - authMfe: https://localhost/mfe/auth/remoteEntry.js
  * - paymentsMfe: https://localhost/mfe/payments/remoteEntry.js
  *
+ * Production Mode:
+ * - All remotes MUST use HTTPS URLs
+ * - URLs validated against allowlist at build time
+ * - Configure NX_MFE_BASE_URL for custom CDN/server URLs
+ *
  * PostCSS loader configured for Tailwind CSS v4
  *
  * NOTE: We use HtmlRspackPlugin instead of NxAppRspackPlugin to avoid
  * NxAppRspackPlugin's automatic CSS rules that conflict with our custom
  * Tailwind CSS v4 loader chain.
+ *
+ * @security Module Federation Security (Phase 6)
+ * - SRI hashes generated post-build (scripts/security/generate-sri-hashes.js)
+ * - URL validation enforced at build time
+ * - HTTPS required in production mode
  */
 
 const rspack = require('@rspack/core');
@@ -30,23 +40,111 @@ const isHttpsMode = process.env.NX_HTTPS_MODE === 'true';
 console.log('[Shell rspack.config.js] NX_API_BASE_URL:', process.env.NX_API_BASE_URL);
 console.log('[Shell rspack.config.js] NODE_ENV:', process.env.NODE_ENV);
 console.log('[Shell rspack.config.js] NX_HTTPS_MODE:', process.env.NX_HTTPS_MODE);
+console.log('[Shell rspack.config.js] NX_MFE_BASE_URL:', process.env.NX_MFE_BASE_URL || '(not set)');
 
 const isProduction = process.env.NODE_ENV === 'production';
 const isDevelopment = !isProduction;
 
 /**
+ * Allowed origins for remote MFE URLs
+ * Production: Only HTTPS origins from trusted CDN/servers
+ * Development: Localhost on any port
+ *
+ * @security Add your production CDN/server origins here
+ */
+const ALLOWED_REMOTE_ORIGINS = isProduction
+  ? [
+      // Production origins - HTTPS only
+      'https://localhost',
+      // Add your production CDN URLs here:
+      // 'https://cdn.yourcompany.com',
+      // 'https://mfe.yourcompany.com',
+    ]
+  : [
+      // Development origins - HTTP allowed
+      'http://localhost',
+      'https://localhost',
+    ];
+
+/**
  * Get remote MFE URL based on mode
+ * - Production: Use configured CDN URL (NX_MFE_BASE_URL) or HTTPS localhost
  * - HTTPS mode: Use nginx proxy paths (Safari-compatible, no mixed content)
  * - HTTP mode: Direct access to MFE dev servers
+ *
+ * @security Production builds enforce HTTPS URLs
  */
 const getRemoteUrl = (mfeName, port) => {
+  // Production: Use environment variable for CDN URL, fallback to HTTPS localhost
+  if (isProduction) {
+    const baseUrl = process.env.NX_MFE_BASE_URL || 'https://localhost';
+    const url = `${baseUrl}/mfe/${mfeName}/remoteEntry.js`;
+
+    // Validate URL uses HTTPS in production
+    if (!url.startsWith('https://')) {
+      console.error(`[SECURITY] Remote URL must use HTTPS in production: ${url}`);
+      throw new Error(`Production remote URL must use HTTPS: ${url}`);
+    }
+
+    return url;
+  }
+
+  // Development: HTTPS mode uses nginx proxy
   if (isHttpsMode) {
-    // HTTPS mode: proxy through nginx to avoid mixed content (Safari requirement)
     return `https://localhost/mfe/${mfeName}/remoteEntry.js`;
   }
-  // HTTP mode: direct access to dev server
+
+  // Development: HTTP mode uses direct dev server access
   return `http://localhost:${port}/remoteEntry.js`;
 };
+
+/**
+ * Validate all remote URLs at build time
+ * @security Prevents loading remotes from unauthorized origins
+ */
+function validateRemoteUrls(remotes) {
+  const errors = [];
+
+  for (const [name, remoteSpec] of Object.entries(remotes)) {
+    // Parse remote spec: "remoteName@url"
+    const url = remoteSpec.split('@').slice(1).join('@');
+
+    try {
+      const parsedUrl = new URL(url);
+      const origin = `${parsedUrl.protocol}//${parsedUrl.hostname}`;
+
+      // Check if origin is allowed
+      const isAllowed = ALLOWED_REMOTE_ORIGINS.some(
+        allowed => origin === allowed || origin.startsWith(allowed)
+      );
+
+      if (!isAllowed) {
+        errors.push(`${name}: Origin not allowed - ${origin}`);
+      }
+
+      // Production must use HTTPS
+      if (isProduction && parsedUrl.protocol !== 'https:') {
+        errors.push(`${name}: HTTPS required in production - ${url}`);
+      }
+    } catch (e) {
+      errors.push(`${name}: Invalid URL - ${url}`);
+    }
+  }
+
+  if (errors.length > 0) {
+    console.error('\n[SECURITY] Remote URL validation failed:');
+    errors.forEach(err => console.error(`  - ${err}`));
+    console.error(`\nAllowed origins: ${ALLOWED_REMOTE_ORIGINS.join(', ')}\n`);
+
+    if (isProduction) {
+      throw new Error('Remote URL validation failed in production build');
+    } else {
+      console.warn('[SECURITY] Continuing with warnings in development mode\n');
+    }
+  } else {
+    console.log('[SECURITY] All remote URLs validated successfully');
+  }
+}
 
 /**
  * Shared dependencies configuration for Module Federation
@@ -326,19 +424,28 @@ module.exports = {
       placeholder: '__CSP_NONCE__',
     }),
     // Module Federation Plugin - Shell acts as HOST consuming remote MFEs
-    new rspack.container.ModuleFederationPlugin({
-      name: 'shell',
-      remotes: {
-        // Remote MFE URLs - dynamically set based on HTTPS mode
-        // HTTPS mode: proxied through nginx (Safari-compatible)
-        // HTTP mode: direct access to dev servers
+    // @security Remote URLs validated at build time (see validateRemoteUrls)
+    (() => {
+      const remotes = {
+        // Remote MFE URLs - dynamically set based on environment
+        // Production: HTTPS required, uses NX_MFE_BASE_URL or https://localhost
+        // Development HTTPS mode: proxied through nginx (Safari-compatible)
+        // Development HTTP mode: direct access to dev servers
         authMfe: `authMfe@${getRemoteUrl('auth', 4201)}`,
         paymentsMfe: `paymentsMfe@${getRemoteUrl('payments', 4202)}`,
         adminMfe: `adminMfe@${getRemoteUrl('admin', 4203)}`,
         profileMfe: `profileMfe@${getRemoteUrl('profile', 4204)}`,
-      },
-      shared: sharedDependencies,
-    }),
+      };
+
+      // Validate remote URLs at build time
+      validateRemoteUrls(remotes);
+
+      return new rspack.container.ModuleFederationPlugin({
+        name: 'shell',
+        remotes,
+        shared: sharedDependencies,
+      });
+    })(),
     // React Fast Refresh plugin - injects $RefreshReg$ runtime for HMR
     ...(isDevelopment
       ? [

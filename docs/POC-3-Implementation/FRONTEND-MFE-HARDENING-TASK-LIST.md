@@ -5,14 +5,14 @@
 **Date:** February 10, 2026
 **Phase:** Frontend MFE Security Hardening
 
-**Overall Progress:** 76% (32 of 42 tasks complete, 5 of 7 phases complete)
+**Overall Progress:** 79% (33 of 42 tasks complete, 5 of 7 phases complete)
 
 - Phase 1: Rate Limiting Restoration (100% - 4/4 sub-tasks complete) ✅
 - Phase 2: Content Security Policy Hardening (100% - 8/8 sub-tasks complete) ✅
 - Phase 3: CSRF Protection (100% - 6/6 sub-tasks complete) ✅
 - Phase 4: Dependency Security & CI Integration (100% - 6/6 sub-tasks complete) ✅
 - Phase 5: XSS & Injection Prevention (100% - 6/6 sub-tasks complete) ✅
-- Phase 6: Module Federation Security (29% - 2/7 sub-tasks complete) 🔄
+- Phase 6: Module Federation Security (43% - 3/7 sub-tasks complete) 🔄
 - Phase 7: Session & Auth Hardening (0% - 0/5 sub-tasks complete)
 
 > **📋 Related Document:** See [`FRONTEND-MFE-HARDENING-PLAN.md`](./FRONTEND-MFE-HARDENING-PLAN.md) for detailed technical analysis and implementation guidance.
@@ -1323,14 +1323,54 @@ const invalid = validator.validateRemotesConfig(remotesConfig);
 
 ### Task 6.3: Configure HTTPS for Remote URLs (Production)
 
-- [ ] Update rspack.config.js for production remote URLs
-- [ ] Use HTTPS URLs for all remotes in production
-- [ ] Configure certificate pinning in nginx (optional)
-- [ ] Document production remote URL configuration
+- [x] Update rspack.config.js for production remote URLs
+- [x] Use HTTPS URLs for all remotes in production
+- [x] Configure certificate pinning in nginx (optional) - documented, not implemented
+- [x] Document production remote URL configuration
 
-**Status:** Not Started
-**Completed Date:**
+**Status:** Complete
+**Completed Date:** 2026-02-12
 **Notes:**
+
+**Implementation Details:**
+
+Enhanced `apps/shell/rspack.config.js` with production-ready Module Federation security:
+
+1. **HTTPS Enforcement in Production:**
+   - Production builds throw an error if remote URLs don't use HTTPS
+   - Environment variable `NX_MFE_BASE_URL` for custom CDN/server URLs
+   - Fallback to `https://localhost` for local production testing
+
+2. **Build-Time URL Validation:**
+   - `validateRemoteUrls()` function validates all remote URLs at build time
+   - Checks origins against `ALLOWED_REMOTE_ORIGINS` allowlist
+   - Production: Fails build if HTTPS not used
+   - Development: Logs warnings but continues
+
+3. **Configurable Allowed Origins:**
+   - `ALLOWED_REMOTE_ORIGINS` constant with environment-aware defaults
+   - Production: HTTPS origins only (add your CDN URLs)
+   - Development: HTTP and HTTPS localhost allowed
+
+4. **Enhanced `getRemoteUrl()` Function:**
+   - Production: Uses `NX_MFE_BASE_URL` or HTTPS localhost
+   - Development HTTPS mode: nginx proxy paths
+   - Development HTTP mode: direct dev server access
+
+**Usage in Production:**
+```bash
+# Set custom CDN URL for production
+NX_MFE_BASE_URL=https://cdn.yourcompany.com pnpm build:shell
+
+# Or use default HTTPS localhost (for local production testing)
+NODE_ENV=production pnpm build:shell
+```
+
+**Note on Certificate Pinning:**
+Certificate pinning via HPKP (HTTP Public Key Pinning) is deprecated. Modern approach is to use:
+- TLS certificate validation (default browser behavior)
+- Certificate Transparency (CT) logs
+- HSTS with preloading for HTTPS enforcement
 
 ---
 
