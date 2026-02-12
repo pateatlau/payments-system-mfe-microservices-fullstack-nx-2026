@@ -1,4 +1,4 @@
-import { ReactNode, useState, useEffect, useCallback, useRef } from 'react';
+import { ReactNode, useState, useEffect, useCallback, useRef, ErrorInfo } from 'react';
 import { ErrorBoundary, FallbackProps } from 'react-error-boundary';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -38,8 +38,9 @@ export interface RemoteErrorBoundaryProps {
 
   /**
    * Name of the remote MFE (e.g., 'authMfe', 'paymentsMfe')
+   * @default 'unknown'
    */
-  remoteName: string;
+  remoteName?: string;
 
   /**
    * Name of the component being loaded (for error message)
@@ -286,7 +287,7 @@ function DefaultErrorFallback({
  */
 export function RemoteErrorBoundary({
   children,
-  remoteName,
+  remoteName = 'unknown',
   componentName,
   fallback,
   enableAutoRetry = true,
@@ -323,7 +324,7 @@ export function RemoteErrorBoundary({
   }, []);
 
   const handleError = useCallback(
-    (error: Error, errorInfo: { componentStack?: string }) => {
+    (error: Error, errorInfo: ErrorInfo) => {
       // Record failure in circuit breaker
       remoteCircuitBreaker.recordFailure(remoteName, error);
       setCircuitState(remoteCircuitBreaker.getState(remoteName));
@@ -470,4 +471,4 @@ export function RemoteErrorBoundary({
 }
 
 // Legacy export for backwards compatibility
-export { RemoteErrorBoundaryProps as RemoteErrorBoundaryLegacyProps };
+export type { RemoteErrorBoundaryProps as RemoteErrorBoundaryLegacyProps };

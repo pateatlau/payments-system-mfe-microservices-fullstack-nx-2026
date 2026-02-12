@@ -101,10 +101,11 @@ function withSuspense<P extends object>(
  * @param importFn - Function that returns the dynamic import promise
  * @returns Lazy React component
  */
-function createRemoteComponent<T extends { default: ComponentType<unknown> }>(
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function createRemoteComponent(
   remoteName: string,
   componentName: string,
-  importFn: () => Promise<T>
+  importFn: () => Promise<{ default: ComponentType<any> }>
 ) {
   return lazy(async () => {
     // Check if circuit breaker allows requests to this remote
