@@ -32,8 +32,8 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Configuration
-BASE_URL="${BASE_URL:-https://localhost}"
-API_URL="${API_URL:-https://localhost/api}"
+BASE_URL="${BASE_URL:-http://localhost}"
+API_URL="${API_URL:-http://localhost/api}"
 TEST_EMAIL="${TEST_EMAIL:-test@example.com}"
 TEST_PASSWORD="${TEST_PASSWORD:-Test123!@#}"
 
@@ -390,13 +390,12 @@ show_help() {
 
 # Main execution
 main() {
-  local RUN_QUICK=false
   local RUN_ZAP=false
 
   # Parse arguments
   case "${1:-}" in
     --quick)
-      RUN_QUICK=true
+      # Quick tests only (default behavior)
       ;;
     --full)
       RUN_ZAP=true
@@ -411,7 +410,7 @@ main() {
       exit 0
       ;;
     "")
-      RUN_QUICK=true  # Default to quick
+      # Default to quick tests only
       ;;
     *)
       echo "Unknown option: $1"

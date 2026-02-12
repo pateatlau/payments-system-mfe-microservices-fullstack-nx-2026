@@ -229,6 +229,10 @@ jobs:
                                  label === 'automated' ? 'Automatically created' :
                                  'Needs review'
                   });
+                } else {
+                  // Re-throw non-404 errors (network, permission, etc.)
+                  console.error(`Failed to check/create label '${label}':`, e.message);
+                  throw e;
                 }
               }
             }
