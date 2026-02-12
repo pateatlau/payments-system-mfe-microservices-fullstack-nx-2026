@@ -25,8 +25,15 @@ export const COOKIE_NAMES = {
 
 /**
  * Cookie configuration based on environment
+ *
+ * Note: In development with HTTPS (via nginx), we still need Secure=true
+ * because modern browsers require Secure flag for cookies over HTTPS.
+ * We use Secure=true whenever NODE_ENV is not 'test' to support:
+ * - Production (HTTPS, Secure=true)
+ * - Development with nginx HTTPS proxy (Secure=true)
+ * - Tests (Secure=false for simpler testing)
  */
-const isProduction = config.nodeEnv === 'production';
+const useSecureCookies = config.nodeEnv !== 'test'; // Secure for both prod and dev (HTTPS via nginx)
 
 /**
  * Parse the JWT refresh expiration duration to milliseconds
@@ -68,7 +75,7 @@ function parseRefreshExpiryMs(): number {
  */
 export const REFRESH_TOKEN_COOKIE_OPTIONS = {
   httpOnly: true,
-  secure: isProduction,
+  secure: useSecureCookies, // Secure=true for HTTPS (prod & dev via nginx), false for tests
   sameSite: 'strict' as const,
   path: '/', // Must be root for cross-path requests via API Gateway
   maxAge: parseRefreshExpiryMs(),
@@ -80,7 +87,7 @@ export const REFRESH_TOKEN_COOKIE_OPTIONS = {
  */
 export const SESSION_COOKIE_OPTIONS = {
   httpOnly: true,
-  secure: isProduction,
+  secure: useSecureCookies, // Secure=true for HTTPS (prod & dev via nginx), false for tests
   sameSite: 'strict' as const,
   path: '/',
   maxAge: parseRefreshExpiryMs(),
@@ -120,7 +127,7 @@ export function clearRefreshTokenCookie(res: Response): void {
   // Clear refresh token cookie
   res.clearCookie(COOKIE_NAMES.REFRESH_TOKEN, {
     httpOnly: true,
-    secure: isProduction,
+    secure: useSecureCookies,
     sameSite: 'strict',
     path: '/',
   });
@@ -128,7 +135,7 @@ export function clearRefreshTokenCookie(res: Response): void {
   // Clear session ID cookie
   res.clearCookie(COOKIE_NAMES.SESSION_ID, {
     httpOnly: true,
-    secure: isProduction,
+    secure: useSecureCookies,
     sameSite: 'strict',
     path: '/',
   });

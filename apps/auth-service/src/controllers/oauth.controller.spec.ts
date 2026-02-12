@@ -88,6 +88,7 @@ describe('OAuthController', () => {
       status: jest.fn().mockReturnThis(),
       json: jest.fn().mockReturnThis(),
       redirect: jest.fn().mockReturnThis(),
+      cookie: jest.fn().mockReturnThis(), // POC-3 Phase 7.1: HttpOnly cookie support
     };
 
     mockNext = jest.fn();
