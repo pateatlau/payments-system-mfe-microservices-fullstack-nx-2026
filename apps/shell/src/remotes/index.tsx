@@ -101,10 +101,10 @@ function withSuspense<P extends object>(
  * @param importFn - Function that returns the dynamic import promise
  * @returns Lazy React component
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function createRemoteComponent(
   remoteName: string,
   componentName: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   importFn: () => Promise<{ default: ComponentType<any> }>
 ) {
   return lazy(async () => {
