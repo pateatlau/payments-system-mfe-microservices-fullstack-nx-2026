@@ -6,6 +6,7 @@
  * POC-3 Phase 7.1: Migrate Tokens to HttpOnly Cookies
  */
 
+import { Response } from 'express';
 import {
   COOKIE_NAMES,
   REFRESH_TOKEN_COOKIE_OPTIONS,
@@ -15,6 +16,9 @@ import {
   getRefreshTokenFromCookie,
   getSessionIdFromCookie,
 } from './cookies';
+
+// Mock response type for testing
+type MockResponse = Pick<Response, 'cookie' | 'clearCookie'>;
 
 describe('Cookie Utilities', () => {
   describe('COOKIE_NAMES', () => {
@@ -56,11 +60,12 @@ describe('Cookie Utilities', () => {
 
   describe('setRefreshTokenCookie', () => {
     it('should set refresh token cookie', () => {
-      const mockRes = {
+      const mockRes: MockResponse = {
         cookie: jest.fn(),
+        clearCookie: jest.fn(),
       };
 
-      setRefreshTokenCookie(mockRes as any, 'test-refresh-token');
+      setRefreshTokenCookie(mockRes as Response, 'test-refresh-token');
 
       expect(mockRes.cookie).toHaveBeenCalledWith(
         COOKIE_NAMES.REFRESH_TOKEN,
@@ -73,11 +78,12 @@ describe('Cookie Utilities', () => {
     });
 
     it('should set session ID cookie when provided', () => {
-      const mockRes = {
+      const mockRes: MockResponse = {
         cookie: jest.fn(),
+        clearCookie: jest.fn(),
       };
 
-      setRefreshTokenCookie(mockRes as any, 'test-refresh-token', 'test-session-id');
+      setRefreshTokenCookie(mockRes as Response, 'test-refresh-token', 'test-session-id');
 
       expect(mockRes.cookie).toHaveBeenCalledTimes(2);
       expect(mockRes.cookie).toHaveBeenNthCalledWith(
@@ -97,11 +103,12 @@ describe('Cookie Utilities', () => {
 
   describe('clearRefreshTokenCookie', () => {
     it('should clear both refresh token and session cookies', () => {
-      const mockRes = {
+      const mockRes: MockResponse = {
+        cookie: jest.fn(),
         clearCookie: jest.fn(),
       };
 
-      clearRefreshTokenCookie(mockRes as any);
+      clearRefreshTokenCookie(mockRes as Response);
 
       expect(mockRes.clearCookie).toHaveBeenCalledTimes(2);
       expect(mockRes.clearCookie).toHaveBeenCalledWith(
