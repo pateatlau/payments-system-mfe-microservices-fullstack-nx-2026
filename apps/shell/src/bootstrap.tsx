@@ -16,6 +16,7 @@ import {
   setTag,
 } from '@mfe-poc/shared-observability';
 import { initCsrfToken } from '@mfe/shared-api-client';
+import { preloadHealthCheck } from '@mfe/shared-utils';
 
 // Import remote components
 // This file (bootstrap.tsx) is dynamically imported, providing the async boundary
@@ -127,6 +128,18 @@ async function bootstrap() {
   initCsrfToken().catch(error => {
     console.warn(
       'CSRF token initialization failed, will retry on first API call.',
+      error
+    );
+  });
+
+  // Pre-load health check for remote MFEs
+  // Non-blocking: Health status is checked and logged, but doesn't block rendering
+  // Circuit breaker will be updated based on health check results
+  // This helps identify unavailable MFEs early and prevents unnecessary load attempts
+  const isHttpsMode = window.location.protocol === 'https:';
+  preloadHealthCheck(isHttpsMode).catch(error => {
+    console.warn(
+      'MFE health check failed, continuing with lazy loading.',
       error
     );
   });

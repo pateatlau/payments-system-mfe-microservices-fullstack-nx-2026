@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { ReactNode, useState, useEffect, useCallback, useRef, ErrorInfo } from 'react';
 import { ErrorBoundary, FallbackProps } from 'react-error-boundary';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -10,6 +10,22 @@ import {
   AlertDescription,
   Button,
 } from '@mfe/shared-design-system';
+import {
+  remoteCircuitBreaker,
+  CircuitState,
+  calculateBackoffDelay,
+} from '@mfe/shared-utils';
+import { captureException, addBreadcrumb, setTag } from '@mfe-poc/shared-observability';
+
+/**
+ * Maximum number of automatic retries before showing error UI
+ */
+const MAX_AUTO_RETRIES = 2;
+
+/**
+ * Delay before first automatic retry (ms)
+ */
+const INITIAL_RETRY_DELAY = 1000;
 
 /**
  * Props for RemoteErrorBoundary
@@ -21,7 +37,13 @@ export interface RemoteErrorBoundaryProps {
   children: ReactNode;
 
   /**
-   * Name of the remote component (for error message)
+   * Name of the remote MFE (e.g., 'authMfe', 'paymentsMfe')
+   * @default 'unknown'
+   */
+  remoteName?: string;
+
+  /**
+   * Name of the component being loaded (for error message)
    */
   componentName: string;
 
@@ -29,14 +51,161 @@ export interface RemoteErrorBoundaryProps {
    * Optional custom fallback component
    */
   fallback?: ReactNode;
+
+  /**
+   * Whether to enable automatic retries (default: true)
+   */
+  enableAutoRetry?: boolean;
+
+  /**
+   * Whether to track errors in Sentry (default: true)
+   */
+  enableSentryTracking?: boolean;
+
+  /**
+   * Callback when remote fails to load
+   */
+  onError?: (error: Error, remoteName: string) => void;
+
+  /**
+   * Callback when remote successfully loads after retry
+   */
+  onRecovery?: (remoteName: string) => void;
 }
 
 /**
- * Default error fallback component
- * Uses design system Card, Alert, and Button components
+ * Extended fallback props with retry functionality
  */
-function DefaultErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
+interface ExtendedFallbackProps extends FallbackProps {
+  remoteName: string;
+  componentName: string;
+  circuitState: CircuitState;
+  retryCount: number;
+  isAutoRetrying: boolean;
+  timeToRetry: number;
+  onManualRetry: () => void;
+}
+
+/**
+ * Loading state shown during automatic retries
+ */
+function RetryingFallback({
+  componentName,
+  retryCount,
+  timeToRetry,
+}: {
+  componentName: string;
+  retryCount: number;
+  timeToRetry: number;
+}) {
+  const [countdown, setCountdown] = useState(Math.ceil(timeToRetry / 1000));
+
+  useEffect(() => {
+    if (countdown <= 0) return;
+    const timer = setInterval(() => {
+      setCountdown(c => Math.max(0, c - 1));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [countdown]);
+
+  return (
+    <div className="min-h-[200px] flex items-center justify-center bg-muted/50 px-4 py-8">
+      <div className="text-center">
+        <div className="mb-4 flex justify-center">
+          <svg
+            className="h-8 w-8 text-muted-foreground animate-spin"
+            fill="none"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <circle
+              className="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="4"
+            />
+            <path
+              className="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            />
+          </svg>
+        </div>
+        {/* ARIA live region to announce status changes to screen readers */}
+        <div aria-live="polite" aria-atomic="true">
+          <p className="text-sm text-muted-foreground">
+            Loading {componentName}... (Attempt {retryCount + 1})
+          </p>
+          {countdown > 0 && (
+            <p className="text-xs text-muted-foreground mt-2">
+              Retrying in {countdown}s
+            </p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Circuit breaker indicator component
+ */
+function CircuitBreakerStatus({
+  circuitState,
+  timeToRetry,
+}: {
+  circuitState: CircuitState;
+  timeToRetry: number;
+}) {
+  if (circuitState === 'CLOSED') return null;
+
+  const statusColor =
+    circuitState === 'OPEN' ? 'bg-red-500' : 'bg-yellow-500';
+  const statusText =
+    circuitState === 'OPEN'
+      ? `Service temporarily unavailable. Auto-retry in ${Math.ceil(timeToRetry / 1000)}s`
+      : 'Testing service recovery...';
+
+  return (
+    <div
+      className="flex items-center gap-2 text-sm text-muted-foreground mb-4"
+      aria-live="polite"
+      aria-atomic="true"
+    >
+      <span className={`w-2 h-2 rounded-full ${statusColor}`} aria-hidden="true" />
+      <span>{statusText}</span>
+    </div>
+  );
+}
+
+/**
+ * Default error fallback component with retry functionality
+ */
+function DefaultErrorFallback({
+  error,
+  resetErrorBoundary: _resetErrorBoundary,
+  remoteName,
+  componentName,
+  circuitState,
+  retryCount,
+  isAutoRetrying,
+  timeToRetry,
+  onManualRetry,
+}: ExtendedFallbackProps) {
   const navigate = useNavigate();
+
+  // Show loading UI during automatic retries
+  if (isAutoRetrying) {
+    return (
+      <RetryingFallback
+        componentName={componentName}
+        retryCount={retryCount}
+        timeToRetry={timeToRetry}
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-muted px-4 py-12">
@@ -58,13 +227,25 @@ function DefaultErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
               />
             </svg>
           </div>
-          <CardTitle>Failed to Load Component</CardTitle>
+          <CardTitle>Failed to Load {componentName}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          <CircuitBreakerStatus
+            circuitState={circuitState}
+            timeToRetry={timeToRetry}
+          />
           <p className="text-muted-foreground">
-            We couldn't load the component from the remote. This might be a
-            temporary issue.
+            We couldn't load the {componentName.toLowerCase()} module from{' '}
+            <code className="text-xs bg-muted px-1 py-0.5 rounded">
+              {remoteName}
+            </code>
+            . This might be a temporary issue.
           </p>
+          {retryCount > 0 && (
+            <p className="text-sm text-muted-foreground">
+              Attempted {retryCount} automatic {retryCount === 1 ? 'retry' : 'retries'}.
+            </p>
+          )}
           {error && (
             <Alert variant="destructive">
               <AlertDescription>
@@ -80,7 +261,12 @@ function DefaultErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
             </Alert>
           )}
           <div className="flex gap-3 justify-center">
-            <Button onClick={resetErrorBoundary}>Try Again</Button>
+            <Button
+              onClick={onManualRetry}
+              disabled={circuitState === 'OPEN'}
+            >
+              {circuitState === 'OPEN' ? 'Please Wait...' : 'Try Again'}
+            </Button>
             <Button variant="secondary" onClick={() => navigate('/')}>
               Go Home
             </Button>
@@ -95,38 +281,220 @@ function DefaultErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
  * RemoteErrorBoundary component
  *
  * Wraps remote components with error boundary to catch loading errors.
- * Provides user-friendly error UI with retry and navigation options.
+ * Features:
+ * - Automatic retries with exponential backoff
+ * - Circuit breaker pattern for repeatedly failing remotes
+ * - Sentry integration for error tracking
+ * - User-friendly error UI with retry and navigation options
  *
  * @example
- * <RemoteErrorBoundary componentName="SignIn">
+ * <RemoteErrorBoundary remoteName="authMfe" componentName="SignIn">
  *   <SignInComponent />
  * </RemoteErrorBoundary>
  */
 export function RemoteErrorBoundary({
   children,
+  remoteName = 'unknown',
   componentName,
   fallback,
+  enableAutoRetry = true,
+  enableSentryTracking = true,
+  onError,
+  onRecovery,
 }: RemoteErrorBoundaryProps) {
+  const [retryCount, setRetryCount] = useState(0);
+  const [isAutoRetrying, setIsAutoRetrying] = useState(false);
+  const [circuitState, setCircuitState] = useState<CircuitState>('CLOSED');
+  const [timeToRetry, setTimeToRetry] = useState(0);
+  const retryTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  const boundaryRef = useRef<{ resetErrorBoundary?: () => void }>({});
+
+  // Update circuit state periodically
+  useEffect(() => {
+    const updateCircuitState = () => {
+      setCircuitState(remoteCircuitBreaker.getState(remoteName));
+      setTimeToRetry(remoteCircuitBreaker.getTimeToRetry(remoteName));
+    };
+
+    updateCircuitState();
+    const interval = setInterval(updateCircuitState, 1000);
+    return () => clearInterval(interval);
+  }, [remoteName]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (retryTimerRef.current) {
+        clearTimeout(retryTimerRef.current);
+      }
+    };
+  }, []);
+
+  const handleError = useCallback(
+    (error: Error, errorInfo: ErrorInfo) => {
+      // Record failure in circuit breaker
+      remoteCircuitBreaker.recordFailure(remoteName, error);
+      setCircuitState(remoteCircuitBreaker.getState(remoteName));
+      setTimeToRetry(remoteCircuitBreaker.getTimeToRetry(remoteName));
+
+      // Log error
+      // eslint-disable-next-line no-console
+      console.error(
+        `[RemoteErrorBoundary] Failed to load ${componentName} from ${remoteName}:`,
+        error
+      );
+
+      // Add breadcrumb for Sentry
+      if (enableSentryTracking) {
+        addBreadcrumb({
+          category: 'mfe',
+          message: `Remote load failed: ${remoteName}/${componentName}`,
+          level: 'error',
+          data: {
+            remoteName,
+            componentName,
+            error: error.message,
+            retryCount,
+            circuitState: remoteCircuitBreaker.getState(remoteName),
+          },
+        });
+
+        // Track in Sentry after max retries
+        if (retryCount >= MAX_AUTO_RETRIES) {
+          setTag('mfe_remote', remoteName);
+          setTag('mfe_component', componentName);
+          captureException(error, {
+            remoteName,
+            componentName,
+            retryCount,
+            circuitState: remoteCircuitBreaker.getState(remoteName),
+            componentStack: errorInfo.componentStack,
+          });
+        }
+      }
+
+      // Call error callback
+      onError?.(error, remoteName);
+
+      // Attempt automatic retry if enabled and within limits
+      if (
+        enableAutoRetry &&
+        retryCount < MAX_AUTO_RETRIES &&
+        remoteCircuitBreaker.canRequest(remoteName)
+      ) {
+        const delay = calculateBackoffDelay(retryCount, {
+          initialDelay: INITIAL_RETRY_DELAY,
+          maxDelay: 5000,
+          backoffFactor: 2,
+        });
+
+        setIsAutoRetrying(true);
+        setTimeToRetry(delay);
+
+        retryTimerRef.current = setTimeout(() => {
+          setRetryCount(c => c + 1);
+          setIsAutoRetrying(false);
+          boundaryRef.current.resetErrorBoundary?.();
+        }, delay);
+      } else {
+        setIsAutoRetrying(false);
+      }
+    },
+    [
+      remoteName,
+      componentName,
+      retryCount,
+      enableAutoRetry,
+      enableSentryTracking,
+      onError,
+    ]
+  );
+
+  const handleReset = useCallback(() => {
+    // Don't record success here - the RecoveryDetector will record success
+    // only when the children actually mount successfully
+    setCircuitState(remoteCircuitBreaker.getState(remoteName));
+  }, [remoteName]);
+
+  const handleManualRetry = useCallback(() => {
+    // Don't allow manual retry when circuit is open
+    if (circuitState === 'OPEN') {
+      return;
+    }
+
+    if (retryTimerRef.current) {
+      clearTimeout(retryTimerRef.current);
+    }
+    setRetryCount(c => c + 1);
+    setIsAutoRetrying(false);
+    boundaryRef.current.resetErrorBoundary?.();
+  }, [circuitState]);
+
+  // Effect to detect successful recovery when children render after a retry
+  useEffect(() => {
+    // Only check for recovery if we had previous retries
+    if (retryCount > 0) {
+      // This effect runs when the component successfully re-renders
+      // If we're here and not in error state, the retry succeeded
+      const checkRecovery = () => {
+        remoteCircuitBreaker.recordSuccess(remoteName);
+        setRetryCount(0);
+        setCircuitState(remoteCircuitBreaker.getState(remoteName));
+        onRecovery?.(remoteName);
+      };
+
+      // Delay slightly to ensure we're not in a render cycle
+      const timerId = setTimeout(checkRecovery, 0);
+      return () => clearTimeout(timerId);
+    }
+    return undefined;
+  }, [remoteName, retryCount, onRecovery]);
+
+  // Custom fallback renderer
+  const FallbackRenderer = useCallback(
+    (props: FallbackProps) => {
+      // Store reset function for manual retry
+      boundaryRef.current.resetErrorBoundary = props.resetErrorBoundary;
+
+      if (fallback) {
+        return <>{fallback}</>;
+      }
+
+      return (
+        <DefaultErrorFallback
+          {...props}
+          remoteName={remoteName}
+          componentName={componentName}
+          circuitState={circuitState}
+          retryCount={retryCount}
+          isAutoRetrying={isAutoRetrying}
+          timeToRetry={timeToRetry}
+          onManualRetry={handleManualRetry}
+        />
+      );
+    },
+    [
+      fallback,
+      remoteName,
+      componentName,
+      circuitState,
+      retryCount,
+      isAutoRetrying,
+      timeToRetry,
+      handleManualRetry,
+    ]
+  );
+
   return (
     <ErrorBoundary
-      FallbackComponent={
-        fallback ? () => <>{fallback}</> : DefaultErrorFallback
-      }
-      onError={(error, errorInfo) => {
-        // Log error for debugging
-        // eslint-disable-next-line no-console
-        console.error(
-          `Failed to load ${componentName} component:`,
-          error,
-          errorInfo
-        );
-      }}
-      onReset={() => {
-        // Clear any cached errors
-        window.location.reload();
-      }}
+      FallbackComponent={FallbackRenderer}
+      onError={handleError}
+      onReset={handleReset}
     >
       {children}
     </ErrorBoundary>
   );
 }
+
+// Legacy export for backwards compatibility
+export type { RemoteErrorBoundaryProps as RemoteErrorBoundaryLegacyProps };

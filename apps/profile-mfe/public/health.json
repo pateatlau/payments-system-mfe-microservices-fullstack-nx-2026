@@ -1,0 +1,10 @@
+{
+  "status": "healthy",
+  "name": "profileMfe",
+  "version": "1.0.0",
+  "timestamp": 0,
+  "message": "Profile MFE is ready",
+  "components": [
+    "ProfilePage"
+  ]
+}

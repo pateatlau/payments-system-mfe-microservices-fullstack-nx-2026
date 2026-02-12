@@ -1,0 +1,16 @@
+{
+  "status": "healthy",
+  "name": "authMfe",
+  "version": "1.0.0",
+  "timestamp": 0,
+  "message": "Auth MFE is ready",
+  "components": [
+    "SignIn",
+    "SignUp",
+    "ForgotPassword",
+    "ResetPassword",
+    "VerifyEmail",
+    "OAuthCallback",
+    "MfaRecommendation"
+  ]
+}

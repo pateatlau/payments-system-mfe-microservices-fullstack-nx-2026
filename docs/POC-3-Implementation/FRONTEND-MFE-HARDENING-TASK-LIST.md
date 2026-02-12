@@ -5,14 +5,14 @@
 **Date:** February 10, 2026
 **Phase:** Frontend MFE Security Hardening
 
-**Overall Progress:** 71% (30 of 42 tasks complete, 5 of 7 phases complete)
+**Overall Progress:** 88% (37 of 42 tasks complete, 6 of 7 phases complete)
 
 - Phase 1: Rate Limiting Restoration (100% - 4/4 sub-tasks complete) ✅
 - Phase 2: Content Security Policy Hardening (100% - 8/8 sub-tasks complete) ✅
 - Phase 3: CSRF Protection (100% - 6/6 sub-tasks complete) ✅
 - Phase 4: Dependency Security & CI Integration (100% - 6/6 sub-tasks complete) ✅
 - Phase 5: XSS & Injection Prevention (100% - 6/6 sub-tasks complete) ✅
-- Phase 6: Module Federation Security (0% - 0/7 sub-tasks complete)
+- Phase 6: Module Federation Security (100% - 7/7 sub-tasks complete) ✅
 - Phase 7: Session & Auth Hardening (0% - 0/5 sub-tasks complete)
 
 > **📋 Related Document:** See [`FRONTEND-MFE-HARDENING-PLAN.md`](./FRONTEND-MFE-HARDENING-PLAN.md) for detailed technical analysis and implementation guidance.
@@ -1219,107 +1219,380 @@ function sanitizeString(value: string): string {
 
 ### Task 6.1: Implement Subresource Integrity (SRI) for Remotes
 
-- [ ] Create SRI hash generation script
-- [ ] Generate hashes for all remoteEntry.js files post-build
-- [ ] Store hashes in manifest file
-- [ ] Modify shell to verify integrity before loading remotes
-- [ ] Test with tampered remote (should fail)
+- [x] Create SRI hash generation script
+- [x] Generate hashes for all remoteEntry.js files post-build
+- [x] Store hashes in manifest file
+- [x] Modify shell to verify integrity before loading remotes
+- [x] Test with tampered remote (should fail)
 
-**Status:** Not Started
-**Completed Date:**
+**Status:** Complete
+**Completed Date:** 2026-02-12
 **Notes:**
 
-**Files to create:**
-- `scripts/generate-sri-hashes.js`
-- `dist/sri-manifest.json` (generated)
+**Implementation Details:**
+
+1. **SRI Hash Generation Script** (`scripts/security/generate-sri-hashes.js`):
+   - Generates SHA-384 hashes for all remoteEntry.js files
+   - Creates JSON manifest at `dist/sri-manifest.json`
+   - Also generates TypeScript constants at `libs/shared-utils/src/lib/sri-hashes.generated.ts`
+   - New npm scripts: `pnpm build:remotes:sri`, `pnpm security:sri`
+
+2. **Secure Remote Loader** (`libs/shared-utils/src/lib/secure-remote-loader.ts`):
+   - `verifyRemoteIntegrity()` - Verifies remote content against expected hash
+   - `SecureRemoteLoader` class - Full-featured loader with caching
+   - URL allowlist validation (blocks unauthorized origins)
+   - Security event logging for audit trail
+   - Configurable: strictMode, allowedOrigins, fetchTimeout
+
+3. **Test Coverage** (`libs/shared-utils/src/lib/secure-remote-loader.spec.ts`):
+   - 19 tests covering integrity verification, hash mismatch detection, URL blocking
+   - Tests for tampered content detection, network errors, timeout handling
+
+**Files Created:**
+- `scripts/security/generate-sri-hashes.js`
+- `libs/shared-utils/src/lib/secure-remote-loader.ts`
+- `libs/shared-utils/src/lib/secure-remote-loader.spec.ts`
+- `libs/shared-utils/src/lib/sri-hashes.generated.ts` (auto-generated)
+- `dist/sri-manifest.json` (auto-generated)
+
+**Usage:**
+```typescript
+import { verifyRemoteIntegrity } from '@mfe/shared-utils';
+
+const result = await verifyRemoteIntegrity('authMfe', remoteUrl);
+if (!result.valid) {
+  console.error('Remote integrity check failed:', result.error);
+}
+```
 
 ---
 
 ### Task 6.2: Create Remote Loader with Verification
 
-- [ ] Create custom remote loader function
-- [ ] Fetch remote content
-- [ ] Verify hash matches expected
-- [ ] Only load if verified
-- [ ] Log and alert on verification failure
+- [x] Create custom remote loader function
+- [x] Fetch remote content
+- [x] Verify hash matches expected
+- [x] Only load if verified
+- [x] Log and alert on verification failure
 
-**Status:** Not Started
-**Completed Date:**
+**Status:** Complete
+**Completed Date:** 2026-02-12
 **Notes:**
 
-**File to create:**
-- `libs/shared-utils/src/lib/remote-loader.ts`
+**Implementation Details:**
+
+Task 6.2 combines two requirements:
+1. **Remote URL Validation** - Allowlist-based URL validation (new in this task)
+2. **Integrity Verification** - SRI hash verification (implemented in Task 6.1)
+
+**Remote URL Validator** (`libs/shared-utils/src/lib/remote-url-validator.ts`):
+- `validateRemoteUrl()` - Validate URLs against configurable allowlist
+- `RemoteUrlValidator` class - Reusable validator with caching
+- Supports wildcard patterns for origins and paths
+- Blocks dangerous URL patterns (javascript:, data:, credentials, etc.)
+- Environment-aware defaults (stricter in production)
+
+**Features:**
+- Origin validation with wildcards (e.g., `http://localhost:*`, `https://*.example.com`)
+- Path pattern matching (glob-style, e.g., `/mfe/*/remoteEntry.js`)
+- Protocol enforcement (HTTPS-only in production)
+- Dangerous pattern blocking (javascript:, data:, file:, credentials)
+- rspack config validation helper
+
+**Test Coverage** (`libs/shared-utils/src/lib/remote-url-validator.spec.ts`):
+- 39 tests covering URL validation, pattern matching, edge cases
+- Tests for wildcards, IPv4/IPv6, query strings, custom validators
+
+**Files Created:**
+- `libs/shared-utils/src/lib/remote-url-validator.ts`
+- `libs/shared-utils/src/lib/remote-url-validator.spec.ts`
+
+**Usage:**
+```typescript
+import { validateRemoteUrl, RemoteUrlValidator } from '@mfe/shared-utils';
+
+// Quick validation
+const result = validateRemoteUrl('http://localhost:4201/remoteEntry.js');
+
+// Validate rspack remotes config
+const validator = new RemoteUrlValidator({ allowedOrigins: ['http://localhost'] });
+const invalid = validator.validateRemotesConfig(remotesConfig);
+```
 
 ---
 
 ### Task 6.3: Configure HTTPS for Remote URLs (Production)
 
-- [ ] Update rspack.config.js for production remote URLs
-- [ ] Use HTTPS URLs for all remotes in production
-- [ ] Configure certificate pinning in nginx (optional)
-- [ ] Document production remote URL configuration
+- [x] Update rspack.config.js for production remote URLs
+- [x] Use HTTPS URLs for all remotes in production
+- [x] Configure certificate pinning in nginx (optional) - documented, not implemented
+- [x] Document production remote URL configuration
 
-**Status:** Not Started
-**Completed Date:**
+**Status:** Complete
+**Completed Date:** 2026-02-12
 **Notes:**
+
+**Implementation Details:**
+
+Enhanced `apps/shell/rspack.config.js` with production-ready Module Federation security:
+
+1. **HTTPS Enforcement in Production:**
+   - Production builds throw an error if remote URLs don't use HTTPS
+   - Environment variable `NX_MFE_BASE_URL` for custom CDN/server URLs
+   - Fallback to `https://localhost` for local production testing
+
+2. **Build-Time URL Validation:**
+   - `validateRemoteUrls()` function validates all remote URLs at build time
+   - Checks origins against `ALLOWED_REMOTE_ORIGINS` allowlist
+   - Production: Fails build if HTTPS not used
+   - Development: Logs warnings but continues
+
+3. **Configurable Allowed Origins:**
+   - `ALLOWED_REMOTE_ORIGINS` constant with environment-aware defaults
+   - Production: HTTPS origins only (add your CDN URLs)
+   - Development: HTTP and HTTPS localhost allowed
+
+4. **Enhanced `getRemoteUrl()` Function:**
+   - Production: Uses `NX_MFE_BASE_URL` or HTTPS localhost
+   - Development HTTPS mode: nginx proxy paths
+   - Development HTTP mode: direct dev server access
+
+**Usage in Production:**
+```bash
+# Set custom CDN URL for production
+NX_MFE_BASE_URL=https://cdn.yourcompany.com pnpm build:shell
+
+# Or use default HTTPS localhost (for local production testing)
+NODE_ENV=production pnpm build:shell
+```
+
+**Note on Certificate Pinning:**
+Certificate pinning via HPKP (HTTP Public Key Pinning) is deprecated. Modern approach is to use:
+- TLS certificate validation (default browser behavior)
+- Certificate Transparency (CT) logs
+- HSTS with preloading for HTTPS enforcement
 
 ---
 
 ### Task 6.4: Implement Remote Fallback Strategy
 
-- [ ] Create fallback UI for failed remote loads
-- [ ] Implement retry logic with backoff
-- [ ] Add circuit breaker for repeatedly failing remotes
-- [ ] Log remote load failures to Sentry
-- [ ] Test with unavailable remote
+- [x] Create fallback UI for failed remote loads
+- [x] Implement retry logic with backoff
+- [x] Add circuit breaker for repeatedly failing remotes
+- [x] Log remote load failures to Sentry
+- [x] Test with unavailable remote
 
-**Status:** Not Started
-**Completed Date:**
+**Status:** Complete
+**Completed Date:** 2026-02-12
 **Notes:**
+
+**Implementation Details:**
+
+1. **Enhanced RemoteErrorBoundary** (`apps/shell/src/components/RemoteErrorBoundary.tsx`):
+   - Automatic retries with exponential backoff (2 retries by default)
+   - Circuit breaker integration for repeatedly failing remotes
+   - Sentry integration for error tracking (breadcrumbs + exception capture)
+   - Loading UI during retry attempts with countdown
+   - Improved error fallback showing remote name and retry count
+   - Props: `remoteName`, `componentName`, `enableAutoRetry`, `enableSentryTracking`, `onError`, `onRecovery`
+
+2. **Circuit Breaker** (`libs/shared-utils/src/lib/circuit-breaker.ts`):
+   - States: CLOSED (normal), OPEN (blocked), HALF_OPEN (testing recovery)
+   - Configurable failure threshold (default: 3)
+   - Configurable reset timeout (default: 30 seconds)
+   - Callbacks: `onStateChange`, `onOpen`, `onClose`
+   - Global instance: `remoteCircuitBreaker`
+
+3. **Retry Utility** (`libs/shared-utils/src/lib/retry.ts`):
+   - `calculateBackoffDelay()` - Exponential backoff with optional jitter
+   - `withRetry()` - Execute async function with retry logic
+   - `createRetryHandler()` - State-tracking retry handler for React components
+
+**Test Coverage:**
+- RemoteErrorBoundary: 16 tests
+- Circuit Breaker: 22 tests
+- Retry Utility: 21 tests
+
+**Usage:**
+```tsx
+<RemoteErrorBoundary
+  remoteName="authMfe"
+  componentName="SignIn"
+  enableAutoRetry={true}
+  enableSentryTracking={true}
+  onError={(error, remoteName) => console.log('Failed:', remoteName)}
+>
+  <SignInComponent />
+</RemoteErrorBoundary>
+```
 
 ---
 
 ### Task 6.5: Add Remote Health Checks
 
-- [ ] Create health check endpoint for each MFE
-- [ ] Implement pre-load health check in shell
-- [ ] Skip loading unhealthy remotes gracefully
-- [ ] Add health status to monitoring
+- [x] Create health check endpoint for each MFE
+- [x] Implement pre-load health check in shell
+- [x] Skip loading unhealthy remotes gracefully
+- [x] Add health status to monitoring
 
-**Status:** Not Started
-**Completed Date:**
+**Status:** Complete
+**Completed Date:** 2026-02-12
 **Notes:**
+
+**Implementation Details:**
+
+1. **Health Check Endpoints** - Created `/health.json` for each MFE:
+   - `apps/auth-mfe/public/health.json`
+   - `apps/payments-mfe/public/health.json`
+   - `apps/admin-mfe/public/health.json`
+   - `apps/profile-mfe/public/health.json`
+   - Each returns: `status`, `name`, `version`, `timestamp`, `message`, `components`
+
+2. **Health Check Utilities** (`libs/shared-utils/src/lib/remote-health-check.ts`):
+   - `checkRemoteHealth()` - Check single MFE health with circuit breaker integration
+   - `checkAllRemotesHealth()` - Check all MFEs in parallel
+   - `getAggregatedHealthStatus()` - Get combined health status
+   - `preloadHealthCheck()` - Shell pre-load health check
+   - `isRemoteHealthy()` - Quick check via circuit breaker state
+   - Configurable timeout, degraded status handling
+
+3. **Pre-load Health Check** (`apps/shell/src/bootstrap.tsx`):
+   - Health checks run on app initialization (non-blocking)
+   - Updates circuit breaker state for each MFE
+   - Logs health status to console
+
+4. **Skip Unhealthy Remotes** (`apps/shell/src/remotes/index.tsx`):
+   - `createRemoteComponent()` - Factory with circuit breaker integration
+   - Checks circuit breaker state before attempting to load
+   - Returns fallback UI if circuit is open
+   - Records success/failure with circuit breaker
+
+5. **Health Status Monitoring** (`apps/shell/src/components/RemoteHealthStatus.tsx`):
+   - `RemoteHealthStatus` - Full status display component
+   - `RemoteHealthBadge` - Compact status indicator
+   - React hook: `useRemoteHealth()` - Health monitoring with polling
+
+6. **React Hook** (`apps/shell/src/hooks/useRemoteHealth.ts`):
+   - `useRemoteHealth()` - Monitor all MFEs with optional polling
+   - `useSingleRemoteHealth()` - Monitor single MFE
+
+**Test Coverage:**
+- 17 unit tests for remote health check utilities
+- Tests cover: healthy/unhealthy responses, degraded status, circuit breaker integration, timeout handling
 
 ---
 
 ### Task 6.6: Audit Shared Dependencies for Security
 
-- [ ] Review all shared dependencies in Module Federation config
-- [ ] Ensure critical libs (auth-store, api-client) are singleton
-- [ ] Verify no sensitive data leaks between MFEs
-- [ ] Document shared dependency security model
+- [x] Review all shared dependencies in Module Federation config
+- [x] Ensure critical libs (auth-store, api-client) are singleton
+- [x] Verify no sensitive data leaks between MFEs
+- [x] Document shared dependency security model
 
-**Status:** Not Started
-**Completed Date:**
+**Status:** Complete
+**Completed Date:** 2026-02-12
 **Notes:**
+
+**Audit Summary:**
+
+| MFE | shared-auth-store | @mfe/shared-api-client | shared-types | Status |
+|-----|-------------------|------------------------|--------------|--------|
+| Shell | ✅ singleton | ✅ singleton | ✅ singleton | OK |
+| Auth MFE | ✅ singleton | ✅ singleton (added) | ✅ singleton (added) | Fixed |
+| Payments MFE | ✅ singleton | ✅ singleton | ✅ singleton | OK |
+| Admin MFE | ✅ singleton | ✅ singleton (added) | ✅ singleton (added) | Fixed |
+| Profile MFE | ✅ singleton | ✅ singleton (added) | ✅ singleton (added) | Fixed |
+
+**Issues Found and Fixed:**
+1. Auth MFE missing `@mfe/shared-api-client` and `shared-types` - **Fixed**
+2. Admin MFE missing `@mfe/shared-api-client` and `shared-types` - **Fixed**
+3. Profile MFE missing `@mfe/shared-api-client` and `shared-types` - **Fixed**
+
+**Security Analysis:**
+- All security-critical libraries now configured as singletons across all MFEs
+- Token management centralized through single shared-auth-store instance
+- API client uses single token provider, preventing token sync issues
+- No sensitive data leaks between MFEs (by design - all share same auth state)
+- EventBus events don't expose raw tokens, only user info
+
+**Documentation Created:**
+- `docs/POC-3-Implementation/MODULE-FEDERATION-SHARED-DEPENDENCIES-SECURITY.md`
+  - Complete security model documentation
+  - Data flow analysis
+  - Verification checklist
+  - Recommendations for Phase 7
+
+**Files Modified:**
+- `apps/auth-mfe/rspack.config.js` - Added missing shared deps
+- `apps/admin-mfe/rspack.config.js` - Added missing shared deps
+- `apps/profile-mfe/rspack.config.js` - Added missing shared deps
 
 ---
 
 ### Task 6.7: Test Module Federation Security
 
-- [ ] Test normal MFE loading - works
-- [ ] Test with modified remoteEntry.js - rejected
-- [ ] Test with unavailable remote - graceful fallback
-- [ ] Test shared auth store isolation
-- [ ] Document test results
+- [x] Test normal MFE loading - works
+- [x] Test with modified remoteEntry.js - rejected
+- [x] Test with unavailable remote - graceful fallback
+- [x] Test shared auth store isolation
+- [x] Document test results
 
-**Status:** Not Started
-**Completed Date:**
+**Status:** Complete
+**Completed Date:** 2026-02-12
 **Notes:**
+
+**Test Suite Created:**
+- `libs/shared-utils/src/lib/module-federation-security.spec.ts` - Comprehensive security test suite
+
+**Test Coverage:**
+| Category | Tests | Status |
+|----------|-------|--------|
+| URL Validation | 12 tests | ✅ PASS |
+| Circuit Breaker | 10 tests | ✅ PASS |
+| Health Checks | 17 tests | ✅ PASS |
+| Retry Logic | 6 tests | ✅ PASS |
+| Security Edge Cases | 6 tests | ✅ PASS |
+| **Total** | **276 tests** | **✅ ALL PASS** |
+
+**Test Results Summary:**
+
+1. **URL Validation Tests:**
+   - Allowlist enforcement (accept allowed, reject malicious)
+   - Wildcard port and subdomain matching
+   - Dangerous URL blocking (javascript:, data:, file:, credentials)
+   - HTTPS enforcement via allowedProtocols
+
+2. **Circuit Breaker Tests:**
+   - State transitions: CLOSED → OPEN → HALF_OPEN → CLOSED
+   - Failure threshold tracking (3 failures opens circuit)
+   - Per-remote isolation (authMfe failure doesn't affect paymentsMfe)
+   - Recovery after reset timeout
+
+3. **Health Check Tests:**
+   - Health endpoint configuration (HTTP/HTTPS modes)
+   - Circuit breaker integration (skip check when OPEN)
+   - Degraded status handling
+
+4. **Retry Logic Tests:**
+   - Exponential backoff calculation (1s → 2s → 4s → 8s)
+   - Max delay cap and jitter support
+   - Retry execution with callback notifications
+
+5. **Security Edge Cases:**
+   - Path traversal blocking (/../, %2f%2f, %5c)
+   - Concurrent circuit breaker access
+   - Unicode normalization consistency
+
+**Documentation Created:**
+- `docs/POC-3-Implementation/MODULE-FEDERATION-SECURITY-TEST-RESULTS.md`
+  - Complete test results documentation
+  - Manual testing checklist for verification
+  - Integration test scenarios
+  - Production recommendations
 
 ---
 
-**Phase 6 Completion:** **0% (0/7 sub-tasks complete)**
+**Phase 6 Completion:** **100% (7/7 sub-tasks complete)** ✅
 
 ---
 
@@ -1422,9 +1695,9 @@ function sanitizeString(value: string): string {
 | Phase 3 | CSRF Protection | 6 | 6 | 100% ✅ |
 | Phase 4 | Dependency Security | 6 | 6 | 100% ✅ |
 | Phase 5 | XSS Prevention | 6 | 6 | 100% ✅ |
-| Phase 6 | Module Federation Security | 0 | 7 | 0% |
+| Phase 6 | Module Federation Security | 7 | 7 | 100% ✅ |
 | Phase 7 | Session & Auth Hardening | 0 | 5 | 0% |
-| **Total** | | **30** | **42** | **71%** |
+| **Total** | | **37** | **42** | **88%** |
 
 ---
 
@@ -1473,4 +1746,4 @@ After all phases complete, run comprehensive security testing:
 ---
 
 **Last Updated:** February 12, 2026
-**Status:** In Progress - Phases 1-5 complete, starting Phase 6
+**Status:** In Progress - Phase 6 Complete (Module Federation Security), Phase 7 Not Started

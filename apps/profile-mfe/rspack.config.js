@@ -54,7 +54,24 @@ const sharedDependencies = {
     requiredVersion: false,
     eager: true, // Must be eager for standalone app
   },
+  // CRITICAL: Share the API client to ensure single token provider
+  '@mfe/shared-api-client': {
+    singleton: true,
+    requiredVersion: false,
+    eager: true, // Must be eager for standalone app
+  },
+  'shared-api-client': {
+    singleton: true,
+    requiredVersion: false,
+    eager: true, // Must be eager for standalone app
+  },
   '@mfe/shared-theme-store': {
+    singleton: true,
+    requiredVersion: false,
+    eager: true, // Must be eager for standalone app
+  },
+  // Shared types for type consistency
+  'shared-types': {
     singleton: true,
     requiredVersion: false,
     eager: true, // Must be eager for standalone app
@@ -235,9 +252,14 @@ module.exports = {
         isProduction ? 'production' : 'development'
       ),
     }),
-    // Copy public assets (favicon.ico, etc.) to output directory
+    // Copy public assets (health.json, favicon.ico, etc.) to output directory
     new rspack.CopyRspackPlugin({
       patterns: [
+        {
+          from: path.resolve(__dirname, 'public'),
+          to: path.resolve(__dirname, '../../dist/apps/profile-mfe'),
+          noErrorOnMissing: true,
+        },
         {
           from: path.resolve(__dirname, 'src/assets'),
           to: path.resolve(__dirname, '../../dist/apps/profile-mfe/assets'),
@@ -276,11 +298,17 @@ module.exports = {
     liveReload: false, // Disable live reload - prevents auto page refresh on HMR failure
     historyApiFallback: true,
     allowedHosts: 'all', // Allow nginx proxy requests
-    // Serve static files from assets directory
-    static: {
-      directory: path.resolve(__dirname, 'src/assets'),
-      publicPath: '/assets',
-    },
+    // Serve static files from public directory (for health.json, etc.)
+    static: [
+      {
+        directory: path.resolve(__dirname, 'public'),
+        publicPath: '/',
+      },
+      {
+        directory: path.resolve(__dirname, 'src/assets'),
+        publicPath: '/assets',
+      },
+    ],
     headers: {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, PATCH, OPTIONS',

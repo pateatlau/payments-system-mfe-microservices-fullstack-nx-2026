@@ -54,7 +54,24 @@ const sharedDependencies = {
     requiredVersion: false,
     eager: true, // Must be eager for standalone app
   },
+  // CRITICAL: Share the API client to ensure single token provider
+  '@mfe/shared-api-client': {
+    singleton: true,
+    requiredVersion: false,
+    eager: true, // Must be eager for standalone app
+  },
+  'shared-api-client': {
+    singleton: true,
+    requiredVersion: false,
+    eager: true, // Must be eager for standalone app
+  },
   '@mfe/shared-theme-store': {
+    singleton: true,
+    requiredVersion: false,
+    eager: true, // Must be eager for standalone app
+  },
+  // Shared types for type consistency
+  'shared-types': {
     singleton: true,
     requiredVersion: false,
     eager: true, // Must be eager for standalone app
@@ -235,7 +252,7 @@ module.exports = {
         isProduction ? 'production' : 'development'
       ),
     }),
-    // Copy public assets (favicon.ico, etc.) to output directory
+    // Copy public assets (favicon.ico, health.json, etc.) to output directory
     new rspack.CopyRspackPlugin({
       patterns: [
         {
@@ -245,6 +262,11 @@ module.exports = {
         },
         {
           from: path.resolve(__dirname, 'src/favicon.ico'),
+          to: path.resolve(__dirname, '../../dist/apps/admin-mfe'),
+          noErrorOnMissing: true,
+        },
+        {
+          from: path.resolve(__dirname, 'public'),
           to: path.resolve(__dirname, '../../dist/apps/admin-mfe'),
           noErrorOnMissing: true,
         },
