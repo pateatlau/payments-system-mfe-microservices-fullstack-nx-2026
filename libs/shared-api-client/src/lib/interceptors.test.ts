@@ -29,10 +29,11 @@ describe('Interceptors', () => {
   let mockAxiosInstance: AxiosInstance;
   let requestMock: jest.Mock<Promise<AxiosResponse>>;
 
+  // POC-3 Phase 7.2: Updated for HttpOnly cookie-based refresh tokens
   let tokenManager: {
     getAccessToken: jest.Mock;
     getRefreshToken: jest.Mock;
-    setTokens: jest.Mock;
+    setAccessToken: jest.Mock;
     clearTokens: jest.Mock;
   };
 
@@ -49,10 +50,11 @@ describe('Interceptors', () => {
     jest.clearAllMocks();
     jest.useFakeTimers();
 
+    // POC-3 Phase 7.2: Updated for HttpOnly cookie-based refresh tokens
     tokenManager = {
       getAccessToken: jest.fn(() => 'test-access-token'),
-      getRefreshToken: jest.fn(() => 'test-refresh-token'),
-      setTokens: jest.fn(),
+      getRefreshToken: jest.fn(() => null), // Refresh token is in HttpOnly cookie
+      setAccessToken: jest.fn(), // Only sets access token now
       clearTokens: jest.fn(),
     };
 
@@ -201,11 +203,13 @@ describe('Interceptors', () => {
     });
 
     it('should handle 401 error and refresh token', async () => {
+      // POC-3 Phase 7.2: Updated for HttpOnly cookie-based refresh tokens
+      // Server returns only accessToken (refreshToken is set via HttpOnly cookie)
       const mockResponse = {
         success: true,
         data: {
           accessToken: 'new-access-token',
-          refreshToken: 'new-refresh-token',
+          // refreshToken is set via HttpOnly cookie by server, not in response
         },
       };
 
@@ -242,6 +246,7 @@ describe('Interceptors', () => {
 
       await resultPromise;
 
+      // POC-3 Phase 7.2: Empty body - refresh token is sent via HttpOnly cookie
       expect(global.fetch).toHaveBeenCalledWith(
         'http://localhost:3001/auth/refresh',
         expect.objectContaining({
@@ -249,24 +254,24 @@ describe('Interceptors', () => {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ refreshToken: 'test-refresh-token' }),
+          credentials: 'include', // Required for HttpOnly cookies
+          body: JSON.stringify({}),
         })
       );
 
-      expect(tokenManager.setTokens).toHaveBeenCalledWith(
-        'new-access-token',
-        'new-refresh-token'
-      );
+      // POC-3 Phase 7.2: Only access token is set (refresh token in HttpOnly cookie)
+      expect(tokenManager.setAccessToken).toHaveBeenCalledWith('new-access-token');
 
       expect(requestMock).toHaveBeenCalled();
     });
 
     it('should handle multiple 401 errors during token refresh', async () => {
+      // POC-3 Phase 7.2: Updated for HttpOnly cookie-based refresh tokens
       const mockResponse = {
         success: true,
         data: {
           accessToken: 'new-access-token',
-          refreshToken: 'new-refresh-token',
+          // refreshToken is set via HttpOnly cookie by server
         },
       };
 
@@ -371,7 +376,10 @@ describe('Interceptors', () => {
 
       const resultPromise = responseErrorInterceptor(error) as Promise<unknown>;
 
-      await expect(resultPromise).rejects.toThrow('No refresh token available');
+      // POC-3 Phase 7.1: When refresh token is missing from memory, the client
+      // will still attempt to refresh via HttpOnly cookie. In test environment,
+      // this will fail with "Token refresh failed" since there's no cookie.
+      await expect(resultPromise).rejects.toThrow('Token refresh failed');
     });
 
     it('should transform API error responses', async () => {

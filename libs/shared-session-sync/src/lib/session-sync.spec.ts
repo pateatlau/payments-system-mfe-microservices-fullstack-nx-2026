@@ -274,11 +274,12 @@ describe('SessionSync', () => {
   });
 
   describe('broadcastTokenRefresh', () => {
-    it('should broadcast token refresh', () => {
+    it('should broadcast token refresh notification (without token for security)', () => {
       const callback = jest.fn();
       sessionSync.on('TOKEN_REFRESH', callback);
 
-      sessionSync.broadcastTokenRefresh('new-token');
+      // POC-3 Phase 7.2: No longer takes token parameter
+      sessionSync.broadcastTokenRefresh();
 
       // Simulate event from another tab
       const channel = (
@@ -287,14 +288,19 @@ describe('SessionSync', () => {
       if (channel) {
         const event: SessionEvent = {
           type: 'TOKEN_REFRESH',
-          payload: { token: 'new-token' },
+          // POC-3 Phase 7.2: payload now contains refreshedAt instead of token
+          payload: { refreshedAt: Date.now() },
           timestamp: Date.now(),
           tabId: 'other-tab-id',
         };
         channel.postMessage(event);
       }
 
-      expect(callback).toHaveBeenCalledWith({ token: 'new-token' });
+      // Verify callback was called with refreshedAt (not token)
+      expect(callback).toHaveBeenCalled();
+      const receivedPayload = callback.mock.calls[0][0];
+      expect(receivedPayload).toHaveProperty('refreshedAt');
+      expect(typeof receivedPayload.refreshedAt).toBe('number');
     });
   });
 

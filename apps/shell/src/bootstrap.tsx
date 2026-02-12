@@ -17,6 +17,7 @@ import {
 } from '@mfe-poc/shared-observability';
 import { initCsrfToken } from '@mfe/shared-api-client';
 import { preloadHealthCheck } from '@mfe/shared-utils';
+import { SessionActivityProvider } from './components/SessionActivityProvider';
 
 // Import remote components
 // This file (bootstrap.tsx) is dynamically imported, providing the async boundary
@@ -90,23 +91,25 @@ function AppWrapper() {
       token={accessToken || undefined}
       debug={process.env['NODE_ENV'] === 'development'}
     >
-      <BrowserRouter>
-        <App
-          remotes={{
-            SignInComponent: SignInRemote,
-            SignUpComponent: SignUpRemote,
-            ForgotPasswordComponent: ForgotPasswordRemote,
-            ResetPasswordComponent: ResetPasswordRemote,
-            VerifyEmailComponent: VerifyEmailRemote,
-            OAuthCallbackComponent: OAuthCallbackRemote,
-            MfaRecommendationComponent: MfaRecommendationRemote,
-            PaymentsComponent: PaymentsPageRemote,
-            ReportsComponent: ReportsPageRemote,
-            AdminDashboardComponent: AdminDashboardRemote,
-            ProfilePageComponent: ProfilePageRemote,
-          }}
-        />
-      </BrowserRouter>
+      <SessionActivityProvider>
+        <BrowserRouter>
+          <App
+            remotes={{
+              SignInComponent: SignInRemote,
+              SignUpComponent: SignUpRemote,
+              ForgotPasswordComponent: ForgotPasswordRemote,
+              ResetPasswordComponent: ResetPasswordRemote,
+              VerifyEmailComponent: VerifyEmailRemote,
+              OAuthCallbackComponent: OAuthCallbackRemote,
+              MfaRecommendationComponent: MfaRecommendationRemote,
+              PaymentsComponent: PaymentsPageRemote,
+              ReportsComponent: ReportsPageRemote,
+              AdminDashboardComponent: AdminDashboardRemote,
+              ProfilePageComponent: ProfilePageRemote,
+            }}
+          />
+        </BrowserRouter>
+      </SessionActivityProvider>
     </WebSocketProvider>
   );
 }

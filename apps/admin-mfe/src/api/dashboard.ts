@@ -40,11 +40,12 @@ const paymentsApiClient = new ApiClient({
   // Always use HTTPS through nginx proxy for cross-browser compatibility
   baseURL: envBaseURL || 'https://localhost/api',
   timeout: 30000,
+  // POC-3 Phase 7.2: Updated for HttpOnly cookie-based refresh tokens
   tokenProvider: {
     getAccessToken: () => useAuthStore.getState().accessToken ?? null,
-    getRefreshToken: () => useAuthStore.getState().refreshToken ?? null,
-    setTokens: (accessToken: string, refreshToken: string) => {
-      useAuthStore.getState().setAccessToken(accessToken, refreshToken);
+    getRefreshToken: () => null, // Refresh token is in HttpOnly cookie
+    setAccessToken: (accessToken: string) => {
+      useAuthStore.getState().setAccessToken(accessToken);
     },
     clearTokens: () => {
       useAuthStore.getState().logout();

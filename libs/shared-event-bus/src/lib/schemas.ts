@@ -39,10 +39,15 @@ export const EventSourceSchema = z.enum([
 // ==================== Auth Event Schemas ====================
 // Matches interfaces in events/auth.ts
 
+/**
+ * POC-3 Phase 7.2: Auth login payload schema - tokens removed for security
+ * Tokens are no longer emitted in events. They are:
+ * - accessToken: Memory only in auth store
+ * - refreshToken: HttpOnly cookie only
+ */
 export const AuthLoginPayloadSchema = z.object({
   user: AuthUserSchema,
-  accessToken: z.string().min(1),
-  refreshToken: z.string().min(1),
+  // POC-3 Phase 7.2: Tokens removed for security
 });
 
 export const AuthLogoutPayloadSchema = z.object({
@@ -52,14 +57,23 @@ export const AuthLogoutPayloadSchema = z.object({
     .optional(),
 });
 
+/**
+ * POC-3 Phase 7.2: Token refreshed payload - token removed for security
+ * This event now just signals that a refresh occurred.
+ * Other tabs refresh via HttpOnly cookie.
+ */
 export const AuthTokenRefreshedPayloadSchema = z.object({
   userId: z.string().min(1),
-  accessToken: z.string().min(1),
+  // POC-3 Phase 7.2: accessToken removed for security
 });
 
+/**
+ * POC-3 Phase 7.4: Session expired payload - added reason field
+ */
 export const AuthSessionExpiredPayloadSchema = z.object({
   userId: z.string().min(1),
-  expiredAt: z.string().min(1),
+  expiredAt: z.string().min(1).optional(),
+  reason: z.enum(['inactivity_timeout', 'token_expired', 'forced_logout']).optional(),
 });
 
 export const AuthSignupPayloadSchema = z.object({

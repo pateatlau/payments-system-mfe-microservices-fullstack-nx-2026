@@ -20,6 +20,7 @@ import {
   oauthLinkSchema,
   oauthUnlinkSchema,
 } from '../validators/oauth.validators';
+import { setRefreshTokenCookie } from '../utils/cookies';
 
 /**
  * Helper to extract request metadata for fingerprinting
@@ -164,11 +165,25 @@ export const handleOAuthCallback = async (
       return res.redirect(302, mfaUrl);
     }
 
+    // POC-3 Phase 7.1: Set refresh token as HttpOnly cookie
+    // This provides XSS protection - the token cannot be accessed by JavaScript
+    // We ALSO keep the token in URL for backward compatibility with existing frontend
+    setRefreshTokenCookie(res, result.refreshToken);
+
     // Success - redirect to frontend with tokens in URL fragment
     // URL fragment (#) is not sent to server, providing security benefit
+    // Note: refreshToken is in BOTH HttpOnly cookie AND URL for backward compatibility
+    // Frontend will gradually migrate to using only the cookie
+    //
+    // TODO(security): Remove refreshToken from successParams once all MFEs have migrated
+    // to cookie-based refresh. Currently included for backward compatibility with older
+    // frontend code that expects the token in the URL fragment. This undermines the XSS
+    // protection provided by the HttpOnly cookie. Target removal: After Phase 7 migration
+    // is complete and verified across all MFEs.
+    // Tracking: https://github.com/pateatlau/payments-system-mfe-microservices-fullstack-nx-2026/issues/TBD
     const successParams = new URLSearchParams({
       accessToken: result.accessToken,
-      refreshToken: result.refreshToken,
+      refreshToken: result.refreshToken, // TODO: Remove after MFE migration complete
       expiresIn: result.expiresIn,
     });
 

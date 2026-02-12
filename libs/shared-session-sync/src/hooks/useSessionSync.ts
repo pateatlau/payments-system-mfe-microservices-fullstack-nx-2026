@@ -22,7 +22,6 @@ import type { AuthStateChangePayload, TokenRefreshPayload } from '../lib/types';
  */
 export function useSessionSync() {
   const logout = useAuthStore(state => state.logout);
-  const setAccessToken = useAuthStore(state => state.setAccessToken);
   const user = useAuthStore(state => state.user);
   const isAuthenticated = useAuthStore(state => state.isAuthenticated);
 
@@ -49,14 +48,15 @@ export function useSessionSync() {
     });
 
     // Listen for token refresh from other tabs
+    // POC-3 Phase 7.2: Token is no longer passed in event (security)
+    // When another tab refreshes, we just log it - our next API call
+    // will automatically refresh via the HttpOnly cookie if needed
     const unsubToken = sessionSync.on('TOKEN_REFRESH', data => {
       const payload = data as TokenRefreshPayload;
-      // Get current refresh token from store to maintain it
-      const currentRefreshToken = useAuthStore.getState().refreshToken;
-      if (currentRefreshToken) {
-        // Update access token, keep refresh token
-        setAccessToken(payload.token, currentRefreshToken);
-      }
+      // Log token refresh from other tab (for debugging)
+      console.debug('[SessionSync] Token refreshed in another tab at:', new Date(payload.refreshedAt).toISOString());
+      // Our next API call will automatically refresh token via HttpOnly cookie if needed
+      // No action required here - the interceptors handle token refresh automatically
     });
 
     return () => {
@@ -64,7 +64,7 @@ export function useSessionSync() {
       unsubAuth();
       unsubToken();
     };
-  }, [logout, setAccessToken]);
+  }, [logout]);
 
   /**
    * Broadcast logout to all tabs
@@ -81,10 +81,11 @@ export function useSessionSync() {
   }, [isAuthenticated, user]);
 
   /**
-   * Broadcast token refresh to all tabs
+   * Broadcast token refresh notification to all tabs
+   * POC-3 Phase 7.2: No longer takes token parameter for security
    */
-  const broadcastTokenRefresh = useCallback((newToken: string) => {
-    sessionSync.broadcastTokenRefresh(newToken);
+  const broadcastTokenRefresh = useCallback(() => {
+    sessionSync.broadcastTokenRefresh();
   }, []);
 
   return {

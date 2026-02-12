@@ -25,14 +25,13 @@ jest.mock('../lib/session-sync', () => {
 });
 
 // Mock auth store
+// POC-3 Phase 7.2: refreshToken removed from state (now in HttpOnly cookie)
 const mockLogout = jest.fn();
 const mockSetAccessToken = jest.fn();
-const mockRefreshToken = jest.fn();
 
 const mockAuthState = {
   logout: mockLogout,
   setAccessToken: mockSetAccessToken,
-  refreshToken: mockRefreshToken,
   user: {
     id: 'user-1',
     email: 'test@example.com',
@@ -40,7 +39,7 @@ const mockAuthState = {
     role: 'CUSTOMER' as const,
   },
   accessToken: 'access-token',
-  refreshToken: 'refresh-token',
+  // refreshToken removed - now in HttpOnly cookie
   isAuthenticated: true,
 };
 
@@ -65,7 +64,6 @@ describe('useSessionSync', () => {
     // Reset mocks
     mockLogout.mockClear();
     mockSetAccessToken.mockClear();
-    mockRefreshToken.mockClear();
   });
 
   it('should register event listeners on mount', () => {
@@ -106,12 +104,13 @@ describe('useSessionSync', () => {
     expect(sessionSync.broadcastAuthState).toHaveBeenCalled();
   });
 
-  it('should call broadcastTokenRefresh when function is called', () => {
+  it('should call broadcastTokenRefresh when function is called (POC-3 Phase 7.2: no token param)', () => {
     const { result } = renderHook(() => useSessionSync());
 
-    result.current.broadcastTokenRefresh('new-token');
+    // POC-3 Phase 7.2: broadcastTokenRefresh no longer takes token parameter
+    result.current.broadcastTokenRefresh();
 
-    expect(sessionSync.broadcastTokenRefresh).toHaveBeenCalledWith('new-token');
+    expect(sessionSync.broadcastTokenRefresh).toHaveBeenCalled();
   });
 
   it('should clean up listeners on unmount', () => {

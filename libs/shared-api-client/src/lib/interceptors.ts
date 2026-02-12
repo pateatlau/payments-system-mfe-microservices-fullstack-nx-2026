@@ -4,6 +4,7 @@
  * Handles:
  * - Request interceptor: Adds JWT token to Authorization header
  * - Request interceptor: Adds CSRF token to X-CSRF-Token header for mutations
+ * - Request interceptor: Adds session fingerprint for security (POC-3 Phase 7.3)
  * - Response interceptor: Handles errors, token refresh, and retry logic
  * - Response interceptor: Handles CSRF token refresh on 403 errors
  */
@@ -22,12 +23,83 @@ import {
 } from './csrf';
 
 /**
+ * POC-3 Phase 7.3: Session fingerprint header name
+ */
+const FINGERPRINT_HEADER_NAME = 'X-Client-Fingerprint';
+
+/**
+ * POC-3 Phase 7.3: Cached fingerprint to avoid async operations on every request
+ */
+let cachedFingerprintHeader: string | null = null;
+let fingerprintPromise: Promise<string> | null = null;
+
+/**
+ * POC-3 Phase 7.3: Initialize fingerprint asynchronously
+ * This is called once on module load to pre-compute the fingerprint
+ */
+async function initializeFingerprint(): Promise<string> {
+  if (typeof window === 'undefined') {
+    return ''; // SSR - no fingerprint
+  }
+
+  try {
+    // Dynamic import to avoid circular dependencies and enable tree-shaking
+    const { getSessionFingerprintHeader } = await import('@mfe/shared-utils');
+    return await getSessionFingerprintHeader();
+  } catch (error) {
+    console.warn('[Interceptors] Failed to generate session fingerprint:', error);
+    return '';
+  }
+}
+
+/**
+ * POC-3 Phase 7.3: Ensure fingerprint is initialized and return it
+ * This is an async function that waits for fingerprint to be ready
+ */
+async function ensureFingerprintHeader(): Promise<string> {
+  // Return cached value if available (only non-empty values are cached)
+  if (cachedFingerprintHeader !== null) {
+    return cachedFingerprintHeader;
+  }
+
+  // Start initialization if not already started
+  if (!fingerprintPromise) {
+    fingerprintPromise = initializeFingerprint();
+  }
+
+  // Await the fingerprint initialization
+  const header = await fingerprintPromise;
+
+  // Only cache non-empty fingerprints to allow retry on subsequent requests
+  if (header) {
+    cachedFingerprintHeader = header;
+  } else {
+    // Reset promise to allow retry on next request
+    fingerprintPromise = null;
+  }
+
+  return header;
+}
+
+/**
+ * POC-3 Phase 7.3: Clear cached fingerprint (call on logout)
+ */
+export function clearCachedFingerprint(): void {
+  cachedFingerprintHeader = null;
+  fingerprintPromise = null;
+}
+
+/**
  * Token management interface for interceptors
+ *
+ * POC-3 Phase 7.2: Updated for HttpOnly cookie-based refresh tokens
  */
 interface TokenManager {
   getAccessToken: () => string | null;
+  /** @deprecated Refresh token is in HttpOnly cookie, returns null */
   getRefreshToken: () => string | null;
-  setTokens: (accessToken: string, refreshToken: string) => void;
+  /** Sets only access token. Refresh token is managed via HttpOnly cookie. */
+  setAccessToken: (accessToken: string) => void;
   clearTokens: () => void;
 }
 
@@ -101,23 +173,25 @@ function onTokenRefreshFailed(error: unknown): void {
 
 /**
  * Attempt to refresh the access token
+ *
+ * POC-3 Phase 7.1/7.2: Updated for HttpOnly cookie-based refresh tokens
+ * - The refresh token is sent automatically via HttpOnly cookie
+ * - The new refresh token is set via HttpOnly cookie by the server
+ * - We only receive and return the new access token
  */
 async function refreshAccessToken(
-  tokenManager: TokenManager,
+  _tokenManager: TokenManager,
   baseURL: string
-): Promise<{ accessToken: string; refreshToken: string }> {
-  const refreshToken = tokenManager.getRefreshToken();
-
-  if (!refreshToken) {
-    throw new Error('No refresh token available');
-  }
-
+): Promise<{ accessToken: string }> {
+  // POC-3 Phase 7.2: Include credentials to send HttpOnly refresh token cookie
+  // The server reads the refresh token from the cookie and sets a new one
   const response = await fetch(`${baseURL}/auth/refresh`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ refreshToken }),
+    credentials: 'include', // Send HttpOnly cookies with request
+    body: JSON.stringify({}), // Empty body - refresh token is in cookie
   });
 
   if (!response.ok) {
@@ -128,7 +202,7 @@ async function refreshAccessToken(
     success: boolean;
     data: {
       accessToken: string;
-      refreshToken: string;
+      // refreshToken is set via HttpOnly cookie, not in response body
     };
   };
 
@@ -138,7 +212,6 @@ async function refreshAccessToken(
 
   return {
     accessToken: data.data.accessToken,
-    refreshToken: data.data.refreshToken,
   };
 }
 
@@ -149,8 +222,9 @@ function setupRequestInterceptor(
   axiosInstance: AxiosInstance,
   tokenManager: TokenManager
 ): void {
+  // Use async interceptor to properly await fingerprint initialization
   axiosInstance.interceptors.request.use(
-    (config: InternalAxiosRequestConfig) => {
+    async (config: InternalAxiosRequestConfig) => {
       const token = tokenManager.getAccessToken();
       addTokenToRequest(config, token);
 
@@ -182,6 +256,17 @@ function setupRequestInterceptor(
         } catch (_error) {
           // localStorage might not be available (e.g., in private browsing)
           // Silently fail - device ID is optional
+        }
+      }
+
+      // POC-3 Phase 7.3: Add session fingerprint for security
+      // The fingerprint helps detect session hijacking by verifying
+      // the request comes from the same browser/device as the original session
+      // Await ensures fingerprint is ready before the first request
+      if (!config.headers[FINGERPRINT_HEADER_NAME]) {
+        const fingerprintHeader = await ensureFingerprintHeader();
+        if (fingerprintHeader) {
+          config.headers[FINGERPRINT_HEADER_NAME] = fingerprintHeader;
         }
       }
 
@@ -266,12 +351,14 @@ function setupResponseInterceptor(
         isRefreshing = true;
 
         try {
-          const { accessToken, refreshToken } = await refreshAccessToken(
+          // POC-3 Phase 7.2: Refresh token is now set via HttpOnly cookie by the server
+          // We only need to store the new access token in memory
+          const { accessToken } = await refreshAccessToken(
             tokenManager,
             baseURL
           );
 
-          tokenManager.setTokens(accessToken, refreshToken);
+          tokenManager.setAccessToken(accessToken);
           onTokenRefreshed(accessToken);
 
           // Retry original request with new token

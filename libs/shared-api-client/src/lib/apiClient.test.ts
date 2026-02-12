@@ -95,6 +95,8 @@ describe('ApiClient', () => {
         headers: {
           'Content-Type': 'application/json',
         },
+        // POC-3 Phase 7.1: withCredentials is now required for HttpOnly cookie auth
+        withCredentials: true,
       });
     });
 
@@ -113,6 +115,8 @@ describe('ApiClient', () => {
         headers: {
           'Content-Type': 'application/json',
         },
+        // POC-3 Phase 7.1: withCredentials is now required for HttpOnly cookie auth
+        withCredentials: true,
       });
     });
 

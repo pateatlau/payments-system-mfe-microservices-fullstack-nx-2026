@@ -1,0 +1,37 @@
+# ZAP Rule Configuration for MFE Payments System
+# Format: Rule ID	Status	Description
+# Status: IGNORE, WARN, FAIL
+#
+# Reference: https://www.zaproxy.org/docs/alerts/
+
+# Core Security Rules - MUST PASS
+10021	FAIL	X-Content-Type-Options Header Missing
+10038	FAIL	Content Security Policy (CSP) Header Not Set
+10096	FAIL	Timestamp Disclosure - Unix
+10098	FAIL	Cross-Domain Misconfiguration
+10105	FAIL	Weak Authentication Method
+10202	FAIL	Absence of Anti-CSRF Tokens
+
+# Important Security Rules - SHOULD PASS
+10020	WARN	X-Frame-Options Header Not Set
+10023	WARN	Information Disclosure - Debug Error Messages
+10035	WARN	Strict-Transport-Security Header Not Set
+10036	WARN	Server Leaks Version Information
+10037	WARN	Server Leaks Information via "X-Powered-By" HTTP Response Header
+10054	WARN	Cookie Without SameSite Attribute
+10055	WARN	CSP: Wildcard Directive
+10063	WARN	Permissions Policy Header Not Set
+10110	WARN	Dangerous JS Functions
+
+# Low Priority - Monitor
+10015	IGNORE	Incomplete or No Cache-control and Pragma HTTP Header Set
+10017	IGNORE	Cross-Domain JavaScript Source File Inclusion
+10027	IGNORE	Information Disclosure - Suspicious Comments
+10109	IGNORE	Modern Web Application
+
+# Development/Test Environment Specific - Ignore
+10011	IGNORE	Cookie Without Secure Flag (dev uses self-signed certs)
+10012	IGNORE	Password Autocomplete in Browser
+10016	IGNORE	Web Browser XSS Protection Not Enabled
+10019	IGNORE	Content-Type Header Missing
+90022	IGNORE	Application Error Disclosure

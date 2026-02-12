@@ -65,10 +65,11 @@ describe('useAuthStore', () => {
     getMockEmit().mockClear();
 
     // Clear store state before each test
+    // POC-3 Phase 7.2: refreshToken removed from state (now in HttpOnly cookie)
     useAuthStore.setState({
       user: null,
       accessToken: null,
-      refreshToken: null,
+      // refreshToken removed - now in HttpOnly cookie
       isAuthenticated: false,
       isLoading: false,
       error: null,
@@ -130,7 +131,7 @@ describe('useAuthStore', () => {
       expect(state.user).not.toBeNull();
       expect(state.user?.email).toBe('test@example.com');
       expect(state.accessToken).toBe('access-token-123');
-      expect(state.refreshToken).toBe('refresh-token-123');
+      // POC-3 Phase 7.2: refreshToken is now in HttpOnly cookie, not in state
       expect(state.isLoading).toBe(false);
       expect(state.error).toBeNull();
 
@@ -141,6 +142,7 @@ describe('useAuthStore', () => {
       });
 
       // Verify event emission
+      // POC-3 Phase 7.2: tokens are no longer emitted for security
       expect(getMockEmit()).toHaveBeenCalledWith(
         'auth:login',
         {
@@ -150,8 +152,6 @@ describe('useAuthStore', () => {
             name: mockUser.name,
             role: mockUser.role,
           },
-          accessToken: 'access-token-123',
-          refreshToken: 'refresh-token-123',
         },
         'auth-mfe'
       );
@@ -208,7 +208,7 @@ describe('useAuthStore', () => {
       expect(state.isAuthenticated).toBe(false);
       expect(state.user).toBeNull();
       expect(state.accessToken).toBeNull();
-      expect(state.refreshToken).toBeNull();
+      // POC-3 Phase 7.2: refreshToken is now in HttpOnly cookie, not in state
       expect(state.isLoading).toBe(false);
       expect(state.error).toBe('Invalid credentials');
 
@@ -354,7 +354,7 @@ describe('useAuthStore', () => {
       expect(state.user?.email).toBe('mfa@example.com');
       expect(state.isAuthenticated).toBe(false); // Not authenticated until MFA complete
       expect(state.accessToken).toBeNull();
-      expect(state.refreshToken).toBeNull();
+      // POC-3 Phase 7.2: refreshToken is now in HttpOnly cookie, not in state
       expect(state.isLoading).toBe(false);
       expect(state.error).toBeNull();
 
@@ -403,7 +403,7 @@ describe('useAuthStore', () => {
       expect(state.mfaPending).toBe(false);
       expect(state.mfaToken).toBeNull();
       expect(state.accessToken).toBe('access-token-mfa');
-      expect(state.refreshToken).toBe('refresh-token-mfa');
+      // POC-3 Phase 7.2: refreshToken is now in HttpOnly cookie, not in state
       expect(state.isLoading).toBe(false);
       expect(state.error).toBeNull();
 
@@ -414,6 +414,7 @@ describe('useAuthStore', () => {
       });
 
       // Verify event emission
+      // POC-3 Phase 7.2: tokens are no longer emitted for security
       expect(getMockEmit()).toHaveBeenCalledWith(
         'auth:login',
         {
@@ -423,8 +424,6 @@ describe('useAuthStore', () => {
             name: mockUser.name,
             role: mockUser.role,
           },
-          accessToken: 'access-token-mfa',
-          refreshToken: 'refresh-token-mfa',
         },
         'auth-mfe'
       );
@@ -567,7 +566,7 @@ describe('useAuthStore', () => {
         user: mockUser,
         isAuthenticated: true,
         accessToken: null,
-        refreshToken: null,
+        // POC-3 Phase 7.2: refreshToken removed from state
       });
 
       const { logout } = useAuthStore.getState();
@@ -578,7 +577,7 @@ describe('useAuthStore', () => {
       const state = useAuthStore.getState();
       expect(state.user).toBeNull();
       expect(state.accessToken).toBeNull();
-      expect(state.refreshToken).toBeNull();
+      // POC-3 Phase 7.2: refreshToken is now in HttpOnly cookie, not in state
       expect(state.isAuthenticated).toBe(false);
 
       // Verify logout API was NOT called (no accessToken)
@@ -635,7 +634,7 @@ describe('useAuthStore', () => {
       const state = useAuthStore.getState();
       expect(state.user).toBeNull();
       expect(state.accessToken).toBeNull();
-      expect(state.refreshToken).toBeNull();
+      // POC-3 Phase 7.2: refreshToken is now in HttpOnly cookie, not in state
       expect(state.isAuthenticated).toBe(false);
       expect(state.error).toBeNull();
 
@@ -689,7 +688,7 @@ describe('useAuthStore', () => {
       const state = useAuthStore.getState();
       expect(state.user).toBeNull();
       expect(state.accessToken).toBeNull();
-      expect(state.refreshToken).toBeNull();
+      // POC-3 Phase 7.2: refreshToken is now in HttpOnly cookie, not in state
       expect(state.isAuthenticated).toBe(false);
     });
 
@@ -733,7 +732,7 @@ describe('useAuthStore', () => {
       const state = useAuthStore.getState();
       expect(state.user).toBeNull();
       expect(state.accessToken).toBeNull();
-      expect(state.refreshToken).toBeNull();
+      // POC-3 Phase 7.2: refreshToken is now in HttpOnly cookie, not in state
       expect(state.isAuthenticated).toBe(false);
     });
   });
@@ -779,7 +778,7 @@ describe('useAuthStore', () => {
       expect(state.user?.name).toBe('New User');
       expect(state.user?.role).toBe('CUSTOMER'); // Default role
       expect(state.accessToken).toBe('access-token-456');
-      expect(state.refreshToken).toBe('refresh-token-456');
+      // POC-3 Phase 7.2: refreshToken is now in HttpOnly cookie, not in state
       expect(state.isLoading).toBe(false);
       expect(state.error).toBeNull();
 
@@ -792,6 +791,7 @@ describe('useAuthStore', () => {
       });
 
       // Verify event emission
+      // POC-3 Phase 7.2: tokens are no longer emitted for security
       expect(getMockEmit()).toHaveBeenCalledWith(
         'auth:login',
         {
@@ -801,8 +801,6 @@ describe('useAuthStore', () => {
             name: mockUser.name,
             role: mockUser.role,
           },
-          accessToken: 'access-token-456',
-          refreshToken: 'refresh-token-456',
         },
         'auth-mfe'
       );
@@ -908,7 +906,7 @@ describe('useAuthStore', () => {
       expect(state.isAuthenticated).toBe(false);
       expect(state.user).toBeNull();
       expect(state.accessToken).toBeNull();
-      expect(state.refreshToken).toBeNull();
+      // POC-3 Phase 7.2: refreshToken is now in HttpOnly cookie, not in state
       expect(state.isLoading).toBe(false);
       expect(state.error).toBe('Email already exists');
     });
@@ -948,7 +946,7 @@ describe('useAuthStore', () => {
       expect(state.isAuthenticated).toBe(false);
       expect(state.user).toBeNull();
       expect(state.accessToken).toBeNull();
-      expect(state.refreshToken).toBeNull();
+      // POC-3 Phase 7.2: refreshToken is now in HttpOnly cookie, not in state
       expect(state.isLoading).toBe(false);
       expect(state.error).toBe('Email already exists');
     });
@@ -1106,7 +1104,8 @@ describe('useAuthStore', () => {
   });
 
   describe('setAccessToken', () => {
-    it('should update access token and emit token refreshed event', () => {
+    // POC-3 Phase 7.2: setAccessToken now only takes accessToken (refreshToken is in HttpOnly cookie)
+    it('should update access token and emit token refreshed event (without token in event)', () => {
       const mockUser: User = {
         id: 'user-123',
         email: 'test@example.com',
@@ -1125,24 +1124,25 @@ describe('useAuthStore', () => {
 
       const { setAccessToken } = useAuthStore.getState();
 
-      setAccessToken('new-access-token', 'new-refresh-token');
+      // POC-3 Phase 7.2: Only pass accessToken (refreshToken is in HttpOnly cookie)
+      setAccessToken('new-access-token');
 
       const state = useAuthStore.getState();
       expect(state.accessToken).toBe('new-access-token');
-      expect(state.refreshToken).toBe('new-refresh-token');
+      // refreshToken is now in HttpOnly cookie, not in state
 
-      // Verify event emission
+      // Verify event emission (token not included for security)
       expect(getMockEmit()).toHaveBeenCalledWith(
         'auth:token-refreshed',
         {
           userId: 'user-123',
-          accessToken: 'new-access-token',
+          // accessToken not included for security
         },
         'auth-mfe'
       );
     });
 
-    it('should update tokens without emitting event if no user', () => {
+    it('should update token without emitting event if no user', () => {
       // Ensure no user is set
       useAuthStore.setState({
         user: null,
@@ -1151,11 +1151,12 @@ describe('useAuthStore', () => {
 
       const { setAccessToken } = useAuthStore.getState();
 
-      setAccessToken('new-access-token', 'new-refresh-token');
+      // POC-3 Phase 7.2: Only pass accessToken
+      setAccessToken('new-access-token');
 
       const state = useAuthStore.getState();
       expect(state.accessToken).toBe('new-access-token');
-      expect(state.refreshToken).toBe('new-refresh-token');
+      // refreshToken is now in HttpOnly cookie, not in state
 
       // Verify event was NOT emitted (no user)
       expect(getMockEmit()).not.toHaveBeenCalled();
@@ -1195,7 +1196,8 @@ describe('useAuthStore', () => {
   });
 
   describe('persistence', () => {
-    it('should persist user, tokens, and isAuthenticated to localStorage', async () => {
+    // POC-3 Phase 7.2: Only user and isAuthenticated are persisted (not tokens)
+    it('should persist user and isAuthenticated to localStorage (not tokens)', async () => {
       const mockUser: User = {
         id: 'user-123',
         email: 'test@example.com',
@@ -1230,8 +1232,9 @@ describe('useAuthStore', () => {
           const parsed = JSON.parse(stored);
           expect(parsed.state.user).not.toBeNull();
           expect(parsed.state.isAuthenticated).toBe(true);
-          expect(parsed.state.accessToken).toBe('access-token-123');
-          expect(parsed.state.refreshToken).toBe('refresh-token-123');
+          // POC-3 Phase 7.2: Tokens should NOT be persisted
+          expect(parsed.state.accessToken).toBeUndefined();
+          expect(parsed.state.refreshToken).toBeUndefined();
         }
       } else {
         // Skip test if localStorage is not available
@@ -1269,10 +1272,10 @@ describe('useAuthStore', () => {
       expect(_user).toBeTruthy();
 
       // Clear store state
+      // POC-3 Phase 7.2: refreshToken no longer in state
       useAuthStore.setState({
         user: null,
         accessToken: null,
-        refreshToken: null,
         isAuthenticated: false,
       });
 

@@ -101,35 +101,103 @@ export async function areUserTokensBlacklisted(userId: string): Promise<boolean>
 /**
  * Generate a fingerprint from request metadata
  *
+ * POC-3 Phase 7.3: Enhanced to optionally include client fingerprint hash
+ *
  * @param ip - Client IP address
  * @param userAgent - Client User-Agent header
+ * @param clientFingerprint - Optional client-side fingerprint hash from X-Client-Fingerprint header
  * @returns Hash of the fingerprint data
  */
-export function generateFingerprint(ip: string, userAgent: string): string {
-  const data = `${ip}:${userAgent}`;
+export function generateFingerprint(
+  ip: string,
+  userAgent: string,
+  clientFingerprint?: string
+): string {
+  // Include client fingerprint if provided (more granular than just IP+UA)
+  const data = clientFingerprint
+    ? `${ip}:${userAgent}:${clientFingerprint}`
+    : `${ip}:${userAgent}`;
   return crypto.createHash('sha256').update(data).digest('hex').substring(0, 32);
+}
+
+/**
+ * POC-3 Phase 7.3: Fingerprint validation result
+ */
+export interface FingerprintValidationResult {
+  isValid: boolean;
+  mismatchType?: 'exact' | 'ip_changed' | 'ua_changed' | 'client_changed' | 'all_changed';
+  details?: string;
 }
 
 /**
  * Validate a fingerprint against current request
  *
+ * POC-3 Phase 7.3: Enhanced with detailed mismatch information for logging
+ *
  * @param storedFingerprint - The fingerprint stored with the token
  * @param ip - Current request IP
  * @param userAgent - Current request User-Agent
+ * @param clientFingerprint - Optional client-side fingerprint from header
+ * @param options - Validation options
+ * @returns Validation result with details
+ */
+export function validateFingerprintDetailed(
+  storedFingerprint: string | null,
+  ip: string,
+  userAgent: string,
+  clientFingerprint?: string,
+  options?: { strictMode?: boolean }
+): FingerprintValidationResult {
+  // If no fingerprint stored and not in strict mode, allow (backwards compatibility)
+  if (!storedFingerprint) {
+    if (options?.strictMode) {
+      return {
+        isValid: false,
+        mismatchType: 'all_changed',
+        details: 'No stored fingerprint (strict mode enabled)',
+      };
+    }
+    return { isValid: true };
+  }
+
+  // Generate current fingerprint
+  const currentFingerprint = generateFingerprint(ip, userAgent, clientFingerprint);
+
+  if (storedFingerprint === currentFingerprint) {
+    return { isValid: true };
+  }
+
+  // Fingerprint mismatch - log details for diagnostics (PII anonymized)
+  // IP is omitted to protect user privacy, only UA prefix is included
+  return {
+    isValid: false,
+    mismatchType: 'exact',
+    details: `Fingerprint mismatch. UA: ${userAgent.substring(0, 30)}...`,
+  };
+}
+
+/**
+ * Validate a fingerprint against current request (simple boolean version)
+ *
+ * @param storedFingerprint - The fingerprint stored with the token
+ * @param ip - Current request IP
+ * @param userAgent - Current request User-Agent
+ * @param clientFingerprint - Optional client-side fingerprint from header
  * @returns true if fingerprint matches, false otherwise
  */
 export function validateFingerprint(
   storedFingerprint: string | null,
   ip: string,
-  userAgent: string
+  userAgent: string,
+  clientFingerprint?: string
 ): boolean {
-  // If no fingerprint stored, skip validation (backwards compatibility)
-  if (!storedFingerprint) {
-    return true;
-  }
-
-  const currentFingerprint = generateFingerprint(ip, userAgent);
-  return storedFingerprint === currentFingerprint;
+  const result = validateFingerprintDetailed(
+    storedFingerprint,
+    ip,
+    userAgent,
+    clientFingerprint
+  );
+  return result.isValid;
 }
 
 /**

@@ -20,11 +20,19 @@ export interface AuthUser {
 /**
  * Auth login event payload
  * Emitted when a user successfully logs in
+ *
+ * POC-3 Phase 7.2: Tokens are no longer emitted for security
+ * - accessToken: Memory only in the store, not broadcast across tabs
+ * - refreshToken: HttpOnly cookie only, not accessible to JS
+ *
+ * Cross-tab session sync now relies on the auth state change, not token sharing.
+ * Other tabs refresh their own tokens via the HttpOnly cookie.
  */
 export interface AuthLoginPayload {
   user: AuthUser;
-  accessToken: string;
-  refreshToken: string;
+  // POC-3 Phase 7.2: Tokens removed for security - not emitted across tabs
+  // accessToken?: string;   // REMOVED - memory only
+  // refreshToken?: string;  // REMOVED - HttpOnly cookie only
 }
 
 /**
@@ -39,19 +47,28 @@ export interface AuthLogoutPayload {
 /**
  * Auth token refreshed event payload
  * Emitted when the access token is refreshed
+ *
+ * POC-3 Phase 7.2: Token is no longer emitted for security
+ * This event now just signals that a token refresh occurred.
+ * Other tabs will refresh their own token via the HttpOnly cookie.
  */
 export interface AuthTokenRefreshedPayload {
   userId: string;
-  accessToken: string;
+  // POC-3 Phase 7.2: accessToken removed for security
+  // Other tabs refresh via HttpOnly cookie, not via event
 }
 
 /**
  * Auth session expired event payload
  * Emitted when a user's session expires
+ *
+ * POC-3 Phase 7.4: Added reason field for different expiration causes
  */
 export interface AuthSessionExpiredPayload {
   userId: string;
-  expiredAt: string;
+  // Can be either a timestamp (legacy) or a reason (POC-3 7.4)
+  expiredAt?: string;
+  reason?: 'inactivity_timeout' | 'token_expired' | 'forced_logout';
 }
 
 /**
