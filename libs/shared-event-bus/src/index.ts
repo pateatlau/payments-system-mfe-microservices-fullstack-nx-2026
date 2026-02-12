@@ -11,7 +11,19 @@
 
 // Core event bus
 export { EventBus, eventBus, createEventBus } from './lib/event-bus';
-export type { IEventBus, EventHandler, UnsubscribeFn } from './lib/event-bus';
+export type {
+  IEventBus,
+  EventHandler,
+  UnsubscribeFn,
+  EventBusOptions,
+} from './lib/event-bus';
+
+// Validation schemas
+export {
+  validateEventPayload,
+  hasEventSchema,
+  eventPayloadSchemas,
+} from './lib/schemas';
 
 // Event types
 export type { EventSource, EventMeta, BaseEvent } from './lib/types';

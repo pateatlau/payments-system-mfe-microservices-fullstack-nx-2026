@@ -4,6 +4,7 @@
  * Provides a pub/sub pattern for inter-MFE communication
  * Features:
  * - Type-safe event emission and subscription
+ * - Runtime payload validation with Zod schemas
  * - Event history for debugging
  * - One-time subscription support
  * - Error handling for listeners
@@ -11,6 +12,7 @@
 
 import type { AppEvent, AppEventType, EventPayloadMap } from './events';
 import type { EventMeta, EventSource } from './types';
+import { validateEventPayload, hasEventSchema } from './schemas';
 
 /**
  * Event handler function type
@@ -74,6 +76,18 @@ export interface IEventBus {
 }
 
 /**
+ * Event bus configuration options
+ */
+export interface EventBusOptions {
+  /** Maximum number of events to store in history (default: 100) */
+  maxHistorySize?: number;
+  /** Enable runtime validation of event payloads (default: true in development) */
+  enableValidation?: boolean;
+  /** Reject invalid events instead of just logging warnings (default: false) */
+  strictValidation?: boolean;
+}
+
+/**
  * Event Bus implementation
  * Singleton pattern for global event communication
  */
@@ -81,9 +95,16 @@ export class EventBus implements IEventBus {
   private listeners: Map<string, Set<EventHandler<AppEventType>>> = new Map();
   private eventHistory: AppEvent[] = [];
   private readonly maxHistorySize: number;
+  private readonly enableValidation: boolean;
+  private readonly strictValidation: boolean;
 
-  constructor(maxHistorySize = 100) {
-    this.maxHistorySize = maxHistorySize;
+  constructor(options: EventBusOptions = {}) {
+    this.maxHistorySize = options.maxHistorySize ?? 100;
+    // Enable validation by default in development and test environments
+    const nodeEnv = process.env['NODE_ENV'];
+    const defaultValidation = nodeEnv === 'development' || nodeEnv === 'test';
+    this.enableValidation = options.enableValidation ?? defaultValidation;
+    this.strictValidation = options.strictValidation ?? false;
   }
 
   /**
@@ -118,12 +139,34 @@ export class EventBus implements IEventBus {
 
   /**
    * Emit an event
+   * @throws Error if strictValidation is enabled and payload is invalid
    */
   emit<T extends AppEventType>(
     eventType: T,
     payload: EventPayloadMap[T],
     source: EventSource
   ): void {
+    // Validate payload if validation is enabled
+    if (this.enableValidation && hasEventSchema(eventType)) {
+      const validationResult = validateEventPayload(eventType, payload);
+
+      if (!validationResult.success) {
+        const errorMessage = `[EventBus] Invalid payload for ${eventType}: ${validationResult.error.message}`;
+
+        if (this.strictValidation) {
+          throw new Error(errorMessage);
+        } else {
+          // Log warning without sensitive payload data
+          console.warn(errorMessage, {
+            eventType,
+            errors: validationResult.error.errors,
+          });
+          // Reject invalid events even in non-strict mode to prevent handlers from crashing
+          return;
+        }
+      }
+    }
+
     const meta: EventMeta = {
       timestamp: new Date().toISOString(),
       source,
@@ -134,9 +177,9 @@ export class EventBus implements IEventBus {
           : `${Date.now()}-${Math.random().toString(36).substring(2, 15)}`,
     };
 
-    // Log event in development
+    // Log event in development (without sensitive payload data)
     if (process.env['NODE_ENV'] === 'development') {
-      console.log(`[EventBus] ${eventType}`, { payload, meta });
+      console.log(`[EventBus] ${eventType}`, { meta });
     }
 
     // Create event object
@@ -231,6 +274,6 @@ export const eventBus = new EventBus();
  * Create a new event bus instance
  * Useful for testing or isolated event communication
  */
-export function createEventBus(maxHistorySize?: number): EventBus {
-  return new EventBus(maxHistorySize);
+export function createEventBus(options?: EventBusOptions): EventBus {
+  return new EventBus(options);
 }

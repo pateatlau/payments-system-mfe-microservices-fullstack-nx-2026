@@ -208,7 +208,10 @@ describe('EventBus', () => {
     });
 
     it('should maintain max history size', () => {
-      const smallEventBus = createEventBus(5);
+      const smallEventBus = createEventBus({
+        maxHistorySize: 5,
+        enableValidation: false, // Disable validation for this test
+      });
 
       for (let i = 0; i < 10; i++) {
         smallEventBus.emit(
