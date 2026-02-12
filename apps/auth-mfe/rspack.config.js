@@ -55,7 +55,24 @@ const sharedDependencies = {
     requiredVersion: false,
     eager: false,
   },
+  // CRITICAL: Share the API client to ensure single token provider
+  '@mfe/shared-api-client': {
+    singleton: true,
+    requiredVersion: false,
+    eager: false,
+  },
+  'shared-api-client': {
+    singleton: true,
+    requiredVersion: false,
+    eager: false,
+  },
   '@mfe/shared-design-system': {
+    singleton: true,
+    requiredVersion: false,
+    eager: false,
+  },
+  // Shared types for type consistency
+  'shared-types': {
     singleton: true,
     requiredVersion: false,
     eager: false,
