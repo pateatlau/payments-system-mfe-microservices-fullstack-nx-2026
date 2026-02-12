@@ -1618,7 +1618,7 @@ Certificate pinning via HPKP (HTTP Public Key Pinning) is deprecated. Modern app
 1. **Cookie Utilities** (`apps/auth-service/src/utils/cookies.ts`):
    - Created secure cookie management utilities
    - HttpOnly: true - Prevents JavaScript access (XSS protection)
-   - Secure: true in production - HTTPS only
+   - Secure: true for HTTPS (production AND development via nginx)
    - SameSite: 'strict' - Prevents CSRF attacks
    - Path: '/' - Available for all API requests
 
@@ -1628,14 +1628,18 @@ Certificate pinning via HPKP (HTTP Public Key Pinning) is deprecated. Modern app
    - `refresh()` - Reads token from cookie (fallback to body), sets new cookie (rotation)
    - `logout()` - Clears refresh token cookie
 
-3. **API Client Updates** (`libs/shared-api-client/src/lib/apiClient.ts`):
+3. **OAuth Controller Updates** (`apps/auth-service/src/controllers/oauth.controller.ts`):
+   - `handleOAuthCallback()` - Sets refresh token as HttpOnly cookie on OAuth login
+   - Maintains backward compatibility by also including token in URL fragment
+
+4. **API Client Updates** (`libs/shared-api-client/src/lib/apiClient.ts`):
    - Added `withCredentials: true` for axios instance (sends/receives cookies)
 
-4. **Interceptors Updates** (`libs/shared-api-client/src/lib/interceptors.ts`):
+5. **Interceptors Updates** (`libs/shared-api-client/src/lib/interceptors.ts`):
    - `refreshAccessToken()` - Includes `credentials: 'include'` in fetch
    - Falls back to body refresh token for backwards compatibility
 
-5. **CORS Updates**:
+6. **CORS Updates**:
    - `apps/api-gateway/src/middleware/cors.ts` - Added X-CSRF-Token, X-Device-ID headers
    - `apps/auth-service/src/main.ts` - Same CORS header additions + cookie-parser
 
@@ -1647,6 +1651,8 @@ Certificate pinning via HPKP (HTTP Public Key Pinning) is deprecated. Modern app
 - `apps/auth-service/src/main.ts` - Added cookie-parser middleware
 - `apps/auth-service/src/controllers/auth.controller.ts` - Cookie handling in auth endpoints
 - `apps/auth-service/src/controllers/auth.controller.spec.ts` - Updated tests for cookie mocking
+- `apps/auth-service/src/controllers/oauth.controller.ts` - Cookie handling for OAuth login
+- `apps/auth-service/src/controllers/oauth.controller.spec.ts` - Updated tests for cookie mocking
 - `libs/shared-api-client/src/lib/apiClient.ts` - Added withCredentials: true
 - `libs/shared-api-client/src/lib/apiClient.test.ts` - Updated test expectations
 - `libs/shared-api-client/src/lib/interceptors.ts` - Added credentials: 'include' to fetch
@@ -1658,6 +1664,7 @@ Certificate pinning via HPKP (HTTP Public Key Pinning) is deprecated. Modern app
 - Refresh tokens are now HttpOnly cookies - protected from XSS, 7-day expiry
 - Both cookie and body-based refresh tokens supported for backwards compatibility
 - SameSite=Strict prevents CSRF attacks on refresh endpoint
+- Secure=true for both production and development (HTTPS via nginx)
 
 ---
 
