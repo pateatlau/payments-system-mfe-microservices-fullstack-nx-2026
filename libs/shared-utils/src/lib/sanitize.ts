@@ -7,18 +7,34 @@
  * @module sanitize
  */
 
-import * as DOMPurifyModule from 'dompurify';
+import * as DOMPurifyLib from 'dompurify';
+import type { Config, DOMPurify as DOMPurifyType } from 'dompurify';
 
 // Handle both ESM and CommonJS module formats
-// In ESM: DOMPurify is at .default, in CommonJS it's the module itself
-const DOMPurify = (
-  DOMPurifyModule as unknown as { default?: typeof DOMPurifyModule }
-).default ?? DOMPurifyModule;
+// In ESM build: default export is the function
+// In CommonJS (Jest): module itself is the function
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const createDOMPurify = (DOMPurifyLib as any).default ?? DOMPurifyLib;
+
+// Lazy-initialized DOMPurify instance
+// This ensures window is available when the functions are called
+let _purify: DOMPurifyType | null = null;
+
+function getDOMPurify(): DOMPurifyType {
+  if (!_purify) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    _purify = createDOMPurify(window as any);
+  }
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  return _purify!;
+}
+
+export type SanitizePreset = 'strict' | 'standard' | 'rich' | 'textOnly';
 
 /**
  * Configuration presets for different sanitization scenarios
  */
-export const SANITIZE_PRESETS = {
+export const SANITIZE_PRESETS: Record<SanitizePreset, Config> = {
   /**
    * Strict: Only allow basic formatting tags, no links or media
    * Use for: Comments, short text fields
@@ -104,9 +120,7 @@ export const SANITIZE_PRESETS = {
     ALLOWED_ATTR: [],
     KEEP_CONTENT: true,
   },
-} as const;
-
-export type SanitizePreset = keyof typeof SANITIZE_PRESETS;
+};
 
 /**
  * Sanitize HTML string to prevent XSS attacks
@@ -138,17 +152,17 @@ export function sanitizeHtml(
   const config = SANITIZE_PRESETS[preset];
 
   // Add hook to enforce rel="noopener noreferrer" on all links
-  DOMPurify.addHook('afterSanitizeAttributes', (node) => {
+  getDOMPurify().addHook('afterSanitizeAttributes', (node: Element) => {
     if (node.tagName === 'A' && node.hasAttribute('href')) {
       node.setAttribute('target', '_blank');
       node.setAttribute('rel', 'noopener noreferrer');
     }
   });
 
-  const clean = DOMPurify.sanitize(dirty, config);
+  const clean = getDOMPurify().sanitize(dirty, config);
 
   // Remove the hook to avoid affecting other sanitize calls
-  DOMPurify.removeHook('afterSanitizeAttributes');
+  getDOMPurify().removeHook('afterSanitizeAttributes');
 
   return clean;
 }
@@ -165,7 +179,7 @@ export function sanitizeHtml(
  */
 export function stripHtml(dirty: string): string {
   if (!dirty) return '';
-  return DOMPurify.sanitize(dirty, SANITIZE_PRESETS.textOnly);
+  return getDOMPurify().sanitize(dirty, SANITIZE_PRESETS.textOnly);
 }
 
 /**
@@ -182,7 +196,7 @@ export function containsDangerousHtml(html: string): boolean {
   if (!html) return false;
 
   // Sanitize with the most permissive preset (rich)
-  const sanitized = DOMPurify.sanitize(html, SANITIZE_PRESETS.rich);
+  const sanitized = getDOMPurify().sanitize(html, SANITIZE_PRESETS.rich);
 
   // If sanitization changed the content significantly, it likely contained dangerous HTML
   // Compare lengths as a quick heuristic
