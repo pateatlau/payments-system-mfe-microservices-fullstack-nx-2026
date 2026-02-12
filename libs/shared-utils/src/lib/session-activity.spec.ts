@@ -124,7 +124,8 @@ describe('SessionActivityMonitor', () => {
 
     it('should throttle activity updates', () => {
       monitor.start();
-      const initialActivity = monitor.getState().lastActivity;
+      // Store initial activity for potential future assertions
+      const _initialActivity = monitor.getState().lastActivity;
       mockCallbacks.onActivity.mockClear();
 
       // Rapid events within throttle period
