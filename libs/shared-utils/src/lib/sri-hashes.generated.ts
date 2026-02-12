@@ -26,5 +26,8 @@ export type RemoteName = keyof typeof REMOTE_INTEGRITY_HASHES;
  * @returns SRI hash string or undefined if not found
  */
 export function getRemoteIntegrityHash(remoteName: string): string | undefined {
-  return REMOTE_INTEGRITY_HASHES[remoteName];
+  if (remoteName in REMOTE_INTEGRITY_HASHES) {
+    return REMOTE_INTEGRITY_HASHES[remoteName as RemoteName];
+  }
+  return undefined;
 }

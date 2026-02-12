@@ -59,7 +59,8 @@ export interface RemoteSecurityEvent {
     | 'hash_mismatch'
     | 'fetch_error'
     | 'url_blocked'
-    | 'verification_skipped';
+    | 'verification_skipped'
+    | 'crypto_unavailable';
   remoteName: string;
   url: string;
   details: Record<string, unknown>;
@@ -302,6 +303,7 @@ export async function verifyRemoteIntegrity(
     integrityHashes,
     enableVerification = isProduction,
     fetchTimeout = 10000,
+    strictMode = isProduction,
     onSecurityEvent,
   } = options;
 
@@ -433,7 +435,7 @@ export async function verifyRemoteIntegrity(
       }
     }
 
-    const actualHash = hashResult.hash;
+    const actualHash = hashResult.hash ?? undefined;
 
     // Compare hashes
     if (actualHash === expectedHash) {
