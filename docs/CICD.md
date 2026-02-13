@@ -1,7 +1,7 @@
 # CI/CD Documentation
 
-**Last Updated:** February 9, 2026
-**Status:** CI Complete, CD Pending
+**Last Updated:** February 13, 2026
+**Status:** CI Complete ✅ | CD Ready to Start 🚀
 **Branching Strategy:** Trunk-Based Development
 
 ---
@@ -10,13 +10,7 @@
 
 ### CI Status: COMPLETE ✅
 
-The CI pipeline runs automatically on push to `main` and on pull requests to `main`.
-
-**Branching Strategy:** Trunk-Based Development
-- All work merges directly to `main` via short-lived feature branches
-- PRs run full CI including E2E tests
-- Main branch deploys to staging automatically (when CD is implemented)
-- Production deployment requires manual approval
+The CI pipeline runs automatically on push to `main` and on pull requests.
 
 ```bash
 # Run CI locally before pushing
@@ -29,9 +23,23 @@ pnpm build:remotes && pnpm e2e
 pnpm nx affected --target=lint,test,build --base=main
 ```
 
-### CD Status: NOT STARTED ❌
+### CD Status: READY TO START 🚀
 
-Requires: Dockerfiles (0/11 complete), AWS infrastructure, CD workflows.
+**Blockers Resolved:**
+- ✅ Backend Hardening Phase 1-7 **COMPLETE** (as of Feb 12, 2026)
+- ✅ All critical security vulnerabilities fixed
+- ✅ Security testing infrastructure in place
+
+**Deployment Options:**
+
+| Option | Use Case | Monthly Cost |
+|--------|----------|--------------|
+| **POC Demo** | Stakeholder presentation | ~$20-40 |
+| **Production** | After approval | ~$420-470 |
+
+**Next Step:** Choose deployment path:
+- **POC Demo:** [CD-POC-RAILWAY-VERCEL.md](./CD-POC-RAILWAY-VERCEL.md) (Railway + Vercel)
+- **Production:** [CD-IMPLEMENTATION-CHECKLIST.md](./CD-IMPLEMENTATION-CHECKLIST.md) (AWS ECS)
 
 ---
 
@@ -39,11 +47,12 @@ Requires: Dockerfiles (0/11 complete), AWS infrastructure, CD workflows.
 
 1. [CI Pipeline Overview](#1-ci-pipeline-overview)
 2. [CD Pipeline Plan](#2-cd-pipeline-plan)
-3. [Prerequisites Checklist](#3-prerequisites-checklist)
-4. [Implementation Phases](#4-implementation-phases)
-5. [AWS Architecture](#5-aws-architecture)
-6. [Troubleshooting](#6-troubleshooting)
-7. [Security Considerations](#7-security-considerations)
+3. [Implementation Status](#3-implementation-status)
+4. [AWS Architecture](#4-aws-architecture)
+5. [Cost Estimate](#5-cost-estimate)
+6. [Quick Start Guide](#6-quick-start-guide)
+7. [Troubleshooting](#7-troubleshooting)
+8. [Related Documentation](#8-related-documentation)
 
 ---
 
@@ -81,11 +90,11 @@ Requires: Dockerfiles (0/11 complete), AWS infrastructure, CD workflows.
 | Job | Duration | Description |
 |-----|----------|-------------|
 | **Lint & TypeCheck** | ~3-5 min | ESLint + TypeScript checking |
-| **Frontend Tests** | ~5-8 min | Jest tests for MFEs and shared libs |
+| **Frontend Tests** | ~5-8 min | Jest tests for MFEs and shared libs (357 accessibility tests) |
 | **Backend Tests** | ~8-12 min | Jest tests with PostgreSQL, Redis, RabbitMQ containers |
 | **Build** | ~8-12 min | Production builds for all 27 projects |
 | **E2E Tests** | ~8-15 min | Playwright tests (main + PRs) |
-| **Security Scan** | ~5 min | Trivy + npm audit |
+| **Security Scan** | ~5 min | Trivy + npm audit + OWASP ZAP |
 | **CI Status** | ~1 min | Final aggregation check |
 
 ### Nx Cloud Integration
@@ -96,15 +105,12 @@ Requires: Dockerfiles (0/11 complete), AWS infrastructure, CD workflows.
 - **Workspace ID:** `69524f7134bb55830a5051a9`
 - Cache sharing between CI runs and local development
 
-### Workflow File
+### Workflow Files
 
-Location: `.github/workflows/ci.yml`
-
-**Triggers (Trunk-Based Development):**
-- Push to: `main`
-- Pull requests to: `main`
-
-**Note:** We use trunk-based development where all work merges directly to `main` via short-lived feature branches. See `docs/POC-3-Implementation/TRUNK-BASED-BRANCHING-PLAN.md` for details.
+| File | Purpose |
+|------|---------|
+| `.github/workflows/ci.yml` | Main CI workflow |
+| `.github/workflows/security-scan.yml` | OWASP ZAP security scanning |
 
 ---
 
@@ -113,12 +119,12 @@ Location: `.github/workflows/ci.yml`
 ### Target Architecture: AWS ECS (Fargate)
 
 **Why ECS Fargate:**
-- Docker Compose compatibility
+- Docker Compose compatibility (easy migration from local)
 - Managed containers (no EC2 management)
 - Auto-scaling, pay-per-use
 - Blue/green deployments
 
-### CD Workflow (Planned)
+### CD Workflow
 
 ```
 CI Pass → Docker Build → Push to ECR → Deploy Staging → Smoke Tests
@@ -133,122 +139,52 @@ Done ← Rollback (if fail) ← Monitor (15m) ← Canary Deploy ← Approve
 | **Staging** | Push to `main` | Automatic |
 | **Production** | Manual promotion | Manual approval required |
 
-**Note:** With trunk-based development, every merge to `main` triggers staging deployment. Production requires explicit manual approval after staging verification.
-
 ---
 
-## 3. Prerequisites Checklist
+## 3. Implementation Status
 
-### Complete ✅
+### Phase Overview
 
+| Phase | Status | Description |
+|-------|--------|-------------|
+| Phase 1: CI Pipeline | ✅ Complete | GitHub Actions, Nx affected, parallel tests |
+| **Phase 2: Docker Configuration** | 🔲 **NEXT** | Dockerfiles for 11 services |
+| Phase 3: AWS Infrastructure | 🔲 Pending | VPC, ECR, ECS, RDS, Redis, ALB |
+| Phase 4: CD Pipeline - Staging | 🔲 Pending | Auto-deploy, health checks, rollback |
+| Phase 5: CD Pipeline - Production | 🔲 Pending | Manual approval, blue/green deployment |
+| Phase 6: Database Migration | 🔲 Pending | Automated Prisma migrations |
+| Phase 7: Monitoring | 🔲 Pending | CloudWatch, alerting |
+| Phase 8: Security Hardening | 🔲 Pending | ACM certificates, secrets rotation |
+
+### Prerequisites Status
+
+**Complete ✅**
 - [x] Repository on GitHub
 - [x] CI pipeline working
 - [x] Nx Cloud integration
-- [x] Unit tests passing
-- [x] Integration tests configured
+- [x] Unit tests passing (357 accessibility tests)
 - [x] E2E tests working
 - [x] Sentry integration
 - [x] Prometheus + Grafana (local)
+- [x] **Backend Hardening Phase 1-7** (all security fixes)
+- [x] Security testing scripts (`pnpm security:test`, `pnpm security:pentest`)
 - [x] Deployment platform decided → AWS ECS Fargate
 - [x] Database hosting decided → AWS RDS PostgreSQL
 - [x] SSL strategy decided → AWS ACM
 
-### Pending ❌
-
-**Dockerfiles (0/11):**
-- [ ] shell
-- [ ] auth-mfe
-- [ ] payments-mfe
-- [ ] admin-mfe
-- [ ] profile-mfe
-- [ ] api-gateway
-- [ ] auth-service
-- [ ] payments-service
-- [ ] admin-service
-- [ ] profile-service
-- [ ] nginx (optional)
-
-**AWS Infrastructure:**
+**Pending ❌**
+- [ ] Dockerfiles (0/11)
 - [ ] AWS account with credentials
 - [ ] ECR repositories (11)
 - [ ] ECS clusters (staging + production)
 - [ ] RDS PostgreSQL (4 databases)
 - [ ] ElastiCache Redis
 - [ ] Application Load Balancer
-- [ ] VPC with subnets
-- [ ] Security groups
-- [ ] AWS Secrets Manager
-- [ ] ACM certificates
-
-**CD Workflows:**
-- [ ] `.github/workflows/cd-staging.yml`
-- [ ] `.github/workflows/cd-production.yml`
-
-**Production:**
-- [ ] Domain name
-- [ ] DNS configuration
-- [ ] Alert channels (PagerDuty/Opsgenie)
+- [ ] CD workflow files
 
 ---
 
-## 4. Implementation Phases
-
-### Phase 1: CI Pipeline ✅ COMPLETE
-
-- GitHub Actions workflow
-- Nx affected builds
-- Parallel test execution
-- Nx Cloud caching
-
-### Phase 2: Docker Configuration ❌ NEXT
-
-**Tasks:**
-1. Create Dockerfiles for all 10 services + nginx
-2. Multi-stage builds for optimization
-3. Configure `.dockerignore`
-4. Test builds locally
-5. Target: Images < 500MB each
-
-### Phase 3: AWS Infrastructure ❌
-
-**Tasks:**
-1. Set up AWS CDK project (TypeScript)
-2. Create VPC with public/private subnets
-3. Create ECR repositories
-4. Create ECS clusters
-5. Set up RDS PostgreSQL (4 databases)
-6. Configure ElastiCache Redis
-7. Set up Application Load Balancer
-8. Configure security groups and IAM roles
-
-### Phase 4: CD Pipeline - Staging ❌
-
-**Tasks:**
-1. Create `cd-staging.yml` workflow
-2. Build and push Docker images to ECR
-3. Create ECS task definitions
-4. Deploy to staging cluster
-5. Configure health checks
-6. Set up rollback mechanism
-
-### Phase 5: CD Pipeline - Production ❌
-
-**Tasks:**
-1. Create `cd-production.yml` workflow
-2. Add manual approval gate
-3. Blue/green deployment
-4. Enhanced health checks
-5. Database migration automation
-
-### Phase 6-8: Monitoring, Security, Storybook ❌
-
-- CloudWatch integration
-- Security scanning in CI
-- Storybook deployment (optional)
-
----
-
-## 5. AWS Architecture
+## 4. AWS Architecture
 
 ```
                          ┌─────────────────────────────────────────────────────────┐
@@ -258,7 +194,7 @@ Done ← Rollback (if fail) ← Monitor (15m) ← Canary Deploy ← Approve
                                                      v
                          ┌─────────────────────────────────────────────────────────┐
                          │         Application Load Balancer (ALB)                 │
-                         │         - SSL/TLS Termination                           │
+                         │         - SSL/TLS Termination (ACM)                     │
                          │         - Health Checks                                 │
                          │         - Routing Rules                                 │
                          └───────────────────────────┬─────────────────────────────┘
@@ -289,17 +225,107 @@ Done ← Rollback (if fail) ← Monitor (15m) ← Canary Deploy ← Approve
                               └────────────────┘ └──────────────┘ └──────────────┘
 ```
 
-### Cost Estimate
+### Services to Deploy (11 total)
 
-| Environment | Monthly Cost |
-|-------------|--------------|
-| Staging | ~$120 |
-| Production | ~$300 |
-| **Total** | **~$420** |
+**Frontend (5):**
+- `shell` - Host application (port 4200)
+- `auth-mfe` - Authentication MFE (port 4201)
+- `payments-mfe` - Payments MFE (port 4202)
+- `admin-mfe` - Admin MFE (port 4203)
+- `profile-mfe` - Profile MFE (port 4204)
+
+**Backend (5):**
+- `api-gateway` - API Gateway + WebSocket (port 3000)
+- `auth-service` - Auth service (port 3001)
+- `payments-service` - Payments service (port 3002)
+- `admin-service` - Admin service (port 3003)
+- `profile-service` - Profile service (port 3004)
+
+**Infrastructure (1):**
+- `nginx` - Reverse proxy (ports 80, 443)
 
 ---
 
-## 6. Troubleshooting
+## 5. Cost Estimate
+
+### Monthly AWS Costs
+
+| Component | Staging | Production | Total |
+|-----------|---------|------------|-------|
+| **ECS Fargate** | $36 | $146 | $182 |
+| **RDS PostgreSQL** | $50 | $99 | $149 |
+| **ElastiCache Redis** | $12 | $25 | $37 |
+| **Amazon MQ** | - | $37 | $37 |
+| **ALB** | - | $26 | $26 |
+| **CloudWatch** | - | $25 | $25 |
+| **Data Transfer** | - | $9 | $9 |
+| **ECR** | - | $1 | $1 |
+| **Total** | **~$98** | **~$368** | **~$466** |
+
+**Cost Optimization:**
+- First year: ~$50-100/month savings with AWS free tier
+- Reserved instances: 30-40% savings on RDS
+- Right-sizing: Start small, scale up as needed
+
+### Platform Alternatives
+
+| Platform | Monthly Cost | Setup Complexity | Notes |
+|----------|--------------|------------------|-------|
+| **AWS ECS (Fargate)** | ~$421 | Medium-High | Enterprise-grade, full control |
+| **GCP Cloud Run** | ~$300 | Medium | Serverless containers |
+| **DigitalOcean** | ~$220 | Low-Medium | Simple, cost-effective |
+| **Render** | ~$118 | Low | Fastest setup, good for startups |
+| **Railway** | ~$60-425 | Low | Usage-based, unpredictable |
+
+See: `docs/POC-3-Implementation/AWS-ALTERNATIVES-DEPLOYMENT.md` for full comparison.
+
+---
+
+## 6. Quick Start Guide
+
+### Phase 2: Docker Configuration (Next Step)
+
+```bash
+# 1. Create Dockerfiles for all services
+# See CD-IMPLEMENTATION-CHECKLIST.md for detailed steps
+
+# 2. Test builds locally
+docker build -t shell:dev -f apps/shell/Dockerfile .
+docker build -t api-gateway:dev -f apps/api-gateway/Dockerfile .
+
+# 3. Verify image sizes (target: < 500MB each)
+docker images | grep -E "(shell|api-gateway|auth)"
+```
+
+### Phase 3: AWS Infrastructure
+
+```bash
+# 1. Install AWS CDK
+npm install -g aws-cdk
+
+# 2. Configure AWS credentials
+aws configure
+
+# 3. Bootstrap CDK (one-time)
+cdk bootstrap aws://ACCOUNT_ID/REGION
+
+# 4. Deploy infrastructure
+cd infrastructure
+cdk deploy --all
+```
+
+### GitHub Secrets Required
+
+| Secret | Description |
+|--------|-------------|
+| `AWS_ACCESS_KEY_ID` | AWS access key |
+| `AWS_SECRET_ACCESS_KEY` | AWS secret key |
+| `AWS_REGION` | AWS region (e.g., `ap-south-1`) |
+| `ECR_REGISTRY` | ECR registry URL |
+
+---
+
+## 7. Troubleshooting
 
 ### Common CI Failures
 
@@ -331,56 +357,53 @@ gh run download <run-id>
 
 # Skip CI (docs only)
 git commit -m "docs: update README [skip ci]"
+
+# Run security tests
+pnpm security:test
+pnpm security:pentest
 ```
 
 ---
 
-## 7. Security Considerations
+## 8. Related Documentation
 
-### CI Security
+### Primary References
 
-- **Trivy scanning:** CRITICAL and HIGH vulnerabilities
-- **npm audit:** Dependency vulnerability checking
-- **Secrets:** Stored in GitHub Secrets, not in code
-- **Permissions:** Minimal (`contents: read`, `security-events: write`)
+| Document | Location | Description |
+|----------|----------|-------------|
+| **POC Deployment (Railway + Vercel)** | `docs/CD-POC-RAILWAY-VERCEL.md` | Low-cost POC demo deployment |
+| **CD Implementation Checklist** | `docs/CD-IMPLEMENTATION-CHECKLIST.md` | AWS production deployment guide |
+| **CI Pipeline Details** | `docs/temp/CI-PIPELINE-IMPLEMENTATION.md` | Detailed CI implementation notes |
+| **AWS Alternatives** | `docs/POC-3-Implementation/AWS-ALTERNATIVES-DEPLOYMENT.md` | Platform comparison |
+| **Backend Hardening** | `docs/POC-3-Implementation/BACKEND-HARDENING-PLAN.md` | Security fixes (all complete) |
 
-### CD Security (Planned)
+### Security Documentation
 
-- AWS Secrets Manager for production secrets
-- IAM roles with least privilege
-- Security groups for network isolation
-- SSL/TLS via AWS ACM
-- No secrets in Docker images
+| Document | Description |
+|----------|-------------|
+| `scripts/security/security-test.sh` | Automated security tests |
+| `scripts/security/manual-pentest.sh` | Manual penetration testing |
+| `.github/workflows/security-scan.yml` | OWASP ZAP CI integration |
 
-### ⚠️ Backend Hardening Required
+### Architecture Documentation
 
-Before production deployment, complete backend security fixes:
-
-1. **Rate Limiting** - Currently disabled (100,000 instead of 100)
-2. **JWT Rotation** - No refresh token rotation
-3. **Account Lockout** - No protection against brute force
-4. **Input Validation** - Missing in payments/admin services
-
-See: `docs/POC-3-Implementation/BACKEND-HARDENING-PLAN.md`
-
----
-
-## File References
-
-| File | Purpose |
-|------|---------|
-| `.github/workflows/ci.yml` | CI workflow definition |
-| `.github/CICD-PREREQUISITES.md` | Prerequisites checklist |
-| `docs/POC-3-Implementation/BACKEND-HARDENING-PLAN.md` | Security fixes required |
-| `apps/shell-e2e/playwright.config.ts` | E2E test configuration |
-| `nx.json` | Nx workspace + cloud configuration |
+| Document | Location |
+|----------|----------|
+| Executive Summary | `docs/EXECUTIVE_SUMMARY.md` |
+| Implementation Journey | `docs/IMPLEMENTATION-JOURNEY.md` |
+| Trunk-Based Development | `docs/POC-3-Implementation/TRUNK-BASED-BRANCHING-PLAN.md` |
 
 ---
 
-## Next Steps
+## Document History
 
-1. **Immediate:** Create Dockerfiles for all services (Phase 2)
-2. **Then:** Set up AWS infrastructure (Phase 3)
-3. **Then:** Create CD workflows (Phase 4-5)
+| Version | Date | Changes |
+|---------|------|---------|
+| 3.1 | 2026-02-13 | Added POC deployment option (Railway + Vercel) |
+| 3.0 | 2026-02-13 | Updated status: Backend hardening complete, CD ready to start |
+| 2.0 | 2026-02-09 | Consolidated CI/CD documentation |
+| 1.0 | 2025-12-12 | Initial CI/CD planning |
 
-**Blocking Issue:** Consider completing Backend Hardening Phase 1-2 before production deployment.
+---
+
+**Next Action:** Start [Phase 2: Docker Configuration](./CD-IMPLEMENTATION-CHECKLIST.md#phase-2-docker-configuration)

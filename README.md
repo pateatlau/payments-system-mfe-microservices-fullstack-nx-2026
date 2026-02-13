@@ -1,7 +1,7 @@
 # MFE Payments System
 
-**Version:** 0.3.2
-**Status:** POC-3 Complete – Infrastructure + Social Login
+**Version:** 0.4.0
+**Status:** POC-3 Complete – Security Hardening + CD Ready
 **Tech Stack:** React + Nx + Rspack + Module Federation v2 + Node.js + PostgreSQL + RabbitMQ + nginx
 
 ---
@@ -19,7 +19,7 @@ A full-stack microfrontend platform demonstrating architecture patterns for paym
 - **Real-Time:** WebSocket server for bidirectional communication
 - **Dual API:** REST (Swagger UI) + GraphQL (Apollo Server)
 - **Full Observability:** Prometheus metrics, Grafana dashboards, Jaeger tracing, Sentry errors
-- **Security:** JWT authentication, RBAC, MFA, anomaly detection, session management, social login (OAuth via Auth0)
+- **Security:** JWT authentication, RBAC, MFA, anomaly detection, session management, social login (OAuth via Auth0), CSP, CSRF protection, XSS prevention
 - **Accessibility:** WCAG 2.1 Level AA compliance (94% conformant), 527 automated tests, screen reader support
 - **CI Pipeline:** GitHub Actions with Nx Cloud distributed caching (50-65% faster builds), automated accessibility testing
 - **Trunk-Based Development:** Short-lived feature branches, squash merges to main
@@ -91,7 +91,7 @@ To trust the self-signed cert:
 
 - macOS: open `nginx/ssl/self-signed.crt` in Keychain Access → set to Always Trust
 - Windows: import into Trusted Root Certification Authorities
-- If you prefer HTTP-only dev, you can later start the frontend via `pnpm dev:mf` (HTTP mode).
+- If you prefer HTTP-only dev, you can later start the frontend via `pnpm dev:frontend` (HTTP mode).
 
 ### 6. Start Infrastructure
 
@@ -112,13 +112,13 @@ pnpm dev:backend
 ```bash
 # Starts Shell app and all MFEs (Auth, Payments, Admin, Profile)
 # HTTPS mode - required for Safari compatibility
-pnpm dev:all
+pnpm dev:frontend:https
 
 # HTTP mode (Chrome/Firefox only - no Safari support):
-pnpm dev:mf
+pnpm dev:frontend
 ```
 
-> **Safari Users:** Must use `pnpm dev:all` (HTTPS mode). See [Cross-Browser Compatibility Guide](docs/POC-3-Implementation/CROSS_BROWSER_COMPATIBILITY.md) for details.
+> **Safari Users:** Must use `pnpm dev:frontend:https` (HTTPS mode). See [Cross-Browser Compatibility Guide](docs/POC-3-Implementation/CROSS_BROWSER_COMPATIBILITY.md) for details.
 
 ### 9. Access Application
 
@@ -150,8 +150,8 @@ pnpm test:e2e
 ### Quick Troubleshooting
 
 - If services fail to start: ensure Docker is running, then rerun `pnpm backend:setup` and `pnpm infra:start`.
-- If HTTPS shows cert errors: trust the generated cert (above) or use HTTP mode via `pnpm dev:mf`.
-- If Safari doesn't load MFEs: use `pnpm dev:all` (HTTPS mode required). See [Cross-Browser Compatibility Guide](docs/POC-3-Implementation/CROSS_BROWSER_COMPATIBILITY.md).
+- If HTTPS shows cert errors: trust the generated cert (above) or use HTTP mode via `pnpm dev:frontend`.
+- If Safari doesn't load MFEs: use `pnpm dev:frontend:https` (HTTPS mode required). See [Cross-Browser Compatibility Guide](docs/POC-3-Implementation/CROSS_BROWSER_COMPATIBILITY.md).
 - If ports are occupied: check 3000–3004, 4200–4204, 443/80, 9090, 3010, 16686, 5672/15672, 6379.
 
 ---
@@ -235,8 +235,8 @@ pnpm test:backend             # Run backend tests
 pnpm backend:setup            # Setup databases with Prisma
 
 # Frontend
-pnpm dev:all                  # Start frontend (HTTPS mode - Safari compatible)
-pnpm dev:mf                   # Start frontend (HTTP mode - Chrome/Firefox only)
+pnpm dev:frontend             # Start frontend (HTTP mode - Chrome/Firefox only)
+pnpm dev:frontend:https       # Start frontend (HTTPS mode - Safari compatible)
 pnpm test                     # Run all frontend tests
 pnpm test:coverage            # Run tests with coverage
 
@@ -309,6 +309,15 @@ pnpm grafana:ui               # Open Grafana dashboards
   - Account linking/unlinking in profile settings
   - OAuth-specific rate limiting (10 req/15 min)
   - Security audit completed (CSRF protection, token encryption, audit logging)
+- **Frontend/MFE Security Hardening (Phases 1-7):**
+  - Phase 1: nginx rate limiting for production environments
+  - Phase 2: Content Security Policy (CSP) hardening with nonces and strict directives
+  - Phase 3: CSRF protection with double-submit cookie pattern
+  - Phase 4: Dependency security scanning (Trivy, npm audit) + CI integration
+  - Phase 5: XSS & injection prevention (DOMPurify, input sanitization, secure rendering)
+  - Phase 6: Module Federation security (remote validation, SRI hashes, trusted origins)
+  - Phase 7: Session & auth hardening (secure cookies, token binding, session fixation prevention)
+  - Comprehensive security test suite (`pnpm security:test`, `pnpm security:pentest`)
 
 ---
 
@@ -381,7 +390,8 @@ pnpm test:e2e:a11y:screen-reader # Screen reader (35 tests)
 
 - [Executive Summary](docs/EXECUTIVE_SUMMARY.md) – High-level overview for stakeholders
 - [Implementation Journey](docs/IMPLEMENTATION-JOURNEY.md) – Evolution from POC-0 → POC-3
-- **[CI/CD Documentation](docs/CICD.md) – Complete CI/CD guide (CI complete, CD planned)**
+- **[CI/CD Documentation](docs/CICD.md) – Complete CI/CD guide (CI complete, CD ready)**
+- **[CD POC Deployment](docs/CD-POC-RAILWAY-VERCEL.md) – Low-cost deployment for stakeholder demo (Railway + Vercel)**
 - [Trunk-Based Branching Plan](docs/POC-3-Implementation/TRUNK-BASED-BRANCHING-PLAN.md) – Branching strategy and workflow
 - [POC-3 Implementation Plan](docs/POC-3-Implementation/implementation-plan.md) – Phases 1–9, current status
 - [POC-3 Task List](docs/POC-3-Implementation/task-list.md) – Progress tracking checklist
@@ -392,6 +402,7 @@ pnpm test:e2e:a11y:screen-reader # Screen reader (35 tests)
 - [Observability Setup](docs/POC-3-Implementation/OBSERVABILITY_LIVE_SETUP.md) – Prometheus/Grafana/Jaeger
 - [Swagger API Docs](docs/POC-3-Implementation/SWAGGER_API_DOCUMENTATION.md) – REST endpoints and auth
 - [Backend Hardening Plan](docs/POC-3-Implementation/BACKEND-HARDENING-PLAN.md) – Security hardening phases 1-7
+- [Frontend MFE Hardening](docs/POC-3-Implementation/FRONTEND-MFE-HARDENING-TASK-LIST.md) – Frontend security phases 1-7
 - [Social Login Plan](docs/POC-3-Implementation/SOCIAL-LOGIN-AUTH0-PLAN.md) – OAuth via Auth0 (Google, GitHub)
 - [OAuth Security Audit](docs/POC-3-Implementation/OAUTH-SECURITY-AUDIT.md) – Security review and recommendations
 
@@ -462,10 +473,11 @@ For details, see [Trunk-Based Branching Plan](docs/POC-3-Implementation/TRUNK-BA
 - **Development Environment:** Functional with HTTPS/TLS and observability stack
 - **Live Demo:** Available locally at https://localhost with complete feature set
 - **CI Pipeline:** ✅ Complete with GitHub Actions + Nx Cloud distributed caching
+- **Security Hardening:** ✅ Complete - Backend (7 phases) + Frontend/MFE (7 phases)
 - **Accessibility:** ✅ Complete - WCAG 2.1 AA (94% conformant) with automated testing
 - **Branching Strategy:** ✅ Trunk-based development (main branch only)
-- **CD & Deployment:** Pending implementation (planned for next phase)
-- **Internet Live Demo:** Will be available once deployment pipeline is implemented
+- **CD & Deployment:** ✅ Ready - POC deployment plan available (Railway + Vercel, ~$20-40/mo)
+- **Internet Live Demo:** Will be available once deployment is executed
 
 ---
 
@@ -475,6 +487,6 @@ For detailed setup instructions, troubleshooting, and development workflows, ref
 
 ---
 
-**Last Updated:** February 10, 2026
-**Status:** POC-3 Complete + CI Pipeline + Trunk-Based Development + Backend Hardening + Social Login + Accessibility (WCAG 2.1 AA)
-**Next Phase:** CD Pipeline + Cloud Deployment
+**Last Updated:** February 13, 2026
+**Status:** POC-3 Complete + Security Hardening (Backend + Frontend) + CI Pipeline + Accessibility + CD Ready
+**Next Phase:** Execute CD Deployment (Railway + Vercel for POC Demo)
