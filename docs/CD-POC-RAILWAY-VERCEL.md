@@ -1019,6 +1019,208 @@ This POC deployment adheres to the established platform architecture rules:
 
 ---
 
+## Phase 7: Demo Video Recording
+
+**Status:** 🔲 Not Started
+**Estimated Time:** 2-3 hours (including practice runs)
+**Target Duration:** 5 minutes
+
+### 7.1 Recording Tools
+
+Choose one of these free/low-cost screen recording options:
+
+| Tool | Platform | Cost | Best For |
+| ---- | -------- | ---- | -------- |
+| **Loom** | Web/Desktop | Free (25 videos) | Easiest setup, webcam overlay |
+| **OBS Studio** | All | Free | Professional quality, more control |
+| **QuickTime** | macOS | Free | Simple, built-in |
+| **ScreenPal** | Web | Free (15 min) | Quick recordings |
+| **Zoom** | All | Free | If you already use it |
+
+**Recommended for first-time:** Loom (https://loom.com)
+- No editing software needed
+- Automatic hosting and sharing
+- Webcam bubble in corner (optional)
+- Easy trimming built-in
+
+### 7.2 Pre-Recording Setup
+
+- [ ] **Browser setup:**
+  - Use Chrome or Firefox (clean profile recommended)
+  - Close unnecessary tabs
+  - Clear browser cache for fresh demo
+  - Disable notifications (Focus mode)
+  - Set zoom to 100% or 110% for readability
+
+- [ ] **Screen setup:**
+  - Resolution: 1920x1080 (1080p) recommended
+  - Hide desktop icons
+  - Hide bookmark bar (or show only relevant bookmarks)
+  - Dark mode or light mode consistently
+
+- [ ] **Demo data ready:**
+  - Test accounts created and logged out
+  - Sample payments in various states
+  - Admin dashboard has visible data
+
+- [ ] **Script ready:**
+  - Print or have second screen with talking points
+  - Practice run completed at least twice
+
+### 7.3 Video Structure (5 Minutes)
+
+| Section | Duration | Content |
+| ------- | -------- | ------- |
+| **Intro** | 30 sec | Problem statement, what you built |
+| **Architecture** | 45 sec | Quick diagram walkthrough |
+| **User Journey** | 2 min | Login → Payment → Confirmation |
+| **Admin Features** | 1 min | Dashboard, user management |
+| **Technical Highlights** | 45 sec | MFE loading, real-time updates |
+| **Wrap-up** | 15 sec | Next steps, call to action |
+
+### 7.4 Detailed Script Outline
+
+#### Opening (0:00 - 0:30)
+```
+"Hi, I'm [Name], and I'm excited to show you our MFE Payments System POC.
+
+This platform demonstrates how we can build a scalable, modular payment
+processing system using microfrontends and microservices.
+
+Let me walk you through what we've built."
+```
+
+#### Architecture Overview (0:30 - 1:15)
+- [ ] Show architecture diagram (from this doc or a slide)
+- [ ] Highlight: "5 independent frontend modules, 5 backend services, 4 databases"
+- [ ] Mention: "Each team can deploy independently"
+- [ ] Point out: "Railway for backend, Vercel for frontend"
+
+#### Customer Journey Demo (1:15 - 3:15)
+
+**Login Flow (30 sec)**
+- [ ] Navigate to login page
+- [ ] Show: "This is the Auth MFE - a separate deployable module"
+- [ ] Enter credentials, click login
+- [ ] Point out: "JWT-based authentication with secure refresh tokens"
+
+**Dashboard (20 sec)**
+- [ ] Show dashboard loading
+- [ ] Mention: "Notice how the Shell loads multiple MFEs seamlessly"
+- [ ] Highlight recent activity
+
+**Make a Payment (50 sec)**
+- [ ] Click "New Payment"
+- [ ] Fill in payment details (use test data)
+- [ ] Point out: "Razorpay integration for India market - UPI, cards, netbanking"
+- [ ] Submit payment
+- [ ] Show success confirmation
+- [ ] Mention: "Real-time status updates via WebSocket"
+
+**Payment History (20 sec)**
+- [ ] Navigate to payment history
+- [ ] Show list of payments with different statuses
+- [ ] Click on a payment for details
+
+#### Admin Features (3:15 - 4:15)
+
+**Switch to Admin (15 sec)**
+- [ ] Logout from customer
+- [ ] Login as admin user
+- [ ] Mention: "Role-based access control"
+
+**Admin Dashboard (25 sec)**
+- [ ] Show admin dashboard with metrics
+- [ ] Highlight: "Real-time overview of system health"
+- [ ] Point out key metrics
+
+**User Management (20 sec)**
+- [ ] Navigate to user management
+- [ ] Show user list
+- [ ] Demonstrate search/filter
+- [ ] Mention: "Full audit trail for compliance"
+
+#### Technical Highlights (4:15 - 5:00)
+
+**Show DevTools briefly (30 sec)**
+- [ ] Open Network tab
+- [ ] Point out: "Each MFE loads its own remoteEntry.js"
+- [ ] Show: "API calls go through our gateway"
+- [ ] Mention: "Rate limiting, health checks, observability built-in"
+
+**Wrap-up (15 sec)**
+```
+"This POC demonstrates our architectural approach at a fraction of
+production costs. We're ready to scale this to AWS after approval.
+
+Thank you for watching - I'm happy to answer any questions."
+```
+
+### 7.5 Features to Highlight
+
+**Must-Show Features:**
+- [ ] Seamless MFE loading (no page refresh between modules)
+- [ ] Login/logout flow with JWT
+- [ ] Payment creation with INR currency
+- [ ] Real-time updates (WebSocket)
+- [ ] Role-based access (customer vs admin)
+- [ ] Responsive design (if time permits, show mobile view)
+
+**Technical Points to Mention:**
+- [ ] Module Federation v2 for MFE architecture
+- [ ] Microservices with separate databases
+- [ ] Event-driven architecture (RabbitMQ)
+- [ ] Production-grade security (rate limiting, CORS, CSP)
+- [ ] India-first: INR, Razorpay, Indian locale
+
+**Avoid Showing:**
+- Error states (unless specifically demoing error handling)
+- Loading spinners (pre-warm the system)
+- Console errors
+- Slow network responses
+
+### 7.6 Recording Tips
+
+**Before Recording:**
+- [ ] Close all unnecessary apps
+- [ ] Silence phone and notifications
+- [ ] Clear throat, have water nearby
+- [ ] Do a 30-second test recording to check audio
+
+**During Recording:**
+- Speak slowly and clearly
+- Pause briefly between sections
+- Don't rush - 5 minutes is enough time
+- If you make a mistake, pause and restart that sentence
+- Keep mouse movements smooth and deliberate
+
+**After Recording:**
+- [ ] Watch the full recording
+- [ ] Trim start/end dead time
+- [ ] Add captions if possible (Loom does this automatically)
+- [ ] Create a shareable link
+
+### 7.7 Backup Plan
+
+If live demo fails during recording:
+- [ ] Have screenshots ready as fallback
+- [ ] Pre-record individual feature clips
+- [ ] Use the architecture diagram as a talking point
+- [ ] Explain what would happen ("At this point, the user would see...")
+
+### 7.8 Video Checklist
+
+Before sharing the video:
+- [ ] Video is under 5 minutes
+- [ ] Audio is clear, no background noise
+- [ ] Screen is readable (font size, resolution)
+- [ ] No sensitive data visible (real emails, tokens, etc.)
+- [ ] All demo features work correctly
+- [ ] Smooth transitions between sections
+- [ ] Clear call-to-action at the end
+
+---
+
 ## Post-Demo: Migration to AWS
 
 After stakeholder approval, migrate to AWS using the full production setup:
@@ -1037,6 +1239,7 @@ See: [CD-IMPLEMENTATION-CHECKLIST.md](./CD-IMPLEMENTATION-CHECKLIST.md) for AWS 
 
 | Version | Date       | Changes                                                                                                                                                                                           |
 | ------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1.3     | 2026-02-13 | Added Phase 7: Demo Video Recording with tools, script outline, features to highlight, and recording tips                                                                                         |
 | 1.2     | 2026-02-13 | Round 2 expert review: MFE manifest-based remote resolution, gateway contract validation, --configuration=production flag, pre-demo warmup checklist, platform rule alignment table, stronger DB reset warning |
 | 1.1     | 2026-02-13 | Round 1 expert review: rollback procedures, secret management, rate limiting, health endpoints, cache busting, MFE architecture rules, POC exclusions                                            |
 | 1.0     | 2026-02-13 | Initial POC deployment guide                                                                                                                                                                      |
