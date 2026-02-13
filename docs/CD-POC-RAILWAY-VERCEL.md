@@ -43,7 +43,7 @@ These features will be implemented in the AWS production deployment after stakeh
 
 ### Architecture Overview
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │                              VERCEL (Frontend)                              │
 │  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐ ┌─────────────┐           │
@@ -211,13 +211,14 @@ For each backend service, we'll deploy from GitHub:
 
 - [ ] Add environment variables (click on service → Variables):
 
-```
+```bash
 PORT=3000
 NODE_ENV=production
 JWT_SECRET=<generate-secure-random-string>
 JWT_EXPIRES_IN=15m
 REFRESH_TOKEN_EXPIRES_IN=7d
 REDIS_URL=${{redis.REDIS_URL}}
+RABBITMQ_URL=<your-cloudamqp-url>
 CORS_ORIGINS=https://your-vercel-domain.vercel.app
 AUTH_SERVICE_URL=http://auth-service.railway.internal:3001
 PAYMENTS_SERVICE_URL=http://payments-service.railway.internal:3002
@@ -228,8 +229,8 @@ RETRY_ATTEMPTS=1
 ```
 
 > **Timeout/Retry Policy:** Gateway uses 5-second timeout and 1 retry attempt to prevent cascading failures during demo.
-
 > **Contract Validation:** Gateway enforces OpenAPI/schema validation for downstream service responses (POC-level validation enabled). This provides contract safety and schema drift detection.
+> **RabbitMQ:** Get your CloudAMQP URL from [Phase 2.3](#23-create-rabbitmq-instance).
 
 - [ ] Generate domain: Settings → Generate Domain
 - [ ] Note the public URL (e.g., `api-gateway-production-xxxx.up.railway.app`)
@@ -244,7 +245,7 @@ RETRY_ATTEMPTS=1
 
 - [ ] Add environment variables:
 
-```
+```bash
 PORT=3001
 NODE_ENV=production
 DATABASE_URL=${{auth-db.DATABASE_URL}}
@@ -261,7 +262,7 @@ JWT_SECRET=<same-as-api-gateway>
 
 - [ ] Add environment variables:
 
-```
+```bash
 PORT=3002
 NODE_ENV=production
 DATABASE_URL=${{payments-db.DATABASE_URL}}
@@ -279,7 +280,7 @@ RAZORPAY_KEY_SECRET=<your-razorpay-test-secret>
 
 - [ ] Add environment variables:
 
-```
+```bash
 PORT=3003
 NODE_ENV=production
 DATABASE_URL=${{admin-db.DATABASE_URL}}
@@ -295,7 +296,7 @@ DATABASE_URL=${{admin-db.DATABASE_URL}}
 
 - [ ] Add environment variables:
 
-```
+```bash
 PORT=3004
 NODE_ENV=production
 DATABASE_URL=${{profile-db.DATABASE_URL}}
@@ -307,7 +308,7 @@ Railway services can communicate via internal DNS:
 
 - [ ] Update API Gateway service URLs to use Railway internal networking:
 
-```
+```bash
 AUTH_SERVICE_URL=http://auth-service.railway.internal:3001
 PAYMENTS_SERVICE_URL=http://payments-service.railway.internal:3002
 ADMIN_SERVICE_URL=http://admin-service.railway.internal:3003
@@ -379,7 +380,7 @@ The Shell app is the main entry point that loads remote MFEs.
 
 - [ ] Add environment variables:
 
-```
+```bash
 NX_API_BASE_URL=https://<api-gateway-url>.up.railway.app/api
 NX_AUTH_MFE_URL=https://<auth-mfe-vercel-url>
 NX_PAYMENTS_MFE_URL=https://<payments-mfe-vercel-url>
@@ -413,7 +414,7 @@ NX_PROFILE_MFE_URL=https://<profile-mfe-vercel-url>
 
 - [ ] Add environment variables:
 
-```
+```bash
 NX_API_BASE_URL=https://<api-gateway-url>.up.railway.app/api
 ```
 
@@ -431,7 +432,7 @@ NX_API_BASE_URL=https://<api-gateway-url>.up.railway.app/api
 
 - [ ] Add environment variables:
 
-```
+```bash
 NX_API_BASE_URL=https://<api-gateway-url>.up.railway.app/api
 ```
 
@@ -449,7 +450,7 @@ NX_API_BASE_URL=https://<api-gateway-url>.up.railway.app/api
 
 - [ ] Add environment variables:
 
-```
+```bash
 NX_API_BASE_URL=https://<api-gateway-url>.up.railway.app/api
 ```
 
@@ -467,7 +468,7 @@ NX_API_BASE_URL=https://<api-gateway-url>.up.railway.app/api
 
 - [ ] Add environment variables:
 
-```
+```bash
 NX_API_BASE_URL=https://<api-gateway-url>.up.railway.app/api
 ```
 
@@ -543,7 +544,7 @@ If not using the manifest approach yet, update Shell's environment variables:
 - [ ] Settings → Environment Variables
 - [ ] Update:
 
-```
+```bash
 NX_AUTH_MFE_URL=https://auth-mfe-xxx.vercel.app
 NX_PAYMENTS_MFE_URL=https://payments-mfe-xxx.vercel.app
 NX_ADMIN_MFE_URL=https://admin-mfe-xxx.vercel.app
@@ -557,7 +558,7 @@ NX_PROFILE_MFE_URL=https://profile-mfe-xxx.vercel.app
 - [ ] Go to Railway → API Gateway → Variables
 - [ ] Update `CORS_ORIGINS` with all Vercel URLs:
 
-```
+```bash
 CORS_ORIGINS=https://shell-xxx.vercel.app,https://auth-mfe-xxx.vercel.app,https://payments-mfe-xxx.vercel.app,https://admin-mfe-xxx.vercel.app,https://profile-mfe-xxx.vercel.app
 ```
 
@@ -911,7 +912,7 @@ railway run --service <service-name> npx prisma migrate deploy
 
 ---
 
-## Rate Limiting Configuration
+## Rate-Limiting Configuration
 
 The API Gateway implements rate limiting using Redis:
 
@@ -929,14 +930,14 @@ The API Gateway implements rate limiting using Redis:
 
 Add to API Gateway:
 
-```
+```bash
 RATE_LIMIT_WINDOW_MS=60000
 RATE_LIMIT_MAX_REQUESTS=100
 AUTH_RATE_LIMIT_WINDOW_MS=900000
 AUTH_RATE_LIMIT_MAX_REQUESTS=10
 ```
 
-### Why Rate Limiting Matters for POC
+### Why Rate-Limiting Matters for POC
 
 - Prevents demo abuse
 - Stops brute-force login attempts
@@ -1145,7 +1146,7 @@ Choose one of these free/low-cost screen recording options:
 ### 7.4 Detailed Script Outline
 
 #### Opening (0:00 - 0:30)
-```
+```text
 "Hi, I'm [Name], and I'm excited to show you our MFE Payments System POC.
 
 This platform demonstrates how we can build a scalable, modular payment
@@ -1176,7 +1177,7 @@ Let me walk you through what we've built."
 **Make a Payment (50 sec)**
 - [ ] Click "New Payment"
 - [ ] Fill in payment details (use test data)
-- [ ] Point out: "Razorpay integration for India market - UPI, cards, netbanking"
+- [ ] Point out: "Razorpay integration for India market - UPI, cards, net banking"
 - [ ] Submit payment
 - [ ] Show success confirmation
 - [ ] Mention: "Real-time status updates via WebSocket"
@@ -1213,7 +1214,7 @@ Let me walk you through what we've built."
 - [ ] Mention: "Rate limiting, health checks, observability built-in"
 
 **Wrap-up (15 sec)**
-```
+```text
 "This POC demonstrates our architectural approach at a fraction of
 production costs. We're ready to scale this to AWS after approval.
 
@@ -1303,6 +1304,7 @@ See: [CD-IMPLEMENTATION-CHECKLIST.md](./CD-IMPLEMENTATION-CHECKLIST.md) for AWS 
 
 | Version | Date       | Changes                                                                                                                                                                                           |
 | ------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1.6     | 2026-02-13 | Lint fixes: contiguous blockquotes, Rate-Limiting hyphenation, net banking spelling, RABBITMQ_URL in API Gateway env block, language tags on all code blocks (MD040)                             |
 | 1.5     | 2026-02-13 | PR review fixes: safer DB rollback with pre-check and interactive option, RABBITMQ_URL marked as required with Phase 2 reference, grammar fix (Log out)                                          |
 | 1.4     | 2026-02-13 | Final refinements: manifest hosting path clarification, mfe-manifest.json cache rule, timeout/retry vars in env reference, softened sleep delays claim                                           |
 | 1.3     | 2026-02-13 | Added Phase 7: Demo Video Recording with tools, script outline, features to highlight, and recording tips                                                                                         |
