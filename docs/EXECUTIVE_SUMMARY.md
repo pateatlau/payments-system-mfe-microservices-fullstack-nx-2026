@@ -311,8 +311,8 @@ Safari has the strictest security policies of all browsers. Full Safari compatib
 
 | Mode | Command | Safari Compatible |
 | ---- | ------- | ----------------- |
-| HTTPS (Production-like) | `pnpm dev:all` | Yes |
-| HTTP (Quick development) | `pnpm dev:mf` | No |
+| HTTPS (Production-like) | `pnpm dev:frontend:https` | Yes |
+| HTTP (Quick development) | `pnpm dev:frontend` | No |
 
 ### Database Architecture
 

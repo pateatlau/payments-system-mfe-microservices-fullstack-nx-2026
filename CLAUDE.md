@@ -26,8 +26,8 @@ pnpm backend:setup          # Run Prisma generate + migrations for all services
 ```bash
 # Start full application
 pnpm dev:backend            # Start all backend services (API Gateway + 4 microservices)
-pnpm dev:all                # Start all frontend MFEs (HTTPS mode via nginx)
-pnpm dev:mf                 # Start all frontend MFEs (HTTP mode, direct access)
+pnpm dev:frontend           # Start all frontend MFEs (HTTP mode, direct access)
+pnpm dev:frontend:https     # Start all frontend MFEs (HTTPS mode via nginx)
 
 # Start individual services
 pnpm dev:api-gateway        # API Gateway (port 3000)
