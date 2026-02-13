@@ -19,7 +19,7 @@ This document provides a complete implementation guide for deploying the MFE Pay
 | --------------------- | ----------------------------------- |
 | **Cost**              | ~$20-40/mo vs ~$420/mo (AWS)        |
 | **Setup Time**        | Hours, not weeks                    |
-| **No Sleep Delays**   | Backend always responsive for demos |
+| **Minimal Sleep**     | Configured to avoid sleep delays for demo workloads |
 | **Familiar Frontend** | You already know Vercel             |
 | **Full Architecture** | All 11 services + 4 databases       |
 | **Easy Migration**    | Can move to AWS after approval      |
@@ -507,6 +507,8 @@ Instead of hardcoding MFE URLs in environment variables, use a manifest file for
 }
 ```
 
+> **Hosting Path:** The manifest file is served by Vercel static hosting at `/mfe-manifest.json` and is fetched by the Shell at runtime using a relative path (`fetch('/mfe-manifest.json')`).
+
 #### Why Manifest-Based Resolution?
 
 | Benefit                   | Description                                            |
@@ -563,7 +565,7 @@ CORS_ORIGINS=https://shell-xxx.vercel.app,https://auth-mfe-xxx.vercel.app,https:
 
 ### 3.10 Configure Cache Headers (Important)
 
-Vercel caching can serve stale `remoteEntry.js` files. Configure cache headers:
+Vercel caching can serve stale `remoteEntry.js` and `mfe-manifest.json` files. Configure cache headers:
 
 - [ ] Create `vercel.json` in each MFE root directory:
 
@@ -592,9 +594,46 @@ Vercel caching can serve stale `remoteEntry.js` files. Configure cache headers:
 }
 ```
 
+- [ ] Create `vercel.json` in the Shell app root directory (includes manifest rule):
+
+```json
+{
+  "headers": [
+    {
+      "source": "/mfe-manifest.json",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/remoteEntry.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    }
+  ]
+}
+```
+
 This ensures:
 
-- `remoteEntry.js` is always fresh (MFE manifest)
+- `mfe-manifest.json` is always fresh (enables instant rollback)
+- `remoteEntry.js` is always fresh (MFE entry points)
 - Other assets use long-term caching with content hashes
 
 ### 3.11 Test Frontend Deployment
@@ -902,6 +941,8 @@ PAYMENTS_SERVICE_URL=http://payments-service.railway.internal:3002
 ADMIN_SERVICE_URL=http://admin-service.railway.internal:3003
 PROFILE_SERVICE_URL=http://profile-service.railway.internal:3004
 RABBITMQ_URL=<cloudamqp-url-or-empty>
+REQUEST_TIMEOUT_MS=5000
+RETRY_ATTEMPTS=1
 SENTRY_DSN=<optional>
 ```
 
@@ -1239,6 +1280,7 @@ See: [CD-IMPLEMENTATION-CHECKLIST.md](./CD-IMPLEMENTATION-CHECKLIST.md) for AWS 
 
 | Version | Date       | Changes                                                                                                                                                                                           |
 | ------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1.4     | 2026-02-13 | Final refinements: manifest hosting path clarification, mfe-manifest.json cache rule, timeout/retry vars in env reference, softened sleep delays claim                                           |
 | 1.3     | 2026-02-13 | Added Phase 7: Demo Video Recording with tools, script outline, features to highlight, and recording tips                                                                                         |
 | 1.2     | 2026-02-13 | Round 2 expert review: MFE manifest-based remote resolution, gateway contract validation, --configuration=production flag, pre-demo warmup checklist, platform rule alignment table, stronger DB reset warning |
 | 1.1     | 2026-02-13 | Round 1 expert review: rollback procedures, secret management, rate limiting, health endpoints, cache busting, MFE architecture rules, POC exclusions                                            |
