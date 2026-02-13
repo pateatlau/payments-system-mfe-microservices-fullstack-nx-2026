@@ -846,11 +846,32 @@ vercel rollback <deployment-url>
 
 If a migration caused issues:
 
+**Option 1: Check Migration Status First (Recommended)**
+
 ```bash
-# Connect to Railway service
+# Check current migration status
+railway run --service <service-name> npx prisma migrate status
+
+# Review what migrations have been applied
+railway run --service <service-name> npx prisma migrate diff
+```
+
+**Option 2: Reset Database (Data Destructive)**
+
+> 🚨 **PRE-RESET CHECKLIST — Complete before running reset:**
+> - [ ] Verified this is a POC/demo environment (NOT production)
+> - [ ] Confirmed data loss is acceptable for this environment
+> - [ ] Documented current database state if needed
+> - [ ] No active demo or stakeholder session in progress
+
+```bash
+# Interactive reset (requires manual confirmation)
+railway run --service <service-name> npx prisma migrate reset
+
+# Force reset (skips confirmation - use with extreme caution)
 railway run --service <service-name> npx prisma migrate reset --force
 
-# Re-run migrations
+# Re-run migrations after reset
 railway run --service <service-name> npx prisma migrate deploy
 ```
 
@@ -940,11 +961,13 @@ AUTH_SERVICE_URL=http://auth-service.railway.internal:3001
 PAYMENTS_SERVICE_URL=http://payments-service.railway.internal:3002
 ADMIN_SERVICE_URL=http://admin-service.railway.internal:3003
 PROFILE_SERVICE_URL=http://profile-service.railway.internal:3004
-RABBITMQ_URL=<cloudamqp-url-or-empty>
+RABBITMQ_URL=<your-cloudamqp-url>
 REQUEST_TIMEOUT_MS=5000
 RETRY_ATTEMPTS=1
 SENTRY_DSN=<optional>
 ```
+
+> **Note:** `RABBITMQ_URL` is required. Get your CloudAMQP URL from [Phase 2.3: Create RabbitMQ Instance](#23-create-rabbitmq-instance).
 
 ### Railway - Backend Services
 
@@ -1166,7 +1189,7 @@ Let me walk you through what we've built."
 #### Admin Features (3:15 - 4:15)
 
 **Switch to Admin (15 sec)**
-- [ ] Logout from customer
+- [ ] Log out from customer account
 - [ ] Login as admin user
 - [ ] Mention: "Role-based access control"
 
@@ -1280,6 +1303,7 @@ See: [CD-IMPLEMENTATION-CHECKLIST.md](./CD-IMPLEMENTATION-CHECKLIST.md) for AWS 
 
 | Version | Date       | Changes                                                                                                                                                                                           |
 | ------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1.5     | 2026-02-13 | PR review fixes: safer DB rollback with pre-check and interactive option, RABBITMQ_URL marked as required with Phase 2 reference, grammar fix (Log out)                                          |
 | 1.4     | 2026-02-13 | Final refinements: manifest hosting path clarification, mfe-manifest.json cache rule, timeout/retry vars in env reference, softened sleep delays claim                                           |
 | 1.3     | 2026-02-13 | Added Phase 7: Demo Video Recording with tools, script outline, features to highlight, and recording tips                                                                                         |
 | 1.2     | 2026-02-13 | Round 2 expert review: MFE manifest-based remote resolution, gateway contract validation, --configuration=production flag, pre-demo warmup checklist, platform rule alignment table, stronger DB reset warning |
