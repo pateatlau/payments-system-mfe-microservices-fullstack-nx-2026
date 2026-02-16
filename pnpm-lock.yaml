@@ -412,8 +412,8 @@ importers:
         specifier: ^8.5.6
         version: 8.5.6
       postcss-loader:
-        specifier: ^8.2.0
-        version: 8.2.0(@rspack/core@1.7.6(@swc/helpers@0.5.17))(postcss@8.5.6)(typescript@5.9.3)(webpack@5.105.1(@swc/core@1.5.29(@swc/helpers@0.5.17))(esbuild@0.27.3))
+        specifier: ^8.2.1
+        version: 8.2.1(@rspack/core@1.7.6(@swc/helpers@0.5.17))(postcss@8.5.6)(typescript@5.9.3)(webpack@5.105.1(@swc/core@1.5.29(@swc/helpers@0.5.17))(esbuild@0.27.3))
       prettier:
         specifier: ^3.8.1
         version: 3.8.1
@@ -534,8 +534,6 @@ importers:
       tslib:
         specifier: ^2.3.0
         version: 2.8.1
-
-  libs/dist/shared-ui: {}
 
   libs/shared-api-client:
     dependencies:
@@ -8331,11 +8329,11 @@ packages:
     peerDependencies:
       postcss: ^8.0.0
 
-  postcss-loader@8.2.0:
-    resolution: {integrity: sha512-tHX+RkpsXVcc7st4dSdDGliI+r4aAQDuv+v3vFYHixb6YgjreG5AG4SEB0kDK8u2s6htqEEpKlkhSBUTvWKYnA==}
+  postcss-loader@8.2.1:
+    resolution: {integrity: sha512-k98jtRzthjj3f76MYTs9JTpRqV1RaaMhEU0Lpw9OTmQZQdppg4B30VZ74BojuBHt3F4KyubHJoXCMUeM8Bqeow==}
     engines: {node: '>= 18.12.0'}
     peerDependencies:
-      '@rspack/core': 0.x || 1.x
+      '@rspack/core': 0.x || ^1.0.0 || ^2.0.0-0
       postcss: ^7.0.0 || ^8.0.1
       webpack: ^5.0.0
     peerDependenciesMeta:
@@ -12780,7 +12778,7 @@ snapshots:
       picocolors: 1.1.1
       postcss: 8.5.6
       postcss-import: 14.1.0(postcss@8.5.6)
-      postcss-loader: 8.2.0(@rspack/core@1.6.8(@swc/helpers@0.5.17))(postcss@8.5.6)(typescript@5.9.3)(webpack@5.105.1(@swc/core@1.5.29(@swc/helpers@0.5.17))(esbuild@0.27.3))
+      postcss-loader: 8.2.1(@rspack/core@1.6.8(@swc/helpers@0.5.17))(postcss@8.5.6)(typescript@5.9.3)(webpack@5.105.1(@swc/core@1.5.29(@swc/helpers@0.5.17))(esbuild@0.27.3))
       sass: 1.97.3
       sass-embedded: 1.97.3
       sass-loader: 16.0.7(@rspack/core@1.6.8(@swc/helpers@0.5.17))(sass-embedded@1.97.3)(sass@1.97.3)(webpack@5.105.1(@swc/core@1.5.29(@swc/helpers@0.5.17))(esbuild@0.27.3))
@@ -19638,24 +19636,24 @@ snapshots:
       read-cache: 1.0.0
       resolve: 1.22.11
 
-  postcss-loader@8.2.0(@rspack/core@1.6.8(@swc/helpers@0.5.17))(postcss@8.5.6)(typescript@5.9.3)(webpack@5.105.1(@swc/core@1.5.29(@swc/helpers@0.5.17))(esbuild@0.27.3)):
+  postcss-loader@8.2.1(@rspack/core@1.6.8(@swc/helpers@0.5.17))(postcss@8.5.6)(typescript@5.9.3)(webpack@5.105.1(@swc/core@1.5.29(@swc/helpers@0.5.17))(esbuild@0.27.3)):
     dependencies:
       cosmiconfig: 9.0.0(typescript@5.9.3)
       jiti: 2.6.1
       postcss: 8.5.6
-      semver: 7.7.3
+      semver: 7.7.4
     optionalDependencies:
       '@rspack/core': 1.6.8(@swc/helpers@0.5.17)
       webpack: 5.105.1(@swc/core@1.5.29(@swc/helpers@0.5.17))(esbuild@0.27.3)
     transitivePeerDependencies:
       - typescript
 
-  postcss-loader@8.2.0(@rspack/core@1.7.6(@swc/helpers@0.5.17))(postcss@8.5.6)(typescript@5.9.3)(webpack@5.105.1(@swc/core@1.5.29(@swc/helpers@0.5.17))(esbuild@0.27.3)):
+  postcss-loader@8.2.1(@rspack/core@1.7.6(@swc/helpers@0.5.17))(postcss@8.5.6)(typescript@5.9.3)(webpack@5.105.1(@swc/core@1.5.29(@swc/helpers@0.5.17))(esbuild@0.27.3)):
     dependencies:
       cosmiconfig: 9.0.0(typescript@5.9.3)
       jiti: 2.6.1
       postcss: 8.5.6
-      semver: 7.7.3
+      semver: 7.7.4
     optionalDependencies:
       '@rspack/core': 1.7.6(@swc/helpers@0.5.17)
       webpack: 5.105.1(@swc/core@1.5.29(@swc/helpers@0.5.17))(esbuild@0.27.3)
