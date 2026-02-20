@@ -377,7 +377,7 @@
     "typescript-eslint": "^8.0.0"
   },
   "dependencies": {
-    "@apollo/client": "^4.1.4",
+    "@apollo/client": "^4.1.5",
     "@apollo/server": "^5.4.0",
     "@as-integrations/express4": "^1.1.2",
     "@graphql-tools/schema": "^10.0.31",
