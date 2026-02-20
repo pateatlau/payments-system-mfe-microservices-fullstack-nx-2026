@@ -895,7 +895,7 @@ jobs:
       - name: Run Trivy vulnerability scanner
         # Pin to specific version for security and reproducibility
         # Version 0.33.1 - see https://github.com/aquasecurity/trivy-action/releases
-        uses: aquasecurity/trivy-action@0.33.1
+        uses: aquasecurity/trivy-action@0.34.0
         with:
           scan-type: 'fs'
           scan-ref: '.'
