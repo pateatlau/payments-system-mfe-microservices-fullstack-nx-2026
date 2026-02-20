@@ -97,68 +97,80 @@ This platform demonstrates these principles in a real-world payment processing c
 
 ## Architecture
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                     Client (Browser)                            │
-└────────────────────────┬────────────────────────────────────────┘
-                         │ HTTPS (TLS Termination)
-                         ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                    nginx Reverse Proxy                          │
-│  • TLS/SSL Termination                                          │
-│  • Rate Limiting (10 req/min auth, 100 req/min API)             │
-│  • Static Asset Caching                                         │
-└────────────────────────┬────────────────────────────────────────┘
-                         │
-        ┌────────────────┴────────────────┐
-        │                                 │
-        ▼                                 ▼
-┌──────────────────┐            ┌─────────────────────────┐
-│  Shell (Host)    │            │     API Gateway         │
-│  Port 4200       │            │     Port 3000           │
-│                  │            │  • JWT Validation       │
-│  Loads Remotes:  │            │  • Service Routing      │
-│  ├─ Auth MFE     │            │  • CORS/CSP             │
-│  ├─ Payments MFE │            │  • GraphQL + REST       │
-│  ├─ Admin MFE    │            │  • WebSocket Server     │
-│  └─ Profile MFE  │            └───────────┬─────────────┘
-└──────────────────┘                        │
-                                            │
-               ┌────────────────────────────┼─────────────────────┐
-               │                            │                     │
-               ▼                            ▼                     ▼
-    ┌──────────────────┐       ┌──────────────────┐   ┌──────────────────┐
-    │  Auth Service    │       │ Payments Service │   │  Admin Service   │
-    │    Port 3001     │       │    Port 3002     │   │    Port 3003     │
-    └────────┬─────────┘       └────────┬─────────┘   └────────┬─────────┘
-             │                          │                      │
-             ▼                          ▼                      ▼
-    ┌──────────────────┐       ┌──────────────────┐   ┌──────────────────┐
-    │    auth_db       │       │   payments_db    │   │    admin_db      │
-    │  (PostgreSQL)    │       │  (PostgreSQL)    │   │  (PostgreSQL)    │
-    └──────────────────┘       └──────────────────┘   └──────────────────┘
-                                            │
-                    ┌───────────────────────┴──────────────────────┐
-                    │              RabbitMQ Event Bus              │
-                    │  • user.events (topic)                       │
-                    │  • payment.events (topic)                    │
-                    │  • system.events (fanout)                    │
-                    └──────────────────────────────────────────────┘
-                                            │
-                    ┌───────────────────────┴──────────────────────┐
-                    │           Observability Stack                │
-                    │  • Prometheus (metrics)                      │
-                    │  • Grafana (dashboards)                      │
-                    │  • Jaeger (distributed tracing)              │
-                    │  • Sentry (error tracking)                   │
-                    └──────────────────────────────────────────────┘
+```text
+┌─────────────────────────────────────────────────────────────────────┐
+│                         Client (Browser)                            │
+└──────────────────────────────┬──────────────────────────────────────┘
+                               │ HTTPS (TLS Termination)
+                               ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                        nginx Reverse Proxy                          │
+│  • TLS/SSL Termination                                              │
+│  • Rate Limiting (10 req/min auth, 100 req/min API)                 │
+│  • Static Asset Caching                                             │
+└──────────────────────────────┬──────────────────────────────────────┘
+                               │
+              ┌────────────────┴────────────────┐
+              │                                 │
+              ▼                                 ▼
+    ┌──────────────────┐            ┌─────────────────────────┐
+    │  Shell (Host)    │            │     API Gateway         │
+    │  Port 4200       │            │     Port 3000           │
+    │                  │            │  • JWT Validation       │
+    │  Loads Remotes:  │            │  • Service Routing      │
+    │  ├─ Auth MFE     │            │  • CORS/CSP             │
+    │  ├─ Payments MFE │            │  • GraphQL + REST       │
+    │  ├─ Admin MFE    │            │  • WebSocket Server     │
+    │  └─ Profile MFE  │            └───────────┬─────────────┘
+    └──────────────────┘                        │
+                                                │
+                   ┌────────────────────────────┼──────────────────────────┐
+                   │                            │                          │
+                   ▼                            ▼                          ▼
+        ┌──────────────────┐       ┌──────────────────┐      ┌──────────────────┐
+        │  Auth Service    │       │ Payments Service │      │  Admin Service   │
+        │    Port 3001     │       │    Port 3002     │      │    Port 3003     │
+        └────────┬─────────┘       └────────┬─────────┘      └────────┬─────────┘
+                 │                          │                         │
+                 ▼                          ▼                         ▼
+        ┌──────────────────┐       ┌──────────────────┐      ┌──────────────────┐
+        │    auth_db       │       │   payments_db    │      │    admin_db      │
+        │  (PostgreSQL)    │       │  (PostgreSQL)    │      │  (PostgreSQL)    │
+        └──────────────────┘       └──────────────────┘      └──────────────────┘
+                   │
+                   │            ┌──────────────────┐
+                   └────────────┤ Profile Service  │
+                                │    Port 3004     │
+                                └────────┬─────────┘
+                                         │
+                                         ▼
+                                ┌──────────────────┐
+                                │   profile_db     │
+                                │  (PostgreSQL)    │
+                                └──────────────────┘
+
+         ┌───────────────────────────────────────────────────────────┐
+         │                    RabbitMQ Event Bus                     │
+         │  • user.events (topic)                                    │
+         │  • payment.events (topic)                                 │
+         │  • system.events (fanout)                                 │
+         │  Connected to: All 4 backend services                     │
+         └───────────────────────────────────────────────────────────┘
+
+         ┌───────────────────────────────────────────────────────────┐
+         │                   Observability Stack                     │
+         │  • Prometheus (metrics)                                   │
+         │  • Grafana (dashboards)                                   │
+         │  • Jaeger (distributed tracing)                           │
+         │  • Sentry (error tracking)                                │
+         └───────────────────────────────────────────────────────────┘
 ```
 
 ---
 
 ## Trade-Offs & Constraints
 
-This architecture is designed for **mid-to-large scale payment systems** with multiple teams. It introduces deliberate complexity in exchange for specific benefits:
+This architecture is designed for **mid-to-large-scale payment systems** with multiple teams. It introduces deliberate complexity in exchange for specific benefits:
 
 **When This Architecture Makes Sense:**
 - Multiple teams working on different domains
@@ -190,12 +202,12 @@ The platform is designed to scale horizontally:
 **Stateless Services:**
 - All backend services are stateless (no in-memory session state)
 - Enables load balancing across multiple instances
-- Auto-scaling based on CPU/memory metrics
+- Designed for auto-scaling based on CPU/memory metrics (manual scaling currently)
 
 **Distributed Session Management:**
 - Redis-backed sessions and rate limiting
 - Supports multi-instance deployments without session loss
-- Cross-region replication for high availability
+- Designed for cross-region replication (single-region deployment currently)
 
 **Message Queue Reliability:**
 - RabbitMQ durable queues ensure message persistence
