@@ -12,7 +12,7 @@ updates:
       day: "monday"
       time: "09:00"
       timezone: "Asia/Kolkata"
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 5  # Reduced from 10 to prevent PR overload
 
     # Commit message settings
     commit-message:
@@ -23,7 +23,6 @@ updates:
     # Labels for PRs
     labels:
       - "dependencies"
-      - "security"
 
     # Reviewers (optional - uncomment and add your team)
     # reviewers:
@@ -123,6 +122,13 @@ updates:
       types:
         patterns:
           - "@types/*"
+        update-types:
+          - "minor"
+          - "patch"
+
+      # Development dependencies (group minor/patch updates)
+      dev-dependencies:
+        dependency-type: "development"
         update-types:
           - "minor"
           - "patch"

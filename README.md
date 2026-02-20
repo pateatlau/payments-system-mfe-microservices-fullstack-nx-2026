@@ -8,32 +8,231 @@
 
 ## Overview
 
-A full-stack microfrontend platform demonstrating architecture patterns for payment processing applications. Features independent deployment of frontend modules and backend microservices, observability stack, and security with JWT, RBAC, and MFA.
+A production-grade distributed payments platform demonstrating security-hardened architecture patterns for payment processing systems. Built with runtime-governed microfrontends, domain-isolated microservices with per-service databases, event-driven architecture via RabbitMQ, and full observability stack.
+
+**Strategic Positioning:** This is a distributed systems reference implementation showcasing platform engineering capabilities, technical leadership, and production-readiness thinking.
 
 ### Key Features
 
+#### Frontend Architecture
 - **Microfrontend Architecture:** Module Federation v2 with independent deployments
-- **Microservices Backend:** Domain-driven service decomposition with separate databases
-- **Infrastructure:** nginx reverse proxy, HTTPS/TLS, rate limiting, load balancing
-- **Event-Driven:** RabbitMQ for reliable asynchronous messaging
-- **Real-Time:** WebSocket server for bidirectional communication
-- **Dual API:** REST (Swagger UI) + GraphQL (Apollo Server)
-- **Full Observability:** Prometheus metrics, Grafana dashboards, Jaeger tracing, Sentry errors
-- **Security:** JWT authentication, RBAC, MFA, anomaly detection, session management, social login (OAuth via Auth0), CSP, CSRF protection, XSS prevention
-- **Accessibility:** WCAG 2.1 Level AA compliance (94% conformant), 527 automated tests, screen reader support
-- **CI Pipeline:** GitHub Actions with Nx Cloud distributed caching (50-65% faster builds), automated accessibility testing
-- **Trunk-Based Development:** Short-lived feature branches, squash merges to main
+- **Host-Controlled Navigation:** Shell orchestrates all routing, prevents cross-MFE coupling
+- **Shared State Management:** Zustand + TanStack Query with singleton guarantees
+- **Design System:** shadcn/ui + Tailwind CSS 4.0 with dark mode support
 - **Cross-Browser:** Full support for Chrome, Firefox, Safari, Edge, and Brave
 
-### Architecture
+#### Backend Architecture
+- **Microservices Backend:** Domain-driven service decomposition with separate databases
+- **Event-Driven:** RabbitMQ for reliable asynchronous messaging with DLQ retry
+- **API Gateway:** Centralized routing, auth validation, rate limiting, contract validation
+- **Real-Time:** WebSocket server for bidirectional communication
+- **Dual API:** REST (Swagger UI) + GraphQL (Apollo Server)
 
+#### Security (Defense-in-Depth)
+
+**Authentication & Session Security:**
+- JWT with refresh token rotation and token family tracking
+- Multi-factor authentication (TOTP)
+- Social login (OAuth via Auth0 - Google, GitHub)
+- Anomaly detection (velocity, location, device fingerprinting)
+- Advanced session management with concurrent session limits
+- Account lockout and brute force protection
+
+**Transport Security:**
+- HTTPS/TLS via nginx with strict transport security
+- Rate limiting (Redis-backed distributed limiting)
+- CORS and CSP hardening with nonces
+
+**Application Security:**
+- CSRF protection with double-submit cookie pattern
+- XSS prevention (DOMPurify, input sanitization)
+- Input validation and sanitization (Zod)
+- Secrets management with encryption at rest
+- Database security hardening (parameterized queries, least privilege)
+
+**Micro-Frontend Security:**
+- Module Federation remote validation with SRI hashes
+- Trusted origins enforcement
+- Secure session storage with token binding
+
+**Infrastructure Security:**
+- Service resilience (circuit breakers, retry policies)
+- Enhanced API security (security headers, response sanitization)
+- Dependency security scanning (Trivy, npm audit)
+- Comprehensive security test suite
+
+#### Observability
+- **Metrics:** Prometheus with custom service metrics
+- **Dashboards:** Grafana with service health and API Gateway dashboards
+- **Distributed Tracing:** Jaeger with automatic span creation
+- **Error Tracking:** Sentry integration (frontend + backend)
+- **Health Endpoints:** `/health`, `/ready`, `/live` for each service
+
+#### Accessibility
+- **WCAG 2.1 Level AA:** 94% conformant (45/48 criteria)
+- **Automated Testing:** 527 tests on every PR (357 unit + 170 E2E)
+- **Keyboard Navigation:** Full keyboard accessibility
+- **Screen Reader Support:** VoiceOver, NVDA, JAWS compatible
+- **CI/CD Enforcement:** Tests fail on accessibility violations
+
+#### Development & Operations
+- **CI Pipeline:** GitHub Actions with Nx Cloud distributed caching (50-65% faster builds)
+- **Trunk-Based Development:** Short-lived feature branches, squash merges to main
+- **Monorepo:** Nx with task caching and affected command optimization
+- **Infrastructure as Code:** Docker Compose for local development
+
+## Why This Platform Exists
+
+Payment systems require strict architectural discipline:
+
+- **Domain Isolation:** Separate databases enforce bounded contexts and service ownership
+- **Independent Deployment:** Frontend modules deploy independently, reducing release coupling
+- **Event-Driven Architecture:** RabbitMQ supports eventual consistency across distributed services
+- **Security Layering:** Defense-in-depth across transport (TLS), application (auth/RBAC/MFA), and session boundaries
+- **Observability:** Production-grade monitoring enables operational excellence at scale
+
+This platform demonstrates these principles in a real-world payment processing context.
+
+---
+
+## Architecture
+
+```text
+┌─────────────────────────────────────────────────────────────────────┐
+│                         Client (Browser)                            │
+└──────────────────────────────┬──────────────────────────────────────┘
+                               │ HTTPS (TLS Termination)
+                               ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                        nginx Reverse Proxy                          │
+│  • TLS/SSL Termination                                              │
+│  • Rate Limiting (10 req/min auth, 100 req/min API)                 │
+│  • Static Asset Caching                                             │
+└──────────────────────────────┬──────────────────────────────────────┘
+                               │
+              ┌────────────────┴────────────────┐
+              │                                 │
+              ▼                                 ▼
+    ┌──────────────────┐            ┌─────────────────────────┐
+    │  Shell (Host)    │            │     API Gateway         │
+    │  Port 4200       │            │     Port 3000           │
+    │                  │            │  • JWT Validation       │
+    │  Loads Remotes:  │            │  • Service Routing      │
+    │  ├─ Auth MFE     │            │  • CORS/CSP             │
+    │  ├─ Payments MFE │            │  • GraphQL + REST       │
+    │  ├─ Admin MFE    │            │  • WebSocket Server     │
+    │  └─ Profile MFE  │            └───────────┬─────────────┘
+    └──────────────────┘                        │
+                                                │
+                   ┌────────────────────────────┼──────────────────────────┐
+                   │                            │                          │
+                   ▼                            ▼                          ▼
+        ┌──────────────────┐       ┌──────────────────┐      ┌──────────────────┐
+        │  Auth Service    │       │ Payments Service │      │  Admin Service   │
+        │    Port 3001     │       │    Port 3002     │      │    Port 3003     │
+        └────────┬─────────┘       └────────┬─────────┘      └────────┬─────────┘
+                 │                          │                         │
+                 ▼                          ▼                         ▼
+        ┌──────────────────┐       ┌──────────────────┐      ┌──────────────────┐
+        │    auth_db       │       │   payments_db    │      │    admin_db      │
+        │  (PostgreSQL)    │       │  (PostgreSQL)    │      │  (PostgreSQL)    │
+        └──────────────────┘       └──────────────────┘      └──────────────────┘
+                   │
+                   │            ┌──────────────────┐
+                   └────────────┤ Profile Service  │
+                                │    Port 3004     │
+                                └────────┬─────────┘
+                                         │
+                                         ▼
+                                ┌──────────────────┐
+                                │   profile_db     │
+                                │  (PostgreSQL)    │
+                                └──────────────────┘
+
+         ┌───────────────────────────────────────────────────────────┐
+         │                    RabbitMQ Event Bus                     │
+         │  • user.events (topic)                                    │
+         │  • payment.events (topic)                                 │
+         │  • system.events (fanout)                                 │
+         │  Connected to: All 4 backend services                     │
+         └───────────────────────────────────────────────────────────┘
+
+         ┌───────────────────────────────────────────────────────────┐
+         │                   Observability Stack                     │
+         │  • Prometheus (metrics)                                   │
+         │  • Grafana (dashboards)                                   │
+         │  • Jaeger (distributed tracing)                           │
+         │  • Sentry (error tracking)                                │
+         └───────────────────────────────────────────────────────────┘
 ```
-[nginx Proxy] → [API Gateway] → [Auth, Payments, Admin, Profile Services]
-                      ↓                           ↓
-                [WebSocket]                 [Separate DBs]
-                      ↓                           ↓
-            [Shell + 3 MFEs]              [RabbitMQ Events]
-```
+
+---
+
+## Trade-Offs & Constraints
+
+This architecture is designed for **mid-to-large-scale payment systems** with multiple teams. It introduces deliberate complexity in exchange for specific benefits:
+
+**When This Architecture Makes Sense:**
+- Multiple teams working on different domains
+- Need for independent deployment cycles
+- High reliability and observability requirements
+- Regulatory compliance needs (audit trails, security)
+- Expectation of horizontal scaling
+
+**Trade-Offs Accepted:**
+- **Operational Overhead:** Microservices require more infrastructure and monitoring
+- **Event-Driven Complexity:** Debugging asynchronous flows is harder than synchronous calls
+- **Infrastructure Cost:** Separate databases and message queues increase operational cost
+- **RabbitMQ Operational Burden:** Requires management, monitoring, and failure handling
+- **Team Size:** Not appropriate for small teams or early-stage startups
+
+**Alternatives Considered:**
+- **Modular Monolith:** Simpler for single-team scenarios, but sacrifices independent deployment
+- **Shared Database:** Reduces infrastructure, but couples services and violates bounded contexts
+- **Synchronous APIs Only:** Simpler debugging, but creates tight coupling and cascading failures
+
+This is a **production-oriented architecture**, not a minimal viable product.
+
+---
+
+## Scaling Considerations
+
+The platform is designed to scale horizontally:
+
+**Stateless Services:**
+- All backend services are stateless (no in-memory session state)
+- Enables load balancing across multiple instances
+- Designed for auto-scaling based on CPU/memory metrics (manual scaling currently)
+
+**Distributed Session Management:**
+- Redis-backed sessions and rate limiting
+- Supports multi-instance deployments without session loss
+- Designed for cross-region replication (single-region deployment currently)
+
+**Message Queue Reliability:**
+- RabbitMQ durable queues ensure message persistence
+- Dead letter queues (DLQ) handle processing failures
+- Supports multiple consumers for parallel processing
+
+**API Gateway as Scaling Boundary:**
+- Centralizes cross-cutting concerns (auth, rate limiting, CORS)
+- Prevents cascading failures with circuit breakers
+- Request/response validation ensures contract stability
+
+**Database Scaling:**
+- Per-service databases allow independent scaling strategies
+- PostgreSQL read replicas for read-heavy workloads
+- Connection pooling optimizes resource usage
+
+**Observability for Scale:**
+- Distributed tracing identifies bottlenecks across services
+- Custom metrics track business KPIs and SLOs
+- Grafana alerts enable proactive issue detection
+
+**Current Limitations:**
+- Single-region deployment (multi-region requires geo-replication)
+- No auto-scaling implemented (manual instance scaling required)
+- Database sharding not implemented (vertical scaling only)
 
 ---
 
@@ -256,68 +455,16 @@ pnpm grafana:ui               # Open Grafana dashboards
 
 ---
 
-## Key Features Implemented
+## Implementation Evolution
 
-### POC-0: Foundation
+This platform was built iteratively across 4 phases:
 
-- Nx monorepo with React + TypeScript
-- Module Federation v2 with Rspack
-- Shared component libraries
+**POC-0 (Foundation):** Nx monorepo, Module Federation v2, shared libraries
+**POC-1 (Rspack Migration):** Vite → Rspack, HMR optimization
+**POC-2 (Backend Integration):** Microservices, JWT/RBAC, design system, event bus
+**POC-3 (Production Hardening):** Infrastructure (nginx, observability), security hardening (14 phases), accessibility (WCAG 2.1 AA), CI/CD pipeline, trunk-based development
 
-### POC-1: Rspack Migration
-
-- Migrated from Vite to Rspack
-- Module Federation with HMR
-- Performance optimizations
-
-### POC-2: Backend Integration
-
-- Full-stack microservices architecture
-- JWT authentication with RBAC
-- Design system (shadcn/ui + Tailwind v4)
-- Event bus for inter-service communication
-
-### POC-3: Infrastructure
-
-- nginx reverse proxy with HTTPS/TLS
-- Separate databases per service
-- RabbitMQ event hub
-- WebSocket real-time communication
-- Complete observability stack
-- GraphQL API alongside REST
-- Interactive API documentation (Swagger)
-- Advanced caching strategies
-- Cross-tab/device session sync
-- Full cross-browser compatibility (Chrome, Firefox, Safari, Edge, Brave)
-- **Backend Hardening (Phases 1-7):**
-  - Rate limiting with Redis-backed distributed limiting
-  - JWT refresh token rotation with token family tracking
-  - Account lockout and brute force protection
-  - Input validation and sanitization (Zod)
-  - Secrets management with encryption
-  - Database security hardening
-  - Service resilience (circuit breakers, retry policies)
-  - Enhanced API security (headers, response sanitization, request limits)
-  - Multi-factor authentication (TOTP)
-  - Anomaly detection (velocity, location, device)
-  - Advanced session management (device fingerprinting, concurrent limits, force logout)
-- **Social Login (OAuth via Auth0):**
-  - Google and GitHub OAuth providers (Facebook, LinkedIn, X deferred)
-  - Auth0 federation layer (handles OAuth, your infrastructure manages users/sessions)
-  - Automatic account linking with email verification
-  - MFA integration for social login users
-  - Account linking/unlinking in profile settings
-  - OAuth-specific rate limiting (10 req/15 min)
-  - Security audit completed (CSRF protection, token encryption, audit logging)
-- **Frontend/MFE Security Hardening (Phases 1-7):**
-  - Phase 1: nginx rate limiting for production environments
-  - Phase 2: Content Security Policy (CSP) hardening with nonces and strict directives
-  - Phase 3: CSRF protection with double-submit cookie pattern
-  - Phase 4: Dependency security scanning (Trivy, npm audit) + CI integration
-  - Phase 5: XSS & injection prevention (DOMPurify, input sanitization, secure rendering)
-  - Phase 6: Module Federation security (remote validation, SRI hashes, trusted origins)
-  - Phase 7: Session & auth hardening (secure cookies, token binding, session fixation prevention)
-  - Comprehensive security test suite (`pnpm security:test`, `pnpm security:pentest`)
+See [Implementation Journey](docs/IMPLEMENTATION-JOURNEY.md) for the complete evolution story.
 
 ---
 
@@ -468,16 +615,31 @@ For details, see [Trunk-Based Branching Plan](docs/POC-3-Implementation/TRUNK-BA
 
 ---
 
-## Current Status
+## Current Status & Maturity
 
-- **Development Environment:** Functional with HTTPS/TLS and observability stack
-- **Live Demo:** Available locally at https://localhost with complete feature set
-- **CI Pipeline:** ✅ Complete with GitHub Actions + Nx Cloud distributed caching
-- **Security Hardening:** ✅ Complete - Backend (7 phases) + Frontend/MFE (7 phases)
-- **Accessibility:** ✅ Complete - WCAG 2.1 AA (94% conformant) with automated testing
-- **Branching Strategy:** ✅ Trunk-based development (main branch only)
-- **CD & Deployment:** ✅ Ready - POC deployment plan available (Railway + Vercel, ~$20-40/mo)
-- **Internet Live Demo:** Will be available once deployment is executed
+**Platform Readiness:**
+- ✅ **Development Environment:** Fully functional with HTTPS/TLS and observability stack
+- ✅ **CI Pipeline:** Complete with GitHub Actions + Nx Cloud (50-65% faster builds)
+- ✅ **Security Hardening:** Production-grade (14 phases: 7 backend + 7 frontend)
+- ✅ **Accessibility:** WCAG 2.1 Level AA - Substantially Conformant (94%)
+- ✅ **Testing:** 527 accessibility tests + unit/integration/E2E test suites
+- ✅ **Trunk-Based Development:** Main-only strategy with feature flags
+- ✅ **CD Ready:** Deployment plan available (Railway + Vercel, ~$20-40/mo)
+
+**Architectural Maturity:**
+- Distributed systems design with bounded contexts
+- Event-driven architecture with message durability
+- Observability stack for production operations
+- Security defense-in-depth across all layers
+- Independent deployment of frontend modules and backend services
+
+**What's NOT Included (Intentional):**
+- Auto-scaling (manual instance scaling)
+- Multi-region deployment
+- Blue/green deployments
+- Service mesh (using direct service-to-service calls)
+
+**Next Phase:** Execute CD deployment to Railway + Vercel for live stakeholder demo
 
 ---
 

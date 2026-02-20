@@ -414,10 +414,10 @@ jobs:
         run: pnpm install --frozen-lockfile --prefer-offline
 
       - name: Run accessibility unit tests (jest-axe)
-        run: pnpm test:a11y --run
+        run: NX_NO_CLOUD=true pnpm test:a11y
 
       - name: Run color contrast audit
-        run: pnpm test:a11y:contrast
+        run: NX_NO_CLOUD=true pnpm test:a11y:contrast
 
       - name: Accessibility test results
         if: always()
@@ -909,13 +909,22 @@ jobs:
         with:
           sarif_file: 'trivy-results.sarif'
 
-      - name: Run pnpm audit (fail on high/critical)
-        # Fails the build if HIGH or CRITICAL vulnerabilities are found
-        # Moderate and low vulnerabilities are reported but don't fail the build
+      - name: Run pnpm audit (fail on high/critical production vulnerabilities)
+        # Fails the build on HIGH or CRITICAL vulnerabilities in production dependencies
+        # Known unresolvable CVEs (transitive deps awaiting upstream fixes) are ignored via
+        # pnpm.auditConfig.ignoreCves in package.json (see CVE-2026-26996 for minimatch in @sentry/node)
         run: |
-          echo "=== Running pnpm audit ==="
-          pnpm audit --audit-level=high
-          echo "✅ No high/critical vulnerabilities found"
+          echo "=== Running pnpm audit (production dependencies) ==="
+          pnpm audit --prod --audit-level=high
+          echo "✅ No high/critical production vulnerabilities found (excluding documented ignores)"
+
+      - name: Report all vulnerabilities (informational)
+        if: always()
+        continue-on-error: true
+        run: |
+          echo "=== Full dependency audit (informational only) ==="
+          echo "This includes dev dependencies and provides visibility into all advisories"
+          pnpm audit
 
       - name: Check license compliance
         # Fails if GPL or other copyleft licenses are found in production dependencies

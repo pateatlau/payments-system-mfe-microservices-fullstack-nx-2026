@@ -443,6 +443,11 @@
   "pnpm": {
     "overrides": {
       "qs": ">=6.14.1"
+    },
+    "auditConfig": {
+      "ignoreCves": [
+        "CVE-2026-26996"
+      ]
     }
   }
 }
