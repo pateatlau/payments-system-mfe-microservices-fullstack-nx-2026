@@ -909,23 +909,22 @@ jobs:
         with:
           sarif_file: 'trivy-results.sarif'
 
-      - name: Run pnpm audit (fail on critical production vulnerabilities)
-        # Fails the build only on CRITICAL vulnerabilities in production dependencies
-        # HIGH vulnerabilities in transitive deps (e.g., minimatch in @sentry/node)
-        # cannot be resolved without upstream fixes and are tracked informally
+      - name: Run pnpm audit (fail on high/critical production vulnerabilities)
+        # Fails the build on HIGH or CRITICAL vulnerabilities in production dependencies
+        # Known unresolvable CVEs (transitive deps awaiting upstream fixes) are ignored via
+        # pnpm.auditConfig.ignoreCves in package.json (see CVE-2026-26996 for minimatch in @sentry/node)
         run: |
-          echo "=== Running pnpm audit (production dependencies, critical only) ==="
-          pnpm audit --prod --audit-level=critical
-          echo "✅ No critical production vulnerabilities found"
+          echo "=== Running pnpm audit (production dependencies) ==="
+          pnpm audit --prod --audit-level=high
+          echo "✅ No high/critical production vulnerabilities found (excluding documented ignores)"
 
       - name: Report all vulnerabilities (informational)
         if: always()
         continue-on-error: true
         run: |
           echo "=== Full dependency audit (informational only) ==="
-          echo "HIGH/moderate/low vulnerabilities are tracked but do not fail CI"
-          echo "when they are in transitive dependencies awaiting upstream fixes"
-          pnpm audit || true
+          echo "This includes dev dependencies and provides visibility into all advisories"
+          pnpm audit
 
       - name: Check license compliance
         # Fails if GPL or other copyleft licenses are found in production dependencies
