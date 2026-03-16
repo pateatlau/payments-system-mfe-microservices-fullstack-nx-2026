@@ -24,7 +24,7 @@ permissions:
 
 env:
   NODE_VERSION: '24.11.x'
-  PNPM_VERSION: '9'
+  # PNPM version is now read from package.json packageManager field
   NX_CLOUD_ACCESS_TOKEN: ${{ secrets.NX_CLOUD_ACCESS_TOKEN }}
 
 jobs:
@@ -47,8 +47,7 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
+        # Version is read from package.json packageManager field
 
       - name: Get pnpm store directory
         id: pnpm-cache
@@ -134,8 +133,7 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
+        # Version is read from package.json packageManager field
 
       - name: Get pnpm store directory
         id: pnpm-cache
@@ -318,8 +316,7 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
+        # Version is read from package.json packageManager field
 
       - name: Get pnpm store directory
         id: pnpm-cache
@@ -392,8 +389,7 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
+        # Version is read from package.json packageManager field
 
       - name: Get pnpm store directory
         id: pnpm-cache
@@ -451,8 +447,7 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
+        # Version is read from package.json packageManager field
 
       - name: Get pnpm store directory
         id: pnpm-cache
@@ -644,8 +639,7 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
+        # Version is read from package.json packageManager field
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -871,8 +865,7 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
+        # Version is read from package.json packageManager field
 
       - name: Get pnpm store directory
         id: pnpm-cache
