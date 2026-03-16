@@ -80,6 +80,7 @@ const ENCRYPTION_CONFIG: ModelEncryptionConfig = {
  */
 function buildDatabaseUrl(): string {
   const baseUrl =
+    process.env.DATABASE_URL ||
     process.env.PROFILE_DATABASE_URL ||
     'postgresql://postgres:postgres@localhost:5435/profile_db';
 
