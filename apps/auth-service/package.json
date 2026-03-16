@@ -1,4 +1,8 @@
 {
+	"name": "@payments-system/auth-service",
+	"version": "0.0.1",
+	"private": true,
+	"packageManager": "pnpm@9.15.4",
 	"dependencies": {
 		"openid-client": "^6.7.1"
 	}
