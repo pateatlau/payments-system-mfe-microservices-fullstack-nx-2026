@@ -1,6 +1,7 @@
 # Railway Backend Deployment Guide - Step-by-Step
 
 **Date:** March 16, 2026
+**Updated:** March 16, 2026 (v2 - fixed build/start commands for unbundled esbuild)
 **Status:** Ready to Deploy
 **Repository:** https://github.com/pateatlau/payments-system-mfe-microservices-fullstack-nx-2026
 
@@ -41,6 +42,23 @@ JWT_SECRET=adbbaf99a5fc72e3e2bdf31723391ddfbf68b1572f4edcd927dcfda58b7aec3468288
 
 ---
 
+## Important: Build Architecture
+
+This monorepo uses **Nx + esbuild with `bundle: false`**. This means:
+
+- Dependencies are NOT bundled into the output — they remain as `require()` calls
+- The build output at `dist/apps/<service>/` includes a generated `package.json` with only runtime dependencies and a `pnpm-lock.yaml`
+- **Production dependencies must be installed inside the dist directory** after building
+- For Prisma services, the Prisma client must also be generated inside the dist directory
+- The workspace root's `node_modules` (pnpm symlink structure) cannot be used at runtime because Node.js resolves modules from the file's location, not the cwd
+
+**Key settings:**
+- **Root Directory:** Leave EMPTY (do NOT set) — builds must run from the repo root to access Nx, pnpm scripts, and the full monorepo
+- **Build Command:** Installs deps, generates Prisma, builds with Nx, then installs production deps in the dist output
+- **Start Command:** Runs from within the dist directory where `node_modules` are available
+
+---
+
 ## Service 1: Auth Service
 
 ### Step 1.1: Create Service in Railway UI
@@ -61,22 +79,18 @@ Click on the newly created service → **Settings** tab:
 auth-service
 ```
 
-**Root Directory:**
-
-```
-apps/auth-service
-```
+**Root Directory:** Leave EMPTY (do not set)
 
 **Build Command:**
 
 ```bash
-pnpm install --frozen-lockfile && pnpm db:auth:generate && pnpm nx build auth-service --configuration=production
+pnpm install --frozen-lockfile && pnpm db:auth:generate && pnpm nx build auth-service --configuration=production && cd dist/apps/auth-service && echo "" > pnpm-workspace.yaml && pnpm install --frozen-lockfile && mkdir -p apps/auth-service/prisma && cp ../../../apps/auth-service/prisma/schema.prisma apps/auth-service/prisma/ && npx prisma generate --schema=apps/auth-service/prisma/schema.prisma
 ```
 
 **Start Command:**
 
 ```bash
-npx prisma migrate deploy --schema=apps/auth-service/prisma/schema.prisma && node dist/apps/auth-service/main.js
+cd dist/apps/auth-service && npx prisma migrate deploy --schema=apps/auth-service/prisma/schema.prisma && node main.js
 ```
 
 **Watch Paths:**
@@ -138,22 +152,18 @@ http://auth-service.railway.internal:3001
 payments-service
 ```
 
-**Root Directory:**
-
-```
-apps/payments-service
-```
+**Root Directory:** Leave EMPTY (do not set)
 
 **Build Command:**
 
 ```bash
-pnpm install --frozen-lockfile && pnpm db:payments:generate && pnpm nx build payments-service --configuration=production
+pnpm install --frozen-lockfile && pnpm db:payments:generate && pnpm nx build payments-service --configuration=production && cd dist/apps/payments-service && echo "" > pnpm-workspace.yaml && pnpm install --frozen-lockfile && mkdir -p apps/payments-service/prisma && cp ../../../apps/payments-service/prisma/schema.prisma apps/payments-service/prisma/ && npx prisma generate --schema=apps/payments-service/prisma/schema.prisma
 ```
 
 **Start Command:**
 
 ```bash
-npx prisma migrate deploy --schema=apps/payments-service/prisma/schema.prisma && node dist/apps/payments-service/main.js
+cd dist/apps/payments-service && npx prisma migrate deploy --schema=apps/payments-service/prisma/schema.prisma && node main.js
 ```
 
 **Watch Paths:**
@@ -199,22 +209,18 @@ RAZORPAY_KEY_SECRET=test_secret_placeholder
 admin-service
 ```
 
-**Root Directory:**
-
-```
-apps/admin-service
-```
+**Root Directory:** Leave EMPTY (do not set)
 
 **Build Command:**
 
 ```bash
-pnpm install --frozen-lockfile && pnpm db:admin:generate && pnpm nx build admin-service --configuration=production
+pnpm install --frozen-lockfile && pnpm db:admin:generate && pnpm nx build admin-service --configuration=production && cd dist/apps/admin-service && echo "" > pnpm-workspace.yaml && pnpm install --frozen-lockfile && mkdir -p apps/admin-service/prisma && cp ../../../apps/admin-service/prisma/schema.prisma apps/admin-service/prisma/ && npx prisma generate --schema=apps/admin-service/prisma/schema.prisma
 ```
 
 **Start Command:**
 
 ```bash
-npx prisma migrate deploy --schema=apps/admin-service/prisma/schema.prisma && node dist/apps/admin-service/main.js
+cd dist/apps/admin-service && npx prisma migrate deploy --schema=apps/admin-service/prisma/schema.prisma && node main.js
 ```
 
 **Watch Paths:**
@@ -255,22 +261,18 @@ DATABASE_URL=${{admin-db.DATABASE_URL}}
 profile-service
 ```
 
-**Root Directory:**
-
-```
-apps/profile-service
-```
+**Root Directory:** Leave EMPTY (do not set)
 
 **Build Command:**
 
 ```bash
-pnpm install --frozen-lockfile && pnpm db:profile:generate && pnpm nx build profile-service --configuration=production
+pnpm install --frozen-lockfile && pnpm db:profile:generate && pnpm nx build profile-service --configuration=production && cd dist/apps/profile-service && echo "" > pnpm-workspace.yaml && pnpm install --frozen-lockfile && mkdir -p apps/profile-service/prisma && cp ../../../apps/profile-service/prisma/schema.prisma apps/profile-service/prisma/ && npx prisma generate --schema=apps/profile-service/prisma/schema.prisma
 ```
 
 **Start Command:**
 
 ```bash
-npx prisma migrate deploy --schema=apps/profile-service/prisma/schema.prisma && node dist/apps/profile-service/main.js
+cd dist/apps/profile-service && npx prisma migrate deploy --schema=apps/profile-service/prisma/schema.prisma && node main.js
 ```
 
 **Watch Paths:**
@@ -313,22 +315,18 @@ DATABASE_URL=${{profile-db.DATABASE_URL}}
 api-gateway
 ```
 
-**Root Directory:**
-
-```
-apps/api-gateway
-```
+**Root Directory:** Leave EMPTY (do not set)
 
 **Build Command:**
 
 ```bash
-pnpm install --frozen-lockfile && pnpm nx build api-gateway --configuration=production
+pnpm install --frozen-lockfile && pnpm nx build api-gateway --configuration=production && cd dist/apps/api-gateway && echo "" > pnpm-workspace.yaml && pnpm install --frozen-lockfile
 ```
 
 **Start Command:**
 
 ```bash
-node dist/apps/api-gateway/main.js
+cd dist/apps/api-gateway && node main.js
 ```
 
 **Watch Paths:**
@@ -437,15 +435,34 @@ Look for:
 
 ## Troubleshooting
 
-### Build Fails with "Cannot find module"
+### Runtime Crash: "Cannot find module 'express'" (or any npm package)
 
-**Cause:** Monorepo dependencies not resolved correctly.
+**Cause:** The Nx esbuild build uses `bundle: false`, so npm packages are NOT bundled into the output. Node.js resolves modules from the file's location (`dist/apps/<service>/`), not the repo root's `node_modules`.
 
 **Fix:**
 
-1. Check that build command includes `pnpm install --frozen-lockfile`
-2. Verify root directory is set correctly (`apps/<service-name>`)
-3. Check that `pnpm-lock.yaml` exists in repository root
+1. The build command MUST include these steps after `pnpm nx build`:
+   ```bash
+   cd dist/apps/<service> && echo "" > pnpm-workspace.yaml && pnpm install --frozen-lockfile
+   ```
+2. The `pnpm-workspace.yaml` prevents pnpm from walking up to the repo root's workspace
+3. The start command MUST `cd dist/apps/<service>` before running `node main.js`
+4. Do NOT set Root Directory in Railway — builds must run from repo root
+
+### Build Fails with "pnpm: not found"
+
+**Cause:** Railway's Railpack needs `packageManager` field in the `package.json` it reads.
+
+**Fix:**
+
+1. Ensure `"packageManager": "pnpm@9.15.4"` exists in the root `package.json`
+2. Do NOT set Root Directory (otherwise Railpack reads the wrong `package.json`)
+
+### Build Fails with "Command not found" (e.g., `pnpm db:auth:generate`)
+
+**Cause:** Root Directory was set to `apps/<service>`, so pnpm scripts from root `package.json` aren't available.
+
+**Fix:** Remove Root Directory setting. Build commands should run from the repo root.
 
 ### Prisma Migration Fails
 
@@ -456,10 +473,16 @@ Look for:
 1. Verify `DATABASE_URL` variable is set and references correct database
 2. Check database is running (should show green in Railway dashboard)
 3. View logs to see exact Prisma error
-4. If needed, run migrations manually:
-   ```bash
-   railway run --service <service-name> npx prisma migrate deploy --schema=apps/<service-name>/prisma/schema.prisma
-   ```
+4. The schema path in the start command must point to the copy inside `dist/apps/<service>/apps/<service>/prisma/schema.prisma`
+
+### Prisma Client Not Found at Runtime
+
+**Cause:** The Nx module resolution wrapper expects the Prisma client at `dist/apps/<service>/apps/<service>/node_modules/.prisma/<service>-client`. This must be generated inside the dist directory during build.
+
+**Fix:** The build command must include:
+```bash
+mkdir -p apps/<service>/prisma && cp ../../../apps/<service>/prisma/schema.prisma apps/<service>/prisma/ && npx prisma generate --schema=apps/<service>/prisma/schema.prisma
+```
 
 ### Service Crashes on Startup
 
