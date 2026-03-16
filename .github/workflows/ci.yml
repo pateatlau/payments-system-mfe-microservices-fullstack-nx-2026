@@ -705,7 +705,7 @@ jobs:
           cd $GITHUB_WORKSPACE/apps/profile-service && DATABASE_URL=$PROFILE_DATABASE_URL npx prisma migrate deploy
 
       - name: Seed auth database for E2E tests
-        run: pnpm db:auth:seed
+        run: DATABASE_URL=$AUTH_DATABASE_URL pnpm db:auth:seed
 
       - name: Start backend services
         run: |
