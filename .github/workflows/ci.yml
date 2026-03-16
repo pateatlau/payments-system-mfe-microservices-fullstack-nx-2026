@@ -896,6 +896,7 @@ jobs:
         # Pin to specific version for security and reproducibility
         # Version 0.33.1 - see https://github.com/aquasecurity/trivy-action/releases
         uses: aquasecurity/trivy-action@0.33.1
+        id: trivy
         with:
           scan-type: 'fs'
           scan-ref: '.'
@@ -904,10 +905,19 @@ jobs:
           severity: 'CRITICAL,HIGH'
         continue-on-error: true # Don't fail CI if vulnerabilities found, just report them
 
+      - name: Check if Trivy results file exists
+        id: trivy-file-check
+        run: |
+          if [ -f trivy-results.sarif ]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Upload Trivy results to GitHub Security
         uses: github/codeql-action/upload-sarif@v4
         # Only upload if the SARIF file was created (Trivy scan succeeded)
-        if: always() && hashFiles('trivy-results.sarif') != ''
+        if: steps.trivy-file-check.outputs.exists == 'true'
         with:
           sarif_file: 'trivy-results.sarif'
 
