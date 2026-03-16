@@ -519,22 +519,30 @@ After all 5 services are deployed, verify each one:
 Open these URLs in your browser (replace `<api-gateway-url>` with your actual URL):
 
 ```bash
-# API Gateway health
+# API Gateway health (basic health check)
 https://<api-gateway-url>/health
 
-# API Gateway ready check
-https://<api-gateway-url>/ready
+# API Gateway ready check (readiness probe)
+https://<api-gateway-url>/health/ready
 
-# API Gateway live check
-https://<api-gateway-url>/live
+# API Gateway live check (liveness probe)
+https://<api-gateway-url>/health/live
+
+# Circuit breaker status (advanced monitoring)
+https://<api-gateway-url>/health/circuits
 ```
 
-Expected response:
+Expected response for `/health`:
 
 ```json
 {
-  "status": "ok",
-  "timestamp": "2026-03-16T..."
+  "success": true,
+  "data": {
+    "status": "healthy",
+    "timestamp": "2026-03-17T...",
+    "service": "api-gateway",
+    "uptime": 1234.56
+  }
 }
 ```
 
@@ -719,6 +727,8 @@ Final verification (recommended):
 - [x] All 5 services show **SUCCESS** status in Railway
 - [ ] API Gateway has a public URL generated (check Railway dashboard)
 - [ ] Test `/health` endpoint: `https://<api-gateway-url>/health`
+- [ ] Test `/health/ready` endpoint: `https://<api-gateway-url>/health/ready`
+- [ ] Test `/health/live` endpoint: `https://<api-gateway-url>/health/live`
 - [ ] Test `/api-docs` shows Swagger documentation: `https://<api-gateway-url>/api-docs`
 - [ ] All service logs show "Server started" messages
 - [ ] No **CRASHED** or **FAILED** deployments
@@ -745,23 +755,28 @@ Once you have your API Gateway URL, test these endpoints:
 ```bash
 # Replace <api-gateway-url> with your actual Railway URL
 
-# Health check
+# Basic health check
 curl https://<api-gateway-url>/health
+
+# Readiness check (dependencies ready)
+curl https://<api-gateway-url>/health/ready
+
+# Liveness check (service alive)
+curl https://<api-gateway-url>/health/live
+
+# Circuit breaker status (advanced monitoring)
+curl https://<api-gateway-url>/health/circuits
 
 # API documentation
 open https://<api-gateway-url>/api-docs
-
-# Ready check
-curl https://<api-gateway-url>/ready
-
-# Live check
-curl https://<api-gateway-url>/live
 ```
 
 Expected response for health endpoints:
 ```json
 {
-  "status": "ok",
+  "success": true,
+  "data": {
+    "status": "healthy",
   "timestamp": "2026-03-17T..."
 }
 ```
