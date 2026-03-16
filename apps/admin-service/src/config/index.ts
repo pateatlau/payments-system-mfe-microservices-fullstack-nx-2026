@@ -63,7 +63,7 @@ const rawConfig = {
   port: process.env['ADMIN_SERVICE_PORT'],
   nodeEnv: process.env['NODE_ENV'],
   database: {
-    url: process.env['ADMIN_DATABASE_URL'],
+    url: process.env['DATABASE_URL'] ?? process.env['ADMIN_DATABASE_URL'],
   },
   authService: {
     url: process.env['AUTH_SERVICE_URL'],

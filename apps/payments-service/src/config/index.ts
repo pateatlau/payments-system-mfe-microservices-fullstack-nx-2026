@@ -67,7 +67,7 @@ const rawConfig = {
   port: process.env['PORT'],
   nodeEnv: process.env['NODE_ENV'],
   database: {
-    url: process.env['PAYMENTS_DATABASE_URL'],
+    url: process.env['DATABASE_URL'] ?? process.env['PAYMENTS_DATABASE_URL'],
   },
   authService: {
     url: process.env['AUTH_SERVICE_URL'],

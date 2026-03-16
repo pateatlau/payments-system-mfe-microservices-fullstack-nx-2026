@@ -73,6 +73,7 @@ const POOL_CONFIG = {
  */
 function buildDatabaseUrl(): string {
   const baseUrl =
+    process.env.DATABASE_URL ||
     process.env.ADMIN_DATABASE_URL ||
     'postgresql://postgres:postgres@localhost:5434/admin_db';
 
