@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "private": true,
   "license": "MIT",
+  "packageManager": "pnpm@9.15.4",
   "scripts": {
     "nx": "./nx",
     "dev": "pnpm build:remotes && pnpm preview:all",
