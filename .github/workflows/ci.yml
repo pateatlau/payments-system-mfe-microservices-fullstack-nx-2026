@@ -520,7 +520,7 @@ jobs:
           echo "=== Bundle verification complete ==="
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: build-artifacts
           path: |
@@ -654,7 +654,7 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: Download build artifacts
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: build-artifacts
           path: dist/
@@ -826,7 +826,7 @@ jobs:
         # via webServer config in playwright.config.ts
 
       - name: Upload E2E test results
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: playwright-report
@@ -895,7 +895,7 @@ jobs:
       - name: Run Trivy vulnerability scanner
         # Pin to specific version for security and reproducibility
         # Version 0.33.1 - see https://github.com/aquasecurity/trivy-action/releases
-        uses: aquasecurity/trivy-action@0.33.1
+        uses: aquasecurity/trivy-action@0.35.0
         id: trivy
         with:
           scan-type: 'fs'
