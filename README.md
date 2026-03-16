@@ -1,7 +1,7 @@
 # MFE Payments System
 
-**Version:** 0.4.0
-**Status:** POC-3 Complete – Security Hardening + CD Ready
+**Version:** 0.4.1
+**Status:** POC-3 Complete – Security Hardening + Backend Deployed (Railway)
 **Tech Stack:** React + Nx + Rspack + Module Federation v2 + Node.js + PostgreSQL + RabbitMQ + nginx
 
 ---
@@ -537,8 +537,9 @@ pnpm test:e2e:a11y:screen-reader # Screen reader (35 tests)
 
 - [Executive Summary](docs/EXECUTIVE_SUMMARY.md) – High-level overview for stakeholders
 - [Implementation Journey](docs/IMPLEMENTATION-JOURNEY.md) – Evolution from POC-0 → POC-3
-- **[CI/CD Documentation](docs/CICD.md) – Complete CI/CD guide (CI complete, CD ready)**
-- **[CD POC Deployment](docs/CD-POC-RAILWAY-VERCEL.md) – Low-cost deployment for stakeholder demo (Railway + Vercel)**
+- **[CI/CD Documentation](docs/CICD.md) – Complete CI/CD guide (CI complete, CD in progress)**
+- **[CD POC Deployment](docs/CD-POC-RAILWAY-VERCEL.md) – Low-cost deployment for stakeholder demo (Railway ✅ + Vercel ⏳)**
+- **[Railway Backend Deployment](docs/temp/RAILWAY-BACKEND-DEPLOYMENT-GUIDE.md) – All 5 backend services deployed ✅**
 - [Trunk-Based Branching Plan](docs/POC-3-Implementation/TRUNK-BASED-BRANCHING-PLAN.md) – Branching strategy and workflow
 - [POC-3 Implementation Plan](docs/POC-3-Implementation/implementation-plan.md) – Phases 1–9, current status
 - [POC-3 Task List](docs/POC-3-Implementation/task-list.md) – Progress tracking checklist
@@ -624,7 +625,8 @@ For details, see [Trunk-Based Branching Plan](docs/POC-3-Implementation/TRUNK-BA
 - ✅ **Accessibility:** WCAG 2.1 Level AA - Substantially Conformant (94%)
 - ✅ **Testing:** 527 accessibility tests + unit/integration/E2E test suites
 - ✅ **Trunk-Based Development:** Main-only strategy with feature flags
-- ✅ **CD Ready:** Deployment plan available (Railway + Vercel, ~$20-40/mo)
+- ✅ **Backend Deployed:** All 5 services running on Railway (auto-deploy enabled)
+- ⏳ **Frontend Deployment:** Ready to deploy to Vercel (Phase 3)
 
 **Architectural Maturity:**
 - Distributed systems design with bounded contexts
@@ -639,7 +641,7 @@ For details, see [Trunk-Based Branching Plan](docs/POC-3-Implementation/TRUNK-BA
 - Blue/green deployments
 - Service mesh (using direct service-to-service calls)
 
-**Next Phase:** Execute CD deployment to Railway + Vercel for live stakeholder demo
+**Next Phase:** Deploy frontend to Vercel (Phase 3) for live stakeholder demo
 
 ---
 
@@ -649,6 +651,6 @@ For detailed setup instructions, troubleshooting, and development workflows, ref
 
 ---
 
-**Last Updated:** February 13, 2026
-**Status:** POC-3 Complete + Security Hardening (Backend + Frontend) + CI Pipeline + Accessibility + CD Ready
-**Next Phase:** Execute CD Deployment (Railway + Vercel for POC Demo)
+**Last Updated:** March 17, 2026
+**Status:** POC-3 Complete + Security Hardening + CI Pipeline + Accessibility + Backend Deployed (Railway ✅)
+**Next Phase:** Frontend Deployment to Vercel (Phase 3)
