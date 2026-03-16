@@ -1,0 +1,8 @@
+# Railway Nixpacks Configuration
+# This tells Railway to use pnpm as the package manager
+
+[phases.setup]
+nixPkgs = ["nodejs_22", "pnpm"]
+
+[phases.install]
+cmds = ["pnpm install --frozen-lockfile"]
