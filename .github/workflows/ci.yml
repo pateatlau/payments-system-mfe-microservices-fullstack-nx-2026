@@ -346,10 +346,10 @@ jobs:
 
       - name: Run database migrations
         run: |
-          cd $GITHUB_WORKSPACE/apps/auth-service && npx prisma migrate deploy
-          cd $GITHUB_WORKSPACE/apps/payments-service && npx prisma migrate deploy
-          cd $GITHUB_WORKSPACE/apps/admin-service && npx prisma migrate deploy
-          cd $GITHUB_WORKSPACE/apps/profile-service && npx prisma migrate deploy
+          cd $GITHUB_WORKSPACE/apps/auth-service && DATABASE_URL=$AUTH_DATABASE_URL npx prisma migrate deploy
+          cd $GITHUB_WORKSPACE/apps/payments-service && DATABASE_URL=$PAYMENTS_DATABASE_URL npx prisma migrate deploy
+          cd $GITHUB_WORKSPACE/apps/admin-service && DATABASE_URL=$ADMIN_DATABASE_URL npx prisma migrate deploy
+          cd $GITHUB_WORKSPACE/apps/profile-service && DATABASE_URL=$PROFILE_DATABASE_URL npx prisma migrate deploy
 
       - name: Derive appropriate SHAs for base and head
         id: set-shas
@@ -699,10 +699,10 @@ jobs:
 
       - name: Run database migrations
         run: |
-          cd $GITHUB_WORKSPACE/apps/auth-service && npx prisma migrate deploy
-          cd $GITHUB_WORKSPACE/apps/payments-service && npx prisma migrate deploy
-          cd $GITHUB_WORKSPACE/apps/admin-service && npx prisma migrate deploy
-          cd $GITHUB_WORKSPACE/apps/profile-service && npx prisma migrate deploy
+          cd $GITHUB_WORKSPACE/apps/auth-service && DATABASE_URL=$AUTH_DATABASE_URL npx prisma migrate deploy
+          cd $GITHUB_WORKSPACE/apps/payments-service && DATABASE_URL=$PAYMENTS_DATABASE_URL npx prisma migrate deploy
+          cd $GITHUB_WORKSPACE/apps/admin-service && DATABASE_URL=$ADMIN_DATABASE_URL npx prisma migrate deploy
+          cd $GITHUB_WORKSPACE/apps/profile-service && DATABASE_URL=$PROFILE_DATABASE_URL npx prisma migrate deploy
 
       - name: Seed auth database for E2E tests
         run: pnpm db:auth:seed
