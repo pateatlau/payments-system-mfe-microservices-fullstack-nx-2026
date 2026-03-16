@@ -90,7 +90,7 @@ const rawConfig = {
   port: process.env['AUTH_SERVICE_PORT'],
   nodeEnv: process.env['NODE_ENV'],
   database: {
-    url: process.env['AUTH_DATABASE_URL'],
+    url: process.env['DATABASE_URL'] ?? process.env['AUTH_DATABASE_URL'],
   },
   jwtSecret: jwtSecrets[0]?.secret ?? '',
   jwtRefreshSecret: jwtRefreshSecrets[0]?.secret ?? '',

@@ -84,7 +84,7 @@ auth-service
 **Build Command:**
 
 ```bash
-pnpm install --frozen-lockfile && pnpm db:auth:generate && pnpm nx build auth-service --configuration=production && cd dist/apps/auth-service && echo "" > pnpm-workspace.yaml && pnpm install --frozen-lockfile && mkdir -p apps/auth-service/prisma && cp ../../../apps/auth-service/prisma/schema.prisma apps/auth-service/prisma/ && npx prisma generate --schema=apps/auth-service/prisma/schema.prisma
+pnpm install --frozen-lockfile && pnpm db:auth:generate && pnpm nx build auth-service --configuration=production && cd dist/apps/auth-service && echo "" > pnpm-workspace.yaml && pnpm install --frozen-lockfile && cp -r ../../../apps/auth-service/prisma apps/auth-service/ && npx prisma generate --schema=apps/auth-service/prisma/schema.prisma
 ```
 
 **Start Command:**
@@ -109,9 +109,15 @@ PORT=3001
 NODE_ENV=production
 DATABASE_URL=${{auth-db.DATABASE_URL}}
 JWT_SECRET=adbbaf99a5fc72e3e2bdf31723391ddfbf68b1572f4edcd927dcfda58b7aec346828894a1e5345ada4c6c7055cbf128d6d5563efc31c88c5d0a8f391d9cb2d27
+JWT_REFRESH_SECRET=<generate-a-unique-secret-here>
+REDIS_URL=${{redis.REDIS_URL}}
+RABBITMQ_URL=<YOUR_CLOUDAMQP_URL_HERE>
 ```
 
-**Note:** Railway will automatically resolve `${{auth-db.DATABASE_URL}}` to the auth-db connection string.
+**IMPORTANT:**
+- `JWT_REFRESH_SECRET` must be a unique, secure string (different from JWT_SECRET). Generate with: `openssl rand -hex 64`
+- Railway will automatically resolve `${{auth-db.DATABASE_URL}}` to the auth-db connection string
+- Replace `<YOUR_CLOUDAMQP_URL_HERE>` with your CloudAMQP URL
 
 ### Step 1.4: Link to Database
 
@@ -157,7 +163,7 @@ payments-service
 **Build Command:**
 
 ```bash
-pnpm install --frozen-lockfile && pnpm db:payments:generate && pnpm nx build payments-service --configuration=production && cd dist/apps/payments-service && echo "" > pnpm-workspace.yaml && pnpm install --frozen-lockfile && mkdir -p apps/payments-service/prisma && cp ../../../apps/payments-service/prisma/schema.prisma apps/payments-service/prisma/ && npx prisma generate --schema=apps/payments-service/prisma/schema.prisma
+pnpm install --frozen-lockfile && pnpm db:payments:generate && pnpm nx build payments-service --configuration=production && cd dist/apps/payments-service && echo "" > pnpm-workspace.yaml && pnpm install --frozen-lockfile && cp -r ../../../apps/payments-service/prisma apps/payments-service/ && npx prisma generate --schema=apps/payments-service/prisma/schema.prisma
 ```
 
 **Start Command:**
@@ -179,11 +185,12 @@ libs/**
 PORT=3002
 NODE_ENV=production
 DATABASE_URL=${{payments-db.DATABASE_URL}}
-RAZORPAY_KEY_ID=test_key_placeholder
-RAZORPAY_KEY_SECRET=test_secret_placeholder
+REDIS_URL=${{redis.REDIS_URL}}
+RABBITMQ_URL=<YOUR_CLOUDAMQP_URL_HERE>
+AUTH_SERVICE_URL=http://auth-service.railway.internal:3001
 ```
 
-**Note:** For POC demo, you can use placeholder Razorpay keys. Replace with real test keys if you want to test actual payment flows.
+**Note:** Razorpay keys (`RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`) are optional for POC.
 
 ### Step 2.4: Deploy
 
@@ -214,7 +221,7 @@ admin-service
 **Build Command:**
 
 ```bash
-pnpm install --frozen-lockfile && pnpm db:admin:generate && pnpm nx build admin-service --configuration=production && cd dist/apps/admin-service && echo "" > pnpm-workspace.yaml && pnpm install --frozen-lockfile && mkdir -p apps/admin-service/prisma && cp ../../../apps/admin-service/prisma/schema.prisma apps/admin-service/prisma/ && npx prisma generate --schema=apps/admin-service/prisma/schema.prisma
+pnpm install --frozen-lockfile && pnpm db:admin:generate && pnpm nx build admin-service --configuration=production && cd dist/apps/admin-service && echo "" > pnpm-workspace.yaml && pnpm install --frozen-lockfile && cp -r ../../../apps/admin-service/prisma apps/admin-service/ && npx prisma generate --schema=apps/admin-service/prisma/schema.prisma
 ```
 
 **Start Command:**
@@ -236,6 +243,8 @@ libs/**
 PORT=3003
 NODE_ENV=production
 DATABASE_URL=${{admin-db.DATABASE_URL}}
+RABBITMQ_URL=<YOUR_CLOUDAMQP_URL_HERE>
+AUTH_SERVICE_URL=http://auth-service.railway.internal:3001
 ```
 
 ### Step 3.4: Deploy
@@ -266,7 +275,7 @@ profile-service
 **Build Command:**
 
 ```bash
-pnpm install --frozen-lockfile && pnpm db:profile:generate && pnpm nx build profile-service --configuration=production && cd dist/apps/profile-service && echo "" > pnpm-workspace.yaml && pnpm install --frozen-lockfile && mkdir -p apps/profile-service/prisma && cp ../../../apps/profile-service/prisma/schema.prisma apps/profile-service/prisma/ && npx prisma generate --schema=apps/profile-service/prisma/schema.prisma
+pnpm install --frozen-lockfile && pnpm db:profile:generate && pnpm nx build profile-service --configuration=production && cd dist/apps/profile-service && echo "" > pnpm-workspace.yaml && pnpm install --frozen-lockfile && cp -r ../../../apps/profile-service/prisma apps/profile-service/ && npx prisma generate --schema=apps/profile-service/prisma/schema.prisma
 ```
 
 **Start Command:**
@@ -288,6 +297,9 @@ libs/**
 PORT=3004
 NODE_ENV=production
 DATABASE_URL=${{profile-db.DATABASE_URL}}
+REDIS_URL=${{redis.REDIS_URL}}
+JWT_SECRET=adbbaf99a5fc72e3e2bdf31723391ddfbf68b1572f4edcd927dcfda58b7aec346828894a1e5345ada4c6c7055cbf128d6d5563efc31c88c5d0a8f391d9cb2d27
+AUTH_SERVICE_URL=http://auth-service.railway.internal:3001
 ```
 
 ### Step 4.4: Deploy
@@ -342,18 +354,16 @@ libs/**
 PORT=3000
 NODE_ENV=production
 JWT_SECRET=adbbaf99a5fc72e3e2bdf31723391ddfbf68b1572f4edcd927dcfda58b7aec346828894a1e5345ada4c6c7055cbf128d6d5563efc31c88c5d0a8f391d9cb2d27
-JWT_EXPIRES_IN=15m
-REFRESH_TOKEN_EXPIRES_IN=7d
+JWT_REFRESH_SECRET=<generate-a-unique-secret-here>
 REDIS_URL=${{redis.REDIS_URL}}
-RABBITMQ_URL=<YOUR_CLOUDAMQP_URL_HERE>
 CORS_ORIGINS=https://localhost,http://localhost:4200
 AUTH_SERVICE_URL=http://auth-service.railway.internal:3001
 PAYMENTS_SERVICE_URL=http://payments-service.railway.internal:3002
 ADMIN_SERVICE_URL=http://admin-service.railway.internal:3003
 PROFILE_SERVICE_URL=http://profile-service.railway.internal:3004
-REQUEST_TIMEOUT_MS=5000
-RETRY_ATTEMPTS=1
 ```
+
+**IMPORTANT:** `JWT_REFRESH_SECRET` must match the value used in auth-service. Generate with: `openssl rand -hex 64`
 
 **IMPORTANT NOTES:**
 
