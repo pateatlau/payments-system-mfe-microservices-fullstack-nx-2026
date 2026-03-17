@@ -91,8 +91,10 @@ apps/auth-mfe
 **Build Command:**
 
 ```bash
-cd ../.. && pnpm install --frozen-lockfile && pnpm nx build auth-mfe --configuration=production
+cd ../.. && pnpm install --frozen-lockfile --ignore-scripts && pnpm nx build auth-mfe --configuration=production
 ```
+
+**Note:** The `--ignore-scripts` flag prevents Prisma postinstall scripts from running (frontend apps don't need Prisma).
 
 **Output Directory:**
 
@@ -171,7 +173,7 @@ apps/payments-mfe
 **Build Command:**
 
 ```bash
-cd ../.. && pnpm install --frozen-lockfile && pnpm nx build payments-mfe --configuration=production
+cd ../.. && pnpm install --frozen-lockfile --ignore-scripts && pnpm nx build payments-mfe --configuration=production
 ```
 
 **Output Directory:**
@@ -228,7 +230,7 @@ apps/admin-mfe
 **Build Command:**
 
 ```bash
-cd ../.. && pnpm install --frozen-lockfile && pnpm nx build admin-mfe --configuration=production
+cd ../.. && pnpm install --frozen-lockfile --ignore-scripts && pnpm nx build admin-mfe --configuration=production
 ```
 
 **Output Directory:**
@@ -284,7 +286,7 @@ apps/profile-mfe
 **Build Command:**
 
 ```bash
-cd ../.. && pnpm install --frozen-lockfile && pnpm nx build profile-mfe --configuration=production
+cd ../.. && pnpm install --frozen-lockfile --ignore-scripts && pnpm nx build profile-mfe --configuration=production
 ```
 
 **Output Directory:**
@@ -342,10 +344,12 @@ apps/shell
 **Build Command:**
 
 ```bash
-cd ../.. && pnpm install --frozen-lockfile && pnpm build:remotes && pnpm nx build shell --configuration=production
+cd ../.. && pnpm install --frozen-lockfile --ignore-scripts && pnpm build:remotes && pnpm nx build shell --configuration=production
 ```
 
-**Note:** `pnpm build:remotes` builds all remote MFEs first to ensure Module Federation manifests are available.
+**Notes:**
+- `--ignore-scripts` prevents Prisma postinstall scripts from running (frontend apps don't need Prisma)
+- `pnpm build:remotes` builds all remote MFEs first to ensure Module Federation manifests are available
 
 **Output Directory:**
 

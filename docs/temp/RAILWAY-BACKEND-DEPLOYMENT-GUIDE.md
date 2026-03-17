@@ -1,9 +1,55 @@
 # Railway Backend Deployment Guide - Step-by-Step
 
 **Date:** March 16, 2026
-**Updated:** March 16, 2026 (v2 - fixed build/start commands for unbundled esbuild)
-**Status:** Ready to Deploy
+**Updated:** March 17, 2026 (v4 - ALL services deployed successfully)
+**Status:** ✅ COMPLETED
 **Repository:** https://github.com/pateatlau/payments-system-mfe-microservices-fullstack-nx-2026
+
+---
+
+## 🚀 Deployment Progress
+
+| Service | Status | Notes |
+|---------|--------|-------|
+| Auth Service | ✅ **DEPLOYED** | Running successfully on Railway |
+| Payments Service | ✅ **DEPLOYED** | Running successfully on Railway |
+| Admin Service | ✅ **DEPLOYED** | Running successfully on Railway |
+| Profile Service | ✅ **DEPLOYED** | Running successfully on Railway |
+| API Gateway | ✅ **DEPLOYED** | Running successfully on Railway |
+
+**🎉 ALL SERVICES SUCCESSFULLY DEPLOYED TO RAILWAY! 🎉**
+
+---
+
+## 📋 Quick Reference - Copy These Values
+
+**RabbitMQ URL (CloudAMQP):**
+```
+<Your CloudAMQP URL from Phase 1 - format: amqps://username:password@host/vhost>
+```
+
+**SECURITY NOTE:** Never commit actual credentials to version control. Store in Railway environment variables only.
+
+**Railway Database References:**
+```
+${{auth-db.DATABASE_URL}}
+${{payments-db.DATABASE_URL}}
+${{admin-db.DATABASE_URL}}
+${{profile-db.DATABASE_URL}}
+```
+
+**Redis Reference:**
+```
+${{redis.REDIS_URL}}
+```
+
+**JWT Secrets (use the values you generated in "Generate Secrets" section below):**
+- `JWT_SECRET` - Same across auth-service, profile-service, and api-gateway
+- `JWT_REFRESH_SECRET` - Same across auth-service and api-gateway
+
+**Sentry DSN (OPTIONAL):**
+- Get from: https://sentry.io → Settings → Projects → <your-project> → Client Keys (DSN)
+- If not provided, error tracking will be disabled but services will still run
 
 ---
 
@@ -68,7 +114,17 @@ This monorepo uses **Nx + esbuild with `bundle: false`**. This means:
 
 ---
 
-## Service 1: Auth Service
+## Service 1: Auth Service ✅ COMPLETED
+
+**Status:** ✅ Successfully deployed and running on Railway
+
+This service has been deployed and verified. You can check the logs to confirm it's running:
+- ✅ "Auth Service started on port 3001"
+- ✅ "Connected to Redis"
+- ✅ "RabbitMQ Connected successfully"
+
+<details>
+<summary>Click to view deployment steps (for reference)</summary>
 
 ### Step 1.1: Create Service in Railway UI
 
@@ -117,16 +173,17 @@ Click on the service → **Variables** tab → **Raw Editor**:
 PORT=3001
 NODE_ENV=production
 DATABASE_URL=${{auth-db.DATABASE_URL}}
-JWT_SECRET=<your-generated-jwt-secret-from-step-above>
-JWT_REFRESH_SECRET=<generate-a-unique-secret-here>
+JWT_SECRET=<your-generated-jwt-secret>
+JWT_REFRESH_SECRET=<your-generated-jwt-refresh-secret>
 REDIS_URL=${{redis.REDIS_URL}}
-RABBITMQ_URL=<YOUR_CLOUDAMQP_URL_HERE>
+RABBITMQ_URL=<your-cloudamqp-url-from-phase-1>
+SENTRY_DSN=<optional-your-sentry-dsn>
 ```
 
 **IMPORTANT:**
-- `JWT_REFRESH_SECRET` must be a unique, secure string (different from JWT_SECRET). Generate with: `openssl rand -hex 64`
+- `JWT_SECRET` and `JWT_REFRESH_SECRET` must be the SAME values you generated in the "Generate Secrets" section
 - Railway will automatically resolve `${{auth-db.DATABASE_URL}}` to the auth-db connection string
-- Replace `<YOUR_CLOUDAMQP_URL_HERE>` with your CloudAMQP URL
+- `SENTRY_DSN` is OPTIONAL - if not provided, error tracking will be disabled (service will still run)
 
 ### Step 1.4: Link to Database
 
@@ -148,9 +205,16 @@ Once deployed, the service will be available at:
 http://auth-service.railway.internal:3001
 ```
 
+</details>
+
 ---
 
-## Service 2: Payments Service
+## Service 2: Payments Service ✅ COMPLETED
+
+**Status:** ✅ Successfully deployed and running on Railway
+
+<details>
+<summary>Click to view deployment steps (for reference)</summary>
 
 ### Step 2.1: Create Service
 
@@ -190,16 +254,22 @@ libs/**
 
 ### Step 2.3: Set Environment Variables
 
+Click on the service → **Variables** tab → **Raw Editor**:
+
 ```bash
 PORT=3002
 NODE_ENV=production
 DATABASE_URL=${{payments-db.DATABASE_URL}}
 REDIS_URL=${{redis.REDIS_URL}}
-RABBITMQ_URL=<YOUR_CLOUDAMQP_URL_HERE>
+RABBITMQ_URL=<your-cloudamqp-url-from-phase-1>
 AUTH_SERVICE_URL=http://auth-service.railway.internal:3001
+SENTRY_DSN=<optional-your-sentry-dsn>
 ```
 
-**Note:** Razorpay keys (`RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`) are optional for POC.
+**Notes:**
+- Railway will automatically resolve `${{payments-db.DATABASE_URL}}` to the payments-db connection string
+- `SENTRY_DSN` is OPTIONAL - if not provided, error tracking will be disabled (service will still run)
+- Razorpay keys (`RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`) are NOT required for POC
 
 ### Step 2.4: Deploy
 
@@ -207,9 +277,16 @@ AUTH_SERVICE_URL=http://auth-service.railway.internal:3001
 2. Wait for **SUCCESS** status
 3. Internal URL: `http://payments-service.railway.internal:3002`
 
+</details>
+
 ---
 
-## Service 3: Admin Service
+## Service 3: Admin Service ✅ COMPLETED
+
+**Status:** ✅ Successfully deployed and running on Railway
+
+<details>
+<summary>Click to view deployment steps (for reference)</summary>
 
 ### Step 3.1: Create Service
 
@@ -248,22 +325,36 @@ libs/**
 
 ### Step 3.3: Set Environment Variables
 
+Click on the service → **Variables** tab → **Raw Editor**:
+
 ```bash
 PORT=3003
 NODE_ENV=production
 DATABASE_URL=${{admin-db.DATABASE_URL}}
-RABBITMQ_URL=<YOUR_CLOUDAMQP_URL_HERE>
+RABBITMQ_URL=<your-cloudamqp-url-from-phase-1>
 AUTH_SERVICE_URL=http://auth-service.railway.internal:3001
+SENTRY_DSN=<optional-your-sentry-dsn>
 ```
+
+**Notes:**
+- Railway will automatically resolve `${{admin-db.DATABASE_URL}}` to the admin-db connection string
+- `SENTRY_DSN` is OPTIONAL - if not provided, error tracking will be disabled (service will still run)
 
 ### Step 3.4: Deploy
 
 1. Deploy and wait for **SUCCESS**
 2. Internal URL: `http://admin-service.railway.internal:3003`
 
+</details>
+
 ---
 
-## Service 4: Profile Service
+## Service 4: Profile Service ✅ COMPLETED
+
+**Status:** ✅ Successfully deployed and running on Railway
+
+<details>
+<summary>Click to view deployment steps (for reference)</summary>
 
 ### Step 4.1: Create Service
 
@@ -302,23 +393,38 @@ libs/**
 
 ### Step 4.3: Set Environment Variables
 
+Click on the service → **Variables** tab → **Raw Editor**:
+
 ```bash
 PORT=3004
 NODE_ENV=production
 DATABASE_URL=${{profile-db.DATABASE_URL}}
 REDIS_URL=${{redis.REDIS_URL}}
-JWT_SECRET=<your-generated-jwt-secret-from-step-above>
+JWT_SECRET=<your-generated-jwt-secret>
 AUTH_SERVICE_URL=http://auth-service.railway.internal:3001
+SENTRY_DSN=<optional-your-sentry-dsn>
 ```
+
+**Notes:**
+- `JWT_SECRET` must be the SAME value you used for auth-service and will use for api-gateway
+- Railway will automatically resolve `${{profile-db.DATABASE_URL}}` to the profile-db connection string
+- `SENTRY_DSN` is OPTIONAL - if not provided, error tracking will be disabled (service will still run)
 
 ### Step 4.4: Deploy
 
 1. Deploy and wait for **SUCCESS**
 2. Internal URL: `http://profile-service.railway.internal:3004`
 
+</details>
+
 ---
 
-## Service 5: API Gateway
+## Service 5: API Gateway ✅ COMPLETED
+
+**Status:** ✅ Successfully deployed and running on Railway
+
+<details>
+<summary>Click to view deployment steps (for reference)</summary>
 
 **IMPORTANT:** Deploy API Gateway **LAST** after all 4 backend services are running!
 
@@ -359,26 +465,29 @@ libs/**
 
 ### Step 5.3: Set Environment Variables
 
+Click on the service → **Variables** tab → **Raw Editor**:
+
 ```bash
 PORT=3000
 NODE_ENV=production
-JWT_SECRET=<your-generated-jwt-secret-from-step-above>
-JWT_REFRESH_SECRET=<generate-a-unique-secret-here>
+JWT_SECRET=<your-generated-jwt-secret>
+JWT_REFRESH_SECRET=<your-generated-jwt-refresh-secret>
 REDIS_URL=${{redis.REDIS_URL}}
 CORS_ORIGINS=https://localhost,http://localhost:4200
 AUTH_SERVICE_URL=http://auth-service.railway.internal:3001
 PAYMENTS_SERVICE_URL=http://payments-service.railway.internal:3002
 ADMIN_SERVICE_URL=http://admin-service.railway.internal:3003
 PROFILE_SERVICE_URL=http://profile-service.railway.internal:3004
+SENTRY_DSN=<optional-your-sentry-dsn>
 ```
 
-**IMPORTANT:** `JWT_REFRESH_SECRET` must match the value used in auth-service. Generate with: `openssl rand -hex 64`
+**CRITICAL REQUIREMENTS:**
 
-**IMPORTANT NOTES:**
-
-1. Replace `<YOUR_CLOUDAMQP_URL_HERE>` with your CloudAMQP URL (should be saved in Railway from previous session)
-2. The `CORS_ORIGINS` will be updated later when we deploy to Vercel - for now, allow localhost
-3. All `*_SERVICE_URL` variables use Railway's internal networking (`.railway.internal`)
+1. **JWT_SECRET** - Must be the SAME value you used for auth-service and profile-service
+2. **JWT_REFRESH_SECRET** - Must be the SAME value you used for auth-service (this secret is used by both services to sign and verify refresh tokens)
+3. **CORS_ORIGINS** - Will be updated later when we deploy to Vercel - for now, allow localhost
+4. **All SERVICE_URL variables** - Use Railway's internal networking (`.railway.internal`) - these will be auto-resolved since the services are already deployed
+5. **SENTRY_DSN** - OPTIONAL - if not provided, error tracking will be disabled (service will still run)
 
 ### Step 5.4: Generate Public Domain
 
@@ -393,6 +502,8 @@ PROFILE_SERVICE_URL=http://profile-service.railway.internal:3004
 1. Click **"Deploy"**
 2. Wait for **SUCCESS**
 3. Note the public URL
+
+</details>
 
 ---
 
@@ -410,22 +521,30 @@ After all 5 services are deployed, verify each one:
 Open these URLs in your browser (replace `<api-gateway-url>` with your actual URL):
 
 ```bash
-# API Gateway health
+# API Gateway health (basic health check)
 https://<api-gateway-url>/health
 
-# API Gateway ready check
-https://<api-gateway-url>/ready
+# API Gateway ready check (readiness probe)
+https://<api-gateway-url>/health/ready
 
-# API Gateway live check
-https://<api-gateway-url>/live
+# API Gateway live check (liveness probe)
+https://<api-gateway-url>/health/live
+
+# Circuit breaker status (advanced monitoring)
+https://<api-gateway-url>/health/circuits
 ```
 
-Expected response:
+Expected response for `/health`:
 
 ```json
 {
-  "status": "ok",
-  "timestamp": "2026-03-16T..."
+  "success": true,
+  "data": {
+    "status": "healthy",
+    "timestamp": "2026-03-17T...",
+    "service": "api-gateway",
+    "uptime": 1234.56
+  }
 }
 ```
 
@@ -569,10 +688,12 @@ Only the API Gateway should have a public URL - all backend services communicate
 Save these for documentation:
 
 ```bash
-# Common across all services
-JWT_SECRET=<your-generated-jwt-secret-from-step-above>
+# JWT Secrets (CRITICAL: Use same values across all services)
+JWT_SECRET=<your-generated-jwt-secret>
+JWT_REFRESH_SECRET=<your-generated-jwt-refresh-secret>
 
 # Database URLs (auto-generated by Railway)
+# Use format: DATABASE_URL=${{<db-name>.DATABASE_URL}}
 AUTH_DB_URL=${{auth-db.DATABASE_URL}}
 PAYMENTS_DB_URL=${{payments-db.DATABASE_URL}}
 ADMIN_DB_URL=${{admin-db.DATABASE_URL}}
@@ -581,27 +702,86 @@ PROFILE_DB_URL=${{profile-db.DATABASE_URL}}
 # Redis URL (auto-generated by Railway)
 REDIS_URL=${{redis.REDIS_URL}}
 
-# RabbitMQ URL (from CloudAMQP)
-RABBITMQ_URL=<your-cloudamqp-url>
+# RabbitMQ URL (from CloudAMQP - Little Lemur free plan)
+RABBITMQ_URL=<your-cloudamqp-url-from-phase-1>
+
+# Sentry DSN (OPTIONAL - for error tracking)
+SENTRY_DSN=<optional-your-sentry-dsn>
+# Get from: https://sentry.io → Settings → Projects → <project> → Client Keys (DSN)
 ```
 
 ---
 
 ## Deployment Checklist
 
-Before proceeding to Phase 3, verify:
+**🎉 DEPLOYMENT COMPLETED! 🎉**
 
-- [ ] All 5 services show **SUCCESS** status in Railway
-- [ ] API Gateway has a public URL generated
-- [ ] `/health` endpoint returns 200 OK
-- [ ] `/api-docs` shows Swagger documentation
+All services deployed:
+
+- [x] Auth Service deployed and verified ✅
+- [x] Payments Service deployed and verified ✅
+- [x] Admin Service deployed and verified ✅
+- [x] Profile Service deployed and verified ✅
+- [x] API Gateway deployed and verified ✅
+
+Final verification (recommended):
+
+- [x] All 5 services show **SUCCESS** status in Railway
+- [ ] API Gateway has a public URL generated (check Railway dashboard)
+- [ ] Test `/health` endpoint: `https://<api-gateway-url>/health`
+- [ ] Test `/health/ready` endpoint: `https://<api-gateway-url>/health/ready`
+- [ ] Test `/health/live` endpoint: `https://<api-gateway-url>/health/live`
+- [ ] Test `/api-docs` shows Swagger documentation: `https://<api-gateway-url>/api-docs`
 - [ ] All service logs show "Server started" messages
 - [ ] No **CRASHED** or **FAILED** deployments
 - [ ] All 4 databases are connected (check service logs)
 - [ ] Redis connection successful (check API Gateway logs)
-- [ ] JWT_SECRET saved securely
-- [ ] API Gateway public URL saved
+- [ ] JWT_SECRET and JWT_REFRESH_SECRET saved securely
+- [ ] API Gateway public URL saved for frontend deployment
 
 ---
 
-**Once all items are checked, you're ready for Phase 3: Vercel Frontend Deployment! 🚀**
+**✅ BACKEND DEPLOYMENT COMPLETE!**
+
+**Next Steps:**
+1. **Save the API Gateway public URL** - You'll need this for frontend deployment
+2. **Test the endpoints** - Verify `/health` and `/api-docs` are accessible
+3. **Proceed to Phase 3: Vercel Frontend Deployment** 🚀
+
+---
+
+## 🎯 Quick Verification Commands
+
+Once you have your API Gateway URL, test these endpoints:
+
+```bash
+# Replace <api-gateway-url> with your actual Railway URL
+
+# Basic health check
+curl https://<api-gateway-url>/health
+
+# Readiness check (dependencies ready)
+curl https://<api-gateway-url>/health/ready
+
+# Liveness check (service alive)
+curl https://<api-gateway-url>/health/live
+
+# Circuit breaker status (advanced monitoring)
+curl https://<api-gateway-url>/health/circuits
+
+# API documentation
+open https://<api-gateway-url>/api-docs
+```
+
+Expected response for health endpoints:
+```json
+{
+  "success": true,
+  "data": {
+    "status": "healthy",
+    "timestamp": "2026-03-17T...",
+    "service": "api-gateway",
+    "uptime": 1234.56
+  }
+}
+```
