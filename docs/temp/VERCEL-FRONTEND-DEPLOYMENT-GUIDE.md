@@ -64,10 +64,11 @@ https://shell-<unique-id>.vercel.app  (main application URL)
 >
 > This monorepo has Prisma (backend-only) and an Nx wrapper that cause issues on Vercel:
 >
-> 1. **Install Command MUST be set explicitly** to `pnpm install --frozen-lockfile --ignore-scripts`. If left blank, Vercel runs a default `pnpm install` WITHOUT `--ignore-scripts`, which triggers Prisma's postinstall and fails because frontend apps have no Prisma schema.
+> 1. **Install Command MUST be set explicitly** to `pnpm install --frozen-lockfile --ignore-scripts --prod=false`. If left blank, Vercel runs a default `pnpm install` WITHOUT `--ignore-scripts`, which triggers Prisma's postinstall and fails because frontend apps have no Prisma schema. The `--prod=false` flag ensures devDependencies (including `nx`) are installed even when `NODE_ENV=production` (which Vercel sets automatically).
 > 2. **`pnpm exec nx`** runs Nx directly from `node_modules/.bin/nx`, bypassing the Nx wrapper (`.nx/nxw.js`) which tries to run `npm i` internally and fails with `--ignore-scripts`.
 > 3. **Do NOT set Root Directory** — leave it blank so Vercel runs from the repo root. This ensures `pnpm install` uses the root `pnpm-lock.yaml` and the build can find all workspace packages.
 > 4. **`PRISMA_SKIP_POSTINSTALL_GENERATE=true`** environment variable is set as a safety net — this is Prisma's native mechanism to skip its postinstall generate step.
+> 5. **Do NOT set `NODE_ENV=production`** as a Vercel environment variable — Vercel sets this automatically. Setting it explicitly causes `pnpm install` to skip devDependencies (where `nx` lives), breaking the build.
 
 ---
 
@@ -100,7 +101,7 @@ auth-mfe
 **Install Command:**
 
 ```bash
-pnpm install --frozen-lockfile --ignore-scripts
+pnpm install --frozen-lockfile --ignore-scripts --prod=false
 ```
 
 **Build Command:**
@@ -122,14 +123,12 @@ Click **"Environment Variables"** section and add:
 | Name                                   | Value                                |
 | -------------------------------------- | ------------------------------------ |
 | `NX_API_BASE_URL`                      | `https://<your-api-gateway-url>/api` |
-| `NODE_ENV`                             | `production`                         |
 | `PRISMA_SKIP_POSTINSTALL_GENERATE`     | `true`                               |
 
 **Example:**
 
 ```bash
 NX_API_BASE_URL=https://api-gateway-production-abc123.up.railway.app/api
-NODE_ENV=production
 ```
 
 **IMPORTANT:** Replace `<your-api-gateway-url>` with your actual Railway API Gateway URL from Phase 2!
@@ -177,7 +176,7 @@ payments-mfe
 **Install Command:**
 
 ```bash
-pnpm install --frozen-lockfile --ignore-scripts
+pnpm install --frozen-lockfile --ignore-scripts --prod=false
 ```
 
 **Build Command:**
@@ -197,7 +196,6 @@ dist/apps/payments-mfe
 | Name                                   | Value                                |
 | -------------------------------------- | ------------------------------------ |
 | `NX_API_BASE_URL`                      | `https://<your-api-gateway-url>/api` |
-| `NODE_ENV`                             | `production`                         |
 | `PRISMA_SKIP_POSTINSTALL_GENERATE`     | `true`                               |
 
 ### Step 2.4: Deploy & Save URL
@@ -231,7 +229,7 @@ admin-mfe
 **Install Command:**
 
 ```bash
-pnpm install --frozen-lockfile --ignore-scripts
+pnpm install --frozen-lockfile --ignore-scripts --prod=false
 ```
 
 **Build Command:**
@@ -251,7 +249,6 @@ dist/apps/admin-mfe
 | Name                                   | Value                                |
 | -------------------------------------- | ------------------------------------ |
 | `NX_API_BASE_URL`                      | `https://<your-api-gateway-url>/api` |
-| `NODE_ENV`                             | `production`                         |
 | `PRISMA_SKIP_POSTINSTALL_GENERATE`     | `true`                               |
 
 ### Step 3.4: Deploy & Save URL
@@ -284,7 +281,7 @@ profile-mfe
 **Install Command:**
 
 ```bash
-pnpm install --frozen-lockfile --ignore-scripts
+pnpm install --frozen-lockfile --ignore-scripts --prod=false
 ```
 
 **Build Command:**
@@ -304,7 +301,6 @@ dist/apps/profile-mfe
 | Name                                   | Value                                |
 | -------------------------------------- | ------------------------------------ |
 | `NX_API_BASE_URL`                      | `https://<your-api-gateway-url>/api` |
-| `NODE_ENV`                             | `production`                         |
 | `PRISMA_SKIP_POSTINSTALL_GENERATE`     | `true`                               |
 
 ### Step 4.4: Deploy & Save URL
@@ -339,7 +335,7 @@ shell
 **Install Command:**
 
 ```bash
-pnpm install --frozen-lockfile --ignore-scripts
+pnpm install --frozen-lockfile --ignore-scripts --prod=false
 ```
 
 **Build Command:**
@@ -367,7 +363,6 @@ dist/apps/shell
 | `NX_PAYMENTS_MFE_URL`                  | Payments MFE Vercel URL | `https://payments-mfe-xyz.vercel.app`                      |
 | `NX_ADMIN_MFE_URL`                     | Admin MFE Vercel URL    | `https://admin-mfe-xyz.vercel.app`                         |
 | `NX_PROFILE_MFE_URL`                   | Profile MFE Vercel URL  | `https://profile-mfe-xyz.vercel.app`                       |
-| `NODE_ENV`                             | `production`            | `production`                                               |
 | `PRISMA_SKIP_POSTINSTALL_GENERATE`     | `true`                  | `true`                                                     |
 
 **CRITICAL:** Replace all `<...>` placeholders with your actual URLs from previous deployments!
@@ -516,9 +511,18 @@ Visit each MFE URL directly:
 
 **Fix (3 layers — use ALL of them):**
 
-1. **Set Install Command explicitly** to `pnpm install --frozen-lockfile --ignore-scripts`. Do NOT leave it blank — Vercel's default install runs `pnpm install` WITHOUT `--ignore-scripts`, which triggers Prisma's postinstall.
+1. **Set Install Command explicitly** to `pnpm install --frozen-lockfile --ignore-scripts --prod=false`. Do NOT leave it blank — Vercel's default install runs `pnpm install` WITHOUT `--ignore-scripts`, which triggers Prisma's postinstall.
 2. **Add `PRISMA_SKIP_POSTINSTALL_GENERATE=true`** as an environment variable in the Vercel project settings. This is Prisma's native mechanism to skip its postinstall generate step.
 3. The Build Command should NOT include `pnpm install` — it's handled by the Install Command.
+
+### Build Fails: "not found: nx" or "devDependencies: skipped"
+
+**Cause:** `NODE_ENV=production` is set as an environment variable, which causes `pnpm install` to skip devDependencies. Since `nx` is a devDependency, the build command can't find it.
+
+**Fix:**
+
+1. **Remove `NODE_ENV=production`** from Vercel environment variables — Vercel sets this automatically
+2. **Add `--prod=false`** to the Install Command: `pnpm install --frozen-lockfile --ignore-scripts --prod=false`
 
 ### Build Fails: "Cannot find module" (general)
 
@@ -527,7 +531,7 @@ Visit each MFE URL directly:
 **Fix:**
 
 1. Do NOT set Root Directory in Vercel — leave it blank so the build runs from repo root
-2. Verify `pnpm install --frozen-lockfile --ignore-scripts` runs before build
+2. Verify `pnpm install --frozen-lockfile --ignore-scripts --prod=false` runs before build
 3. Check `pnpm-lock.yaml` exists in repository root
 
 ### MFE Won't Load in Shell
@@ -689,7 +693,8 @@ PROFILE_MFE_URL=https://profile-mfe-<id>.vercel.app
 
 # For Each Vercel Project
 NX_API_BASE_URL=${API_GATEWAY_URL}/api
-NODE_ENV=production
+PRISMA_SKIP_POSTINSTALL_GENERATE=true
+# Note: Do NOT set NODE_ENV=production — Vercel sets this automatically
 
 # Shell App Additional Variables
 NX_AUTH_MFE_URL=${AUTH_MFE_URL}
