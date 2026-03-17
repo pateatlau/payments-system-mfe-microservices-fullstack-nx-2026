@@ -89,6 +89,13 @@ const getRemoteUrl = (mfeName, port) => {
     const mfeBaseUrl = process.env[envVarName];
 
     if (!mfeBaseUrl) {
+      // CI builds: Use placeholder URLs (won't be used at runtime)
+      // Vercel builds: Must have actual MFE URLs set
+      if (process.env.CI === 'true') {
+        console.warn(`[WARN] ${envVarName} not set in CI - using placeholder URL`);
+        return `https://placeholder.vercel.app/remoteEntry.js`;
+      }
+
       console.error(`[ERROR] Missing environment variable: ${envVarName}`);
       throw new Error(`Production build requires ${envVarName} to be set`);
     }
