@@ -23,16 +23,23 @@ const isDevelopment = !isProduction;
 // In production, NX_PUBLIC_PATH must be set to the MFE's Vercel URL (e.g.
 // https://payments-mfe.vercel.app/). Fail fast rather than silently falling
 // back to 'auto', which would reproduce the double-slash chunk URL bug.
+// CI builds (nx run-many --configuration=production) don't set NX_PUBLIC_PATH
+// and don't serve assets cross-origin, so 'auto' is safe there.
 if (isProduction && !process.env.NX_PUBLIC_PATH) {
-  throw new Error(
-    '[payments-mfe] NX_PUBLIC_PATH is required in production.\n' +
-      'Set it in Vercel project env vars, e.g.: https://payments-mfe.vercel.app/'
-  );
+  if (process.env.CI === 'true') {
+    console.warn('[WARN] [payments-mfe] NX_PUBLIC_PATH not set in CI - falling back to auto');
+  } else {
+    throw new Error(
+      '[payments-mfe] NX_PUBLIC_PATH is required in production.\n' +
+        'Set it in Vercel project env vars, e.g.: https://payments-mfe.vercel.app/'
+    );
+  }
 }
-const publicPath = isProduction
-  ? process.env.NX_PUBLIC_PATH.endsWith('/')
-    ? process.env.NX_PUBLIC_PATH
-    : `${process.env.NX_PUBLIC_PATH}/`
+const rawPublicPath = process.env.NX_PUBLIC_PATH;
+const publicPath = isProduction && rawPublicPath
+  ? rawPublicPath.endsWith('/')
+    ? rawPublicPath
+    : `${rawPublicPath}/`
   : 'auto';
 
 /**
