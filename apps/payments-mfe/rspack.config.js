@@ -124,7 +124,10 @@ module.exports = {
     path: path.resolve(__dirname, '../../dist/apps/payments-mfe'),
     // CRITICAL: uniqueName is required for Module Federation HMR
     uniqueName: 'paymentsMfe',
-    publicPath: 'auto',
+    // In production, 'auto' can fail cross-origin (shell loads remoteEntry.js from a
+    // different origin, making document.currentScript unreliable). Use NX_PUBLIC_PATH
+    // (e.g. https://payments-mfe.vercel.app/) set in the Vercel project env vars.
+    publicPath: isProduction ? process.env.NX_PUBLIC_PATH || 'auto' : 'auto',
     filename: isProduction ? '[name].[contenthash].js' : '[name].js',
     chunkFilename: isProduction
       ? '[name].[contenthash].chunk.js'
