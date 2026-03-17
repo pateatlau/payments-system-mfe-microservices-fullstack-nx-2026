@@ -87,8 +87,45 @@ const DEFAULT_CONFIG: Required<Omit<HealthCheckConfig, 'fetchFn'>> = {
 
 /**
  * Default MFE configurations based on environment
+ *
+ * Production: Uses NX_*_MFE_URL env vars (baked in at build time via DefinePlugin)
+ * HTTPS mode: MFEs accessed via nginx proxy (local dev)
+ * HTTP mode: Direct access to MFE dev servers (local dev)
  */
 export function getDefaultMfeConfigs(isHttpsMode: boolean): MfeConfig[] {
+  // Production: use env-var-based URLs if available
+  const envVars: Record<string, string | undefined> = {
+    NX_AUTH_MFE_URL: process.env['NX_AUTH_MFE_URL'],
+    NX_PAYMENTS_MFE_URL: process.env['NX_PAYMENTS_MFE_URL'],
+    NX_ADMIN_MFE_URL: process.env['NX_ADMIN_MFE_URL'],
+    NX_PROFILE_MFE_URL: process.env['NX_PROFILE_MFE_URL'],
+  };
+
+  const presentKeys = Object.keys(envVars).filter(k => Boolean(envVars[k]));
+  const missingKeys = Object.keys(envVars).filter(k => !envVars[k]);
+
+  if (presentKeys.length > 0 && missingKeys.length > 0) {
+    // Partial config — surface a clear error rather than silently using localhost
+    const message = `[MFE Health] Incomplete MFE URL configuration. Missing env var(s): ${missingKeys.join(', ')}. All four NX_*_MFE_URL vars must be set together.`;
+    if (process.env['NODE_ENV'] === 'production') {
+      throw new Error(message);
+    }
+    // eslint-disable-next-line no-console
+    console.error(message);
+  }
+
+  if (presentKeys.length === 4) {
+    return [
+      { name: 'authMfe', baseUrl: envVars['NX_AUTH_MFE_URL'] as string },
+      {
+        name: 'paymentsMfe',
+        baseUrl: envVars['NX_PAYMENTS_MFE_URL'] as string,
+      },
+      { name: 'adminMfe', baseUrl: envVars['NX_ADMIN_MFE_URL'] as string },
+      { name: 'profileMfe', baseUrl: envVars['NX_PROFILE_MFE_URL'] as string },
+    ];
+  }
+
   if (isHttpsMode) {
     // HTTPS mode: MFEs accessed via nginx proxy
     return [
@@ -246,13 +283,19 @@ export async function checkRemoteHealth(
     if (mergedConfig.updateCircuitBreaker) {
       remoteCircuitBreaker.recordFailure(
         mfe.name,
-        new Error(isTimeout ? `Health check timeout after ${mergedConfig.timeout}ms` : error)
+        new Error(
+          isTimeout
+            ? `Health check timeout after ${mergedConfig.timeout}ms`
+            : error
+        )
       );
     }
 
     return {
       healthy: false,
-      error: isTimeout ? `Health check timeout after ${mergedConfig.timeout}ms` : error,
+      error: isTimeout
+        ? `Health check timeout after ${mergedConfig.timeout}ms`
+        : error,
       duration,
       circuitState: remoteCircuitBreaker.getState(mfe.name),
     };
@@ -265,16 +308,18 @@ export async function checkRemoteHealth(
 /**
  * Validate that a health response has the required structure
  */
-function isValidHealthResponse(response: unknown): response is RemoteHealthResponse {
+function isValidHealthResponse(
+  response: unknown
+): response is RemoteHealthResponse {
   if (typeof response !== 'object' || response === null) return false;
 
   const r = response as Record<string, unknown>;
 
   return (
-    typeof r.status === 'string' &&
-    ['healthy', 'degraded', 'unhealthy'].includes(r.status) &&
-    typeof r.name === 'string' &&
-    typeof r.timestamp === 'number'
+    typeof r['status'] === 'string' &&
+    ['healthy', 'degraded', 'unhealthy'].includes(r['status']) &&
+    typeof r['name'] === 'string' &&
+    typeof r['timestamp'] === 'number'
   );
 }
 
@@ -423,10 +468,16 @@ export async function preloadHealthCheck(
   // Log health status
   if (status.status === 'all_healthy') {
     // eslint-disable-next-line no-console
-    console.log('[MFE Health] All remotes healthy:', status.healthyRemotes.join(', '));
+    console.log(
+      '[MFE Health] All remotes healthy:',
+      status.healthyRemotes.join(', ')
+    );
   } else if (status.status === 'all_unhealthy') {
     // eslint-disable-next-line no-console
-    console.error('[MFE Health] All remotes unhealthy:', status.unhealthyRemotes.join(', '));
+    console.error(
+      '[MFE Health] All remotes unhealthy:',
+      status.unhealthyRemotes.join(', ')
+    );
   } else {
     // eslint-disable-next-line no-console
     console.warn('[MFE Health] Some remotes unhealthy:');

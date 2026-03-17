@@ -422,8 +422,8 @@ module.exports = {
       {
         test: /\.css$/,
         use: [
-          // style-loader injects CSS into DOM via <style> tags (dev mode only) - executes LAST
-          ...(isDevelopment ? ['style-loader'] : []),
+          // Production: extract CSS to separate files; Development: inject via <style> tags
+          isDevelopment ? 'style-loader' : rspack.CssExtractRspackPlugin.loader,
           // css-loader processes @import and url() in CSS - executes SECOND
           'css-loader',
           // postcss-loader processes PostCSS plugins (Tailwind, Autoprefixer) - executes FIRST
@@ -485,6 +485,22 @@ module.exports = {
       'process.env.NODE_ENV': JSON.stringify(
         isProduction ? 'production' : 'development'
       ),
+      // MFE base URLs - used at runtime for health checks and other MFE interactions
+      'process.env.NX_AUTH_MFE_URL': JSON.stringify(
+        process.env.NX_AUTH_MFE_URL || ''
+      ),
+      'process.env.NX_PAYMENTS_MFE_URL': JSON.stringify(
+        process.env.NX_PAYMENTS_MFE_URL || ''
+      ),
+      'process.env.NX_ADMIN_MFE_URL': JSON.stringify(
+        process.env.NX_ADMIN_MFE_URL || ''
+      ),
+      'process.env.NX_PROFILE_MFE_URL': JSON.stringify(
+        process.env.NX_PROFILE_MFE_URL || ''
+      ),
+      'process.env.NX_ENABLE_SW': JSON.stringify(
+        process.env.NX_ENABLE_SW || ''
+      ),
     }),
     // Copy public assets (favicon.ico, etc.) to output directory
     new rspack.CopyRspackPlugin({
@@ -536,6 +552,15 @@ module.exports = {
       ? [
           new ReactRefreshPlugin({
             overlay: false, // Disable overlay to avoid conflicts with devServer overlay
+          }),
+        ]
+      : []),
+    // CSS extraction plugin - extracts CSS into separate files in production
+    ...(isProduction
+      ? [
+          new rspack.CssExtractRspackPlugin({
+            filename: '[name].[contenthash].css',
+            chunkFilename: '[name].[contenthash].chunk.css',
           }),
         ]
       : []),

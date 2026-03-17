@@ -239,7 +239,9 @@ module.exports = (env, argv) => {
         {
           test: /\.css$/,
           use: [
-            ...(isDevelopment ? ['style-loader'] : []),
+            isDevelopment
+              ? 'style-loader'
+              : rspack.CssExtractRspackPlugin.loader,
             'css-loader',
             {
               loader: 'postcss-loader',
@@ -325,6 +327,15 @@ module.exports = (env, argv) => {
       }),
       // React Fast Refresh plugin
       ...(isDevelopment ? [new ReactRefreshPlugin()] : []),
+      // CSS extraction plugin - extracts CSS into separate files in production
+      ...(isProduction
+        ? [
+            new rspack.CssExtractRspackPlugin({
+              filename: '[name].[contenthash].css',
+              chunkFilename: '[name].[contenthash].chunk.css',
+            }),
+          ]
+        : []),
     ],
     // Dev server configuration
     devServer: {

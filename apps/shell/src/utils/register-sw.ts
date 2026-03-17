@@ -4,7 +4,15 @@
  */
 
 export function registerServiceWorker(): void {
-  if ('serviceWorker' in navigator && process.env.NODE_ENV === 'production') {
+  // SW registration disabled until workbox build step is added to rspack pipeline.
+  // Without sw.js in the build output, registration causes a 404 error.
+  const enableSW = process.env['NX_ENABLE_SW'] === 'true';
+
+  if (
+    enableSW &&
+    'serviceWorker' in navigator &&
+    process.env.NODE_ENV === 'production'
+  ) {
     window.addEventListener('load', () => {
       navigator.serviceWorker
         .register('/sw.js')
