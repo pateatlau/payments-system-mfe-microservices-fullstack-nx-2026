@@ -455,9 +455,10 @@ The Shell app is the main entry point that loads remote MFEs.
 - [ ] Configure project:
   - **Framework Preset:** Other
   - **Root Directory:** _(leave blank — do NOT set this)_
-  - **Build Command:** `pnpm install --frozen-lockfile --ignore-scripts && pnpm exec nx run-many --target=build --projects=auth-mfe,payments-mfe,admin-mfe,profile-mfe --configuration=production --parallel && pnpm exec nx build shell --configuration=production`
+  - **Install Command:** `pnpm install --frozen-lockfile --ignore-scripts`
+  - **Build Command:** `pnpm exec nx run-many --target=build --projects=auth-mfe,payments-mfe,admin-mfe,profile-mfe --configuration=production --parallel && pnpm exec nx build shell --configuration=production`
   - **Output Directory:** `dist/apps/shell`
-  - **Install Command:** _(leave blank)_
+  - **Environment Variable:** `PRISMA_SKIP_POSTINSTALL_GENERATE=true`
 
 - [ ] Add environment variables:
 
@@ -490,9 +491,10 @@ NX_PROFILE_MFE_URL=https://<profile-mfe-vercel-url>
 - [ ] Import same repository
 - [ ] Configure:
   - **Root Directory:** _(leave blank)_
-  - **Build Command:** `pnpm install --frozen-lockfile --ignore-scripts && pnpm exec nx build auth-mfe --configuration=production`
+  - **Install Command:** `pnpm install --frozen-lockfile --ignore-scripts`
+  - **Build Command:** `pnpm exec nx build auth-mfe --configuration=production`
   - **Output Directory:** `dist/apps/auth-mfe`
-  - **Install Command:** _(leave blank)_
+  - **Environment Variable:** `PRISMA_SKIP_POSTINSTALL_GENERATE=true`
 
 - [ ] Add environment variables:
 
@@ -509,9 +511,10 @@ NX_API_BASE_URL=https://<api-gateway-url>.up.railway.app/api
 - [ ] Import same repository
 - [ ] Configure:
   - **Root Directory:** _(leave blank)_
-  - **Build Command:** `pnpm install --frozen-lockfile --ignore-scripts && pnpm exec nx build payments-mfe --configuration=production`
+  - **Install Command:** `pnpm install --frozen-lockfile --ignore-scripts`
+  - **Build Command:** `pnpm exec nx build payments-mfe --configuration=production`
   - **Output Directory:** `dist/apps/payments-mfe`
-  - **Install Command:** _(leave blank)_
+  - **Environment Variable:** `PRISMA_SKIP_POSTINSTALL_GENERATE=true`
 
 - [ ] Add environment variables:
 
@@ -528,9 +531,10 @@ NX_API_BASE_URL=https://<api-gateway-url>.up.railway.app/api
 - [ ] Import same repository
 - [ ] Configure:
   - **Root Directory:** _(leave blank)_
-  - **Build Command:** `pnpm install --frozen-lockfile --ignore-scripts && pnpm exec nx build admin-mfe --configuration=production`
+  - **Install Command:** `pnpm install --frozen-lockfile --ignore-scripts`
+  - **Build Command:** `pnpm exec nx build admin-mfe --configuration=production`
   - **Output Directory:** `dist/apps/admin-mfe`
-  - **Install Command:** _(leave blank)_
+  - **Environment Variable:** `PRISMA_SKIP_POSTINSTALL_GENERATE=true`
 
 - [ ] Add environment variables:
 
@@ -547,9 +551,10 @@ NX_API_BASE_URL=https://<api-gateway-url>.up.railway.app/api
 - [ ] Import same repository
 - [ ] Configure:
   - **Root Directory:** _(leave blank)_
-  - **Build Command:** `pnpm install --frozen-lockfile --ignore-scripts && pnpm exec nx build profile-mfe --configuration=production`
+  - **Install Command:** `pnpm install --frozen-lockfile --ignore-scripts`
+  - **Build Command:** `pnpm exec nx build profile-mfe --configuration=production`
   - **Output Directory:** `dist/apps/profile-mfe`
-  - **Install Command:** _(leave blank)_
+  - **Environment Variable:** `PRISMA_SKIP_POSTINSTALL_GENERATE=true`
 
 - [ ] Add environment variables:
 
