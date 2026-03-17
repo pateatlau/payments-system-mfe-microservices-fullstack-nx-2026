@@ -66,8 +66,8 @@ const ALLOWED_REMOTE_ORIGINS = isProduction
       'https://payments-mfe.vercel.app',
       'https://admin-mfe-theta.vercel.app',
       'https://profile-mfe-bice.vercel.app',
-      // Generic Vercel pattern (for future deployments)
-      // Note: This is a workaround - ideally validate specific domains
+      // CI placeholder (build-time only, not used at runtime)
+      ...(process.env.CI === 'true' ? ['https://placeholder.vercel.app'] : []),
     ]
   : [
       // Development origins - HTTP allowed
