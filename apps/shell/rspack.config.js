@@ -455,6 +455,9 @@ module.exports = {
       'process.env.NX_APP_VERSION': JSON.stringify(
         process.env.NX_APP_VERSION || '0.0.1'
       ),
+      'process.env.NX_SESSION_TIMEOUT_MS': JSON.stringify(
+        process.env.NX_SESSION_TIMEOUT_MS || ''
+      ),
       'process.env.NODE_ENV': JSON.stringify(
         isProduction ? 'production' : 'development'
       ),
