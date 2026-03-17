@@ -264,6 +264,14 @@ module.exports = {
       'process.env.NX_API_BASE_URL': JSON.stringify(
         process.env.NX_API_BASE_URL || 'https://localhost/api'
       ),
+      // WebSocket URL (for real-time features)
+      'process.env.NX_WS_URL': JSON.stringify(
+        process.env.NX_WS_URL || 'ws://localhost:3000/ws'
+      ),
+      // GraphQL URL
+      'process.env.NX_GRAPHQL_URL': JSON.stringify(
+        process.env.NX_GRAPHQL_URL || 'http://localhost:3000/graphql'
+      ),
       // Sentry (Frontend)
       'process.env.NX_SENTRY_DSN': JSON.stringify(
         process.env.NX_SENTRY_DSN || ''

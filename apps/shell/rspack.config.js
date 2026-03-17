@@ -417,6 +417,10 @@ module.exports = {
       'process.env.NX_WS_URL': JSON.stringify(
         process.env.NX_WS_URL || 'wss://localhost/ws'
       ),
+      // GraphQL URL
+      'process.env.NX_GRAPHQL_URL': JSON.stringify(
+        process.env.NX_GRAPHQL_URL || 'http://localhost:3000/graphql'
+      ),
       // Sentry (Frontend)
       'process.env.NX_SENTRY_DSN': JSON.stringify(
         process.env.NX_SENTRY_DSN || ''
