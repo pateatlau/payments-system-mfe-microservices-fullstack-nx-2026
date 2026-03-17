@@ -36,11 +36,16 @@ const CspNoncePlugin = require('./plugins/csp-nonce-plugin');
 // Check if running in HTTPS mode (via nginx proxy)
 const isHttpsMode = process.env.NX_HTTPS_MODE === 'true';
 
-// Debug: Log environment variables during config evaluation
-console.log('[Shell rspack.config.js] NX_API_BASE_URL:', process.env.NX_API_BASE_URL);
-console.log('[Shell rspack.config.js] NODE_ENV:', process.env.NODE_ENV);
-console.log('[Shell rspack.config.js] NX_HTTPS_MODE:', process.env.NX_HTTPS_MODE);
-console.log('[Shell rspack.config.js] NX_MFE_BASE_URL:', process.env.NX_MFE_BASE_URL || '(not set)');
+// Debug: Log environment variables during config evaluation (gated by feature flag)
+if (process.env.NX_ENABLE_CONFIG_DEBUG === 'true') {
+  console.log('[Shell rspack.config.js] NX_API_BASE_URL:', process.env.NX_API_BASE_URL);
+  console.log('[Shell rspack.config.js] NODE_ENV:', process.env.NODE_ENV);
+  console.log('[Shell rspack.config.js] NX_HTTPS_MODE:', process.env.NX_HTTPS_MODE);
+  console.log('[Shell rspack.config.js] NX_AUTH_MFE_URL:', process.env.NX_AUTH_MFE_URL || '(not set)');
+  console.log('[Shell rspack.config.js] NX_PAYMENTS_MFE_URL:', process.env.NX_PAYMENTS_MFE_URL || '(not set)');
+  console.log('[Shell rspack.config.js] NX_ADMIN_MFE_URL:', process.env.NX_ADMIN_MFE_URL || '(not set)');
+  console.log('[Shell rspack.config.js] NX_PROFILE_MFE_URL:', process.env.NX_PROFILE_MFE_URL || '(not set)');
+}
 
 const isProduction = process.env.NODE_ENV === 'production';
 const isDevelopment = !isProduction;
@@ -56,9 +61,13 @@ const ALLOWED_REMOTE_ORIGINS = isProduction
   ? [
       // Production origins - HTTPS only
       'https://localhost',
-      // Add your production CDN URLs here:
-      // 'https://cdn.yourcompany.com',
-      // 'https://mfe.yourcompany.com',
+      // Vercel domains (MFE deployments)
+      'https://auth-mfe-one.vercel.app',
+      'https://payments-mfe.vercel.app',
+      'https://admin-mfe-theta.vercel.app',
+      'https://profile-mfe-bice.vercel.app',
+      // CI placeholder (build-time only, not used at runtime)
+      ...(process.env.CI === 'true' ? ['https://placeholder.vercel.app'] : []),
     ]
   : [
       // Development origins - HTTP allowed
@@ -68,17 +77,32 @@ const ALLOWED_REMOTE_ORIGINS = isProduction
 
 /**
  * Get remote MFE URL based on mode
- * - Production: Use configured CDN URL (NX_MFE_BASE_URL) or HTTPS localhost
+ * - Production: Use individual NX_<MFE>_URL env vars (e.g., NX_AUTH_MFE_URL)
  * - HTTPS mode: Use nginx proxy paths (Safari-compatible, no mixed content)
  * - HTTP mode: Direct access to MFE dev servers
  *
  * @security Production builds enforce HTTPS URLs
  */
 const getRemoteUrl = (mfeName, port) => {
-  // Production: Use environment variable for CDN URL, fallback to HTTPS localhost
+  // Production: Use individual MFE URL from environment variables
   if (isProduction) {
-    const baseUrl = process.env.NX_MFE_BASE_URL || 'https://localhost';
-    const url = `${baseUrl}/mfe/${mfeName}/remoteEntry.js`;
+    // Map MFE name to env var (e.g., 'auth' -> 'NX_AUTH_MFE_URL')
+    const envVarName = `NX_${mfeName.toUpperCase()}_MFE_URL`;
+    const mfeBaseUrl = process.env[envVarName];
+
+    if (!mfeBaseUrl) {
+      // CI builds: Use placeholder URLs (won't be used at runtime)
+      // Vercel builds: Must have actual MFE URLs set
+      if (process.env.CI === 'true') {
+        console.warn(`[WARN] ${envVarName} not set in CI - using placeholder URL`);
+        return `https://placeholder.vercel.app/remoteEntry.js`;
+      }
+
+      console.error(`[ERROR] Missing environment variable: ${envVarName}`);
+      throw new Error(`Production build requires ${envVarName} to be set`);
+    }
+
+    const url = `${mfeBaseUrl}/remoteEntry.js`;
 
     // Validate URL uses HTTPS in production
     if (!url.startsWith('https://')) {
