@@ -21,6 +21,21 @@ const ReactRefreshPlugin = require('@rspack/plugin-react-refresh');
 const isProduction = process.env.NODE_ENV === 'production';
 const isDevelopment = !isProduction;
 
+// In production, NX_PUBLIC_PATH must be set to the MFE's Vercel URL (e.g.
+// https://auth-mfe-one.vercel.app/). Fail fast rather than silently falling
+// back to 'auto', which would reproduce the double-slash chunk URL bug.
+if (isProduction && !process.env.NX_PUBLIC_PATH) {
+  throw new Error(
+    '[auth-mfe] NX_PUBLIC_PATH is required in production.\n' +
+      'Set it in Vercel project env vars, e.g.: https://auth-mfe-one.vercel.app/'
+  );
+}
+const publicPath = isProduction
+  ? process.env.NX_PUBLIC_PATH.endsWith('/')
+    ? process.env.NX_PUBLIC_PATH
+    : `${process.env.NX_PUBLIC_PATH}/`
+  : 'auto';
+
 /**
  * Shared dependencies configuration for Module Federation
  * CRITICAL: All MFEs must have matching shared dependency configurations
@@ -115,7 +130,7 @@ module.exports = {
     // In production, 'auto' can fail cross-origin (shell loads remoteEntry.js from a
     // different origin, making document.currentScript unreliable). Use NX_PUBLIC_PATH
     // (e.g. https://auth-mfe-one.vercel.app/) set in the Vercel project env vars.
-    publicPath: isProduction ? process.env.NX_PUBLIC_PATH || 'auto' : 'auto',
+    publicPath,
     filename: isProduction ? '[name].[contenthash].js' : '[name].js',
     chunkFilename: isProduction
       ? '[name].[contenthash].chunk.js'
