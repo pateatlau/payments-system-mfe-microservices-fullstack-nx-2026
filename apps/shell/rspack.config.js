@@ -36,14 +36,16 @@ const CspNoncePlugin = require('./plugins/csp-nonce-plugin');
 // Check if running in HTTPS mode (via nginx proxy)
 const isHttpsMode = process.env.NX_HTTPS_MODE === 'true';
 
-// Debug: Log environment variables during config evaluation
-console.log('[Shell rspack.config.js] NX_API_BASE_URL:', process.env.NX_API_BASE_URL);
-console.log('[Shell rspack.config.js] NODE_ENV:', process.env.NODE_ENV);
-console.log('[Shell rspack.config.js] NX_HTTPS_MODE:', process.env.NX_HTTPS_MODE);
-console.log('[Shell rspack.config.js] NX_AUTH_MFE_URL:', process.env.NX_AUTH_MFE_URL || '(not set)');
-console.log('[Shell rspack.config.js] NX_PAYMENTS_MFE_URL:', process.env.NX_PAYMENTS_MFE_URL || '(not set)');
-console.log('[Shell rspack.config.js] NX_ADMIN_MFE_URL:', process.env.NX_ADMIN_MFE_URL || '(not set)');
-console.log('[Shell rspack.config.js] NX_PROFILE_MFE_URL:', process.env.NX_PROFILE_MFE_URL || '(not set)');
+// Debug: Log environment variables during config evaluation (gated by feature flag)
+if (process.env.NX_ENABLE_CONFIG_DEBUG === 'true') {
+  console.log('[Shell rspack.config.js] NX_API_BASE_URL:', process.env.NX_API_BASE_URL);
+  console.log('[Shell rspack.config.js] NODE_ENV:', process.env.NODE_ENV);
+  console.log('[Shell rspack.config.js] NX_HTTPS_MODE:', process.env.NX_HTTPS_MODE);
+  console.log('[Shell rspack.config.js] NX_AUTH_MFE_URL:', process.env.NX_AUTH_MFE_URL || '(not set)');
+  console.log('[Shell rspack.config.js] NX_PAYMENTS_MFE_URL:', process.env.NX_PAYMENTS_MFE_URL || '(not set)');
+  console.log('[Shell rspack.config.js] NX_ADMIN_MFE_URL:', process.env.NX_ADMIN_MFE_URL || '(not set)');
+  console.log('[Shell rspack.config.js] NX_PROFILE_MFE_URL:', process.env.NX_PROFILE_MFE_URL || '(not set)');
+}
 
 const isProduction = process.env.NODE_ENV === 'production';
 const isDevelopment = !isProduction;
