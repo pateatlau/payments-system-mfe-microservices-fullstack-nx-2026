@@ -58,6 +58,19 @@ https://shell-<unique-id>.vercel.app  (main application URL)
 
 ---
 
+## Important: Vercel Build Configuration
+
+> **Why these specific settings?**
+>
+> This monorepo has Prisma (backend-only) and an Nx wrapper that cause issues on Vercel:
+>
+> 1. **`--ignore-scripts`** prevents Prisma's postinstall from running (frontend apps don't need it)
+> 2. **`pnpm exec nx`** runs Nx directly from `node_modules/.bin/nx`, bypassing the Nx wrapper (`.nx/nxw.js`) which tries to run `npm i` internally and fails with `--ignore-scripts`
+> 3. **Do NOT set Root Directory** — leave it blank so Vercel runs from the repo root. This ensures `pnpm install` uses the root `pnpm-lock.yaml` and the build can find all workspace packages.
+> 4. **Install Command is left blank (default)** — the build command handles installation with the correct flags.
+
+---
+
 ## Service 1: Auth MFE
 
 ### Step 1.1: Create Vercel Project
@@ -82,31 +95,21 @@ Other
 auth-mfe
 ```
 
-**Root Directory:**
-
-```
-apps/auth-mfe
-```
+**Root Directory:** _(leave blank — do NOT set this)_
 
 **Build Command:**
 
 ```bash
-cd ../.. && pnpm install --frozen-lockfile --ignore-scripts && pnpm nx build auth-mfe --configuration=production
+pnpm install --frozen-lockfile --ignore-scripts && pnpm exec nx build auth-mfe --configuration=production
 ```
-
-**Note:** The `--ignore-scripts` flag prevents Prisma postinstall scripts from running (frontend apps don't need Prisma).
 
 **Output Directory:**
 
 ```
-../../dist/apps/auth-mfe
+dist/apps/auth-mfe
 ```
 
-**Install Command:**
-
-```bash
-pnpm install --frozen-lockfile
-```
+**Install Command:** _(leave blank — handled by build command)_
 
 ### Step 1.3: Set Environment Variables
 
@@ -164,29 +167,21 @@ https://auth-mfe-<random-id>.vercel.app
 payments-mfe
 ```
 
-**Root Directory:**
-
-```
-apps/payments-mfe
-```
+**Root Directory:** _(leave blank)_
 
 **Build Command:**
 
 ```bash
-cd ../.. && pnpm install --frozen-lockfile --ignore-scripts && pnpm nx build payments-mfe --configuration=production
+pnpm install --frozen-lockfile --ignore-scripts && pnpm exec nx build payments-mfe --configuration=production
 ```
 
 **Output Directory:**
 
 ```
-../../dist/apps/payments-mfe
+dist/apps/payments-mfe
 ```
 
-**Install Command:**
-
-```bash
-pnpm install --frozen-lockfile
-```
+**Install Command:** _(leave blank)_
 
 ### Step 2.3: Environment Variables
 
@@ -221,29 +216,21 @@ pnpm install --frozen-lockfile
 admin-mfe
 ```
 
-**Root Directory:**
-
-```
-apps/admin-mfe
-```
+**Root Directory:** _(leave blank)_
 
 **Build Command:**
 
 ```bash
-cd ../.. && pnpm install --frozen-lockfile --ignore-scripts && pnpm nx build admin-mfe --configuration=production
+pnpm install --frozen-lockfile --ignore-scripts && pnpm exec nx build admin-mfe --configuration=production
 ```
 
 **Output Directory:**
 
 ```
-../../dist/apps/admin-mfe
+dist/apps/admin-mfe
 ```
 
-**Install Command:**
-
-```bash
-pnpm install --frozen-lockfile
-```
+**Install Command:** _(leave blank)_
 
 ### Step 3.3: Environment Variables
 
@@ -277,29 +264,21 @@ pnpm install --frozen-lockfile
 profile-mfe
 ```
 
-**Root Directory:**
-
-```
-apps/profile-mfe
-```
+**Root Directory:** _(leave blank)_
 
 **Build Command:**
 
 ```bash
-cd ../.. && pnpm install --frozen-lockfile --ignore-scripts && pnpm nx build profile-mfe --configuration=production
+pnpm install --frozen-lockfile --ignore-scripts && pnpm exec nx build profile-mfe --configuration=production
 ```
 
 **Output Directory:**
 
 ```
-../../dist/apps/profile-mfe
+dist/apps/profile-mfe
 ```
 
-**Install Command:**
-
-```bash
-pnpm install --frozen-lockfile
-```
+**Install Command:** _(leave blank)_
 
 ### Step 4.3: Environment Variables
 
@@ -335,33 +314,26 @@ pnpm install --frozen-lockfile
 shell
 ```
 
-**Root Directory:**
-
-```
-apps/shell
-```
+**Root Directory:** _(leave blank)_
 
 **Build Command:**
 
 ```bash
-cd ../.. && pnpm install --frozen-lockfile --ignore-scripts && pnpm build:remotes && pnpm nx build shell --configuration=production
+pnpm install --frozen-lockfile --ignore-scripts && pnpm exec nx run-many --target=build --projects=auth-mfe,payments-mfe,admin-mfe,profile-mfe --configuration=production --parallel && pnpm exec nx build shell --configuration=production
 ```
 
 **Notes:**
-- `--ignore-scripts` prevents Prisma postinstall scripts from running (frontend apps don't need Prisma)
-- `pnpm build:remotes` builds all remote MFEs first to ensure Module Federation manifests are available
+- `--ignore-scripts` prevents Prisma postinstall from running
+- `pnpm exec nx` bypasses the Nx wrapper and runs Nx directly from `node_modules`
+- Builds all remote MFEs first to ensure Module Federation manifests are available, then builds Shell
 
 **Output Directory:**
 
 ```
-../../dist/apps/shell
+dist/apps/shell
 ```
 
-**Install Command:**
-
-```bash
-pnpm install --frozen-lockfile
-```
+**Install Command:** _(leave blank)_
 
 ### Step 5.3: Environment Variables
 
@@ -508,14 +480,26 @@ Visit each MFE URL directly:
 
 ## Troubleshooting
 
-### Build Fails: "Cannot find module"
+### Build Fails: "Cannot find module './installation/node_modules/nx/bin/nx'"
+
+**Cause:** The Nx wrapper (`.nx/nxw.js`) tries to run `npm i` internally, which fails when `--ignore-scripts` is set.
+
+**Fix:** Use `pnpm exec nx` instead of `pnpm nx` in build commands. This runs Nx directly from `node_modules/.bin/nx`, bypassing the wrapper entirely.
+
+### Build Fails: Prisma postinstall error
+
+**Cause:** Prisma's `@prisma/client` postinstall script runs during `pnpm install` and looks for a schema file that doesn't exist in frontend apps.
+
+**Fix:** Always use `pnpm install --frozen-lockfile --ignore-scripts` in the build command. Do NOT set a separate Install Command in Vercel — let the build command handle it.
+
+### Build Fails: "Cannot find module" (general)
 
 **Cause:** Monorepo dependencies not resolved.
 
 **Fix:**
 
-1. Ensure build command includes `cd ../..` to run from workspace root
-2. Verify `pnpm install --frozen-lockfile` runs before build
+1. Do NOT set Root Directory in Vercel — leave it blank so the build runs from repo root
+2. Verify `pnpm install --frozen-lockfile --ignore-scripts` runs before build
 3. Check `pnpm-lock.yaml` exists in repository root
 
 ### MFE Won't Load in Shell
