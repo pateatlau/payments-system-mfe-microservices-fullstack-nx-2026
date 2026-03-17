@@ -87,8 +87,27 @@ const DEFAULT_CONFIG: Required<Omit<HealthCheckConfig, 'fetchFn'>> = {
 
 /**
  * Default MFE configurations based on environment
+ *
+ * Production: Uses NX_*_MFE_URL env vars (baked in at build time via DefinePlugin)
+ * HTTPS mode: MFEs accessed via nginx proxy (local dev)
+ * HTTP mode: Direct access to MFE dev servers (local dev)
  */
 export function getDefaultMfeConfigs(isHttpsMode: boolean): MfeConfig[] {
+  // Production: use env-var-based URLs if available
+  const authUrl = process.env['NX_AUTH_MFE_URL'];
+  const paymentsUrl = process.env['NX_PAYMENTS_MFE_URL'];
+  const adminUrl = process.env['NX_ADMIN_MFE_URL'];
+  const profileUrl = process.env['NX_PROFILE_MFE_URL'];
+
+  if (authUrl && paymentsUrl && adminUrl && profileUrl) {
+    return [
+      { name: 'authMfe', baseUrl: authUrl },
+      { name: 'paymentsMfe', baseUrl: paymentsUrl },
+      { name: 'adminMfe', baseUrl: adminUrl },
+      { name: 'profileMfe', baseUrl: profileUrl },
+    ];
+  }
+
   if (isHttpsMode) {
     // HTTPS mode: MFEs accessed via nginx proxy
     return [
@@ -246,13 +265,19 @@ export async function checkRemoteHealth(
     if (mergedConfig.updateCircuitBreaker) {
       remoteCircuitBreaker.recordFailure(
         mfe.name,
-        new Error(isTimeout ? `Health check timeout after ${mergedConfig.timeout}ms` : error)
+        new Error(
+          isTimeout
+            ? `Health check timeout after ${mergedConfig.timeout}ms`
+            : error
+        )
       );
     }
 
     return {
       healthy: false,
-      error: isTimeout ? `Health check timeout after ${mergedConfig.timeout}ms` : error,
+      error: isTimeout
+        ? `Health check timeout after ${mergedConfig.timeout}ms`
+        : error,
       duration,
       circuitState: remoteCircuitBreaker.getState(mfe.name),
     };
@@ -265,16 +290,18 @@ export async function checkRemoteHealth(
 /**
  * Validate that a health response has the required structure
  */
-function isValidHealthResponse(response: unknown): response is RemoteHealthResponse {
+function isValidHealthResponse(
+  response: unknown
+): response is RemoteHealthResponse {
   if (typeof response !== 'object' || response === null) return false;
 
   const r = response as Record<string, unknown>;
 
   return (
-    typeof r.status === 'string' &&
-    ['healthy', 'degraded', 'unhealthy'].includes(r.status) &&
-    typeof r.name === 'string' &&
-    typeof r.timestamp === 'number'
+    typeof r['status'] === 'string' &&
+    ['healthy', 'degraded', 'unhealthy'].includes(r['status']) &&
+    typeof r['name'] === 'string' &&
+    typeof r['timestamp'] === 'number'
   );
 }
 
@@ -423,10 +450,16 @@ export async function preloadHealthCheck(
   // Log health status
   if (status.status === 'all_healthy') {
     // eslint-disable-next-line no-console
-    console.log('[MFE Health] All remotes healthy:', status.healthyRemotes.join(', '));
+    console.log(
+      '[MFE Health] All remotes healthy:',
+      status.healthyRemotes.join(', ')
+    );
   } else if (status.status === 'all_unhealthy') {
     // eslint-disable-next-line no-console
-    console.error('[MFE Health] All remotes unhealthy:', status.unhealthyRemotes.join(', '));
+    console.error(
+      '[MFE Health] All remotes unhealthy:',
+      status.unhealthyRemotes.join(', ')
+    );
   } else {
     // eslint-disable-next-line no-console
     console.warn('[MFE Health] Some remotes unhealthy:');
