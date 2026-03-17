@@ -18,8 +18,8 @@ const path = require('path');
 const ReactRefreshPlugin = require('@rspack/plugin-react-refresh');
 
 // isProduction/isDevelopment and publicPath are resolved inside the exported
-// config function using argv.mode — the reliable build-mode signal from the
-// Nx Rspack executor, not process.env.NODE_ENV which may be unset.
+// config function.  The Nx Rspack executor sets process.env.NODE_ENV
+// *before* invoking the config function, so it is reliable here.
 function resolvePublicPath(isProduction) {
   const raw = process.env.NX_PUBLIC_PATH;
   if (isProduction && !raw) {
@@ -112,7 +112,7 @@ const sharedDependencies = {
 };
 
 module.exports = (env, argv) => {
-  const isProduction = argv.mode === 'production';
+  const isProduction = process.env.NODE_ENV === 'production';
   const isDevelopment = !isProduction;
   const publicPath = resolvePublicPath(isProduction);
   return {
