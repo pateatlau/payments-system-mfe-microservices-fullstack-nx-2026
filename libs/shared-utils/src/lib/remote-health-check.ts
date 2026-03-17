@@ -94,17 +94,35 @@ const DEFAULT_CONFIG: Required<Omit<HealthCheckConfig, 'fetchFn'>> = {
  */
 export function getDefaultMfeConfigs(isHttpsMode: boolean): MfeConfig[] {
   // Production: use env-var-based URLs if available
-  const authUrl = process.env['NX_AUTH_MFE_URL'];
-  const paymentsUrl = process.env['NX_PAYMENTS_MFE_URL'];
-  const adminUrl = process.env['NX_ADMIN_MFE_URL'];
-  const profileUrl = process.env['NX_PROFILE_MFE_URL'];
+  const envVars: Record<string, string | undefined> = {
+    NX_AUTH_MFE_URL: process.env['NX_AUTH_MFE_URL'],
+    NX_PAYMENTS_MFE_URL: process.env['NX_PAYMENTS_MFE_URL'],
+    NX_ADMIN_MFE_URL: process.env['NX_ADMIN_MFE_URL'],
+    NX_PROFILE_MFE_URL: process.env['NX_PROFILE_MFE_URL'],
+  };
 
-  if (authUrl && paymentsUrl && adminUrl && profileUrl) {
+  const presentKeys = Object.keys(envVars).filter(k => Boolean(envVars[k]));
+  const missingKeys = Object.keys(envVars).filter(k => !envVars[k]);
+
+  if (presentKeys.length > 0 && missingKeys.length > 0) {
+    // Partial config — surface a clear error rather than silently using localhost
+    const message = `[MFE Health] Incomplete MFE URL configuration. Missing env var(s): ${missingKeys.join(', ')}. All four NX_*_MFE_URL vars must be set together.`;
+    if (process.env['NODE_ENV'] === 'production') {
+      throw new Error(message);
+    }
+    // eslint-disable-next-line no-console
+    console.error(message);
+  }
+
+  if (presentKeys.length === 4) {
     return [
-      { name: 'authMfe', baseUrl: authUrl },
-      { name: 'paymentsMfe', baseUrl: paymentsUrl },
-      { name: 'adminMfe', baseUrl: adminUrl },
-      { name: 'profileMfe', baseUrl: profileUrl },
+      { name: 'authMfe', baseUrl: envVars['NX_AUTH_MFE_URL'] as string },
+      {
+        name: 'paymentsMfe',
+        baseUrl: envVars['NX_PAYMENTS_MFE_URL'] as string,
+      },
+      { name: 'adminMfe', baseUrl: envVars['NX_ADMIN_MFE_URL'] as string },
+      { name: 'profileMfe', baseUrl: envVars['NX_PROFILE_MFE_URL'] as string },
     ];
   }
 
