@@ -25,8 +25,10 @@
 
 **RabbitMQ URL (CloudAMQP):**
 ```
-amqps://ucavhcaz:3NOuuoR7SPZKY4tDw0dt3aycmSuBOjGU@chameleon.lmq.cloudamqp.com/ucavhcaz
+<Your CloudAMQP URL from Phase 1 - format: amqps://username:password@host/vhost>
 ```
+
+**SECURITY NOTE:** Never commit actual credentials to version control. Store in Railway environment variables only.
 
 **Railway Database References:**
 ```
@@ -174,7 +176,7 @@ DATABASE_URL=${{auth-db.DATABASE_URL}}
 JWT_SECRET=<your-generated-jwt-secret>
 JWT_REFRESH_SECRET=<your-generated-jwt-refresh-secret>
 REDIS_URL=${{redis.REDIS_URL}}
-RABBITMQ_URL=amqps://ucavhcaz:3NOuuoR7SPZKY4tDw0dt3aycmSuBOjGU@chameleon.lmq.cloudamqp.com/ucavhcaz
+RABBITMQ_URL=<your-cloudamqp-url-from-phase-1>
 SENTRY_DSN=<optional-your-sentry-dsn>
 ```
 
@@ -259,7 +261,7 @@ PORT=3002
 NODE_ENV=production
 DATABASE_URL=${{payments-db.DATABASE_URL}}
 REDIS_URL=${{redis.REDIS_URL}}
-RABBITMQ_URL=amqps://ucavhcaz:3NOuuoR7SPZKY4tDw0dt3aycmSuBOjGU@chameleon.lmq.cloudamqp.com/ucavhcaz
+RABBITMQ_URL=<your-cloudamqp-url-from-phase-1>
 AUTH_SERVICE_URL=http://auth-service.railway.internal:3001
 SENTRY_DSN=<optional-your-sentry-dsn>
 ```
@@ -329,7 +331,7 @@ Click on the service → **Variables** tab → **Raw Editor**:
 PORT=3003
 NODE_ENV=production
 DATABASE_URL=${{admin-db.DATABASE_URL}}
-RABBITMQ_URL=amqps://ucavhcaz:3NOuuoR7SPZKY4tDw0dt3aycmSuBOjGU@chameleon.lmq.cloudamqp.com/ucavhcaz
+RABBITMQ_URL=<your-cloudamqp-url-from-phase-1>
 AUTH_SERVICE_URL=http://auth-service.railway.internal:3001
 SENTRY_DSN=<optional-your-sentry-dsn>
 ```
@@ -701,7 +703,7 @@ PROFILE_DB_URL=${{profile-db.DATABASE_URL}}
 REDIS_URL=${{redis.REDIS_URL}}
 
 # RabbitMQ URL (from CloudAMQP - Little Lemur free plan)
-RABBITMQ_URL=amqps://ucavhcaz:3NOuuoR7SPZKY4tDw0dt3aycmSuBOjGU@chameleon.lmq.cloudamqp.com/ucavhcaz
+RABBITMQ_URL=<your-cloudamqp-url-from-phase-1>
 
 # Sentry DSN (OPTIONAL - for error tracking)
 SENTRY_DSN=<optional-your-sentry-dsn>
@@ -777,6 +779,9 @@ Expected response for health endpoints:
   "success": true,
   "data": {
     "status": "healthy",
-  "timestamp": "2026-03-17T..."
+    "timestamp": "2026-03-17T...",
+    "service": "api-gateway",
+    "uptime": 1234.56
+  }
 }
 ```
