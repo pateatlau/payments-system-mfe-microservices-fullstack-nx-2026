@@ -454,10 +454,10 @@ The Shell app is the main entry point that loads remote MFEs.
 - [ ] Import your GitHub repository
 - [ ] Configure project:
   - **Framework Preset:** Other
-  - **Root Directory:** `apps/shell`
-  - **Build Command:** `cd ../.. && pnpm install --frozen-lockfile && pnpm build:remotes && pnpm nx build shell --configuration=production`
+  - **Root Directory:** _(leave blank — do NOT set this)_
+  - **Build Command:** `pnpm install --frozen-lockfile --ignore-scripts && pnpm exec nx run-many --target=build --projects=auth-mfe,payments-mfe,admin-mfe,profile-mfe --configuration=production --parallel && pnpm exec nx build shell --configuration=production`
   - **Output Directory:** `dist/apps/shell`
-  - **Install Command:** `pnpm install --frozen-lockfile`
+  - **Install Command:** _(leave blank)_
 
 - [ ] Add environment variables:
 
@@ -489,9 +489,10 @@ NX_PROFILE_MFE_URL=https://<profile-mfe-vercel-url>
 - [ ] Go to https://vercel.com/new
 - [ ] Import same repository
 - [ ] Configure:
-  - **Root Directory:** `apps/auth-mfe`
-  - **Build Command:** `cd ../.. && pnpm install --frozen-lockfile && pnpm nx build auth-mfe --configuration=production`
+  - **Root Directory:** _(leave blank)_
+  - **Build Command:** `pnpm install --frozen-lockfile --ignore-scripts && pnpm exec nx build auth-mfe --configuration=production`
   - **Output Directory:** `dist/apps/auth-mfe`
+  - **Install Command:** _(leave blank)_
 
 - [ ] Add environment variables:
 
@@ -507,9 +508,10 @@ NX_API_BASE_URL=https://<api-gateway-url>.up.railway.app/api
 - [ ] Go to https://vercel.com/new
 - [ ] Import same repository
 - [ ] Configure:
-  - **Root Directory:** `apps/payments-mfe`
-  - **Build Command:** `cd ../.. && pnpm install --frozen-lockfile && pnpm nx build payments-mfe --configuration=production`
+  - **Root Directory:** _(leave blank)_
+  - **Build Command:** `pnpm install --frozen-lockfile --ignore-scripts && pnpm exec nx build payments-mfe --configuration=production`
   - **Output Directory:** `dist/apps/payments-mfe`
+  - **Install Command:** _(leave blank)_
 
 - [ ] Add environment variables:
 
@@ -525,9 +527,10 @@ NX_API_BASE_URL=https://<api-gateway-url>.up.railway.app/api
 - [ ] Go to https://vercel.com/new
 - [ ] Import same repository
 - [ ] Configure:
-  - **Root Directory:** `apps/admin-mfe`
-  - **Build Command:** `cd ../.. && pnpm install --frozen-lockfile && pnpm nx build admin-mfe --configuration=production`
+  - **Root Directory:** _(leave blank)_
+  - **Build Command:** `pnpm install --frozen-lockfile --ignore-scripts && pnpm exec nx build admin-mfe --configuration=production`
   - **Output Directory:** `dist/apps/admin-mfe`
+  - **Install Command:** _(leave blank)_
 
 - [ ] Add environment variables:
 
@@ -543,9 +546,10 @@ NX_API_BASE_URL=https://<api-gateway-url>.up.railway.app/api
 - [ ] Go to https://vercel.com/new
 - [ ] Import same repository
 - [ ] Configure:
-  - **Root Directory:** `apps/profile-mfe`
-  - **Build Command:** `cd ../.. && pnpm install --frozen-lockfile && pnpm nx build profile-mfe --configuration=production`
+  - **Root Directory:** _(leave blank)_
+  - **Build Command:** `pnpm install --frozen-lockfile --ignore-scripts && pnpm exec nx build profile-mfe --configuration=production`
   - **Output Directory:** `dist/apps/profile-mfe`
+  - **Install Command:** _(leave blank)_
 
 - [ ] Add environment variables:
 
