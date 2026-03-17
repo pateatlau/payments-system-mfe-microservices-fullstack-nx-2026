@@ -24,7 +24,7 @@ const ReactRefreshPlugin = require('@rspack/plugin-react-refresh');
 function resolvePublicPath(isProduction) {
   const raw = process.env.NX_PUBLIC_PATH;
   if (isProduction && !raw) {
-    if (process.env.CI === 'true') {
+    if (process.env.CI) {
       console.warn(
         '[WARN] [auth-mfe] NX_PUBLIC_PATH not set in CI - falling back to auto'
       );

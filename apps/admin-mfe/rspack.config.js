@@ -23,7 +23,7 @@ const ReactRefreshPlugin = require('@rspack/plugin-react-refresh');
 function resolvePublicPath(isProduction) {
   const raw = process.env.NX_PUBLIC_PATH;
   if (isProduction && !raw) {
-    if (process.env.CI === 'true') {
+    if (process.env.CI) {
       console.warn(
         '[WARN] [admin-mfe] NX_PUBLIC_PATH not set in CI - falling back to auto'
       );
@@ -42,7 +42,7 @@ function resolvePaymentsMfeRemote(isProduction) {
   if (!isProduction) return 'paymentsMfe@http://localhost:4202/remoteEntry.js';
   const base = process.env.NX_PAYMENTS_MFE_URL;
   if (!base) {
-    if (process.env.CI === 'true') {
+    if (process.env.CI) {
       console.warn(
         '[WARN] [admin-mfe] NX_PAYMENTS_MFE_URL not set in CI - using placeholder'
       );
