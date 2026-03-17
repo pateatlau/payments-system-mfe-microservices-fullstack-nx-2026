@@ -38,13 +38,31 @@ const isHttpsMode = process.env.NX_HTTPS_MODE === 'true';
 
 // Debug: Log environment variables during config evaluation (gated by feature flag)
 if (process.env.NX_ENABLE_CONFIG_DEBUG === 'true') {
-  console.log('[Shell rspack.config.js] NX_API_BASE_URL:', process.env.NX_API_BASE_URL);
+  console.log(
+    '[Shell rspack.config.js] NX_API_BASE_URL:',
+    process.env.NX_API_BASE_URL
+  );
   console.log('[Shell rspack.config.js] NODE_ENV:', process.env.NODE_ENV);
-  console.log('[Shell rspack.config.js] NX_HTTPS_MODE:', process.env.NX_HTTPS_MODE);
-  console.log('[Shell rspack.config.js] NX_AUTH_MFE_URL:', process.env.NX_AUTH_MFE_URL || '(not set)');
-  console.log('[Shell rspack.config.js] NX_PAYMENTS_MFE_URL:', process.env.NX_PAYMENTS_MFE_URL || '(not set)');
-  console.log('[Shell rspack.config.js] NX_ADMIN_MFE_URL:', process.env.NX_ADMIN_MFE_URL || '(not set)');
-  console.log('[Shell rspack.config.js] NX_PROFILE_MFE_URL:', process.env.NX_PROFILE_MFE_URL || '(not set)');
+  console.log(
+    '[Shell rspack.config.js] NX_HTTPS_MODE:',
+    process.env.NX_HTTPS_MODE
+  );
+  console.log(
+    '[Shell rspack.config.js] NX_AUTH_MFE_URL:',
+    process.env.NX_AUTH_MFE_URL || '(not set)'
+  );
+  console.log(
+    '[Shell rspack.config.js] NX_PAYMENTS_MFE_URL:',
+    process.env.NX_PAYMENTS_MFE_URL || '(not set)'
+  );
+  console.log(
+    '[Shell rspack.config.js] NX_ADMIN_MFE_URL:',
+    process.env.NX_ADMIN_MFE_URL || '(not set)'
+  );
+  console.log(
+    '[Shell rspack.config.js] NX_PROFILE_MFE_URL:',
+    process.env.NX_PROFILE_MFE_URL || '(not set)'
+  );
 }
 
 const isProduction = process.env.NODE_ENV === 'production';
@@ -67,7 +85,7 @@ const ALLOWED_REMOTE_ORIGINS = isProduction
       'https://admin-mfe-theta.vercel.app',
       'https://profile-mfe-bice.vercel.app',
       // CI placeholder (build-time only, not used at runtime)
-      ...(process.env.CI === 'true' ? ['https://placeholder.vercel.app'] : []),
+      ...(process.env.CI ? ['https://placeholder.vercel.app'] : []),
     ]
   : [
       // Development origins - HTTP allowed
@@ -93,8 +111,10 @@ const getRemoteUrl = (mfeName, port) => {
     if (!mfeBaseUrl) {
       // CI builds: Use placeholder URLs (won't be used at runtime)
       // Vercel builds: Must have actual MFE URLs set
-      if (process.env.CI === 'true') {
-        console.warn(`[WARN] ${envVarName} not set in CI - using placeholder URL`);
+      if (process.env.CI) {
+        console.warn(
+          `[WARN] ${envVarName} not set in CI - using placeholder URL`
+        );
         return `https://placeholder.vercel.app/remoteEntry.js`;
       }
 
@@ -106,7 +126,9 @@ const getRemoteUrl = (mfeName, port) => {
 
     // Validate URL uses HTTPS in production
     if (!url.startsWith('https://')) {
-      console.error(`[SECURITY] Remote URL must use HTTPS in production: ${url}`);
+      console.error(
+        `[SECURITY] Remote URL must use HTTPS in production: ${url}`
+      );
       throw new Error(`Production remote URL must use HTTPS: ${url}`);
     }
 
@@ -130,7 +152,9 @@ function isOriginAllowed(parsedUrl, allowedOrigins) {
   for (const allowed of allowedOrigins) {
     try {
       // Parse the allowed origin (add path if needed for URL parsing)
-      const allowedUrl = new URL(allowed.includes('/') ? allowed : `${allowed}/`);
+      const allowedUrl = new URL(
+        allowed.includes('/') ? allowed : `${allowed}/`
+      );
 
       // Protocol must match exactly
       if (parsedUrl.protocol !== allowedUrl.protocol) continue;
