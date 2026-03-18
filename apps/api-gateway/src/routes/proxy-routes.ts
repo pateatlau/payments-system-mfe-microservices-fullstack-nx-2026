@@ -14,7 +14,11 @@
  */
 
 import { Router, Request, Response } from 'express';
-import { createStreamingProxy, ProxyTarget, getAllProxyCircuitStats } from '../middleware/proxy';
+import {
+  createStreamingProxy,
+  ProxyTarget,
+  getAllProxyCircuitStats,
+} from '../middleware/proxy';
 import { logger } from '../utils/logger';
 import {
   apiVersionMiddleware,
@@ -31,10 +35,28 @@ import { config } from '../config';
  */
 function parseServiceUrl(urlString: string): ProxyTarget {
   const url = new URL(urlString);
+
+  if (url.pathname !== '/' || url.search || url.hash) {
+    throw new Error(
+      `Invalid service URL "${urlString}": path, query, and hash are not supported`
+    );
+  }
+
+  let protocol: 'http' | 'https';
+  if (url.protocol === 'http:') {
+    protocol = 'http';
+  } else if (url.protocol === 'https:') {
+    protocol = 'https';
+  } else {
+    throw new Error(
+      `Invalid service URL "${urlString}": protocol must be http or https`
+    );
+  }
+
   return {
     host: url.hostname,
-    port: url.port ? parseInt(url.port, 10) : url.protocol === 'https:' ? 443 : 80,
-    protocol: url.protocol.replace(':', '') as 'http' | 'https',
+    port: url.port ? parseInt(url.port, 10) : protocol === 'https' ? 443 : 80,
+    protocol,
   };
 }
 
@@ -43,9 +65,9 @@ function parseServiceUrl(urlString: string): ProxyTarget {
  */
 const circuitBreakerConfig = {
   enabled: true,
-  errorThresholdPercentage: 50,  // Open circuit after 50% errors
-  resetTimeout: 30000,           // Try again after 30 seconds
-  volumeThreshold: 5,            // Minimum 5 requests before calculating threshold
+  errorThresholdPercentage: 50, // Open circuit after 50% errors
+  resetTimeout: 30000, // Try again after 30 seconds
+  volumeThreshold: 5, // Minimum 5 requests before calculating threshold
 };
 
 const router = Router();
@@ -109,7 +131,11 @@ router.get(
   (req, _res, next) => {
     // Skip rate limiting for special routes that shouldn't be limited
     const provider = req.params.provider;
-    if (provider === 'callback' || provider === 'providers' || provider === 'accounts') {
+    if (
+      provider === 'callback' ||
+      provider === 'providers' ||
+      provider === 'accounts'
+    ) {
       return next('route'); // Skip to next matching route (the general proxy)
     }
     next();
@@ -268,7 +294,7 @@ router.get('/api/version', (_req: Request, res: Response) => {
       currentVersion: config.latestVersion,
       supportedVersions: config.supportedVersions,
       defaultVersion: config.defaultVersion,
-      deprecatedVersions: config.deprecatedVersions.map((d) => ({
+      deprecatedVersions: config.deprecatedVersions.map(d => ({
         version: d.version,
         sunsetDate: d.sunsetDate,
         message: d.message,
@@ -297,7 +323,12 @@ const versionConfig = getVersionConfig();
 logger.info('API Gateway proxy routes initialized', {
   services: Object.keys(services),
   routes: ['/api/auth', '/api/payments', '/api/admin', '/api/profile'],
-  versionedRoutes: ['/api/v1/auth', '/api/v1/payments', '/api/v1/admin', '/api/v1/profile'],
+  versionedRoutes: [
+    '/api/v1/auth',
+    '/api/v1/payments',
+    '/api/v1/admin',
+    '/api/v1/profile',
+  ],
   apiVersioning: {
     supportedVersions: versionConfig.supportedVersions,
     defaultVersion: versionConfig.defaultVersion,
