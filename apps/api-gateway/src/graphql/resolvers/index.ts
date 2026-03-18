@@ -8,25 +8,27 @@ import { GraphQLError } from 'graphql';
 import axios, { AxiosInstance } from 'axios';
 import type { Resolvers } from '../types/generated';
 import type { GraphQLContext } from '../context';
+import { config } from '../../config';
 
-// Create API clients for backend services
+// Create API clients for backend services using config URLs
+// (AUTH_SERVICE_URL, PAYMENTS_SERVICE_URL, etc. — defaults to localhost for dev)
 const authClient: AxiosInstance = axios.create({
-  baseURL: `http://localhost:${process.env.AUTH_SERVICE_PORT || 3001}`,
+  baseURL: config.services.auth,
   timeout: 30000,
 });
 
 const paymentsClient: AxiosInstance = axios.create({
-  baseURL: `http://localhost:${process.env.PAYMENTS_SERVICE_PORT || 3002}`,
+  baseURL: config.services.payments,
   timeout: 30000,
 });
 
 const adminClient: AxiosInstance = axios.create({
-  baseURL: `http://localhost:${process.env.ADMIN_SERVICE_PORT || 3003}`,
+  baseURL: config.services.admin,
   timeout: 30000,
 });
 
 const profileClient: AxiosInstance = axios.create({
-  baseURL: `http://localhost:${process.env.PROFILE_SERVICE_PORT || 3004}`,
+  baseURL: config.services.profile,
   timeout: 30000,
 });
 
