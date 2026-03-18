@@ -55,7 +55,11 @@ const apiGatewayConfigSchema = z.object({
 
   // Rate Limiting
   rateLimit: z.object({
-    windowMs: z.number().int().positive().default(15 * 60 * 1000), // 15 minutes
+    windowMs: z
+      .number()
+      .int()
+      .positive()
+      .default(15 * 60 * 1000), // 15 minutes
     max: z.number().int().positive().default(100),
   }),
 
@@ -81,14 +85,18 @@ const apiGatewayConfigSchema = z.object({
 });
 
 // Parse CORS origins from comma-separated string
-const corsOriginsStr = process.env['CORS_ORIGINS'] ??
+const corsOriginsStr =
+  process.env['CORS_ORIGINS'] ??
   'http://localhost:4200,http://localhost:4201,http://localhost:4202,http://localhost:4203,https://localhost';
 
 // Validate and parse configuration
 const rawConfig = {
-  port: process.env['API_GATEWAY_PORT'],
+  port: process.env['PORT'] ?? process.env['API_GATEWAY_PORT'],
   nodeEnv: process.env['NODE_ENV'],
-  corsOrigins: corsOriginsStr.split(',').map(s => s.trim()).filter(s => s.length > 0),
+  corsOrigins: corsOriginsStr
+    .split(',')
+    .map(s => s.trim())
+    .filter(s => s.length > 0),
   rateLimit: {
     windowMs: 15 * 60 * 1000,
     max: 100,
@@ -107,7 +115,11 @@ const rawConfig = {
   logLevel: process.env['LOG_LEVEL'],
 };
 
-const validatedConfig = validateConfig(apiGatewayConfigSchema, rawConfig, 'API Gateway');
+const validatedConfig = validateConfig(
+  apiGatewayConfigSchema,
+  rawConfig,
+  'API Gateway'
+);
 
 // Type for the validated config (ensures non-optional types from defaults)
 type ValidatedApiGatewayConfig = z.infer<typeof apiGatewayConfigSchema>;
@@ -136,6 +148,7 @@ export function getSecretManager(): SecretManager {
       jwtRefreshSecrets: config.jwtRefreshSecrets,
       redisUrl: config.redis.url,
       onSecretExpiring: (secret, daysUntilExpiry) => {
+        // eslint-disable-next-line no-console
         console.warn(
           `[API Gateway] WARNING: JWT secret ${secret.kid} expires in ${daysUntilExpiry} days`
         );
