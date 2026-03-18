@@ -69,14 +69,20 @@ app.use(
   })
 );
 
-// CORS - allow frontend MFEs (shell/auth/payments/admin) and nginx proxy (HTTPS)
-const allowedOrigins = [
+// CORS - allow frontend MFEs and API Gateway proxy
+// Configurable via CORS_ORIGINS env var for production deployments
+const defaultOrigins = [
   'http://localhost:4200',
   'http://localhost:4201',
   'http://localhost:4202',
   'http://localhost:4203',
   'https://localhost', // nginx proxy
 ];
+const parsedOrigins = (process.env['CORS_ORIGINS'] ?? '')
+  .split(',')
+  .map(s => s.trim())
+  .filter(Boolean);
+const allowedOrigins = parsedOrigins.length > 0 ? parsedOrigins : defaultOrigins;
 
 app.use(
   cors({
@@ -140,7 +146,7 @@ const limiter = rateLimit({
   standardHeaders: true, // Return rate limit info in RateLimit-* headers
   legacyHeaders: false, // Disable X-RateLimit-* headers
   // Skip health checks and metrics endpoints
-  skip: (req) => {
+  skip: req => {
     return req.path === '/health' || req.path === '/metrics';
   },
 });
