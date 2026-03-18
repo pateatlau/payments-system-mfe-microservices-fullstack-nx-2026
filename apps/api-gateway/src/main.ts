@@ -84,6 +84,12 @@ initTracing({
  */
 const app = express();
 
+// Trust proxy headers — required when running behind a reverse proxy / load
+// balancer (Railway, nginx, etc.).  Without this Express ignores
+// X-Forwarded-For / X-Forwarded-Proto, causing req.ip to return the proxy's
+// internal IP and express-rate-limit to throw ERR_ERL_UNEXPECTED_X_FORWARDED_FOR.
+app.set('trust proxy', 1);
+
 /**
  * Initialize Prometheus Metrics
  */

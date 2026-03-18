@@ -6,7 +6,7 @@
  * Falls back to in-memory store if Redis is unavailable (e.g., in CI)
  */
 
-import rateLimit from 'express-rate-limit';
+import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
 import Redis from 'ioredis';
 import { config } from '../config';
 import type { RequestHandler } from 'express';
@@ -144,7 +144,7 @@ export const authRateLimiter = rateLimit({
   // Don't specify store - will use in-memory by default
   // Custom key generator to track by IP + User-Agent combination
   keyGenerator: (req) => {
-    const ip = req.ip || req.socket.remoteAddress || 'unknown';
+    const ip = ipKeyGenerator(req.ip || req.socket.remoteAddress || '0.0.0.0');
     const userAgent = req.get('user-agent') || 'unknown';
     // Hash user agent to keep key size reasonable
     const uaHash = Buffer.from(userAgent).toString('base64').slice(0, 16);
@@ -183,7 +183,7 @@ export const oauthRateLimiter = rateLimit({
   legacyHeaders: false,
   // Track by IP address
   keyGenerator: (req) => {
-    const ip = req.ip || req.socket.remoteAddress || 'unknown';
+    const ip = ipKeyGenerator(req.ip || req.socket.remoteAddress || '0.0.0.0');
     return `oauth:${ip}`;
   },
 }) as unknown as RequestHandler;
