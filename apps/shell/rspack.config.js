@@ -122,7 +122,7 @@ const getRemoteUrl = (mfeName, port) => {
       throw new Error(`Production build requires ${envVarName} to be set`);
     }
 
-    const url = `${mfeBaseUrl}/remoteEntry.js`;
+    const url = `${mfeBaseUrl.replace(/\/+$/, '')}/remoteEntry.js`;
 
     // Validate URL uses HTTPS in production
     if (!url.startsWith('https://')) {
