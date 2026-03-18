@@ -162,7 +162,7 @@ export const resolvers: Resolvers<GraphQLContext> = {
     // Profile Queries
     profile: async (_parent, _args, context) => {
       try {
-        const response = await profileClient.get('/profile', {
+        const response = await profileClient.get('/api/profile', {
           headers: getAuthHeaders(context),
         });
         return response.data.data;
@@ -182,7 +182,7 @@ export const resolvers: Resolvers<GraphQLContext> = {
           params.append('limit', input.first.toString());
         }
 
-        const response = await adminClient.get('/admin/users', {
+        const response = await adminClient.get('/api/admin/users', {
           params: Object.fromEntries(params),
           headers: getAuthHeaders(context),
         });
@@ -194,7 +194,7 @@ export const resolvers: Resolvers<GraphQLContext> = {
 
     user: async (_parent, { id }, context) => {
       try {
-        const response = await adminClient.get(`/admin/users/${id}`, {
+        const response = await adminClient.get(`/api/admin/users/${id}`, {
           headers: getAuthHeaders(context),
         });
         return response.data.data;
@@ -213,7 +213,7 @@ export const resolvers: Resolvers<GraphQLContext> = {
           params.append('limit', input.first.toString());
         }
 
-        const response = await adminClient.get('/admin/audit-logs', {
+        const response = await adminClient.get('/api/admin/audit-logs', {
           params: Object.fromEntries(params),
           headers: getAuthHeaders(context),
         });
@@ -225,7 +225,7 @@ export const resolvers: Resolvers<GraphQLContext> = {
 
     systemConfig: async (_parent, { key }, context) => {
       try {
-        const response = await adminClient.get(`/admin/config/${key}`, {
+        const response = await adminClient.get(`/api/admin/config/${key}`, {
           headers: getAuthHeaders(context),
         });
         return response.data.data;
@@ -348,7 +348,7 @@ export const resolvers: Resolvers<GraphQLContext> = {
     updateProfile: async (_parent, { input }, context) => {
       try {
         const response = await profileClient.put(
-          '/profile',
+          '/api/profile',
           {
             firstName: input.firstName,
             lastName: input.lastName,
@@ -373,7 +373,7 @@ export const resolvers: Resolvers<GraphQLContext> = {
     updateUserRole: async (_parent, { id, role }, context) => {
       try {
         const response = await adminClient.put(
-          `/admin/users/${id}/role`,
+          `/api/admin/users/${id}/role`,
           { role },
           {
             headers: getAuthHeaders(context),
@@ -388,7 +388,7 @@ export const resolvers: Resolvers<GraphQLContext> = {
     updateSystemConfig: async (_parent, { key, value }, context) => {
       try {
         const response = await adminClient.put(
-          `/admin/config/${key}`,
+          `/api/admin/config/${key}`,
           { value },
           {
             headers: getAuthHeaders(context),

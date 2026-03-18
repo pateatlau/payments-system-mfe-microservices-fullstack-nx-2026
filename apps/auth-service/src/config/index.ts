@@ -87,7 +87,7 @@ const authConfigSchema = z.object({
 
 // Validate and parse configuration
 const rawConfig = {
-  port: process.env['AUTH_SERVICE_PORT'],
+  port: process.env['PORT'] ?? process.env['AUTH_SERVICE_PORT'],
   nodeEnv: process.env['NODE_ENV'],
   database: {
     url: process.env['DATABASE_URL'] ?? process.env['AUTH_DATABASE_URL'],

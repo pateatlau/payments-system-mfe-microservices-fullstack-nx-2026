@@ -30,7 +30,9 @@ const adminConfigSchema = z.object({
 
   // Database (POC-3: Separate database per service)
   database: z.object({
-    url: postgresUrlSchema.default('postgresql://postgres:postgres@localhost:5434/admin_db'),
+    url: postgresUrlSchema.default(
+      'postgresql://postgres:postgres@localhost:5434/admin_db'
+    ),
   }),
 
   // Auth Service (for user validation)
@@ -60,7 +62,7 @@ const adminConfigSchema = z.object({
 
 // Validate and parse configuration
 const rawConfig = {
-  port: process.env['ADMIN_SERVICE_PORT'],
+  port: process.env['PORT'] ?? process.env['ADMIN_SERVICE_PORT'],
   nodeEnv: process.env['NODE_ENV'],
   database: {
     url: process.env['DATABASE_URL'] ?? process.env['ADMIN_DATABASE_URL'],
@@ -82,6 +84,10 @@ const rawConfig = {
 // Type for the validated config (ensures non-optional types from defaults)
 type ValidatedAdminConfig = z.infer<typeof adminConfigSchema>;
 
-const config = validateConfig(adminConfigSchema, rawConfig, 'Admin Service') as ValidatedAdminConfig;
+const config = validateConfig(
+  adminConfigSchema,
+  rawConfig,
+  'Admin Service'
+) as ValidatedAdminConfig;
 
 export default config;
