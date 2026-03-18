@@ -172,7 +172,10 @@ export async function checkRemoteHealth(
 ): Promise<HealthCheckResult> {
   const mergedConfig = { ...DEFAULT_CONFIG, ...config };
   const healthPath = mfe.healthPath || '/health.json';
-  const healthUrl = `${mfe.baseUrl}${healthPath}`;
+  const normalizedHealthPath = healthPath.startsWith('/')
+    ? healthPath
+    : `/${healthPath}`;
+  const healthUrl = `${mfe.baseUrl.replace(/\/+$/, '')}${normalizedHealthPath}`;
   const fetchFn = config.fetchFn || fetch;
 
   const startTime = performance.now();
