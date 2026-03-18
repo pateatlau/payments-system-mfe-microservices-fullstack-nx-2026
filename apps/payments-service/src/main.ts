@@ -104,9 +104,11 @@ const defaultOrigins = [
   'http://localhost:4203',
   'https://localhost', // nginx proxy
 ];
-const allowedOrigins = process.env['CORS_ORIGINS']
-  ? process.env['CORS_ORIGINS'].split(',').map(s => s.trim()).filter(Boolean)
-  : defaultOrigins;
+const parsedOrigins = (process.env['CORS_ORIGINS'] ?? '')
+  .split(',')
+  .map(s => s.trim())
+  .filter(Boolean);
+const allowedOrigins = parsedOrigins.length > 0 ? parsedOrigins : defaultOrigins;
 
 app.use(
   cors({

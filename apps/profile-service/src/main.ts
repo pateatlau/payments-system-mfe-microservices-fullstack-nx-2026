@@ -78,9 +78,11 @@ const defaultOrigins = [
   'http://localhost:4203',
   'https://localhost', // nginx proxy
 ];
-const allowedOrigins = process.env['CORS_ORIGINS']
-  ? process.env['CORS_ORIGINS'].split(',').map(s => s.trim()).filter(Boolean)
-  : defaultOrigins;
+const parsedOrigins = (process.env['CORS_ORIGINS'] ?? '')
+  .split(',')
+  .map(s => s.trim())
+  .filter(Boolean);
+const allowedOrigins = parsedOrigins.length > 0 ? parsedOrigins : defaultOrigins;
 
 app.use(
   cors({
@@ -144,7 +146,7 @@ const limiter = rateLimit({
   standardHeaders: true, // Return rate limit info in RateLimit-* headers
   legacyHeaders: false, // Disable X-RateLimit-* headers
   // Skip health checks and metrics endpoints
-  skip: (req) => {
+  skip: req => {
     return req.path === '/health' || req.path === '/metrics';
   },
 });
