@@ -3,10 +3,10 @@
  *
  * Purpose: Route definitions for proxying requests to backend microservices
  * Features:
- *   - Auth Service proxy (/api/auth -> http://localhost:3001)
- *   - Payments Service proxy (/api/payments -> http://localhost:3002)
- *   - Admin Service proxy (/api/admin -> http://localhost:3003)
- *   - Profile Service proxy (/api/profile -> http://localhost:3004)
+ *   - Auth Service proxy (/api/auth -> AUTH_SERVICE_URL)
+ *   - Payments Service proxy (/api/payments -> PAYMENTS_SERVICE_URL)
+ *   - Admin Service proxy (/api/admin -> ADMIN_SERVICE_URL)
+ *   - Profile Service proxy (/api/profile -> PROFILE_SERVICE_URL)
  *   - Circuit breaker protection for all services (Phase 5.1)
  *   - API versioning support (Phase 6.4): /api/v1/auth, /api/v2/auth, etc.
  *
@@ -23,6 +23,20 @@ import {
 } from '../middleware/apiVersion';
 import { oauthRateLimiter } from '../middleware/rateLimit';
 import { authenticate } from '../middleware/auth';
+import { config } from '../config';
+
+/**
+ * Parse a full service URL string into a ProxyTarget
+ * e.g. "http://auth-service.railway.internal:3001" -> { host, port, protocol }
+ */
+function parseServiceUrl(urlString: string): ProxyTarget {
+  const url = new URL(urlString);
+  return {
+    host: url.hostname,
+    port: url.port ? parseInt(url.port, 10) : url.protocol === 'https:' ? 443 : 80,
+    protocol: url.protocol.replace(':', '') as 'http' | 'https',
+  };
+}
 
 /**
  * Circuit breaker configuration (shared across services)
@@ -68,29 +82,15 @@ router.use('/api', apiVersionMiddleware);
  */
 
 /**
- * Service target configurations
+ * Service target configurations — resolved from AUTH_SERVICE_URL,
+ * PAYMENTS_SERVICE_URL, ADMIN_SERVICE_URL, PROFILE_SERVICE_URL env vars.
+ * Defaults to localhost ports for local development.
  */
 const services: Record<string, ProxyTarget> = {
-  auth: {
-    host: 'localhost',
-    port: 3001,
-    protocol: 'http',
-  },
-  payments: {
-    host: 'localhost',
-    port: 3002,
-    protocol: 'http',
-  },
-  admin: {
-    host: 'localhost',
-    port: 3003,
-    protocol: 'http',
-  },
-  profile: {
-    host: 'localhost',
-    port: 3004,
-    protocol: 'http',
-  },
+  auth: parseServiceUrl(config.services.auth),
+  payments: parseServiceUrl(config.services.payments),
+  admin: parseServiceUrl(config.services.admin),
+  profile: parseServiceUrl(config.services.profile),
 };
 
 /**
