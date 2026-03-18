@@ -435,9 +435,13 @@ function buildProxyHeaders(
   // Add X-Real-IP
   headers['x-real-ip'] = clientIp;
 
-  // Remove problematic headers
+  // Remove headers that cause issues with downstream services
   delete headers['content-length']; // Will be recalculated by Node.js
   delete headers['transfer-encoding']; // Will be handled by Node.js
+  // CORS is enforced by the API Gateway — strip origin/referer so downstream
+  // services don't reject proxied requests with their own CORS middleware.
+  delete headers['origin'];
+  delete headers['referer'];
 
   return headers;
 }

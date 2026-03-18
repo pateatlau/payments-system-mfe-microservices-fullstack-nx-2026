@@ -95,14 +95,18 @@ app.use(
   })
 );
 
-// CORS - allow frontend MFEs (shell/auth/payments/admin) and nginx proxy (HTTPS)
-const allowedOrigins = [
+// CORS - allow frontend MFEs and API Gateway proxy
+// Configurable via CORS_ORIGINS env var for production deployments
+const defaultOrigins = [
   'http://localhost:4200',
   'http://localhost:4201',
   'http://localhost:4202',
   'http://localhost:4203',
   'https://localhost', // nginx proxy
 ];
+const allowedOrigins = process.env['CORS_ORIGINS']
+  ? process.env['CORS_ORIGINS'].split(',').map(s => s.trim()).filter(Boolean)
+  : defaultOrigins;
 
 app.use(
   cors({
