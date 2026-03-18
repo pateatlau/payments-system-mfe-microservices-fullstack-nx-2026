@@ -85,18 +85,21 @@ const apiGatewayConfigSchema = z.object({
 });
 
 // Parse CORS origins from comma-separated string
-const corsOriginsStr =
-  process.env['CORS_ORIGINS'] ??
+// Guard against empty CORS_ORIGINS yielding empty allowlist
+const defaultCorsOrigins =
   'http://localhost:4200,http://localhost:4201,http://localhost:4202,http://localhost:4203,https://localhost';
+const parsedCorsOrigins = (process.env['CORS_ORIGINS'] ?? '')
+  .split(',')
+  .map(s => s.trim())
+  .filter(s => s.length > 0);
 
 // Validate and parse configuration
 const rawConfig = {
   port: process.env['PORT'] ?? process.env['API_GATEWAY_PORT'],
   nodeEnv: process.env['NODE_ENV'],
-  corsOrigins: corsOriginsStr
-    .split(',')
-    .map(s => s.trim())
-    .filter(s => s.length > 0),
+  corsOrigins: parsedCorsOrigins.length > 0
+    ? parsedCorsOrigins
+    : defaultCorsOrigins.split(','),
   rateLimit: {
     windowMs: 15 * 60 * 1000,
     max: 100,
