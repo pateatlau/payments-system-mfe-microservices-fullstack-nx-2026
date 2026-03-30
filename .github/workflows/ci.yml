@@ -46,7 +46,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v5
         # Version is read from package.json packageManager field
 
       - name: Get pnpm store directory
@@ -87,7 +87,7 @@ jobs:
 
       - name: Derive appropriate SHAs for base and head
         id: set-shas
-        uses: nrwl/nx-set-shas@v4
+        uses: nrwl/nx-set-shas@v5
 
       - name: Run ESLint (affected)
         run: NX_NO_CLOUD=true pnpm nx affected --target=lint --base=${{ steps.set-shas.outputs.base }} --head=${{ steps.set-shas.outputs.head }} --verbose
@@ -132,7 +132,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v5
         # Version is read from package.json packageManager field
 
       - name: Get pnpm store directory
@@ -160,7 +160,7 @@ jobs:
 
       - name: Derive appropriate SHAs for base and head
         id: set-shas
-        uses: nrwl/nx-set-shas@v4
+        uses: nrwl/nx-set-shas@v5
 
       # TEMPORARILY DISABLED: Shell tests cause OOM in GitHub Actions
       # The shell app is a Module Federation host that imports all MFEs,
@@ -188,7 +188,7 @@ jobs:
             --forceExit
 
       - name: Upload frontend coverage
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v6
         if: always()
         with:
           # Note: shell coverage excluded due to OOM issues with Module Federation host
@@ -315,7 +315,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v5
         # Version is read from package.json packageManager field
 
       - name: Get pnpm store directory
@@ -353,7 +353,7 @@ jobs:
 
       - name: Derive appropriate SHAs for base and head
         id: set-shas
-        uses: nrwl/nx-set-shas@v4
+        uses: nrwl/nx-set-shas@v5
 
       - name: Run backend unit tests (all on main/PRs)
         if: github.ref == 'refs/heads/main' || github.event_name == 'pull_request'
@@ -364,7 +364,7 @@ jobs:
             --maxWorkers=2
 
       - name: Upload backend coverage
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v6
         if: always()
         with:
           files: ./coverage/apps/auth-service/lcov.info,./coverage/apps/payments-service/lcov.info,./coverage/apps/admin-service/lcov.info,./coverage/apps/profile-service/lcov.info
@@ -388,7 +388,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v5
         # Version is read from package.json packageManager field
 
       - name: Get pnpm store directory
@@ -446,7 +446,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v5
         # Version is read from package.json packageManager field
 
       - name: Get pnpm store directory
@@ -477,7 +477,7 @@ jobs:
 
       - name: Derive appropriate SHAs for base and head
         id: set-shas
-        uses: nrwl/nx-set-shas@v4
+        uses: nrwl/nx-set-shas@v5
 
       - name: Build all projects (main/PRs)
         if: github.ref == 'refs/heads/main' || github.event_name == 'pull_request'
@@ -515,7 +515,7 @@ jobs:
           echo "=== Bundle verification complete ==="
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: build-artifacts
           path: |
@@ -638,7 +638,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v5
         # Version is read from package.json packageManager field
 
       - name: Install dependencies
@@ -648,7 +648,7 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: Download build artifacts
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: build-artifacts
           path: dist/
@@ -820,7 +820,7 @@ jobs:
         # via webServer config in playwright.config.ts
 
       - name: Upload E2E test results
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: playwright-report
@@ -864,7 +864,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v5
         # Version is read from package.json packageManager field
 
       - name: Get pnpm store directory
@@ -888,7 +888,7 @@ jobs:
       - name: Run Trivy vulnerability scanner
         # Pin to specific version for security and reproducibility
         # Version 0.33.1 - see https://github.com/aquasecurity/trivy-action/releases
-        uses: aquasecurity/trivy-action@0.33.1
+        uses: aquasecurity/trivy-action@0.35.0
         id: trivy
         with:
           scan-type: 'fs'
